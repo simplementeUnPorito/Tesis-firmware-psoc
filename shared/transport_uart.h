@@ -23,4 +23,21 @@ extern Transport_t uart_transport;
  * Called by debug.c when channel includes DBG_CH_UART. */
 void TransportUART_SendDebug(uint8 event, const uint8 *payload, uint8 len);
 
+/* Send PSoC full-state packet over UART_PC.
+ * Called by Communication_SendState() when last command came via UART. */
+void TransportUART_SendState(uint8 adc_cfg, uint8 buf_gain,
+                             uint8 streaming, uint8 debug_en,
+                             uint8 debug_ch, uint8 vdac_mode,
+                             uint8 filter_sel);
+
+/* Start UART_PC peripheral unconditionally (called from Communication_Init).
+ * Allows UART RX transparency even when uart_transport is not registered. */
+void TransportUART_Init(void);
+
+/* Number of bytes waiting in UART_PC RX buffer. */
+uint8 TransportUART_RxAvailable(void);
+
+/* Read one byte from UART_PC RX buffer (non-blocking). */
+uint8 TransportUART_RxRead(void);
+
 #endif /* TRANSPORT_UART_H */

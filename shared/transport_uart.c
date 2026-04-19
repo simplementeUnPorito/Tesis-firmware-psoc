@@ -34,11 +34,60 @@ void TransportUART_SendDebug(uint8 event, const uint8 *payload, uint8 len)
     UART_PC_PutChar(crc);
 }
 
+/* ---- State packet sender -------------------------------------------------- */
+
+#define STATE_HDR_UART  0xCCu
+#define STATE_PLEN_UART 7u
+
+static uint8 CalcCrc(const uint8 *buf, uint8 len)
+{
+    uint8 crc = 0u;
+    uint8 i;
+    for (i = 0u; i < len; i++) { crc ^= buf[i]; }
+    return crc;
+}
+
+void TransportUART_SendState(uint8 adc_cfg, uint8 buf_gain,
+                             uint8 streaming, uint8 debug_en,
+                             uint8 debug_ch, uint8 vdac_mode,
+                             uint8 filter_sel)
+{
+    uint8 pkt[2u + STATE_PLEN_UART + 1u];
+
+    pkt[0] = STATE_HDR_UART;
+    pkt[1] = STATE_PLEN_UART;
+    pkt[2] = adc_cfg;
+    pkt[3] = buf_gain;
+    pkt[4] = streaming;
+    pkt[5] = debug_en;
+    pkt[6] = debug_ch;
+    pkt[7] = vdac_mode;
+    pkt[8] = filter_sel;
+    pkt[9] = CalcCrc(pkt, 9u);
+
+    UART_PC_PutArray(pkt, 10u);
+}
+
+void TransportUART_Init(void)
+{
+    UART_PC_Start();
+}
+
+uint8 TransportUART_RxAvailable(void)
+{
+    return UART_PC_GetRxBufferSize();
+}
+
+uint8 TransportUART_RxRead(void)
+{
+    return UART_PC_ReadRxData();
+}
+
 /* ---- Transport_t callbacks ----------------------------------------------- */
 
 static void UART_Init(void)
 {
-    UART_PC_Start();
+    /* UART_PC already started by TransportUART_Init(); avoid double Start() */
 }
 
 static void UART_Task(void)

@@ -31,6 +31,11 @@ void Communication_RegisterTransport(Transport_t *t)
     }
 }
 
+/* ---- Interface tracking for transparent UART/USB response ---------------- */
+
+typedef enum { IFACE_USB = 0u, IFACE_UART = 1u } IfaceId_t;
+static IfaceId_t s_last_iface = IFACE_USB;   /* last interface that sent a command */
+
 /* ---- Streaming / debug state --------------------------------------------- */
 
 static uint8 s_streaming = 0u;
@@ -205,6 +210,11 @@ void Communication_Init(void)
     uint8 i;
     s_streaming = 0u;
     s_rx_state  = RX_WAIT_MARKER;
+    s_last_iface = IFACE_USB;
+
+    /* Always start UART_PC so UART RX transparency works regardless of
+     * whether uart_transport is registered as a data transport. */
+    TransportUART_Init();
 
     for (i = 0u; i < s_transport_count; i++)
     {
@@ -228,14 +238,21 @@ void Communication_Task(void)
         }
     }
 
-    /* USB CDC RX — command parsing */
-    if (USBFS_GetConfiguration() == 0u) { return; }
+    /* UART_PC RX — transparent command parsing (responds via UART) */
+    while (TransportUART_RxAvailable())
+    {
+        uint8 b = TransportUART_RxRead();
+        s_last_iface = IFACE_UART;
+        ParseRxByte(b);
+    }
 
-    if (USBFS_DataIsReady())
+    /* USB CDC RX — command parsing (responds via USB) */
+    if (USBFS_GetConfiguration() != 0u && USBFS_DataIsReady())
     {
         uint8  rxBuf[64u];
         uint16 rxLen = USBFS_GetAll(rxBuf);
         uint16 i2;
+        s_last_iface = IFACE_USB;
         for (i2 = 0u; i2 < rxLen; i2++) { ParseRxByte(rxBuf[i2]); }
     }
 }
@@ -262,14 +279,21 @@ void Communication_SendSample(int16 raw_input, int32 post_analog,
 
 void Communication_SendState(void)
 {
-    TransportUSB_SendState(
-        g_adc_cfg,
-        g_adc_buf_gain,
-        s_streaming,
-        Debug_IsEnabled(),
-        Debug_GetChannel(),
-        g_vdac_mode,
-        g_filter_sel);
+    /* Transparency: respond via the same interface that received the command. */
+    if (s_last_iface == IFACE_UART)
+    {
+        TransportUART_SendState(
+            g_adc_cfg, g_adc_buf_gain, s_streaming,
+            Debug_IsEnabled(), Debug_GetChannel(),
+            g_vdac_mode, g_filter_sel);
+    }
+    else
+    {
+        TransportUSB_SendState(
+            g_adc_cfg, g_adc_buf_gain, s_streaming,
+            Debug_IsEnabled(), Debug_GetChannel(),
+            g_vdac_mode, g_filter_sel);
+    }
 }
 
 uint8 Communication_IsConnected(void)
