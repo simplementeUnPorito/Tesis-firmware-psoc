@@ -1,0 +1,2108 @@
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"AnalogToDigital.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.AnalogToDigital_Init,"ax",%progbits
+  20              		.align	2
+  21              		.global	AnalogToDigital_Init
+  22              		.thumb
+  23              		.thumb_func
+  24              		.type	AnalogToDigital_Init, %function
+  25              	AnalogToDigital_Init:
+  26              	.LFB63:
+  27              		.file 1 "AnalogToDigital.c"
+   1:AnalogToDigital.c **** /* AnalogToDigital.c
+   2:AnalogToDigital.c ****  * ADC_DelSig + DFB Filter pipeline implementation — THESIS PERMANENT
+   3:AnalogToDigital.c ****  *
+   4:AnalogToDigital.c ****  * DMA chain layout:
+   5:AnalogToDigital.c ****  *  Chain A (ADC -> Filter STAGEA, 3 bytes, hardware trigger ADC EOC)
+   6:AnalogToDigital.c ****  *  Chain B (ADC -> g_raw_delsig, 3 bytes, triggered by Chain A TERMOUT)
+   7:AnalogToDigital.c ****  *  Chain C (Filter HOLDA -> g_filtered, 3 bytes, hardware trigger Filter DMA_Req_A)
+   8:AnalogToDigital.c ****  *           TERMOUT on Chain C fires isr_DMA_Filter → sets g_sample_ready
+   9:AnalogToDigital.c ****  */
+  10:AnalogToDigital.c **** 
+  11:AnalogToDigital.c **** #include "project.h"
+  12:AnalogToDigital.c **** #include "AnalogToDigital.h"
+  13:AnalogToDigital.c **** #include "buffers.h"
+  14:AnalogToDigital.c **** 
+  15:AnalogToDigital.c **** #include "DMA_DelSig_FIlter_dma.h"
+  16:AnalogToDigital.c **** #include "DMA_DelSig_RAM_dma.h"
+  17:AnalogToDigital.c **** #include "DMA_Filter_dma.h"
+  18:AnalogToDigital.c **** 
+  19:AnalogToDigital.c **** static uint8 s_td_adc_to_filter;
+  20:AnalogToDigital.c **** static uint8 s_td_adc_to_ram;
+  21:AnalogToDigital.c **** static uint8 s_td_filter_to_ram;
+  22:AnalogToDigital.c **** 
+  23:AnalogToDigital.c **** void AnalogToDigital_Init(void)
+  24:AnalogToDigital.c **** {
+  28              		.loc 1 24 0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32 0000 38B5     		push	{r3, r4, r5, lr}
+  33              		.cfi_def_cfa_offset 16
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 2
+
+
+  34              		.cfi_offset 3, -16
+  35              		.cfi_offset 4, -12
+  36              		.cfi_offset 5, -8
+  37              		.cfi_offset 14, -4
+  25:AnalogToDigital.c ****     /* --- Chain A: ADC_DelSig -> Filter STAGEA (3 bytes) --- */
+  26:AnalogToDigital.c ****     DMA_DelSig_FIlter_DmaHandle = DMA_DelSig_FIlter_DmaInitialize(
+  38              		.loc 1 26 0
+  39 0002 4FF48043 		mov	r3, #16384
+  40 0006 1A46     		mov	r2, r3
+  41 0008 0121     		movs	r1, #1
+  42 000a 0320     		movs	r0, #3
+  43 000c FFF7FEFF 		bl	DMA_DelSig_FIlter_DmaInitialize
+  44              	.LVL0:
+  45 0010 2E4D     		ldr	r5, .L3
+  46 0012 2870     		strb	r0, [r5]
+  27:AnalogToDigital.c ****         3u, 1u,
+  28:AnalogToDigital.c ****         HI16(CYDEV_PERIPH_BASE),
+  29:AnalogToDigital.c ****         HI16(CYDEV_PERIPH_BASE));
+  30:AnalogToDigital.c **** 
+  31:AnalogToDigital.c ****     s_td_adc_to_filter = CyDmaTdAllocate();
+  47              		.loc 1 31 0
+  48 0014 FFF7FEFF 		bl	CyDmaTdAllocate
+  49              	.LVL1:
+  50 0018 0246     		mov	r2, r0
+  51 001a 2D4C     		ldr	r4, .L3+4
+  52 001c 2070     		strb	r0, [r4]
+  32:AnalogToDigital.c ****     CyDmaTdSetConfiguration(
+  53              		.loc 1 32 0
+  54 001e 0723     		movs	r3, #7
+  55 0020 0321     		movs	r1, #3
+  56 0022 FFF7FEFF 		bl	CyDmaTdSetConfiguration
+  57              	.LVL2:
+  33:AnalogToDigital.c ****         s_td_adc_to_filter, 3u, s_td_adc_to_filter,
+  34:AnalogToDigital.c ****         CY_DMA_TD_INC_SRC_ADR | CY_DMA_TD_INC_DST_ADR | CY_DMA_TD_TERMOUT0_EN);
+  35:AnalogToDigital.c ****     CyDmaTdSetAddress(
+  58              		.loc 1 35 0
+  59 0026 4CF2A072 		movw	r2, #51104
+  60 002a 44F61061 		movw	r1, #19984
+  61 002e 2078     		ldrb	r0, [r4]	@ zero_extendqisi2
+  62 0030 FFF7FEFF 		bl	CyDmaTdSetAddress
+  63              	.LVL3:
+  36:AnalogToDigital.c ****         s_td_adc_to_filter,
+  37:AnalogToDigital.c ****         LO16((uint32)ADC_DelSig_DEC_SAMP_PTR),
+  38:AnalogToDigital.c ****         LO16((uint32)Filter_DFB__STAGEA));
+  39:AnalogToDigital.c ****     CyDmaChSetInitialTd(DMA_DelSig_FIlter_DmaHandle, s_td_adc_to_filter);
+  64              		.loc 1 39 0
+  65 0034 2178     		ldrb	r1, [r4]	@ zero_extendqisi2
+  66 0036 2878     		ldrb	r0, [r5]	@ zero_extendqisi2
+  67 0038 FFF7FEFF 		bl	CyDmaChSetInitialTd
+  68              	.LVL4:
+  40:AnalogToDigital.c **** 
+  41:AnalogToDigital.c ****     /* --- Chain B: ADC_DelSig -> g_raw_delsig (3 bytes) --- */
+  42:AnalogToDigital.c ****     DMA_DelSig_RAM_DmaHandle = DMA_DelSig_RAM_DmaInitialize(
+  69              		.loc 1 42 0
+  70 003c 41F6FF73 		movw	r3, #8191
+  71 0040 4FF48042 		mov	r2, #16384
+  72 0044 0121     		movs	r1, #1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 3
+
+
+  73 0046 0320     		movs	r0, #3
+  74 0048 FFF7FEFF 		bl	DMA_DelSig_RAM_DmaInitialize
+  75              	.LVL5:
+  76 004c 214D     		ldr	r5, .L3+8
+  77 004e 2870     		strb	r0, [r5]
+  43:AnalogToDigital.c ****         3u, 1u,
+  44:AnalogToDigital.c ****         HI16(CYDEV_PERIPH_BASE),
+  45:AnalogToDigital.c ****         HI16(CYDEV_SRAM_BASE));
+  46:AnalogToDigital.c **** 
+  47:AnalogToDigital.c ****     s_td_adc_to_ram = CyDmaTdAllocate();
+  78              		.loc 1 47 0
+  79 0050 FFF7FEFF 		bl	CyDmaTdAllocate
+  80              	.LVL6:
+  81 0054 0246     		mov	r2, r0
+  82 0056 6070     		strb	r0, [r4, #1]
+  48:AnalogToDigital.c ****     CyDmaTdSetConfiguration(
+  83              		.loc 1 48 0
+  84 0058 0323     		movs	r3, #3
+  85 005a 1946     		mov	r1, r3
+  86 005c FFF7FEFF 		bl	CyDmaTdSetConfiguration
+  87              	.LVL7:
+  49:AnalogToDigital.c ****         s_td_adc_to_ram, 3u, s_td_adc_to_ram,
+  50:AnalogToDigital.c ****         CY_DMA_TD_INC_SRC_ADR | CY_DMA_TD_INC_DST_ADR);
+  51:AnalogToDigital.c ****     CyDmaTdSetAddress(
+  88              		.loc 1 51 0
+  89 0060 1D4A     		ldr	r2, .L3+12
+  90 0062 92B2     		uxth	r2, r2
+  91 0064 44F61061 		movw	r1, #19984
+  92 0068 6078     		ldrb	r0, [r4, #1]	@ zero_extendqisi2
+  93 006a FFF7FEFF 		bl	CyDmaTdSetAddress
+  94              	.LVL8:
+  52:AnalogToDigital.c ****         s_td_adc_to_ram,
+  53:AnalogToDigital.c ****         LO16((uint32)ADC_DelSig_DEC_SAMP_PTR),
+  54:AnalogToDigital.c ****         LO16((uint32)&g_raw_delsig));
+  55:AnalogToDigital.c ****     CyDmaChSetInitialTd(DMA_DelSig_RAM_DmaHandle, s_td_adc_to_ram);
+  95              		.loc 1 55 0
+  96 006e 6178     		ldrb	r1, [r4, #1]	@ zero_extendqisi2
+  97 0070 2878     		ldrb	r0, [r5]	@ zero_extendqisi2
+  98 0072 FFF7FEFF 		bl	CyDmaChSetInitialTd
+  99              	.LVL9:
+  56:AnalogToDigital.c **** 
+  57:AnalogToDigital.c ****     /* --- Chain C: Filter HOLDA -> g_filtered (3 bytes) --- */
+  58:AnalogToDigital.c ****     DMA_Filter_DmaHandle = DMA_Filter_DmaInitialize(
+ 100              		.loc 1 58 0
+ 101 0076 41F6FF73 		movw	r3, #8191
+ 102 007a 4FF48042 		mov	r2, #16384
+ 103 007e 0121     		movs	r1, #1
+ 104 0080 0320     		movs	r0, #3
+ 105 0082 FFF7FEFF 		bl	DMA_Filter_DmaInitialize
+ 106              	.LVL10:
+ 107 0086 154D     		ldr	r5, .L3+16
+ 108 0088 2870     		strb	r0, [r5]
+  59:AnalogToDigital.c ****         3u, 1u,
+  60:AnalogToDigital.c ****         HI16(CYDEV_PERIPH_BASE),
+  61:AnalogToDigital.c ****         HI16(CYDEV_SRAM_BASE));
+  62:AnalogToDigital.c **** 
+  63:AnalogToDigital.c ****     s_td_filter_to_ram = CyDmaTdAllocate();
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 4
+
+
+ 109              		.loc 1 63 0
+ 110 008a FFF7FEFF 		bl	CyDmaTdAllocate
+ 111              	.LVL11:
+ 112 008e 0246     		mov	r2, r0
+ 113 0090 A070     		strb	r0, [r4, #2]
+  64:AnalogToDigital.c ****     CyDmaTdSetConfiguration(
+ 114              		.loc 1 64 0
+ 115 0092 0723     		movs	r3, #7
+ 116 0094 0321     		movs	r1, #3
+ 117 0096 FFF7FEFF 		bl	CyDmaTdSetConfiguration
+ 118              	.LVL12:
+  65:AnalogToDigital.c ****         s_td_filter_to_ram, 3u, s_td_filter_to_ram,
+  66:AnalogToDigital.c ****         CY_DMA_TD_INC_SRC_ADR | CY_DMA_TD_INC_DST_ADR | CY_DMA_TD_TERMOUT0_EN);
+  67:AnalogToDigital.c ****     CyDmaTdSetAddress(
+ 119              		.loc 1 67 0
+ 120 009a 114A     		ldr	r2, .L3+20
+ 121 009c 92B2     		uxth	r2, r2
+ 122 009e 4CF2A871 		movw	r1, #51112
+ 123 00a2 A078     		ldrb	r0, [r4, #2]	@ zero_extendqisi2
+ 124 00a4 FFF7FEFF 		bl	CyDmaTdSetAddress
+ 125              	.LVL13:
+  68:AnalogToDigital.c ****         s_td_filter_to_ram,
+  69:AnalogToDigital.c ****         LO16((uint32)Filter_DFB__HOLDA),
+  70:AnalogToDigital.c ****         LO16((uint32)&g_filtered));
+  71:AnalogToDigital.c ****     CyDmaChSetInitialTd(DMA_Filter_DmaHandle, s_td_filter_to_ram);
+ 126              		.loc 1 71 0
+ 127 00a8 A178     		ldrb	r1, [r4, #2]	@ zero_extendqisi2
+ 128 00aa 2878     		ldrb	r0, [r5]	@ zero_extendqisi2
+ 129 00ac FFF7FEFF 		bl	CyDmaChSetInitialTd
+ 130              	.LVL14:
+  72:AnalogToDigital.c **** 
+  73:AnalogToDigital.c ****     /* DFB coherency: reading HOLDA (LSB) latches the full 24-bit word */
+  74:AnalogToDigital.c ****     Filter_SetCoherency(Filter_CHANNEL_A, Filter_KEY_LOW);
+ 131              		.loc 1 74 0
+ 132 00b0 0021     		movs	r1, #0
+ 133 00b2 0846     		mov	r0, r1
+ 134 00b4 FFF7FEFF 		bl	Filter_SetCoherency
+ 135              	.LVL15:
+  75:AnalogToDigital.c ****     Filter_SetDalign(Filter_STAGEA_DALIGN, 0u);
+ 136              		.loc 1 75 0
+ 137 00b8 0021     		movs	r1, #0
+ 138 00ba 0120     		movs	r0, #1
+ 139 00bc FFF7FEFF 		bl	Filter_SetDalign
+ 140              	.LVL16:
+  76:AnalogToDigital.c ****     Filter_SetDalign(Filter_HOLDA_DALIGN,  0u);
+ 141              		.loc 1 76 0
+ 142 00c0 0021     		movs	r1, #0
+ 143 00c2 0420     		movs	r0, #4
+ 144 00c4 FFF7FEFF 		bl	Filter_SetDalign
+ 145              	.LVL17:
+ 146 00c8 38BD     		pop	{r3, r4, r5, pc}
+ 147              	.L4:
+ 148 00ca 00BF     		.align	2
+ 149              	.L3:
+ 150 00cc 00000000 		.word	DMA_DelSig_FIlter_DmaHandle
+ 151 00d0 00000000 		.word	.LANCHOR0
+ 152 00d4 00000000 		.word	DMA_DelSig_RAM_DmaHandle
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 5
+
+
+ 153 00d8 00000000 		.word	g_raw_delsig
+ 154 00dc 00000000 		.word	DMA_Filter_DmaHandle
+ 155 00e0 00000000 		.word	g_filtered
+ 156              		.cfi_endproc
+ 157              	.LFE63:
+ 158              		.size	AnalogToDigital_Init, .-AnalogToDigital_Init
+ 159              		.section	.text.AnalogToDigital_Start,"ax",%progbits
+ 160              		.align	2
+ 161              		.global	AnalogToDigital_Start
+ 162              		.thumb
+ 163              		.thumb_func
+ 164              		.type	AnalogToDigital_Start, %function
+ 165              	AnalogToDigital_Start:
+ 166              	.LFB64:
+  77:AnalogToDigital.c **** }
+  78:AnalogToDigital.c **** 
+  79:AnalogToDigital.c **** void AnalogToDigital_Start(void)
+  80:AnalogToDigital.c **** {
+ 167              		.loc 1 80 0
+ 168              		.cfi_startproc
+ 169              		@ args = 0, pretend = 0, frame = 0
+ 170              		@ frame_needed = 0, uses_anonymous_args = 0
+ 171 0000 08B5     		push	{r3, lr}
+ 172              		.cfi_def_cfa_offset 8
+ 173              		.cfi_offset 3, -8
+ 174              		.cfi_offset 14, -4
+  81:AnalogToDigital.c ****     Filter_Start();
+ 175              		.loc 1 81 0
+ 176 0002 FFF7FEFF 		bl	Filter_Start
+ 177              	.LVL18:
+  82:AnalogToDigital.c **** 
+  83:AnalogToDigital.c ****     CyDmaChEnable(DMA_DelSig_FIlter_DmaHandle, 1u);
+ 178              		.loc 1 83 0
+ 179 0006 0121     		movs	r1, #1
+ 180 0008 0C4B     		ldr	r3, .L7
+ 181 000a 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 182 000c FFF7FEFF 		bl	CyDmaChEnable
+ 183              	.LVL19:
+  84:AnalogToDigital.c ****     CyDmaChEnable(DMA_DelSig_RAM_DmaHandle,    1u);
+ 184              		.loc 1 84 0
+ 185 0010 0121     		movs	r1, #1
+ 186 0012 0B4B     		ldr	r3, .L7+4
+ 187 0014 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 188 0016 FFF7FEFF 		bl	CyDmaChEnable
+ 189              	.LVL20:
+  85:AnalogToDigital.c ****     CyDmaChEnable(DMA_Filter_DmaHandle,        1u);
+ 190              		.loc 1 85 0
+ 191 001a 0121     		movs	r1, #1
+ 192 001c 094B     		ldr	r3, .L7+8
+ 193 001e 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 194 0020 FFF7FEFF 		bl	CyDmaChEnable
+ 195              	.LVL21:
+  86:AnalogToDigital.c **** 
+  87:AnalogToDigital.c ****     /* Start in default config (CFG4 = ±6.144 V, buf_gain 8) */
+  88:AnalogToDigital.c ****     ADC_DelSig_SelectConfiguration(ADC_DelSig_CFG4, 1u);
+ 196              		.loc 1 88 0
+ 197 0024 0121     		movs	r1, #1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 6
+
+
+ 198 0026 0420     		movs	r0, #4
+ 199 0028 FFF7FEFF 		bl	ADC_DelSig_SelectConfiguration
+ 200              	.LVL22:
+  89:AnalogToDigital.c ****     ADC_DelSig_SetBufferGain(ADC_DelSig_BUF_GAIN_8X);
+ 201              		.loc 1 89 0
+ 202 002c 0320     		movs	r0, #3
+ 203 002e FFF7FEFF 		bl	ADC_DelSig_SetBufferGain
+ 204              	.LVL23:
+  90:AnalogToDigital.c ****     ADC_DelSig_Start();
+ 205              		.loc 1 90 0
+ 206 0032 FFF7FEFF 		bl	ADC_DelSig_Start
+ 207              	.LVL24:
+  91:AnalogToDigital.c ****     ADC_DelSig_StartConvert();
+ 208              		.loc 1 91 0
+ 209 0036 FFF7FEFF 		bl	ADC_DelSig_StartConvert
+ 210              	.LVL25:
+ 211 003a 08BD     		pop	{r3, pc}
+ 212              	.L8:
+ 213              		.align	2
+ 214              	.L7:
+ 215 003c 00000000 		.word	DMA_DelSig_FIlter_DmaHandle
+ 216 0040 00000000 		.word	DMA_DelSig_RAM_DmaHandle
+ 217 0044 00000000 		.word	DMA_Filter_DmaHandle
+ 218              		.cfi_endproc
+ 219              	.LFE64:
+ 220              		.size	AnalogToDigital_Start, .-AnalogToDigital_Start
+ 221              		.section	.text.AnalogToDigital_Stop,"ax",%progbits
+ 222              		.align	2
+ 223              		.global	AnalogToDigital_Stop
+ 224              		.thumb
+ 225              		.thumb_func
+ 226              		.type	AnalogToDigital_Stop, %function
+ 227              	AnalogToDigital_Stop:
+ 228              	.LFB65:
+  92:AnalogToDigital.c ****     /* ADC_SAR is started by TestBench_Init() */
+  93:AnalogToDigital.c **** }
+  94:AnalogToDigital.c **** 
+  95:AnalogToDigital.c **** void AnalogToDigital_Stop(void)
+  96:AnalogToDigital.c **** {
+ 229              		.loc 1 96 0
+ 230              		.cfi_startproc
+ 231              		@ args = 0, pretend = 0, frame = 0
+ 232              		@ frame_needed = 0, uses_anonymous_args = 0
+ 233 0000 08B5     		push	{r3, lr}
+ 234              		.cfi_def_cfa_offset 8
+ 235              		.cfi_offset 3, -8
+ 236              		.cfi_offset 14, -4
+  97:AnalogToDigital.c ****     ADC_DelSig_StopConvert();
+ 237              		.loc 1 97 0
+ 238 0002 FFF7FEFF 		bl	ADC_DelSig_StopConvert
+ 239              	.LVL26:
+  98:AnalogToDigital.c ****     ADC_DelSig_Stop();
+ 240              		.loc 1 98 0
+ 241 0006 FFF7FEFF 		bl	ADC_DelSig_Stop
+ 242              	.LVL27:
+  99:AnalogToDigital.c ****     Filter_Stop();
+ 243              		.loc 1 99 0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 7
+
+
+ 244 000a FFF7FEFF 		bl	Filter_Stop
+ 245              	.LVL28:
+ 100:AnalogToDigital.c **** 
+ 101:AnalogToDigital.c ****     CyDmaChDisable(DMA_DelSig_FIlter_DmaHandle);
+ 246              		.loc 1 101 0
+ 247 000e 064B     		ldr	r3, .L11
+ 248 0010 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 249 0012 FFF7FEFF 		bl	CyDmaChDisable
+ 250              	.LVL29:
+ 102:AnalogToDigital.c ****     CyDmaChDisable(DMA_DelSig_RAM_DmaHandle);
+ 251              		.loc 1 102 0
+ 252 0016 054B     		ldr	r3, .L11+4
+ 253 0018 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 254 001a FFF7FEFF 		bl	CyDmaChDisable
+ 255              	.LVL30:
+ 103:AnalogToDigital.c ****     CyDmaChDisable(DMA_Filter_DmaHandle);
+ 256              		.loc 1 103 0
+ 257 001e 044B     		ldr	r3, .L11+8
+ 258 0020 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 259 0022 FFF7FEFF 		bl	CyDmaChDisable
+ 260              	.LVL31:
+ 261 0026 08BD     		pop	{r3, pc}
+ 262              	.L12:
+ 263              		.align	2
+ 264              	.L11:
+ 265 0028 00000000 		.word	DMA_DelSig_FIlter_DmaHandle
+ 266 002c 00000000 		.word	DMA_DelSig_RAM_DmaHandle
+ 267 0030 00000000 		.word	DMA_Filter_DmaHandle
+ 268              		.cfi_endproc
+ 269              	.LFE65:
+ 270              		.size	AnalogToDigital_Stop, .-AnalogToDigital_Stop
+ 271              		.section	.text.AnalogToDigital_SetADC,"ax",%progbits
+ 272              		.align	2
+ 273              		.global	AnalogToDigital_SetADC
+ 274              		.thumb
+ 275              		.thumb_func
+ 276              		.type	AnalogToDigital_SetADC, %function
+ 277              	AnalogToDigital_SetADC:
+ 278              	.LFB66:
+ 104:AnalogToDigital.c **** }
+ 105:AnalogToDigital.c **** 
+ 106:AnalogToDigital.c **** void AnalogToDigital_SetADC(uint8 cfg, uint8 buf_gain)
+ 107:AnalogToDigital.c **** {
+ 279              		.loc 1 107 0
+ 280              		.cfi_startproc
+ 281              		@ args = 0, pretend = 0, frame = 0
+ 282              		@ frame_needed = 0, uses_anonymous_args = 0
+ 283              	.LVL32:
+ 284 0000 70B5     		push	{r4, r5, r6, lr}
+ 285              		.cfi_def_cfa_offset 16
+ 286              		.cfi_offset 4, -16
+ 287              		.cfi_offset 5, -12
+ 288              		.cfi_offset 6, -8
+ 289              		.cfi_offset 14, -4
+ 290 0002 0446     		mov	r4, r0
+ 108:AnalogToDigital.c ****     uint8 psoc_cfg;
+ 109:AnalogToDigital.c ****     uint8 psoc_gain;
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 8
+
+
+ 110:AnalogToDigital.c **** 
+ 111:AnalogToDigital.c ****     /* Clamp to valid config range */
+ 112:AnalogToDigital.c ****     if (cfg < ATD_CFG_1 || cfg > ATD_CFG_4) { cfg = ATD_CFG_4; }
+ 291              		.loc 1 112 0
+ 292 0004 431E     		subs	r3, r0, #1
+ 293 0006 DBB2     		uxtb	r3, r3
+ 294 0008 032B     		cmp	r3, #3
+ 295 000a 00D9     		bls	.L14
+ 296 000c 0424     		movs	r4, #4
+ 297              	.L14:
+ 298              	.LVL33:
+ 113:AnalogToDigital.c **** 
+ 114:AnalogToDigital.c ****     /* CFG1 constraint: buffer gain must be 1 */
+ 115:AnalogToDigital.c ****     if (cfg == ATD_CFG_1) { buf_gain = ATD_BGAIN_1; }
+ 299              		.loc 1 115 0
+ 300 000e 012C     		cmp	r4, #1
+ 301 0010 00D1     		bne	.L15
+ 302 0012 0121     		movs	r1, #1
+ 303              	.LVL34:
+ 304              	.L15:
+ 116:AnalogToDigital.c **** 
+ 117:AnalogToDigital.c ****     /* Map cfg index to PSoC Creator constants */
+ 118:AnalogToDigital.c ****     switch (cfg)
+ 305              		.loc 1 118 0
+ 306 0014 022C     		cmp	r4, #2
+ 307 0016 09D0     		beq	.L23
+ 308 0018 032C     		cmp	r4, #3
+ 309 001a 03D0     		beq	.L18
+ 310 001c 012C     		cmp	r4, #1
+ 311 001e 03D1     		bne	.L27
+ 119:AnalogToDigital.c ****     {
+ 120:AnalogToDigital.c ****         case ATD_CFG_1: psoc_cfg = ADC_DelSig_CFG1; break;
+ 312              		.loc 1 120 0
+ 313 0020 0120     		movs	r0, #1
+ 314 0022 04E0     		b	.L17
+ 315              	.L18:
+ 316              	.LVL35:
+ 121:AnalogToDigital.c ****         case ATD_CFG_2: psoc_cfg = ADC_DelSig_CFG2; break;
+ 122:AnalogToDigital.c ****         case ATD_CFG_3: psoc_cfg = ADC_DelSig_CFG3; break;
+ 317              		.loc 1 122 0
+ 318 0024 0320     		movs	r0, #3
+ 319 0026 02E0     		b	.L17
+ 320              	.LVL36:
+ 321              	.L27:
+ 123:AnalogToDigital.c ****         case ATD_CFG_4:
+ 124:AnalogToDigital.c ****         default:        psoc_cfg = ADC_DelSig_CFG4; break;
+ 322              		.loc 1 124 0
+ 323 0028 0420     		movs	r0, #4
+ 324 002a 00E0     		b	.L17
+ 325              	.LVL37:
+ 326              	.L23:
+ 121:AnalogToDigital.c ****         case ATD_CFG_2: psoc_cfg = ADC_DelSig_CFG2; break;
+ 327              		.loc 1 121 0
+ 328 002c 0220     		movs	r0, #2
+ 329              	.L17:
+ 330              	.LVL38:
+ 125:AnalogToDigital.c ****     }
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 9
+
+
+ 126:AnalogToDigital.c **** 
+ 127:AnalogToDigital.c ****     /* Map gain value to PSoC Creator buffer gain constant */
+ 128:AnalogToDigital.c ****     if      (buf_gain >= ATD_BGAIN_8) { psoc_gain = ADC_DelSig_BUF_GAIN_8X; buf_gain = ATD_BGAIN_8;
+ 331              		.loc 1 128 0
+ 332 002e 0729     		cmp	r1, #7
+ 333 0030 06D8     		bhi	.L24
+ 129:AnalogToDigital.c ****     else if (buf_gain >= ATD_BGAIN_4) { psoc_gain = ADC_DelSig_BUF_GAIN_4X; buf_gain = ATD_BGAIN_4;
+ 334              		.loc 1 129 0
+ 335 0032 0329     		cmp	r1, #3
+ 336 0034 07D8     		bhi	.L25
+ 130:AnalogToDigital.c ****     else if (buf_gain >= ATD_BGAIN_2) { psoc_gain = ADC_DelSig_BUF_GAIN_2X; buf_gain = ATD_BGAIN_2;
+ 337              		.loc 1 130 0
+ 338 0036 0129     		cmp	r1, #1
+ 339 0038 08D9     		bls	.L26
+ 340 003a 0126     		movs	r6, #1
+ 341 003c 0225     		movs	r5, #2
+ 342 003e 07E0     		b	.L20
+ 343              	.L24:
+ 128:AnalogToDigital.c ****     else if (buf_gain >= ATD_BGAIN_4) { psoc_gain = ADC_DelSig_BUF_GAIN_4X; buf_gain = ATD_BGAIN_4;
+ 344              		.loc 1 128 0
+ 345 0040 0326     		movs	r6, #3
+ 346 0042 0825     		movs	r5, #8
+ 347 0044 04E0     		b	.L20
+ 348              	.L25:
+ 129:AnalogToDigital.c ****     else if (buf_gain >= ATD_BGAIN_4) { psoc_gain = ADC_DelSig_BUF_GAIN_4X; buf_gain = ATD_BGAIN_4;
+ 349              		.loc 1 129 0
+ 350 0046 0226     		movs	r6, #2
+ 351 0048 0425     		movs	r5, #4
+ 352 004a 01E0     		b	.L20
+ 353              	.L26:
+ 131:AnalogToDigital.c ****     else                              { psoc_gain = ADC_DelSig_BUF_GAIN_1X; buf_gain = ATD_BGAIN_1;
+ 354              		.loc 1 131 0
+ 355 004c 0026     		movs	r6, #0
+ 356 004e 0125     		movs	r5, #1
+ 357              	.L20:
+ 358              	.LVL39:
+ 132:AnalogToDigital.c **** 
+ 133:AnalogToDigital.c ****     ADC_DelSig_SelectConfiguration(psoc_cfg, 1u);
+ 359              		.loc 1 133 0
+ 360 0050 0121     		movs	r1, #1
+ 361 0052 FFF7FEFF 		bl	ADC_DelSig_SelectConfiguration
+ 362              	.LVL40:
+ 134:AnalogToDigital.c ****     ADC_DelSig_SetBufferGain(psoc_gain);
+ 363              		.loc 1 134 0
+ 364 0056 3046     		mov	r0, r6
+ 365 0058 FFF7FEFF 		bl	ADC_DelSig_SetBufferGain
+ 366              	.LVL41:
+ 135:AnalogToDigital.c **** 
+ 136:AnalogToDigital.c ****     g_adc_cfg      = cfg;
+ 367              		.loc 1 136 0
+ 368 005c 024B     		ldr	r3, .L29
+ 369 005e 1C70     		strb	r4, [r3]
+ 137:AnalogToDigital.c ****     g_adc_buf_gain = buf_gain;
+ 370              		.loc 1 137 0
+ 371 0060 024B     		ldr	r3, .L29+4
+ 372 0062 1D70     		strb	r5, [r3]
+ 373 0064 70BD     		pop	{r4, r5, r6, pc}
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 10
+
+
+ 374              	.LVL42:
+ 375              	.L30:
+ 376 0066 00BF     		.align	2
+ 377              	.L29:
+ 378 0068 00000000 		.word	g_adc_cfg
+ 379 006c 00000000 		.word	g_adc_buf_gain
+ 380              		.cfi_endproc
+ 381              	.LFE66:
+ 382              		.size	AnalogToDigital_SetADC, .-AnalogToDigital_SetADC
+ 383              		.section	.text.AnalogToDigital_GetCfg,"ax",%progbits
+ 384              		.align	2
+ 385              		.global	AnalogToDigital_GetCfg
+ 386              		.thumb
+ 387              		.thumb_func
+ 388              		.type	AnalogToDigital_GetCfg, %function
+ 389              	AnalogToDigital_GetCfg:
+ 390              	.LFB67:
+ 138:AnalogToDigital.c **** }
+ 139:AnalogToDigital.c **** 
+ 140:AnalogToDigital.c **** uint8 AnalogToDigital_GetCfg(void)
+ 141:AnalogToDigital.c **** {
+ 391              		.loc 1 141 0
+ 392              		.cfi_startproc
+ 393              		@ args = 0, pretend = 0, frame = 0
+ 394              		@ frame_needed = 0, uses_anonymous_args = 0
+ 395              		@ link register save eliminated.
+ 142:AnalogToDigital.c ****     return g_adc_cfg;
+ 396              		.loc 1 142 0
+ 397 0000 014B     		ldr	r3, .L32
+ 398 0002 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 143:AnalogToDigital.c **** }
+ 399              		.loc 1 143 0
+ 400 0004 7047     		bx	lr
+ 401              	.L33:
+ 402 0006 00BF     		.align	2
+ 403              	.L32:
+ 404 0008 00000000 		.word	g_adc_cfg
+ 405              		.cfi_endproc
+ 406              	.LFE67:
+ 407              		.size	AnalogToDigital_GetCfg, .-AnalogToDigital_GetCfg
+ 408              		.section	.text.AnalogToDigital_GetBufGain,"ax",%progbits
+ 409              		.align	2
+ 410              		.global	AnalogToDigital_GetBufGain
+ 411              		.thumb
+ 412              		.thumb_func
+ 413              		.type	AnalogToDigital_GetBufGain, %function
+ 414              	AnalogToDigital_GetBufGain:
+ 415              	.LFB68:
+ 144:AnalogToDigital.c **** 
+ 145:AnalogToDigital.c **** uint8 AnalogToDigital_GetBufGain(void)
+ 146:AnalogToDigital.c **** {
+ 416              		.loc 1 146 0
+ 417              		.cfi_startproc
+ 418              		@ args = 0, pretend = 0, frame = 0
+ 419              		@ frame_needed = 0, uses_anonymous_args = 0
+ 420              		@ link register save eliminated.
+ 147:AnalogToDigital.c ****     return g_adc_buf_gain;
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 11
+
+
+ 421              		.loc 1 147 0
+ 422 0000 014B     		ldr	r3, .L35
+ 423 0002 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 148:AnalogToDigital.c **** }
+ 424              		.loc 1 148 0
+ 425 0004 7047     		bx	lr
+ 426              	.L36:
+ 427 0006 00BF     		.align	2
+ 428              	.L35:
+ 429 0008 00000000 		.word	g_adc_buf_gain
+ 430              		.cfi_endproc
+ 431              	.LFE68:
+ 432              		.size	AnalogToDigital_GetBufGain, .-AnalogToDigital_GetBufGain
+ 433              		.bss
+ 434              		.set	.LANCHOR0,. + 0
+ 435              		.type	s_td_adc_to_filter, %object
+ 436              		.size	s_td_adc_to_filter, 1
+ 437              	s_td_adc_to_filter:
+ 438 0000 00       		.space	1
+ 439              		.type	s_td_adc_to_ram, %object
+ 440              		.size	s_td_adc_to_ram, 1
+ 441              	s_td_adc_to_ram:
+ 442 0001 00       		.space	1
+ 443              		.type	s_td_filter_to_ram, %object
+ 444              		.size	s_td_filter_to_ram, 1
+ 445              	s_td_filter_to_ram:
+ 446 0002 00       		.space	1
+ 447              		.text
+ 448              	.Letext0:
+ 449              		.file 2 "c:\\program files (x86)\\cypress\\psoc creator\\4.4\\psoc creator\\import\\gnu\\arm\\5.4.
+ 450              		.file 3 "c:\\program files (x86)\\cypress\\psoc creator\\4.4\\psoc creator\\import\\gnu\\arm\\5.4.
+ 451              		.file 4 "Generated_Source\\PSoC5/cytypes.h"
+ 452              		.file 5 "Generated_Source\\PSoC5/DMA_DelSig_FIlter_dma.h"
+ 453              		.file 6 "Generated_Source\\PSoC5/DMA_Filter_dma.h"
+ 454              		.file 7 "Generated_Source\\PSoC5/DMA_DelSig_RAM_dma.h"
+ 455              		.file 8 "Generated_Source\\PSoC5/core_cm3.h"
+ 456              		.file 9 "buffers.h"
+ 457              		.file 10 "Generated_Source\\PSoC5/CYDMAC.H"
+ 458              		.file 11 "Generated_Source\\PSoC5/Filter.h"
+ 459              		.file 12 "Generated_Source\\PSoC5/ADC_DelSig.h"
+ 460              		.section	.debug_info,"",%progbits
+ 461              	.Ldebug_info0:
+ 462 0000 59050000 		.4byte	0x559
+ 463 0004 0400     		.2byte	0x4
+ 464 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 465 000a 04       		.byte	0x4
+ 466 000b 01       		.uleb128 0x1
+ 467 000c CC030000 		.4byte	.LASF60
+ 468 0010 0C       		.byte	0xc
+ 469 0011 2A000000 		.4byte	.LASF61
+ 470 0015 3C000000 		.4byte	.LASF62
+ 471 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 472 001d 00000000 		.4byte	0
+ 473 0021 00000000 		.4byte	.Ldebug_line0
+ 474 0025 02       		.uleb128 0x2
+ 475 0026 01       		.byte	0x1
+ 476 0027 06       		.byte	0x6
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 12
+
+
+ 477 0028 60020000 		.4byte	.LASF0
+ 478 002c 02       		.uleb128 0x2
+ 479 002d 01       		.byte	0x1
+ 480 002e 08       		.byte	0x8
+ 481 002f 52020000 		.4byte	.LASF1
+ 482 0033 02       		.uleb128 0x2
+ 483 0034 02       		.byte	0x2
+ 484 0035 05       		.byte	0x5
+ 485 0036 9D000000 		.4byte	.LASF2
+ 486 003a 02       		.uleb128 0x2
+ 487 003b 02       		.byte	0x2
+ 488 003c 07       		.byte	0x7
+ 489 003d B5020000 		.4byte	.LASF3
+ 490 0041 03       		.uleb128 0x3
+ 491 0042 59030000 		.4byte	.LASF9
+ 492 0046 02       		.byte	0x2
+ 493 0047 3F       		.byte	0x3f
+ 494 0048 4C000000 		.4byte	0x4c
+ 495 004c 02       		.uleb128 0x2
+ 496 004d 04       		.byte	0x4
+ 497 004e 05       		.byte	0x5
+ 498 004f CB010000 		.4byte	.LASF4
+ 499 0053 02       		.uleb128 0x2
+ 500 0054 04       		.byte	0x4
+ 501 0055 07       		.byte	0x7
+ 502 0056 03030000 		.4byte	.LASF5
+ 503 005a 02       		.uleb128 0x2
+ 504 005b 08       		.byte	0x8
+ 505 005c 05       		.byte	0x5
+ 506 005d A6010000 		.4byte	.LASF6
+ 507 0061 02       		.uleb128 0x2
+ 508 0062 08       		.byte	0x8
+ 509 0063 07       		.byte	0x7
+ 510 0064 6C020000 		.4byte	.LASF7
+ 511 0068 04       		.uleb128 0x4
+ 512 0069 04       		.byte	0x4
+ 513 006a 05       		.byte	0x5
+ 514 006b 696E7400 		.ascii	"int\000"
+ 515 006f 02       		.uleb128 0x2
+ 516 0070 04       		.byte	0x4
+ 517 0071 07       		.byte	0x7
+ 518 0072 83020000 		.4byte	.LASF8
+ 519 0076 03       		.uleb128 0x3
+ 520 0077 CD020000 		.4byte	.LASF10
+ 521 007b 03       		.byte	0x3
+ 522 007c 2C       		.byte	0x2c
+ 523 007d 41000000 		.4byte	0x41
+ 524 0081 05       		.uleb128 0x5
+ 525 0082 5C010000 		.4byte	.LASF11
+ 526 0086 04       		.byte	0x4
+ 527 0087 E901     		.2byte	0x1e9
+ 528 0089 2C000000 		.4byte	0x2c
+ 529 008d 05       		.uleb128 0x5
+ 530 008e 36010000 		.4byte	.LASF12
+ 531 0092 04       		.byte	0x4
+ 532 0093 EA01     		.2byte	0x1ea
+ 533 0095 3A000000 		.4byte	0x3a
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 13
+
+
+ 534 0099 05       		.uleb128 0x5
+ 535 009a F7020000 		.4byte	.LASF13
+ 536 009e 04       		.byte	0x4
+ 537 009f EB01     		.2byte	0x1eb
+ 538 00a1 53000000 		.4byte	0x53
+ 539 00a5 05       		.uleb128 0x5
+ 540 00a6 15030000 		.4byte	.LASF14
+ 541 00aa 04       		.byte	0x4
+ 542 00ab EE01     		.2byte	0x1ee
+ 543 00ad 4C000000 		.4byte	0x4c
+ 544 00b1 02       		.uleb128 0x2
+ 545 00b2 04       		.byte	0x4
+ 546 00b3 04       		.byte	0x4
+ 547 00b4 97010000 		.4byte	.LASF15
+ 548 00b8 02       		.uleb128 0x2
+ 549 00b9 08       		.byte	0x8
+ 550 00ba 04       		.byte	0x4
+ 551 00bb 1B030000 		.4byte	.LASF16
+ 552 00bf 02       		.uleb128 0x2
+ 553 00c0 01       		.byte	0x1
+ 554 00c1 08       		.byte	0x8
+ 555 00c2 C8020000 		.4byte	.LASF17
+ 556 00c6 05       		.uleb128 0x5
+ 557 00c7 FE020000 		.4byte	.LASF18
+ 558 00cb 04       		.byte	0x4
+ 559 00cc 9302     		.2byte	0x293
+ 560 00ce D2000000 		.4byte	0xd2
+ 561 00d2 06       		.uleb128 0x6
+ 562 00d3 81000000 		.4byte	0x81
+ 563 00d7 02       		.uleb128 0x2
+ 564 00d8 08       		.byte	0x8
+ 565 00d9 04       		.byte	0x4
+ 566 00da 27020000 		.4byte	.LASF19
+ 567 00de 02       		.uleb128 0x2
+ 568 00df 04       		.byte	0x4
+ 569 00e0 07       		.byte	0x7
+ 570 00e1 CD000000 		.4byte	.LASF20
+ 571 00e5 07       		.uleb128 0x7
+ 572 00e6 E2020000 		.4byte	.LASF21
+ 573 00ea 01       		.byte	0x1
+ 574 00eb 17       		.byte	0x17
+ 575 00ec 00000000 		.4byte	.LFB63
+ 576 00f0 E4000000 		.4byte	.LFE63-.LFB63
+ 577 00f4 01       		.uleb128 0x1
+ 578 00f5 9C       		.byte	0x9c
+ 579 00f6 75020000 		.4byte	0x275
+ 580 00fa 08       		.uleb128 0x8
+ 581 00fb 10000000 		.4byte	.LVL0
+ 582 00ff 8B040000 		.4byte	0x48b
+ 583 0103 20010000 		.4byte	0x120
+ 584 0107 09       		.uleb128 0x9
+ 585 0108 01       		.uleb128 0x1
+ 586 0109 50       		.byte	0x50
+ 587 010a 01       		.uleb128 0x1
+ 588 010b 33       		.byte	0x33
+ 589 010c 09       		.uleb128 0x9
+ 590 010d 01       		.uleb128 0x1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 14
+
+
+ 591 010e 51       		.byte	0x51
+ 592 010f 01       		.uleb128 0x1
+ 593 0110 31       		.byte	0x31
+ 594 0111 09       		.uleb128 0x9
+ 595 0112 01       		.uleb128 0x1
+ 596 0113 52       		.byte	0x52
+ 597 0114 03       		.uleb128 0x3
+ 598 0115 0A       		.byte	0xa
+ 599 0116 0040     		.2byte	0x4000
+ 600 0118 09       		.uleb128 0x9
+ 601 0119 01       		.uleb128 0x1
+ 602 011a 53       		.byte	0x53
+ 603 011b 03       		.uleb128 0x3
+ 604 011c 0A       		.byte	0xa
+ 605 011d 0040     		.2byte	0x4000
+ 606 011f 00       		.byte	0
+ 607 0120 0A       		.uleb128 0xa
+ 608 0121 18000000 		.4byte	.LVL1
+ 609 0125 96040000 		.4byte	0x496
+ 610 0129 08       		.uleb128 0x8
+ 611 012a 26000000 		.4byte	.LVL2
+ 612 012e A1040000 		.4byte	0x4a1
+ 613 0132 41010000 		.4byte	0x141
+ 614 0136 09       		.uleb128 0x9
+ 615 0137 01       		.uleb128 0x1
+ 616 0138 51       		.byte	0x51
+ 617 0139 01       		.uleb128 0x1
+ 618 013a 33       		.byte	0x33
+ 619 013b 09       		.uleb128 0x9
+ 620 013c 01       		.uleb128 0x1
+ 621 013d 53       		.byte	0x53
+ 622 013e 01       		.uleb128 0x1
+ 623 013f 37       		.byte	0x37
+ 624 0140 00       		.byte	0
+ 625 0141 08       		.uleb128 0x8
+ 626 0142 34000000 		.4byte	.LVL3
+ 627 0146 AC040000 		.4byte	0x4ac
+ 628 014a 5D010000 		.4byte	0x15d
+ 629 014e 09       		.uleb128 0x9
+ 630 014f 01       		.uleb128 0x1
+ 631 0150 51       		.byte	0x51
+ 632 0151 03       		.uleb128 0x3
+ 633 0152 0A       		.byte	0xa
+ 634 0153 104E     		.2byte	0x4e10
+ 635 0155 09       		.uleb128 0x9
+ 636 0156 01       		.uleb128 0x1
+ 637 0157 52       		.byte	0x52
+ 638 0158 03       		.uleb128 0x3
+ 639 0159 0B       		.byte	0xb
+ 640 015a A0C7     		.2byte	0xc7a0
+ 641 015c 00       		.byte	0
+ 642 015d 0A       		.uleb128 0xa
+ 643 015e 3C000000 		.4byte	.LVL4
+ 644 0162 B7040000 		.4byte	0x4b7
+ 645 0166 08       		.uleb128 0x8
+ 646 0167 4C000000 		.4byte	.LVL5
+ 647 016b C2040000 		.4byte	0x4c2
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 15
+
+
+ 648 016f 8C010000 		.4byte	0x18c
+ 649 0173 09       		.uleb128 0x9
+ 650 0174 01       		.uleb128 0x1
+ 651 0175 50       		.byte	0x50
+ 652 0176 01       		.uleb128 0x1
+ 653 0177 33       		.byte	0x33
+ 654 0178 09       		.uleb128 0x9
+ 655 0179 01       		.uleb128 0x1
+ 656 017a 51       		.byte	0x51
+ 657 017b 01       		.uleb128 0x1
+ 658 017c 31       		.byte	0x31
+ 659 017d 09       		.uleb128 0x9
+ 660 017e 01       		.uleb128 0x1
+ 661 017f 52       		.byte	0x52
+ 662 0180 03       		.uleb128 0x3
+ 663 0181 0A       		.byte	0xa
+ 664 0182 0040     		.2byte	0x4000
+ 665 0184 09       		.uleb128 0x9
+ 666 0185 01       		.uleb128 0x1
+ 667 0186 53       		.byte	0x53
+ 668 0187 03       		.uleb128 0x3
+ 669 0188 0A       		.byte	0xa
+ 670 0189 FF1F     		.2byte	0x1fff
+ 671 018b 00       		.byte	0
+ 672 018c 0A       		.uleb128 0xa
+ 673 018d 54000000 		.4byte	.LVL6
+ 674 0191 96040000 		.4byte	0x496
+ 675 0195 08       		.uleb128 0x8
+ 676 0196 60000000 		.4byte	.LVL7
+ 677 019a A1040000 		.4byte	0x4a1
+ 678 019e AD010000 		.4byte	0x1ad
+ 679 01a2 09       		.uleb128 0x9
+ 680 01a3 01       		.uleb128 0x1
+ 681 01a4 51       		.byte	0x51
+ 682 01a5 01       		.uleb128 0x1
+ 683 01a6 33       		.byte	0x33
+ 684 01a7 09       		.uleb128 0x9
+ 685 01a8 01       		.uleb128 0x1
+ 686 01a9 53       		.byte	0x53
+ 687 01aa 01       		.uleb128 0x1
+ 688 01ab 33       		.byte	0x33
+ 689 01ac 00       		.byte	0
+ 690 01ad 08       		.uleb128 0x8
+ 691 01ae 6E000000 		.4byte	.LVL8
+ 692 01b2 AC040000 		.4byte	0x4ac
+ 693 01b6 C2010000 		.4byte	0x1c2
+ 694 01ba 09       		.uleb128 0x9
+ 695 01bb 01       		.uleb128 0x1
+ 696 01bc 51       		.byte	0x51
+ 697 01bd 03       		.uleb128 0x3
+ 698 01be 0A       		.byte	0xa
+ 699 01bf 104E     		.2byte	0x4e10
+ 700 01c1 00       		.byte	0
+ 701 01c2 0A       		.uleb128 0xa
+ 702 01c3 76000000 		.4byte	.LVL9
+ 703 01c7 B7040000 		.4byte	0x4b7
+ 704 01cb 08       		.uleb128 0x8
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 16
+
+
+ 705 01cc 86000000 		.4byte	.LVL10
+ 706 01d0 CD040000 		.4byte	0x4cd
+ 707 01d4 F1010000 		.4byte	0x1f1
+ 708 01d8 09       		.uleb128 0x9
+ 709 01d9 01       		.uleb128 0x1
+ 710 01da 50       		.byte	0x50
+ 711 01db 01       		.uleb128 0x1
+ 712 01dc 33       		.byte	0x33
+ 713 01dd 09       		.uleb128 0x9
+ 714 01de 01       		.uleb128 0x1
+ 715 01df 51       		.byte	0x51
+ 716 01e0 01       		.uleb128 0x1
+ 717 01e1 31       		.byte	0x31
+ 718 01e2 09       		.uleb128 0x9
+ 719 01e3 01       		.uleb128 0x1
+ 720 01e4 52       		.byte	0x52
+ 721 01e5 03       		.uleb128 0x3
+ 722 01e6 0A       		.byte	0xa
+ 723 01e7 0040     		.2byte	0x4000
+ 724 01e9 09       		.uleb128 0x9
+ 725 01ea 01       		.uleb128 0x1
+ 726 01eb 53       		.byte	0x53
+ 727 01ec 03       		.uleb128 0x3
+ 728 01ed 0A       		.byte	0xa
+ 729 01ee FF1F     		.2byte	0x1fff
+ 730 01f0 00       		.byte	0
+ 731 01f1 0A       		.uleb128 0xa
+ 732 01f2 8E000000 		.4byte	.LVL11
+ 733 01f6 96040000 		.4byte	0x496
+ 734 01fa 08       		.uleb128 0x8
+ 735 01fb 9A000000 		.4byte	.LVL12
+ 736 01ff A1040000 		.4byte	0x4a1
+ 737 0203 12020000 		.4byte	0x212
+ 738 0207 09       		.uleb128 0x9
+ 739 0208 01       		.uleb128 0x1
+ 740 0209 51       		.byte	0x51
+ 741 020a 01       		.uleb128 0x1
+ 742 020b 33       		.byte	0x33
+ 743 020c 09       		.uleb128 0x9
+ 744 020d 01       		.uleb128 0x1
+ 745 020e 53       		.byte	0x53
+ 746 020f 01       		.uleb128 0x1
+ 747 0210 37       		.byte	0x37
+ 748 0211 00       		.byte	0
+ 749 0212 08       		.uleb128 0x8
+ 750 0213 A8000000 		.4byte	.LVL13
+ 751 0217 AC040000 		.4byte	0x4ac
+ 752 021b 27020000 		.4byte	0x227
+ 753 021f 09       		.uleb128 0x9
+ 754 0220 01       		.uleb128 0x1
+ 755 0221 51       		.byte	0x51
+ 756 0222 03       		.uleb128 0x3
+ 757 0223 0B       		.byte	0xb
+ 758 0224 A8C7     		.2byte	0xc7a8
+ 759 0226 00       		.byte	0
+ 760 0227 0A       		.uleb128 0xa
+ 761 0228 B0000000 		.4byte	.LVL14
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 17
+
+
+ 762 022c B7040000 		.4byte	0x4b7
+ 763 0230 08       		.uleb128 0x8
+ 764 0231 B8000000 		.4byte	.LVL15
+ 765 0235 D8040000 		.4byte	0x4d8
+ 766 0239 48020000 		.4byte	0x248
+ 767 023d 09       		.uleb128 0x9
+ 768 023e 01       		.uleb128 0x1
+ 769 023f 50       		.byte	0x50
+ 770 0240 01       		.uleb128 0x1
+ 771 0241 30       		.byte	0x30
+ 772 0242 09       		.uleb128 0x9
+ 773 0243 01       		.uleb128 0x1
+ 774 0244 51       		.byte	0x51
+ 775 0245 01       		.uleb128 0x1
+ 776 0246 30       		.byte	0x30
+ 777 0247 00       		.byte	0
+ 778 0248 08       		.uleb128 0x8
+ 779 0249 C0000000 		.4byte	.LVL16
+ 780 024d E3040000 		.4byte	0x4e3
+ 781 0251 60020000 		.4byte	0x260
+ 782 0255 09       		.uleb128 0x9
+ 783 0256 01       		.uleb128 0x1
+ 784 0257 50       		.byte	0x50
+ 785 0258 01       		.uleb128 0x1
+ 786 0259 31       		.byte	0x31
+ 787 025a 09       		.uleb128 0x9
+ 788 025b 01       		.uleb128 0x1
+ 789 025c 51       		.byte	0x51
+ 790 025d 01       		.uleb128 0x1
+ 791 025e 30       		.byte	0x30
+ 792 025f 00       		.byte	0
+ 793 0260 0B       		.uleb128 0xb
+ 794 0261 C8000000 		.4byte	.LVL17
+ 795 0265 E3040000 		.4byte	0x4e3
+ 796 0269 09       		.uleb128 0x9
+ 797 026a 01       		.uleb128 0x1
+ 798 026b 50       		.byte	0x50
+ 799 026c 01       		.uleb128 0x1
+ 800 026d 34       		.byte	0x34
+ 801 026e 09       		.uleb128 0x9
+ 802 026f 01       		.uleb128 0x1
+ 803 0270 51       		.byte	0x51
+ 804 0271 01       		.uleb128 0x1
+ 805 0272 30       		.byte	0x30
+ 806 0273 00       		.byte	0
+ 807 0274 00       		.byte	0
+ 808 0275 07       		.uleb128 0x7
+ 809 0276 90020000 		.4byte	.LASF22
+ 810 027a 01       		.byte	0x1
+ 811 027b 4F       		.byte	0x4f
+ 812 027c 00000000 		.4byte	.LFB64
+ 813 0280 48000000 		.4byte	.LFE64-.LFB64
+ 814 0284 01       		.uleb128 0x1
+ 815 0285 9C       		.byte	0x9c
+ 816 0286 0A030000 		.4byte	0x30a
+ 817 028a 0A       		.uleb128 0xa
+ 818 028b 06000000 		.4byte	.LVL18
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 18
+
+
+ 819 028f EE040000 		.4byte	0x4ee
+ 820 0293 08       		.uleb128 0x8
+ 821 0294 10000000 		.4byte	.LVL19
+ 822 0298 F9040000 		.4byte	0x4f9
+ 823 029c A6020000 		.4byte	0x2a6
+ 824 02a0 09       		.uleb128 0x9
+ 825 02a1 01       		.uleb128 0x1
+ 826 02a2 51       		.byte	0x51
+ 827 02a3 01       		.uleb128 0x1
+ 828 02a4 31       		.byte	0x31
+ 829 02a5 00       		.byte	0
+ 830 02a6 08       		.uleb128 0x8
+ 831 02a7 1A000000 		.4byte	.LVL20
+ 832 02ab F9040000 		.4byte	0x4f9
+ 833 02af B9020000 		.4byte	0x2b9
+ 834 02b3 09       		.uleb128 0x9
+ 835 02b4 01       		.uleb128 0x1
+ 836 02b5 51       		.byte	0x51
+ 837 02b6 01       		.uleb128 0x1
+ 838 02b7 31       		.byte	0x31
+ 839 02b8 00       		.byte	0
+ 840 02b9 08       		.uleb128 0x8
+ 841 02ba 24000000 		.4byte	.LVL21
+ 842 02be F9040000 		.4byte	0x4f9
+ 843 02c2 CC020000 		.4byte	0x2cc
+ 844 02c6 09       		.uleb128 0x9
+ 845 02c7 01       		.uleb128 0x1
+ 846 02c8 51       		.byte	0x51
+ 847 02c9 01       		.uleb128 0x1
+ 848 02ca 31       		.byte	0x31
+ 849 02cb 00       		.byte	0
+ 850 02cc 08       		.uleb128 0x8
+ 851 02cd 2C000000 		.4byte	.LVL22
+ 852 02d1 04050000 		.4byte	0x504
+ 853 02d5 E4020000 		.4byte	0x2e4
+ 854 02d9 09       		.uleb128 0x9
+ 855 02da 01       		.uleb128 0x1
+ 856 02db 50       		.byte	0x50
+ 857 02dc 01       		.uleb128 0x1
+ 858 02dd 34       		.byte	0x34
+ 859 02de 09       		.uleb128 0x9
+ 860 02df 01       		.uleb128 0x1
+ 861 02e0 51       		.byte	0x51
+ 862 02e1 01       		.uleb128 0x1
+ 863 02e2 31       		.byte	0x31
+ 864 02e3 00       		.byte	0
+ 865 02e4 08       		.uleb128 0x8
+ 866 02e5 32000000 		.4byte	.LVL23
+ 867 02e9 0F050000 		.4byte	0x50f
+ 868 02ed F7020000 		.4byte	0x2f7
+ 869 02f1 09       		.uleb128 0x9
+ 870 02f2 01       		.uleb128 0x1
+ 871 02f3 50       		.byte	0x50
+ 872 02f4 01       		.uleb128 0x1
+ 873 02f5 33       		.byte	0x33
+ 874 02f6 00       		.byte	0
+ 875 02f7 0A       		.uleb128 0xa
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 19
+
+
+ 876 02f8 36000000 		.4byte	.LVL24
+ 877 02fc 1A050000 		.4byte	0x51a
+ 878 0300 0A       		.uleb128 0xa
+ 879 0301 3A000000 		.4byte	.LVL25
+ 880 0305 25050000 		.4byte	0x525
+ 881 0309 00       		.byte	0
+ 882 030a 07       		.uleb128 0x7
+ 883 030b 09010000 		.4byte	.LASF23
+ 884 030f 01       		.byte	0x1
+ 885 0310 5F       		.byte	0x5f
+ 886 0311 00000000 		.4byte	.LFB65
+ 887 0315 34000000 		.4byte	.LFE65-.LFB65
+ 888 0319 01       		.uleb128 0x1
+ 889 031a 9C       		.byte	0x9c
+ 890 031b 56030000 		.4byte	0x356
+ 891 031f 0A       		.uleb128 0xa
+ 892 0320 06000000 		.4byte	.LVL26
+ 893 0324 30050000 		.4byte	0x530
+ 894 0328 0A       		.uleb128 0xa
+ 895 0329 0A000000 		.4byte	.LVL27
+ 896 032d 3B050000 		.4byte	0x53b
+ 897 0331 0A       		.uleb128 0xa
+ 898 0332 0E000000 		.4byte	.LVL28
+ 899 0336 46050000 		.4byte	0x546
+ 900 033a 0A       		.uleb128 0xa
+ 901 033b 16000000 		.4byte	.LVL29
+ 902 033f 51050000 		.4byte	0x551
+ 903 0343 0A       		.uleb128 0xa
+ 904 0344 1E000000 		.4byte	.LVL30
+ 905 0348 51050000 		.4byte	0x551
+ 906 034c 0A       		.uleb128 0xa
+ 907 034d 26000000 		.4byte	.LVL31
+ 908 0351 51050000 		.4byte	0x551
+ 909 0355 00       		.byte	0
+ 910 0356 07       		.uleb128 0x7
+ 911 0357 B4010000 		.4byte	.LASF24
+ 912 035b 01       		.byte	0x1
+ 913 035c 6A       		.byte	0x6a
+ 914 035d 00000000 		.4byte	.LFB66
+ 915 0361 70000000 		.4byte	.LFE66-.LFB66
+ 916 0365 01       		.uleb128 0x1
+ 917 0366 9C       		.byte	0x9c
+ 918 0367 CB030000 		.4byte	0x3cb
+ 919 036b 0C       		.uleb128 0xc
+ 920 036c 63666700 		.ascii	"cfg\000"
+ 921 0370 01       		.byte	0x1
+ 922 0371 6A       		.byte	0x6a
+ 923 0372 81000000 		.4byte	0x81
+ 924 0376 00000000 		.4byte	.LLST0
+ 925 037a 0D       		.uleb128 0xd
+ 926 037b D4010000 		.4byte	.LASF25
+ 927 037f 01       		.byte	0x1
+ 928 0380 6A       		.byte	0x6a
+ 929 0381 81000000 		.4byte	0x81
+ 930 0385 1E000000 		.4byte	.LLST1
+ 931 0389 0E       		.uleb128 0xe
+ 932 038a 9D010000 		.4byte	.LASF26
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 20
+
+
+ 933 038e 01       		.byte	0x1
+ 934 038f 6C       		.byte	0x6c
+ 935 0390 81000000 		.4byte	0x81
+ 936 0394 53000000 		.4byte	.LLST2
+ 937 0398 0E       		.uleb128 0xe
+ 938 0399 6B040000 		.4byte	.LASF27
+ 939 039d 01       		.byte	0x1
+ 940 039e 6D       		.byte	0x6d
+ 941 039f 81000000 		.4byte	0x81
+ 942 03a3 7E000000 		.4byte	.LLST3
+ 943 03a7 08       		.uleb128 0x8
+ 944 03a8 56000000 		.4byte	.LVL40
+ 945 03ac 04050000 		.4byte	0x504
+ 946 03b0 BA030000 		.4byte	0x3ba
+ 947 03b4 09       		.uleb128 0x9
+ 948 03b5 01       		.uleb128 0x1
+ 949 03b6 51       		.byte	0x51
+ 950 03b7 01       		.uleb128 0x1
+ 951 03b8 31       		.byte	0x31
+ 952 03b9 00       		.byte	0
+ 953 03ba 0B       		.uleb128 0xb
+ 954 03bb 5C000000 		.4byte	.LVL41
+ 955 03bf 0F050000 		.4byte	0x50f
+ 956 03c3 09       		.uleb128 0x9
+ 957 03c4 01       		.uleb128 0x1
+ 958 03c5 50       		.byte	0x50
+ 959 03c6 02       		.uleb128 0x2
+ 960 03c7 76       		.byte	0x76
+ 961 03c8 00       		.sleb128 0
+ 962 03c9 00       		.byte	0
+ 963 03ca 00       		.byte	0
+ 964 03cb 0F       		.uleb128 0xf
+ 965 03cc ED010000 		.4byte	.LASF28
+ 966 03d0 01       		.byte	0x1
+ 967 03d1 8C       		.byte	0x8c
+ 968 03d2 81000000 		.4byte	0x81
+ 969 03d6 00000000 		.4byte	.LFB67
+ 970 03da 0C000000 		.4byte	.LFE67-.LFB67
+ 971 03de 01       		.uleb128 0x1
+ 972 03df 9C       		.byte	0x9c
+ 973 03e0 0F       		.uleb128 0xf
+ 974 03e1 33030000 		.4byte	.LASF29
+ 975 03e5 01       		.byte	0x1
+ 976 03e6 91       		.byte	0x91
+ 977 03e7 81000000 		.4byte	0x81
+ 978 03eb 00000000 		.4byte	.LFB68
+ 979 03ef 0C000000 		.4byte	.LFE68-.LFB68
+ 980 03f3 01       		.uleb128 0x1
+ 981 03f4 9C       		.byte	0x9c
+ 982 03f5 10       		.uleb128 0x10
+ 983 03f6 F6000000 		.4byte	.LASF30
+ 984 03fa 01       		.byte	0x1
+ 985 03fb 13       		.byte	0x13
+ 986 03fc 81000000 		.4byte	0x81
+ 987 0400 05       		.uleb128 0x5
+ 988 0401 03       		.byte	0x3
+ 989 0402 00000000 		.4byte	s_td_adc_to_filter
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 21
+
+
+ 990 0406 10       		.uleb128 0x10
+ 991 0407 33020000 		.4byte	.LASF31
+ 992 040b 01       		.byte	0x1
+ 993 040c 14       		.byte	0x14
+ 994 040d 81000000 		.4byte	0x81
+ 995 0411 05       		.uleb128 0x5
+ 996 0412 03       		.byte	0x3
+ 997 0413 01000000 		.4byte	s_td_adc_to_ram
+ 998 0417 10       		.uleb128 0x10
+ 999 0418 17000000 		.4byte	.LASF32
+ 1000 041c 01       		.byte	0x1
+ 1001 041d 15       		.byte	0x15
+ 1002 041e 81000000 		.4byte	0x81
+ 1003 0422 05       		.uleb128 0x5
+ 1004 0423 03       		.byte	0x3
+ 1005 0424 02000000 		.4byte	s_td_filter_to_ram
+ 1006 0428 11       		.uleb128 0x11
+ 1007 0429 75040000 		.4byte	.LASF33
+ 1008 042d 05       		.byte	0x5
+ 1009 042e 1B       		.byte	0x1b
+ 1010 042f 81000000 		.4byte	0x81
+ 1011 0433 11       		.uleb128 0x11
+ 1012 0434 62010000 		.4byte	.LASF34
+ 1013 0438 06       		.byte	0x6
+ 1014 0439 1B       		.byte	0x1b
+ 1015 043a 81000000 		.4byte	0x81
+ 1016 043e 11       		.uleb128 0x11
+ 1017 043f 8D030000 		.4byte	.LASF35
+ 1018 0443 07       		.byte	0x7
+ 1019 0444 1B       		.byte	0x1b
+ 1020 0445 81000000 		.4byte	0x81
+ 1021 0449 12       		.uleb128 0x12
+ 1022 044a BF030000 		.4byte	.LASF36
+ 1023 044e 08       		.byte	0x8
+ 1024 044f 1207     		.2byte	0x712
+ 1025 0451 55040000 		.4byte	0x455
+ 1026 0455 06       		.uleb128 0x6
+ 1027 0456 76000000 		.4byte	0x76
+ 1028 045a 11       		.uleb128 0x11
+ 1029 045b D5020000 		.4byte	.LASF37
+ 1030 045f 09       		.byte	0x9
+ 1031 0460 12       		.byte	0x12
+ 1032 0461 65040000 		.4byte	0x465
+ 1033 0465 06       		.uleb128 0x6
+ 1034 0466 A5000000 		.4byte	0xa5
+ 1035 046a 11       		.uleb128 0x11
+ 1036 046b 4E030000 		.4byte	.LASF38
+ 1037 046f 09       		.byte	0x9
+ 1038 0470 17       		.byte	0x17
+ 1039 0471 65040000 		.4byte	0x465
+ 1040 0475 11       		.uleb128 0x11
+ 1041 0476 04020000 		.4byte	.LASF39
+ 1042 047a 09       		.byte	0x9
+ 1043 047b 22       		.byte	0x22
+ 1044 047c D2000000 		.4byte	0xd2
+ 1045 0480 11       		.uleb128 0x11
+ 1046 0481 43020000 		.4byte	.LASF40
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 22
+
+
+ 1047 0485 09       		.byte	0x9
+ 1048 0486 26       		.byte	0x26
+ 1049 0487 D2000000 		.4byte	0xd2
+ 1050 048b 13       		.uleb128 0x13
+ 1051 048c D6000000 		.4byte	.LASF41
+ 1052 0490 D6000000 		.4byte	.LASF41
+ 1053 0494 05       		.byte	0x5
+ 1054 0495 1E       		.byte	0x1e
+ 1055 0496 13       		.uleb128 0x13
+ 1056 0497 79000000 		.4byte	.LASF42
+ 1057 049b 79000000 		.4byte	.LASF42
+ 1058 049f 0A       		.byte	0xa
+ 1059 04a0 38       		.byte	0x38
+ 1060 04a1 13       		.uleb128 0x13
+ 1061 04a2 A7000000 		.4byte	.LASF43
+ 1062 04a6 A7000000 		.4byte	.LASF43
+ 1063 04aa 0A       		.byte	0xa
+ 1064 04ab 3B       		.byte	0x3b
+ 1065 04ac 13       		.uleb128 0x13
+ 1066 04ad 67000000 		.4byte	.LASF44
+ 1067 04b1 67000000 		.4byte	.LASF44
+ 1068 04b5 0A       		.byte	0xa
+ 1069 04b6 3F       		.byte	0x3f
+ 1070 04b7 13       		.uleb128 0x13
+ 1071 04b8 89000000 		.4byte	.LASF45
+ 1072 04bc 89000000 		.4byte	.LASF45
+ 1073 04c0 0A       		.byte	0xa
+ 1074 04c1 2F       		.byte	0x2f
+ 1075 04c2 13       		.uleb128 0x13
+ 1076 04c3 70030000 		.4byte	.LASF46
+ 1077 04c7 70030000 		.4byte	.LASF46
+ 1078 04cb 07       		.byte	0x7
+ 1079 04cc 1E       		.byte	0x1e
+ 1080 04cd 13       		.uleb128 0x13
+ 1081 04ce A6030000 		.4byte	.LASF47
+ 1082 04d2 A6030000 		.4byte	.LASF47
+ 1083 04d6 06       		.byte	0x6
+ 1084 04d7 1E       		.byte	0x1e
+ 1085 04d8 13       		.uleb128 0x13
+ 1086 04d9 77010000 		.4byte	.LASF48
+ 1087 04dd 77010000 		.4byte	.LASF48
+ 1088 04e1 0B       		.byte	0xb
+ 1089 04e2 4A       		.byte	0x4a
+ 1090 04e3 13       		.uleb128 0x13
+ 1091 04e4 5A040000 		.4byte	.LASF49
+ 1092 04e8 5A040000 		.4byte	.LASF49
+ 1093 04ec 0B       		.byte	0xb
+ 1094 04ed 4C       		.byte	0x4c
+ 1095 04ee 13       		.uleb128 0x13
+ 1096 04ef 63030000 		.4byte	.LASF50
+ 1097 04f3 63030000 		.4byte	.LASF50
+ 1098 04f7 0B       		.byte	0xb
+ 1099 04f8 3C       		.byte	0x3c
+ 1100 04f9 13       		.uleb128 0x13
+ 1101 04fa BF000000 		.4byte	.LASF51
+ 1102 04fe BF000000 		.4byte	.LASF51
+ 1103 0502 0A       		.byte	0xa
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 23
+
+
+ 1104 0503 29       		.byte	0x29
+ 1105 0504 13       		.uleb128 0x13
+ 1106 0505 3D010000 		.4byte	.LASF52
+ 1107 0509 3D010000 		.4byte	.LASF52
+ 1108 050d 0C       		.byte	0xc
+ 1109 050e 44       		.byte	0x44
+ 1110 050f 13       		.uleb128 0x13
+ 1111 0510 0E020000 		.4byte	.LASF53
+ 1112 0514 0E020000 		.4byte	.LASF53
+ 1113 0518 0C       		.byte	0xc
+ 1114 0519 3C       		.byte	0x3c
+ 1115 051a 13       		.uleb128 0x13
+ 1116 051b 22030000 		.4byte	.LASF54
+ 1117 051f 22030000 		.4byte	.LASF54
+ 1118 0523 0C       		.byte	0xc
+ 1119 0524 3A       		.byte	0x3a
+ 1120 0525 13       		.uleb128 0x13
+ 1121 0526 1E010000 		.4byte	.LASF55
+ 1122 052a 1E010000 		.4byte	.LASF55
+ 1123 052e 0C       		.byte	0xc
+ 1124 052f 3D       		.byte	0x3d
+ 1125 0530 13       		.uleb128 0x13
+ 1126 0531 00000000 		.4byte	.LASF56
+ 1127 0535 00000000 		.4byte	.LASF56
+ 1128 0539 0C       		.byte	0xc
+ 1129 053a 3E       		.byte	0x3e
+ 1130 053b 13       		.uleb128 0x13
+ 1131 053c DD010000 		.4byte	.LASF57
+ 1132 0540 DD010000 		.4byte	.LASF57
+ 1133 0544 0C       		.byte	0xc
+ 1134 0545 3B       		.byte	0x3b
+ 1135 0546 13       		.uleb128 0x13
+ 1136 0547 8B010000 		.4byte	.LASF58
+ 1137 054b 8B010000 		.4byte	.LASF58
+ 1138 054f 0B       		.byte	0xb
+ 1139 0550 3D       		.byte	0x3d
+ 1140 0551 13       		.uleb128 0x13
+ 1141 0552 A6020000 		.4byte	.LASF59
+ 1142 0556 A6020000 		.4byte	.LASF59
+ 1143 055a 0A       		.byte	0xa
+ 1144 055b 2A       		.byte	0x2a
+ 1145 055c 00       		.byte	0
+ 1146              		.section	.debug_abbrev,"",%progbits
+ 1147              	.Ldebug_abbrev0:
+ 1148 0000 01       		.uleb128 0x1
+ 1149 0001 11       		.uleb128 0x11
+ 1150 0002 01       		.byte	0x1
+ 1151 0003 25       		.uleb128 0x25
+ 1152 0004 0E       		.uleb128 0xe
+ 1153 0005 13       		.uleb128 0x13
+ 1154 0006 0B       		.uleb128 0xb
+ 1155 0007 03       		.uleb128 0x3
+ 1156 0008 0E       		.uleb128 0xe
+ 1157 0009 1B       		.uleb128 0x1b
+ 1158 000a 0E       		.uleb128 0xe
+ 1159 000b 55       		.uleb128 0x55
+ 1160 000c 17       		.uleb128 0x17
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 24
+
+
+ 1161 000d 11       		.uleb128 0x11
+ 1162 000e 01       		.uleb128 0x1
+ 1163 000f 10       		.uleb128 0x10
+ 1164 0010 17       		.uleb128 0x17
+ 1165 0011 00       		.byte	0
+ 1166 0012 00       		.byte	0
+ 1167 0013 02       		.uleb128 0x2
+ 1168 0014 24       		.uleb128 0x24
+ 1169 0015 00       		.byte	0
+ 1170 0016 0B       		.uleb128 0xb
+ 1171 0017 0B       		.uleb128 0xb
+ 1172 0018 3E       		.uleb128 0x3e
+ 1173 0019 0B       		.uleb128 0xb
+ 1174 001a 03       		.uleb128 0x3
+ 1175 001b 0E       		.uleb128 0xe
+ 1176 001c 00       		.byte	0
+ 1177 001d 00       		.byte	0
+ 1178 001e 03       		.uleb128 0x3
+ 1179 001f 16       		.uleb128 0x16
+ 1180 0020 00       		.byte	0
+ 1181 0021 03       		.uleb128 0x3
+ 1182 0022 0E       		.uleb128 0xe
+ 1183 0023 3A       		.uleb128 0x3a
+ 1184 0024 0B       		.uleb128 0xb
+ 1185 0025 3B       		.uleb128 0x3b
+ 1186 0026 0B       		.uleb128 0xb
+ 1187 0027 49       		.uleb128 0x49
+ 1188 0028 13       		.uleb128 0x13
+ 1189 0029 00       		.byte	0
+ 1190 002a 00       		.byte	0
+ 1191 002b 04       		.uleb128 0x4
+ 1192 002c 24       		.uleb128 0x24
+ 1193 002d 00       		.byte	0
+ 1194 002e 0B       		.uleb128 0xb
+ 1195 002f 0B       		.uleb128 0xb
+ 1196 0030 3E       		.uleb128 0x3e
+ 1197 0031 0B       		.uleb128 0xb
+ 1198 0032 03       		.uleb128 0x3
+ 1199 0033 08       		.uleb128 0x8
+ 1200 0034 00       		.byte	0
+ 1201 0035 00       		.byte	0
+ 1202 0036 05       		.uleb128 0x5
+ 1203 0037 16       		.uleb128 0x16
+ 1204 0038 00       		.byte	0
+ 1205 0039 03       		.uleb128 0x3
+ 1206 003a 0E       		.uleb128 0xe
+ 1207 003b 3A       		.uleb128 0x3a
+ 1208 003c 0B       		.uleb128 0xb
+ 1209 003d 3B       		.uleb128 0x3b
+ 1210 003e 05       		.uleb128 0x5
+ 1211 003f 49       		.uleb128 0x49
+ 1212 0040 13       		.uleb128 0x13
+ 1213 0041 00       		.byte	0
+ 1214 0042 00       		.byte	0
+ 1215 0043 06       		.uleb128 0x6
+ 1216 0044 35       		.uleb128 0x35
+ 1217 0045 00       		.byte	0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 25
+
+
+ 1218 0046 49       		.uleb128 0x49
+ 1219 0047 13       		.uleb128 0x13
+ 1220 0048 00       		.byte	0
+ 1221 0049 00       		.byte	0
+ 1222 004a 07       		.uleb128 0x7
+ 1223 004b 2E       		.uleb128 0x2e
+ 1224 004c 01       		.byte	0x1
+ 1225 004d 3F       		.uleb128 0x3f
+ 1226 004e 19       		.uleb128 0x19
+ 1227 004f 03       		.uleb128 0x3
+ 1228 0050 0E       		.uleb128 0xe
+ 1229 0051 3A       		.uleb128 0x3a
+ 1230 0052 0B       		.uleb128 0xb
+ 1231 0053 3B       		.uleb128 0x3b
+ 1232 0054 0B       		.uleb128 0xb
+ 1233 0055 27       		.uleb128 0x27
+ 1234 0056 19       		.uleb128 0x19
+ 1235 0057 11       		.uleb128 0x11
+ 1236 0058 01       		.uleb128 0x1
+ 1237 0059 12       		.uleb128 0x12
+ 1238 005a 06       		.uleb128 0x6
+ 1239 005b 40       		.uleb128 0x40
+ 1240 005c 18       		.uleb128 0x18
+ 1241 005d 9742     		.uleb128 0x2117
+ 1242 005f 19       		.uleb128 0x19
+ 1243 0060 01       		.uleb128 0x1
+ 1244 0061 13       		.uleb128 0x13
+ 1245 0062 00       		.byte	0
+ 1246 0063 00       		.byte	0
+ 1247 0064 08       		.uleb128 0x8
+ 1248 0065 898201   		.uleb128 0x4109
+ 1249 0068 01       		.byte	0x1
+ 1250 0069 11       		.uleb128 0x11
+ 1251 006a 01       		.uleb128 0x1
+ 1252 006b 31       		.uleb128 0x31
+ 1253 006c 13       		.uleb128 0x13
+ 1254 006d 01       		.uleb128 0x1
+ 1255 006e 13       		.uleb128 0x13
+ 1256 006f 00       		.byte	0
+ 1257 0070 00       		.byte	0
+ 1258 0071 09       		.uleb128 0x9
+ 1259 0072 8A8201   		.uleb128 0x410a
+ 1260 0075 00       		.byte	0
+ 1261 0076 02       		.uleb128 0x2
+ 1262 0077 18       		.uleb128 0x18
+ 1263 0078 9142     		.uleb128 0x2111
+ 1264 007a 18       		.uleb128 0x18
+ 1265 007b 00       		.byte	0
+ 1266 007c 00       		.byte	0
+ 1267 007d 0A       		.uleb128 0xa
+ 1268 007e 898201   		.uleb128 0x4109
+ 1269 0081 00       		.byte	0
+ 1270 0082 11       		.uleb128 0x11
+ 1271 0083 01       		.uleb128 0x1
+ 1272 0084 31       		.uleb128 0x31
+ 1273 0085 13       		.uleb128 0x13
+ 1274 0086 00       		.byte	0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 26
+
+
+ 1275 0087 00       		.byte	0
+ 1276 0088 0B       		.uleb128 0xb
+ 1277 0089 898201   		.uleb128 0x4109
+ 1278 008c 01       		.byte	0x1
+ 1279 008d 11       		.uleb128 0x11
+ 1280 008e 01       		.uleb128 0x1
+ 1281 008f 31       		.uleb128 0x31
+ 1282 0090 13       		.uleb128 0x13
+ 1283 0091 00       		.byte	0
+ 1284 0092 00       		.byte	0
+ 1285 0093 0C       		.uleb128 0xc
+ 1286 0094 05       		.uleb128 0x5
+ 1287 0095 00       		.byte	0
+ 1288 0096 03       		.uleb128 0x3
+ 1289 0097 08       		.uleb128 0x8
+ 1290 0098 3A       		.uleb128 0x3a
+ 1291 0099 0B       		.uleb128 0xb
+ 1292 009a 3B       		.uleb128 0x3b
+ 1293 009b 0B       		.uleb128 0xb
+ 1294 009c 49       		.uleb128 0x49
+ 1295 009d 13       		.uleb128 0x13
+ 1296 009e 02       		.uleb128 0x2
+ 1297 009f 17       		.uleb128 0x17
+ 1298 00a0 00       		.byte	0
+ 1299 00a1 00       		.byte	0
+ 1300 00a2 0D       		.uleb128 0xd
+ 1301 00a3 05       		.uleb128 0x5
+ 1302 00a4 00       		.byte	0
+ 1303 00a5 03       		.uleb128 0x3
+ 1304 00a6 0E       		.uleb128 0xe
+ 1305 00a7 3A       		.uleb128 0x3a
+ 1306 00a8 0B       		.uleb128 0xb
+ 1307 00a9 3B       		.uleb128 0x3b
+ 1308 00aa 0B       		.uleb128 0xb
+ 1309 00ab 49       		.uleb128 0x49
+ 1310 00ac 13       		.uleb128 0x13
+ 1311 00ad 02       		.uleb128 0x2
+ 1312 00ae 17       		.uleb128 0x17
+ 1313 00af 00       		.byte	0
+ 1314 00b0 00       		.byte	0
+ 1315 00b1 0E       		.uleb128 0xe
+ 1316 00b2 34       		.uleb128 0x34
+ 1317 00b3 00       		.byte	0
+ 1318 00b4 03       		.uleb128 0x3
+ 1319 00b5 0E       		.uleb128 0xe
+ 1320 00b6 3A       		.uleb128 0x3a
+ 1321 00b7 0B       		.uleb128 0xb
+ 1322 00b8 3B       		.uleb128 0x3b
+ 1323 00b9 0B       		.uleb128 0xb
+ 1324 00ba 49       		.uleb128 0x49
+ 1325 00bb 13       		.uleb128 0x13
+ 1326 00bc 02       		.uleb128 0x2
+ 1327 00bd 17       		.uleb128 0x17
+ 1328 00be 00       		.byte	0
+ 1329 00bf 00       		.byte	0
+ 1330 00c0 0F       		.uleb128 0xf
+ 1331 00c1 2E       		.uleb128 0x2e
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 27
+
+
+ 1332 00c2 00       		.byte	0
+ 1333 00c3 3F       		.uleb128 0x3f
+ 1334 00c4 19       		.uleb128 0x19
+ 1335 00c5 03       		.uleb128 0x3
+ 1336 00c6 0E       		.uleb128 0xe
+ 1337 00c7 3A       		.uleb128 0x3a
+ 1338 00c8 0B       		.uleb128 0xb
+ 1339 00c9 3B       		.uleb128 0x3b
+ 1340 00ca 0B       		.uleb128 0xb
+ 1341 00cb 27       		.uleb128 0x27
+ 1342 00cc 19       		.uleb128 0x19
+ 1343 00cd 49       		.uleb128 0x49
+ 1344 00ce 13       		.uleb128 0x13
+ 1345 00cf 11       		.uleb128 0x11
+ 1346 00d0 01       		.uleb128 0x1
+ 1347 00d1 12       		.uleb128 0x12
+ 1348 00d2 06       		.uleb128 0x6
+ 1349 00d3 40       		.uleb128 0x40
+ 1350 00d4 18       		.uleb128 0x18
+ 1351 00d5 9742     		.uleb128 0x2117
+ 1352 00d7 19       		.uleb128 0x19
+ 1353 00d8 00       		.byte	0
+ 1354 00d9 00       		.byte	0
+ 1355 00da 10       		.uleb128 0x10
+ 1356 00db 34       		.uleb128 0x34
+ 1357 00dc 00       		.byte	0
+ 1358 00dd 03       		.uleb128 0x3
+ 1359 00de 0E       		.uleb128 0xe
+ 1360 00df 3A       		.uleb128 0x3a
+ 1361 00e0 0B       		.uleb128 0xb
+ 1362 00e1 3B       		.uleb128 0x3b
+ 1363 00e2 0B       		.uleb128 0xb
+ 1364 00e3 49       		.uleb128 0x49
+ 1365 00e4 13       		.uleb128 0x13
+ 1366 00e5 02       		.uleb128 0x2
+ 1367 00e6 18       		.uleb128 0x18
+ 1368 00e7 00       		.byte	0
+ 1369 00e8 00       		.byte	0
+ 1370 00e9 11       		.uleb128 0x11
+ 1371 00ea 34       		.uleb128 0x34
+ 1372 00eb 00       		.byte	0
+ 1373 00ec 03       		.uleb128 0x3
+ 1374 00ed 0E       		.uleb128 0xe
+ 1375 00ee 3A       		.uleb128 0x3a
+ 1376 00ef 0B       		.uleb128 0xb
+ 1377 00f0 3B       		.uleb128 0x3b
+ 1378 00f1 0B       		.uleb128 0xb
+ 1379 00f2 49       		.uleb128 0x49
+ 1380 00f3 13       		.uleb128 0x13
+ 1381 00f4 3F       		.uleb128 0x3f
+ 1382 00f5 19       		.uleb128 0x19
+ 1383 00f6 3C       		.uleb128 0x3c
+ 1384 00f7 19       		.uleb128 0x19
+ 1385 00f8 00       		.byte	0
+ 1386 00f9 00       		.byte	0
+ 1387 00fa 12       		.uleb128 0x12
+ 1388 00fb 34       		.uleb128 0x34
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 28
+
+
+ 1389 00fc 00       		.byte	0
+ 1390 00fd 03       		.uleb128 0x3
+ 1391 00fe 0E       		.uleb128 0xe
+ 1392 00ff 3A       		.uleb128 0x3a
+ 1393 0100 0B       		.uleb128 0xb
+ 1394 0101 3B       		.uleb128 0x3b
+ 1395 0102 05       		.uleb128 0x5
+ 1396 0103 49       		.uleb128 0x49
+ 1397 0104 13       		.uleb128 0x13
+ 1398 0105 3F       		.uleb128 0x3f
+ 1399 0106 19       		.uleb128 0x19
+ 1400 0107 3C       		.uleb128 0x3c
+ 1401 0108 19       		.uleb128 0x19
+ 1402 0109 00       		.byte	0
+ 1403 010a 00       		.byte	0
+ 1404 010b 13       		.uleb128 0x13
+ 1405 010c 2E       		.uleb128 0x2e
+ 1406 010d 00       		.byte	0
+ 1407 010e 3F       		.uleb128 0x3f
+ 1408 010f 19       		.uleb128 0x19
+ 1409 0110 3C       		.uleb128 0x3c
+ 1410 0111 19       		.uleb128 0x19
+ 1411 0112 6E       		.uleb128 0x6e
+ 1412 0113 0E       		.uleb128 0xe
+ 1413 0114 03       		.uleb128 0x3
+ 1414 0115 0E       		.uleb128 0xe
+ 1415 0116 3A       		.uleb128 0x3a
+ 1416 0117 0B       		.uleb128 0xb
+ 1417 0118 3B       		.uleb128 0x3b
+ 1418 0119 0B       		.uleb128 0xb
+ 1419 011a 00       		.byte	0
+ 1420 011b 00       		.byte	0
+ 1421 011c 00       		.byte	0
+ 1422              		.section	.debug_loc,"",%progbits
+ 1423              	.Ldebug_loc0:
+ 1424              	.LLST0:
+ 1425 0000 00000000 		.4byte	.LVL32
+ 1426 0004 0E000000 		.4byte	.LVL33
+ 1427 0008 0100     		.2byte	0x1
+ 1428 000a 50       		.byte	0x50
+ 1429 000b 0E000000 		.4byte	.LVL33
+ 1430 000f 66000000 		.4byte	.LVL42
+ 1431 0013 0100     		.2byte	0x1
+ 1432 0015 54       		.byte	0x54
+ 1433 0016 00000000 		.4byte	0
+ 1434 001a 00000000 		.4byte	0
+ 1435              	.LLST1:
+ 1436 001e 00000000 		.4byte	.LVL32
+ 1437 0022 14000000 		.4byte	.LVL34
+ 1438 0026 0100     		.2byte	0x1
+ 1439 0028 51       		.byte	0x51
+ 1440 0029 14000000 		.4byte	.LVL34
+ 1441 002d 50000000 		.4byte	.LVL39
+ 1442 0031 0100     		.2byte	0x1
+ 1443 0033 51       		.byte	0x51
+ 1444 0034 50000000 		.4byte	.LVL39
+ 1445 0038 66000000 		.4byte	.LVL42
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 29
+
+
+ 1446 003c 0100     		.2byte	0x1
+ 1447 003e 55       		.byte	0x55
+ 1448 003f 66000000 		.4byte	.LVL42
+ 1449 0043 70000000 		.4byte	.LFE66
+ 1450 0047 0200     		.2byte	0x2
+ 1451 0049 73       		.byte	0x73
+ 1452 004a 00       		.sleb128 0
+ 1453 004b 00000000 		.4byte	0
+ 1454 004f 00000000 		.4byte	0
+ 1455              	.LLST2:
+ 1456 0053 24000000 		.4byte	.LVL35
+ 1457 0057 28000000 		.4byte	.LVL36
+ 1458 005b 0200     		.2byte	0x2
+ 1459 005d 33       		.byte	0x33
+ 1460 005e 9F       		.byte	0x9f
+ 1461 005f 28000000 		.4byte	.LVL36
+ 1462 0063 2C000000 		.4byte	.LVL37
+ 1463 0067 0200     		.2byte	0x2
+ 1464 0069 34       		.byte	0x34
+ 1465 006a 9F       		.byte	0x9f
+ 1466 006b 2E000000 		.4byte	.LVL38
+ 1467 006f 55000000 		.4byte	.LVL40-1
+ 1468 0073 0100     		.2byte	0x1
+ 1469 0075 50       		.byte	0x50
+ 1470 0076 00000000 		.4byte	0
+ 1471 007a 00000000 		.4byte	0
+ 1472              	.LLST3:
+ 1473 007e 50000000 		.4byte	.LVL39
+ 1474 0082 66000000 		.4byte	.LVL42
+ 1475 0086 0100     		.2byte	0x1
+ 1476 0088 56       		.byte	0x56
+ 1477 0089 00000000 		.4byte	0
+ 1478 008d 00000000 		.4byte	0
+ 1479              		.section	.debug_aranges,"",%progbits
+ 1480 0000 44000000 		.4byte	0x44
+ 1481 0004 0200     		.2byte	0x2
+ 1482 0006 00000000 		.4byte	.Ldebug_info0
+ 1483 000a 04       		.byte	0x4
+ 1484 000b 00       		.byte	0
+ 1485 000c 0000     		.2byte	0
+ 1486 000e 0000     		.2byte	0
+ 1487 0010 00000000 		.4byte	.LFB63
+ 1488 0014 E4000000 		.4byte	.LFE63-.LFB63
+ 1489 0018 00000000 		.4byte	.LFB64
+ 1490 001c 48000000 		.4byte	.LFE64-.LFB64
+ 1491 0020 00000000 		.4byte	.LFB65
+ 1492 0024 34000000 		.4byte	.LFE65-.LFB65
+ 1493 0028 00000000 		.4byte	.LFB66
+ 1494 002c 70000000 		.4byte	.LFE66-.LFB66
+ 1495 0030 00000000 		.4byte	.LFB67
+ 1496 0034 0C000000 		.4byte	.LFE67-.LFB67
+ 1497 0038 00000000 		.4byte	.LFB68
+ 1498 003c 0C000000 		.4byte	.LFE68-.LFB68
+ 1499 0040 00000000 		.4byte	0
+ 1500 0044 00000000 		.4byte	0
+ 1501              		.section	.debug_ranges,"",%progbits
+ 1502              	.Ldebug_ranges0:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 30
+
+
+ 1503 0000 00000000 		.4byte	.LFB63
+ 1504 0004 E4000000 		.4byte	.LFE63
+ 1505 0008 00000000 		.4byte	.LFB64
+ 1506 000c 48000000 		.4byte	.LFE64
+ 1507 0010 00000000 		.4byte	.LFB65
+ 1508 0014 34000000 		.4byte	.LFE65
+ 1509 0018 00000000 		.4byte	.LFB66
+ 1510 001c 70000000 		.4byte	.LFE66
+ 1511 0020 00000000 		.4byte	.LFB67
+ 1512 0024 0C000000 		.4byte	.LFE67
+ 1513 0028 00000000 		.4byte	.LFB68
+ 1514 002c 0C000000 		.4byte	.LFE68
+ 1515 0030 00000000 		.4byte	0
+ 1516 0034 00000000 		.4byte	0
+ 1517              		.section	.debug_line,"",%progbits
+ 1518              	.Ldebug_line0:
+ 1519 0000 6D020000 		.section	.debug_str,"MS",%progbits,1
+ 1519      0200D301 
+ 1519      00000201 
+ 1519      FB0E0D00 
+ 1519      01010101 
+ 1520              	.LASF56:
+ 1521 0000 4144435F 		.ascii	"ADC_DelSig_StopConvert\000"
+ 1521      44656C53 
+ 1521      69675F53 
+ 1521      746F7043 
+ 1521      6F6E7665 
+ 1522              	.LASF32:
+ 1523 0017 735F7464 		.ascii	"s_td_filter_to_ram\000"
+ 1523      5F66696C 
+ 1523      7465725F 
+ 1523      746F5F72 
+ 1523      616D00
+ 1524              	.LASF61:
+ 1525 002a 416E616C 		.ascii	"AnalogToDigital.c\000"
+ 1525      6F67546F 
+ 1525      44696769 
+ 1525      74616C2E 
+ 1525      6300
+ 1526              	.LASF62:
+ 1527 003c 433A5C47 		.ascii	"C:\\Github\\Tesis\\src\\psoc\\Comparation.cydsn\000"
+ 1527      69746875 
+ 1527      625C5465 
+ 1527      7369735C 
+ 1527      7372635C 
+ 1528              	.LASF44:
+ 1529 0067 4379446D 		.ascii	"CyDmaTdSetAddress\000"
+ 1529      61546453 
+ 1529      65744164 
+ 1529      64726573 
+ 1529      7300
+ 1530              	.LASF42:
+ 1531 0079 4379446D 		.ascii	"CyDmaTdAllocate\000"
+ 1531      61546441 
+ 1531      6C6C6F63 
+ 1531      61746500 
+ 1532              	.LASF45:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 31
+
+
+ 1533 0089 4379446D 		.ascii	"CyDmaChSetInitialTd\000"
+ 1533      61436853 
+ 1533      6574496E 
+ 1533      69746961 
+ 1533      6C546400 
+ 1534              	.LASF2:
+ 1535 009d 73686F72 		.ascii	"short int\000"
+ 1535      7420696E 
+ 1535      7400
+ 1536              	.LASF43:
+ 1537 00a7 4379446D 		.ascii	"CyDmaTdSetConfiguration\000"
+ 1537      61546453 
+ 1537      6574436F 
+ 1537      6E666967 
+ 1537      75726174 
+ 1538              	.LASF51:
+ 1539 00bf 4379446D 		.ascii	"CyDmaChEnable\000"
+ 1539      61436845 
+ 1539      6E61626C 
+ 1539      6500
+ 1540              	.LASF20:
+ 1541 00cd 73697A65 		.ascii	"sizetype\000"
+ 1541      74797065 
+ 1541      00
+ 1542              	.LASF41:
+ 1543 00d6 444D415F 		.ascii	"DMA_DelSig_FIlter_DmaInitialize\000"
+ 1543      44656C53 
+ 1543      69675F46 
+ 1543      496C7465 
+ 1543      725F446D 
+ 1544              	.LASF30:
+ 1545 00f6 735F7464 		.ascii	"s_td_adc_to_filter\000"
+ 1545      5F616463 
+ 1545      5F746F5F 
+ 1545      66696C74 
+ 1545      657200
+ 1546              	.LASF23:
+ 1547 0109 416E616C 		.ascii	"AnalogToDigital_Stop\000"
+ 1547      6F67546F 
+ 1547      44696769 
+ 1547      74616C5F 
+ 1547      53746F70 
+ 1548              	.LASF55:
+ 1549 011e 4144435F 		.ascii	"ADC_DelSig_StartConvert\000"
+ 1549      44656C53 
+ 1549      69675F53 
+ 1549      74617274 
+ 1549      436F6E76 
+ 1550              	.LASF12:
+ 1551 0136 75696E74 		.ascii	"uint16\000"
+ 1551      313600
+ 1552              	.LASF52:
+ 1553 013d 4144435F 		.ascii	"ADC_DelSig_SelectConfiguration\000"
+ 1553      44656C53 
+ 1553      69675F53 
+ 1553      656C6563 
+ 1553      74436F6E 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 32
+
+
+ 1554              	.LASF11:
+ 1555 015c 75696E74 		.ascii	"uint8\000"
+ 1555      3800
+ 1556              	.LASF34:
+ 1557 0162 444D415F 		.ascii	"DMA_Filter_DmaHandle\000"
+ 1557      46696C74 
+ 1557      65725F44 
+ 1557      6D614861 
+ 1557      6E646C65 
+ 1558              	.LASF48:
+ 1559 0177 46696C74 		.ascii	"Filter_SetCoherency\000"
+ 1559      65725F53 
+ 1559      6574436F 
+ 1559      68657265 
+ 1559      6E637900 
+ 1560              	.LASF58:
+ 1561 018b 46696C74 		.ascii	"Filter_Stop\000"
+ 1561      65725F53 
+ 1561      746F7000 
+ 1562              	.LASF15:
+ 1563 0197 666C6F61 		.ascii	"float\000"
+ 1563      7400
+ 1564              	.LASF26:
+ 1565 019d 70736F63 		.ascii	"psoc_cfg\000"
+ 1565      5F636667 
+ 1565      00
+ 1566              	.LASF6:
+ 1567 01a6 6C6F6E67 		.ascii	"long long int\000"
+ 1567      206C6F6E 
+ 1567      6720696E 
+ 1567      7400
+ 1568              	.LASF24:
+ 1569 01b4 416E616C 		.ascii	"AnalogToDigital_SetADC\000"
+ 1569      6F67546F 
+ 1569      44696769 
+ 1569      74616C5F 
+ 1569      53657441 
+ 1570              	.LASF4:
+ 1571 01cb 6C6F6E67 		.ascii	"long int\000"
+ 1571      20696E74 
+ 1571      00
+ 1572              	.LASF25:
+ 1573 01d4 6275665F 		.ascii	"buf_gain\000"
+ 1573      6761696E 
+ 1573      00
+ 1574              	.LASF57:
+ 1575 01dd 4144435F 		.ascii	"ADC_DelSig_Stop\000"
+ 1575      44656C53 
+ 1575      69675F53 
+ 1575      746F7000 
+ 1576              	.LASF28:
+ 1577 01ed 416E616C 		.ascii	"AnalogToDigital_GetCfg\000"
+ 1577      6F67546F 
+ 1577      44696769 
+ 1577      74616C5F 
+ 1577      47657443 
+ 1578              	.LASF39:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 33
+
+
+ 1579 0204 675F6164 		.ascii	"g_adc_cfg\000"
+ 1579      635F6366 
+ 1579      6700
+ 1580              	.LASF53:
+ 1581 020e 4144435F 		.ascii	"ADC_DelSig_SetBufferGain\000"
+ 1581      44656C53 
+ 1581      69675F53 
+ 1581      65744275 
+ 1581      66666572 
+ 1582              	.LASF19:
+ 1583 0227 6C6F6E67 		.ascii	"long double\000"
+ 1583      20646F75 
+ 1583      626C6500 
+ 1584              	.LASF31:
+ 1585 0233 735F7464 		.ascii	"s_td_adc_to_ram\000"
+ 1585      5F616463 
+ 1585      5F746F5F 
+ 1585      72616D00 
+ 1586              	.LASF40:
+ 1587 0243 675F6164 		.ascii	"g_adc_buf_gain\000"
+ 1587      635F6275 
+ 1587      665F6761 
+ 1587      696E00
+ 1588              	.LASF1:
+ 1589 0252 756E7369 		.ascii	"unsigned char\000"
+ 1589      676E6564 
+ 1589      20636861 
+ 1589      7200
+ 1590              	.LASF0:
+ 1591 0260 7369676E 		.ascii	"signed char\000"
+ 1591      65642063 
+ 1591      68617200 
+ 1592              	.LASF7:
+ 1593 026c 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 1593      206C6F6E 
+ 1593      6720756E 
+ 1593      7369676E 
+ 1593      65642069 
+ 1594              	.LASF8:
+ 1595 0283 756E7369 		.ascii	"unsigned int\000"
+ 1595      676E6564 
+ 1595      20696E74 
+ 1595      00
+ 1596              	.LASF22:
+ 1597 0290 416E616C 		.ascii	"AnalogToDigital_Start\000"
+ 1597      6F67546F 
+ 1597      44696769 
+ 1597      74616C5F 
+ 1597      53746172 
+ 1598              	.LASF59:
+ 1599 02a6 4379446D 		.ascii	"CyDmaChDisable\000"
+ 1599      61436844 
+ 1599      69736162 
+ 1599      6C6500
+ 1600              	.LASF3:
+ 1601 02b5 73686F72 		.ascii	"short unsigned int\000"
+ 1601      7420756E 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 34
+
+
+ 1601      7369676E 
+ 1601      65642069 
+ 1601      6E7400
+ 1602              	.LASF17:
+ 1603 02c8 63686172 		.ascii	"char\000"
+ 1603      00
+ 1604              	.LASF10:
+ 1605 02cd 696E7433 		.ascii	"int32_t\000"
+ 1605      325F7400 
+ 1606              	.LASF37:
+ 1607 02d5 675F7261 		.ascii	"g_raw_delsig\000"
+ 1607      775F6465 
+ 1607      6C736967 
+ 1607      00
+ 1608              	.LASF21:
+ 1609 02e2 416E616C 		.ascii	"AnalogToDigital_Init\000"
+ 1609      6F67546F 
+ 1609      44696769 
+ 1609      74616C5F 
+ 1609      496E6974 
+ 1610              	.LASF13:
+ 1611 02f7 75696E74 		.ascii	"uint32\000"
+ 1611      333200
+ 1612              	.LASF18:
+ 1613 02fe 72656738 		.ascii	"reg8\000"
+ 1613      00
+ 1614              	.LASF5:
+ 1615 0303 6C6F6E67 		.ascii	"long unsigned int\000"
+ 1615      20756E73 
+ 1615      69676E65 
+ 1615      6420696E 
+ 1615      7400
+ 1616              	.LASF14:
+ 1617 0315 696E7433 		.ascii	"int32\000"
+ 1617      3200
+ 1618              	.LASF16:
+ 1619 031b 646F7562 		.ascii	"double\000"
+ 1619      6C6500
+ 1620              	.LASF54:
+ 1621 0322 4144435F 		.ascii	"ADC_DelSig_Start\000"
+ 1621      44656C53 
+ 1621      69675F53 
+ 1621      74617274 
+ 1621      00
+ 1622              	.LASF29:
+ 1623 0333 416E616C 		.ascii	"AnalogToDigital_GetBufGain\000"
+ 1623      6F67546F 
+ 1623      44696769 
+ 1623      74616C5F 
+ 1623      47657442 
+ 1624              	.LASF38:
+ 1625 034e 675F6669 		.ascii	"g_filtered\000"
+ 1625      6C746572 
+ 1625      656400
+ 1626              	.LASF9:
+ 1627 0359 5F5F696E 		.ascii	"__int32_t\000"
+ 1627      7433325F 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 35
+
+
+ 1627      7400
+ 1628              	.LASF50:
+ 1629 0363 46696C74 		.ascii	"Filter_Start\000"
+ 1629      65725F53 
+ 1629      74617274 
+ 1629      00
+ 1630              	.LASF46:
+ 1631 0370 444D415F 		.ascii	"DMA_DelSig_RAM_DmaInitialize\000"
+ 1631      44656C53 
+ 1631      69675F52 
+ 1631      414D5F44 
+ 1631      6D61496E 
+ 1632              	.LASF35:
+ 1633 038d 444D415F 		.ascii	"DMA_DelSig_RAM_DmaHandle\000"
+ 1633      44656C53 
+ 1633      69675F52 
+ 1633      414D5F44 
+ 1633      6D614861 
+ 1634              	.LASF47:
+ 1635 03a6 444D415F 		.ascii	"DMA_Filter_DmaInitialize\000"
+ 1635      46696C74 
+ 1635      65725F44 
+ 1635      6D61496E 
+ 1635      69746961 
+ 1636              	.LASF36:
+ 1637 03bf 49544D5F 		.ascii	"ITM_RxBuffer\000"
+ 1637      52784275 
+ 1637      66666572 
+ 1637      00
+ 1638              	.LASF60:
+ 1639 03cc 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 1639      43313120 
+ 1639      352E342E 
+ 1639      31203230 
+ 1639      31363036 
+ 1640 03ff 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"
+ 1640      20726576 
+ 1640      6973696F 
+ 1640      6E203233 
+ 1640      37373135 
+ 1641 0432 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 1641      66756E63 
+ 1641      74696F6E 
+ 1641      2D736563 
+ 1641      74696F6E 
+ 1642              	.LASF49:
+ 1643 045a 46696C74 		.ascii	"Filter_SetDalign\000"
+ 1643      65725F53 
+ 1643      65744461 
+ 1643      6C69676E 
+ 1643      00
+ 1644              	.LASF27:
+ 1645 046b 70736F63 		.ascii	"psoc_gain\000"
+ 1645      5F676169 
+ 1645      6E00
+ 1646              	.LASF33:
+ 1647 0475 444D415F 		.ascii	"DMA_DelSig_FIlter_DmaHandle\000"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccO6tTBM.s 			page 36
+
+
+ 1647      44656C53 
+ 1647      69675F46 
+ 1647      496C7465 
+ 1647      725F446D 
+ 1648              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

@@ -1,0 +1,395 @@
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccmeZc14.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"buffers.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.global	g_adc_buf_gain
+  20              		.global	g_adc_cfg
+  21              		.global	g_sample_ready
+  22              		.global	g_filtered
+  23              		.global	g_raw_delsig
+  24              		.data
+  25              		.type	g_adc_buf_gain, %object
+  26              		.size	g_adc_buf_gain, 1
+  27              	g_adc_buf_gain:
+  28 0000 08       		.byte	8
+  29              		.type	g_adc_cfg, %object
+  30              		.size	g_adc_cfg, 1
+  31              	g_adc_cfg:
+  32 0001 04       		.byte	4
+  33              		.bss
+  34              		.align	2
+  35              		.type	g_sample_ready, %object
+  36              		.size	g_sample_ready, 1
+  37              	g_sample_ready:
+  38 0000 00       		.space	1
+  39 0001 000000   		.space	3
+  40              		.type	g_filtered, %object
+  41              		.size	g_filtered, 4
+  42              	g_filtered:
+  43 0004 00000000 		.space	4
+  44              		.type	g_raw_delsig, %object
+  45              		.size	g_raw_delsig, 4
+  46              	g_raw_delsig:
+  47 0008 00000000 		.space	4
+  48              		.text
+  49              	.Letext0:
+  50              		.file 1 "Generated_Source\\PSoC5/cytypes.h"
+  51              		.file 2 "buffers.c"
+  52              		.section	.debug_info,"",%progbits
+  53              	.Ldebug_info0:
+  54 0000 EC000000 		.4byte	0xec
+  55 0004 0400     		.2byte	0x4
+  56 0006 00000000 		.4byte	.Ldebug_abbrev0
+  57 000a 04       		.byte	0x4
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccmeZc14.s 			page 2
+
+
+  58 000b 01       		.uleb128 0x1
+  59 000c 3C000000 		.4byte	.LASF19
+  60 0010 0C       		.byte	0xc
+  61 0011 5D010000 		.4byte	.LASF20
+  62 0015 01010000 		.4byte	.LASF21
+  63 0019 00000000 		.4byte	.Ldebug_line0
+  64 001d 02       		.uleb128 0x2
+  65 001e 01       		.byte	0x1
+  66 001f 06       		.byte	0x6
+  67 0020 99010000 		.4byte	.LASF0
+  68 0024 02       		.uleb128 0x2
+  69 0025 01       		.byte	0x1
+  70 0026 08       		.byte	0x8
+  71 0027 2E000000 		.4byte	.LASF1
+  72 002b 02       		.uleb128 0x2
+  73 002c 02       		.byte	0x2
+  74 002d 05       		.byte	0x5
+  75 002e 80010000 		.4byte	.LASF2
+  76 0032 02       		.uleb128 0x2
+  77 0033 02       		.byte	0x2
+  78 0034 07       		.byte	0x7
+  79 0035 DC000000 		.4byte	.LASF3
+  80 0039 02       		.uleb128 0x2
+  81 003a 04       		.byte	0x4
+  82 003b 05       		.byte	0x5
+  83 003c 90010000 		.4byte	.LASF4
+  84 0040 02       		.uleb128 0x2
+  85 0041 04       		.byte	0x4
+  86 0042 07       		.byte	0x7
+  87 0043 CA000000 		.4byte	.LASF5
+  88 0047 02       		.uleb128 0x2
+  89 0048 08       		.byte	0x8
+  90 0049 05       		.byte	0x5
+  91 004a 6D010000 		.4byte	.LASF6
+  92 004e 02       		.uleb128 0x2
+  93 004f 08       		.byte	0x8
+  94 0050 07       		.byte	0x7
+  95 0051 46010000 		.4byte	.LASF7
+  96 0055 03       		.uleb128 0x3
+  97 0056 04       		.byte	0x4
+  98 0057 05       		.byte	0x5
+  99 0058 696E7400 		.ascii	"int\000"
+ 100 005c 02       		.uleb128 0x2
+ 101 005d 04       		.byte	0x4
+ 102 005e 07       		.byte	0x7
+ 103 005f 39010000 		.4byte	.LASF8
+ 104 0063 04       		.uleb128 0x4
+ 105 0064 8A010000 		.4byte	.LASF9
+ 106 0068 01       		.byte	0x1
+ 107 0069 E901     		.2byte	0x1e9
+ 108 006b 24000000 		.4byte	0x24
+ 109 006f 04       		.uleb128 0x4
+ 110 0070 67010000 		.4byte	.LASF10
+ 111 0074 01       		.byte	0x1
+ 112 0075 EE01     		.2byte	0x1ee
+ 113 0077 39000000 		.4byte	0x39
+ 114 007b 02       		.uleb128 0x2
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccmeZc14.s 			page 3
+
+
+ 115 007c 04       		.byte	0x4
+ 116 007d 04       		.byte	0x4
+ 117 007e 28000000 		.4byte	.LASF11
+ 118 0082 02       		.uleb128 0x2
+ 119 0083 08       		.byte	0x8
+ 120 0084 04       		.byte	0x4
+ 121 0085 FA000000 		.4byte	.LASF12
+ 122 0089 02       		.uleb128 0x2
+ 123 008a 01       		.byte	0x1
+ 124 008b 08       		.byte	0x8
+ 125 008c 7B010000 		.4byte	.LASF13
+ 126 0090 05       		.uleb128 0x5
+ 127 0091 63000000 		.4byte	0x63
+ 128 0095 06       		.uleb128 0x6
+ 129 0096 2C010000 		.4byte	.LASF14
+ 130 009a 02       		.byte	0x2
+ 131 009b 07       		.byte	0x7
+ 132 009c A6000000 		.4byte	0xa6
+ 133 00a0 05       		.uleb128 0x5
+ 134 00a1 03       		.byte	0x3
+ 135 00a2 00000000 		.4byte	g_raw_delsig
+ 136 00a6 05       		.uleb128 0x5
+ 137 00a7 6F000000 		.4byte	0x6f
+ 138 00ab 06       		.uleb128 0x6
+ 139 00ac EF000000 		.4byte	.LASF15
+ 140 00b0 02       		.byte	0x2
+ 141 00b1 08       		.byte	0x8
+ 142 00b2 A6000000 		.4byte	0xa6
+ 143 00b6 05       		.uleb128 0x5
+ 144 00b7 03       		.byte	0x3
+ 145 00b8 00000000 		.4byte	g_filtered
+ 146 00bc 06       		.uleb128 0x6
+ 147 00bd 00000000 		.4byte	.LASF16
+ 148 00c1 02       		.byte	0x2
+ 149 00c2 09       		.byte	0x9
+ 150 00c3 90000000 		.4byte	0x90
+ 151 00c7 05       		.uleb128 0x5
+ 152 00c8 03       		.byte	0x3
+ 153 00c9 00000000 		.4byte	g_sample_ready
+ 154 00cd 06       		.uleb128 0x6
+ 155 00ce 1E000000 		.4byte	.LASF17
+ 156 00d2 02       		.byte	0x2
+ 157 00d3 0A       		.byte	0xa
+ 158 00d4 90000000 		.4byte	0x90
+ 159 00d8 05       		.uleb128 0x5
+ 160 00d9 03       		.byte	0x3
+ 161 00da 00000000 		.4byte	g_adc_cfg
+ 162 00de 06       		.uleb128 0x6
+ 163 00df 0F000000 		.4byte	.LASF18
+ 164 00e3 02       		.byte	0x2
+ 165 00e4 0B       		.byte	0xb
+ 166 00e5 90000000 		.4byte	0x90
+ 167 00e9 05       		.uleb128 0x5
+ 168 00ea 03       		.byte	0x3
+ 169 00eb 00000000 		.4byte	g_adc_buf_gain
+ 170 00ef 00       		.byte	0
+ 171              		.section	.debug_abbrev,"",%progbits
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccmeZc14.s 			page 4
+
+
+ 172              	.Ldebug_abbrev0:
+ 173 0000 01       		.uleb128 0x1
+ 174 0001 11       		.uleb128 0x11
+ 175 0002 01       		.byte	0x1
+ 176 0003 25       		.uleb128 0x25
+ 177 0004 0E       		.uleb128 0xe
+ 178 0005 13       		.uleb128 0x13
+ 179 0006 0B       		.uleb128 0xb
+ 180 0007 03       		.uleb128 0x3
+ 181 0008 0E       		.uleb128 0xe
+ 182 0009 1B       		.uleb128 0x1b
+ 183 000a 0E       		.uleb128 0xe
+ 184 000b 10       		.uleb128 0x10
+ 185 000c 17       		.uleb128 0x17
+ 186 000d 00       		.byte	0
+ 187 000e 00       		.byte	0
+ 188 000f 02       		.uleb128 0x2
+ 189 0010 24       		.uleb128 0x24
+ 190 0011 00       		.byte	0
+ 191 0012 0B       		.uleb128 0xb
+ 192 0013 0B       		.uleb128 0xb
+ 193 0014 3E       		.uleb128 0x3e
+ 194 0015 0B       		.uleb128 0xb
+ 195 0016 03       		.uleb128 0x3
+ 196 0017 0E       		.uleb128 0xe
+ 197 0018 00       		.byte	0
+ 198 0019 00       		.byte	0
+ 199 001a 03       		.uleb128 0x3
+ 200 001b 24       		.uleb128 0x24
+ 201 001c 00       		.byte	0
+ 202 001d 0B       		.uleb128 0xb
+ 203 001e 0B       		.uleb128 0xb
+ 204 001f 3E       		.uleb128 0x3e
+ 205 0020 0B       		.uleb128 0xb
+ 206 0021 03       		.uleb128 0x3
+ 207 0022 08       		.uleb128 0x8
+ 208 0023 00       		.byte	0
+ 209 0024 00       		.byte	0
+ 210 0025 04       		.uleb128 0x4
+ 211 0026 16       		.uleb128 0x16
+ 212 0027 00       		.byte	0
+ 213 0028 03       		.uleb128 0x3
+ 214 0029 0E       		.uleb128 0xe
+ 215 002a 3A       		.uleb128 0x3a
+ 216 002b 0B       		.uleb128 0xb
+ 217 002c 3B       		.uleb128 0x3b
+ 218 002d 05       		.uleb128 0x5
+ 219 002e 49       		.uleb128 0x49
+ 220 002f 13       		.uleb128 0x13
+ 221 0030 00       		.byte	0
+ 222 0031 00       		.byte	0
+ 223 0032 05       		.uleb128 0x5
+ 224 0033 35       		.uleb128 0x35
+ 225 0034 00       		.byte	0
+ 226 0035 49       		.uleb128 0x49
+ 227 0036 13       		.uleb128 0x13
+ 228 0037 00       		.byte	0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccmeZc14.s 			page 5
+
+
+ 229 0038 00       		.byte	0
+ 230 0039 06       		.uleb128 0x6
+ 231 003a 34       		.uleb128 0x34
+ 232 003b 00       		.byte	0
+ 233 003c 03       		.uleb128 0x3
+ 234 003d 0E       		.uleb128 0xe
+ 235 003e 3A       		.uleb128 0x3a
+ 236 003f 0B       		.uleb128 0xb
+ 237 0040 3B       		.uleb128 0x3b
+ 238 0041 0B       		.uleb128 0xb
+ 239 0042 49       		.uleb128 0x49
+ 240 0043 13       		.uleb128 0x13
+ 241 0044 3F       		.uleb128 0x3f
+ 242 0045 19       		.uleb128 0x19
+ 243 0046 02       		.uleb128 0x2
+ 244 0047 18       		.uleb128 0x18
+ 245 0048 00       		.byte	0
+ 246 0049 00       		.byte	0
+ 247 004a 00       		.byte	0
+ 248              		.section	.debug_aranges,"",%progbits
+ 249 0000 14000000 		.4byte	0x14
+ 250 0004 0200     		.2byte	0x2
+ 251 0006 00000000 		.4byte	.Ldebug_info0
+ 252 000a 04       		.byte	0x4
+ 253 000b 00       		.byte	0
+ 254 000c 0000     		.2byte	0
+ 255 000e 0000     		.2byte	0
+ 256 0010 00000000 		.4byte	0
+ 257 0014 00000000 		.4byte	0
+ 258              		.section	.debug_line,"",%progbits
+ 259              	.Ldebug_line0:
+ 260 0000 4A000000 		.section	.debug_str,"MS",%progbits,1
+ 260      02004400 
+ 260      00000201 
+ 260      FB0E0D00 
+ 260      01010101 
+ 261              	.LASF16:
+ 262 0000 675F7361 		.ascii	"g_sample_ready\000"
+ 262      6D706C65 
+ 262      5F726561 
+ 262      647900
+ 263              	.LASF18:
+ 264 000f 675F6164 		.ascii	"g_adc_buf_gain\000"
+ 264      635F6275 
+ 264      665F6761 
+ 264      696E00
+ 265              	.LASF17:
+ 266 001e 675F6164 		.ascii	"g_adc_cfg\000"
+ 266      635F6366 
+ 266      6700
+ 267              	.LASF11:
+ 268 0028 666C6F61 		.ascii	"float\000"
+ 268      7400
+ 269              	.LASF1:
+ 270 002e 756E7369 		.ascii	"unsigned char\000"
+ 270      676E6564 
+ 270      20636861 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccmeZc14.s 			page 6
+
+
+ 270      7200
+ 271              	.LASF19:
+ 272 003c 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 272      43313120 
+ 272      352E342E 
+ 272      31203230 
+ 272      31363036 
+ 273 006f 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"
+ 273      20726576 
+ 273      6973696F 
+ 273      6E203233 
+ 273      37373135 
+ 274 00a2 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 274      66756E63 
+ 274      74696F6E 
+ 274      2D736563 
+ 274      74696F6E 
+ 275              	.LASF5:
+ 276 00ca 6C6F6E67 		.ascii	"long unsigned int\000"
+ 276      20756E73 
+ 276      69676E65 
+ 276      6420696E 
+ 276      7400
+ 277              	.LASF3:
+ 278 00dc 73686F72 		.ascii	"short unsigned int\000"
+ 278      7420756E 
+ 278      7369676E 
+ 278      65642069 
+ 278      6E7400
+ 279              	.LASF15:
+ 280 00ef 675F6669 		.ascii	"g_filtered\000"
+ 280      6C746572 
+ 280      656400
+ 281              	.LASF12:
+ 282 00fa 646F7562 		.ascii	"double\000"
+ 282      6C6500
+ 283              	.LASF21:
+ 284 0101 433A5C47 		.ascii	"C:\\Github\\Tesis\\src\\psoc\\Comparation.cydsn\000"
+ 284      69746875 
+ 284      625C5465 
+ 284      7369735C 
+ 284      7372635C 
+ 285              	.LASF14:
+ 286 012c 675F7261 		.ascii	"g_raw_delsig\000"
+ 286      775F6465 
+ 286      6C736967 
+ 286      00
+ 287              	.LASF8:
+ 288 0139 756E7369 		.ascii	"unsigned int\000"
+ 288      676E6564 
+ 288      20696E74 
+ 288      00
+ 289              	.LASF7:
+ 290 0146 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 290      206C6F6E 
+ 290      6720756E 
+ 290      7369676E 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccmeZc14.s 			page 7
+
+
+ 290      65642069 
+ 291              	.LASF20:
+ 292 015d 62756666 		.ascii	"buffers.c\000"
+ 292      6572732E 
+ 292      6300
+ 293              	.LASF10:
+ 294 0167 696E7433 		.ascii	"int32\000"
+ 294      3200
+ 295              	.LASF6:
+ 296 016d 6C6F6E67 		.ascii	"long long int\000"
+ 296      206C6F6E 
+ 296      6720696E 
+ 296      7400
+ 297              	.LASF13:
+ 298 017b 63686172 		.ascii	"char\000"
+ 298      00
+ 299              	.LASF2:
+ 300 0180 73686F72 		.ascii	"short int\000"
+ 300      7420696E 
+ 300      7400
+ 301              	.LASF9:
+ 302 018a 75696E74 		.ascii	"uint8\000"
+ 302      3800
+ 303              	.LASF4:
+ 304 0190 6C6F6E67 		.ascii	"long int\000"
+ 304      20696E74 
+ 304      00
+ 305              	.LASF0:
+ 306 0199 7369676E 		.ascii	"signed char\000"
+ 306      65642063 
+ 306      68617200 
+ 307              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

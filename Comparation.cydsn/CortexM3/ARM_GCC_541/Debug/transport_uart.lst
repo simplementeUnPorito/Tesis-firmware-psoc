@@ -1,0 +1,1623 @@
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"transport_uart.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.CalcDebugCrc,"ax",%progbits
+  20              		.align	2
+  21              		.thumb
+  22              		.thumb_func
+  23              		.type	CalcDebugCrc, %function
+  24              	CalcDebugCrc:
+  25              	.LFB63:
+  26              		.file 1 "..\\shared\\transport_uart.c"
+   1:..\shared/transport_uart.c **** /* transport_uart.c
+   2:..\shared/transport_uart.c ****  * UART_PC transport implementation.
+   3:..\shared/transport_uart.c ****  */
+   4:..\shared/transport_uart.c **** 
+   5:..\shared/transport_uart.c **** #include "project.h"
+   6:..\shared/transport_uart.c **** #include "transport_uart.h"
+   7:..\shared/transport_uart.c **** #include "debug.h"
+   8:..\shared/transport_uart.c **** 
+   9:..\shared/transport_uart.c **** /* ---- Debug packet builder ------------------------------------------------ */
+  10:..\shared/transport_uart.c **** 
+  11:..\shared/transport_uart.c **** static uint8 CalcDebugCrc(uint8 event, uint8 len, const uint8 *payload)
+  12:..\shared/transport_uart.c **** {
+  27              		.loc 1 12 0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 0
+  30              		@ frame_needed = 0, uses_anonymous_args = 0
+  31              		@ link register save eliminated.
+  32              	.LVL0:
+  33 0000 10B4     		push	{r4}
+  34              		.cfi_def_cfa_offset 4
+  35              		.cfi_offset 4, -4
+  13:..\shared/transport_uart.c ****     uint8 crc = DBG_HEADER ^ event ^ len;
+  36              		.loc 1 13 0
+  37 0002 4840     		eors	r0, r0, r1
+  38              	.LVL1:
+  39 0004 80F0DD00 		eor	r0, r0, #221
+  40              	.LVL2:
+  14:..\shared/transport_uart.c ****     uint8 i;
+  15:..\shared/transport_uart.c ****     for (i = 0u; i < len; i++) { crc ^= payload[i]; }
+  41              		.loc 1 15 0
+  42 0008 0023     		movs	r3, #0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 2
+
+
+  43 000a 03E0     		b	.L2
+  44              	.LVL3:
+  45              	.L3:
+  46              		.loc 1 15 0 is_stmt 0 discriminator 3
+  47 000c D45C     		ldrb	r4, [r2, r3]	@ zero_extendqisi2
+  48 000e 6040     		eors	r0, r0, r4
+  49              	.LVL4:
+  50 0010 0133     		adds	r3, r3, #1
+  51              	.LVL5:
+  52 0012 DBB2     		uxtb	r3, r3
+  53              	.LVL6:
+  54              	.L2:
+  55              		.loc 1 15 0 discriminator 1
+  56 0014 8B42     		cmp	r3, r1
+  57 0016 F9D3     		bcc	.L3
+  16:..\shared/transport_uart.c ****     return crc;
+  17:..\shared/transport_uart.c **** }
+  58              		.loc 1 17 0 is_stmt 1
+  59 0018 10BC     		pop	{r4}
+  60              		.cfi_restore 4
+  61              		.cfi_def_cfa_offset 0
+  62 001a 7047     		bx	lr
+  63              		.cfi_endproc
+  64              	.LFE63:
+  65              		.size	CalcDebugCrc, .-CalcDebugCrc
+  66              		.section	.text.UART_Task,"ax",%progbits
+  67              		.align	2
+  68              		.thumb
+  69              		.thumb_func
+  70              		.type	UART_Task, %function
+  71              	UART_Task:
+  72              	.LFB66:
+  18:..\shared/transport_uart.c **** 
+  19:..\shared/transport_uart.c **** void TransportUART_SendDebug(uint8 event, const uint8 *payload, uint8 len)
+  20:..\shared/transport_uart.c **** {
+  21:..\shared/transport_uart.c ****     uint8 hdr[3];
+  22:..\shared/transport_uart.c ****     uint8 crc;
+  23:..\shared/transport_uart.c **** 
+  24:..\shared/transport_uart.c ****     hdr[0] = DBG_HEADER;
+  25:..\shared/transport_uart.c ****     hdr[1] = event;
+  26:..\shared/transport_uart.c ****     hdr[2] = len;
+  27:..\shared/transport_uart.c **** 
+  28:..\shared/transport_uart.c ****     UART_PC_PutArray(hdr, 3u);
+  29:..\shared/transport_uart.c ****     if (len > 0u && payload != (void *)0u)
+  30:..\shared/transport_uart.c ****     {
+  31:..\shared/transport_uart.c ****         UART_PC_PutArray((uint8 *)payload, len);
+  32:..\shared/transport_uart.c ****     }
+  33:..\shared/transport_uart.c ****     crc = CalcDebugCrc(event, len, payload != (void *)0u ? payload : hdr);
+  34:..\shared/transport_uart.c ****     UART_PC_PutChar(crc);
+  35:..\shared/transport_uart.c **** }
+  36:..\shared/transport_uart.c **** 
+  37:..\shared/transport_uart.c **** /* ---- Transport_t callbacks ----------------------------------------------- */
+  38:..\shared/transport_uart.c **** 
+  39:..\shared/transport_uart.c **** static void UART_Init(void)
+  40:..\shared/transport_uart.c **** {
+  41:..\shared/transport_uart.c ****     UART_PC_Start();
+  42:..\shared/transport_uart.c **** }
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 3
+
+
+  43:..\shared/transport_uart.c **** 
+  44:..\shared/transport_uart.c **** static void UART_Task(void)
+  45:..\shared/transport_uart.c **** {
+  73              		.loc 1 45 0
+  74              		.cfi_startproc
+  75              		@ args = 0, pretend = 0, frame = 0
+  76              		@ frame_needed = 0, uses_anonymous_args = 0
+  77              		@ link register save eliminated.
+  78 0000 7047     		bx	lr
+  79              		.cfi_endproc
+  80              	.LFE66:
+  81              		.size	UART_Task, .-UART_Task
+  82 0002 00BF     		.section	.text.UART_IsReady,"ax",%progbits
+  83              		.align	2
+  84              		.thumb
+  85              		.thumb_func
+  86              		.type	UART_IsReady, %function
+  87              	UART_IsReady:
+  88              	.LFB67:
+  46:..\shared/transport_uart.c ****     /* Reserved: future RX from ESP32 */
+  47:..\shared/transport_uart.c **** }
+  48:..\shared/transport_uart.c **** 
+  49:..\shared/transport_uart.c **** static uint8 UART_IsReady(void)
+  50:..\shared/transport_uart.c **** {
+  89              		.loc 1 50 0
+  90              		.cfi_startproc
+  91              		@ args = 0, pretend = 0, frame = 0
+  92              		@ frame_needed = 0, uses_anonymous_args = 0
+  93              		@ link register save eliminated.
+  51:..\shared/transport_uart.c ****     return 1u;   /* UART TX is always ready (buffered internally by PSoC) */
+  52:..\shared/transport_uart.c **** }
+  94              		.loc 1 52 0
+  95 0000 0120     		movs	r0, #1
+  96 0002 7047     		bx	lr
+  97              		.cfi_endproc
+  98              	.LFE67:
+  99              		.size	UART_IsReady, .-UART_IsReady
+ 100              		.section	.text.UART_SendSample,"ax",%progbits
+ 101              		.align	2
+ 102              		.thumb
+ 103              		.thumb_func
+ 104              		.type	UART_SendSample, %function
+ 105              	UART_SendSample:
+ 106              	.LFB68:
+  53:..\shared/transport_uart.c **** 
+  54:..\shared/transport_uart.c **** static void UART_SendSample(int16 raw_input, int32 post_analog,
+  55:..\shared/transport_uart.c ****                             int32 post_digital, uint8 flags, uint8 gain_byte)
+  56:..\shared/transport_uart.c **** {
+ 107              		.loc 1 56 0
+ 108              		.cfi_startproc
+ 109              		@ args = 4, pretend = 0, frame = 0
+ 110              		@ frame_needed = 0, uses_anonymous_args = 0
+ 111              		@ link register save eliminated.
+ 112              	.LVL7:
+ 113 0000 7047     		bx	lr
+ 114              		.cfi_endproc
+ 115              	.LFE68:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 4
+
+
+ 116              		.size	UART_SendSample, .-UART_SendSample
+ 117 0002 00BF     		.section	.text.UART_Init,"ax",%progbits
+ 118              		.align	2
+ 119              		.thumb
+ 120              		.thumb_func
+ 121              		.type	UART_Init, %function
+ 122              	UART_Init:
+ 123              	.LFB65:
+  40:..\shared/transport_uart.c ****     UART_PC_Start();
+ 124              		.loc 1 40 0
+ 125              		.cfi_startproc
+ 126              		@ args = 0, pretend = 0, frame = 0
+ 127              		@ frame_needed = 0, uses_anonymous_args = 0
+  40:..\shared/transport_uart.c ****     UART_PC_Start();
+ 128              		.loc 1 40 0
+ 129 0000 08B5     		push	{r3, lr}
+ 130              		.cfi_def_cfa_offset 8
+ 131              		.cfi_offset 3, -8
+ 132              		.cfi_offset 14, -4
+  41:..\shared/transport_uart.c **** }
+ 133              		.loc 1 41 0
+ 134 0002 FFF7FEFF 		bl	UART_PC_Start
+ 135              	.LVL8:
+ 136 0006 08BD     		pop	{r3, pc}
+ 137              		.cfi_endproc
+ 138              	.LFE65:
+ 139              		.size	UART_Init, .-UART_Init
+ 140              		.section	.text.TransportUART_SendDebug,"ax",%progbits
+ 141              		.align	2
+ 142              		.global	TransportUART_SendDebug
+ 143              		.thumb
+ 144              		.thumb_func
+ 145              		.type	TransportUART_SendDebug, %function
+ 146              	TransportUART_SendDebug:
+ 147              	.LFB64:
+  20:..\shared/transport_uart.c ****     uint8 hdr[3];
+ 148              		.loc 1 20 0
+ 149              		.cfi_startproc
+ 150              		@ args = 0, pretend = 0, frame = 8
+ 151              		@ frame_needed = 0, uses_anonymous_args = 0
+ 152              	.LVL9:
+ 153 0000 70B5     		push	{r4, r5, r6, lr}
+ 154              		.cfi_def_cfa_offset 16
+ 155              		.cfi_offset 4, -16
+ 156              		.cfi_offset 5, -12
+ 157              		.cfi_offset 6, -8
+ 158              		.cfi_offset 14, -4
+ 159 0002 82B0     		sub	sp, sp, #8
+ 160              		.cfi_def_cfa_offset 24
+ 161 0004 0646     		mov	r6, r0
+ 162 0006 0C46     		mov	r4, r1
+ 163 0008 1546     		mov	r5, r2
+  24:..\shared/transport_uart.c ****     hdr[1] = event;
+ 164              		.loc 1 24 0
+ 165 000a DD23     		movs	r3, #221
+ 166 000c 8DF80430 		strb	r3, [sp, #4]
+  25:..\shared/transport_uart.c ****     hdr[2] = len;
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 5
+
+
+ 167              		.loc 1 25 0
+ 168 0010 8DF80500 		strb	r0, [sp, #5]
+  26:..\shared/transport_uart.c **** 
+ 169              		.loc 1 26 0
+ 170 0014 8DF80620 		strb	r2, [sp, #6]
+  28:..\shared/transport_uart.c ****     if (len > 0u && payload != (void *)0u)
+ 171              		.loc 1 28 0
+ 172 0018 0321     		movs	r1, #3
+ 173              	.LVL10:
+ 174 001a 01A8     		add	r0, sp, #4
+ 175              	.LVL11:
+ 176 001c FFF7FEFF 		bl	UART_PC_PutArray
+ 177              	.LVL12:
+  29:..\shared/transport_uart.c ****     {
+ 178              		.loc 1 29 0
+ 179 0020 25B1     		cbz	r5, .L11
+  29:..\shared/transport_uart.c ****     {
+ 180              		.loc 1 29 0 is_stmt 0 discriminator 1
+ 181 0022 1CB1     		cbz	r4, .L11
+  31:..\shared/transport_uart.c ****     }
+ 182              		.loc 1 31 0 is_stmt 1
+ 183 0024 2946     		mov	r1, r5
+ 184 0026 2046     		mov	r0, r4
+ 185 0028 FFF7FEFF 		bl	UART_PC_PutArray
+ 186              	.LVL13:
+ 187              	.L11:
+  33:..\shared/transport_uart.c ****     UART_PC_PutChar(crc);
+ 188              		.loc 1 33 0
+ 189 002c 0CB9     		cbnz	r4, .L13
+ 190 002e 01AA     		add	r2, sp, #4
+ 191 0030 00E0     		b	.L12
+ 192              	.L13:
+ 193 0032 2246     		mov	r2, r4
+ 194              	.L12:
+  33:..\shared/transport_uart.c ****     UART_PC_PutChar(crc);
+ 195              		.loc 1 33 0 is_stmt 0 discriminator 4
+ 196 0034 2946     		mov	r1, r5
+ 197 0036 3046     		mov	r0, r6
+ 198 0038 FFF7FEFF 		bl	CalcDebugCrc
+ 199              	.LVL14:
+  34:..\shared/transport_uart.c **** }
+ 200              		.loc 1 34 0 is_stmt 1 discriminator 4
+ 201 003c FFF7FEFF 		bl	UART_PC_PutChar
+ 202              	.LVL15:
+  35:..\shared/transport_uart.c **** 
+ 203              		.loc 1 35 0 discriminator 4
+ 204 0040 02B0     		add	sp, sp, #8
+ 205              		.cfi_def_cfa_offset 16
+ 206              		@ sp needed
+ 207 0042 70BD     		pop	{r4, r5, r6, pc}
+ 208              		.cfi_endproc
+ 209              	.LFE64:
+ 210              		.size	TransportUART_SendDebug, .-TransportUART_SendDebug
+ 211              		.global	uart_transport
+ 212              		.data
+ 213              		.align	2
+ 214              		.type	uart_transport, %object
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 6
+
+
+ 215              		.size	uart_transport, 24
+ 216              	uart_transport:
+ 217 0000 00000000 		.word	UART_Init
+ 218 0004 00000000 		.word	UART_Task
+ 219 0008 00000000 		.word	UART_IsReady
+ 220 000c 00000000 		.word	UART_SendSample
+ 221 0010 00       		.byte	0
+ 222 0011 000000   		.space	3
+ 223 0014 00000000 		.word	.LC0
+ 224              		.section	.rodata.str1.4,"aMS",%progbits,1
+ 225              		.align	2
+ 226              	.LC0:
+ 227 0000 55415254 		.ascii	"UART_PC\000"
+ 227      5F504300 
+ 228              		.text
+ 229              	.Letext0:
+ 230              		.file 2 "c:\\program files (x86)\\cypress\\psoc creator\\4.4\\psoc creator\\import\\gnu\\arm\\5.4.
+ 231              		.file 3 "c:\\program files (x86)\\cypress\\psoc creator\\4.4\\psoc creator\\import\\gnu\\arm\\5.4.
+ 232              		.file 4 "Generated_Source\\PSoC5/cytypes.h"
+ 233              		.file 5 "..\\shared\\transport.h"
+ 234              		.file 6 "Generated_Source\\PSoC5/core_cm3.h"
+ 235              		.file 7 "Generated_Source\\PSoC5/UART_PC.h"
+ 236              		.section	.debug_info,"",%progbits
+ 237              	.Ldebug_info0:
+ 238 0000 71030000 		.4byte	0x371
+ 239 0004 0400     		.2byte	0x4
+ 240 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 241 000a 04       		.byte	0x4
+ 242 000b 01       		.uleb128 0x1
+ 243 000c 71010000 		.4byte	.LASF40
+ 244 0010 0C       		.byte	0xc
+ 245 0011 31010000 		.4byte	.LASF41
+ 246 0015 AF000000 		.4byte	.LASF42
+ 247 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 248 001d 00000000 		.4byte	0
+ 249 0021 00000000 		.4byte	.Ldebug_line0
+ 250 0025 02       		.uleb128 0x2
+ 251 0026 01       		.byte	0x1
+ 252 0027 06       		.byte	0x6
+ 253 0028 7E020000 		.4byte	.LASF0
+ 254 002c 02       		.uleb128 0x2
+ 255 002d 01       		.byte	0x1
+ 256 002e 08       		.byte	0x8
+ 257 002f 51000000 		.4byte	.LASF1
+ 258 0033 02       		.uleb128 0x2
+ 259 0034 02       		.byte	0x2
+ 260 0035 05       		.byte	0x5
+ 261 0036 33020000 		.4byte	.LASF2
+ 262 003a 02       		.uleb128 0x2
+ 263 003b 02       		.byte	0x2
+ 264 003c 07       		.byte	0x7
+ 265 003d 0F000000 		.4byte	.LASF3
+ 266 0041 03       		.uleb128 0x3
+ 267 0042 05000000 		.4byte	.LASF9
+ 268 0046 02       		.byte	0x2
+ 269 0047 3F       		.byte	0x3f
+ 270 0048 4C000000 		.4byte	0x4c
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 7
+
+
+ 271 004c 02       		.uleb128 0x2
+ 272 004d 04       		.byte	0x4
+ 273 004e 05       		.byte	0x5
+ 274 004f 69020000 		.4byte	.LASF4
+ 275 0053 02       		.uleb128 0x2
+ 276 0054 04       		.byte	0x4
+ 277 0055 07       		.byte	0x7
+ 278 0056 9D000000 		.4byte	.LASF5
+ 279 005a 02       		.uleb128 0x2
+ 280 005b 08       		.byte	0x8
+ 281 005c 05       		.byte	0x5
+ 282 005d 10020000 		.4byte	.LASF6
+ 283 0061 02       		.uleb128 0x2
+ 284 0062 08       		.byte	0x8
+ 285 0063 07       		.byte	0x7
+ 286 0064 1A010000 		.4byte	.LASF7
+ 287 0068 04       		.uleb128 0x4
+ 288 0069 04       		.byte	0x4
+ 289 006a 05       		.byte	0x5
+ 290 006b 696E7400 		.ascii	"int\000"
+ 291 006f 02       		.uleb128 0x2
+ 292 0070 04       		.byte	0x4
+ 293 0071 07       		.byte	0x7
+ 294 0072 FA000000 		.4byte	.LASF8
+ 295 0076 03       		.uleb128 0x3
+ 296 0077 FF010000 		.4byte	.LASF10
+ 297 007b 03       		.byte	0x3
+ 298 007c 2C       		.byte	0x2c
+ 299 007d 41000000 		.4byte	0x41
+ 300 0081 05       		.uleb128 0x5
+ 301 0082 56020000 		.4byte	.LASF11
+ 302 0086 04       		.byte	0x4
+ 303 0087 E901     		.2byte	0x1e9
+ 304 0089 2C000000 		.4byte	0x2c
+ 305 008d 05       		.uleb128 0x5
+ 306 008e 71000000 		.4byte	.LASF12
+ 307 0092 04       		.byte	0x4
+ 308 0093 ED01     		.2byte	0x1ed
+ 309 0095 33000000 		.4byte	0x33
+ 310 0099 05       		.uleb128 0x5
+ 311 009a 81000000 		.4byte	.LASF13
+ 312 009e 04       		.byte	0x4
+ 313 009f EE01     		.2byte	0x1ee
+ 314 00a1 4C000000 		.4byte	0x4c
+ 315 00a5 02       		.uleb128 0x2
+ 316 00a6 04       		.byte	0x4
+ 317 00a7 04       		.byte	0x4
+ 318 00a8 41000000 		.4byte	.LASF14
+ 319 00ac 02       		.uleb128 0x2
+ 320 00ad 08       		.byte	0x8
+ 321 00ae 04       		.byte	0x4
+ 322 00af 8A020000 		.4byte	.LASF15
+ 323 00b3 02       		.uleb128 0x2
+ 324 00b4 01       		.byte	0x1
+ 325 00b5 08       		.byte	0x8
+ 326 00b6 1E020000 		.4byte	.LASF16
+ 327 00ba 06       		.uleb128 0x6
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 8
+
+
+ 328 00bb 04       		.byte	0x4
+ 329 00bc C0000000 		.4byte	0xc0
+ 330 00c0 07       		.uleb128 0x7
+ 331 00c1 02       		.uleb128 0x2
+ 332 00c2 08       		.byte	0x8
+ 333 00c3 04       		.byte	0x4
+ 334 00c4 72020000 		.4byte	.LASF17
+ 335 00c8 02       		.uleb128 0x2
+ 336 00c9 04       		.byte	0x4
+ 337 00ca 07       		.byte	0x7
+ 338 00cb 07020000 		.4byte	.LASF18
+ 339 00cf 06       		.uleb128 0x6
+ 340 00d0 04       		.byte	0x4
+ 341 00d1 D5000000 		.4byte	0xd5
+ 342 00d5 08       		.uleb128 0x8
+ 343 00d6 B3000000 		.4byte	0xb3
+ 344 00da 09       		.uleb128 0x9
+ 345 00db 18       		.byte	0x18
+ 346 00dc 05       		.byte	0x5
+ 347 00dd 12       		.byte	0x12
+ 348 00de 2B010000 		.4byte	0x12b
+ 349 00e2 0A       		.uleb128 0xa
+ 350 00e3 22000000 		.4byte	.LASF19
+ 351 00e7 05       		.byte	0x5
+ 352 00e8 13       		.byte	0x13
+ 353 00e9 BA000000 		.4byte	0xba
+ 354 00ed 00       		.byte	0
+ 355 00ee 0A       		.uleb128 0xa
+ 356 00ef 00000000 		.4byte	.LASF20
+ 357 00f3 05       		.byte	0x5
+ 358 00f4 14       		.byte	0x14
+ 359 00f5 BA000000 		.4byte	0xba
+ 360 00f9 04       		.byte	0x4
+ 361 00fa 0A       		.uleb128 0xa
+ 362 00fb 94000000 		.4byte	.LASF21
+ 363 00ff 05       		.byte	0x5
+ 364 0100 15       		.byte	0x15
+ 365 0101 30010000 		.4byte	0x130
+ 366 0105 08       		.byte	0x8
+ 367 0106 0A       		.uleb128 0xa
+ 368 0107 65010000 		.4byte	.LASF22
+ 369 010b 05       		.byte	0x5
+ 370 010c 16       		.byte	0x16
+ 371 010d 55010000 		.4byte	0x155
+ 372 0111 0C       		.byte	0xc
+ 373 0112 0A       		.uleb128 0xa
+ 374 0113 69000000 		.4byte	.LASF23
+ 375 0117 05       		.byte	0x5
+ 376 0118 18       		.byte	0x18
+ 377 0119 81000000 		.4byte	0x81
+ 378 011d 10       		.byte	0x10
+ 379 011e 0A       		.uleb128 0xa
+ 380 011f A9020000 		.4byte	.LASF24
+ 381 0123 05       		.byte	0x5
+ 382 0124 19       		.byte	0x19
+ 383 0125 CF000000 		.4byte	0xcf
+ 384 0129 14       		.byte	0x14
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 9
+
+
+ 385 012a 00       		.byte	0
+ 386 012b 0B       		.uleb128 0xb
+ 387 012c 81000000 		.4byte	0x81
+ 388 0130 06       		.uleb128 0x6
+ 389 0131 04       		.byte	0x4
+ 390 0132 2B010000 		.4byte	0x12b
+ 391 0136 0C       		.uleb128 0xc
+ 392 0137 55010000 		.4byte	0x155
+ 393 013b 0D       		.uleb128 0xd
+ 394 013c 8D000000 		.4byte	0x8d
+ 395 0140 0D       		.uleb128 0xd
+ 396 0141 99000000 		.4byte	0x99
+ 397 0145 0D       		.uleb128 0xd
+ 398 0146 99000000 		.4byte	0x99
+ 399 014a 0D       		.uleb128 0xd
+ 400 014b 81000000 		.4byte	0x81
+ 401 014f 0D       		.uleb128 0xd
+ 402 0150 81000000 		.4byte	0x81
+ 403 0154 00       		.byte	0
+ 404 0155 06       		.uleb128 0x6
+ 405 0156 04       		.byte	0x4
+ 406 0157 36010000 		.4byte	0x136
+ 407 015b 03       		.uleb128 0x3
+ 408 015c 4A020000 		.4byte	.LASF25
+ 409 0160 05       		.byte	0x5
+ 410 0161 1A       		.byte	0x1a
+ 411 0162 DA000000 		.4byte	0xda
+ 412 0166 0E       		.uleb128 0xe
+ 413 0167 5C020000 		.4byte	.LASF43
+ 414 016b 01       		.byte	0x1
+ 415 016c 0B       		.byte	0xb
+ 416 016d 81000000 		.4byte	0x81
+ 417 0171 00000000 		.4byte	.LFB63
+ 418 0175 1C000000 		.4byte	.LFE63-.LFB63
+ 419 0179 01       		.uleb128 0x1
+ 420 017a 9C       		.byte	0x9c
+ 421 017b C3010000 		.4byte	0x1c3
+ 422 017f 0F       		.uleb128 0xf
+ 423 0180 EA000000 		.4byte	.LASF26
+ 424 0184 01       		.byte	0x1
+ 425 0185 0B       		.byte	0xb
+ 426 0186 81000000 		.4byte	0x81
+ 427 018a 00000000 		.4byte	.LLST0
+ 428 018e 10       		.uleb128 0x10
+ 429 018f 6C656E00 		.ascii	"len\000"
+ 430 0193 01       		.byte	0x1
+ 431 0194 0B       		.byte	0xb
+ 432 0195 81000000 		.4byte	0x81
+ 433 0199 01       		.uleb128 0x1
+ 434 019a 51       		.byte	0x51
+ 435 019b 11       		.uleb128 0x11
+ 436 019c 5D010000 		.4byte	.LASF27
+ 437 01a0 01       		.byte	0x1
+ 438 01a1 0B       		.byte	0xb
+ 439 01a2 C3010000 		.4byte	0x1c3
+ 440 01a6 01       		.uleb128 0x1
+ 441 01a7 52       		.byte	0x52
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 10
+
+
+ 442 01a8 12       		.uleb128 0x12
+ 443 01a9 63726300 		.ascii	"crc\000"
+ 444 01ad 01       		.byte	0x1
+ 445 01ae 0D       		.byte	0xd
+ 446 01af 81000000 		.4byte	0x81
+ 447 01b3 01       		.uleb128 0x1
+ 448 01b4 50       		.byte	0x50
+ 449 01b5 13       		.uleb128 0x13
+ 450 01b6 6900     		.ascii	"i\000"
+ 451 01b8 01       		.byte	0x1
+ 452 01b9 0E       		.byte	0xe
+ 453 01ba 81000000 		.4byte	0x81
+ 454 01be 21000000 		.4byte	.LLST1
+ 455 01c2 00       		.byte	0
+ 456 01c3 06       		.uleb128 0x6
+ 457 01c4 04       		.byte	0x4
+ 458 01c5 C9010000 		.4byte	0x1c9
+ 459 01c9 08       		.uleb128 0x8
+ 460 01ca 81000000 		.4byte	0x81
+ 461 01ce 14       		.uleb128 0x14
+ 462 01cf 77000000 		.4byte	.LASF44
+ 463 01d3 01       		.byte	0x1
+ 464 01d4 2C       		.byte	0x2c
+ 465 01d5 00000000 		.4byte	.LFB66
+ 466 01d9 02000000 		.4byte	.LFE66-.LFB66
+ 467 01dd 01       		.uleb128 0x1
+ 468 01de 9C       		.byte	0x9c
+ 469 01df 15       		.uleb128 0x15
+ 470 01e0 0D010000 		.4byte	.LASF45
+ 471 01e4 01       		.byte	0x1
+ 472 01e5 31       		.byte	0x31
+ 473 01e6 81000000 		.4byte	0x81
+ 474 01ea 00000000 		.4byte	.LFB67
+ 475 01ee 04000000 		.4byte	.LFE67-.LFB67
+ 476 01f2 01       		.uleb128 0x1
+ 477 01f3 9C       		.byte	0x9c
+ 478 01f4 16       		.uleb128 0x16
+ 479 01f5 DA000000 		.4byte	.LASF33
+ 480 01f9 01       		.byte	0x1
+ 481 01fa 36       		.byte	0x36
+ 482 01fb 00000000 		.4byte	.LFB68
+ 483 01ff 02000000 		.4byte	.LFE68-.LFB68
+ 484 0203 01       		.uleb128 0x1
+ 485 0204 9C       		.byte	0x9c
+ 486 0205 4C020000 		.4byte	0x24c
+ 487 0209 11       		.uleb128 0x11
+ 488 020a F0000000 		.4byte	.LASF28
+ 489 020e 01       		.byte	0x1
+ 490 020f 36       		.byte	0x36
+ 491 0210 8D000000 		.4byte	0x8d
+ 492 0214 01       		.uleb128 0x1
+ 493 0215 50       		.byte	0x50
+ 494 0216 11       		.uleb128 0x11
+ 495 0217 27000000 		.4byte	.LASF29
+ 496 021b 01       		.byte	0x1
+ 497 021c 36       		.byte	0x36
+ 498 021d 99000000 		.4byte	0x99
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 11
+
+
+ 499 0221 01       		.uleb128 0x1
+ 500 0222 51       		.byte	0x51
+ 501 0223 11       		.uleb128 0x11
+ 502 0224 3D020000 		.4byte	.LASF30
+ 503 0228 01       		.byte	0x1
+ 504 0229 37       		.byte	0x37
+ 505 022a 99000000 		.4byte	0x99
+ 506 022e 01       		.uleb128 0x1
+ 507 022f 52       		.byte	0x52
+ 508 0230 11       		.uleb128 0x11
+ 509 0231 07010000 		.4byte	.LASF31
+ 510 0235 01       		.byte	0x1
+ 511 0236 37       		.byte	0x37
+ 512 0237 81000000 		.4byte	0x81
+ 513 023b 01       		.uleb128 0x1
+ 514 023c 53       		.byte	0x53
+ 515 023d 11       		.uleb128 0x11
+ 516 023e 47000000 		.4byte	.LASF32
+ 517 0242 01       		.byte	0x1
+ 518 0243 37       		.byte	0x37
+ 519 0244 81000000 		.4byte	0x81
+ 520 0248 02       		.uleb128 0x2
+ 521 0249 91       		.byte	0x91
+ 522 024a 00       		.sleb128 0
+ 523 024b 00       		.byte	0
+ 524 024c 16       		.uleb128 0x16
+ 525 024d 5F000000 		.4byte	.LASF34
+ 526 0251 01       		.byte	0x1
+ 527 0252 27       		.byte	0x27
+ 528 0253 00000000 		.4byte	.LFB65
+ 529 0257 08000000 		.4byte	.LFE65-.LFB65
+ 530 025b 01       		.uleb128 0x1
+ 531 025c 9C       		.byte	0x9c
+ 532 025d 6B020000 		.4byte	0x26b
+ 533 0261 17       		.uleb128 0x17
+ 534 0262 06000000 		.4byte	.LVL8
+ 535 0266 53030000 		.4byte	0x353
+ 536 026a 00       		.byte	0
+ 537 026b 18       		.uleb128 0x18
+ 538 026c 91020000 		.4byte	.LASF46
+ 539 0270 01       		.byte	0x1
+ 540 0271 13       		.byte	0x13
+ 541 0272 00000000 		.4byte	.LFB64
+ 542 0276 44000000 		.4byte	.LFE64-.LFB64
+ 543 027a 01       		.uleb128 0x1
+ 544 027b 9C       		.byte	0x9c
+ 545 027c 21030000 		.4byte	0x321
+ 546 0280 0F       		.uleb128 0xf
+ 547 0281 EA000000 		.4byte	.LASF26
+ 548 0285 01       		.byte	0x1
+ 549 0286 13       		.byte	0x13
+ 550 0287 81000000 		.4byte	0x81
+ 551 028b 4B000000 		.4byte	.LLST2
+ 552 028f 0F       		.uleb128 0xf
+ 553 0290 5D010000 		.4byte	.LASF27
+ 554 0294 01       		.byte	0x1
+ 555 0295 13       		.byte	0x13
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 12
+
+
+ 556 0296 C3010000 		.4byte	0x1c3
+ 557 029a 78000000 		.4byte	.LLST3
+ 558 029e 19       		.uleb128 0x19
+ 559 029f 6C656E00 		.ascii	"len\000"
+ 560 02a3 01       		.byte	0x1
+ 561 02a4 13       		.byte	0x13
+ 562 02a5 81000000 		.4byte	0x81
+ 563 02a9 96000000 		.4byte	.LLST4
+ 564 02ad 12       		.uleb128 0x12
+ 565 02ae 68647200 		.ascii	"hdr\000"
+ 566 02b2 01       		.byte	0x1
+ 567 02b3 15       		.byte	0x15
+ 568 02b4 21030000 		.4byte	0x321
+ 569 02b8 02       		.uleb128 0x2
+ 570 02b9 91       		.byte	0x91
+ 571 02ba 6C       		.sleb128 -20
+ 572 02bb 13       		.uleb128 0x13
+ 573 02bc 63726300 		.ascii	"crc\000"
+ 574 02c0 01       		.byte	0x1
+ 575 02c1 16       		.byte	0x16
+ 576 02c2 81000000 		.4byte	0x81
+ 577 02c6 B7000000 		.4byte	.LLST5
+ 578 02ca 1A       		.uleb128 0x1a
+ 579 02cb 20000000 		.4byte	.LVL12
+ 580 02cf 5E030000 		.4byte	0x35e
+ 581 02d3 E3020000 		.4byte	0x2e3
+ 582 02d7 1B       		.uleb128 0x1b
+ 583 02d8 01       		.uleb128 0x1
+ 584 02d9 50       		.byte	0x50
+ 585 02da 02       		.uleb128 0x2
+ 586 02db 91       		.byte	0x91
+ 587 02dc 6C       		.sleb128 -20
+ 588 02dd 1B       		.uleb128 0x1b
+ 589 02de 01       		.uleb128 0x1
+ 590 02df 51       		.byte	0x51
+ 591 02e0 01       		.uleb128 0x1
+ 592 02e1 33       		.byte	0x33
+ 593 02e2 00       		.byte	0
+ 594 02e3 1A       		.uleb128 0x1a
+ 595 02e4 2C000000 		.4byte	.LVL13
+ 596 02e8 5E030000 		.4byte	0x35e
+ 597 02ec FD020000 		.4byte	0x2fd
+ 598 02f0 1B       		.uleb128 0x1b
+ 599 02f1 01       		.uleb128 0x1
+ 600 02f2 50       		.byte	0x50
+ 601 02f3 02       		.uleb128 0x2
+ 602 02f4 74       		.byte	0x74
+ 603 02f5 00       		.sleb128 0
+ 604 02f6 1B       		.uleb128 0x1b
+ 605 02f7 01       		.uleb128 0x1
+ 606 02f8 51       		.byte	0x51
+ 607 02f9 02       		.uleb128 0x2
+ 608 02fa 75       		.byte	0x75
+ 609 02fb 00       		.sleb128 0
+ 610 02fc 00       		.byte	0
+ 611 02fd 1A       		.uleb128 0x1a
+ 612 02fe 3C000000 		.4byte	.LVL14
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 13
+
+
+ 613 0302 66010000 		.4byte	0x166
+ 614 0306 17030000 		.4byte	0x317
+ 615 030a 1B       		.uleb128 0x1b
+ 616 030b 01       		.uleb128 0x1
+ 617 030c 50       		.byte	0x50
+ 618 030d 02       		.uleb128 0x2
+ 619 030e 76       		.byte	0x76
+ 620 030f 00       		.sleb128 0
+ 621 0310 1B       		.uleb128 0x1b
+ 622 0311 01       		.uleb128 0x1
+ 623 0312 51       		.byte	0x51
+ 624 0313 02       		.uleb128 0x2
+ 625 0314 75       		.byte	0x75
+ 626 0315 00       		.sleb128 0
+ 627 0316 00       		.byte	0
+ 628 0317 17       		.uleb128 0x17
+ 629 0318 40000000 		.4byte	.LVL15
+ 630 031c 69030000 		.4byte	0x369
+ 631 0320 00       		.byte	0
+ 632 0321 1C       		.uleb128 0x1c
+ 633 0322 81000000 		.4byte	0x81
+ 634 0326 31030000 		.4byte	0x331
+ 635 032a 1D       		.uleb128 0x1d
+ 636 032b C8000000 		.4byte	0xc8
+ 637 032f 02       		.byte	0x2
+ 638 0330 00       		.byte	0
+ 639 0331 1E       		.uleb128 0x1e
+ 640 0332 87000000 		.4byte	.LASF35
+ 641 0336 06       		.byte	0x6
+ 642 0337 1207     		.2byte	0x712
+ 643 0339 3D030000 		.4byte	0x33d
+ 644 033d 1F       		.uleb128 0x1f
+ 645 033e 76000000 		.4byte	0x76
+ 646 0342 20       		.uleb128 0x20
+ 647 0343 AE020000 		.4byte	.LASF36
+ 648 0347 01       		.byte	0x1
+ 649 0348 3E       		.byte	0x3e
+ 650 0349 5B010000 		.4byte	0x15b
+ 651 034d 05       		.uleb128 0x5
+ 652 034e 03       		.byte	0x3
+ 653 034f 00000000 		.4byte	uart_transport
+ 654 0353 21       		.uleb128 0x21
+ 655 0354 33000000 		.4byte	.LASF37
+ 656 0358 33000000 		.4byte	.LASF37
+ 657 035c 07       		.byte	0x7
+ 658 035d 54       		.byte	0x54
+ 659 035e 21       		.uleb128 0x21
+ 660 035f 4C010000 		.4byte	.LASF38
+ 661 0363 4C010000 		.4byte	.LASF38
+ 662 0367 07       		.byte	0x7
+ 663 0368 8C       		.byte	0x8c
+ 664 0369 21       		.uleb128 0x21
+ 665 036a 23020000 		.4byte	.LASF39
+ 666 036e 23020000 		.4byte	.LASF39
+ 667 0372 07       		.byte	0x7
+ 668 0373 8A       		.byte	0x8a
+ 669 0374 00       		.byte	0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 14
+
+
+ 670              		.section	.debug_abbrev,"",%progbits
+ 671              	.Ldebug_abbrev0:
+ 672 0000 01       		.uleb128 0x1
+ 673 0001 11       		.uleb128 0x11
+ 674 0002 01       		.byte	0x1
+ 675 0003 25       		.uleb128 0x25
+ 676 0004 0E       		.uleb128 0xe
+ 677 0005 13       		.uleb128 0x13
+ 678 0006 0B       		.uleb128 0xb
+ 679 0007 03       		.uleb128 0x3
+ 680 0008 0E       		.uleb128 0xe
+ 681 0009 1B       		.uleb128 0x1b
+ 682 000a 0E       		.uleb128 0xe
+ 683 000b 55       		.uleb128 0x55
+ 684 000c 17       		.uleb128 0x17
+ 685 000d 11       		.uleb128 0x11
+ 686 000e 01       		.uleb128 0x1
+ 687 000f 10       		.uleb128 0x10
+ 688 0010 17       		.uleb128 0x17
+ 689 0011 00       		.byte	0
+ 690 0012 00       		.byte	0
+ 691 0013 02       		.uleb128 0x2
+ 692 0014 24       		.uleb128 0x24
+ 693 0015 00       		.byte	0
+ 694 0016 0B       		.uleb128 0xb
+ 695 0017 0B       		.uleb128 0xb
+ 696 0018 3E       		.uleb128 0x3e
+ 697 0019 0B       		.uleb128 0xb
+ 698 001a 03       		.uleb128 0x3
+ 699 001b 0E       		.uleb128 0xe
+ 700 001c 00       		.byte	0
+ 701 001d 00       		.byte	0
+ 702 001e 03       		.uleb128 0x3
+ 703 001f 16       		.uleb128 0x16
+ 704 0020 00       		.byte	0
+ 705 0021 03       		.uleb128 0x3
+ 706 0022 0E       		.uleb128 0xe
+ 707 0023 3A       		.uleb128 0x3a
+ 708 0024 0B       		.uleb128 0xb
+ 709 0025 3B       		.uleb128 0x3b
+ 710 0026 0B       		.uleb128 0xb
+ 711 0027 49       		.uleb128 0x49
+ 712 0028 13       		.uleb128 0x13
+ 713 0029 00       		.byte	0
+ 714 002a 00       		.byte	0
+ 715 002b 04       		.uleb128 0x4
+ 716 002c 24       		.uleb128 0x24
+ 717 002d 00       		.byte	0
+ 718 002e 0B       		.uleb128 0xb
+ 719 002f 0B       		.uleb128 0xb
+ 720 0030 3E       		.uleb128 0x3e
+ 721 0031 0B       		.uleb128 0xb
+ 722 0032 03       		.uleb128 0x3
+ 723 0033 08       		.uleb128 0x8
+ 724 0034 00       		.byte	0
+ 725 0035 00       		.byte	0
+ 726 0036 05       		.uleb128 0x5
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 15
+
+
+ 727 0037 16       		.uleb128 0x16
+ 728 0038 00       		.byte	0
+ 729 0039 03       		.uleb128 0x3
+ 730 003a 0E       		.uleb128 0xe
+ 731 003b 3A       		.uleb128 0x3a
+ 732 003c 0B       		.uleb128 0xb
+ 733 003d 3B       		.uleb128 0x3b
+ 734 003e 05       		.uleb128 0x5
+ 735 003f 49       		.uleb128 0x49
+ 736 0040 13       		.uleb128 0x13
+ 737 0041 00       		.byte	0
+ 738 0042 00       		.byte	0
+ 739 0043 06       		.uleb128 0x6
+ 740 0044 0F       		.uleb128 0xf
+ 741 0045 00       		.byte	0
+ 742 0046 0B       		.uleb128 0xb
+ 743 0047 0B       		.uleb128 0xb
+ 744 0048 49       		.uleb128 0x49
+ 745 0049 13       		.uleb128 0x13
+ 746 004a 00       		.byte	0
+ 747 004b 00       		.byte	0
+ 748 004c 07       		.uleb128 0x7
+ 749 004d 15       		.uleb128 0x15
+ 750 004e 00       		.byte	0
+ 751 004f 27       		.uleb128 0x27
+ 752 0050 19       		.uleb128 0x19
+ 753 0051 00       		.byte	0
+ 754 0052 00       		.byte	0
+ 755 0053 08       		.uleb128 0x8
+ 756 0054 26       		.uleb128 0x26
+ 757 0055 00       		.byte	0
+ 758 0056 49       		.uleb128 0x49
+ 759 0057 13       		.uleb128 0x13
+ 760 0058 00       		.byte	0
+ 761 0059 00       		.byte	0
+ 762 005a 09       		.uleb128 0x9
+ 763 005b 13       		.uleb128 0x13
+ 764 005c 01       		.byte	0x1
+ 765 005d 0B       		.uleb128 0xb
+ 766 005e 0B       		.uleb128 0xb
+ 767 005f 3A       		.uleb128 0x3a
+ 768 0060 0B       		.uleb128 0xb
+ 769 0061 3B       		.uleb128 0x3b
+ 770 0062 0B       		.uleb128 0xb
+ 771 0063 01       		.uleb128 0x1
+ 772 0064 13       		.uleb128 0x13
+ 773 0065 00       		.byte	0
+ 774 0066 00       		.byte	0
+ 775 0067 0A       		.uleb128 0xa
+ 776 0068 0D       		.uleb128 0xd
+ 777 0069 00       		.byte	0
+ 778 006a 03       		.uleb128 0x3
+ 779 006b 0E       		.uleb128 0xe
+ 780 006c 3A       		.uleb128 0x3a
+ 781 006d 0B       		.uleb128 0xb
+ 782 006e 3B       		.uleb128 0x3b
+ 783 006f 0B       		.uleb128 0xb
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 16
+
+
+ 784 0070 49       		.uleb128 0x49
+ 785 0071 13       		.uleb128 0x13
+ 786 0072 38       		.uleb128 0x38
+ 787 0073 0B       		.uleb128 0xb
+ 788 0074 00       		.byte	0
+ 789 0075 00       		.byte	0
+ 790 0076 0B       		.uleb128 0xb
+ 791 0077 15       		.uleb128 0x15
+ 792 0078 00       		.byte	0
+ 793 0079 27       		.uleb128 0x27
+ 794 007a 19       		.uleb128 0x19
+ 795 007b 49       		.uleb128 0x49
+ 796 007c 13       		.uleb128 0x13
+ 797 007d 00       		.byte	0
+ 798 007e 00       		.byte	0
+ 799 007f 0C       		.uleb128 0xc
+ 800 0080 15       		.uleb128 0x15
+ 801 0081 01       		.byte	0x1
+ 802 0082 27       		.uleb128 0x27
+ 803 0083 19       		.uleb128 0x19
+ 804 0084 01       		.uleb128 0x1
+ 805 0085 13       		.uleb128 0x13
+ 806 0086 00       		.byte	0
+ 807 0087 00       		.byte	0
+ 808 0088 0D       		.uleb128 0xd
+ 809 0089 05       		.uleb128 0x5
+ 810 008a 00       		.byte	0
+ 811 008b 49       		.uleb128 0x49
+ 812 008c 13       		.uleb128 0x13
+ 813 008d 00       		.byte	0
+ 814 008e 00       		.byte	0
+ 815 008f 0E       		.uleb128 0xe
+ 816 0090 2E       		.uleb128 0x2e
+ 817 0091 01       		.byte	0x1
+ 818 0092 03       		.uleb128 0x3
+ 819 0093 0E       		.uleb128 0xe
+ 820 0094 3A       		.uleb128 0x3a
+ 821 0095 0B       		.uleb128 0xb
+ 822 0096 3B       		.uleb128 0x3b
+ 823 0097 0B       		.uleb128 0xb
+ 824 0098 27       		.uleb128 0x27
+ 825 0099 19       		.uleb128 0x19
+ 826 009a 49       		.uleb128 0x49
+ 827 009b 13       		.uleb128 0x13
+ 828 009c 11       		.uleb128 0x11
+ 829 009d 01       		.uleb128 0x1
+ 830 009e 12       		.uleb128 0x12
+ 831 009f 06       		.uleb128 0x6
+ 832 00a0 40       		.uleb128 0x40
+ 833 00a1 18       		.uleb128 0x18
+ 834 00a2 9742     		.uleb128 0x2117
+ 835 00a4 19       		.uleb128 0x19
+ 836 00a5 01       		.uleb128 0x1
+ 837 00a6 13       		.uleb128 0x13
+ 838 00a7 00       		.byte	0
+ 839 00a8 00       		.byte	0
+ 840 00a9 0F       		.uleb128 0xf
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 17
+
+
+ 841 00aa 05       		.uleb128 0x5
+ 842 00ab 00       		.byte	0
+ 843 00ac 03       		.uleb128 0x3
+ 844 00ad 0E       		.uleb128 0xe
+ 845 00ae 3A       		.uleb128 0x3a
+ 846 00af 0B       		.uleb128 0xb
+ 847 00b0 3B       		.uleb128 0x3b
+ 848 00b1 0B       		.uleb128 0xb
+ 849 00b2 49       		.uleb128 0x49
+ 850 00b3 13       		.uleb128 0x13
+ 851 00b4 02       		.uleb128 0x2
+ 852 00b5 17       		.uleb128 0x17
+ 853 00b6 00       		.byte	0
+ 854 00b7 00       		.byte	0
+ 855 00b8 10       		.uleb128 0x10
+ 856 00b9 05       		.uleb128 0x5
+ 857 00ba 00       		.byte	0
+ 858 00bb 03       		.uleb128 0x3
+ 859 00bc 08       		.uleb128 0x8
+ 860 00bd 3A       		.uleb128 0x3a
+ 861 00be 0B       		.uleb128 0xb
+ 862 00bf 3B       		.uleb128 0x3b
+ 863 00c0 0B       		.uleb128 0xb
+ 864 00c1 49       		.uleb128 0x49
+ 865 00c2 13       		.uleb128 0x13
+ 866 00c3 02       		.uleb128 0x2
+ 867 00c4 18       		.uleb128 0x18
+ 868 00c5 00       		.byte	0
+ 869 00c6 00       		.byte	0
+ 870 00c7 11       		.uleb128 0x11
+ 871 00c8 05       		.uleb128 0x5
+ 872 00c9 00       		.byte	0
+ 873 00ca 03       		.uleb128 0x3
+ 874 00cb 0E       		.uleb128 0xe
+ 875 00cc 3A       		.uleb128 0x3a
+ 876 00cd 0B       		.uleb128 0xb
+ 877 00ce 3B       		.uleb128 0x3b
+ 878 00cf 0B       		.uleb128 0xb
+ 879 00d0 49       		.uleb128 0x49
+ 880 00d1 13       		.uleb128 0x13
+ 881 00d2 02       		.uleb128 0x2
+ 882 00d3 18       		.uleb128 0x18
+ 883 00d4 00       		.byte	0
+ 884 00d5 00       		.byte	0
+ 885 00d6 12       		.uleb128 0x12
+ 886 00d7 34       		.uleb128 0x34
+ 887 00d8 00       		.byte	0
+ 888 00d9 03       		.uleb128 0x3
+ 889 00da 08       		.uleb128 0x8
+ 890 00db 3A       		.uleb128 0x3a
+ 891 00dc 0B       		.uleb128 0xb
+ 892 00dd 3B       		.uleb128 0x3b
+ 893 00de 0B       		.uleb128 0xb
+ 894 00df 49       		.uleb128 0x49
+ 895 00e0 13       		.uleb128 0x13
+ 896 00e1 02       		.uleb128 0x2
+ 897 00e2 18       		.uleb128 0x18
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 18
+
+
+ 898 00e3 00       		.byte	0
+ 899 00e4 00       		.byte	0
+ 900 00e5 13       		.uleb128 0x13
+ 901 00e6 34       		.uleb128 0x34
+ 902 00e7 00       		.byte	0
+ 903 00e8 03       		.uleb128 0x3
+ 904 00e9 08       		.uleb128 0x8
+ 905 00ea 3A       		.uleb128 0x3a
+ 906 00eb 0B       		.uleb128 0xb
+ 907 00ec 3B       		.uleb128 0x3b
+ 908 00ed 0B       		.uleb128 0xb
+ 909 00ee 49       		.uleb128 0x49
+ 910 00ef 13       		.uleb128 0x13
+ 911 00f0 02       		.uleb128 0x2
+ 912 00f1 17       		.uleb128 0x17
+ 913 00f2 00       		.byte	0
+ 914 00f3 00       		.byte	0
+ 915 00f4 14       		.uleb128 0x14
+ 916 00f5 2E       		.uleb128 0x2e
+ 917 00f6 00       		.byte	0
+ 918 00f7 03       		.uleb128 0x3
+ 919 00f8 0E       		.uleb128 0xe
+ 920 00f9 3A       		.uleb128 0x3a
+ 921 00fa 0B       		.uleb128 0xb
+ 922 00fb 3B       		.uleb128 0x3b
+ 923 00fc 0B       		.uleb128 0xb
+ 924 00fd 27       		.uleb128 0x27
+ 925 00fe 19       		.uleb128 0x19
+ 926 00ff 11       		.uleb128 0x11
+ 927 0100 01       		.uleb128 0x1
+ 928 0101 12       		.uleb128 0x12
+ 929 0102 06       		.uleb128 0x6
+ 930 0103 40       		.uleb128 0x40
+ 931 0104 18       		.uleb128 0x18
+ 932 0105 9742     		.uleb128 0x2117
+ 933 0107 19       		.uleb128 0x19
+ 934 0108 00       		.byte	0
+ 935 0109 00       		.byte	0
+ 936 010a 15       		.uleb128 0x15
+ 937 010b 2E       		.uleb128 0x2e
+ 938 010c 00       		.byte	0
+ 939 010d 03       		.uleb128 0x3
+ 940 010e 0E       		.uleb128 0xe
+ 941 010f 3A       		.uleb128 0x3a
+ 942 0110 0B       		.uleb128 0xb
+ 943 0111 3B       		.uleb128 0x3b
+ 944 0112 0B       		.uleb128 0xb
+ 945 0113 27       		.uleb128 0x27
+ 946 0114 19       		.uleb128 0x19
+ 947 0115 49       		.uleb128 0x49
+ 948 0116 13       		.uleb128 0x13
+ 949 0117 11       		.uleb128 0x11
+ 950 0118 01       		.uleb128 0x1
+ 951 0119 12       		.uleb128 0x12
+ 952 011a 06       		.uleb128 0x6
+ 953 011b 40       		.uleb128 0x40
+ 954 011c 18       		.uleb128 0x18
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 19
+
+
+ 955 011d 9742     		.uleb128 0x2117
+ 956 011f 19       		.uleb128 0x19
+ 957 0120 00       		.byte	0
+ 958 0121 00       		.byte	0
+ 959 0122 16       		.uleb128 0x16
+ 960 0123 2E       		.uleb128 0x2e
+ 961 0124 01       		.byte	0x1
+ 962 0125 03       		.uleb128 0x3
+ 963 0126 0E       		.uleb128 0xe
+ 964 0127 3A       		.uleb128 0x3a
+ 965 0128 0B       		.uleb128 0xb
+ 966 0129 3B       		.uleb128 0x3b
+ 967 012a 0B       		.uleb128 0xb
+ 968 012b 27       		.uleb128 0x27
+ 969 012c 19       		.uleb128 0x19
+ 970 012d 11       		.uleb128 0x11
+ 971 012e 01       		.uleb128 0x1
+ 972 012f 12       		.uleb128 0x12
+ 973 0130 06       		.uleb128 0x6
+ 974 0131 40       		.uleb128 0x40
+ 975 0132 18       		.uleb128 0x18
+ 976 0133 9742     		.uleb128 0x2117
+ 977 0135 19       		.uleb128 0x19
+ 978 0136 01       		.uleb128 0x1
+ 979 0137 13       		.uleb128 0x13
+ 980 0138 00       		.byte	0
+ 981 0139 00       		.byte	0
+ 982 013a 17       		.uleb128 0x17
+ 983 013b 898201   		.uleb128 0x4109
+ 984 013e 00       		.byte	0
+ 985 013f 11       		.uleb128 0x11
+ 986 0140 01       		.uleb128 0x1
+ 987 0141 31       		.uleb128 0x31
+ 988 0142 13       		.uleb128 0x13
+ 989 0143 00       		.byte	0
+ 990 0144 00       		.byte	0
+ 991 0145 18       		.uleb128 0x18
+ 992 0146 2E       		.uleb128 0x2e
+ 993 0147 01       		.byte	0x1
+ 994 0148 3F       		.uleb128 0x3f
+ 995 0149 19       		.uleb128 0x19
+ 996 014a 03       		.uleb128 0x3
+ 997 014b 0E       		.uleb128 0xe
+ 998 014c 3A       		.uleb128 0x3a
+ 999 014d 0B       		.uleb128 0xb
+ 1000 014e 3B       		.uleb128 0x3b
+ 1001 014f 0B       		.uleb128 0xb
+ 1002 0150 27       		.uleb128 0x27
+ 1003 0151 19       		.uleb128 0x19
+ 1004 0152 11       		.uleb128 0x11
+ 1005 0153 01       		.uleb128 0x1
+ 1006 0154 12       		.uleb128 0x12
+ 1007 0155 06       		.uleb128 0x6
+ 1008 0156 40       		.uleb128 0x40
+ 1009 0157 18       		.uleb128 0x18
+ 1010 0158 9742     		.uleb128 0x2117
+ 1011 015a 19       		.uleb128 0x19
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 20
+
+
+ 1012 015b 01       		.uleb128 0x1
+ 1013 015c 13       		.uleb128 0x13
+ 1014 015d 00       		.byte	0
+ 1015 015e 00       		.byte	0
+ 1016 015f 19       		.uleb128 0x19
+ 1017 0160 05       		.uleb128 0x5
+ 1018 0161 00       		.byte	0
+ 1019 0162 03       		.uleb128 0x3
+ 1020 0163 08       		.uleb128 0x8
+ 1021 0164 3A       		.uleb128 0x3a
+ 1022 0165 0B       		.uleb128 0xb
+ 1023 0166 3B       		.uleb128 0x3b
+ 1024 0167 0B       		.uleb128 0xb
+ 1025 0168 49       		.uleb128 0x49
+ 1026 0169 13       		.uleb128 0x13
+ 1027 016a 02       		.uleb128 0x2
+ 1028 016b 17       		.uleb128 0x17
+ 1029 016c 00       		.byte	0
+ 1030 016d 00       		.byte	0
+ 1031 016e 1A       		.uleb128 0x1a
+ 1032 016f 898201   		.uleb128 0x4109
+ 1033 0172 01       		.byte	0x1
+ 1034 0173 11       		.uleb128 0x11
+ 1035 0174 01       		.uleb128 0x1
+ 1036 0175 31       		.uleb128 0x31
+ 1037 0176 13       		.uleb128 0x13
+ 1038 0177 01       		.uleb128 0x1
+ 1039 0178 13       		.uleb128 0x13
+ 1040 0179 00       		.byte	0
+ 1041 017a 00       		.byte	0
+ 1042 017b 1B       		.uleb128 0x1b
+ 1043 017c 8A8201   		.uleb128 0x410a
+ 1044 017f 00       		.byte	0
+ 1045 0180 02       		.uleb128 0x2
+ 1046 0181 18       		.uleb128 0x18
+ 1047 0182 9142     		.uleb128 0x2111
+ 1048 0184 18       		.uleb128 0x18
+ 1049 0185 00       		.byte	0
+ 1050 0186 00       		.byte	0
+ 1051 0187 1C       		.uleb128 0x1c
+ 1052 0188 01       		.uleb128 0x1
+ 1053 0189 01       		.byte	0x1
+ 1054 018a 49       		.uleb128 0x49
+ 1055 018b 13       		.uleb128 0x13
+ 1056 018c 01       		.uleb128 0x1
+ 1057 018d 13       		.uleb128 0x13
+ 1058 018e 00       		.byte	0
+ 1059 018f 00       		.byte	0
+ 1060 0190 1D       		.uleb128 0x1d
+ 1061 0191 21       		.uleb128 0x21
+ 1062 0192 00       		.byte	0
+ 1063 0193 49       		.uleb128 0x49
+ 1064 0194 13       		.uleb128 0x13
+ 1065 0195 2F       		.uleb128 0x2f
+ 1066 0196 0B       		.uleb128 0xb
+ 1067 0197 00       		.byte	0
+ 1068 0198 00       		.byte	0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 21
+
+
+ 1069 0199 1E       		.uleb128 0x1e
+ 1070 019a 34       		.uleb128 0x34
+ 1071 019b 00       		.byte	0
+ 1072 019c 03       		.uleb128 0x3
+ 1073 019d 0E       		.uleb128 0xe
+ 1074 019e 3A       		.uleb128 0x3a
+ 1075 019f 0B       		.uleb128 0xb
+ 1076 01a0 3B       		.uleb128 0x3b
+ 1077 01a1 05       		.uleb128 0x5
+ 1078 01a2 49       		.uleb128 0x49
+ 1079 01a3 13       		.uleb128 0x13
+ 1080 01a4 3F       		.uleb128 0x3f
+ 1081 01a5 19       		.uleb128 0x19
+ 1082 01a6 3C       		.uleb128 0x3c
+ 1083 01a7 19       		.uleb128 0x19
+ 1084 01a8 00       		.byte	0
+ 1085 01a9 00       		.byte	0
+ 1086 01aa 1F       		.uleb128 0x1f
+ 1087 01ab 35       		.uleb128 0x35
+ 1088 01ac 00       		.byte	0
+ 1089 01ad 49       		.uleb128 0x49
+ 1090 01ae 13       		.uleb128 0x13
+ 1091 01af 00       		.byte	0
+ 1092 01b0 00       		.byte	0
+ 1093 01b1 20       		.uleb128 0x20
+ 1094 01b2 34       		.uleb128 0x34
+ 1095 01b3 00       		.byte	0
+ 1096 01b4 03       		.uleb128 0x3
+ 1097 01b5 0E       		.uleb128 0xe
+ 1098 01b6 3A       		.uleb128 0x3a
+ 1099 01b7 0B       		.uleb128 0xb
+ 1100 01b8 3B       		.uleb128 0x3b
+ 1101 01b9 0B       		.uleb128 0xb
+ 1102 01ba 49       		.uleb128 0x49
+ 1103 01bb 13       		.uleb128 0x13
+ 1104 01bc 3F       		.uleb128 0x3f
+ 1105 01bd 19       		.uleb128 0x19
+ 1106 01be 02       		.uleb128 0x2
+ 1107 01bf 18       		.uleb128 0x18
+ 1108 01c0 00       		.byte	0
+ 1109 01c1 00       		.byte	0
+ 1110 01c2 21       		.uleb128 0x21
+ 1111 01c3 2E       		.uleb128 0x2e
+ 1112 01c4 00       		.byte	0
+ 1113 01c5 3F       		.uleb128 0x3f
+ 1114 01c6 19       		.uleb128 0x19
+ 1115 01c7 3C       		.uleb128 0x3c
+ 1116 01c8 19       		.uleb128 0x19
+ 1117 01c9 6E       		.uleb128 0x6e
+ 1118 01ca 0E       		.uleb128 0xe
+ 1119 01cb 03       		.uleb128 0x3
+ 1120 01cc 0E       		.uleb128 0xe
+ 1121 01cd 3A       		.uleb128 0x3a
+ 1122 01ce 0B       		.uleb128 0xb
+ 1123 01cf 3B       		.uleb128 0x3b
+ 1124 01d0 0B       		.uleb128 0xb
+ 1125 01d1 00       		.byte	0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 22
+
+
+ 1126 01d2 00       		.byte	0
+ 1127 01d3 00       		.byte	0
+ 1128              		.section	.debug_loc,"",%progbits
+ 1129              	.Ldebug_loc0:
+ 1130              	.LLST0:
+ 1131 0000 00000000 		.4byte	.LVL0
+ 1132 0004 04000000 		.4byte	.LVL1
+ 1133 0008 0100     		.2byte	0x1
+ 1134 000a 50       		.byte	0x50
+ 1135 000b 04000000 		.4byte	.LVL1
+ 1136 000f 1C000000 		.4byte	.LFE63
+ 1137 0013 0400     		.2byte	0x4
+ 1138 0015 F3       		.byte	0xf3
+ 1139 0016 01       		.uleb128 0x1
+ 1140 0017 50       		.byte	0x50
+ 1141 0018 9F       		.byte	0x9f
+ 1142 0019 00000000 		.4byte	0
+ 1143 001d 00000000 		.4byte	0
+ 1144              	.LLST1:
+ 1145 0021 08000000 		.4byte	.LVL2
+ 1146 0025 0C000000 		.4byte	.LVL3
+ 1147 0029 0200     		.2byte	0x2
+ 1148 002b 30       		.byte	0x30
+ 1149 002c 9F       		.byte	0x9f
+ 1150 002d 0C000000 		.4byte	.LVL3
+ 1151 0031 12000000 		.4byte	.LVL5
+ 1152 0035 0100     		.2byte	0x1
+ 1153 0037 53       		.byte	0x53
+ 1154 0038 14000000 		.4byte	.LVL6
+ 1155 003c 1C000000 		.4byte	.LFE63
+ 1156 0040 0100     		.2byte	0x1
+ 1157 0042 53       		.byte	0x53
+ 1158 0043 00000000 		.4byte	0
+ 1159 0047 00000000 		.4byte	0
+ 1160              	.LLST2:
+ 1161 004b 00000000 		.4byte	.LVL9
+ 1162 004f 1C000000 		.4byte	.LVL11
+ 1163 0053 0100     		.2byte	0x1
+ 1164 0055 50       		.byte	0x50
+ 1165 0056 1C000000 		.4byte	.LVL11
+ 1166 005a 1F000000 		.4byte	.LVL12-1
+ 1167 005e 0200     		.2byte	0x2
+ 1168 0060 91       		.byte	0x91
+ 1169 0061 6D       		.sleb128 -19
+ 1170 0062 1F000000 		.4byte	.LVL12-1
+ 1171 0066 44000000 		.4byte	.LFE64
+ 1172 006a 0400     		.2byte	0x4
+ 1173 006c F3       		.byte	0xf3
+ 1174 006d 01       		.uleb128 0x1
+ 1175 006e 50       		.byte	0x50
+ 1176 006f 9F       		.byte	0x9f
+ 1177 0070 00000000 		.4byte	0
+ 1178 0074 00000000 		.4byte	0
+ 1179              	.LLST3:
+ 1180 0078 00000000 		.4byte	.LVL9
+ 1181 007c 1A000000 		.4byte	.LVL10
+ 1182 0080 0100     		.2byte	0x1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 23
+
+
+ 1183 0082 51       		.byte	0x51
+ 1184 0083 1A000000 		.4byte	.LVL10
+ 1185 0087 44000000 		.4byte	.LFE64
+ 1186 008b 0100     		.2byte	0x1
+ 1187 008d 54       		.byte	0x54
+ 1188 008e 00000000 		.4byte	0
+ 1189 0092 00000000 		.4byte	0
+ 1190              	.LLST4:
+ 1191 0096 00000000 		.4byte	.LVL9
+ 1192 009a 1F000000 		.4byte	.LVL12-1
+ 1193 009e 0100     		.2byte	0x1
+ 1194 00a0 52       		.byte	0x52
+ 1195 00a1 1F000000 		.4byte	.LVL12-1
+ 1196 00a5 44000000 		.4byte	.LFE64
+ 1197 00a9 0400     		.2byte	0x4
+ 1198 00ab F3       		.byte	0xf3
+ 1199 00ac 01       		.uleb128 0x1
+ 1200 00ad 52       		.byte	0x52
+ 1201 00ae 9F       		.byte	0x9f
+ 1202 00af 00000000 		.4byte	0
+ 1203 00b3 00000000 		.4byte	0
+ 1204              	.LLST5:
+ 1205 00b7 3C000000 		.4byte	.LVL14
+ 1206 00bb 3F000000 		.4byte	.LVL15-1
+ 1207 00bf 0100     		.2byte	0x1
+ 1208 00c1 50       		.byte	0x50
+ 1209 00c2 00000000 		.4byte	0
+ 1210 00c6 00000000 		.4byte	0
+ 1211              		.section	.debug_aranges,"",%progbits
+ 1212 0000 44000000 		.4byte	0x44
+ 1213 0004 0200     		.2byte	0x2
+ 1214 0006 00000000 		.4byte	.Ldebug_info0
+ 1215 000a 04       		.byte	0x4
+ 1216 000b 00       		.byte	0
+ 1217 000c 0000     		.2byte	0
+ 1218 000e 0000     		.2byte	0
+ 1219 0010 00000000 		.4byte	.LFB63
+ 1220 0014 1C000000 		.4byte	.LFE63-.LFB63
+ 1221 0018 00000000 		.4byte	.LFB66
+ 1222 001c 02000000 		.4byte	.LFE66-.LFB66
+ 1223 0020 00000000 		.4byte	.LFB67
+ 1224 0024 04000000 		.4byte	.LFE67-.LFB67
+ 1225 0028 00000000 		.4byte	.LFB68
+ 1226 002c 02000000 		.4byte	.LFE68-.LFB68
+ 1227 0030 00000000 		.4byte	.LFB65
+ 1228 0034 08000000 		.4byte	.LFE65-.LFB65
+ 1229 0038 00000000 		.4byte	.LFB64
+ 1230 003c 44000000 		.4byte	.LFE64-.LFB64
+ 1231 0040 00000000 		.4byte	0
+ 1232 0044 00000000 		.4byte	0
+ 1233              		.section	.debug_ranges,"",%progbits
+ 1234              	.Ldebug_ranges0:
+ 1235 0000 00000000 		.4byte	.LFB63
+ 1236 0004 1C000000 		.4byte	.LFE63
+ 1237 0008 00000000 		.4byte	.LFB66
+ 1238 000c 02000000 		.4byte	.LFE66
+ 1239 0010 00000000 		.4byte	.LFB67
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 24
+
+
+ 1240 0014 04000000 		.4byte	.LFE67
+ 1241 0018 00000000 		.4byte	.LFB68
+ 1242 001c 02000000 		.4byte	.LFE68
+ 1243 0020 00000000 		.4byte	.LFB65
+ 1244 0024 08000000 		.4byte	.LFE65
+ 1245 0028 00000000 		.4byte	.LFB64
+ 1246 002c 44000000 		.4byte	.LFE64
+ 1247 0030 00000000 		.4byte	0
+ 1248 0034 00000000 		.4byte	0
+ 1249              		.section	.debug_line,"",%progbits
+ 1250              	.Ldebug_line0:
+ 1251 0000 0D020000 		.section	.debug_str,"MS",%progbits,1
+ 1251      02007C01 
+ 1251      00000201 
+ 1251      FB0E0D00 
+ 1251      01010101 
+ 1252              	.LASF20:
+ 1253 0000 7461736B 		.ascii	"task\000"
+ 1253      00
+ 1254              	.LASF9:
+ 1255 0005 5F5F696E 		.ascii	"__int32_t\000"
+ 1255      7433325F 
+ 1255      7400
+ 1256              	.LASF3:
+ 1257 000f 73686F72 		.ascii	"short unsigned int\000"
+ 1257      7420756E 
+ 1257      7369676E 
+ 1257      65642069 
+ 1257      6E7400
+ 1258              	.LASF19:
+ 1259 0022 696E6974 		.ascii	"init\000"
+ 1259      00
+ 1260              	.LASF29:
+ 1261 0027 706F7374 		.ascii	"post_analog\000"
+ 1261      5F616E61 
+ 1261      6C6F6700 
+ 1262              	.LASF37:
+ 1263 0033 55415254 		.ascii	"UART_PC_Start\000"
+ 1263      5F50435F 
+ 1263      53746172 
+ 1263      7400
+ 1264              	.LASF14:
+ 1265 0041 666C6F61 		.ascii	"float\000"
+ 1265      7400
+ 1266              	.LASF32:
+ 1267 0047 6761696E 		.ascii	"gain_byte\000"
+ 1267      5F627974 
+ 1267      6500
+ 1268              	.LASF1:
+ 1269 0051 756E7369 		.ascii	"unsigned char\000"
+ 1269      676E6564 
+ 1269      20636861 
+ 1269      7200
+ 1270              	.LASF34:
+ 1271 005f 55415254 		.ascii	"UART_Init\000"
+ 1271      5F496E69 
+ 1271      7400
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 25
+
+
+ 1272              	.LASF23:
+ 1273 0069 656E6162 		.ascii	"enabled\000"
+ 1273      6C656400 
+ 1274              	.LASF12:
+ 1275 0071 696E7431 		.ascii	"int16\000"
+ 1275      3600
+ 1276              	.LASF44:
+ 1277 0077 55415254 		.ascii	"UART_Task\000"
+ 1277      5F546173 
+ 1277      6B00
+ 1278              	.LASF13:
+ 1279 0081 696E7433 		.ascii	"int32\000"
+ 1279      3200
+ 1280              	.LASF35:
+ 1281 0087 49544D5F 		.ascii	"ITM_RxBuffer\000"
+ 1281      52784275 
+ 1281      66666572 
+ 1281      00
+ 1282              	.LASF21:
+ 1283 0094 69735F72 		.ascii	"is_ready\000"
+ 1283      65616479 
+ 1283      00
+ 1284              	.LASF5:
+ 1285 009d 6C6F6E67 		.ascii	"long unsigned int\000"
+ 1285      20756E73 
+ 1285      69676E65 
+ 1285      6420696E 
+ 1285      7400
+ 1286              	.LASF42:
+ 1287 00af 433A5C47 		.ascii	"C:\\Github\\Tesis\\src\\psoc\\Comparation.cydsn\000"
+ 1287      69746875 
+ 1287      625C5465 
+ 1287      7369735C 
+ 1287      7372635C 
+ 1288              	.LASF33:
+ 1289 00da 55415254 		.ascii	"UART_SendSample\000"
+ 1289      5F53656E 
+ 1289      6453616D 
+ 1289      706C6500 
+ 1290              	.LASF26:
+ 1291 00ea 6576656E 		.ascii	"event\000"
+ 1291      7400
+ 1292              	.LASF28:
+ 1293 00f0 7261775F 		.ascii	"raw_input\000"
+ 1293      696E7075 
+ 1293      7400
+ 1294              	.LASF8:
+ 1295 00fa 756E7369 		.ascii	"unsigned int\000"
+ 1295      676E6564 
+ 1295      20696E74 
+ 1295      00
+ 1296              	.LASF31:
+ 1297 0107 666C6167 		.ascii	"flags\000"
+ 1297      7300
+ 1298              	.LASF45:
+ 1299 010d 55415254 		.ascii	"UART_IsReady\000"
+ 1299      5F497352 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 26
+
+
+ 1299      65616479 
+ 1299      00
+ 1300              	.LASF7:
+ 1301 011a 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 1301      206C6F6E 
+ 1301      6720756E 
+ 1301      7369676E 
+ 1301      65642069 
+ 1302              	.LASF41:
+ 1303 0131 2E2E5C73 		.ascii	"..\\shared\\transport_uart.c\000"
+ 1303      68617265 
+ 1303      645C7472 
+ 1303      616E7370 
+ 1303      6F72745F 
+ 1304              	.LASF38:
+ 1305 014c 55415254 		.ascii	"UART_PC_PutArray\000"
+ 1305      5F50435F 
+ 1305      50757441 
+ 1305      72726179 
+ 1305      00
+ 1306              	.LASF27:
+ 1307 015d 7061796C 		.ascii	"payload\000"
+ 1307      6F616400 
+ 1308              	.LASF22:
+ 1309 0165 73656E64 		.ascii	"send_sample\000"
+ 1309      5F73616D 
+ 1309      706C6500 
+ 1310              	.LASF40:
+ 1311 0171 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 1311      43313120 
+ 1311      352E342E 
+ 1311      31203230 
+ 1311      31363036 
+ 1312 01a4 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"
+ 1312      20726576 
+ 1312      6973696F 
+ 1312      6E203233 
+ 1312      37373135 
+ 1313 01d7 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 1313      66756E63 
+ 1313      74696F6E 
+ 1313      2D736563 
+ 1313      74696F6E 
+ 1314              	.LASF10:
+ 1315 01ff 696E7433 		.ascii	"int32_t\000"
+ 1315      325F7400 
+ 1316              	.LASF18:
+ 1317 0207 73697A65 		.ascii	"sizetype\000"
+ 1317      74797065 
+ 1317      00
+ 1318              	.LASF6:
+ 1319 0210 6C6F6E67 		.ascii	"long long int\000"
+ 1319      206C6F6E 
+ 1319      6720696E 
+ 1319      7400
+ 1320              	.LASF16:
+ 1321 021e 63686172 		.ascii	"char\000"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 27
+
+
+ 1321      00
+ 1322              	.LASF39:
+ 1323 0223 55415254 		.ascii	"UART_PC_PutChar\000"
+ 1323      5F50435F 
+ 1323      50757443 
+ 1323      68617200 
+ 1324              	.LASF2:
+ 1325 0233 73686F72 		.ascii	"short int\000"
+ 1325      7420696E 
+ 1325      7400
+ 1326              	.LASF30:
+ 1327 023d 706F7374 		.ascii	"post_digital\000"
+ 1327      5F646967 
+ 1327      6974616C 
+ 1327      00
+ 1328              	.LASF25:
+ 1329 024a 5472616E 		.ascii	"Transport_t\000"
+ 1329      73706F72 
+ 1329      745F7400 
+ 1330              	.LASF11:
+ 1331 0256 75696E74 		.ascii	"uint8\000"
+ 1331      3800
+ 1332              	.LASF43:
+ 1333 025c 43616C63 		.ascii	"CalcDebugCrc\000"
+ 1333      44656275 
+ 1333      67437263 
+ 1333      00
+ 1334              	.LASF4:
+ 1335 0269 6C6F6E67 		.ascii	"long int\000"
+ 1335      20696E74 
+ 1335      00
+ 1336              	.LASF17:
+ 1337 0272 6C6F6E67 		.ascii	"long double\000"
+ 1337      20646F75 
+ 1337      626C6500 
+ 1338              	.LASF0:
+ 1339 027e 7369676E 		.ascii	"signed char\000"
+ 1339      65642063 
+ 1339      68617200 
+ 1340              	.LASF15:
+ 1341 028a 646F7562 		.ascii	"double\000"
+ 1341      6C6500
+ 1342              	.LASF46:
+ 1343 0291 5472616E 		.ascii	"TransportUART_SendDebug\000"
+ 1343      73706F72 
+ 1343      74554152 
+ 1343      545F5365 
+ 1343      6E644465 
+ 1344              	.LASF24:
+ 1345 02a9 6E616D65 		.ascii	"name\000"
+ 1345      00
+ 1346              	.LASF36:
+ 1347 02ae 75617274 		.ascii	"uart_transport\000"
+ 1347      5F747261 
+ 1347      6E73706F 
+ 1347      727400
+ 1348              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccC5pRMc.s 			page 28
+
+

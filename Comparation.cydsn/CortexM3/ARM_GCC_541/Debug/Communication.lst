@@ -1,0 +1,3699 @@
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"Communication.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.EncodeGainByte,"ax",%progbits
+  20              		.align	2
+  21              		.thumb
+  22              		.thumb_func
+  23              		.type	EncodeGainByte, %function
+  24              	EncodeGainByte:
+  25              	.LFB64:
+  26              		.file 1 "Communication.c"
+   1:Communication.c **** /* Communication.c
+   2:Communication.c ****  * Multi-transport communication manager — THESIS PERMANENT
+   3:Communication.c ****  *
+   4:Communication.c ****  * Responsibilities:
+   5:Communication.c ****  *   - USB CDC RX: frame parsing and command dispatch
+   6:Communication.c ****  *   - Transport registry: fan-out SendSample to all enabled transports
+   7:Communication.c ****  *   - State sync: send 0xCC state packet after every command so Python
+   8:Communication.c ****  *                 only updates its UI once PSoC confirms the change
+   9:Communication.c ****  */
+  10:Communication.c **** 
+  11:Communication.c **** #include "project.h"
+  12:Communication.c **** #include "Communication.h"
+  13:Communication.c **** #include "transport_usb.h"
+  14:Communication.c **** #include "transport_uart.h"
+  15:Communication.c **** #include "debug.h"
+  16:Communication.c **** #include "buffers.h"
+  17:Communication.c **** #include "tb_buffers.h"
+  18:Communication.c **** #include "AnalogToDigital.h"
+  19:Communication.c **** #include "TestBench.h"
+  20:Communication.c **** 
+  21:Communication.c **** /* ---- Transport registry -------------------------------------------------- */
+  22:Communication.c **** 
+  23:Communication.c **** static Transport_t *s_transports[COMM_MAX_TRANSPORTS];
+  24:Communication.c **** static uint8        s_transport_count = 0u;
+  25:Communication.c **** 
+  26:Communication.c **** void Communication_RegisterTransport(Transport_t *t)
+  27:Communication.c **** {
+  28:Communication.c ****     if (s_transport_count < COMM_MAX_TRANSPORTS)
+  29:Communication.c ****     {
+  30:Communication.c ****         s_transports[s_transport_count++] = t;
+  31:Communication.c ****     }
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 2
+
+
+  32:Communication.c **** }
+  33:Communication.c **** 
+  34:Communication.c **** /* ---- Streaming / debug state --------------------------------------------- */
+  35:Communication.c **** 
+  36:Communication.c **** static uint8 s_streaming = 0u;
+  37:Communication.c **** 
+  38:Communication.c **** /* ---- Gain byte encoding -------------------------------------------------- */
+  39:Communication.c **** 
+  40:Communication.c **** /* Encodes cfg (1-4) and buf_gain (1/2/4/8) into one byte:
+  41:Communication.c ****  *   low nibble  = cfg
+  42:Communication.c ****  *   high nibble = log2(buf_gain)  (0=1x, 1=2x, 2=4x, 3=8x) */
+  43:Communication.c **** static uint8 EncodeGainByte(uint8 cfg, uint8 buf_gain)
+  44:Communication.c **** {
+  27              		.loc 1 44 0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 0
+  30              		@ frame_needed = 0, uses_anonymous_args = 0
+  31              		@ link register save eliminated.
+  32              	.LVL0:
+  45:Communication.c ****     uint8 gc = 0u;
+  46:Communication.c ****     if      (buf_gain >= 8u) { gc = 3u; }
+  33              		.loc 1 46 0
+  34 0000 0729     		cmp	r1, #7
+  35 0002 05D8     		bhi	.L3
+  47:Communication.c ****     else if (buf_gain >= 4u) { gc = 2u; }
+  36              		.loc 1 47 0
+  37 0004 0329     		cmp	r1, #3
+  38 0006 05D8     		bhi	.L4
+  48:Communication.c ****     else if (buf_gain >= 2u) { gc = 1u; }
+  39              		.loc 1 48 0
+  40 0008 0129     		cmp	r1, #1
+  41 000a 05D8     		bhi	.L5
+  45:Communication.c ****     uint8 gc = 0u;
+  42              		.loc 1 45 0
+  43 000c 0023     		movs	r3, #0
+  44 000e 04E0     		b	.L2
+  45              	.L3:
+  46:Communication.c ****     else if (buf_gain >= 4u) { gc = 2u; }
+  46              		.loc 1 46 0
+  47 0010 0323     		movs	r3, #3
+  48 0012 02E0     		b	.L2
+  49              	.L4:
+  47:Communication.c ****     else if (buf_gain >= 4u) { gc = 2u; }
+  50              		.loc 1 47 0
+  51 0014 0223     		movs	r3, #2
+  52 0016 00E0     		b	.L2
+  53              	.L5:
+  54              		.loc 1 48 0
+  55 0018 0123     		movs	r3, #1
+  56              	.L2:
+  57              	.LVL1:
+  49:Communication.c ****     return (uint8)((gc << 4u) | (cfg & 0x0Fu));
+  58              		.loc 1 49 0
+  59 001a 00F00F00 		and	r0, r0, #15
+  60              	.LVL2:
+  50:Communication.c **** }
+  61              		.loc 1 50 0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 3
+
+
+  62 001e 40EA0310 		orr	r0, r0, r3, lsl #4
+  63 0022 7047     		bx	lr
+  64              		.cfi_endproc
+  65              	.LFE64:
+  66              		.size	EncodeGainByte, .-EncodeGainByte
+  67              		.section	.text.Communication_RegisterTransport,"ax",%progbits
+  68              		.align	2
+  69              		.global	Communication_RegisterTransport
+  70              		.thumb
+  71              		.thumb_func
+  72              		.type	Communication_RegisterTransport, %function
+  73              	Communication_RegisterTransport:
+  74              	.LFB63:
+  27:Communication.c ****     if (s_transport_count < COMM_MAX_TRANSPORTS)
+  75              		.loc 1 27 0
+  76              		.cfi_startproc
+  77              		@ args = 0, pretend = 0, frame = 0
+  78              		@ frame_needed = 0, uses_anonymous_args = 0
+  79              		@ link register save eliminated.
+  80              	.LVL3:
+  28:Communication.c ****     {
+  81              		.loc 1 28 0
+  82 0000 054B     		ldr	r3, .L8
+  83 0002 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+  84 0004 032B     		cmp	r3, #3
+  85 0006 05D8     		bhi	.L6
+  30:Communication.c ****     }
+  86              		.loc 1 30 0
+  87 0008 034A     		ldr	r2, .L8
+  88 000a 591C     		adds	r1, r3, #1
+  89 000c 1170     		strb	r1, [r2]
+  90 000e 02EB8303 		add	r3, r2, r3, lsl #2
+  91 0012 5860     		str	r0, [r3, #4]
+  92              	.L6:
+  93 0014 7047     		bx	lr
+  94              	.L9:
+  95 0016 00BF     		.align	2
+  96              	.L8:
+  97 0018 00000000 		.word	.LANCHOR0
+  98              		.cfi_endproc
+  99              	.LFE63:
+ 100              		.size	Communication_RegisterTransport, .-Communication_RegisterTransport
+ 101              		.section	.text.Communication_Init,"ax",%progbits
+ 102              		.align	2
+ 103              		.global	Communication_Init
+ 104              		.thumb
+ 105              		.thumb_func
+ 106              		.type	Communication_Init, %function
+ 107              	Communication_Init:
+ 108              	.LFB67:
+  51:Communication.c **** 
+  52:Communication.c **** /* ---- RX command parser state machine ------------------------------------- */
+  53:Communication.c **** 
+  54:Communication.c **** typedef enum {
+  55:Communication.c ****     RX_WAIT_MARKER = 0,
+  56:Communication.c ****     RX_WAIT_CMD,
+  57:Communication.c ****     RX_WAIT_LEN,
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 4
+
+
+  58:Communication.c ****     RX_WAIT_LEN2,     /* second length byte for VDAC_LOAD only */
+  59:Communication.c ****     RX_WAIT_PAYLOAD
+  60:Communication.c **** } RxState_t;
+  61:Communication.c **** 
+  62:Communication.c **** static RxState_t s_rx_state    = RX_WAIT_MARKER;
+  63:Communication.c **** static uint8     s_rx_cmd      = 0u;
+  64:Communication.c **** static uint8     s_rx_len_hi   = 0u;   /* VDAC_LOAD: high byte of 16-bit length */
+  65:Communication.c **** static uint8     s_rx_buf[TB_VDAC_MAX_LEN];
+  66:Communication.c **** static uint16    s_rx_count    = 0u;
+  67:Communication.c **** static uint16    s_rx_expected = 0u;
+  68:Communication.c **** 
+  69:Communication.c **** static void ProcessCommand(uint8 cmd, const uint8 *payload, uint16 len)
+  70:Communication.c **** {
+  71:Communication.c ****     uint8 dbg_pld[2];
+  72:Communication.c **** 
+  73:Communication.c ****     dbg_pld[0] = cmd;
+  74:Communication.c ****     Debug_Send(DBG_EVT_CMD_RX, dbg_pld, 1u);
+  75:Communication.c **** 
+  76:Communication.c ****     switch (cmd)
+  77:Communication.c ****     {
+  78:Communication.c ****         case COMM_CMD_START:
+  79:Communication.c ****             s_streaming = 1u;
+  80:Communication.c ****             Debug_Send(DBG_EVT_STREAM_ON, (void *)0u, 0u);
+  81:Communication.c ****             break;
+  82:Communication.c **** 
+  83:Communication.c ****         case COMM_CMD_STOP:
+  84:Communication.c ****             s_streaming = 0u;
+  85:Communication.c ****             Debug_Send(DBG_EVT_STREAM_OFF, (void *)0u, 0u);
+  86:Communication.c ****             break;
+  87:Communication.c **** 
+  88:Communication.c ****         case COMM_CMD_SET_MUX_IN:
+  89:Communication.c ****             if (len >= 1u) { TestBench_SetInput(payload[0]); }
+  90:Communication.c ****             break;
+  91:Communication.c **** 
+  92:Communication.c ****         case COMM_CMD_SET_MUX_OUT:
+  93:Communication.c ****             if (len >= 1u) { TestBench_SetOutput(payload[0]); }
+  94:Communication.c ****             break;
+  95:Communication.c **** 
+  96:Communication.c ****         case COMM_CMD_SET_ADC:
+  97:Communication.c ****             /* payload: [cfg:1-4][buf_gain:1/2/4/8] */
+  98:Communication.c ****             if (len >= 2u)
+  99:Communication.c ****             {
+ 100:Communication.c ****                 uint8 cfg      = payload[0];
+ 101:Communication.c ****                 uint8 buf_gain = payload[1];
+ 102:Communication.c ****                 AnalogToDigital_SetADC(cfg, buf_gain);
+ 103:Communication.c ****                 dbg_pld[0] = g_adc_cfg;
+ 104:Communication.c ****                 dbg_pld[1] = g_adc_buf_gain;
+ 105:Communication.c ****                 Debug_Send(DBG_EVT_ADC_CHG, dbg_pld, 2u);
+ 106:Communication.c ****             }
+ 107:Communication.c ****             break;
+ 108:Communication.c **** 
+ 109:Communication.c ****         case COMM_CMD_VDAC_LOAD:
+ 110:Communication.c ****             /* payload is raw data; len == sequence length */
+ 111:Communication.c ****             if (len > 0u && len <= TB_VDAC_MAX_LEN)
+ 112:Communication.c ****             {
+ 113:Communication.c ****                 TestBench_SetVdacSeq(payload, len);
+ 114:Communication.c ****                 dbg_pld[0] = (uint8)(len >> 8u);
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 5
+
+
+ 115:Communication.c ****                 dbg_pld[1] = (uint8)(len & 0xFFu);
+ 116:Communication.c ****                 Debug_Send(DBG_EVT_VDAC_LOADED, dbg_pld, 2u);
+ 117:Communication.c ****             }
+ 118:Communication.c ****             break;
+ 119:Communication.c **** 
+ 120:Communication.c ****         case COMM_CMD_SET_DEBUG:
+ 121:Communication.c ****             if (len >= 1u) { Debug_SetEnabled(payload[0]); }
+ 122:Communication.c ****             break;
+ 123:Communication.c **** 
+ 124:Communication.c ****         case COMM_CMD_SET_DBG_CH:
+ 125:Communication.c ****             if (len >= 1u) { Debug_SetChannel(payload[0]); }
+ 126:Communication.c ****             break;
+ 127:Communication.c **** 
+ 128:Communication.c ****         case COMM_CMD_GET_STATE:
+ 129:Communication.c ****             /* State packet sent unconditionally after switch */
+ 130:Communication.c ****             break;
+ 131:Communication.c **** 
+ 132:Communication.c ****         default:
+ 133:Communication.c ****             break;
+ 134:Communication.c ****     }
+ 135:Communication.c **** 
+ 136:Communication.c ****     /* Always confirm current state so Python syncs its UI */
+ 137:Communication.c ****     Communication_SendState();
+ 138:Communication.c **** }
+ 139:Communication.c **** 
+ 140:Communication.c **** static void ParseRxByte(uint8 b)
+ 141:Communication.c **** {
+ 142:Communication.c ****     switch (s_rx_state)
+ 143:Communication.c ****     {
+ 144:Communication.c ****         case RX_WAIT_MARKER:
+ 145:Communication.c ****             if (b == COMM_CMD_MARKER) { s_rx_state = RX_WAIT_CMD; }
+ 146:Communication.c ****             break;
+ 147:Communication.c **** 
+ 148:Communication.c ****         case RX_WAIT_CMD:
+ 149:Communication.c ****             s_rx_cmd   = b;
+ 150:Communication.c ****             s_rx_state = RX_WAIT_LEN;
+ 151:Communication.c ****             break;
+ 152:Communication.c **** 
+ 153:Communication.c ****         case RX_WAIT_LEN:
+ 154:Communication.c ****             if (s_rx_cmd == COMM_CMD_VDAC_LOAD)
+ 155:Communication.c ****             {
+ 156:Communication.c ****                 /* Special: next 2 bytes are the 16-bit sequence length */
+ 157:Communication.c ****                 s_rx_len_hi = b;
+ 158:Communication.c ****                 s_rx_state  = RX_WAIT_LEN2;
+ 159:Communication.c ****             }
+ 160:Communication.c ****             else if (b == 0u)
+ 161:Communication.c ****             {
+ 162:Communication.c ****                 ProcessCommand(s_rx_cmd, s_rx_buf, 0u);
+ 163:Communication.c ****                 s_rx_state = RX_WAIT_MARKER;
+ 164:Communication.c ****             }
+ 165:Communication.c ****             else
+ 166:Communication.c ****             {
+ 167:Communication.c ****                 s_rx_expected = (uint16)b;
+ 168:Communication.c ****                 s_rx_count    = 0u;
+ 169:Communication.c ****                 s_rx_state    = RX_WAIT_PAYLOAD;
+ 170:Communication.c ****             }
+ 171:Communication.c ****             break;
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 6
+
+
+ 172:Communication.c **** 
+ 173:Communication.c ****         case RX_WAIT_LEN2:
+ 174:Communication.c ****             s_rx_expected = ((uint16)s_rx_len_hi << 8u) | (uint16)b;
+ 175:Communication.c ****             s_rx_count    = 0u;
+ 176:Communication.c ****             if (s_rx_expected == 0u)
+ 177:Communication.c ****             {
+ 178:Communication.c ****                 s_rx_state = RX_WAIT_MARKER;   /* empty VDAC_LOAD: ignore */
+ 179:Communication.c ****             }
+ 180:Communication.c ****             else
+ 181:Communication.c ****             {
+ 182:Communication.c ****                 s_rx_state = RX_WAIT_PAYLOAD;
+ 183:Communication.c ****             }
+ 184:Communication.c ****             break;
+ 185:Communication.c **** 
+ 186:Communication.c ****         case RX_WAIT_PAYLOAD:
+ 187:Communication.c ****             if (s_rx_count < sizeof(s_rx_buf))
+ 188:Communication.c ****             {
+ 189:Communication.c ****                 s_rx_buf[s_rx_count] = b;
+ 190:Communication.c ****             }
+ 191:Communication.c ****             s_rx_count++;
+ 192:Communication.c ****             if (s_rx_count >= s_rx_expected)
+ 193:Communication.c ****             {
+ 194:Communication.c ****                 ProcessCommand(s_rx_cmd, s_rx_buf, s_rx_count);
+ 195:Communication.c ****                 s_rx_state = RX_WAIT_MARKER;
+ 196:Communication.c ****             }
+ 197:Communication.c ****             break;
+ 198:Communication.c ****     }
+ 199:Communication.c **** }
+ 200:Communication.c **** 
+ 201:Communication.c **** /* ---- Public API ---------------------------------------------------------- */
+ 202:Communication.c **** 
+ 203:Communication.c **** void Communication_Init(void)
+ 204:Communication.c **** {
+ 109              		.loc 1 204 0
+ 110              		.cfi_startproc
+ 111              		@ args = 0, pretend = 0, frame = 0
+ 112              		@ frame_needed = 0, uses_anonymous_args = 0
+ 113 0000 10B5     		push	{r4, lr}
+ 114              		.cfi_def_cfa_offset 8
+ 115              		.cfi_offset 4, -8
+ 116              		.cfi_offset 14, -4
+ 205:Communication.c ****     uint8 i;
+ 206:Communication.c ****     s_streaming = 0u;
+ 117              		.loc 1 206 0
+ 118 0002 094B     		ldr	r3, .L15
+ 119 0004 0024     		movs	r4, #0
+ 120 0006 1C75     		strb	r4, [r3, #20]
+ 207:Communication.c ****     s_rx_state  = RX_WAIT_MARKER;
+ 121              		.loc 1 207 0
+ 122 0008 5C75     		strb	r4, [r3, #21]
+ 123              	.LVL4:
+ 208:Communication.c **** 
+ 209:Communication.c ****     for (i = 0u; i < s_transport_count; i++)
+ 124              		.loc 1 209 0
+ 125 000a 08E0     		b	.L11
+ 126              	.LVL5:
+ 127              	.L13:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 7
+
+
+ 210:Communication.c ****     {
+ 211:Communication.c ****         if (s_transports[i]->init != (void *)0u)
+ 128              		.loc 1 211 0
+ 129 000c 064B     		ldr	r3, .L15
+ 130 000e 03EB8403 		add	r3, r3, r4, lsl #2
+ 131 0012 5B68     		ldr	r3, [r3, #4]
+ 132 0014 1B68     		ldr	r3, [r3]
+ 133 0016 03B1     		cbz	r3, .L12
+ 212:Communication.c ****         {
+ 213:Communication.c ****             s_transports[i]->init();
+ 134              		.loc 1 213 0
+ 135 0018 9847     		blx	r3
+ 136              	.LVL6:
+ 137              	.L12:
+ 209:Communication.c ****     {
+ 138              		.loc 1 209 0 discriminator 2
+ 139 001a 0134     		adds	r4, r4, #1
+ 140              	.LVL7:
+ 141 001c E4B2     		uxtb	r4, r4
+ 142              	.LVL8:
+ 143              	.L11:
+ 209:Communication.c ****     {
+ 144              		.loc 1 209 0 is_stmt 0 discriminator 1
+ 145 001e 024B     		ldr	r3, .L15
+ 146 0020 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 147 0022 9C42     		cmp	r4, r3
+ 148 0024 F2D3     		bcc	.L13
+ 214:Communication.c ****         }
+ 215:Communication.c ****     }
+ 216:Communication.c **** }
+ 149              		.loc 1 216 0 is_stmt 1
+ 150 0026 10BD     		pop	{r4, pc}
+ 151              	.LVL9:
+ 152              	.L16:
+ 153              		.align	2
+ 154              	.L15:
+ 155 0028 00000000 		.word	.LANCHOR0
+ 156              		.cfi_endproc
+ 157              	.LFE67:
+ 158              		.size	Communication_Init, .-Communication_Init
+ 159              		.section	.text.Communication_SendSample,"ax",%progbits
+ 160              		.align	2
+ 161              		.global	Communication_SendSample
+ 162              		.thumb
+ 163              		.thumb_func
+ 164              		.type	Communication_SendSample, %function
+ 165              	Communication_SendSample:
+ 166              	.LFB69:
+ 217:Communication.c **** 
+ 218:Communication.c **** void Communication_Task(void)
+ 219:Communication.c **** {
+ 220:Communication.c ****     uint8 i;
+ 221:Communication.c **** 
+ 222:Communication.c ****     /* Run all transport tasks */
+ 223:Communication.c ****     for (i = 0u; i < s_transport_count; i++)
+ 224:Communication.c ****     {
+ 225:Communication.c ****         if (s_transports[i]->task != (void *)0u)
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 8
+
+
+ 226:Communication.c ****         {
+ 227:Communication.c ****             s_transports[i]->task();
+ 228:Communication.c ****         }
+ 229:Communication.c ****     }
+ 230:Communication.c **** 
+ 231:Communication.c ****     /* USB CDC RX — command parsing */
+ 232:Communication.c ****     if (USBFS_GetConfiguration() == 0u) { return; }
+ 233:Communication.c **** 
+ 234:Communication.c ****     if (USBFS_DataIsReady())
+ 235:Communication.c ****     {
+ 236:Communication.c ****         uint8  rxBuf[64u];
+ 237:Communication.c ****         uint16 rxLen = USBFS_GetAll(rxBuf);
+ 238:Communication.c ****         uint16 i2;
+ 239:Communication.c ****         for (i2 = 0u; i2 < rxLen; i2++) { ParseRxByte(rxBuf[i2]); }
+ 240:Communication.c ****     }
+ 241:Communication.c **** }
+ 242:Communication.c **** 
+ 243:Communication.c **** void Communication_SendSample(int16 raw_input, int32 post_analog,
+ 244:Communication.c ****                                int32 post_digital, uint8 flags)
+ 245:Communication.c **** {
+ 167              		.loc 1 245 0
+ 168              		.cfi_startproc
+ 169              		@ args = 0, pretend = 0, frame = 0
+ 170              		@ frame_needed = 0, uses_anonymous_args = 0
+ 171              	.LVL10:
+ 172 0000 2DE9F047 		push	{r4, r5, r6, r7, r8, r9, r10, lr}
+ 173              		.cfi_def_cfa_offset 32
+ 174              		.cfi_offset 4, -32
+ 175              		.cfi_offset 5, -28
+ 176              		.cfi_offset 6, -24
+ 177              		.cfi_offset 7, -20
+ 178              		.cfi_offset 8, -16
+ 179              		.cfi_offset 9, -12
+ 180              		.cfi_offset 10, -8
+ 181              		.cfi_offset 14, -4
+ 182 0004 82B0     		sub	sp, sp, #8
+ 183              		.cfi_def_cfa_offset 40
+ 246:Communication.c ****     uint8 i;
+ 247:Communication.c ****     uint8 gain_byte;
+ 248:Communication.c **** 
+ 249:Communication.c ****     if (!s_streaming) { return; }
+ 184              		.loc 1 249 0
+ 185 0006 154C     		ldr	r4, .L23
+ 186 0008 247D     		ldrb	r4, [r4, #20]	@ zero_extendqisi2
+ 187 000a 24B3     		cbz	r4, .L17
+ 188 000c 9946     		mov	r9, r3
+ 189 000e 9046     		mov	r8, r2
+ 190 0010 0F46     		mov	r7, r1
+ 191 0012 8246     		mov	r10, r0
+ 250:Communication.c **** 
+ 251:Communication.c ****     gain_byte = EncodeGainByte(g_adc_cfg, g_adc_buf_gain);
+ 192              		.loc 1 251 0
+ 193 0014 124B     		ldr	r3, .L23+4
+ 194              	.LVL11:
+ 195 0016 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 196              	.LVL12:
+ 197 0018 124B     		ldr	r3, .L23+8
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 9
+
+
+ 198 001a 1978     		ldrb	r1, [r3]	@ zero_extendqisi2
+ 199              	.LVL13:
+ 200 001c FFF7FEFF 		bl	EncodeGainByte
+ 201              	.LVL14:
+ 202 0020 0646     		mov	r6, r0
+ 203              	.LVL15:
+ 252:Communication.c **** 
+ 253:Communication.c ****     for (i = 0u; i < s_transport_count; i++)
+ 204              		.loc 1 253 0
+ 205 0022 0024     		movs	r4, #0
+ 206 0024 13E0     		b	.L19
+ 207              	.LVL16:
+ 208              	.L21:
+ 209              	.LBB2:
+ 254:Communication.c ****     {
+ 255:Communication.c ****         Transport_t *t = s_transports[i];
+ 210              		.loc 1 255 0
+ 211 0026 0D4D     		ldr	r5, .L23
+ 212 0028 05EB8405 		add	r5, r5, r4, lsl #2
+ 213 002c 6D68     		ldr	r5, [r5, #4]
+ 214              	.LVL17:
+ 256:Communication.c ****         if (t->enabled && t->is_ready && t->is_ready() && t->send_sample)
+ 215              		.loc 1 256 0
+ 216 002e 2B7C     		ldrb	r3, [r5, #16]	@ zero_extendqisi2
+ 217 0030 5BB1     		cbz	r3, .L20
+ 218              		.loc 1 256 0 is_stmt 0 discriminator 1
+ 219 0032 AB68     		ldr	r3, [r5, #8]
+ 220 0034 4BB1     		cbz	r3, .L20
+ 221              		.loc 1 256 0 discriminator 2
+ 222 0036 9847     		blx	r3
+ 223              	.LVL18:
+ 224 0038 38B1     		cbz	r0, .L20
+ 225              		.loc 1 256 0 discriminator 3
+ 226 003a ED68     		ldr	r5, [r5, #12]
+ 227              	.LVL19:
+ 228 003c 2DB1     		cbz	r5, .L20
+ 257:Communication.c ****         {
+ 258:Communication.c ****             t->send_sample(raw_input, post_analog, post_digital, flags, gain_byte);
+ 229              		.loc 1 258 0 is_stmt 1
+ 230 003e 0096     		str	r6, [sp]
+ 231 0040 4B46     		mov	r3, r9
+ 232 0042 4246     		mov	r2, r8
+ 233 0044 3946     		mov	r1, r7
+ 234 0046 5046     		mov	r0, r10
+ 235 0048 A847     		blx	r5
+ 236              	.LVL20:
+ 237              	.L20:
+ 238              	.LBE2:
+ 253:Communication.c ****     {
+ 239              		.loc 1 253 0 discriminator 2
+ 240 004a 0134     		adds	r4, r4, #1
+ 241              	.LVL21:
+ 242 004c E4B2     		uxtb	r4, r4
+ 243              	.LVL22:
+ 244              	.L19:
+ 253:Communication.c ****     {
+ 245              		.loc 1 253 0 is_stmt 0 discriminator 1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 10
+
+
+ 246 004e 034B     		ldr	r3, .L23
+ 247 0050 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 248 0052 9C42     		cmp	r4, r3
+ 249 0054 E7D3     		bcc	.L21
+ 250              	.LVL23:
+ 251              	.L17:
+ 259:Communication.c ****         }
+ 260:Communication.c ****     }
+ 261:Communication.c **** }
+ 252              		.loc 1 261 0 is_stmt 1
+ 253 0056 02B0     		add	sp, sp, #8
+ 254              		.cfi_def_cfa_offset 32
+ 255              		@ sp needed
+ 256 0058 BDE8F087 		pop	{r4, r5, r6, r7, r8, r9, r10, pc}
+ 257              	.L24:
+ 258              		.align	2
+ 259              	.L23:
+ 260 005c 00000000 		.word	.LANCHOR0
+ 261 0060 00000000 		.word	g_adc_cfg
+ 262 0064 00000000 		.word	g_adc_buf_gain
+ 263              		.cfi_endproc
+ 264              	.LFE69:
+ 265              		.size	Communication_SendSample, .-Communication_SendSample
+ 266              		.section	.text.Communication_SendState,"ax",%progbits
+ 267              		.align	2
+ 268              		.global	Communication_SendState
+ 269              		.thumb
+ 270              		.thumb_func
+ 271              		.type	Communication_SendState, %function
+ 272              	Communication_SendState:
+ 273              	.LFB70:
+ 262:Communication.c **** 
+ 263:Communication.c **** void Communication_SendState(void)
+ 264:Communication.c **** {
+ 274              		.loc 1 264 0
+ 275              		.cfi_startproc
+ 276              		@ args = 0, pretend = 0, frame = 0
+ 277              		@ frame_needed = 0, uses_anonymous_args = 0
+ 278 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+ 279              		.cfi_def_cfa_offset 20
+ 280              		.cfi_offset 4, -20
+ 281              		.cfi_offset 5, -16
+ 282              		.cfi_offset 6, -12
+ 283              		.cfi_offset 7, -8
+ 284              		.cfi_offset 14, -4
+ 285 0002 85B0     		sub	sp, sp, #20
+ 286              		.cfi_def_cfa_offset 40
+ 265:Communication.c ****     TransportUSB_SendState(
+ 287              		.loc 1 265 0
+ 288 0004 0D4B     		ldr	r3, .L27
+ 289 0006 1C78     		ldrb	r4, [r3]	@ zero_extendqisi2
+ 290 0008 E4B2     		uxtb	r4, r4
+ 291 000a 0D4B     		ldr	r3, .L27+4
+ 292 000c 1D78     		ldrb	r5, [r3]	@ zero_extendqisi2
+ 293 000e EDB2     		uxtb	r5, r5
+ 294 0010 0C4B     		ldr	r3, .L27+8
+ 295 0012 1E7D     		ldrb	r6, [r3, #20]	@ zero_extendqisi2
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 11
+
+
+ 296 0014 FFF7FEFF 		bl	Debug_IsEnabled
+ 297              	.LVL24:
+ 298 0018 0746     		mov	r7, r0
+ 299 001a FFF7FEFF 		bl	Debug_GetChannel
+ 300              	.LVL25:
+ 301 001e 0A4B     		ldr	r3, .L27+12
+ 302 0020 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 303 0022 0A4A     		ldr	r2, .L27+16
+ 304 0024 1278     		ldrb	r2, [r2]	@ zero_extendqisi2
+ 305 0026 0292     		str	r2, [sp, #8]
+ 306 0028 0193     		str	r3, [sp, #4]
+ 307 002a 0090     		str	r0, [sp]
+ 308 002c 3B46     		mov	r3, r7
+ 309 002e 3246     		mov	r2, r6
+ 310 0030 2946     		mov	r1, r5
+ 311 0032 2046     		mov	r0, r4
+ 312 0034 FFF7FEFF 		bl	TransportUSB_SendState
+ 313              	.LVL26:
+ 266:Communication.c ****         g_adc_cfg,
+ 267:Communication.c ****         g_adc_buf_gain,
+ 268:Communication.c ****         s_streaming,
+ 269:Communication.c ****         Debug_IsEnabled(),
+ 270:Communication.c ****         Debug_GetChannel(),
+ 271:Communication.c ****         g_vdac_mode,
+ 272:Communication.c ****         g_filter_sel);
+ 273:Communication.c **** }
+ 314              		.loc 1 273 0
+ 315 0038 05B0     		add	sp, sp, #20
+ 316              		.cfi_def_cfa_offset 20
+ 317              		@ sp needed
+ 318 003a F0BD     		pop	{r4, r5, r6, r7, pc}
+ 319              	.L28:
+ 320              		.align	2
+ 321              	.L27:
+ 322 003c 00000000 		.word	g_adc_cfg
+ 323 0040 00000000 		.word	g_adc_buf_gain
+ 324 0044 00000000 		.word	.LANCHOR0
+ 325 0048 00000000 		.word	g_vdac_mode
+ 326 004c 00000000 		.word	g_filter_sel
+ 327              		.cfi_endproc
+ 328              	.LFE70:
+ 329              		.size	Communication_SendState, .-Communication_SendState
+ 330              		.section	.text.ProcessCommand,"ax",%progbits
+ 331              		.align	2
+ 332              		.thumb
+ 333              		.thumb_func
+ 334              		.type	ProcessCommand, %function
+ 335              	ProcessCommand:
+ 336              	.LFB65:
+  70:Communication.c ****     uint8 dbg_pld[2];
+ 337              		.loc 1 70 0
+ 338              		.cfi_startproc
+ 339              		@ args = 0, pretend = 0, frame = 8
+ 340              		@ frame_needed = 0, uses_anonymous_args = 0
+ 341              	.LVL27:
+ 342 0000 70B5     		push	{r4, r5, r6, lr}
+ 343              		.cfi_def_cfa_offset 16
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 12
+
+
+ 344              		.cfi_offset 4, -16
+ 345              		.cfi_offset 5, -12
+ 346              		.cfi_offset 6, -8
+ 347              		.cfi_offset 14, -4
+ 348 0002 82B0     		sub	sp, sp, #8
+ 349              		.cfi_def_cfa_offset 24
+ 350 0004 0446     		mov	r4, r0
+ 351 0006 0E46     		mov	r6, r1
+ 352 0008 1546     		mov	r5, r2
+  73:Communication.c ****     Debug_Send(DBG_EVT_CMD_RX, dbg_pld, 1u);
+ 353              		.loc 1 73 0
+ 354 000a 02A9     		add	r1, sp, #8
+ 355              	.LVL28:
+ 356 000c 01F8040D 		strb	r0, [r1, #-4]!
+  74:Communication.c **** 
+ 357              		.loc 1 74 0
+ 358 0010 0122     		movs	r2, #1
+ 359              	.LVL29:
+ 360 0012 3020     		movs	r0, #48
+ 361              	.LVL30:
+ 362 0014 FFF7FEFF 		bl	Debug_Send
+ 363              	.LVL31:
+  76:Communication.c ****     {
+ 364              		.loc 1 76 0
+ 365 0018 013C     		subs	r4, r4, #1
+ 366 001a 072C     		cmp	r4, #7
+ 367 001c 54D8     		bhi	.L30
+ 368 001e DFE804F0 		tbb	[pc, r4]
+ 369              	.L32:
+ 370 0022 04       		.byte	(.L31-.L32)/2
+ 371 0023 0D       		.byte	(.L33-.L32)/2
+ 372 0024 15       		.byte	(.L34-.L32)/2
+ 373 0025 1B       		.byte	(.L35-.L32)/2
+ 374 0026 21       		.byte	(.L36-.L32)/2
+ 375 0027 35       		.byte	(.L37-.L32)/2
+ 376 0028 4A       		.byte	(.L38-.L32)/2
+ 377 0029 4F       		.byte	(.L39-.L32)/2
+ 378              		.p2align 1
+ 379              	.L31:
+  79:Communication.c ****             Debug_Send(DBG_EVT_STREAM_ON, (void *)0u, 0u);
+ 380              		.loc 1 79 0
+ 381 002a 0122     		movs	r2, #1
+ 382 002c 284B     		ldr	r3, .L41
+ 383 002e 1A75     		strb	r2, [r3, #20]
+  80:Communication.c ****             break;
+ 384              		.loc 1 80 0
+ 385 0030 0022     		movs	r2, #0
+ 386 0032 1146     		mov	r1, r2
+ 387 0034 2020     		movs	r0, #32
+ 388 0036 FFF7FEFF 		bl	Debug_Send
+ 389              	.LVL32:
+  81:Communication.c **** 
+ 390              		.loc 1 81 0
+ 391 003a 45E0     		b	.L30
+ 392              	.L33:
+  84:Communication.c ****             Debug_Send(DBG_EVT_STREAM_OFF, (void *)0u, 0u);
+ 393              		.loc 1 84 0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 13
+
+
+ 394 003c 0021     		movs	r1, #0
+ 395 003e 244B     		ldr	r3, .L41
+ 396 0040 1975     		strb	r1, [r3, #20]
+  85:Communication.c ****             break;
+ 397              		.loc 1 85 0
+ 398 0042 0A46     		mov	r2, r1
+ 399 0044 2120     		movs	r0, #33
+ 400 0046 FFF7FEFF 		bl	Debug_Send
+ 401              	.LVL33:
+  86:Communication.c **** 
+ 402              		.loc 1 86 0
+ 403 004a 3DE0     		b	.L30
+ 404              	.L34:
+  89:Communication.c ****             break;
+ 405              		.loc 1 89 0
+ 406 004c 002D     		cmp	r5, #0
+ 407 004e 3BD0     		beq	.L30
+  89:Communication.c ****             break;
+ 408              		.loc 1 89 0 is_stmt 0 discriminator 1
+ 409 0050 3078     		ldrb	r0, [r6]	@ zero_extendqisi2
+ 410 0052 FFF7FEFF 		bl	TestBench_SetInput
+ 411              	.LVL34:
+ 412 0056 37E0     		b	.L30
+ 413              	.L35:
+  93:Communication.c ****             break;
+ 414              		.loc 1 93 0 is_stmt 1
+ 415 0058 002D     		cmp	r5, #0
+ 416 005a 35D0     		beq	.L30
+  93:Communication.c ****             break;
+ 417              		.loc 1 93 0 is_stmt 0 discriminator 1
+ 418 005c 3078     		ldrb	r0, [r6]	@ zero_extendqisi2
+ 419 005e FFF7FEFF 		bl	TestBench_SetOutput
+ 420              	.LVL35:
+ 421 0062 31E0     		b	.L30
+ 422              	.L36:
+  98:Communication.c ****             {
+ 423              		.loc 1 98 0 is_stmt 1
+ 424 0064 012D     		cmp	r5, #1
+ 425 0066 2FD9     		bls	.L30
+ 426              	.LVL36:
+ 427              	.LBB3:
+ 102:Communication.c ****                 dbg_pld[0] = g_adc_cfg;
+ 428              		.loc 1 102 0
+ 429 0068 7178     		ldrb	r1, [r6, #1]	@ zero_extendqisi2
+ 430 006a 3078     		ldrb	r0, [r6]	@ zero_extendqisi2
+ 431 006c FFF7FEFF 		bl	AnalogToDigital_SetADC
+ 432              	.LVL37:
+ 103:Communication.c ****                 dbg_pld[1] = g_adc_buf_gain;
+ 433              		.loc 1 103 0
+ 434 0070 184B     		ldr	r3, .L41+4
+ 435 0072 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 436 0074 8DF80430 		strb	r3, [sp, #4]
+ 104:Communication.c ****                 Debug_Send(DBG_EVT_ADC_CHG, dbg_pld, 2u);
+ 437              		.loc 1 104 0
+ 438 0078 174B     		ldr	r3, .L41+8
+ 439 007a 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 440 007c 8DF80530 		strb	r3, [sp, #5]
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 14
+
+
+ 105:Communication.c ****             }
+ 441              		.loc 1 105 0
+ 442 0080 0222     		movs	r2, #2
+ 443 0082 01A9     		add	r1, sp, #4
+ 444 0084 6020     		movs	r0, #96
+ 445 0086 FFF7FEFF 		bl	Debug_Send
+ 446              	.LVL38:
+ 447 008a 1DE0     		b	.L30
+ 448              	.L37:
+ 449              	.LBE3:
+ 111:Communication.c ****             {
+ 450              		.loc 1 111 0
+ 451 008c 6B1E     		subs	r3, r5, #1
+ 452 008e 9BB2     		uxth	r3, r3
+ 453 0090 40F6B732 		movw	r2, #2999
+ 454 0094 9342     		cmp	r3, r2
+ 455 0096 17D8     		bhi	.L30
+ 113:Communication.c ****                 dbg_pld[0] = (uint8)(len >> 8u);
+ 456              		.loc 1 113 0
+ 457 0098 2946     		mov	r1, r5
+ 458 009a 3046     		mov	r0, r6
+ 459 009c FFF7FEFF 		bl	TestBench_SetVdacSeq
+ 460              	.LVL39:
+ 114:Communication.c ****                 dbg_pld[1] = (uint8)(len & 0xFFu);
+ 461              		.loc 1 114 0
+ 462 00a0 2B0A     		lsrs	r3, r5, #8
+ 463 00a2 8DF80430 		strb	r3, [sp, #4]
+ 115:Communication.c ****                 Debug_Send(DBG_EVT_VDAC_LOADED, dbg_pld, 2u);
+ 464              		.loc 1 115 0
+ 465 00a6 8DF80550 		strb	r5, [sp, #5]
+ 116:Communication.c ****             }
+ 466              		.loc 1 116 0
+ 467 00aa 0222     		movs	r2, #2
+ 468 00ac 01A9     		add	r1, sp, #4
+ 469 00ae 5020     		movs	r0, #80
+ 470 00b0 FFF7FEFF 		bl	Debug_Send
+ 471              	.LVL40:
+ 472 00b4 08E0     		b	.L30
+ 473              	.L38:
+ 121:Communication.c ****             break;
+ 474              		.loc 1 121 0
+ 475 00b6 3DB1     		cbz	r5, .L30
+ 121:Communication.c ****             break;
+ 476              		.loc 1 121 0 is_stmt 0 discriminator 1
+ 477 00b8 3078     		ldrb	r0, [r6]	@ zero_extendqisi2
+ 478 00ba FFF7FEFF 		bl	Debug_SetEnabled
+ 479              	.LVL41:
+ 480 00be 03E0     		b	.L30
+ 481              	.L39:
+ 125:Communication.c ****             break;
+ 482              		.loc 1 125 0 is_stmt 1
+ 483 00c0 15B1     		cbz	r5, .L30
+ 125:Communication.c ****             break;
+ 484              		.loc 1 125 0 is_stmt 0 discriminator 1
+ 485 00c2 3078     		ldrb	r0, [r6]	@ zero_extendqisi2
+ 486 00c4 FFF7FEFF 		bl	Debug_SetChannel
+ 487              	.LVL42:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 15
+
+
+ 488              	.L30:
+ 137:Communication.c **** }
+ 489              		.loc 1 137 0 is_stmt 1
+ 490 00c8 FFF7FEFF 		bl	Communication_SendState
+ 491              	.LVL43:
+ 138:Communication.c **** 
+ 492              		.loc 1 138 0
+ 493 00cc 02B0     		add	sp, sp, #8
+ 494              		.cfi_def_cfa_offset 16
+ 495              		@ sp needed
+ 496 00ce 70BD     		pop	{r4, r5, r6, pc}
+ 497              	.LVL44:
+ 498              	.L42:
+ 499              		.align	2
+ 500              	.L41:
+ 501 00d0 00000000 		.word	.LANCHOR0
+ 502 00d4 00000000 		.word	g_adc_cfg
+ 503 00d8 00000000 		.word	g_adc_buf_gain
+ 504              		.cfi_endproc
+ 505              	.LFE65:
+ 506              		.size	ProcessCommand, .-ProcessCommand
+ 507              		.section	.text.ParseRxByte,"ax",%progbits
+ 508              		.align	2
+ 509              		.thumb
+ 510              		.thumb_func
+ 511              		.type	ParseRxByte, %function
+ 512              	ParseRxByte:
+ 513              	.LFB66:
+ 141:Communication.c ****     switch (s_rx_state)
+ 514              		.loc 1 141 0
+ 515              		.cfi_startproc
+ 516              		@ args = 0, pretend = 0, frame = 0
+ 517              		@ frame_needed = 0, uses_anonymous_args = 0
+ 518              	.LVL45:
+ 519 0000 10B5     		push	{r4, lr}
+ 520              		.cfi_def_cfa_offset 8
+ 521              		.cfi_offset 4, -8
+ 522              		.cfi_offset 14, -4
+ 142:Communication.c ****     {
+ 523              		.loc 1 142 0
+ 524 0002 2F4B     		ldr	r3, .L56
+ 525 0004 5B7D     		ldrb	r3, [r3, #21]	@ zero_extendqisi2
+ 526 0006 042B     		cmp	r3, #4
+ 527 0008 59D8     		bhi	.L43
+ 528 000a DFE803F0 		tbb	[pc, r3]
+ 529              	.L46:
+ 530 000e 03       		.byte	(.L45-.L46)/2
+ 531 000f 09       		.byte	(.L47-.L46)/2
+ 532 0010 0E       		.byte	(.L48-.L46)/2
+ 533 0011 2B       		.byte	(.L49-.L46)/2
+ 534 0012 3D       		.byte	(.L50-.L46)/2
+ 535 0013 00       		.p2align 1
+ 536              	.L45:
+ 145:Communication.c ****             break;
+ 537              		.loc 1 145 0
+ 538 0014 BB28     		cmp	r0, #187
+ 539 0016 52D1     		bne	.L43
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 16
+
+
+ 145:Communication.c ****             break;
+ 540              		.loc 1 145 0 is_stmt 0 discriminator 1
+ 541 0018 0122     		movs	r2, #1
+ 542 001a 294B     		ldr	r3, .L56
+ 543 001c 5A75     		strb	r2, [r3, #21]
+ 544 001e 10BD     		pop	{r4, pc}
+ 545              	.L47:
+ 149:Communication.c ****             s_rx_state = RX_WAIT_LEN;
+ 546              		.loc 1 149 0 is_stmt 1
+ 547 0020 274B     		ldr	r3, .L56
+ 548 0022 9875     		strb	r0, [r3, #22]
+ 150:Communication.c ****             break;
+ 549              		.loc 1 150 0
+ 550 0024 0222     		movs	r2, #2
+ 551 0026 5A75     		strb	r2, [r3, #21]
+ 151:Communication.c **** 
+ 552              		.loc 1 151 0
+ 553 0028 10BD     		pop	{r4, pc}
+ 554              	.L48:
+ 154:Communication.c ****             {
+ 555              		.loc 1 154 0
+ 556 002a 254B     		ldr	r3, .L56
+ 557 002c 9B7D     		ldrb	r3, [r3, #22]	@ zero_extendqisi2
+ 558 002e 062B     		cmp	r3, #6
+ 559 0030 04D1     		bne	.L51
+ 157:Communication.c ****                 s_rx_state  = RX_WAIT_LEN2;
+ 560              		.loc 1 157 0
+ 561 0032 234B     		ldr	r3, .L56
+ 562 0034 D875     		strb	r0, [r3, #23]
+ 158:Communication.c ****             }
+ 563              		.loc 1 158 0
+ 564 0036 0322     		movs	r2, #3
+ 565 0038 5A75     		strb	r2, [r3, #21]
+ 566 003a 10BD     		pop	{r4, pc}
+ 567              	.L51:
+ 160:Communication.c ****             {
+ 568              		.loc 1 160 0
+ 569 003c 48B9     		cbnz	r0, .L52
+ 162:Communication.c ****                 s_rx_state = RX_WAIT_MARKER;
+ 570              		.loc 1 162 0
+ 571 003e 204C     		ldr	r4, .L56
+ 572 0040 0022     		movs	r2, #0
+ 573 0042 04F11801 		add	r1, r4, #24
+ 574 0046 1846     		mov	r0, r3
+ 575              	.LVL46:
+ 576 0048 FFF7FEFF 		bl	ProcessCommand
+ 577              	.LVL47:
+ 163:Communication.c ****             }
+ 578              		.loc 1 163 0
+ 579 004c 0023     		movs	r3, #0
+ 580 004e 6375     		strb	r3, [r4, #21]
+ 581 0050 10BD     		pop	{r4, pc}
+ 582              	.LVL48:
+ 583              	.L52:
+ 167:Communication.c ****                 s_rx_count    = 0u;
+ 584              		.loc 1 167 0
+ 585 0052 1B4B     		ldr	r3, .L56
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 17
+
+
+ 586 0054 A3F8D00B 		strh	r0, [r3, #3024]	@ movhi
+ 168:Communication.c ****                 s_rx_state    = RX_WAIT_PAYLOAD;
+ 587              		.loc 1 168 0
+ 588 0058 0022     		movs	r2, #0
+ 589 005a A3F8D22B 		strh	r2, [r3, #3026]	@ movhi
+ 169:Communication.c ****             }
+ 590              		.loc 1 169 0
+ 591 005e 0422     		movs	r2, #4
+ 592 0060 5A75     		strb	r2, [r3, #21]
+ 593 0062 10BD     		pop	{r4, pc}
+ 594              	.L49:
+ 174:Communication.c ****             s_rx_count    = 0u;
+ 595              		.loc 1 174 0
+ 596 0064 164A     		ldr	r2, .L56
+ 597 0066 D37D     		ldrb	r3, [r2, #23]	@ zero_extendqisi2
+ 598 0068 40EA0320 		orr	r0, r0, r3, lsl #8
+ 599              	.LVL49:
+ 600 006c A2F8D00B 		strh	r0, [r2, #3024]	@ movhi
+ 175:Communication.c ****             if (s_rx_expected == 0u)
+ 601              		.loc 1 175 0
+ 602 0070 0023     		movs	r3, #0
+ 603 0072 A2F8D23B 		strh	r3, [r2, #3026]	@ movhi
+ 176:Communication.c ****             {
+ 604              		.loc 1 176 0
+ 605 0076 18B9     		cbnz	r0, .L53
+ 178:Communication.c ****             }
+ 606              		.loc 1 178 0
+ 607 0078 1A46     		mov	r2, r3
+ 608 007a 114B     		ldr	r3, .L56
+ 609 007c 5A75     		strb	r2, [r3, #21]
+ 610 007e 10BD     		pop	{r4, pc}
+ 611              	.L53:
+ 182:Communication.c ****             }
+ 612              		.loc 1 182 0
+ 613 0080 0422     		movs	r2, #4
+ 614 0082 0F4B     		ldr	r3, .L56
+ 615 0084 5A75     		strb	r2, [r3, #21]
+ 616 0086 10BD     		pop	{r4, pc}
+ 617              	.LVL50:
+ 618              	.L50:
+ 187:Communication.c ****             {
+ 619              		.loc 1 187 0
+ 620 0088 0D4B     		ldr	r3, .L56
+ 621 008a B3F8D22B 		ldrh	r2, [r3, #3026]
+ 622 008e 40F6B733 		movw	r3, #2999
+ 623 0092 9A42     		cmp	r2, r3
+ 624 0094 02D8     		bhi	.L54
+ 189:Communication.c ****             }
+ 625              		.loc 1 189 0
+ 626 0096 0A4B     		ldr	r3, .L56
+ 627 0098 1344     		add	r3, r3, r2
+ 628 009a 1876     		strb	r0, [r3, #24]
+ 629              	.L54:
+ 191:Communication.c ****             if (s_rx_count >= s_rx_expected)
+ 630              		.loc 1 191 0
+ 631 009c 0132     		adds	r2, r2, #1
+ 632 009e 92B2     		uxth	r2, r2
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 18
+
+
+ 633 00a0 074B     		ldr	r3, .L56
+ 634 00a2 A3F8D22B 		strh	r2, [r3, #3026]	@ movhi
+ 192:Communication.c ****             {
+ 635              		.loc 1 192 0
+ 636 00a6 B3F8D03B 		ldrh	r3, [r3, #3024]
+ 637 00aa 9A42     		cmp	r2, r3
+ 638 00ac 07D3     		bcc	.L43
+ 194:Communication.c ****                 s_rx_state = RX_WAIT_MARKER;
+ 639              		.loc 1 194 0
+ 640 00ae 044C     		ldr	r4, .L56
+ 641 00b0 04F11801 		add	r1, r4, #24
+ 642 00b4 A07D     		ldrb	r0, [r4, #22]	@ zero_extendqisi2
+ 643              	.LVL51:
+ 644 00b6 FFF7FEFF 		bl	ProcessCommand
+ 645              	.LVL52:
+ 195:Communication.c ****             }
+ 646              		.loc 1 195 0
+ 647 00ba 0023     		movs	r3, #0
+ 648 00bc 6375     		strb	r3, [r4, #21]
+ 649              	.L43:
+ 650 00be 10BD     		pop	{r4, pc}
+ 651              	.L57:
+ 652              		.align	2
+ 653              	.L56:
+ 654 00c0 00000000 		.word	.LANCHOR0
+ 655              		.cfi_endproc
+ 656              	.LFE66:
+ 657              		.size	ParseRxByte, .-ParseRxByte
+ 658              		.section	.text.Communication_Task,"ax",%progbits
+ 659              		.align	2
+ 660              		.global	Communication_Task
+ 661              		.thumb
+ 662              		.thumb_func
+ 663              		.type	Communication_Task, %function
+ 664              	Communication_Task:
+ 665              	.LFB68:
+ 219:Communication.c ****     uint8 i;
+ 666              		.loc 1 219 0
+ 667              		.cfi_startproc
+ 668              		@ args = 0, pretend = 0, frame = 64
+ 669              		@ frame_needed = 0, uses_anonymous_args = 0
+ 670 0000 30B5     		push	{r4, r5, lr}
+ 671              		.cfi_def_cfa_offset 12
+ 672              		.cfi_offset 4, -12
+ 673              		.cfi_offset 5, -8
+ 674              		.cfi_offset 14, -4
+ 675 0002 91B0     		sub	sp, sp, #68
+ 676              		.cfi_def_cfa_offset 80
+ 677              	.LVL53:
+ 223:Communication.c ****     {
+ 678              		.loc 1 223 0
+ 679 0004 0024     		movs	r4, #0
+ 680 0006 08E0     		b	.L59
+ 681              	.LVL54:
+ 682              	.L61:
+ 225:Communication.c ****         {
+ 683              		.loc 1 225 0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 19
+
+
+ 684 0008 124B     		ldr	r3, .L66
+ 685 000a 03EB8403 		add	r3, r3, r4, lsl #2
+ 686 000e 5B68     		ldr	r3, [r3, #4]
+ 687 0010 5B68     		ldr	r3, [r3, #4]
+ 688 0012 03B1     		cbz	r3, .L60
+ 227:Communication.c ****         }
+ 689              		.loc 1 227 0
+ 690 0014 9847     		blx	r3
+ 691              	.LVL55:
+ 692              	.L60:
+ 223:Communication.c ****     {
+ 693              		.loc 1 223 0 discriminator 2
+ 694 0016 0134     		adds	r4, r4, #1
+ 695              	.LVL56:
+ 696 0018 E4B2     		uxtb	r4, r4
+ 697              	.LVL57:
+ 698              	.L59:
+ 223:Communication.c ****     {
+ 699              		.loc 1 223 0 is_stmt 0 discriminator 1
+ 700 001a 0E4B     		ldr	r3, .L66
+ 701 001c 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 702 001e 9C42     		cmp	r4, r3
+ 703 0020 F2D3     		bcc	.L61
+ 232:Communication.c **** 
+ 704              		.loc 1 232 0 is_stmt 1
+ 705 0022 FFF7FEFF 		bl	USBFS_GetConfiguration
+ 706              	.LVL58:
+ 707 0026 90B1     		cbz	r0, .L58
+ 234:Communication.c ****     {
+ 708              		.loc 1 234 0
+ 709 0028 FFF7FEFF 		bl	USBFS_DataIsReady
+ 710              	.LVL59:
+ 711 002c 78B1     		cbz	r0, .L58
+ 712              	.LBB4:
+ 237:Communication.c ****         uint16 i2;
+ 713              		.loc 1 237 0
+ 714 002e 6846     		mov	r0, sp
+ 715 0030 FFF7FEFF 		bl	USBFS_GetAll
+ 716              	.LVL60:
+ 717 0034 0546     		mov	r5, r0
+ 718              	.LVL61:
+ 239:Communication.c ****     }
+ 719              		.loc 1 239 0
+ 720 0036 0024     		movs	r4, #0
+ 721              	.LVL62:
+ 722 0038 07E0     		b	.L63
+ 723              	.LVL63:
+ 724              	.L64:
+ 239:Communication.c ****     }
+ 725              		.loc 1 239 0 is_stmt 0 discriminator 3
+ 726 003a 10AB     		add	r3, sp, #64
+ 727 003c 2344     		add	r3, r3, r4
+ 728 003e 13F8400C 		ldrb	r0, [r3, #-64]	@ zero_extendqisi2
+ 729 0042 FFF7FEFF 		bl	ParseRxByte
+ 730              	.LVL64:
+ 731 0046 0134     		adds	r4, r4, #1
+ 732              	.LVL65:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 20
+
+
+ 733 0048 A4B2     		uxth	r4, r4
+ 734              	.LVL66:
+ 735              	.L63:
+ 239:Communication.c ****     }
+ 736              		.loc 1 239 0 discriminator 1
+ 737 004a AC42     		cmp	r4, r5
+ 738 004c F5D3     		bcc	.L64
+ 739              	.LVL67:
+ 740              	.L58:
+ 741              	.LBE4:
+ 241:Communication.c **** 
+ 742              		.loc 1 241 0 is_stmt 1
+ 743 004e 11B0     		add	sp, sp, #68
+ 744              		.cfi_def_cfa_offset 12
+ 745              		@ sp needed
+ 746 0050 30BD     		pop	{r4, r5, pc}
+ 747              	.L67:
+ 748 0052 00BF     		.align	2
+ 749              	.L66:
+ 750 0054 00000000 		.word	.LANCHOR0
+ 751              		.cfi_endproc
+ 752              	.LFE68:
+ 753              		.size	Communication_Task, .-Communication_Task
+ 754              		.section	.text.Communication_IsConnected,"ax",%progbits
+ 755              		.align	2
+ 756              		.global	Communication_IsConnected
+ 757              		.thumb
+ 758              		.thumb_func
+ 759              		.type	Communication_IsConnected, %function
+ 760              	Communication_IsConnected:
+ 761              	.LFB71:
+ 274:Communication.c **** 
+ 275:Communication.c **** uint8 Communication_IsConnected(void)
+ 276:Communication.c **** {
+ 762              		.loc 1 276 0
+ 763              		.cfi_startproc
+ 764              		@ args = 0, pretend = 0, frame = 0
+ 765              		@ frame_needed = 0, uses_anonymous_args = 0
+ 766 0000 08B5     		push	{r3, lr}
+ 767              		.cfi_def_cfa_offset 8
+ 768              		.cfi_offset 3, -8
+ 769              		.cfi_offset 14, -4
+ 277:Communication.c ****     return TransportUSB_IsConnected();
+ 770              		.loc 1 277 0
+ 771 0002 FFF7FEFF 		bl	TransportUSB_IsConnected
+ 772              	.LVL68:
+ 278:Communication.c **** }
+ 773              		.loc 1 278 0
+ 774 0006 08BD     		pop	{r3, pc}
+ 775              		.cfi_endproc
+ 776              	.LFE71:
+ 777              		.size	Communication_IsConnected, .-Communication_IsConnected
+ 778              		.section	.text.Communication_IsStreaming,"ax",%progbits
+ 779              		.align	2
+ 780              		.global	Communication_IsStreaming
+ 781              		.thumb
+ 782              		.thumb_func
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 21
+
+
+ 783              		.type	Communication_IsStreaming, %function
+ 784              	Communication_IsStreaming:
+ 785              	.LFB72:
+ 279:Communication.c **** 
+ 280:Communication.c **** uint8 Communication_IsStreaming(void)
+ 281:Communication.c **** {
+ 786              		.loc 1 281 0
+ 787              		.cfi_startproc
+ 788              		@ args = 0, pretend = 0, frame = 0
+ 789              		@ frame_needed = 0, uses_anonymous_args = 0
+ 790              		@ link register save eliminated.
+ 282:Communication.c ****     return s_streaming;
+ 283:Communication.c **** }
+ 791              		.loc 1 283 0
+ 792 0000 014B     		ldr	r3, .L71
+ 793 0002 187D     		ldrb	r0, [r3, #20]	@ zero_extendqisi2
+ 794 0004 7047     		bx	lr
+ 795              	.L72:
+ 796 0006 00BF     		.align	2
+ 797              	.L71:
+ 798 0008 00000000 		.word	.LANCHOR0
+ 799              		.cfi_endproc
+ 800              	.LFE72:
+ 801              		.size	Communication_IsStreaming, .-Communication_IsStreaming
+ 802              		.bss
+ 803              		.align	2
+ 804              		.set	.LANCHOR0,. + 0
+ 805              		.type	s_transport_count, %object
+ 806              		.size	s_transport_count, 1
+ 807              	s_transport_count:
+ 808 0000 00       		.space	1
+ 809 0001 000000   		.space	3
+ 810              		.type	s_transports, %object
+ 811              		.size	s_transports, 16
+ 812              	s_transports:
+ 813 0004 00000000 		.space	16
+ 813      00000000 
+ 813      00000000 
+ 813      00000000 
+ 814              		.type	s_streaming, %object
+ 815              		.size	s_streaming, 1
+ 816              	s_streaming:
+ 817 0014 00       		.space	1
+ 818              		.type	s_rx_state, %object
+ 819              		.size	s_rx_state, 1
+ 820              	s_rx_state:
+ 821 0015 00       		.space	1
+ 822              		.type	s_rx_cmd, %object
+ 823              		.size	s_rx_cmd, 1
+ 824              	s_rx_cmd:
+ 825 0016 00       		.space	1
+ 826              		.type	s_rx_len_hi, %object
+ 827              		.size	s_rx_len_hi, 1
+ 828              	s_rx_len_hi:
+ 829 0017 00       		.space	1
+ 830              		.type	s_rx_buf, %object
+ 831              		.size	s_rx_buf, 3000
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 22
+
+
+ 832              	s_rx_buf:
+ 833 0018 00000000 		.space	3000
+ 833      00000000 
+ 833      00000000 
+ 833      00000000 
+ 833      00000000 
+ 834              		.type	s_rx_expected, %object
+ 835              		.size	s_rx_expected, 2
+ 836              	s_rx_expected:
+ 837 0bd0 0000     		.space	2
+ 838              		.type	s_rx_count, %object
+ 839              		.size	s_rx_count, 2
+ 840              	s_rx_count:
+ 841 0bd2 0000     		.space	2
+ 842              		.text
+ 843              	.Letext0:
+ 844              		.file 2 "c:\\program files (x86)\\cypress\\psoc creator\\4.4\\psoc creator\\import\\gnu\\arm\\5.4.
+ 845              		.file 3 "c:\\program files (x86)\\cypress\\psoc creator\\4.4\\psoc creator\\import\\gnu\\arm\\5.4.
+ 846              		.file 4 "Generated_Source\\PSoC5/cytypes.h"
+ 847              		.file 5 "..\\shared/transport.h"
+ 848              		.file 6 "Generated_Source\\PSoC5/core_cm3.h"
+ 849              		.file 7 "buffers.h"
+ 850              		.file 8 "tb_buffers.h"
+ 851              		.file 9 "..\\shared/debug.h"
+ 852              		.file 10 "..\\shared/transport_usb.h"
+ 853              		.file 11 "AnalogToDigital.h"
+ 854              		.file 12 "TestBench.h"
+ 855              		.file 13 "Generated_Source\\PSoC5/USBFS_cdc.h"
+ 856              		.file 14 "Generated_Source\\PSoC5/USBFS.h"
+ 857              		.section	.debug_info,"",%progbits
+ 858              	.Ldebug_info0:
+ 859 0000 6E070000 		.4byte	0x76e
+ 860 0004 0400     		.2byte	0x4
+ 861 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 862 000a 04       		.byte	0x4
+ 863 000b 01       		.uleb128 0x1
+ 864 000c 2D040000 		.4byte	.LASF78
+ 865 0010 0C       		.byte	0xc
+ 866 0011 1B020000 		.4byte	.LASF79
+ 867 0015 00000000 		.4byte	.LASF80
+ 868 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 869 001d 00000000 		.4byte	0
+ 870 0021 00000000 		.4byte	.Ldebug_line0
+ 871 0025 02       		.uleb128 0x2
+ 872 0026 01       		.byte	0x1
+ 873 0027 06       		.byte	0x6
+ 874 0028 E7010000 		.4byte	.LASF0
+ 875 002c 02       		.uleb128 0x2
+ 876 002d 01       		.byte	0x1
+ 877 002e 08       		.byte	0x8
+ 878 002f B7010000 		.4byte	.LASF1
+ 879 0033 02       		.uleb128 0x2
+ 880 0034 02       		.byte	0x2
+ 881 0035 05       		.byte	0x5
+ 882 0036 6C000000 		.4byte	.LASF2
+ 883 003a 02       		.uleb128 0x2
+ 884 003b 02       		.byte	0x2
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 23
+
+
+ 885 003c 07       		.byte	0x7
+ 886 003d 97020000 		.4byte	.LASF3
+ 887 0041 03       		.uleb128 0x3
+ 888 0042 D7030000 		.4byte	.LASF9
+ 889 0046 02       		.byte	0x2
+ 890 0047 3F       		.byte	0x3f
+ 891 0048 4C000000 		.4byte	0x4c
+ 892 004c 02       		.uleb128 0x2
+ 893 004d 04       		.byte	0x4
+ 894 004e 05       		.byte	0x5
+ 895 004f 2B010000 		.4byte	.LASF4
+ 896 0053 02       		.uleb128 0x2
+ 897 0054 04       		.byte	0x4
+ 898 0055 07       		.byte	0x7
+ 899 0056 6B020000 		.4byte	.LASF5
+ 900 005a 02       		.uleb128 0x2
+ 901 005b 08       		.byte	0x8
+ 902 005c 05       		.byte	0x5
+ 903 005d FD000000 		.4byte	.LASF6
+ 904 0061 02       		.uleb128 0x2
+ 905 0062 08       		.byte	0x8
+ 906 0063 07       		.byte	0x7
+ 907 0064 F9010000 		.4byte	.LASF7
+ 908 0068 04       		.uleb128 0x4
+ 909 0069 04       		.byte	0x4
+ 910 006a 05       		.byte	0x5
+ 911 006b 696E7400 		.ascii	"int\000"
+ 912 006f 02       		.uleb128 0x2
+ 913 0070 04       		.byte	0x4
+ 914 0071 07       		.byte	0x7
+ 915 0072 2B020000 		.4byte	.LASF8
+ 916 0076 03       		.uleb128 0x3
+ 917 0077 3D010000 		.4byte	.LASF10
+ 918 007b 03       		.byte	0x3
+ 919 007c 2C       		.byte	0x2c
+ 920 007d 41000000 		.4byte	0x41
+ 921 0081 05       		.uleb128 0x5
+ 922 0082 CC000000 		.4byte	.LASF11
+ 923 0086 04       		.byte	0x4
+ 924 0087 E901     		.2byte	0x1e9
+ 925 0089 2C000000 		.4byte	0x2c
+ 926 008d 05       		.uleb128 0x5
+ 927 008e 1F030000 		.4byte	.LASF12
+ 928 0092 04       		.byte	0x4
+ 929 0093 EA01     		.2byte	0x1ea
+ 930 0095 3A000000 		.4byte	0x3a
+ 931 0099 05       		.uleb128 0x5
+ 932 009a C6000000 		.4byte	.LASF13
+ 933 009e 04       		.byte	0x4
+ 934 009f ED01     		.2byte	0x1ed
+ 935 00a1 33000000 		.4byte	0x33
+ 936 00a5 05       		.uleb128 0x5
+ 937 00a6 7B030000 		.4byte	.LASF14
+ 938 00aa 04       		.byte	0x4
+ 939 00ab EE01     		.2byte	0x1ee
+ 940 00ad 4C000000 		.4byte	0x4c
+ 941 00b1 02       		.uleb128 0x2
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 24
+
+
+ 942 00b2 04       		.byte	0x4
+ 943 00b3 04       		.byte	0x4
+ 944 00b4 F7000000 		.4byte	.LASF15
+ 945 00b8 02       		.uleb128 0x2
+ 946 00b9 08       		.byte	0x8
+ 947 00ba 04       		.byte	0x4
+ 948 00bb 08040000 		.4byte	.LASF16
+ 949 00bf 02       		.uleb128 0x2
+ 950 00c0 01       		.byte	0x1
+ 951 00c1 08       		.byte	0x8
+ 952 00c2 B0020000 		.4byte	.LASF17
+ 953 00c6 06       		.uleb128 0x6
+ 954 00c7 81000000 		.4byte	0x81
+ 955 00cb 07       		.uleb128 0x7
+ 956 00cc 04       		.byte	0x4
+ 957 00cd D1000000 		.4byte	0xd1
+ 958 00d1 08       		.uleb128 0x8
+ 959 00d2 02       		.uleb128 0x2
+ 960 00d3 08       		.byte	0x8
+ 961 00d4 04       		.byte	0x4
+ 962 00d5 8C000000 		.4byte	.LASF18
+ 963 00d9 02       		.uleb128 0x2
+ 964 00da 04       		.byte	0x4
+ 965 00db 07       		.byte	0x7
+ 966 00dc 7E000000 		.4byte	.LASF19
+ 967 00e0 07       		.uleb128 0x7
+ 968 00e1 04       		.byte	0x4
+ 969 00e2 E6000000 		.4byte	0xe6
+ 970 00e6 09       		.uleb128 0x9
+ 971 00e7 BF000000 		.4byte	0xbf
+ 972 00eb 0A       		.uleb128 0xa
+ 973 00ec 81000000 		.4byte	0x81
+ 974 00f0 FB000000 		.4byte	0xfb
+ 975 00f4 0B       		.uleb128 0xb
+ 976 00f5 D9000000 		.4byte	0xd9
+ 977 00f9 3F       		.byte	0x3f
+ 978 00fa 00       		.byte	0
+ 979 00fb 0C       		.uleb128 0xc
+ 980 00fc 18       		.byte	0x18
+ 981 00fd 05       		.byte	0x5
+ 982 00fe 12       		.byte	0x12
+ 983 00ff 4C010000 		.4byte	0x14c
+ 984 0103 0D       		.uleb128 0xd
+ 985 0104 B5020000 		.4byte	.LASF20
+ 986 0108 05       		.byte	0x5
+ 987 0109 13       		.byte	0x13
+ 988 010a CB000000 		.4byte	0xcb
+ 989 010e 00       		.byte	0
+ 990 010f 0D       		.uleb128 0xd
+ 991 0110 87000000 		.4byte	.LASF21
+ 992 0114 05       		.byte	0x5
+ 993 0115 14       		.byte	0x14
+ 994 0116 CB000000 		.4byte	0xcb
+ 995 011a 04       		.byte	0x4
+ 996 011b 0D       		.uleb128 0xd
+ 997 011c 8E020000 		.4byte	.LASF22
+ 998 0120 05       		.byte	0x5
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 25
+
+
+ 999 0121 15       		.byte	0x15
+ 1000 0122 51010000 		.4byte	0x151
+ 1001 0126 08       		.byte	0x8
+ 1002 0127 0D       		.uleb128 0xd
+ 1003 0128 B4000000 		.4byte	.LASF23
+ 1004 012c 05       		.byte	0x5
+ 1005 012d 16       		.byte	0x16
+ 1006 012e 76010000 		.4byte	0x176
+ 1007 0132 0C       		.byte	0xc
+ 1008 0133 0D       		.uleb128 0xd
+ 1009 0134 E1030000 		.4byte	.LASF24
+ 1010 0138 05       		.byte	0x5
+ 1011 0139 18       		.byte	0x18
+ 1012 013a 81000000 		.4byte	0x81
+ 1013 013e 10       		.byte	0x10
+ 1014 013f 0D       		.uleb128 0xd
+ 1015 0140 70010000 		.4byte	.LASF25
+ 1016 0144 05       		.byte	0x5
+ 1017 0145 19       		.byte	0x19
+ 1018 0146 E0000000 		.4byte	0xe0
+ 1019 014a 14       		.byte	0x14
+ 1020 014b 00       		.byte	0
+ 1021 014c 0E       		.uleb128 0xe
+ 1022 014d 81000000 		.4byte	0x81
+ 1023 0151 07       		.uleb128 0x7
+ 1024 0152 04       		.byte	0x4
+ 1025 0153 4C010000 		.4byte	0x14c
+ 1026 0157 0F       		.uleb128 0xf
+ 1027 0158 76010000 		.4byte	0x176
+ 1028 015c 10       		.uleb128 0x10
+ 1029 015d 99000000 		.4byte	0x99
+ 1030 0161 10       		.uleb128 0x10
+ 1031 0162 A5000000 		.4byte	0xa5
+ 1032 0166 10       		.uleb128 0x10
+ 1033 0167 A5000000 		.4byte	0xa5
+ 1034 016b 10       		.uleb128 0x10
+ 1035 016c 81000000 		.4byte	0x81
+ 1036 0170 10       		.uleb128 0x10
+ 1037 0171 81000000 		.4byte	0x81
+ 1038 0175 00       		.byte	0
+ 1039 0176 07       		.uleb128 0x7
+ 1040 0177 04       		.byte	0x4
+ 1041 0178 57010000 		.4byte	0x157
+ 1042 017c 03       		.uleb128 0x3
+ 1043 017d F7020000 		.4byte	.LASF26
+ 1044 0181 05       		.byte	0x5
+ 1045 0182 1A       		.byte	0x1a
+ 1046 0183 FB000000 		.4byte	0xfb
+ 1047 0187 11       		.uleb128 0x11
+ 1048 0188 01       		.byte	0x1
+ 1049 0189 2C000000 		.4byte	0x2c
+ 1050 018d 01       		.byte	0x1
+ 1051 018e 36       		.byte	0x36
+ 1052 018f B2010000 		.4byte	0x1b2
+ 1053 0193 12       		.uleb128 0x12
+ 1054 0194 10030000 		.4byte	.LASF27
+ 1055 0198 00       		.byte	0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 26
+
+
+ 1056 0199 12       		.uleb128 0x12
+ 1057 019a B2030000 		.4byte	.LASF28
+ 1058 019e 01       		.byte	0x1
+ 1059 019f 12       		.uleb128 0x12
+ 1060 01a0 BA020000 		.4byte	.LASF29
+ 1061 01a4 02       		.byte	0x2
+ 1062 01a5 12       		.uleb128 0x12
+ 1063 01a6 D2000000 		.4byte	.LASF30
+ 1064 01aa 03       		.byte	0x3
+ 1065 01ab 12       		.uleb128 0x12
+ 1066 01ac 6B030000 		.4byte	.LASF31
+ 1067 01b0 04       		.byte	0x4
+ 1068 01b1 00       		.byte	0
+ 1069 01b2 03       		.uleb128 0x3
+ 1070 01b3 61030000 		.4byte	.LASF32
+ 1071 01b7 01       		.byte	0x1
+ 1072 01b8 3C       		.byte	0x3c
+ 1073 01b9 87010000 		.4byte	0x187
+ 1074 01bd 13       		.uleb128 0x13
+ 1075 01be A5000000 		.4byte	.LASF81
+ 1076 01c2 01       		.byte	0x1
+ 1077 01c3 2B       		.byte	0x2b
+ 1078 01c4 81000000 		.4byte	0x81
+ 1079 01c8 00000000 		.4byte	.LFB64
+ 1080 01cc 24000000 		.4byte	.LFE64-.LFB64
+ 1081 01d0 01       		.uleb128 0x1
+ 1082 01d1 9C       		.byte	0x9c
+ 1083 01d2 01020000 		.4byte	0x201
+ 1084 01d6 14       		.uleb128 0x14
+ 1085 01d7 63666700 		.ascii	"cfg\000"
+ 1086 01db 01       		.byte	0x1
+ 1087 01dc 2B       		.byte	0x2b
+ 1088 01dd 81000000 		.4byte	0x81
+ 1089 01e1 00000000 		.4byte	.LLST0
+ 1090 01e5 15       		.uleb128 0x15
+ 1091 01e6 34010000 		.4byte	.LASF33
+ 1092 01ea 01       		.byte	0x1
+ 1093 01eb 2B       		.byte	0x2b
+ 1094 01ec 81000000 		.4byte	0x81
+ 1095 01f0 01       		.uleb128 0x1
+ 1096 01f1 51       		.byte	0x51
+ 1097 01f2 16       		.uleb128 0x16
+ 1098 01f3 676300   		.ascii	"gc\000"
+ 1099 01f6 01       		.byte	0x1
+ 1100 01f7 2D       		.byte	0x2d
+ 1101 01f8 81000000 		.4byte	0x81
+ 1102 01fc 21000000 		.4byte	.LLST1
+ 1103 0200 00       		.byte	0
+ 1104 0201 17       		.uleb128 0x17
+ 1105 0202 4B020000 		.4byte	.LASF34
+ 1106 0206 01       		.byte	0x1
+ 1107 0207 1A       		.byte	0x1a
+ 1108 0208 00000000 		.4byte	.LFB63
+ 1109 020c 1C000000 		.4byte	.LFE63-.LFB63
+ 1110 0210 01       		.uleb128 0x1
+ 1111 0211 9C       		.byte	0x9c
+ 1112 0212 22020000 		.4byte	0x222
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 27
+
+
+ 1113 0216 18       		.uleb128 0x18
+ 1114 0217 7400     		.ascii	"t\000"
+ 1115 0219 01       		.byte	0x1
+ 1116 021a 1A       		.byte	0x1a
+ 1117 021b 22020000 		.4byte	0x222
+ 1118 021f 01       		.uleb128 0x1
+ 1119 0220 50       		.byte	0x50
+ 1120 0221 00       		.byte	0
+ 1121 0222 07       		.uleb128 0x7
+ 1122 0223 04       		.byte	0x4
+ 1123 0224 7C010000 		.4byte	0x17c
+ 1124 0228 19       		.uleb128 0x19
+ 1125 0229 EA040000 		.4byte	.LASF35
+ 1126 022d 01       		.byte	0x1
+ 1127 022e CB       		.byte	0xcb
+ 1128 022f 00000000 		.4byte	.LFB67
+ 1129 0233 2C000000 		.4byte	.LFE67-.LFB67
+ 1130 0237 01       		.uleb128 0x1
+ 1131 0238 9C       		.byte	0x9c
+ 1132 0239 4B020000 		.4byte	0x24b
+ 1133 023d 16       		.uleb128 0x16
+ 1134 023e 6900     		.ascii	"i\000"
+ 1135 0240 01       		.byte	0x1
+ 1136 0241 CD       		.byte	0xcd
+ 1137 0242 81000000 		.4byte	0x81
+ 1138 0246 40000000 		.4byte	.LLST2
+ 1139 024a 00       		.byte	0
+ 1140 024b 19       		.uleb128 0x19
+ 1141 024c BE030000 		.4byte	.LASF36
+ 1142 0250 01       		.byte	0x1
+ 1143 0251 F3       		.byte	0xf3
+ 1144 0252 00000000 		.4byte	.LFB69
+ 1145 0256 68000000 		.4byte	.LFE69-.LFB69
+ 1146 025a 01       		.uleb128 0x1
+ 1147 025b 9C       		.byte	0x9c
+ 1148 025c 05030000 		.4byte	0x305
+ 1149 0260 1A       		.uleb128 0x1a
+ 1150 0261 DD010000 		.4byte	.LASF37
+ 1151 0265 01       		.byte	0x1
+ 1152 0266 F3       		.byte	0xf3
+ 1153 0267 99000000 		.4byte	0x99
+ 1154 026b 6A000000 		.4byte	.LLST3
+ 1155 026f 1A       		.uleb128 0x1a
+ 1156 0270 9C010000 		.4byte	.LASF38
+ 1157 0274 01       		.byte	0x1
+ 1158 0275 F3       		.byte	0xf3
+ 1159 0276 A5000000 		.4byte	0xa5
+ 1160 027a 8B000000 		.4byte	.LLST4
+ 1161 027e 1A       		.uleb128 0x1a
+ 1162 027f 98000000 		.4byte	.LASF39
+ 1163 0283 01       		.byte	0x1
+ 1164 0284 F4       		.byte	0xf4
+ 1165 0285 A5000000 		.4byte	0xa5
+ 1166 0289 B7000000 		.4byte	.LLST5
+ 1167 028d 1A       		.uleb128 0x1a
+ 1168 028e F3010000 		.4byte	.LASF40
+ 1169 0292 01       		.byte	0x1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 28
+
+
+ 1170 0293 F4       		.byte	0xf4
+ 1171 0294 81000000 		.4byte	0x81
+ 1172 0298 E3000000 		.4byte	.LLST6
+ 1173 029c 16       		.uleb128 0x16
+ 1174 029d 6900     		.ascii	"i\000"
+ 1175 029f 01       		.byte	0x1
+ 1176 02a0 F6       		.byte	0xf6
+ 1177 02a1 81000000 		.4byte	0x81
+ 1178 02a5 04010000 		.4byte	.LLST7
+ 1179 02a9 1B       		.uleb128 0x1b
+ 1180 02aa BB040000 		.4byte	.LASF41
+ 1181 02ae 01       		.byte	0x1
+ 1182 02af F7       		.byte	0xf7
+ 1183 02b0 81000000 		.4byte	0x81
+ 1184 02b4 2E010000 		.4byte	.LLST8
+ 1185 02b8 1C       		.uleb128 0x1c
+ 1186 02b9 26000000 		.4byte	.LBB2
+ 1187 02bd 24000000 		.4byte	.LBE2-.LBB2
+ 1188 02c1 FB020000 		.4byte	0x2fb
+ 1189 02c5 16       		.uleb128 0x16
+ 1190 02c6 7400     		.ascii	"t\000"
+ 1191 02c8 01       		.byte	0x1
+ 1192 02c9 FF       		.byte	0xff
+ 1193 02ca 22020000 		.4byte	0x222
+ 1194 02ce 41010000 		.4byte	.LLST9
+ 1195 02d2 1D       		.uleb128 0x1d
+ 1196 02d3 4A000000 		.4byte	.LVL20
+ 1197 02d7 02       		.uleb128 0x2
+ 1198 02d8 75       		.byte	0x75
+ 1199 02d9 00       		.sleb128 0
+ 1200 02da 1E       		.uleb128 0x1e
+ 1201 02db 01       		.uleb128 0x1
+ 1202 02dc 50       		.byte	0x50
+ 1203 02dd 02       		.uleb128 0x2
+ 1204 02de 7A       		.byte	0x7a
+ 1205 02df 00       		.sleb128 0
+ 1206 02e0 1E       		.uleb128 0x1e
+ 1207 02e1 01       		.uleb128 0x1
+ 1208 02e2 51       		.byte	0x51
+ 1209 02e3 02       		.uleb128 0x2
+ 1210 02e4 77       		.byte	0x77
+ 1211 02e5 00       		.sleb128 0
+ 1212 02e6 1E       		.uleb128 0x1e
+ 1213 02e7 01       		.uleb128 0x1
+ 1214 02e8 52       		.byte	0x52
+ 1215 02e9 02       		.uleb128 0x2
+ 1216 02ea 78       		.byte	0x78
+ 1217 02eb 00       		.sleb128 0
+ 1218 02ec 1E       		.uleb128 0x1e
+ 1219 02ed 01       		.uleb128 0x1
+ 1220 02ee 53       		.byte	0x53
+ 1221 02ef 02       		.uleb128 0x2
+ 1222 02f0 79       		.byte	0x79
+ 1223 02f1 00       		.sleb128 0
+ 1224 02f2 1E       		.uleb128 0x1e
+ 1225 02f3 02       		.uleb128 0x2
+ 1226 02f4 7D       		.byte	0x7d
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 29
+
+
+ 1227 02f5 00       		.sleb128 0
+ 1228 02f6 02       		.uleb128 0x2
+ 1229 02f7 76       		.byte	0x76
+ 1230 02f8 00       		.sleb128 0
+ 1231 02f9 00       		.byte	0
+ 1232 02fa 00       		.byte	0
+ 1233 02fb 1F       		.uleb128 0x1f
+ 1234 02fc 20000000 		.4byte	.LVL14
+ 1235 0300 BD010000 		.4byte	0x1bd
+ 1236 0304 00       		.byte	0
+ 1237 0305 20       		.uleb128 0x20
+ 1238 0306 DF000000 		.4byte	.LASF42
+ 1239 030a 01       		.byte	0x1
+ 1240 030b 0701     		.2byte	0x107
+ 1241 030d 00000000 		.4byte	.LFB70
+ 1242 0311 50000000 		.4byte	.LFE70-.LFB70
+ 1243 0315 01       		.uleb128 0x1
+ 1244 0316 9C       		.byte	0x9c
+ 1245 0317 50030000 		.4byte	0x350
+ 1246 031b 1F       		.uleb128 0x1f
+ 1247 031c 18000000 		.4byte	.LVL24
+ 1248 0320 D6060000 		.4byte	0x6d6
+ 1249 0324 1F       		.uleb128 0x1f
+ 1250 0325 1E000000 		.4byte	.LVL25
+ 1251 0329 E1060000 		.4byte	0x6e1
+ 1252 032d 21       		.uleb128 0x21
+ 1253 032e 38000000 		.4byte	.LVL26
+ 1254 0332 EC060000 		.4byte	0x6ec
+ 1255 0336 1E       		.uleb128 0x1e
+ 1256 0337 01       		.uleb128 0x1
+ 1257 0338 50       		.byte	0x50
+ 1258 0339 02       		.uleb128 0x2
+ 1259 033a 74       		.byte	0x74
+ 1260 033b 00       		.sleb128 0
+ 1261 033c 1E       		.uleb128 0x1e
+ 1262 033d 01       		.uleb128 0x1
+ 1263 033e 51       		.byte	0x51
+ 1264 033f 02       		.uleb128 0x2
+ 1265 0340 75       		.byte	0x75
+ 1266 0341 00       		.sleb128 0
+ 1267 0342 1E       		.uleb128 0x1e
+ 1268 0343 01       		.uleb128 0x1
+ 1269 0344 52       		.byte	0x52
+ 1270 0345 02       		.uleb128 0x2
+ 1271 0346 76       		.byte	0x76
+ 1272 0347 00       		.sleb128 0
+ 1273 0348 1E       		.uleb128 0x1e
+ 1274 0349 01       		.uleb128 0x1
+ 1275 034a 53       		.byte	0x53
+ 1276 034b 02       		.uleb128 0x2
+ 1277 034c 77       		.byte	0x77
+ 1278 034d 00       		.sleb128 0
+ 1279 034e 00       		.byte	0
+ 1280 034f 00       		.byte	0
+ 1281 0350 22       		.uleb128 0x22
+ 1282 0351 F9030000 		.4byte	.LASF45
+ 1283 0355 01       		.byte	0x1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 30
+
+
+ 1284 0356 45       		.byte	0x45
+ 1285 0357 00000000 		.4byte	.LFB65
+ 1286 035b DC000000 		.4byte	.LFE65-.LFB65
+ 1287 035f 01       		.uleb128 0x1
+ 1288 0360 9C       		.byte	0x9c
+ 1289 0361 B2040000 		.4byte	0x4b2
+ 1290 0365 14       		.uleb128 0x14
+ 1291 0366 636D6400 		.ascii	"cmd\000"
+ 1292 036a 01       		.byte	0x1
+ 1293 036b 45       		.byte	0x45
+ 1294 036c 81000000 		.4byte	0x81
+ 1295 0370 54010000 		.4byte	.LLST10
+ 1296 0374 1A       		.uleb128 0x1a
+ 1297 0375 FD040000 		.4byte	.LASF43
+ 1298 0379 01       		.byte	0x1
+ 1299 037a 45       		.byte	0x45
+ 1300 037b B2040000 		.4byte	0x4b2
+ 1301 037f 81010000 		.4byte	.LLST11
+ 1302 0383 14       		.uleb128 0x14
+ 1303 0384 6C656E00 		.ascii	"len\000"
+ 1304 0388 01       		.byte	0x1
+ 1305 0389 45       		.byte	0x45
+ 1306 038a 8D000000 		.4byte	0x8d
+ 1307 038e AD010000 		.4byte	.LLST12
+ 1308 0392 23       		.uleb128 0x23
+ 1309 0393 76000000 		.4byte	.LASF44
+ 1310 0397 01       		.byte	0x1
+ 1311 0398 47       		.byte	0x47
+ 1312 0399 BD040000 		.4byte	0x4bd
+ 1313 039d 02       		.uleb128 0x2
+ 1314 039e 91       		.byte	0x91
+ 1315 039f 6C       		.sleb128 -20
+ 1316 03a0 1C       		.uleb128 0x1c
+ 1317 03a1 68000000 		.4byte	.LBB3
+ 1318 03a5 24000000 		.4byte	.LBE3-.LBB3
+ 1319 03a9 F0030000 		.4byte	0x3f0
+ 1320 03ad 16       		.uleb128 0x16
+ 1321 03ae 63666700 		.ascii	"cfg\000"
+ 1322 03b2 01       		.byte	0x1
+ 1323 03b3 64       		.byte	0x64
+ 1324 03b4 81000000 		.4byte	0x81
+ 1325 03b8 CE010000 		.4byte	.LLST13
+ 1326 03bc 1B       		.uleb128 0x1b
+ 1327 03bd 34010000 		.4byte	.LASF33
+ 1328 03c1 01       		.byte	0x1
+ 1329 03c2 65       		.byte	0x65
+ 1330 03c3 81000000 		.4byte	0x81
+ 1331 03c7 E2010000 		.4byte	.LLST14
+ 1332 03cb 1F       		.uleb128 0x1f
+ 1333 03cc 70000000 		.4byte	.LVL37
+ 1334 03d0 F7060000 		.4byte	0x6f7
+ 1335 03d4 21       		.uleb128 0x21
+ 1336 03d5 8A000000 		.4byte	.LVL38
+ 1337 03d9 02070000 		.4byte	0x702
+ 1338 03dd 1E       		.uleb128 0x1e
+ 1339 03de 01       		.uleb128 0x1
+ 1340 03df 50       		.byte	0x50
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 31
+
+
+ 1341 03e0 02       		.uleb128 0x2
+ 1342 03e1 08       		.byte	0x8
+ 1343 03e2 60       		.byte	0x60
+ 1344 03e3 1E       		.uleb128 0x1e
+ 1345 03e4 01       		.uleb128 0x1
+ 1346 03e5 51       		.byte	0x51
+ 1347 03e6 02       		.uleb128 0x2
+ 1348 03e7 91       		.byte	0x91
+ 1349 03e8 6C       		.sleb128 -20
+ 1350 03e9 1E       		.uleb128 0x1e
+ 1351 03ea 01       		.uleb128 0x1
+ 1352 03eb 52       		.byte	0x52
+ 1353 03ec 01       		.uleb128 0x1
+ 1354 03ed 32       		.byte	0x32
+ 1355 03ee 00       		.byte	0
+ 1356 03ef 00       		.byte	0
+ 1357 03f0 24       		.uleb128 0x24
+ 1358 03f1 18000000 		.4byte	.LVL31
+ 1359 03f5 02070000 		.4byte	0x702
+ 1360 03f9 0F040000 		.4byte	0x40f
+ 1361 03fd 1E       		.uleb128 0x1e
+ 1362 03fe 01       		.uleb128 0x1
+ 1363 03ff 50       		.byte	0x50
+ 1364 0400 02       		.uleb128 0x2
+ 1365 0401 08       		.byte	0x8
+ 1366 0402 30       		.byte	0x30
+ 1367 0403 1E       		.uleb128 0x1e
+ 1368 0404 01       		.uleb128 0x1
+ 1369 0405 51       		.byte	0x51
+ 1370 0406 02       		.uleb128 0x2
+ 1371 0407 91       		.byte	0x91
+ 1372 0408 6C       		.sleb128 -20
+ 1373 0409 1E       		.uleb128 0x1e
+ 1374 040a 01       		.uleb128 0x1
+ 1375 040b 52       		.byte	0x52
+ 1376 040c 01       		.uleb128 0x1
+ 1377 040d 31       		.byte	0x31
+ 1378 040e 00       		.byte	0
+ 1379 040f 24       		.uleb128 0x24
+ 1380 0410 3A000000 		.4byte	.LVL32
+ 1381 0414 02070000 		.4byte	0x702
+ 1382 0418 2D040000 		.4byte	0x42d
+ 1383 041c 1E       		.uleb128 0x1e
+ 1384 041d 01       		.uleb128 0x1
+ 1385 041e 50       		.byte	0x50
+ 1386 041f 02       		.uleb128 0x2
+ 1387 0420 08       		.byte	0x8
+ 1388 0421 20       		.byte	0x20
+ 1389 0422 1E       		.uleb128 0x1e
+ 1390 0423 01       		.uleb128 0x1
+ 1391 0424 51       		.byte	0x51
+ 1392 0425 01       		.uleb128 0x1
+ 1393 0426 30       		.byte	0x30
+ 1394 0427 1E       		.uleb128 0x1e
+ 1395 0428 01       		.uleb128 0x1
+ 1396 0429 52       		.byte	0x52
+ 1397 042a 01       		.uleb128 0x1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 32
+
+
+ 1398 042b 30       		.byte	0x30
+ 1399 042c 00       		.byte	0
+ 1400 042d 24       		.uleb128 0x24
+ 1401 042e 4A000000 		.4byte	.LVL33
+ 1402 0432 02070000 		.4byte	0x702
+ 1403 0436 4B040000 		.4byte	0x44b
+ 1404 043a 1E       		.uleb128 0x1e
+ 1405 043b 01       		.uleb128 0x1
+ 1406 043c 50       		.byte	0x50
+ 1407 043d 02       		.uleb128 0x2
+ 1408 043e 08       		.byte	0x8
+ 1409 043f 21       		.byte	0x21
+ 1410 0440 1E       		.uleb128 0x1e
+ 1411 0441 01       		.uleb128 0x1
+ 1412 0442 51       		.byte	0x51
+ 1413 0443 01       		.uleb128 0x1
+ 1414 0444 30       		.byte	0x30
+ 1415 0445 1E       		.uleb128 0x1e
+ 1416 0446 01       		.uleb128 0x1
+ 1417 0447 52       		.byte	0x52
+ 1418 0448 01       		.uleb128 0x1
+ 1419 0449 30       		.byte	0x30
+ 1420 044a 00       		.byte	0
+ 1421 044b 1F       		.uleb128 0x1f
+ 1422 044c 56000000 		.4byte	.LVL34
+ 1423 0450 0D070000 		.4byte	0x70d
+ 1424 0454 1F       		.uleb128 0x1f
+ 1425 0455 62000000 		.4byte	.LVL35
+ 1426 0459 18070000 		.4byte	0x718
+ 1427 045d 24       		.uleb128 0x24
+ 1428 045e A0000000 		.4byte	.LVL39
+ 1429 0462 23070000 		.4byte	0x723
+ 1430 0466 77040000 		.4byte	0x477
+ 1431 046a 1E       		.uleb128 0x1e
+ 1432 046b 01       		.uleb128 0x1
+ 1433 046c 50       		.byte	0x50
+ 1434 046d 02       		.uleb128 0x2
+ 1435 046e 76       		.byte	0x76
+ 1436 046f 00       		.sleb128 0
+ 1437 0470 1E       		.uleb128 0x1e
+ 1438 0471 01       		.uleb128 0x1
+ 1439 0472 51       		.byte	0x51
+ 1440 0473 02       		.uleb128 0x2
+ 1441 0474 75       		.byte	0x75
+ 1442 0475 00       		.sleb128 0
+ 1443 0476 00       		.byte	0
+ 1444 0477 24       		.uleb128 0x24
+ 1445 0478 B4000000 		.4byte	.LVL40
+ 1446 047c 02070000 		.4byte	0x702
+ 1447 0480 96040000 		.4byte	0x496
+ 1448 0484 1E       		.uleb128 0x1e
+ 1449 0485 01       		.uleb128 0x1
+ 1450 0486 50       		.byte	0x50
+ 1451 0487 02       		.uleb128 0x2
+ 1452 0488 08       		.byte	0x8
+ 1453 0489 50       		.byte	0x50
+ 1454 048a 1E       		.uleb128 0x1e
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 33
+
+
+ 1455 048b 01       		.uleb128 0x1
+ 1456 048c 51       		.byte	0x51
+ 1457 048d 02       		.uleb128 0x2
+ 1458 048e 91       		.byte	0x91
+ 1459 048f 6C       		.sleb128 -20
+ 1460 0490 1E       		.uleb128 0x1e
+ 1461 0491 01       		.uleb128 0x1
+ 1462 0492 52       		.byte	0x52
+ 1463 0493 01       		.uleb128 0x1
+ 1464 0494 32       		.byte	0x32
+ 1465 0495 00       		.byte	0
+ 1466 0496 1F       		.uleb128 0x1f
+ 1467 0497 BE000000 		.4byte	.LVL41
+ 1468 049b 2E070000 		.4byte	0x72e
+ 1469 049f 1F       		.uleb128 0x1f
+ 1470 04a0 C8000000 		.4byte	.LVL42
+ 1471 04a4 39070000 		.4byte	0x739
+ 1472 04a8 1F       		.uleb128 0x1f
+ 1473 04a9 CC000000 		.4byte	.LVL43
+ 1474 04ad 05030000 		.4byte	0x305
+ 1475 04b1 00       		.byte	0
+ 1476 04b2 07       		.uleb128 0x7
+ 1477 04b3 04       		.byte	0x4
+ 1478 04b4 B8040000 		.4byte	0x4b8
+ 1479 04b8 09       		.uleb128 0x9
+ 1480 04b9 81000000 		.4byte	0x81
+ 1481 04bd 0A       		.uleb128 0xa
+ 1482 04be 81000000 		.4byte	0x81
+ 1483 04c2 CD040000 		.4byte	0x4cd
+ 1484 04c6 0B       		.uleb128 0xb
+ 1485 04c7 D9000000 		.4byte	0xd9
+ 1486 04cb 01       		.byte	0x1
+ 1487 04cc 00       		.byte	0
+ 1488 04cd 22       		.uleb128 0x22
+ 1489 04ce A6030000 		.4byte	.LASF46
+ 1490 04d2 01       		.byte	0x1
+ 1491 04d3 8C       		.byte	0x8c
+ 1492 04d4 00000000 		.4byte	.LFB66
+ 1493 04d8 C4000000 		.4byte	.LFE66-.LFB66
+ 1494 04dc 01       		.uleb128 0x1
+ 1495 04dd 9C       		.byte	0x9c
+ 1496 04de 19050000 		.4byte	0x519
+ 1497 04e2 14       		.uleb128 0x14
+ 1498 04e3 6200     		.ascii	"b\000"
+ 1499 04e5 01       		.byte	0x1
+ 1500 04e6 8C       		.byte	0x8c
+ 1501 04e7 81000000 		.4byte	0x81
+ 1502 04eb F6010000 		.4byte	.LLST15
+ 1503 04ef 24       		.uleb128 0x24
+ 1504 04f0 4C000000 		.4byte	.LVL47
+ 1505 04f4 50030000 		.4byte	0x350
+ 1506 04f8 08050000 		.4byte	0x508
+ 1507 04fc 1E       		.uleb128 0x1e
+ 1508 04fd 01       		.uleb128 0x1
+ 1509 04fe 51       		.byte	0x51
+ 1510 04ff 02       		.uleb128 0x2
+ 1511 0500 74       		.byte	0x74
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 34
+
+
+ 1512 0501 18       		.sleb128 24
+ 1513 0502 1E       		.uleb128 0x1e
+ 1514 0503 01       		.uleb128 0x1
+ 1515 0504 52       		.byte	0x52
+ 1516 0505 01       		.uleb128 0x1
+ 1517 0506 30       		.byte	0x30
+ 1518 0507 00       		.byte	0
+ 1519 0508 21       		.uleb128 0x21
+ 1520 0509 BA000000 		.4byte	.LVL52
+ 1521 050d 50030000 		.4byte	0x350
+ 1522 0511 1E       		.uleb128 0x1e
+ 1523 0512 01       		.uleb128 0x1
+ 1524 0513 51       		.byte	0x51
+ 1525 0514 02       		.uleb128 0x2
+ 1526 0515 74       		.byte	0x74
+ 1527 0516 18       		.sleb128 24
+ 1528 0517 00       		.byte	0
+ 1529 0518 00       		.byte	0
+ 1530 0519 19       		.uleb128 0x19
+ 1531 051a C5040000 		.4byte	.LASF47
+ 1532 051e 01       		.byte	0x1
+ 1533 051f DA       		.byte	0xda
+ 1534 0520 00000000 		.4byte	.LFB68
+ 1535 0524 58000000 		.4byte	.LFE68-.LFB68
+ 1536 0528 01       		.uleb128 0x1
+ 1537 0529 9C       		.byte	0x9c
+ 1538 052a A5050000 		.4byte	0x5a5
+ 1539 052e 16       		.uleb128 0x16
+ 1540 052f 6900     		.ascii	"i\000"
+ 1541 0531 01       		.byte	0x1
+ 1542 0532 DC       		.byte	0xdc
+ 1543 0533 81000000 		.4byte	0x81
+ 1544 0537 49020000 		.4byte	.LLST16
+ 1545 053b 1C       		.uleb128 0x1c
+ 1546 053c 2E000000 		.4byte	.LBB4
+ 1547 0540 20000000 		.4byte	.LBE4-.LBB4
+ 1548 0544 92050000 		.4byte	0x592
+ 1549 0548 23       		.uleb128 0x23
+ 1550 0549 AA020000 		.4byte	.LASF48
+ 1551 054d 01       		.byte	0x1
+ 1552 054e EC       		.byte	0xec
+ 1553 054f EB000000 		.4byte	0xeb
+ 1554 0553 03       		.uleb128 0x3
+ 1555 0554 91       		.byte	0x91
+ 1556 0555 B07F     		.sleb128 -80
+ 1557 0557 1B       		.uleb128 0x1b
+ 1558 0558 C0000000 		.4byte	.LASF49
+ 1559 055c 01       		.byte	0x1
+ 1560 055d ED       		.byte	0xed
+ 1561 055e 8D000000 		.4byte	0x8d
+ 1562 0562 73020000 		.4byte	.LLST17
+ 1563 0566 16       		.uleb128 0x16
+ 1564 0567 693200   		.ascii	"i2\000"
+ 1565 056a 01       		.byte	0x1
+ 1566 056b EE       		.byte	0xee
+ 1567 056c 8D000000 		.4byte	0x8d
+ 1568 0570 86020000 		.4byte	.LLST18
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 35
+
+
+ 1569 0574 24       		.uleb128 0x24
+ 1570 0575 34000000 		.4byte	.LVL60
+ 1571 0579 44070000 		.4byte	0x744
+ 1572 057d 88050000 		.4byte	0x588
+ 1573 0581 1E       		.uleb128 0x1e
+ 1574 0582 01       		.uleb128 0x1
+ 1575 0583 50       		.byte	0x50
+ 1576 0584 02       		.uleb128 0x2
+ 1577 0585 7D       		.byte	0x7d
+ 1578 0586 00       		.sleb128 0
+ 1579 0587 00       		.byte	0
+ 1580 0588 1F       		.uleb128 0x1f
+ 1581 0589 46000000 		.4byte	.LVL64
+ 1582 058d CD040000 		.4byte	0x4cd
+ 1583 0591 00       		.byte	0
+ 1584 0592 1F       		.uleb128 0x1f
+ 1585 0593 26000000 		.4byte	.LVL58
+ 1586 0597 4F070000 		.4byte	0x74f
+ 1587 059b 1F       		.uleb128 0x1f
+ 1588 059c 2C000000 		.4byte	.LVL59
+ 1589 05a0 5B070000 		.4byte	0x75b
+ 1590 05a4 00       		.byte	0
+ 1591 05a5 25       		.uleb128 0x25
+ 1592 05a6 8C030000 		.4byte	.LASF82
+ 1593 05aa 01       		.byte	0x1
+ 1594 05ab 1301     		.2byte	0x113
+ 1595 05ad 81000000 		.4byte	0x81
+ 1596 05b1 00000000 		.4byte	.LFB71
+ 1597 05b5 08000000 		.4byte	.LFE71-.LFB71
+ 1598 05b9 01       		.uleb128 0x1
+ 1599 05ba 9C       		.byte	0x9c
+ 1600 05bb C9050000 		.4byte	0x5c9
+ 1601 05bf 1F       		.uleb128 0x1f
+ 1602 05c0 06000000 		.4byte	.LVL68
+ 1603 05c4 66070000 		.4byte	0x766
+ 1604 05c8 00       		.byte	0
+ 1605 05c9 26       		.uleb128 0x26
+ 1606 05ca C6020000 		.4byte	.LASF83
+ 1607 05ce 01       		.byte	0x1
+ 1608 05cf 1801     		.2byte	0x118
+ 1609 05d1 81000000 		.4byte	0x81
+ 1610 05d5 00000000 		.4byte	.LFB72
+ 1611 05d9 0C000000 		.4byte	.LFE72-.LFB72
+ 1612 05dd 01       		.uleb128 0x1
+ 1613 05de 9C       		.byte	0x9c
+ 1614 05df 0A       		.uleb128 0xa
+ 1615 05e0 22020000 		.4byte	0x222
+ 1616 05e4 EF050000 		.4byte	0x5ef
+ 1617 05e8 0B       		.uleb128 0xb
+ 1618 05e9 D9000000 		.4byte	0xd9
+ 1619 05ed 03       		.byte	0x3
+ 1620 05ee 00       		.byte	0
+ 1621 05ef 23       		.uleb128 0x23
+ 1622 05f0 03030000 		.4byte	.LASF50
+ 1623 05f4 01       		.byte	0x1
+ 1624 05f5 17       		.byte	0x17
+ 1625 05f6 DF050000 		.4byte	0x5df
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 36
+
+
+ 1626 05fa 05       		.uleb128 0x5
+ 1627 05fb 03       		.byte	0x3
+ 1628 05fc 04000000 		.4byte	s_transports
+ 1629 0600 23       		.uleb128 0x23
+ 1630 0601 8A010000 		.4byte	.LASF51
+ 1631 0605 01       		.byte	0x1
+ 1632 0606 18       		.byte	0x18
+ 1633 0607 81000000 		.4byte	0x81
+ 1634 060b 05       		.uleb128 0x5
+ 1635 060c 03       		.byte	0x3
+ 1636 060d 00000000 		.4byte	s_transport_count
+ 1637 0611 23       		.uleb128 0x23
+ 1638 0612 40030000 		.4byte	.LASF52
+ 1639 0616 01       		.byte	0x1
+ 1640 0617 24       		.byte	0x24
+ 1641 0618 81000000 		.4byte	0x81
+ 1642 061c 05       		.uleb128 0x5
+ 1643 061d 03       		.byte	0x3
+ 1644 061e 14000000 		.4byte	s_streaming
+ 1645 0622 23       		.uleb128 0x23
+ 1646 0623 C5010000 		.4byte	.LASF53
+ 1647 0627 01       		.byte	0x1
+ 1648 0628 3E       		.byte	0x3e
+ 1649 0629 B2010000 		.4byte	0x1b2
+ 1650 062d 05       		.uleb128 0x5
+ 1651 062e 03       		.byte	0x3
+ 1652 062f 15000000 		.4byte	s_rx_state
+ 1653 0633 23       		.uleb128 0x23
+ 1654 0634 0B010000 		.4byte	.LASF54
+ 1655 0638 01       		.byte	0x1
+ 1656 0639 3F       		.byte	0x3f
+ 1657 063a 81000000 		.4byte	0x81
+ 1658 063e 05       		.uleb128 0x5
+ 1659 063f 03       		.byte	0x3
+ 1660 0640 16000000 		.4byte	s_rx_cmd
+ 1661 0644 23       		.uleb128 0x23
+ 1662 0645 75010000 		.4byte	.LASF55
+ 1663 0649 01       		.byte	0x1
+ 1664 064a 40       		.byte	0x40
+ 1665 064b 81000000 		.4byte	0x81
+ 1666 064f 05       		.uleb128 0x5
+ 1667 0650 03       		.byte	0x3
+ 1668 0651 17000000 		.4byte	s_rx_len_hi
+ 1669 0655 0A       		.uleb128 0xa
+ 1670 0656 81000000 		.4byte	0x81
+ 1671 065a 66060000 		.4byte	0x666
+ 1672 065e 27       		.uleb128 0x27
+ 1673 065f D9000000 		.4byte	0xd9
+ 1674 0663 B70B     		.2byte	0xbb7
+ 1675 0665 00       		.byte	0
+ 1676 0666 23       		.uleb128 0x23
+ 1677 0667 81010000 		.4byte	.LASF56
+ 1678 066b 01       		.byte	0x1
+ 1679 066c 41       		.byte	0x41
+ 1680 066d 55060000 		.4byte	0x655
+ 1681 0671 05       		.uleb128 0x5
+ 1682 0672 03       		.byte	0x3
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 37
+
+
+ 1683 0673 18000000 		.4byte	s_rx_buf
+ 1684 0677 23       		.uleb128 0x23
+ 1685 0678 81030000 		.4byte	.LASF57
+ 1686 067c 01       		.byte	0x1
+ 1687 067d 42       		.byte	0x42
+ 1688 067e 8D000000 		.4byte	0x8d
+ 1689 0682 05       		.uleb128 0x5
+ 1690 0683 03       		.byte	0x3
+ 1691 0684 D20B0000 		.4byte	s_rx_count
+ 1692 0688 23       		.uleb128 0x23
+ 1693 0689 32030000 		.4byte	.LASF58
+ 1694 068d 01       		.byte	0x1
+ 1695 068e 43       		.byte	0x43
+ 1696 068f 8D000000 		.4byte	0x8d
+ 1697 0693 05       		.uleb128 0x5
+ 1698 0694 03       		.byte	0x3
+ 1699 0695 D00B0000 		.4byte	s_rx_expected
+ 1700 0699 28       		.uleb128 0x28
+ 1701 069a 20040000 		.4byte	.LASF59
+ 1702 069e 06       		.byte	0x6
+ 1703 069f 1207     		.2byte	0x712
+ 1704 06a1 A5060000 		.4byte	0x6a5
+ 1705 06a5 06       		.uleb128 0x6
+ 1706 06a6 76000000 		.4byte	0x76
+ 1707 06aa 29       		.uleb128 0x29
+ 1708 06ab 66010000 		.4byte	.LASF60
+ 1709 06af 07       		.byte	0x7
+ 1710 06b0 22       		.byte	0x22
+ 1711 06b1 C6000000 		.4byte	0xc6
+ 1712 06b5 29       		.uleb128 0x29
+ 1713 06b6 A8010000 		.4byte	.LASF61
+ 1714 06ba 07       		.byte	0x7
+ 1715 06bb 26       		.byte	0x26
+ 1716 06bc C6000000 		.4byte	0xc6
+ 1717 06c0 29       		.uleb128 0x29
+ 1718 06c1 26030000 		.4byte	.LASF62
+ 1719 06c5 08       		.byte	0x8
+ 1720 06c6 20       		.byte	0x20
+ 1721 06c7 C6000000 		.4byte	0xc6
+ 1722 06cb 29       		.uleb128 0x29
+ 1723 06cc 59010000 		.4byte	.LASF63
+ 1724 06d0 08       		.byte	0x8
+ 1725 06d1 24       		.byte	0x24
+ 1726 06d2 C6000000 		.4byte	0xc6
+ 1727 06d6 2A       		.uleb128 0x2a
+ 1728 06d7 E9030000 		.4byte	.LASF64
+ 1729 06db E9030000 		.4byte	.LASF64
+ 1730 06df 09       		.byte	0x9
+ 1731 06e0 2B       		.byte	0x2b
+ 1732 06e1 2A       		.uleb128 0x2a
+ 1733 06e2 7D020000 		.4byte	.LASF65
+ 1734 06e6 7D020000 		.4byte	.LASF65
+ 1735 06ea 09       		.byte	0x9
+ 1736 06eb 2F       		.byte	0x2f
+ 1737 06ec 2A       		.uleb128 0x2a
+ 1738 06ed E0020000 		.4byte	.LASF66
+ 1739 06f1 E0020000 		.4byte	.LASF66
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 38
+
+
+ 1740 06f5 0A       		.byte	0xa
+ 1741 06f6 14       		.byte	0x14
+ 1742 06f7 2A       		.uleb128 0x2a
+ 1743 06f8 14010000 		.4byte	.LASF67
+ 1744 06fc 14010000 		.4byte	.LASF67
+ 1745 0700 0B       		.byte	0xb
+ 1746 0701 2E       		.byte	0x2e
+ 1747 0702 2A       		.uleb128 0x2a
+ 1748 0703 10020000 		.4byte	.LASF68
+ 1749 0707 10020000 		.4byte	.LASF68
+ 1750 070b 09       		.byte	0x9
+ 1751 070c 32       		.byte	0x32
+ 1752 070d 2A       		.uleb128 0x2a
+ 1753 070e 38020000 		.4byte	.LASF69
+ 1754 0712 38020000 		.4byte	.LASF69
+ 1755 0716 0C       		.byte	0xc
+ 1756 0717 23       		.byte	0x23
+ 1757 0718 2A       		.uleb128 0x2a
+ 1758 0719 45010000 		.4byte	.LASF70
+ 1759 071d 45010000 		.4byte	.LASF70
+ 1760 0721 0C       		.byte	0xc
+ 1761 0722 27       		.byte	0x27
+ 1762 0723 2A       		.uleb128 0x2a
+ 1763 0724 4C030000 		.4byte	.LASF71
+ 1764 0728 4C030000 		.4byte	.LASF71
+ 1765 072c 0C       		.byte	0xc
+ 1766 072d 2D       		.byte	0x2d
+ 1767 072e 2A       		.uleb128 0x2a
+ 1768 072f 2B000000 		.4byte	.LASF72
+ 1769 0733 2B000000 		.4byte	.LASF72
+ 1770 0737 09       		.byte	0x9
+ 1771 0738 2A       		.byte	0x2a
+ 1772 0739 2A       		.uleb128 0x2a
+ 1773 073a 0F040000 		.4byte	.LASF73
+ 1774 073e 0F040000 		.4byte	.LASF73
+ 1775 0742 09       		.byte	0x9
+ 1776 0743 2E       		.byte	0x2e
+ 1777 0744 2A       		.uleb128 0x2a
+ 1778 0745 D0010000 		.4byte	.LASF74
+ 1779 0749 D0010000 		.4byte	.LASF74
+ 1780 074d 0D       		.byte	0xd
+ 1781 074e 2B       		.byte	0x2b
+ 1782 074f 2B       		.uleb128 0x2b
+ 1783 0750 3C000000 		.4byte	.LASF75
+ 1784 0754 3C000000 		.4byte	.LASF75
+ 1785 0758 0E       		.byte	0xe
+ 1786 0759 2D01     		.2byte	0x12d
+ 1787 075b 2A       		.uleb128 0x2a
+ 1788 075c D8040000 		.4byte	.LASF76
+ 1789 0760 D8040000 		.4byte	.LASF76
+ 1790 0764 0D       		.byte	0xd
+ 1791 0765 29       		.byte	0x29
+ 1792 0766 2A       		.uleb128 0x2a
+ 1793 0767 53000000 		.4byte	.LASF77
+ 1794 076b 53000000 		.4byte	.LASF77
+ 1795 076f 0A       		.byte	0xa
+ 1796 0770 1A       		.byte	0x1a
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 39
+
+
+ 1797 0771 00       		.byte	0
+ 1798              		.section	.debug_abbrev,"",%progbits
+ 1799              	.Ldebug_abbrev0:
+ 1800 0000 01       		.uleb128 0x1
+ 1801 0001 11       		.uleb128 0x11
+ 1802 0002 01       		.byte	0x1
+ 1803 0003 25       		.uleb128 0x25
+ 1804 0004 0E       		.uleb128 0xe
+ 1805 0005 13       		.uleb128 0x13
+ 1806 0006 0B       		.uleb128 0xb
+ 1807 0007 03       		.uleb128 0x3
+ 1808 0008 0E       		.uleb128 0xe
+ 1809 0009 1B       		.uleb128 0x1b
+ 1810 000a 0E       		.uleb128 0xe
+ 1811 000b 55       		.uleb128 0x55
+ 1812 000c 17       		.uleb128 0x17
+ 1813 000d 11       		.uleb128 0x11
+ 1814 000e 01       		.uleb128 0x1
+ 1815 000f 10       		.uleb128 0x10
+ 1816 0010 17       		.uleb128 0x17
+ 1817 0011 00       		.byte	0
+ 1818 0012 00       		.byte	0
+ 1819 0013 02       		.uleb128 0x2
+ 1820 0014 24       		.uleb128 0x24
+ 1821 0015 00       		.byte	0
+ 1822 0016 0B       		.uleb128 0xb
+ 1823 0017 0B       		.uleb128 0xb
+ 1824 0018 3E       		.uleb128 0x3e
+ 1825 0019 0B       		.uleb128 0xb
+ 1826 001a 03       		.uleb128 0x3
+ 1827 001b 0E       		.uleb128 0xe
+ 1828 001c 00       		.byte	0
+ 1829 001d 00       		.byte	0
+ 1830 001e 03       		.uleb128 0x3
+ 1831 001f 16       		.uleb128 0x16
+ 1832 0020 00       		.byte	0
+ 1833 0021 03       		.uleb128 0x3
+ 1834 0022 0E       		.uleb128 0xe
+ 1835 0023 3A       		.uleb128 0x3a
+ 1836 0024 0B       		.uleb128 0xb
+ 1837 0025 3B       		.uleb128 0x3b
+ 1838 0026 0B       		.uleb128 0xb
+ 1839 0027 49       		.uleb128 0x49
+ 1840 0028 13       		.uleb128 0x13
+ 1841 0029 00       		.byte	0
+ 1842 002a 00       		.byte	0
+ 1843 002b 04       		.uleb128 0x4
+ 1844 002c 24       		.uleb128 0x24
+ 1845 002d 00       		.byte	0
+ 1846 002e 0B       		.uleb128 0xb
+ 1847 002f 0B       		.uleb128 0xb
+ 1848 0030 3E       		.uleb128 0x3e
+ 1849 0031 0B       		.uleb128 0xb
+ 1850 0032 03       		.uleb128 0x3
+ 1851 0033 08       		.uleb128 0x8
+ 1852 0034 00       		.byte	0
+ 1853 0035 00       		.byte	0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 40
+
+
+ 1854 0036 05       		.uleb128 0x5
+ 1855 0037 16       		.uleb128 0x16
+ 1856 0038 00       		.byte	0
+ 1857 0039 03       		.uleb128 0x3
+ 1858 003a 0E       		.uleb128 0xe
+ 1859 003b 3A       		.uleb128 0x3a
+ 1860 003c 0B       		.uleb128 0xb
+ 1861 003d 3B       		.uleb128 0x3b
+ 1862 003e 05       		.uleb128 0x5
+ 1863 003f 49       		.uleb128 0x49
+ 1864 0040 13       		.uleb128 0x13
+ 1865 0041 00       		.byte	0
+ 1866 0042 00       		.byte	0
+ 1867 0043 06       		.uleb128 0x6
+ 1868 0044 35       		.uleb128 0x35
+ 1869 0045 00       		.byte	0
+ 1870 0046 49       		.uleb128 0x49
+ 1871 0047 13       		.uleb128 0x13
+ 1872 0048 00       		.byte	0
+ 1873 0049 00       		.byte	0
+ 1874 004a 07       		.uleb128 0x7
+ 1875 004b 0F       		.uleb128 0xf
+ 1876 004c 00       		.byte	0
+ 1877 004d 0B       		.uleb128 0xb
+ 1878 004e 0B       		.uleb128 0xb
+ 1879 004f 49       		.uleb128 0x49
+ 1880 0050 13       		.uleb128 0x13
+ 1881 0051 00       		.byte	0
+ 1882 0052 00       		.byte	0
+ 1883 0053 08       		.uleb128 0x8
+ 1884 0054 15       		.uleb128 0x15
+ 1885 0055 00       		.byte	0
+ 1886 0056 27       		.uleb128 0x27
+ 1887 0057 19       		.uleb128 0x19
+ 1888 0058 00       		.byte	0
+ 1889 0059 00       		.byte	0
+ 1890 005a 09       		.uleb128 0x9
+ 1891 005b 26       		.uleb128 0x26
+ 1892 005c 00       		.byte	0
+ 1893 005d 49       		.uleb128 0x49
+ 1894 005e 13       		.uleb128 0x13
+ 1895 005f 00       		.byte	0
+ 1896 0060 00       		.byte	0
+ 1897 0061 0A       		.uleb128 0xa
+ 1898 0062 01       		.uleb128 0x1
+ 1899 0063 01       		.byte	0x1
+ 1900 0064 49       		.uleb128 0x49
+ 1901 0065 13       		.uleb128 0x13
+ 1902 0066 01       		.uleb128 0x1
+ 1903 0067 13       		.uleb128 0x13
+ 1904 0068 00       		.byte	0
+ 1905 0069 00       		.byte	0
+ 1906 006a 0B       		.uleb128 0xb
+ 1907 006b 21       		.uleb128 0x21
+ 1908 006c 00       		.byte	0
+ 1909 006d 49       		.uleb128 0x49
+ 1910 006e 13       		.uleb128 0x13
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 41
+
+
+ 1911 006f 2F       		.uleb128 0x2f
+ 1912 0070 0B       		.uleb128 0xb
+ 1913 0071 00       		.byte	0
+ 1914 0072 00       		.byte	0
+ 1915 0073 0C       		.uleb128 0xc
+ 1916 0074 13       		.uleb128 0x13
+ 1917 0075 01       		.byte	0x1
+ 1918 0076 0B       		.uleb128 0xb
+ 1919 0077 0B       		.uleb128 0xb
+ 1920 0078 3A       		.uleb128 0x3a
+ 1921 0079 0B       		.uleb128 0xb
+ 1922 007a 3B       		.uleb128 0x3b
+ 1923 007b 0B       		.uleb128 0xb
+ 1924 007c 01       		.uleb128 0x1
+ 1925 007d 13       		.uleb128 0x13
+ 1926 007e 00       		.byte	0
+ 1927 007f 00       		.byte	0
+ 1928 0080 0D       		.uleb128 0xd
+ 1929 0081 0D       		.uleb128 0xd
+ 1930 0082 00       		.byte	0
+ 1931 0083 03       		.uleb128 0x3
+ 1932 0084 0E       		.uleb128 0xe
+ 1933 0085 3A       		.uleb128 0x3a
+ 1934 0086 0B       		.uleb128 0xb
+ 1935 0087 3B       		.uleb128 0x3b
+ 1936 0088 0B       		.uleb128 0xb
+ 1937 0089 49       		.uleb128 0x49
+ 1938 008a 13       		.uleb128 0x13
+ 1939 008b 38       		.uleb128 0x38
+ 1940 008c 0B       		.uleb128 0xb
+ 1941 008d 00       		.byte	0
+ 1942 008e 00       		.byte	0
+ 1943 008f 0E       		.uleb128 0xe
+ 1944 0090 15       		.uleb128 0x15
+ 1945 0091 00       		.byte	0
+ 1946 0092 27       		.uleb128 0x27
+ 1947 0093 19       		.uleb128 0x19
+ 1948 0094 49       		.uleb128 0x49
+ 1949 0095 13       		.uleb128 0x13
+ 1950 0096 00       		.byte	0
+ 1951 0097 00       		.byte	0
+ 1952 0098 0F       		.uleb128 0xf
+ 1953 0099 15       		.uleb128 0x15
+ 1954 009a 01       		.byte	0x1
+ 1955 009b 27       		.uleb128 0x27
+ 1956 009c 19       		.uleb128 0x19
+ 1957 009d 01       		.uleb128 0x1
+ 1958 009e 13       		.uleb128 0x13
+ 1959 009f 00       		.byte	0
+ 1960 00a0 00       		.byte	0
+ 1961 00a1 10       		.uleb128 0x10
+ 1962 00a2 05       		.uleb128 0x5
+ 1963 00a3 00       		.byte	0
+ 1964 00a4 49       		.uleb128 0x49
+ 1965 00a5 13       		.uleb128 0x13
+ 1966 00a6 00       		.byte	0
+ 1967 00a7 00       		.byte	0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 42
+
+
+ 1968 00a8 11       		.uleb128 0x11
+ 1969 00a9 04       		.uleb128 0x4
+ 1970 00aa 01       		.byte	0x1
+ 1971 00ab 0B       		.uleb128 0xb
+ 1972 00ac 0B       		.uleb128 0xb
+ 1973 00ad 49       		.uleb128 0x49
+ 1974 00ae 13       		.uleb128 0x13
+ 1975 00af 3A       		.uleb128 0x3a
+ 1976 00b0 0B       		.uleb128 0xb
+ 1977 00b1 3B       		.uleb128 0x3b
+ 1978 00b2 0B       		.uleb128 0xb
+ 1979 00b3 01       		.uleb128 0x1
+ 1980 00b4 13       		.uleb128 0x13
+ 1981 00b5 00       		.byte	0
+ 1982 00b6 00       		.byte	0
+ 1983 00b7 12       		.uleb128 0x12
+ 1984 00b8 28       		.uleb128 0x28
+ 1985 00b9 00       		.byte	0
+ 1986 00ba 03       		.uleb128 0x3
+ 1987 00bb 0E       		.uleb128 0xe
+ 1988 00bc 1C       		.uleb128 0x1c
+ 1989 00bd 0B       		.uleb128 0xb
+ 1990 00be 00       		.byte	0
+ 1991 00bf 00       		.byte	0
+ 1992 00c0 13       		.uleb128 0x13
+ 1993 00c1 2E       		.uleb128 0x2e
+ 1994 00c2 01       		.byte	0x1
+ 1995 00c3 03       		.uleb128 0x3
+ 1996 00c4 0E       		.uleb128 0xe
+ 1997 00c5 3A       		.uleb128 0x3a
+ 1998 00c6 0B       		.uleb128 0xb
+ 1999 00c7 3B       		.uleb128 0x3b
+ 2000 00c8 0B       		.uleb128 0xb
+ 2001 00c9 27       		.uleb128 0x27
+ 2002 00ca 19       		.uleb128 0x19
+ 2003 00cb 49       		.uleb128 0x49
+ 2004 00cc 13       		.uleb128 0x13
+ 2005 00cd 11       		.uleb128 0x11
+ 2006 00ce 01       		.uleb128 0x1
+ 2007 00cf 12       		.uleb128 0x12
+ 2008 00d0 06       		.uleb128 0x6
+ 2009 00d1 40       		.uleb128 0x40
+ 2010 00d2 18       		.uleb128 0x18
+ 2011 00d3 9742     		.uleb128 0x2117
+ 2012 00d5 19       		.uleb128 0x19
+ 2013 00d6 01       		.uleb128 0x1
+ 2014 00d7 13       		.uleb128 0x13
+ 2015 00d8 00       		.byte	0
+ 2016 00d9 00       		.byte	0
+ 2017 00da 14       		.uleb128 0x14
+ 2018 00db 05       		.uleb128 0x5
+ 2019 00dc 00       		.byte	0
+ 2020 00dd 03       		.uleb128 0x3
+ 2021 00de 08       		.uleb128 0x8
+ 2022 00df 3A       		.uleb128 0x3a
+ 2023 00e0 0B       		.uleb128 0xb
+ 2024 00e1 3B       		.uleb128 0x3b
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 43
+
+
+ 2025 00e2 0B       		.uleb128 0xb
+ 2026 00e3 49       		.uleb128 0x49
+ 2027 00e4 13       		.uleb128 0x13
+ 2028 00e5 02       		.uleb128 0x2
+ 2029 00e6 17       		.uleb128 0x17
+ 2030 00e7 00       		.byte	0
+ 2031 00e8 00       		.byte	0
+ 2032 00e9 15       		.uleb128 0x15
+ 2033 00ea 05       		.uleb128 0x5
+ 2034 00eb 00       		.byte	0
+ 2035 00ec 03       		.uleb128 0x3
+ 2036 00ed 0E       		.uleb128 0xe
+ 2037 00ee 3A       		.uleb128 0x3a
+ 2038 00ef 0B       		.uleb128 0xb
+ 2039 00f0 3B       		.uleb128 0x3b
+ 2040 00f1 0B       		.uleb128 0xb
+ 2041 00f2 49       		.uleb128 0x49
+ 2042 00f3 13       		.uleb128 0x13
+ 2043 00f4 02       		.uleb128 0x2
+ 2044 00f5 18       		.uleb128 0x18
+ 2045 00f6 00       		.byte	0
+ 2046 00f7 00       		.byte	0
+ 2047 00f8 16       		.uleb128 0x16
+ 2048 00f9 34       		.uleb128 0x34
+ 2049 00fa 00       		.byte	0
+ 2050 00fb 03       		.uleb128 0x3
+ 2051 00fc 08       		.uleb128 0x8
+ 2052 00fd 3A       		.uleb128 0x3a
+ 2053 00fe 0B       		.uleb128 0xb
+ 2054 00ff 3B       		.uleb128 0x3b
+ 2055 0100 0B       		.uleb128 0xb
+ 2056 0101 49       		.uleb128 0x49
+ 2057 0102 13       		.uleb128 0x13
+ 2058 0103 02       		.uleb128 0x2
+ 2059 0104 17       		.uleb128 0x17
+ 2060 0105 00       		.byte	0
+ 2061 0106 00       		.byte	0
+ 2062 0107 17       		.uleb128 0x17
+ 2063 0108 2E       		.uleb128 0x2e
+ 2064 0109 01       		.byte	0x1
+ 2065 010a 3F       		.uleb128 0x3f
+ 2066 010b 19       		.uleb128 0x19
+ 2067 010c 03       		.uleb128 0x3
+ 2068 010d 0E       		.uleb128 0xe
+ 2069 010e 3A       		.uleb128 0x3a
+ 2070 010f 0B       		.uleb128 0xb
+ 2071 0110 3B       		.uleb128 0x3b
+ 2072 0111 0B       		.uleb128 0xb
+ 2073 0112 27       		.uleb128 0x27
+ 2074 0113 19       		.uleb128 0x19
+ 2075 0114 11       		.uleb128 0x11
+ 2076 0115 01       		.uleb128 0x1
+ 2077 0116 12       		.uleb128 0x12
+ 2078 0117 06       		.uleb128 0x6
+ 2079 0118 40       		.uleb128 0x40
+ 2080 0119 18       		.uleb128 0x18
+ 2081 011a 9742     		.uleb128 0x2117
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 44
+
+
+ 2082 011c 19       		.uleb128 0x19
+ 2083 011d 01       		.uleb128 0x1
+ 2084 011e 13       		.uleb128 0x13
+ 2085 011f 00       		.byte	0
+ 2086 0120 00       		.byte	0
+ 2087 0121 18       		.uleb128 0x18
+ 2088 0122 05       		.uleb128 0x5
+ 2089 0123 00       		.byte	0
+ 2090 0124 03       		.uleb128 0x3
+ 2091 0125 08       		.uleb128 0x8
+ 2092 0126 3A       		.uleb128 0x3a
+ 2093 0127 0B       		.uleb128 0xb
+ 2094 0128 3B       		.uleb128 0x3b
+ 2095 0129 0B       		.uleb128 0xb
+ 2096 012a 49       		.uleb128 0x49
+ 2097 012b 13       		.uleb128 0x13
+ 2098 012c 02       		.uleb128 0x2
+ 2099 012d 18       		.uleb128 0x18
+ 2100 012e 00       		.byte	0
+ 2101 012f 00       		.byte	0
+ 2102 0130 19       		.uleb128 0x19
+ 2103 0131 2E       		.uleb128 0x2e
+ 2104 0132 01       		.byte	0x1
+ 2105 0133 3F       		.uleb128 0x3f
+ 2106 0134 19       		.uleb128 0x19
+ 2107 0135 03       		.uleb128 0x3
+ 2108 0136 0E       		.uleb128 0xe
+ 2109 0137 3A       		.uleb128 0x3a
+ 2110 0138 0B       		.uleb128 0xb
+ 2111 0139 3B       		.uleb128 0x3b
+ 2112 013a 0B       		.uleb128 0xb
+ 2113 013b 27       		.uleb128 0x27
+ 2114 013c 19       		.uleb128 0x19
+ 2115 013d 11       		.uleb128 0x11
+ 2116 013e 01       		.uleb128 0x1
+ 2117 013f 12       		.uleb128 0x12
+ 2118 0140 06       		.uleb128 0x6
+ 2119 0141 40       		.uleb128 0x40
+ 2120 0142 18       		.uleb128 0x18
+ 2121 0143 9642     		.uleb128 0x2116
+ 2122 0145 19       		.uleb128 0x19
+ 2123 0146 01       		.uleb128 0x1
+ 2124 0147 13       		.uleb128 0x13
+ 2125 0148 00       		.byte	0
+ 2126 0149 00       		.byte	0
+ 2127 014a 1A       		.uleb128 0x1a
+ 2128 014b 05       		.uleb128 0x5
+ 2129 014c 00       		.byte	0
+ 2130 014d 03       		.uleb128 0x3
+ 2131 014e 0E       		.uleb128 0xe
+ 2132 014f 3A       		.uleb128 0x3a
+ 2133 0150 0B       		.uleb128 0xb
+ 2134 0151 3B       		.uleb128 0x3b
+ 2135 0152 0B       		.uleb128 0xb
+ 2136 0153 49       		.uleb128 0x49
+ 2137 0154 13       		.uleb128 0x13
+ 2138 0155 02       		.uleb128 0x2
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 45
+
+
+ 2139 0156 17       		.uleb128 0x17
+ 2140 0157 00       		.byte	0
+ 2141 0158 00       		.byte	0
+ 2142 0159 1B       		.uleb128 0x1b
+ 2143 015a 34       		.uleb128 0x34
+ 2144 015b 00       		.byte	0
+ 2145 015c 03       		.uleb128 0x3
+ 2146 015d 0E       		.uleb128 0xe
+ 2147 015e 3A       		.uleb128 0x3a
+ 2148 015f 0B       		.uleb128 0xb
+ 2149 0160 3B       		.uleb128 0x3b
+ 2150 0161 0B       		.uleb128 0xb
+ 2151 0162 49       		.uleb128 0x49
+ 2152 0163 13       		.uleb128 0x13
+ 2153 0164 02       		.uleb128 0x2
+ 2154 0165 17       		.uleb128 0x17
+ 2155 0166 00       		.byte	0
+ 2156 0167 00       		.byte	0
+ 2157 0168 1C       		.uleb128 0x1c
+ 2158 0169 0B       		.uleb128 0xb
+ 2159 016a 01       		.byte	0x1
+ 2160 016b 11       		.uleb128 0x11
+ 2161 016c 01       		.uleb128 0x1
+ 2162 016d 12       		.uleb128 0x12
+ 2163 016e 06       		.uleb128 0x6
+ 2164 016f 01       		.uleb128 0x1
+ 2165 0170 13       		.uleb128 0x13
+ 2166 0171 00       		.byte	0
+ 2167 0172 00       		.byte	0
+ 2168 0173 1D       		.uleb128 0x1d
+ 2169 0174 898201   		.uleb128 0x4109
+ 2170 0177 01       		.byte	0x1
+ 2171 0178 11       		.uleb128 0x11
+ 2172 0179 01       		.uleb128 0x1
+ 2173 017a 9342     		.uleb128 0x2113
+ 2174 017c 18       		.uleb128 0x18
+ 2175 017d 00       		.byte	0
+ 2176 017e 00       		.byte	0
+ 2177 017f 1E       		.uleb128 0x1e
+ 2178 0180 8A8201   		.uleb128 0x410a
+ 2179 0183 00       		.byte	0
+ 2180 0184 02       		.uleb128 0x2
+ 2181 0185 18       		.uleb128 0x18
+ 2182 0186 9142     		.uleb128 0x2111
+ 2183 0188 18       		.uleb128 0x18
+ 2184 0189 00       		.byte	0
+ 2185 018a 00       		.byte	0
+ 2186 018b 1F       		.uleb128 0x1f
+ 2187 018c 898201   		.uleb128 0x4109
+ 2188 018f 00       		.byte	0
+ 2189 0190 11       		.uleb128 0x11
+ 2190 0191 01       		.uleb128 0x1
+ 2191 0192 31       		.uleb128 0x31
+ 2192 0193 13       		.uleb128 0x13
+ 2193 0194 00       		.byte	0
+ 2194 0195 00       		.byte	0
+ 2195 0196 20       		.uleb128 0x20
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 46
+
+
+ 2196 0197 2E       		.uleb128 0x2e
+ 2197 0198 01       		.byte	0x1
+ 2198 0199 3F       		.uleb128 0x3f
+ 2199 019a 19       		.uleb128 0x19
+ 2200 019b 03       		.uleb128 0x3
+ 2201 019c 0E       		.uleb128 0xe
+ 2202 019d 3A       		.uleb128 0x3a
+ 2203 019e 0B       		.uleb128 0xb
+ 2204 019f 3B       		.uleb128 0x3b
+ 2205 01a0 05       		.uleb128 0x5
+ 2206 01a1 27       		.uleb128 0x27
+ 2207 01a2 19       		.uleb128 0x19
+ 2208 01a3 11       		.uleb128 0x11
+ 2209 01a4 01       		.uleb128 0x1
+ 2210 01a5 12       		.uleb128 0x12
+ 2211 01a6 06       		.uleb128 0x6
+ 2212 01a7 40       		.uleb128 0x40
+ 2213 01a8 18       		.uleb128 0x18
+ 2214 01a9 9742     		.uleb128 0x2117
+ 2215 01ab 19       		.uleb128 0x19
+ 2216 01ac 01       		.uleb128 0x1
+ 2217 01ad 13       		.uleb128 0x13
+ 2218 01ae 00       		.byte	0
+ 2219 01af 00       		.byte	0
+ 2220 01b0 21       		.uleb128 0x21
+ 2221 01b1 898201   		.uleb128 0x4109
+ 2222 01b4 01       		.byte	0x1
+ 2223 01b5 11       		.uleb128 0x11
+ 2224 01b6 01       		.uleb128 0x1
+ 2225 01b7 31       		.uleb128 0x31
+ 2226 01b8 13       		.uleb128 0x13
+ 2227 01b9 00       		.byte	0
+ 2228 01ba 00       		.byte	0
+ 2229 01bb 22       		.uleb128 0x22
+ 2230 01bc 2E       		.uleb128 0x2e
+ 2231 01bd 01       		.byte	0x1
+ 2232 01be 03       		.uleb128 0x3
+ 2233 01bf 0E       		.uleb128 0xe
+ 2234 01c0 3A       		.uleb128 0x3a
+ 2235 01c1 0B       		.uleb128 0xb
+ 2236 01c2 3B       		.uleb128 0x3b
+ 2237 01c3 0B       		.uleb128 0xb
+ 2238 01c4 27       		.uleb128 0x27
+ 2239 01c5 19       		.uleb128 0x19
+ 2240 01c6 11       		.uleb128 0x11
+ 2241 01c7 01       		.uleb128 0x1
+ 2242 01c8 12       		.uleb128 0x12
+ 2243 01c9 06       		.uleb128 0x6
+ 2244 01ca 40       		.uleb128 0x40
+ 2245 01cb 18       		.uleb128 0x18
+ 2246 01cc 9742     		.uleb128 0x2117
+ 2247 01ce 19       		.uleb128 0x19
+ 2248 01cf 01       		.uleb128 0x1
+ 2249 01d0 13       		.uleb128 0x13
+ 2250 01d1 00       		.byte	0
+ 2251 01d2 00       		.byte	0
+ 2252 01d3 23       		.uleb128 0x23
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 47
+
+
+ 2253 01d4 34       		.uleb128 0x34
+ 2254 01d5 00       		.byte	0
+ 2255 01d6 03       		.uleb128 0x3
+ 2256 01d7 0E       		.uleb128 0xe
+ 2257 01d8 3A       		.uleb128 0x3a
+ 2258 01d9 0B       		.uleb128 0xb
+ 2259 01da 3B       		.uleb128 0x3b
+ 2260 01db 0B       		.uleb128 0xb
+ 2261 01dc 49       		.uleb128 0x49
+ 2262 01dd 13       		.uleb128 0x13
+ 2263 01de 02       		.uleb128 0x2
+ 2264 01df 18       		.uleb128 0x18
+ 2265 01e0 00       		.byte	0
+ 2266 01e1 00       		.byte	0
+ 2267 01e2 24       		.uleb128 0x24
+ 2268 01e3 898201   		.uleb128 0x4109
+ 2269 01e6 01       		.byte	0x1
+ 2270 01e7 11       		.uleb128 0x11
+ 2271 01e8 01       		.uleb128 0x1
+ 2272 01e9 31       		.uleb128 0x31
+ 2273 01ea 13       		.uleb128 0x13
+ 2274 01eb 01       		.uleb128 0x1
+ 2275 01ec 13       		.uleb128 0x13
+ 2276 01ed 00       		.byte	0
+ 2277 01ee 00       		.byte	0
+ 2278 01ef 25       		.uleb128 0x25
+ 2279 01f0 2E       		.uleb128 0x2e
+ 2280 01f1 01       		.byte	0x1
+ 2281 01f2 3F       		.uleb128 0x3f
+ 2282 01f3 19       		.uleb128 0x19
+ 2283 01f4 03       		.uleb128 0x3
+ 2284 01f5 0E       		.uleb128 0xe
+ 2285 01f6 3A       		.uleb128 0x3a
+ 2286 01f7 0B       		.uleb128 0xb
+ 2287 01f8 3B       		.uleb128 0x3b
+ 2288 01f9 05       		.uleb128 0x5
+ 2289 01fa 27       		.uleb128 0x27
+ 2290 01fb 19       		.uleb128 0x19
+ 2291 01fc 49       		.uleb128 0x49
+ 2292 01fd 13       		.uleb128 0x13
+ 2293 01fe 11       		.uleb128 0x11
+ 2294 01ff 01       		.uleb128 0x1
+ 2295 0200 12       		.uleb128 0x12
+ 2296 0201 06       		.uleb128 0x6
+ 2297 0202 40       		.uleb128 0x40
+ 2298 0203 18       		.uleb128 0x18
+ 2299 0204 9742     		.uleb128 0x2117
+ 2300 0206 19       		.uleb128 0x19
+ 2301 0207 01       		.uleb128 0x1
+ 2302 0208 13       		.uleb128 0x13
+ 2303 0209 00       		.byte	0
+ 2304 020a 00       		.byte	0
+ 2305 020b 26       		.uleb128 0x26
+ 2306 020c 2E       		.uleb128 0x2e
+ 2307 020d 00       		.byte	0
+ 2308 020e 3F       		.uleb128 0x3f
+ 2309 020f 19       		.uleb128 0x19
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 48
+
+
+ 2310 0210 03       		.uleb128 0x3
+ 2311 0211 0E       		.uleb128 0xe
+ 2312 0212 3A       		.uleb128 0x3a
+ 2313 0213 0B       		.uleb128 0xb
+ 2314 0214 3B       		.uleb128 0x3b
+ 2315 0215 05       		.uleb128 0x5
+ 2316 0216 27       		.uleb128 0x27
+ 2317 0217 19       		.uleb128 0x19
+ 2318 0218 49       		.uleb128 0x49
+ 2319 0219 13       		.uleb128 0x13
+ 2320 021a 11       		.uleb128 0x11
+ 2321 021b 01       		.uleb128 0x1
+ 2322 021c 12       		.uleb128 0x12
+ 2323 021d 06       		.uleb128 0x6
+ 2324 021e 40       		.uleb128 0x40
+ 2325 021f 18       		.uleb128 0x18
+ 2326 0220 9742     		.uleb128 0x2117
+ 2327 0222 19       		.uleb128 0x19
+ 2328 0223 00       		.byte	0
+ 2329 0224 00       		.byte	0
+ 2330 0225 27       		.uleb128 0x27
+ 2331 0226 21       		.uleb128 0x21
+ 2332 0227 00       		.byte	0
+ 2333 0228 49       		.uleb128 0x49
+ 2334 0229 13       		.uleb128 0x13
+ 2335 022a 2F       		.uleb128 0x2f
+ 2336 022b 05       		.uleb128 0x5
+ 2337 022c 00       		.byte	0
+ 2338 022d 00       		.byte	0
+ 2339 022e 28       		.uleb128 0x28
+ 2340 022f 34       		.uleb128 0x34
+ 2341 0230 00       		.byte	0
+ 2342 0231 03       		.uleb128 0x3
+ 2343 0232 0E       		.uleb128 0xe
+ 2344 0233 3A       		.uleb128 0x3a
+ 2345 0234 0B       		.uleb128 0xb
+ 2346 0235 3B       		.uleb128 0x3b
+ 2347 0236 05       		.uleb128 0x5
+ 2348 0237 49       		.uleb128 0x49
+ 2349 0238 13       		.uleb128 0x13
+ 2350 0239 3F       		.uleb128 0x3f
+ 2351 023a 19       		.uleb128 0x19
+ 2352 023b 3C       		.uleb128 0x3c
+ 2353 023c 19       		.uleb128 0x19
+ 2354 023d 00       		.byte	0
+ 2355 023e 00       		.byte	0
+ 2356 023f 29       		.uleb128 0x29
+ 2357 0240 34       		.uleb128 0x34
+ 2358 0241 00       		.byte	0
+ 2359 0242 03       		.uleb128 0x3
+ 2360 0243 0E       		.uleb128 0xe
+ 2361 0244 3A       		.uleb128 0x3a
+ 2362 0245 0B       		.uleb128 0xb
+ 2363 0246 3B       		.uleb128 0x3b
+ 2364 0247 0B       		.uleb128 0xb
+ 2365 0248 49       		.uleb128 0x49
+ 2366 0249 13       		.uleb128 0x13
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 49
+
+
+ 2367 024a 3F       		.uleb128 0x3f
+ 2368 024b 19       		.uleb128 0x19
+ 2369 024c 3C       		.uleb128 0x3c
+ 2370 024d 19       		.uleb128 0x19
+ 2371 024e 00       		.byte	0
+ 2372 024f 00       		.byte	0
+ 2373 0250 2A       		.uleb128 0x2a
+ 2374 0251 2E       		.uleb128 0x2e
+ 2375 0252 00       		.byte	0
+ 2376 0253 3F       		.uleb128 0x3f
+ 2377 0254 19       		.uleb128 0x19
+ 2378 0255 3C       		.uleb128 0x3c
+ 2379 0256 19       		.uleb128 0x19
+ 2380 0257 6E       		.uleb128 0x6e
+ 2381 0258 0E       		.uleb128 0xe
+ 2382 0259 03       		.uleb128 0x3
+ 2383 025a 0E       		.uleb128 0xe
+ 2384 025b 3A       		.uleb128 0x3a
+ 2385 025c 0B       		.uleb128 0xb
+ 2386 025d 3B       		.uleb128 0x3b
+ 2387 025e 0B       		.uleb128 0xb
+ 2388 025f 00       		.byte	0
+ 2389 0260 00       		.byte	0
+ 2390 0261 2B       		.uleb128 0x2b
+ 2391 0262 2E       		.uleb128 0x2e
+ 2392 0263 00       		.byte	0
+ 2393 0264 3F       		.uleb128 0x3f
+ 2394 0265 19       		.uleb128 0x19
+ 2395 0266 3C       		.uleb128 0x3c
+ 2396 0267 19       		.uleb128 0x19
+ 2397 0268 6E       		.uleb128 0x6e
+ 2398 0269 0E       		.uleb128 0xe
+ 2399 026a 03       		.uleb128 0x3
+ 2400 026b 0E       		.uleb128 0xe
+ 2401 026c 3A       		.uleb128 0x3a
+ 2402 026d 0B       		.uleb128 0xb
+ 2403 026e 3B       		.uleb128 0x3b
+ 2404 026f 05       		.uleb128 0x5
+ 2405 0270 00       		.byte	0
+ 2406 0271 00       		.byte	0
+ 2407 0272 00       		.byte	0
+ 2408              		.section	.debug_loc,"",%progbits
+ 2409              	.Ldebug_loc0:
+ 2410              	.LLST0:
+ 2411 0000 00000000 		.4byte	.LVL0
+ 2412 0004 1E000000 		.4byte	.LVL2
+ 2413 0008 0100     		.2byte	0x1
+ 2414 000a 50       		.byte	0x50
+ 2415 000b 1E000000 		.4byte	.LVL2
+ 2416 000f 24000000 		.4byte	.LFE64
+ 2417 0013 0400     		.2byte	0x4
+ 2418 0015 F3       		.byte	0xf3
+ 2419 0016 01       		.uleb128 0x1
+ 2420 0017 50       		.byte	0x50
+ 2421 0018 9F       		.byte	0x9f
+ 2422 0019 00000000 		.4byte	0
+ 2423 001d 00000000 		.4byte	0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 50
+
+
+ 2424              	.LLST1:
+ 2425 0021 00000000 		.4byte	.LVL0
+ 2426 0025 1A000000 		.4byte	.LVL1
+ 2427 0029 0200     		.2byte	0x2
+ 2428 002b 30       		.byte	0x30
+ 2429 002c 9F       		.byte	0x9f
+ 2430 002d 1A000000 		.4byte	.LVL1
+ 2431 0031 24000000 		.4byte	.LFE64
+ 2432 0035 0100     		.2byte	0x1
+ 2433 0037 53       		.byte	0x53
+ 2434 0038 00000000 		.4byte	0
+ 2435 003c 00000000 		.4byte	0
+ 2436              	.LLST2:
+ 2437 0040 0A000000 		.4byte	.LVL4
+ 2438 0044 0C000000 		.4byte	.LVL5
+ 2439 0048 0200     		.2byte	0x2
+ 2440 004a 30       		.byte	0x30
+ 2441 004b 9F       		.byte	0x9f
+ 2442 004c 0C000000 		.4byte	.LVL5
+ 2443 0050 1C000000 		.4byte	.LVL7
+ 2444 0054 0100     		.2byte	0x1
+ 2445 0056 54       		.byte	0x54
+ 2446 0057 1E000000 		.4byte	.LVL8
+ 2447 005b 28000000 		.4byte	.LVL9
+ 2448 005f 0100     		.2byte	0x1
+ 2449 0061 54       		.byte	0x54
+ 2450 0062 00000000 		.4byte	0
+ 2451 0066 00000000 		.4byte	0
+ 2452              	.LLST3:
+ 2453 006a 00000000 		.4byte	.LVL10
+ 2454 006e 18000000 		.4byte	.LVL12
+ 2455 0072 0100     		.2byte	0x1
+ 2456 0074 50       		.byte	0x50
+ 2457 0075 18000000 		.4byte	.LVL12
+ 2458 0079 68000000 		.4byte	.LFE69
+ 2459 007d 0400     		.2byte	0x4
+ 2460 007f F3       		.byte	0xf3
+ 2461 0080 01       		.uleb128 0x1
+ 2462 0081 50       		.byte	0x50
+ 2463 0082 9F       		.byte	0x9f
+ 2464 0083 00000000 		.4byte	0
+ 2465 0087 00000000 		.4byte	0
+ 2466              	.LLST4:
+ 2467 008b 00000000 		.4byte	.LVL10
+ 2468 008f 1C000000 		.4byte	.LVL13
+ 2469 0093 0100     		.2byte	0x1
+ 2470 0095 51       		.byte	0x51
+ 2471 0096 1C000000 		.4byte	.LVL13
+ 2472 009a 56000000 		.4byte	.LVL23
+ 2473 009e 0100     		.2byte	0x1
+ 2474 00a0 57       		.byte	0x57
+ 2475 00a1 56000000 		.4byte	.LVL23
+ 2476 00a5 68000000 		.4byte	.LFE69
+ 2477 00a9 0400     		.2byte	0x4
+ 2478 00ab F3       		.byte	0xf3
+ 2479 00ac 01       		.uleb128 0x1
+ 2480 00ad 51       		.byte	0x51
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 51
+
+
+ 2481 00ae 9F       		.byte	0x9f
+ 2482 00af 00000000 		.4byte	0
+ 2483 00b3 00000000 		.4byte	0
+ 2484              	.LLST5:
+ 2485 00b7 00000000 		.4byte	.LVL10
+ 2486 00bb 1F000000 		.4byte	.LVL14-1
+ 2487 00bf 0100     		.2byte	0x1
+ 2488 00c1 52       		.byte	0x52
+ 2489 00c2 1F000000 		.4byte	.LVL14-1
+ 2490 00c6 56000000 		.4byte	.LVL23
+ 2491 00ca 0100     		.2byte	0x1
+ 2492 00cc 58       		.byte	0x58
+ 2493 00cd 56000000 		.4byte	.LVL23
+ 2494 00d1 68000000 		.4byte	.LFE69
+ 2495 00d5 0400     		.2byte	0x4
+ 2496 00d7 F3       		.byte	0xf3
+ 2497 00d8 01       		.uleb128 0x1
+ 2498 00d9 52       		.byte	0x52
+ 2499 00da 9F       		.byte	0x9f
+ 2500 00db 00000000 		.4byte	0
+ 2501 00df 00000000 		.4byte	0
+ 2502              	.LLST6:
+ 2503 00e3 00000000 		.4byte	.LVL10
+ 2504 00e7 16000000 		.4byte	.LVL11
+ 2505 00eb 0100     		.2byte	0x1
+ 2506 00ed 53       		.byte	0x53
+ 2507 00ee 16000000 		.4byte	.LVL11
+ 2508 00f2 68000000 		.4byte	.LFE69
+ 2509 00f6 0400     		.2byte	0x4
+ 2510 00f8 F3       		.byte	0xf3
+ 2511 00f9 01       		.uleb128 0x1
+ 2512 00fa 53       		.byte	0x53
+ 2513 00fb 9F       		.byte	0x9f
+ 2514 00fc 00000000 		.4byte	0
+ 2515 0100 00000000 		.4byte	0
+ 2516              	.LLST7:
+ 2517 0104 22000000 		.4byte	.LVL15
+ 2518 0108 26000000 		.4byte	.LVL16
+ 2519 010c 0200     		.2byte	0x2
+ 2520 010e 30       		.byte	0x30
+ 2521 010f 9F       		.byte	0x9f
+ 2522 0110 26000000 		.4byte	.LVL16
+ 2523 0114 4C000000 		.4byte	.LVL21
+ 2524 0118 0100     		.2byte	0x1
+ 2525 011a 54       		.byte	0x54
+ 2526 011b 4E000000 		.4byte	.LVL22
+ 2527 011f 56000000 		.4byte	.LVL23
+ 2528 0123 0100     		.2byte	0x1
+ 2529 0125 54       		.byte	0x54
+ 2530 0126 00000000 		.4byte	0
+ 2531 012a 00000000 		.4byte	0
+ 2532              	.LLST8:
+ 2533 012e 22000000 		.4byte	.LVL15
+ 2534 0132 56000000 		.4byte	.LVL23
+ 2535 0136 0100     		.2byte	0x1
+ 2536 0138 56       		.byte	0x56
+ 2537 0139 00000000 		.4byte	0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 52
+
+
+ 2538 013d 00000000 		.4byte	0
+ 2539              	.LLST9:
+ 2540 0141 2E000000 		.4byte	.LVL17
+ 2541 0145 3C000000 		.4byte	.LVL19
+ 2542 0149 0100     		.2byte	0x1
+ 2543 014b 55       		.byte	0x55
+ 2544 014c 00000000 		.4byte	0
+ 2545 0150 00000000 		.4byte	0
+ 2546              	.LLST10:
+ 2547 0154 00000000 		.4byte	.LVL27
+ 2548 0158 14000000 		.4byte	.LVL30
+ 2549 015c 0100     		.2byte	0x1
+ 2550 015e 50       		.byte	0x50
+ 2551 015f 14000000 		.4byte	.LVL30
+ 2552 0163 17000000 		.4byte	.LVL31-1
+ 2553 0167 0200     		.2byte	0x2
+ 2554 0169 71       		.byte	0x71
+ 2555 016a 00       		.sleb128 0
+ 2556 016b 17000000 		.4byte	.LVL31-1
+ 2557 016f DC000000 		.4byte	.LFE65
+ 2558 0173 0400     		.2byte	0x4
+ 2559 0175 F3       		.byte	0xf3
+ 2560 0176 01       		.uleb128 0x1
+ 2561 0177 50       		.byte	0x50
+ 2562 0178 9F       		.byte	0x9f
+ 2563 0179 00000000 		.4byte	0
+ 2564 017d 00000000 		.4byte	0
+ 2565              	.LLST11:
+ 2566 0181 00000000 		.4byte	.LVL27
+ 2567 0185 0C000000 		.4byte	.LVL28
+ 2568 0189 0100     		.2byte	0x1
+ 2569 018b 51       		.byte	0x51
+ 2570 018c 0C000000 		.4byte	.LVL28
+ 2571 0190 D0000000 		.4byte	.LVL44
+ 2572 0194 0100     		.2byte	0x1
+ 2573 0196 56       		.byte	0x56
+ 2574 0197 D0000000 		.4byte	.LVL44
+ 2575 019b DC000000 		.4byte	.LFE65
+ 2576 019f 0400     		.2byte	0x4
+ 2577 01a1 F3       		.byte	0xf3
+ 2578 01a2 01       		.uleb128 0x1
+ 2579 01a3 51       		.byte	0x51
+ 2580 01a4 9F       		.byte	0x9f
+ 2581 01a5 00000000 		.4byte	0
+ 2582 01a9 00000000 		.4byte	0
+ 2583              	.LLST12:
+ 2584 01ad 00000000 		.4byte	.LVL27
+ 2585 01b1 12000000 		.4byte	.LVL29
+ 2586 01b5 0100     		.2byte	0x1
+ 2587 01b7 52       		.byte	0x52
+ 2588 01b8 12000000 		.4byte	.LVL29
+ 2589 01bc DC000000 		.4byte	.LFE65
+ 2590 01c0 0400     		.2byte	0x4
+ 2591 01c2 F3       		.byte	0xf3
+ 2592 01c3 01       		.uleb128 0x1
+ 2593 01c4 52       		.byte	0x52
+ 2594 01c5 9F       		.byte	0x9f
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 53
+
+
+ 2595 01c6 00000000 		.4byte	0
+ 2596 01ca 00000000 		.4byte	0
+ 2597              	.LLST13:
+ 2598 01ce 68000000 		.4byte	.LVL36
+ 2599 01d2 6F000000 		.4byte	.LVL37-1
+ 2600 01d6 0200     		.2byte	0x2
+ 2601 01d8 76       		.byte	0x76
+ 2602 01d9 00       		.sleb128 0
+ 2603 01da 00000000 		.4byte	0
+ 2604 01de 00000000 		.4byte	0
+ 2605              	.LLST14:
+ 2606 01e2 68000000 		.4byte	.LVL36
+ 2607 01e6 6F000000 		.4byte	.LVL37-1
+ 2608 01ea 0200     		.2byte	0x2
+ 2609 01ec 76       		.byte	0x76
+ 2610 01ed 01       		.sleb128 1
+ 2611 01ee 00000000 		.4byte	0
+ 2612 01f2 00000000 		.4byte	0
+ 2613              	.LLST15:
+ 2614 01f6 00000000 		.4byte	.LVL45
+ 2615 01fa 48000000 		.4byte	.LVL46
+ 2616 01fe 0100     		.2byte	0x1
+ 2617 0200 50       		.byte	0x50
+ 2618 0201 48000000 		.4byte	.LVL46
+ 2619 0205 52000000 		.4byte	.LVL48
+ 2620 0209 0400     		.2byte	0x4
+ 2621 020b F3       		.byte	0xf3
+ 2622 020c 01       		.uleb128 0x1
+ 2623 020d 50       		.byte	0x50
+ 2624 020e 9F       		.byte	0x9f
+ 2625 020f 52000000 		.4byte	.LVL48
+ 2626 0213 6C000000 		.4byte	.LVL49
+ 2627 0217 0100     		.2byte	0x1
+ 2628 0219 50       		.byte	0x50
+ 2629 021a 6C000000 		.4byte	.LVL49
+ 2630 021e 88000000 		.4byte	.LVL50
+ 2631 0222 0400     		.2byte	0x4
+ 2632 0224 F3       		.byte	0xf3
+ 2633 0225 01       		.uleb128 0x1
+ 2634 0226 50       		.byte	0x50
+ 2635 0227 9F       		.byte	0x9f
+ 2636 0228 88000000 		.4byte	.LVL50
+ 2637 022c B6000000 		.4byte	.LVL51
+ 2638 0230 0100     		.2byte	0x1
+ 2639 0232 50       		.byte	0x50
+ 2640 0233 B6000000 		.4byte	.LVL51
+ 2641 0237 C4000000 		.4byte	.LFE66
+ 2642 023b 0400     		.2byte	0x4
+ 2643 023d F3       		.byte	0xf3
+ 2644 023e 01       		.uleb128 0x1
+ 2645 023f 50       		.byte	0x50
+ 2646 0240 9F       		.byte	0x9f
+ 2647 0241 00000000 		.4byte	0
+ 2648 0245 00000000 		.4byte	0
+ 2649              	.LLST16:
+ 2650 0249 04000000 		.4byte	.LVL53
+ 2651 024d 08000000 		.4byte	.LVL54
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 54
+
+
+ 2652 0251 0200     		.2byte	0x2
+ 2653 0253 30       		.byte	0x30
+ 2654 0254 9F       		.byte	0x9f
+ 2655 0255 08000000 		.4byte	.LVL54
+ 2656 0259 18000000 		.4byte	.LVL56
+ 2657 025d 0100     		.2byte	0x1
+ 2658 025f 54       		.byte	0x54
+ 2659 0260 1A000000 		.4byte	.LVL57
+ 2660 0264 38000000 		.4byte	.LVL62
+ 2661 0268 0100     		.2byte	0x1
+ 2662 026a 54       		.byte	0x54
+ 2663 026b 00000000 		.4byte	0
+ 2664 026f 00000000 		.4byte	0
+ 2665              	.LLST17:
+ 2666 0273 36000000 		.4byte	.LVL61
+ 2667 0277 4E000000 		.4byte	.LVL67
+ 2668 027b 0100     		.2byte	0x1
+ 2669 027d 55       		.byte	0x55
+ 2670 027e 00000000 		.4byte	0
+ 2671 0282 00000000 		.4byte	0
+ 2672              	.LLST18:
+ 2673 0286 36000000 		.4byte	.LVL61
+ 2674 028a 3A000000 		.4byte	.LVL63
+ 2675 028e 0200     		.2byte	0x2
+ 2676 0290 30       		.byte	0x30
+ 2677 0291 9F       		.byte	0x9f
+ 2678 0292 3A000000 		.4byte	.LVL63
+ 2679 0296 48000000 		.4byte	.LVL65
+ 2680 029a 0100     		.2byte	0x1
+ 2681 029c 54       		.byte	0x54
+ 2682 029d 4A000000 		.4byte	.LVL66
+ 2683 02a1 4E000000 		.4byte	.LVL67
+ 2684 02a5 0100     		.2byte	0x1
+ 2685 02a7 54       		.byte	0x54
+ 2686 02a8 00000000 		.4byte	0
+ 2687 02ac 00000000 		.4byte	0
+ 2688              		.section	.debug_aranges,"",%progbits
+ 2689 0000 64000000 		.4byte	0x64
+ 2690 0004 0200     		.2byte	0x2
+ 2691 0006 00000000 		.4byte	.Ldebug_info0
+ 2692 000a 04       		.byte	0x4
+ 2693 000b 00       		.byte	0
+ 2694 000c 0000     		.2byte	0
+ 2695 000e 0000     		.2byte	0
+ 2696 0010 00000000 		.4byte	.LFB64
+ 2697 0014 24000000 		.4byte	.LFE64-.LFB64
+ 2698 0018 00000000 		.4byte	.LFB63
+ 2699 001c 1C000000 		.4byte	.LFE63-.LFB63
+ 2700 0020 00000000 		.4byte	.LFB67
+ 2701 0024 2C000000 		.4byte	.LFE67-.LFB67
+ 2702 0028 00000000 		.4byte	.LFB69
+ 2703 002c 68000000 		.4byte	.LFE69-.LFB69
+ 2704 0030 00000000 		.4byte	.LFB70
+ 2705 0034 50000000 		.4byte	.LFE70-.LFB70
+ 2706 0038 00000000 		.4byte	.LFB65
+ 2707 003c DC000000 		.4byte	.LFE65-.LFB65
+ 2708 0040 00000000 		.4byte	.LFB66
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 55
+
+
+ 2709 0044 C4000000 		.4byte	.LFE66-.LFB66
+ 2710 0048 00000000 		.4byte	.LFB68
+ 2711 004c 58000000 		.4byte	.LFE68-.LFB68
+ 2712 0050 00000000 		.4byte	.LFB71
+ 2713 0054 08000000 		.4byte	.LFE71-.LFB71
+ 2714 0058 00000000 		.4byte	.LFB72
+ 2715 005c 0C000000 		.4byte	.LFE72-.LFB72
+ 2716 0060 00000000 		.4byte	0
+ 2717 0064 00000000 		.4byte	0
+ 2718              		.section	.debug_ranges,"",%progbits
+ 2719              	.Ldebug_ranges0:
+ 2720 0000 00000000 		.4byte	.LFB64
+ 2721 0004 24000000 		.4byte	.LFE64
+ 2722 0008 00000000 		.4byte	.LFB63
+ 2723 000c 1C000000 		.4byte	.LFE63
+ 2724 0010 00000000 		.4byte	.LFB67
+ 2725 0014 2C000000 		.4byte	.LFE67
+ 2726 0018 00000000 		.4byte	.LFB69
+ 2727 001c 68000000 		.4byte	.LFE69
+ 2728 0020 00000000 		.4byte	.LFB70
+ 2729 0024 50000000 		.4byte	.LFE70
+ 2730 0028 00000000 		.4byte	.LFB65
+ 2731 002c DC000000 		.4byte	.LFE65
+ 2732 0030 00000000 		.4byte	.LFB66
+ 2733 0034 C4000000 		.4byte	.LFE66
+ 2734 0038 00000000 		.4byte	.LFB68
+ 2735 003c 58000000 		.4byte	.LFE68
+ 2736 0040 00000000 		.4byte	.LFB71
+ 2737 0044 08000000 		.4byte	.LFE71
+ 2738 0048 00000000 		.4byte	.LFB72
+ 2739 004c 0C000000 		.4byte	.LFE72
+ 2740 0050 00000000 		.4byte	0
+ 2741 0054 00000000 		.4byte	0
+ 2742              		.section	.debug_line,"",%progbits
+ 2743              	.Ldebug_line0:
+ 2744 0000 4B030000 		.section	.debug_str,"MS",%progbits,1
+ 2744      0200E701 
+ 2744      00000201 
+ 2744      FB0E0D00 
+ 2744      01010101 
+ 2745              	.LASF80:
+ 2746 0000 433A5C47 		.ascii	"C:\\Github\\Tesis\\src\\psoc\\Comparation.cydsn\000"
+ 2746      69746875 
+ 2746      625C5465 
+ 2746      7369735C 
+ 2746      7372635C 
+ 2747              	.LASF72:
+ 2748 002b 44656275 		.ascii	"Debug_SetEnabled\000"
+ 2748      675F5365 
+ 2748      74456E61 
+ 2748      626C6564 
+ 2748      00
+ 2749              	.LASF75:
+ 2750 003c 55534246 		.ascii	"USBFS_GetConfiguration\000"
+ 2750      535F4765 
+ 2750      74436F6E 
+ 2750      66696775 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 56
+
+
+ 2750      72617469 
+ 2751              	.LASF77:
+ 2752 0053 5472616E 		.ascii	"TransportUSB_IsConnected\000"
+ 2752      73706F72 
+ 2752      74555342 
+ 2752      5F497343 
+ 2752      6F6E6E65 
+ 2753              	.LASF2:
+ 2754 006c 73686F72 		.ascii	"short int\000"
+ 2754      7420696E 
+ 2754      7400
+ 2755              	.LASF44:
+ 2756 0076 6462675F 		.ascii	"dbg_pld\000"
+ 2756      706C6400 
+ 2757              	.LASF19:
+ 2758 007e 73697A65 		.ascii	"sizetype\000"
+ 2758      74797065 
+ 2758      00
+ 2759              	.LASF21:
+ 2760 0087 7461736B 		.ascii	"task\000"
+ 2760      00
+ 2761              	.LASF18:
+ 2762 008c 6C6F6E67 		.ascii	"long double\000"
+ 2762      20646F75 
+ 2762      626C6500 
+ 2763              	.LASF39:
+ 2764 0098 706F7374 		.ascii	"post_digital\000"
+ 2764      5F646967 
+ 2764      6974616C 
+ 2764      00
+ 2765              	.LASF81:
+ 2766 00a5 456E636F 		.ascii	"EncodeGainByte\000"
+ 2766      64654761 
+ 2766      696E4279 
+ 2766      746500
+ 2767              	.LASF23:
+ 2768 00b4 73656E64 		.ascii	"send_sample\000"
+ 2768      5F73616D 
+ 2768      706C6500 
+ 2769              	.LASF49:
+ 2770 00c0 72784C65 		.ascii	"rxLen\000"
+ 2770      6E00
+ 2771              	.LASF13:
+ 2772 00c6 696E7431 		.ascii	"int16\000"
+ 2772      3600
+ 2773              	.LASF11:
+ 2774 00cc 75696E74 		.ascii	"uint8\000"
+ 2774      3800
+ 2775              	.LASF30:
+ 2776 00d2 52585F57 		.ascii	"RX_WAIT_LEN2\000"
+ 2776      4149545F 
+ 2776      4C454E32 
+ 2776      00
+ 2777              	.LASF42:
+ 2778 00df 436F6D6D 		.ascii	"Communication_SendState\000"
+ 2778      756E6963 
+ 2778      6174696F 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 57
+
+
+ 2778      6E5F5365 
+ 2778      6E645374 
+ 2779              	.LASF15:
+ 2780 00f7 666C6F61 		.ascii	"float\000"
+ 2780      7400
+ 2781              	.LASF6:
+ 2782 00fd 6C6F6E67 		.ascii	"long long int\000"
+ 2782      206C6F6E 
+ 2782      6720696E 
+ 2782      7400
+ 2783              	.LASF54:
+ 2784 010b 735F7278 		.ascii	"s_rx_cmd\000"
+ 2784      5F636D64 
+ 2784      00
+ 2785              	.LASF67:
+ 2786 0114 416E616C 		.ascii	"AnalogToDigital_SetADC\000"
+ 2786      6F67546F 
+ 2786      44696769 
+ 2786      74616C5F 
+ 2786      53657441 
+ 2787              	.LASF4:
+ 2788 012b 6C6F6E67 		.ascii	"long int\000"
+ 2788      20696E74 
+ 2788      00
+ 2789              	.LASF33:
+ 2790 0134 6275665F 		.ascii	"buf_gain\000"
+ 2790      6761696E 
+ 2790      00
+ 2791              	.LASF10:
+ 2792 013d 696E7433 		.ascii	"int32_t\000"
+ 2792      325F7400 
+ 2793              	.LASF70:
+ 2794 0145 54657374 		.ascii	"TestBench_SetOutput\000"
+ 2794      42656E63 
+ 2794      685F5365 
+ 2794      744F7574 
+ 2794      70757400 
+ 2795              	.LASF63:
+ 2796 0159 675F6669 		.ascii	"g_filter_sel\000"
+ 2796      6C746572 
+ 2796      5F73656C 
+ 2796      00
+ 2797              	.LASF60:
+ 2798 0166 675F6164 		.ascii	"g_adc_cfg\000"
+ 2798      635F6366 
+ 2798      6700
+ 2799              	.LASF25:
+ 2800 0170 6E616D65 		.ascii	"name\000"
+ 2800      00
+ 2801              	.LASF55:
+ 2802 0175 735F7278 		.ascii	"s_rx_len_hi\000"
+ 2802      5F6C656E 
+ 2802      5F686900 
+ 2803              	.LASF56:
+ 2804 0181 735F7278 		.ascii	"s_rx_buf\000"
+ 2804      5F627566 
+ 2804      00
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 58
+
+
+ 2805              	.LASF51:
+ 2806 018a 735F7472 		.ascii	"s_transport_count\000"
+ 2806      616E7370 
+ 2806      6F72745F 
+ 2806      636F756E 
+ 2806      7400
+ 2807              	.LASF38:
+ 2808 019c 706F7374 		.ascii	"post_analog\000"
+ 2808      5F616E61 
+ 2808      6C6F6700 
+ 2809              	.LASF61:
+ 2810 01a8 675F6164 		.ascii	"g_adc_buf_gain\000"
+ 2810      635F6275 
+ 2810      665F6761 
+ 2810      696E00
+ 2811              	.LASF1:
+ 2812 01b7 756E7369 		.ascii	"unsigned char\000"
+ 2812      676E6564 
+ 2812      20636861 
+ 2812      7200
+ 2813              	.LASF53:
+ 2814 01c5 735F7278 		.ascii	"s_rx_state\000"
+ 2814      5F737461 
+ 2814      746500
+ 2815              	.LASF74:
+ 2816 01d0 55534246 		.ascii	"USBFS_GetAll\000"
+ 2816      535F4765 
+ 2816      74416C6C 
+ 2816      00
+ 2817              	.LASF37:
+ 2818 01dd 7261775F 		.ascii	"raw_input\000"
+ 2818      696E7075 
+ 2818      7400
+ 2819              	.LASF0:
+ 2820 01e7 7369676E 		.ascii	"signed char\000"
+ 2820      65642063 
+ 2820      68617200 
+ 2821              	.LASF40:
+ 2822 01f3 666C6167 		.ascii	"flags\000"
+ 2822      7300
+ 2823              	.LASF7:
+ 2824 01f9 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 2824      206C6F6E 
+ 2824      6720756E 
+ 2824      7369676E 
+ 2824      65642069 
+ 2825              	.LASF68:
+ 2826 0210 44656275 		.ascii	"Debug_Send\000"
+ 2826      675F5365 
+ 2826      6E6400
+ 2827              	.LASF79:
+ 2828 021b 436F6D6D 		.ascii	"Communication.c\000"
+ 2828      756E6963 
+ 2828      6174696F 
+ 2828      6E2E6300 
+ 2829              	.LASF8:
+ 2830 022b 756E7369 		.ascii	"unsigned int\000"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 59
+
+
+ 2830      676E6564 
+ 2830      20696E74 
+ 2830      00
+ 2831              	.LASF69:
+ 2832 0238 54657374 		.ascii	"TestBench_SetInput\000"
+ 2832      42656E63 
+ 2832      685F5365 
+ 2832      74496E70 
+ 2832      757400
+ 2833              	.LASF34:
+ 2834 024b 436F6D6D 		.ascii	"Communication_RegisterTransport\000"
+ 2834      756E6963 
+ 2834      6174696F 
+ 2834      6E5F5265 
+ 2834      67697374 
+ 2835              	.LASF5:
+ 2836 026b 6C6F6E67 		.ascii	"long unsigned int\000"
+ 2836      20756E73 
+ 2836      69676E65 
+ 2836      6420696E 
+ 2836      7400
+ 2837              	.LASF65:
+ 2838 027d 44656275 		.ascii	"Debug_GetChannel\000"
+ 2838      675F4765 
+ 2838      74436861 
+ 2838      6E6E656C 
+ 2838      00
+ 2839              	.LASF22:
+ 2840 028e 69735F72 		.ascii	"is_ready\000"
+ 2840      65616479 
+ 2840      00
+ 2841              	.LASF3:
+ 2842 0297 73686F72 		.ascii	"short unsigned int\000"
+ 2842      7420756E 
+ 2842      7369676E 
+ 2842      65642069 
+ 2842      6E7400
+ 2843              	.LASF48:
+ 2844 02aa 72784275 		.ascii	"rxBuf\000"
+ 2844      6600
+ 2845              	.LASF17:
+ 2846 02b0 63686172 		.ascii	"char\000"
+ 2846      00
+ 2847              	.LASF20:
+ 2848 02b5 696E6974 		.ascii	"init\000"
+ 2848      00
+ 2849              	.LASF29:
+ 2850 02ba 52585F57 		.ascii	"RX_WAIT_LEN\000"
+ 2850      4149545F 
+ 2850      4C454E00 
+ 2851              	.LASF83:
+ 2852 02c6 436F6D6D 		.ascii	"Communication_IsStreaming\000"
+ 2852      756E6963 
+ 2852      6174696F 
+ 2852      6E5F4973 
+ 2852      53747265 
+ 2853              	.LASF66:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 60
+
+
+ 2854 02e0 5472616E 		.ascii	"TransportUSB_SendState\000"
+ 2854      73706F72 
+ 2854      74555342 
+ 2854      5F53656E 
+ 2854      64537461 
+ 2855              	.LASF26:
+ 2856 02f7 5472616E 		.ascii	"Transport_t\000"
+ 2856      73706F72 
+ 2856      745F7400 
+ 2857              	.LASF50:
+ 2858 0303 735F7472 		.ascii	"s_transports\000"
+ 2858      616E7370 
+ 2858      6F727473 
+ 2858      00
+ 2859              	.LASF27:
+ 2860 0310 52585F57 		.ascii	"RX_WAIT_MARKER\000"
+ 2860      4149545F 
+ 2860      4D41524B 
+ 2860      455200
+ 2861              	.LASF12:
+ 2862 031f 75696E74 		.ascii	"uint16\000"
+ 2862      313600
+ 2863              	.LASF62:
+ 2864 0326 675F7664 		.ascii	"g_vdac_mode\000"
+ 2864      61635F6D 
+ 2864      6F646500 
+ 2865              	.LASF58:
+ 2866 0332 735F7278 		.ascii	"s_rx_expected\000"
+ 2866      5F657870 
+ 2866      65637465 
+ 2866      6400
+ 2867              	.LASF52:
+ 2868 0340 735F7374 		.ascii	"s_streaming\000"
+ 2868      7265616D 
+ 2868      696E6700 
+ 2869              	.LASF71:
+ 2870 034c 54657374 		.ascii	"TestBench_SetVdacSeq\000"
+ 2870      42656E63 
+ 2870      685F5365 
+ 2870      74566461 
+ 2870      63536571 
+ 2871              	.LASF32:
+ 2872 0361 52785374 		.ascii	"RxState_t\000"
+ 2872      6174655F 
+ 2872      7400
+ 2873              	.LASF31:
+ 2874 036b 52585F57 		.ascii	"RX_WAIT_PAYLOAD\000"
+ 2874      4149545F 
+ 2874      5041594C 
+ 2874      4F414400 
+ 2875              	.LASF14:
+ 2876 037b 696E7433 		.ascii	"int32\000"
+ 2876      3200
+ 2877              	.LASF57:
+ 2878 0381 735F7278 		.ascii	"s_rx_count\000"
+ 2878      5F636F75 
+ 2878      6E7400
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 61
+
+
+ 2879              	.LASF82:
+ 2880 038c 436F6D6D 		.ascii	"Communication_IsConnected\000"
+ 2880      756E6963 
+ 2880      6174696F 
+ 2880      6E5F4973 
+ 2880      436F6E6E 
+ 2881              	.LASF46:
+ 2882 03a6 50617273 		.ascii	"ParseRxByte\000"
+ 2882      65527842 
+ 2882      79746500 
+ 2883              	.LASF28:
+ 2884 03b2 52585F57 		.ascii	"RX_WAIT_CMD\000"
+ 2884      4149545F 
+ 2884      434D4400 
+ 2885              	.LASF36:
+ 2886 03be 436F6D6D 		.ascii	"Communication_SendSample\000"
+ 2886      756E6963 
+ 2886      6174696F 
+ 2886      6E5F5365 
+ 2886      6E645361 
+ 2887              	.LASF9:
+ 2888 03d7 5F5F696E 		.ascii	"__int32_t\000"
+ 2888      7433325F 
+ 2888      7400
+ 2889              	.LASF24:
+ 2890 03e1 656E6162 		.ascii	"enabled\000"
+ 2890      6C656400 
+ 2891              	.LASF64:
+ 2892 03e9 44656275 		.ascii	"Debug_IsEnabled\000"
+ 2892      675F4973 
+ 2892      456E6162 
+ 2892      6C656400 
+ 2893              	.LASF45:
+ 2894 03f9 50726F63 		.ascii	"ProcessCommand\000"
+ 2894      65737343 
+ 2894      6F6D6D61 
+ 2894      6E6400
+ 2895              	.LASF16:
+ 2896 0408 646F7562 		.ascii	"double\000"
+ 2896      6C6500
+ 2897              	.LASF73:
+ 2898 040f 44656275 		.ascii	"Debug_SetChannel\000"
+ 2898      675F5365 
+ 2898      74436861 
+ 2898      6E6E656C 
+ 2898      00
+ 2899              	.LASF59:
+ 2900 0420 49544D5F 		.ascii	"ITM_RxBuffer\000"
+ 2900      52784275 
+ 2900      66666572 
+ 2900      00
+ 2901              	.LASF78:
+ 2902 042d 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 2902      43313120 
+ 2902      352E342E 
+ 2902      31203230 
+ 2902      31363036 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cceKkOti.s 			page 62
+
+
+ 2903 0460 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"
+ 2903      20726576 
+ 2903      6973696F 
+ 2903      6E203233 
+ 2903      37373135 
+ 2904 0493 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 2904      66756E63 
+ 2904      74696F6E 
+ 2904      2D736563 
+ 2904      74696F6E 
+ 2905              	.LASF41:
+ 2906 04bb 6761696E 		.ascii	"gain_byte\000"
+ 2906      5F627974 
+ 2906      6500
+ 2907              	.LASF47:
+ 2908 04c5 436F6D6D 		.ascii	"Communication_Task\000"
+ 2908      756E6963 
+ 2908      6174696F 
+ 2908      6E5F5461 
+ 2908      736B00
+ 2909              	.LASF76:
+ 2910 04d8 55534246 		.ascii	"USBFS_DataIsReady\000"
+ 2910      535F4461 
+ 2910      74614973 
+ 2910      52656164 
+ 2910      7900
+ 2911              	.LASF35:
+ 2912 04ea 436F6D6D 		.ascii	"Communication_Init\000"
+ 2912      756E6963 
+ 2912      6174696F 
+ 2912      6E5F496E 
+ 2912      697400
+ 2913              	.LASF43:
+ 2914 04fd 7061796C 		.ascii	"payload\000"
+ 2914      6F616400 
+ 2915              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran
