@@ -33,6 +33,8 @@
 #define DBG_EVT_DMA_ERR     0x40u  /* DMA error         payload: [chain_id 0-3]   */
 #define DBG_EVT_ADC_ERR     0x41u  /* ADC lost lock     payload: none             */
 #define DBG_EVT_VDAC_LOADED 0x50u  /* VDAC loaded       payload: [len_hi][len_lo] */
+#define DBG_EVT_FIR_LOADED  0x51u  /* FIR filter loaded payload: [n_taps]         */
+#define DBG_EVT_FIR_CLEAR   0x52u  /* FIR disabled      payload: none             */
 #define DBG_EVT_ADC_CHG     0x60u  /* ADC config change payload: [cfg][buf_gain]  */
 
 /* Initialize debug system (default: UART channel, disabled). */

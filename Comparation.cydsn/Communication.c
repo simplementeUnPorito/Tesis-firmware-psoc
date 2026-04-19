@@ -145,12 +145,13 @@ static void ProcessCommand(uint8 cmd, const uint8 *payload, uint16 len)
                 if (n_taps > ATD_FIR_MAX_TAPS) { n_taps = ATD_FIR_MAX_TAPS; }
                 AnalogToDigital_FIR_Load((const int16 *)payload, n_taps);
                 dbg_pld[0] = n_taps;
-                Debug_Send(DBG_EVT_VDAC_LOADED, dbg_pld, 1u);  /* reuse event slot */
+                Debug_Send(DBG_EVT_FIR_LOADED, dbg_pld, 1u);
             }
             break;
 
         case COMM_CMD_FIR_CLEAR:
             AnalogToDigital_FIR_Clear();
+            Debug_Send(DBG_EVT_FIR_CLEAR, (void *)0u, 0u);
             break;
 
         default:
