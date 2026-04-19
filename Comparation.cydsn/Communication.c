@@ -134,6 +134,25 @@ static void ProcessCommand(uint8 cmd, const uint8 *payload, uint16 len)
             /* State packet sent unconditionally after switch */
             break;
 
+        case COMM_CMD_LOAD_FIR:
+            /* payload: [c0_lo][c0_hi][c1_lo][c1_hi]... (Q1.15 LE int16 pairs)
+             * len must be even and represent at least 1 coefficient.
+             * Max: ATD_FIR_MAX_TAPS * 2 = 510 bytes. */
+            if (len >= 2u && (len & 1u) == 0u)
+            {
+                uint8 n_taps = (uint8)(len >> 1u);
+                /* Guard: clamp to ATD_FIR_MAX_TAPS (255) */
+                if (n_taps > ATD_FIR_MAX_TAPS) { n_taps = ATD_FIR_MAX_TAPS; }
+                AnalogToDigital_FIR_Load((const int16 *)payload, n_taps);
+                dbg_pld[0] = n_taps;
+                Debug_Send(DBG_EVT_VDAC_LOADED, dbg_pld, 1u);  /* reuse event slot */
+            }
+            break;
+
+        case COMM_CMD_FIR_CLEAR:
+            AnalogToDigital_FIR_Clear();
+            break;
+
         default:
             break;
     }
@@ -156,9 +175,9 @@ static void ParseRxByte(uint8 b)
             break;
 
         case RX_WAIT_LEN:
-            if (s_rx_cmd == COMM_CMD_VDAC_LOAD)
+            if (s_rx_cmd == COMM_CMD_VDAC_LOAD || s_rx_cmd == COMM_CMD_LOAD_FIR)
             {
-                /* Special: next 2 bytes are the 16-bit sequence length */
+                /* Special: next 2 bytes are the 16-bit payload length */
                 s_rx_len_hi = b;
                 s_rx_state  = RX_WAIT_LEN2;
             }

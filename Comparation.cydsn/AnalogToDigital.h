@@ -51,4 +51,41 @@ uint8 AnalogToDigital_GetCfg(void);
 /* Return current buffer gain (1, 2, 4, or 8). */
 uint8 AnalogToDigital_GetBufGain(void);
 
+/* ── Software FIR stage (second filter, after DFB hardware filter) ──────────
+ *
+ * Up to ATD_FIR_MAX_TAPS taps, Q1.15 int16 coefficients.
+ * Delay line is a power-of-2 circular buffer (256 slots) for efficient
+ * uint8 index arithmetic — no modulo needed.
+ *
+ * Typical workflow from Python:
+ *   1. Design filter (scipy.signal), convert coefficients to Q1.15 int16.
+ *   2. Send CMD_LOAD_FIR (0x0A) with raw coefficient bytes (2 bytes/tap, LE).
+ *   3. PSoC calls AnalogToDigital_FIR_Load(); g_fir_loaded is set to 1.
+ *   4. Main loop calls AnalogToDigital_FIR_Process(g_filtered) every sample.
+ *   5. Communication_SendSample uses g_fir_out as post_digital channel.
+ */
+
+#define ATD_FIR_MAX_TAPS  255u   /* max taps; delay line is 256 for uint8 wrap */
+
+/* Output of the software FIR stage.  Updated every sample when loaded.
+ * When no FIR is loaded (g_fir_loaded == 0), mirrors g_filtered. */
+extern volatile int32  g_fir_out;
+
+/* 1 when valid FIR coefficients are loaded and processing is active. */
+extern volatile uint8  g_fir_loaded;
+
+/* Load FIR filter.
+ *   coeffs  : Q1.15 signed int16 array (values in [-32768 .. 32767]).
+ *             Normalize so sum(|h|) ≤ 1.0 to avoid overflow.
+ *   n_taps  : number of coefficients (1..ATD_FIR_MAX_TAPS).
+ *             Pass 0 to disable (same as FIR_Clear). */
+void AnalogToDigital_FIR_Load(const int16 *coeffs, uint8 n_taps);
+
+/* Apply FIR to one 24-bit sample; result stored in g_fir_out.
+ * Pass-through (g_fir_out = sample) when g_fir_loaded == 0. */
+void AnalogToDigital_FIR_Process(int32 sample);
+
+/* Disable FIR, clear delay line, reset g_fir_loaded to 0. */
+void AnalogToDigital_FIR_Clear(void);
+
 #endif /* ANALOG_TO_DIGITAL_H */

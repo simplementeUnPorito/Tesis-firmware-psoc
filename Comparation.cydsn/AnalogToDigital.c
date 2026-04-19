@@ -146,3 +146,96 @@ uint8 AnalogToDigital_GetBufGain(void)
 {
     return g_adc_buf_gain;
 }
+
+/* ── Software FIR stage ─────────────────────────────────────────────────────
+ *
+ * Delay line: 256-element circular buffer indexed by uint8 s_fir_head.
+ * uint8 subtraction wraps naturally (no modulo needed) because the buffer
+ * size is exactly 2^8 = 256.
+ *
+ * Coefficient format: Q1.15 int16.
+ * MAC: acc += coeff[k] * delay[(head - k)], using int64 accumulator.
+ * Output: acc >> 15, saturated to ±0x7FFFFF (24-bit, matching DFB range).
+ */
+
+volatile int32  g_fir_out    = 0;
+volatile uint8  g_fir_loaded = 0u;
+
+static uint8  s_fir_len;
+static int16  s_fir_coeffs[256u];   /* always 256 slots; active taps = s_fir_len */
+static int32  s_fir_delay[256u];    /* circular delay line — 256 for uint8 wrap */
+static uint8  s_fir_head;
+
+void AnalogToDigital_FIR_Load(const int16 *coeffs, uint8 n_taps)
+{
+    uint16 i;
+    uint8  intState;
+
+    intState     = CyEnterCriticalSection();
+    g_fir_loaded = 0u;  /* pause processing while swapping coefficients */
+
+    if (n_taps == 0u)
+    {
+        s_fir_len = 0u;
+        CyExitCriticalSection(intState);
+        return;
+    }
+
+    s_fir_len = n_taps;  /* n_taps <= ATD_FIR_MAX_TAPS (255) guaranteed by caller */
+
+    for (i = 0u; i < (uint16)n_taps; i++)
+    {
+        s_fir_coeffs[i] = coeffs[i];
+    }
+
+    /* Clear delay line to suppress startup transient */
+    for (i = 0u; i < 256u; i++)
+    {
+        s_fir_delay[i] = 0;
+    }
+    s_fir_head   = 0u;
+    g_fir_loaded = 1u;
+    CyExitCriticalSection(intState);
+}
+
+void AnalogToDigital_FIR_Process(int32 sample)
+{
+    uint8 k;
+    int64 acc = 0;
+    int32 result;
+
+    if (g_fir_loaded == 0u)
+    {
+        g_fir_out = sample;
+        return;
+    }
+
+    /* Push newest sample */
+    s_fir_delay[s_fir_head] = sample;
+
+    /* MAC: coeff[0] multiplies newest sample, coeff[1] previous, etc.
+     * uint8 index subtraction wraps for free — no masking needed. */
+    for (k = 0u; k < s_fir_len; k++)
+    {
+        uint8 idx = (uint8)(s_fir_head - k);
+        acc += (int64)s_fir_coeffs[k] * (int64)s_fir_delay[idx];
+    }
+
+    s_fir_head = (uint8)(s_fir_head + 1u);
+
+    /* Normalize Q1.15 → int24 and saturate */
+    result = (int32)(acc >> 15);
+    if      (result >  0x7FFFFF) { result =  0x7FFFFF; }
+    else if (result < -0x800000) { result = -0x800000; }
+
+    g_fir_out = result;
+}
+
+void AnalogToDigital_FIR_Clear(void)
+{
+    uint8 intState = CyEnterCriticalSection();
+    g_fir_loaded = 0u;
+    s_fir_len    = 0u;
+    s_fir_head   = 0u;
+    CyExitCriticalSection(intState);
+}

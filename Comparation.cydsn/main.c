@@ -78,10 +78,15 @@ int main(void)
         {
             g_sample_ready = 0u;
 
+            /* Software FIR: always run so delay line stays current.
+             * When g_fir_loaded==0, FIR_Process simply copies g_filtered. */
+            AnalogToDigital_FIR_Process(g_filtered);
+
             if (Communication_IsStreaming())
             {
                 int16 raw_input;
                 uint8 flags;
+                int32 post_digital;
 
                 flags = (uint8)((g_vdac_mode  & 0x01u)       |
                                 ((g_filter_sel & 0x01u) << 1u));
@@ -90,8 +95,12 @@ int main(void)
                           ? g_sar_latest
                           : (int16)g_vdac_last_val;
 
+                /* post_digital: use FIR output when a filter is loaded,
+                 * otherwise use raw DFB output (pass-through). */
+                post_digital = g_fir_loaded ? g_fir_out : g_filtered;
+
                 Communication_SendSample(raw_input, g_raw_delsig,
-                                         g_filtered, flags);
+                                         post_digital, flags);
             }
         }
     }

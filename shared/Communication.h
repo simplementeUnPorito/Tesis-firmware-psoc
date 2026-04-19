@@ -44,6 +44,11 @@
  *   CMD_SET_DEBUG   0x07  LEN=1  [0/1]    — enable/disable debug
  *   CMD_SET_DBG_CH  0x08  LEN=1  [0/1/2]  — debug channel USB/UART/BOTH
  *   CMD_GET_STATE   0x09  LEN=0            — request state packet immediately
+ *   CMD_LOAD_FIR    0x0A  [len_hi][len_lo][c0_lo][c0_hi]...[cN_lo][cN_hi]
+ *                         2-byte length (like VDAC_LOAD); each coefficient is
+ *                         2 bytes little-endian int16 Q1.15.
+ *                         max payload = 255 * 2 = 510 bytes.
+ *   CMD_FIR_CLEAR   0x0B  LEN=0            — disable FIR, pass-through mode
  */
 
 #ifndef COMMUNICATION_H
@@ -62,6 +67,8 @@
 #define COMM_CMD_SET_DEBUG    0x07u
 #define COMM_CMD_SET_DBG_CH   0x08u
 #define COMM_CMD_GET_STATE    0x09u
+#define COMM_CMD_LOAD_FIR     0x0Au  /* 2-byte length: n_taps*2 bytes of Q1.15 int16 */
+#define COMM_CMD_FIR_CLEAR    0x0Bu  /* LEN=0: disable FIR, pass-through */
 
 /* Packet / frame markers */
 #define COMM_PKT_DATA_HDR   0xAAu
