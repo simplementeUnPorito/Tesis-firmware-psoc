@@ -1,0 +1,2427 @@
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"Timer_VDAC.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.Timer_VDAC_Enable,"ax",%progbits
+  20              		.align	2
+  21              		.global	Timer_VDAC_Enable
+  22              		.thumb
+  23              		.thumb_func
+  24              		.type	Timer_VDAC_Enable, %function
+  25              	Timer_VDAC_Enable:
+  26              	.LFB1:
+  27              		.file 1 "Generated_Source\\PSoC5\\Timer_VDAC.c"
+   1:Generated_Source\PSoC5/Timer_VDAC.c **** /*******************************************************************************
+   2:Generated_Source\PSoC5/Timer_VDAC.c **** * File Name: Timer_VDAC.c
+   3:Generated_Source\PSoC5/Timer_VDAC.c **** * Version 2.80
+   4:Generated_Source\PSoC5/Timer_VDAC.c **** *
+   5:Generated_Source\PSoC5/Timer_VDAC.c **** * Description:
+   6:Generated_Source\PSoC5/Timer_VDAC.c **** *  The Timer component consists of a 8, 16, 24 or 32-bit timer with
+   7:Generated_Source\PSoC5/Timer_VDAC.c **** *  a selectable period between 2 and 2^Width - 1.  The timer may free run
+   8:Generated_Source\PSoC5/Timer_VDAC.c **** *  or be used as a capture timer as well.  The capture can be initiated
+   9:Generated_Source\PSoC5/Timer_VDAC.c **** *  by a positive or negative edge signal as well as via software.
+  10:Generated_Source\PSoC5/Timer_VDAC.c **** *  A trigger input can be programmed to enable the timer on rising edge
+  11:Generated_Source\PSoC5/Timer_VDAC.c **** *  falling edge, either edge or continous run.
+  12:Generated_Source\PSoC5/Timer_VDAC.c **** *  Interrupts may be generated due to a terminal count condition
+  13:Generated_Source\PSoC5/Timer_VDAC.c **** *  or a capture event.
+  14:Generated_Source\PSoC5/Timer_VDAC.c **** *
+  15:Generated_Source\PSoC5/Timer_VDAC.c **** * Note:
+  16:Generated_Source\PSoC5/Timer_VDAC.c **** *
+  17:Generated_Source\PSoC5/Timer_VDAC.c **** ********************************************************************************
+  18:Generated_Source\PSoC5/Timer_VDAC.c **** * Copyright 2008-2017, Cypress Semiconductor Corporation.  All rights reserved.
+  19:Generated_Source\PSoC5/Timer_VDAC.c **** * You may use this file only in accordance with the license, terms, conditions,
+  20:Generated_Source\PSoC5/Timer_VDAC.c **** * disclaimers, and limitations in the end user license agreement accompanying
+  21:Generated_Source\PSoC5/Timer_VDAC.c **** * the software package with which this file was provided.
+  22:Generated_Source\PSoC5/Timer_VDAC.c **** ********************************************************************************/
+  23:Generated_Source\PSoC5/Timer_VDAC.c **** 
+  24:Generated_Source\PSoC5/Timer_VDAC.c **** #include "Timer_VDAC.h"
+  25:Generated_Source\PSoC5/Timer_VDAC.c **** 
+  26:Generated_Source\PSoC5/Timer_VDAC.c **** uint8 Timer_VDAC_initVar = 0u;
+  27:Generated_Source\PSoC5/Timer_VDAC.c **** 
+  28:Generated_Source\PSoC5/Timer_VDAC.c **** 
+  29:Generated_Source\PSoC5/Timer_VDAC.c **** /*******************************************************************************
+  30:Generated_Source\PSoC5/Timer_VDAC.c **** * Function Name: Timer_VDAC_Init
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 2
+
+
+  31:Generated_Source\PSoC5/Timer_VDAC.c **** ********************************************************************************
+  32:Generated_Source\PSoC5/Timer_VDAC.c **** *
+  33:Generated_Source\PSoC5/Timer_VDAC.c **** * Summary:
+  34:Generated_Source\PSoC5/Timer_VDAC.c **** *  Initialize to the schematic state
+  35:Generated_Source\PSoC5/Timer_VDAC.c **** *
+  36:Generated_Source\PSoC5/Timer_VDAC.c **** * Parameters:
+  37:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+  38:Generated_Source\PSoC5/Timer_VDAC.c **** *
+  39:Generated_Source\PSoC5/Timer_VDAC.c **** * Return:
+  40:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+  41:Generated_Source\PSoC5/Timer_VDAC.c **** *
+  42:Generated_Source\PSoC5/Timer_VDAC.c **** *******************************************************************************/
+  43:Generated_Source\PSoC5/Timer_VDAC.c **** void Timer_VDAC_Init(void) 
+  44:Generated_Source\PSoC5/Timer_VDAC.c **** {
+  45:Generated_Source\PSoC5/Timer_VDAC.c ****     #if(!Timer_VDAC_UsingFixedFunction)
+  46:Generated_Source\PSoC5/Timer_VDAC.c ****             /* Interrupt State Backup for Critical Region*/
+  47:Generated_Source\PSoC5/Timer_VDAC.c ****             uint8 Timer_VDAC_interruptState;
+  48:Generated_Source\PSoC5/Timer_VDAC.c ****     #endif /* Interrupt state back up for Fixed Function only */
+  49:Generated_Source\PSoC5/Timer_VDAC.c **** 
+  50:Generated_Source\PSoC5/Timer_VDAC.c ****     #if (Timer_VDAC_UsingFixedFunction)
+  51:Generated_Source\PSoC5/Timer_VDAC.c ****         /* Clear all bits but the enable bit (if it's already set) for Timer operation */
+  52:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_CONTROL &= Timer_VDAC_CTRL_ENABLE;
+  53:Generated_Source\PSoC5/Timer_VDAC.c **** 
+  54:Generated_Source\PSoC5/Timer_VDAC.c ****         /* Clear the mode bits for continuous run mode */
+  55:Generated_Source\PSoC5/Timer_VDAC.c ****         #if (CY_PSOC5A)
+  56:Generated_Source\PSoC5/Timer_VDAC.c ****             Timer_VDAC_CONTROL2 &= ((uint8)(~Timer_VDAC_CTRL_MODE_MASK));
+  57:Generated_Source\PSoC5/Timer_VDAC.c ****         #endif /* Clear bits in CONTROL2 only in PSOC5A */
+  58:Generated_Source\PSoC5/Timer_VDAC.c **** 
+  59:Generated_Source\PSoC5/Timer_VDAC.c ****         #if (CY_PSOC3 || CY_PSOC5LP)
+  60:Generated_Source\PSoC5/Timer_VDAC.c ****             Timer_VDAC_CONTROL3 &= ((uint8)(~Timer_VDAC_CTRL_MODE_MASK));
+  61:Generated_Source\PSoC5/Timer_VDAC.c ****         #endif /* CONTROL3 register exists only in PSoC3 OR PSoC5LP */
+  62:Generated_Source\PSoC5/Timer_VDAC.c **** 
+  63:Generated_Source\PSoC5/Timer_VDAC.c ****         /* Check if One Shot mode is enabled i.e. RunMode !=0*/
+  64:Generated_Source\PSoC5/Timer_VDAC.c ****         #if (Timer_VDAC_RunModeUsed != 0x0u)
+  65:Generated_Source\PSoC5/Timer_VDAC.c ****             /* Set 3rd bit of Control register to enable one shot mode */
+  66:Generated_Source\PSoC5/Timer_VDAC.c ****             Timer_VDAC_CONTROL |= 0x04u;
+  67:Generated_Source\PSoC5/Timer_VDAC.c ****         #endif /* One Shot enabled only when RunModeUsed is not Continuous*/
+  68:Generated_Source\PSoC5/Timer_VDAC.c **** 
+  69:Generated_Source\PSoC5/Timer_VDAC.c ****         #if (Timer_VDAC_RunModeUsed == 2)
+  70:Generated_Source\PSoC5/Timer_VDAC.c ****             #if (CY_PSOC5A)
+  71:Generated_Source\PSoC5/Timer_VDAC.c ****                 /* Set last 2 bits of control2 register if one shot(halt on
+  72:Generated_Source\PSoC5/Timer_VDAC.c ****                 interrupt) is enabled*/
+  73:Generated_Source\PSoC5/Timer_VDAC.c ****                 Timer_VDAC_CONTROL2 |= 0x03u;
+  74:Generated_Source\PSoC5/Timer_VDAC.c ****             #endif /* Set One-Shot Halt on Interrupt bit in CONTROL2 for PSoC5A */
+  75:Generated_Source\PSoC5/Timer_VDAC.c **** 
+  76:Generated_Source\PSoC5/Timer_VDAC.c ****             #if (CY_PSOC3 || CY_PSOC5LP)
+  77:Generated_Source\PSoC5/Timer_VDAC.c ****                 /* Set last 2 bits of control3 register if one shot(halt on
+  78:Generated_Source\PSoC5/Timer_VDAC.c ****                 interrupt) is enabled*/
+  79:Generated_Source\PSoC5/Timer_VDAC.c ****                 Timer_VDAC_CONTROL3 |= 0x03u;
+  80:Generated_Source\PSoC5/Timer_VDAC.c ****             #endif /* Set One-Shot Halt on Interrupt bit in CONTROL3 for PSoC3 or PSoC5LP */
+  81:Generated_Source\PSoC5/Timer_VDAC.c **** 
+  82:Generated_Source\PSoC5/Timer_VDAC.c ****         #endif /* Remove section if One Shot Halt on Interrupt is not enabled */
+  83:Generated_Source\PSoC5/Timer_VDAC.c **** 
+  84:Generated_Source\PSoC5/Timer_VDAC.c ****         #if (Timer_VDAC_UsingHWEnable != 0)
+  85:Generated_Source\PSoC5/Timer_VDAC.c ****             #if (CY_PSOC5A)
+  86:Generated_Source\PSoC5/Timer_VDAC.c ****                 /* Set the default Run Mode of the Timer to Continuous */
+  87:Generated_Source\PSoC5/Timer_VDAC.c ****                 Timer_VDAC_CONTROL2 |= Timer_VDAC_CTRL_MODE_PULSEWIDTH;
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 3
+
+
+  88:Generated_Source\PSoC5/Timer_VDAC.c ****             #endif /* Set Continuous Run Mode in CONTROL2 for PSoC5A */
+  89:Generated_Source\PSoC5/Timer_VDAC.c **** 
+  90:Generated_Source\PSoC5/Timer_VDAC.c ****             #if (CY_PSOC3 || CY_PSOC5LP)
+  91:Generated_Source\PSoC5/Timer_VDAC.c ****                 /* Clear and Set ROD and COD bits of CFG2 register */
+  92:Generated_Source\PSoC5/Timer_VDAC.c ****                 Timer_VDAC_CONTROL3 &= ((uint8)(~Timer_VDAC_CTRL_RCOD_MASK));
+  93:Generated_Source\PSoC5/Timer_VDAC.c ****                 Timer_VDAC_CONTROL3 |= Timer_VDAC_CTRL_RCOD;
+  94:Generated_Source\PSoC5/Timer_VDAC.c **** 
+  95:Generated_Source\PSoC5/Timer_VDAC.c ****                 /* Clear and Enable the HW enable bit in CFG2 register */
+  96:Generated_Source\PSoC5/Timer_VDAC.c ****                 Timer_VDAC_CONTROL3 &= ((uint8)(~Timer_VDAC_CTRL_ENBL_MASK));
+  97:Generated_Source\PSoC5/Timer_VDAC.c ****                 Timer_VDAC_CONTROL3 |= Timer_VDAC_CTRL_ENBL;
+  98:Generated_Source\PSoC5/Timer_VDAC.c **** 
+  99:Generated_Source\PSoC5/Timer_VDAC.c ****                 /* Set the default Run Mode of the Timer to Continuous */
+ 100:Generated_Source\PSoC5/Timer_VDAC.c ****                 Timer_VDAC_CONTROL3 |= Timer_VDAC_CTRL_MODE_CONTINUOUS;
+ 101:Generated_Source\PSoC5/Timer_VDAC.c ****             #endif /* Set Continuous Run Mode in CONTROL3 for PSoC3ES3 or PSoC5A */
+ 102:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 103:Generated_Source\PSoC5/Timer_VDAC.c ****         #endif /* Configure Run Mode with hardware enable */
+ 104:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 105:Generated_Source\PSoC5/Timer_VDAC.c ****         /* Clear and Set SYNCTC and SYNCCMP bits of RT1 register */
+ 106:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_RT1 &= ((uint8)(~Timer_VDAC_RT1_MASK));
+ 107:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_RT1 |= Timer_VDAC_SYNC;
+ 108:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 109:Generated_Source\PSoC5/Timer_VDAC.c ****         /*Enable DSI Sync all all inputs of the Timer*/
+ 110:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_RT1 &= ((uint8)(~Timer_VDAC_SYNCDSI_MASK));
+ 111:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_RT1 |= Timer_VDAC_SYNCDSI_EN;
+ 112:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 113:Generated_Source\PSoC5/Timer_VDAC.c ****         /* Set the IRQ to use the status register interrupts */
+ 114:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_CONTROL2 |= Timer_VDAC_CTRL2_IRQ_SEL;
+ 115:Generated_Source\PSoC5/Timer_VDAC.c ****     #endif /* Configuring registers of fixed function implementation */
+ 116:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 117:Generated_Source\PSoC5/Timer_VDAC.c ****     /* Set Initial values from Configuration */
+ 118:Generated_Source\PSoC5/Timer_VDAC.c ****     Timer_VDAC_WritePeriod(Timer_VDAC_INIT_PERIOD);
+ 119:Generated_Source\PSoC5/Timer_VDAC.c ****     Timer_VDAC_WriteCounter(Timer_VDAC_INIT_PERIOD);
+ 120:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 121:Generated_Source\PSoC5/Timer_VDAC.c ****     #if (Timer_VDAC_UsingHWCaptureCounter)/* Capture counter is enabled */
+ 122:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_CAPTURE_COUNT_CTRL |= Timer_VDAC_CNTR_ENABLE;
+ 123:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_SetCaptureCount(Timer_VDAC_INIT_CAPTURE_COUNT);
+ 124:Generated_Source\PSoC5/Timer_VDAC.c ****     #endif /* Configure capture counter value */
+ 125:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 126:Generated_Source\PSoC5/Timer_VDAC.c ****     #if (!Timer_VDAC_UsingFixedFunction)
+ 127:Generated_Source\PSoC5/Timer_VDAC.c ****         #if (Timer_VDAC_SoftwareCaptureMode)
+ 128:Generated_Source\PSoC5/Timer_VDAC.c ****             Timer_VDAC_SetCaptureMode(Timer_VDAC_INIT_CAPTURE_MODE);
+ 129:Generated_Source\PSoC5/Timer_VDAC.c ****         #endif /* Set Capture Mode for UDB implementation if capture mode is software controlled */
+ 130:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 131:Generated_Source\PSoC5/Timer_VDAC.c ****         #if (Timer_VDAC_SoftwareTriggerMode)
+ 132:Generated_Source\PSoC5/Timer_VDAC.c ****             #if (!Timer_VDAC_UDB_CONTROL_REG_REMOVED)
+ 133:Generated_Source\PSoC5/Timer_VDAC.c ****                 if (0u == (Timer_VDAC_CONTROL & Timer_VDAC__B_TIMER__TM_SOFTWARE))
+ 134:Generated_Source\PSoC5/Timer_VDAC.c ****                 {
+ 135:Generated_Source\PSoC5/Timer_VDAC.c ****                     Timer_VDAC_SetTriggerMode(Timer_VDAC_INIT_TRIGGER_MODE);
+ 136:Generated_Source\PSoC5/Timer_VDAC.c ****                 }
+ 137:Generated_Source\PSoC5/Timer_VDAC.c ****             #endif /* (!Timer_VDAC_UDB_CONTROL_REG_REMOVED) */
+ 138:Generated_Source\PSoC5/Timer_VDAC.c ****         #endif /* Set trigger mode for UDB Implementation if trigger mode is software controlled */
+ 139:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 140:Generated_Source\PSoC5/Timer_VDAC.c ****         /* CyEnterCriticalRegion and CyExitCriticalRegion are used to mark following region critica
+ 141:Generated_Source\PSoC5/Timer_VDAC.c ****         /* Enter Critical Region*/
+ 142:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_interruptState = CyEnterCriticalSection();
+ 143:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 144:Generated_Source\PSoC5/Timer_VDAC.c ****         /* Use the interrupt output of the status register for IRQ output */
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 4
+
+
+ 145:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_STATUS_AUX_CTRL |= Timer_VDAC_STATUS_ACTL_INT_EN_MASK;
+ 146:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 147:Generated_Source\PSoC5/Timer_VDAC.c ****         /* Exit Critical Region*/
+ 148:Generated_Source\PSoC5/Timer_VDAC.c ****         CyExitCriticalSection(Timer_VDAC_interruptState);
+ 149:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 150:Generated_Source\PSoC5/Timer_VDAC.c ****         #if (Timer_VDAC_EnableTriggerMode)
+ 151:Generated_Source\PSoC5/Timer_VDAC.c ****             Timer_VDAC_EnableTrigger();
+ 152:Generated_Source\PSoC5/Timer_VDAC.c ****         #endif /* Set Trigger enable bit for UDB implementation in the control register*/
+ 153:Generated_Source\PSoC5/Timer_VDAC.c **** 		
+ 154:Generated_Source\PSoC5/Timer_VDAC.c **** 		
+ 155:Generated_Source\PSoC5/Timer_VDAC.c ****         #if (Timer_VDAC_InterruptOnCaptureCount && !Timer_VDAC_UDB_CONTROL_REG_REMOVED)
+ 156:Generated_Source\PSoC5/Timer_VDAC.c ****             Timer_VDAC_SetInterruptCount(Timer_VDAC_INIT_INT_CAPTURE_COUNT);
+ 157:Generated_Source\PSoC5/Timer_VDAC.c ****         #endif /* Set interrupt count in UDB implementation if interrupt count feature is checked.*
+ 158:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 159:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_ClearFIFO();
+ 160:Generated_Source\PSoC5/Timer_VDAC.c ****     #endif /* Configure additional features of UDB implementation */
+ 161:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 162:Generated_Source\PSoC5/Timer_VDAC.c ****     Timer_VDAC_SetInterruptMode(Timer_VDAC_INIT_INTERRUPT_MODE);
+ 163:Generated_Source\PSoC5/Timer_VDAC.c **** }
+ 164:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 165:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 166:Generated_Source\PSoC5/Timer_VDAC.c **** /*******************************************************************************
+ 167:Generated_Source\PSoC5/Timer_VDAC.c **** * Function Name: Timer_VDAC_Enable
+ 168:Generated_Source\PSoC5/Timer_VDAC.c **** ********************************************************************************
+ 169:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 170:Generated_Source\PSoC5/Timer_VDAC.c **** * Summary:
+ 171:Generated_Source\PSoC5/Timer_VDAC.c **** *  Enable the Timer
+ 172:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 173:Generated_Source\PSoC5/Timer_VDAC.c **** * Parameters:
+ 174:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 175:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 176:Generated_Source\PSoC5/Timer_VDAC.c **** * Return:
+ 177:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 178:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 179:Generated_Source\PSoC5/Timer_VDAC.c **** *******************************************************************************/
+ 180:Generated_Source\PSoC5/Timer_VDAC.c **** void Timer_VDAC_Enable(void) 
+ 181:Generated_Source\PSoC5/Timer_VDAC.c **** {
+  28              		.loc 1 181 0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32              		@ link register save eliminated.
+ 182:Generated_Source\PSoC5/Timer_VDAC.c ****     /* Globally Enable the Fixed Function Block chosen */
+ 183:Generated_Source\PSoC5/Timer_VDAC.c ****     #if (Timer_VDAC_UsingFixedFunction)
+ 184:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_GLOBAL_ENABLE |= Timer_VDAC_BLOCK_EN_MASK;
+ 185:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_GLOBAL_STBY_ENABLE |= Timer_VDAC_BLOCK_STBY_EN_MASK;
+ 186:Generated_Source\PSoC5/Timer_VDAC.c ****     #endif /* Set Enable bit for enabling Fixed function timer*/
+ 187:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 188:Generated_Source\PSoC5/Timer_VDAC.c ****     /* Remove assignment if control register is removed */
+ 189:Generated_Source\PSoC5/Timer_VDAC.c ****     #if (!Timer_VDAC_UDB_CONTROL_REG_REMOVED || Timer_VDAC_UsingFixedFunction)
+ 190:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_CONTROL |= Timer_VDAC_CTRL_ENABLE;
+  33              		.loc 1 190 0
+  34 0000 024A     		ldr	r2, .L2
+  35 0002 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+  36 0004 43F08003 		orr	r3, r3, #128
+  37 0008 1370     		strb	r3, [r2]
+  38 000a 7047     		bx	lr
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 5
+
+
+  39              	.L3:
+  40              		.align	2
+  41              	.L2:
+  42 000c 75650040 		.word	1073767797
+  43              		.cfi_endproc
+  44              	.LFE1:
+  45              		.size	Timer_VDAC_Enable, .-Timer_VDAC_Enable
+  46              		.section	.text.Timer_VDAC_Stop,"ax",%progbits
+  47              		.align	2
+  48              		.global	Timer_VDAC_Stop
+  49              		.thumb
+  50              		.thumb_func
+  51              		.type	Timer_VDAC_Stop, %function
+  52              	Timer_VDAC_Stop:
+  53              	.LFB3:
+ 191:Generated_Source\PSoC5/Timer_VDAC.c ****     #endif /* Remove assignment if control register is removed */
+ 192:Generated_Source\PSoC5/Timer_VDAC.c **** }
+ 193:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 194:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 195:Generated_Source\PSoC5/Timer_VDAC.c **** /*******************************************************************************
+ 196:Generated_Source\PSoC5/Timer_VDAC.c **** * Function Name: Timer_VDAC_Start
+ 197:Generated_Source\PSoC5/Timer_VDAC.c **** ********************************************************************************
+ 198:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 199:Generated_Source\PSoC5/Timer_VDAC.c **** * Summary:
+ 200:Generated_Source\PSoC5/Timer_VDAC.c **** *  The start function initializes the timer with the default values, the
+ 201:Generated_Source\PSoC5/Timer_VDAC.c **** *  enables the timerto begin counting.  It does not enable interrupts,
+ 202:Generated_Source\PSoC5/Timer_VDAC.c **** *  the EnableInt command should be called if interrupt generation is required.
+ 203:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 204:Generated_Source\PSoC5/Timer_VDAC.c **** * Parameters:
+ 205:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 206:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 207:Generated_Source\PSoC5/Timer_VDAC.c **** * Return:
+ 208:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 209:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 210:Generated_Source\PSoC5/Timer_VDAC.c **** * Global variables:
+ 211:Generated_Source\PSoC5/Timer_VDAC.c **** *  Timer_VDAC_initVar: Is modified when this function is called for the
+ 212:Generated_Source\PSoC5/Timer_VDAC.c **** *   first time. Is used to ensure that initialization happens only once.
+ 213:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 214:Generated_Source\PSoC5/Timer_VDAC.c **** *******************************************************************************/
+ 215:Generated_Source\PSoC5/Timer_VDAC.c **** void Timer_VDAC_Start(void) 
+ 216:Generated_Source\PSoC5/Timer_VDAC.c **** {
+ 217:Generated_Source\PSoC5/Timer_VDAC.c ****     if(Timer_VDAC_initVar == 0u)
+ 218:Generated_Source\PSoC5/Timer_VDAC.c ****     {
+ 219:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_Init();
+ 220:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 221:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_initVar = 1u;   /* Clear this bit for Initialization */
+ 222:Generated_Source\PSoC5/Timer_VDAC.c ****     }
+ 223:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 224:Generated_Source\PSoC5/Timer_VDAC.c ****     /* Enable the Timer */
+ 225:Generated_Source\PSoC5/Timer_VDAC.c ****     Timer_VDAC_Enable();
+ 226:Generated_Source\PSoC5/Timer_VDAC.c **** }
+ 227:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 228:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 229:Generated_Source\PSoC5/Timer_VDAC.c **** /*******************************************************************************
+ 230:Generated_Source\PSoC5/Timer_VDAC.c **** * Function Name: Timer_VDAC_Stop
+ 231:Generated_Source\PSoC5/Timer_VDAC.c **** ********************************************************************************
+ 232:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 6
+
+
+ 233:Generated_Source\PSoC5/Timer_VDAC.c **** * Summary:
+ 234:Generated_Source\PSoC5/Timer_VDAC.c **** *  The stop function halts the timer, but does not change any modes or disable
+ 235:Generated_Source\PSoC5/Timer_VDAC.c **** *  interrupts.
+ 236:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 237:Generated_Source\PSoC5/Timer_VDAC.c **** * Parameters:
+ 238:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 239:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 240:Generated_Source\PSoC5/Timer_VDAC.c **** * Return:
+ 241:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 242:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 243:Generated_Source\PSoC5/Timer_VDAC.c **** * Side Effects: If the Enable mode is set to Hardware only then this function
+ 244:Generated_Source\PSoC5/Timer_VDAC.c **** *               has no effect on the operation of the timer.
+ 245:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 246:Generated_Source\PSoC5/Timer_VDAC.c **** *******************************************************************************/
+ 247:Generated_Source\PSoC5/Timer_VDAC.c **** void Timer_VDAC_Stop(void) 
+ 248:Generated_Source\PSoC5/Timer_VDAC.c **** {
+  54              		.loc 1 248 0
+  55              		.cfi_startproc
+  56              		@ args = 0, pretend = 0, frame = 0
+  57              		@ frame_needed = 0, uses_anonymous_args = 0
+  58              		@ link register save eliminated.
+ 249:Generated_Source\PSoC5/Timer_VDAC.c ****     /* Disable Timer */
+ 250:Generated_Source\PSoC5/Timer_VDAC.c ****     #if(!Timer_VDAC_UDB_CONTROL_REG_REMOVED || Timer_VDAC_UsingFixedFunction)
+ 251:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_CONTROL &= ((uint8)(~Timer_VDAC_CTRL_ENABLE));
+  59              		.loc 1 251 0
+  60 0000 024A     		ldr	r2, .L5
+  61 0002 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+  62 0004 03F07F03 		and	r3, r3, #127
+  63 0008 1370     		strb	r3, [r2]
+  64 000a 7047     		bx	lr
+  65              	.L6:
+  66              		.align	2
+  67              	.L5:
+  68 000c 75650040 		.word	1073767797
+  69              		.cfi_endproc
+  70              	.LFE3:
+  71              		.size	Timer_VDAC_Stop, .-Timer_VDAC_Stop
+  72              		.section	.text.Timer_VDAC_SetInterruptMode,"ax",%progbits
+  73              		.align	2
+  74              		.global	Timer_VDAC_SetInterruptMode
+  75              		.thumb
+  76              		.thumb_func
+  77              		.type	Timer_VDAC_SetInterruptMode, %function
+  78              	Timer_VDAC_SetInterruptMode:
+  79              	.LFB4:
+ 252:Generated_Source\PSoC5/Timer_VDAC.c ****     #endif /* Remove assignment if control register is removed */
+ 253:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 254:Generated_Source\PSoC5/Timer_VDAC.c ****     /* Globally disable the Fixed Function Block chosen */
+ 255:Generated_Source\PSoC5/Timer_VDAC.c ****     #if (Timer_VDAC_UsingFixedFunction)
+ 256:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_GLOBAL_ENABLE &= ((uint8)(~Timer_VDAC_BLOCK_EN_MASK));
+ 257:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_GLOBAL_STBY_ENABLE &= ((uint8)(~Timer_VDAC_BLOCK_STBY_EN_MASK));
+ 258:Generated_Source\PSoC5/Timer_VDAC.c ****     #endif /* Disable global enable for the Timer Fixed function block to stop the Timer*/
+ 259:Generated_Source\PSoC5/Timer_VDAC.c **** }
+ 260:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 261:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 262:Generated_Source\PSoC5/Timer_VDAC.c **** /*******************************************************************************
+ 263:Generated_Source\PSoC5/Timer_VDAC.c **** * Function Name: Timer_VDAC_SetInterruptMode
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 7
+
+
+ 264:Generated_Source\PSoC5/Timer_VDAC.c **** ********************************************************************************
+ 265:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 266:Generated_Source\PSoC5/Timer_VDAC.c **** * Summary:
+ 267:Generated_Source\PSoC5/Timer_VDAC.c **** *  This function selects which of the interrupt inputs may cause an interrupt.
+ 268:Generated_Source\PSoC5/Timer_VDAC.c **** *  The twosources are caputure and terminal.  One, both or neither may
+ 269:Generated_Source\PSoC5/Timer_VDAC.c **** *  be selected.
+ 270:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 271:Generated_Source\PSoC5/Timer_VDAC.c **** * Parameters:
+ 272:Generated_Source\PSoC5/Timer_VDAC.c **** *  interruptMode:   This parameter is used to enable interrups on either/or
+ 273:Generated_Source\PSoC5/Timer_VDAC.c **** *                   terminal count or capture.
+ 274:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 275:Generated_Source\PSoC5/Timer_VDAC.c **** * Return:
+ 276:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 277:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 278:Generated_Source\PSoC5/Timer_VDAC.c **** *******************************************************************************/
+ 279:Generated_Source\PSoC5/Timer_VDAC.c **** void Timer_VDAC_SetInterruptMode(uint8 interruptMode) 
+ 280:Generated_Source\PSoC5/Timer_VDAC.c **** {
+  80              		.loc 1 280 0
+  81              		.cfi_startproc
+  82              		@ args = 0, pretend = 0, frame = 0
+  83              		@ frame_needed = 0, uses_anonymous_args = 0
+  84              		@ link register save eliminated.
+  85              	.LVL0:
+ 281:Generated_Source\PSoC5/Timer_VDAC.c ****     Timer_VDAC_STATUS_MASK = interruptMode;
+  86              		.loc 1 281 0
+  87 0000 014B     		ldr	r3, .L8
+  88 0002 1870     		strb	r0, [r3]
+  89 0004 7047     		bx	lr
+  90              	.L9:
+  91 0006 00BF     		.align	2
+  92              	.L8:
+  93 0008 85650040 		.word	1073767813
+  94              		.cfi_endproc
+  95              	.LFE4:
+  96              		.size	Timer_VDAC_SetInterruptMode, .-Timer_VDAC_SetInterruptMode
+  97              		.section	.text.Timer_VDAC_SoftwareCapture,"ax",%progbits
+  98              		.align	2
+  99              		.global	Timer_VDAC_SoftwareCapture
+ 100              		.thumb
+ 101              		.thumb_func
+ 102              		.type	Timer_VDAC_SoftwareCapture, %function
+ 103              	Timer_VDAC_SoftwareCapture:
+ 104              	.LFB5:
+ 282:Generated_Source\PSoC5/Timer_VDAC.c **** }
+ 283:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 284:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 285:Generated_Source\PSoC5/Timer_VDAC.c **** /*******************************************************************************
+ 286:Generated_Source\PSoC5/Timer_VDAC.c **** * Function Name: Timer_VDAC_SoftwareCapture
+ 287:Generated_Source\PSoC5/Timer_VDAC.c **** ********************************************************************************
+ 288:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 289:Generated_Source\PSoC5/Timer_VDAC.c **** * Summary:
+ 290:Generated_Source\PSoC5/Timer_VDAC.c **** *  This function forces a capture independent of the capture signal.
+ 291:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 292:Generated_Source\PSoC5/Timer_VDAC.c **** * Parameters:
+ 293:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 294:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 295:Generated_Source\PSoC5/Timer_VDAC.c **** * Return:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 8
+
+
+ 296:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 297:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 298:Generated_Source\PSoC5/Timer_VDAC.c **** * Side Effects:
+ 299:Generated_Source\PSoC5/Timer_VDAC.c **** *  An existing hardware capture could be overwritten.
+ 300:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 301:Generated_Source\PSoC5/Timer_VDAC.c **** *******************************************************************************/
+ 302:Generated_Source\PSoC5/Timer_VDAC.c **** void Timer_VDAC_SoftwareCapture(void) 
+ 303:Generated_Source\PSoC5/Timer_VDAC.c **** {
+ 105              		.loc 1 303 0
+ 106              		.cfi_startproc
+ 107              		@ args = 0, pretend = 0, frame = 0
+ 108              		@ frame_needed = 0, uses_anonymous_args = 0
+ 109              		@ link register save eliminated.
+ 304:Generated_Source\PSoC5/Timer_VDAC.c ****     /* Generate a software capture by reading the counter register */
+ 305:Generated_Source\PSoC5/Timer_VDAC.c ****     #if(Timer_VDAC_UsingFixedFunction)
+ 306:Generated_Source\PSoC5/Timer_VDAC.c ****         (void)CY_GET_REG16(Timer_VDAC_COUNTER_LSB_PTR);
+ 307:Generated_Source\PSoC5/Timer_VDAC.c ****     #else
+ 308:Generated_Source\PSoC5/Timer_VDAC.c ****         (void)CY_GET_REG8(Timer_VDAC_COUNTER_LSB_PTR_8BIT);
+ 110              		.loc 1 308 0
+ 111 0000 014B     		ldr	r3, .L11
+ 112 0002 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 113 0004 7047     		bx	lr
+ 114              	.L12:
+ 115 0006 00BF     		.align	2
+ 116              	.L11:
+ 117 0008 04650040 		.word	1073767684
+ 118              		.cfi_endproc
+ 119              	.LFE5:
+ 120              		.size	Timer_VDAC_SoftwareCapture, .-Timer_VDAC_SoftwareCapture
+ 121              		.section	.text.Timer_VDAC_ReadStatusRegister,"ax",%progbits
+ 122              		.align	2
+ 123              		.global	Timer_VDAC_ReadStatusRegister
+ 124              		.thumb
+ 125              		.thumb_func
+ 126              		.type	Timer_VDAC_ReadStatusRegister, %function
+ 127              	Timer_VDAC_ReadStatusRegister:
+ 128              	.LFB6:
+ 309:Generated_Source\PSoC5/Timer_VDAC.c ****     #endif/* (Timer_VDAC_UsingFixedFunction) */
+ 310:Generated_Source\PSoC5/Timer_VDAC.c ****     /* Capture Data is now in the FIFO */
+ 311:Generated_Source\PSoC5/Timer_VDAC.c **** }
+ 312:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 313:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 314:Generated_Source\PSoC5/Timer_VDAC.c **** /*******************************************************************************
+ 315:Generated_Source\PSoC5/Timer_VDAC.c **** * Function Name: Timer_VDAC_ReadStatusRegister
+ 316:Generated_Source\PSoC5/Timer_VDAC.c **** ********************************************************************************
+ 317:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 318:Generated_Source\PSoC5/Timer_VDAC.c **** * Summary:
+ 319:Generated_Source\PSoC5/Timer_VDAC.c **** *  Reads the status register and returns it's state. This function should use
+ 320:Generated_Source\PSoC5/Timer_VDAC.c **** *  defined types for the bit-field information as the bits in this register may
+ 321:Generated_Source\PSoC5/Timer_VDAC.c **** *  be permuteable.
+ 322:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 323:Generated_Source\PSoC5/Timer_VDAC.c **** * Parameters:
+ 324:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 325:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 326:Generated_Source\PSoC5/Timer_VDAC.c **** * Return:
+ 327:Generated_Source\PSoC5/Timer_VDAC.c **** *  The contents of the status register
+ 328:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 9
+
+
+ 329:Generated_Source\PSoC5/Timer_VDAC.c **** * Side Effects:
+ 330:Generated_Source\PSoC5/Timer_VDAC.c **** *  Status register bits may be clear on read.
+ 331:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 332:Generated_Source\PSoC5/Timer_VDAC.c **** *******************************************************************************/
+ 333:Generated_Source\PSoC5/Timer_VDAC.c **** uint8   Timer_VDAC_ReadStatusRegister(void) 
+ 334:Generated_Source\PSoC5/Timer_VDAC.c **** {
+ 129              		.loc 1 334 0
+ 130              		.cfi_startproc
+ 131              		@ args = 0, pretend = 0, frame = 0
+ 132              		@ frame_needed = 0, uses_anonymous_args = 0
+ 133              		@ link register save eliminated.
+ 335:Generated_Source\PSoC5/Timer_VDAC.c ****     return (Timer_VDAC_STATUS);
+ 134              		.loc 1 335 0
+ 135 0000 014B     		ldr	r3, .L14
+ 136 0002 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 336:Generated_Source\PSoC5/Timer_VDAC.c **** }
+ 137              		.loc 1 336 0
+ 138 0004 7047     		bx	lr
+ 139              	.L15:
+ 140 0006 00BF     		.align	2
+ 141              	.L14:
+ 142 0008 65650040 		.word	1073767781
+ 143              		.cfi_endproc
+ 144              	.LFE6:
+ 145              		.size	Timer_VDAC_ReadStatusRegister, .-Timer_VDAC_ReadStatusRegister
+ 146              		.section	.text.Timer_VDAC_ReadControlRegister,"ax",%progbits
+ 147              		.align	2
+ 148              		.global	Timer_VDAC_ReadControlRegister
+ 149              		.thumb
+ 150              		.thumb_func
+ 151              		.type	Timer_VDAC_ReadControlRegister, %function
+ 152              	Timer_VDAC_ReadControlRegister:
+ 153              	.LFB7:
+ 337:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 338:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 339:Generated_Source\PSoC5/Timer_VDAC.c **** #if (!Timer_VDAC_UDB_CONTROL_REG_REMOVED) /* Remove API if control register is unused */
+ 340:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 341:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 342:Generated_Source\PSoC5/Timer_VDAC.c **** /*******************************************************************************
+ 343:Generated_Source\PSoC5/Timer_VDAC.c **** * Function Name: Timer_VDAC_ReadControlRegister
+ 344:Generated_Source\PSoC5/Timer_VDAC.c **** ********************************************************************************
+ 345:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 346:Generated_Source\PSoC5/Timer_VDAC.c **** * Summary:
+ 347:Generated_Source\PSoC5/Timer_VDAC.c **** *  Reads the control register and returns it's value.
+ 348:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 349:Generated_Source\PSoC5/Timer_VDAC.c **** * Parameters:
+ 350:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 351:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 352:Generated_Source\PSoC5/Timer_VDAC.c **** * Return:
+ 353:Generated_Source\PSoC5/Timer_VDAC.c **** *  The contents of the control register
+ 354:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 355:Generated_Source\PSoC5/Timer_VDAC.c **** *******************************************************************************/
+ 356:Generated_Source\PSoC5/Timer_VDAC.c **** uint8 Timer_VDAC_ReadControlRegister(void) 
+ 357:Generated_Source\PSoC5/Timer_VDAC.c **** {
+ 154              		.loc 1 357 0
+ 155              		.cfi_startproc
+ 156              		@ args = 0, pretend = 0, frame = 0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 10
+
+
+ 157              		@ frame_needed = 0, uses_anonymous_args = 0
+ 158              		@ link register save eliminated.
+ 358:Generated_Source\PSoC5/Timer_VDAC.c ****     #if (!Timer_VDAC_UDB_CONTROL_REG_REMOVED) 
+ 359:Generated_Source\PSoC5/Timer_VDAC.c ****         return ((uint8)Timer_VDAC_CONTROL);
+ 159              		.loc 1 359 0
+ 160 0000 014B     		ldr	r3, .L17
+ 161 0002 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 360:Generated_Source\PSoC5/Timer_VDAC.c ****     #else
+ 361:Generated_Source\PSoC5/Timer_VDAC.c ****         return (0);
+ 362:Generated_Source\PSoC5/Timer_VDAC.c ****     #endif /* (!Timer_VDAC_UDB_CONTROL_REG_REMOVED) */
+ 363:Generated_Source\PSoC5/Timer_VDAC.c **** }
+ 162              		.loc 1 363 0
+ 163 0004 7047     		bx	lr
+ 164              	.L18:
+ 165 0006 00BF     		.align	2
+ 166              	.L17:
+ 167 0008 75650040 		.word	1073767797
+ 168              		.cfi_endproc
+ 169              	.LFE7:
+ 170              		.size	Timer_VDAC_ReadControlRegister, .-Timer_VDAC_ReadControlRegister
+ 171              		.section	.text.Timer_VDAC_WriteControlRegister,"ax",%progbits
+ 172              		.align	2
+ 173              		.global	Timer_VDAC_WriteControlRegister
+ 174              		.thumb
+ 175              		.thumb_func
+ 176              		.type	Timer_VDAC_WriteControlRegister, %function
+ 177              	Timer_VDAC_WriteControlRegister:
+ 178              	.LFB8:
+ 364:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 365:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 366:Generated_Source\PSoC5/Timer_VDAC.c **** /*******************************************************************************
+ 367:Generated_Source\PSoC5/Timer_VDAC.c **** * Function Name: Timer_VDAC_WriteControlRegister
+ 368:Generated_Source\PSoC5/Timer_VDAC.c **** ********************************************************************************
+ 369:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 370:Generated_Source\PSoC5/Timer_VDAC.c **** * Summary:
+ 371:Generated_Source\PSoC5/Timer_VDAC.c **** *  Sets the bit-field of the control register.
+ 372:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 373:Generated_Source\PSoC5/Timer_VDAC.c **** * Parameters:
+ 374:Generated_Source\PSoC5/Timer_VDAC.c **** *  control: The contents of the control register
+ 375:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 376:Generated_Source\PSoC5/Timer_VDAC.c **** * Return:
+ 377:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 378:Generated_Source\PSoC5/Timer_VDAC.c **** *******************************************************************************/
+ 379:Generated_Source\PSoC5/Timer_VDAC.c **** void Timer_VDAC_WriteControlRegister(uint8 control) 
+ 380:Generated_Source\PSoC5/Timer_VDAC.c **** {
+ 179              		.loc 1 380 0
+ 180              		.cfi_startproc
+ 181              		@ args = 0, pretend = 0, frame = 0
+ 182              		@ frame_needed = 0, uses_anonymous_args = 0
+ 183              		@ link register save eliminated.
+ 184              	.LVL1:
+ 381:Generated_Source\PSoC5/Timer_VDAC.c ****     #if (!Timer_VDAC_UDB_CONTROL_REG_REMOVED) 
+ 382:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_CONTROL = control;
+ 185              		.loc 1 382 0
+ 186 0000 014B     		ldr	r3, .L20
+ 187 0002 1870     		strb	r0, [r3]
+ 188 0004 7047     		bx	lr
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 11
+
+
+ 189              	.L21:
+ 190 0006 00BF     		.align	2
+ 191              	.L20:
+ 192 0008 75650040 		.word	1073767797
+ 193              		.cfi_endproc
+ 194              	.LFE8:
+ 195              		.size	Timer_VDAC_WriteControlRegister, .-Timer_VDAC_WriteControlRegister
+ 196              		.section	.text.Timer_VDAC_ReadPeriod,"ax",%progbits
+ 197              		.align	2
+ 198              		.global	Timer_VDAC_ReadPeriod
+ 199              		.thumb
+ 200              		.thumb_func
+ 201              		.type	Timer_VDAC_ReadPeriod, %function
+ 202              	Timer_VDAC_ReadPeriod:
+ 203              	.LFB9:
+ 383:Generated_Source\PSoC5/Timer_VDAC.c ****     #else
+ 384:Generated_Source\PSoC5/Timer_VDAC.c ****         control = 0u;
+ 385:Generated_Source\PSoC5/Timer_VDAC.c ****     #endif /* (!Timer_VDAC_UDB_CONTROL_REG_REMOVED) */
+ 386:Generated_Source\PSoC5/Timer_VDAC.c **** }
+ 387:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 388:Generated_Source\PSoC5/Timer_VDAC.c **** #endif /* Remove API if control register is unused */
+ 389:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 390:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 391:Generated_Source\PSoC5/Timer_VDAC.c **** /*******************************************************************************
+ 392:Generated_Source\PSoC5/Timer_VDAC.c **** * Function Name: Timer_VDAC_ReadPeriod
+ 393:Generated_Source\PSoC5/Timer_VDAC.c **** ********************************************************************************
+ 394:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 395:Generated_Source\PSoC5/Timer_VDAC.c **** * Summary:
+ 396:Generated_Source\PSoC5/Timer_VDAC.c **** *  This function returns the current value of the Period.
+ 397:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 398:Generated_Source\PSoC5/Timer_VDAC.c **** * Parameters:
+ 399:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 400:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 401:Generated_Source\PSoC5/Timer_VDAC.c **** * Return:
+ 402:Generated_Source\PSoC5/Timer_VDAC.c **** *  The present value of the counter.
+ 403:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 404:Generated_Source\PSoC5/Timer_VDAC.c **** *******************************************************************************/
+ 405:Generated_Source\PSoC5/Timer_VDAC.c **** uint16 Timer_VDAC_ReadPeriod(void) 
+ 406:Generated_Source\PSoC5/Timer_VDAC.c **** {
+ 204              		.loc 1 406 0
+ 205              		.cfi_startproc
+ 206              		@ args = 0, pretend = 0, frame = 0
+ 207              		@ frame_needed = 0, uses_anonymous_args = 0
+ 208              		@ link register save eliminated.
+ 407:Generated_Source\PSoC5/Timer_VDAC.c ****    #if(Timer_VDAC_UsingFixedFunction)
+ 408:Generated_Source\PSoC5/Timer_VDAC.c ****        return ((uint16)CY_GET_REG16(Timer_VDAC_PERIOD_LSB_PTR));
+ 409:Generated_Source\PSoC5/Timer_VDAC.c ****    #else
+ 410:Generated_Source\PSoC5/Timer_VDAC.c ****        return (CY_GET_REG16(Timer_VDAC_PERIOD_LSB_PTR));
+ 209              		.loc 1 410 0
+ 210 0000 014B     		ldr	r3, .L23
+ 211 0002 1888     		ldrh	r0, [r3]
+ 411:Generated_Source\PSoC5/Timer_VDAC.c ****    #endif /* (Timer_VDAC_UsingFixedFunction) */
+ 412:Generated_Source\PSoC5/Timer_VDAC.c **** }
+ 212              		.loc 1 412 0
+ 213 0004 80B2     		uxth	r0, r0
+ 214 0006 7047     		bx	lr
+ 215              	.L24:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 12
+
+
+ 216              		.align	2
+ 217              	.L23:
+ 218 0008 486A0040 		.word	1073769032
+ 219              		.cfi_endproc
+ 220              	.LFE9:
+ 221              		.size	Timer_VDAC_ReadPeriod, .-Timer_VDAC_ReadPeriod
+ 222              		.section	.text.Timer_VDAC_WritePeriod,"ax",%progbits
+ 223              		.align	2
+ 224              		.global	Timer_VDAC_WritePeriod
+ 225              		.thumb
+ 226              		.thumb_func
+ 227              		.type	Timer_VDAC_WritePeriod, %function
+ 228              	Timer_VDAC_WritePeriod:
+ 229              	.LFB10:
+ 413:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 414:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 415:Generated_Source\PSoC5/Timer_VDAC.c **** /*******************************************************************************
+ 416:Generated_Source\PSoC5/Timer_VDAC.c **** * Function Name: Timer_VDAC_WritePeriod
+ 417:Generated_Source\PSoC5/Timer_VDAC.c **** ********************************************************************************
+ 418:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 419:Generated_Source\PSoC5/Timer_VDAC.c **** * Summary:
+ 420:Generated_Source\PSoC5/Timer_VDAC.c **** *  This function is used to change the period of the counter.  The new period
+ 421:Generated_Source\PSoC5/Timer_VDAC.c **** *  will be loaded the next time terminal count is detected.
+ 422:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 423:Generated_Source\PSoC5/Timer_VDAC.c **** * Parameters:
+ 424:Generated_Source\PSoC5/Timer_VDAC.c **** *  period: This value may be between 1 and (2^Resolution)-1.  A value of 0 will
+ 425:Generated_Source\PSoC5/Timer_VDAC.c **** *          result in the counter remaining at zero.
+ 426:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 427:Generated_Source\PSoC5/Timer_VDAC.c **** * Return:
+ 428:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 429:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 430:Generated_Source\PSoC5/Timer_VDAC.c **** *******************************************************************************/
+ 431:Generated_Source\PSoC5/Timer_VDAC.c **** void Timer_VDAC_WritePeriod(uint16 period) 
+ 432:Generated_Source\PSoC5/Timer_VDAC.c **** {
+ 230              		.loc 1 432 0
+ 231              		.cfi_startproc
+ 232              		@ args = 0, pretend = 0, frame = 0
+ 233              		@ frame_needed = 0, uses_anonymous_args = 0
+ 234              		@ link register save eliminated.
+ 235              	.LVL2:
+ 433:Generated_Source\PSoC5/Timer_VDAC.c ****     #if(Timer_VDAC_UsingFixedFunction)
+ 434:Generated_Source\PSoC5/Timer_VDAC.c ****         uint16 period_temp = (uint16)period;
+ 435:Generated_Source\PSoC5/Timer_VDAC.c ****         CY_SET_REG16(Timer_VDAC_PERIOD_LSB_PTR, period_temp);
+ 436:Generated_Source\PSoC5/Timer_VDAC.c ****     #else
+ 437:Generated_Source\PSoC5/Timer_VDAC.c ****         CY_SET_REG16(Timer_VDAC_PERIOD_LSB_PTR, period);
+ 236              		.loc 1 437 0
+ 237 0000 014B     		ldr	r3, .L26
+ 238 0002 1880     		strh	r0, [r3]	@ movhi
+ 239 0004 7047     		bx	lr
+ 240              	.L27:
+ 241 0006 00BF     		.align	2
+ 242              	.L26:
+ 243 0008 486A0040 		.word	1073769032
+ 244              		.cfi_endproc
+ 245              	.LFE10:
+ 246              		.size	Timer_VDAC_WritePeriod, .-Timer_VDAC_WritePeriod
+ 247              		.section	.text.Timer_VDAC_ReadCapture,"ax",%progbits
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 13
+
+
+ 248              		.align	2
+ 249              		.global	Timer_VDAC_ReadCapture
+ 250              		.thumb
+ 251              		.thumb_func
+ 252              		.type	Timer_VDAC_ReadCapture, %function
+ 253              	Timer_VDAC_ReadCapture:
+ 254              	.LFB11:
+ 438:Generated_Source\PSoC5/Timer_VDAC.c ****     #endif /*Write Period value with appropriate resolution suffix depending on UDB or fixed functi
+ 439:Generated_Source\PSoC5/Timer_VDAC.c **** }
+ 440:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 441:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 442:Generated_Source\PSoC5/Timer_VDAC.c **** /*******************************************************************************
+ 443:Generated_Source\PSoC5/Timer_VDAC.c **** * Function Name: Timer_VDAC_ReadCapture
+ 444:Generated_Source\PSoC5/Timer_VDAC.c **** ********************************************************************************
+ 445:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 446:Generated_Source\PSoC5/Timer_VDAC.c **** * Summary:
+ 447:Generated_Source\PSoC5/Timer_VDAC.c **** *  This function returns the last value captured.
+ 448:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 449:Generated_Source\PSoC5/Timer_VDAC.c **** * Parameters:
+ 450:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 451:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 452:Generated_Source\PSoC5/Timer_VDAC.c **** * Return:
+ 453:Generated_Source\PSoC5/Timer_VDAC.c **** *  Present Capture value.
+ 454:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 455:Generated_Source\PSoC5/Timer_VDAC.c **** *******************************************************************************/
+ 456:Generated_Source\PSoC5/Timer_VDAC.c **** uint16 Timer_VDAC_ReadCapture(void) 
+ 457:Generated_Source\PSoC5/Timer_VDAC.c **** {
+ 255              		.loc 1 457 0
+ 256              		.cfi_startproc
+ 257              		@ args = 0, pretend = 0, frame = 0
+ 258              		@ frame_needed = 0, uses_anonymous_args = 0
+ 259              		@ link register save eliminated.
+ 458:Generated_Source\PSoC5/Timer_VDAC.c ****    #if(Timer_VDAC_UsingFixedFunction)
+ 459:Generated_Source\PSoC5/Timer_VDAC.c ****        return ((uint16)CY_GET_REG16(Timer_VDAC_CAPTURE_LSB_PTR));
+ 460:Generated_Source\PSoC5/Timer_VDAC.c ****    #else
+ 461:Generated_Source\PSoC5/Timer_VDAC.c ****        return (CY_GET_REG16(Timer_VDAC_CAPTURE_LSB_PTR));
+ 260              		.loc 1 461 0
+ 261 0000 014B     		ldr	r3, .L29
+ 262 0002 1888     		ldrh	r0, [r3]
+ 462:Generated_Source\PSoC5/Timer_VDAC.c ****    #endif /* (Timer_VDAC_UsingFixedFunction) */
+ 463:Generated_Source\PSoC5/Timer_VDAC.c **** }
+ 263              		.loc 1 463 0
+ 264 0004 80B2     		uxth	r0, r0
+ 265 0006 7047     		bx	lr
+ 266              	.L30:
+ 267              		.align	2
+ 268              	.L29:
+ 269 0008 886A0040 		.word	1073769096
+ 270              		.cfi_endproc
+ 271              	.LFE11:
+ 272              		.size	Timer_VDAC_ReadCapture, .-Timer_VDAC_ReadCapture
+ 273              		.section	.text.Timer_VDAC_WriteCounter,"ax",%progbits
+ 274              		.align	2
+ 275              		.global	Timer_VDAC_WriteCounter
+ 276              		.thumb
+ 277              		.thumb_func
+ 278              		.type	Timer_VDAC_WriteCounter, %function
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 14
+
+
+ 279              	Timer_VDAC_WriteCounter:
+ 280              	.LFB12:
+ 464:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 465:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 466:Generated_Source\PSoC5/Timer_VDAC.c **** /*******************************************************************************
+ 467:Generated_Source\PSoC5/Timer_VDAC.c **** * Function Name: Timer_VDAC_WriteCounter
+ 468:Generated_Source\PSoC5/Timer_VDAC.c **** ********************************************************************************
+ 469:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 470:Generated_Source\PSoC5/Timer_VDAC.c **** * Summary:
+ 471:Generated_Source\PSoC5/Timer_VDAC.c **** *  This funtion is used to set the counter to a specific value
+ 472:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 473:Generated_Source\PSoC5/Timer_VDAC.c **** * Parameters:
+ 474:Generated_Source\PSoC5/Timer_VDAC.c **** *  counter:  New counter value.
+ 475:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 476:Generated_Source\PSoC5/Timer_VDAC.c **** * Return:
+ 477:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 478:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 479:Generated_Source\PSoC5/Timer_VDAC.c **** *******************************************************************************/
+ 480:Generated_Source\PSoC5/Timer_VDAC.c **** void Timer_VDAC_WriteCounter(uint16 counter) 
+ 481:Generated_Source\PSoC5/Timer_VDAC.c **** {
+ 281              		.loc 1 481 0
+ 282              		.cfi_startproc
+ 283              		@ args = 0, pretend = 0, frame = 0
+ 284              		@ frame_needed = 0, uses_anonymous_args = 0
+ 285              		@ link register save eliminated.
+ 286              	.LVL3:
+ 482:Generated_Source\PSoC5/Timer_VDAC.c ****    #if(Timer_VDAC_UsingFixedFunction)
+ 483:Generated_Source\PSoC5/Timer_VDAC.c ****         /* This functionality is removed until a FixedFunction HW update to
+ 484:Generated_Source\PSoC5/Timer_VDAC.c ****          * allow this register to be written
+ 485:Generated_Source\PSoC5/Timer_VDAC.c ****          */
+ 486:Generated_Source\PSoC5/Timer_VDAC.c ****         CY_SET_REG16(Timer_VDAC_COUNTER_LSB_PTR, (uint16)counter);
+ 487:Generated_Source\PSoC5/Timer_VDAC.c ****         
+ 488:Generated_Source\PSoC5/Timer_VDAC.c ****     #else
+ 489:Generated_Source\PSoC5/Timer_VDAC.c ****         CY_SET_REG16(Timer_VDAC_COUNTER_LSB_PTR, counter);
+ 287              		.loc 1 489 0
+ 288 0000 014B     		ldr	r3, .L32
+ 289 0002 1880     		strh	r0, [r3]	@ movhi
+ 290 0004 7047     		bx	lr
+ 291              	.L33:
+ 292 0006 00BF     		.align	2
+ 293              	.L32:
+ 294 0008 086A0040 		.word	1073768968
+ 295              		.cfi_endproc
+ 296              	.LFE12:
+ 297              		.size	Timer_VDAC_WriteCounter, .-Timer_VDAC_WriteCounter
+ 298              		.section	.text.Timer_VDAC_ReadCounter,"ax",%progbits
+ 299              		.align	2
+ 300              		.global	Timer_VDAC_ReadCounter
+ 301              		.thumb
+ 302              		.thumb_func
+ 303              		.type	Timer_VDAC_ReadCounter, %function
+ 304              	Timer_VDAC_ReadCounter:
+ 305              	.LFB13:
+ 490:Generated_Source\PSoC5/Timer_VDAC.c ****     #endif /* Set Write Counter only for the UDB implementation (Write Counter not available in fix
+ 491:Generated_Source\PSoC5/Timer_VDAC.c **** }
+ 492:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 493:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 15
+
+
+ 494:Generated_Source\PSoC5/Timer_VDAC.c **** /*******************************************************************************
+ 495:Generated_Source\PSoC5/Timer_VDAC.c **** * Function Name: Timer_VDAC_ReadCounter
+ 496:Generated_Source\PSoC5/Timer_VDAC.c **** ********************************************************************************
+ 497:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 498:Generated_Source\PSoC5/Timer_VDAC.c **** * Summary:
+ 499:Generated_Source\PSoC5/Timer_VDAC.c **** *  This function returns the current counter value.
+ 500:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 501:Generated_Source\PSoC5/Timer_VDAC.c **** * Parameters:
+ 502:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 503:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 504:Generated_Source\PSoC5/Timer_VDAC.c **** * Return:
+ 505:Generated_Source\PSoC5/Timer_VDAC.c **** *  Present compare value.
+ 506:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 507:Generated_Source\PSoC5/Timer_VDAC.c **** *******************************************************************************/
+ 508:Generated_Source\PSoC5/Timer_VDAC.c **** uint16 Timer_VDAC_ReadCounter(void) 
+ 509:Generated_Source\PSoC5/Timer_VDAC.c **** {
+ 306              		.loc 1 509 0
+ 307              		.cfi_startproc
+ 308              		@ args = 0, pretend = 0, frame = 0
+ 309              		@ frame_needed = 0, uses_anonymous_args = 0
+ 310              		@ link register save eliminated.
+ 510:Generated_Source\PSoC5/Timer_VDAC.c ****     /* Force capture by reading Accumulator */
+ 511:Generated_Source\PSoC5/Timer_VDAC.c ****     /* Must first do a software capture to be able to read the counter */
+ 512:Generated_Source\PSoC5/Timer_VDAC.c ****     /* It is up to the user code to make sure there isn't already captured data in the FIFO */
+ 513:Generated_Source\PSoC5/Timer_VDAC.c ****     #if(Timer_VDAC_UsingFixedFunction)
+ 514:Generated_Source\PSoC5/Timer_VDAC.c ****         (void)CY_GET_REG16(Timer_VDAC_COUNTER_LSB_PTR);
+ 515:Generated_Source\PSoC5/Timer_VDAC.c ****     #else
+ 516:Generated_Source\PSoC5/Timer_VDAC.c ****         (void)CY_GET_REG8(Timer_VDAC_COUNTER_LSB_PTR_8BIT);
+ 311              		.loc 1 516 0
+ 312 0000 024B     		ldr	r3, .L35
+ 313 0002 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 517:Generated_Source\PSoC5/Timer_VDAC.c ****     #endif/* (Timer_VDAC_UsingFixedFunction) */
+ 518:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 519:Generated_Source\PSoC5/Timer_VDAC.c ****     /* Read the data from the FIFO (or capture register for Fixed Function)*/
+ 520:Generated_Source\PSoC5/Timer_VDAC.c ****     #if(Timer_VDAC_UsingFixedFunction)
+ 521:Generated_Source\PSoC5/Timer_VDAC.c ****         return ((uint16)CY_GET_REG16(Timer_VDAC_CAPTURE_LSB_PTR));
+ 522:Generated_Source\PSoC5/Timer_VDAC.c ****     #else
+ 523:Generated_Source\PSoC5/Timer_VDAC.c ****         return (CY_GET_REG16(Timer_VDAC_CAPTURE_LSB_PTR));
+ 314              		.loc 1 523 0
+ 315 0004 024B     		ldr	r3, .L35+4
+ 316 0006 1888     		ldrh	r0, [r3]
+ 524:Generated_Source\PSoC5/Timer_VDAC.c ****     #endif /* (Timer_VDAC_UsingFixedFunction) */
+ 525:Generated_Source\PSoC5/Timer_VDAC.c **** }
+ 317              		.loc 1 525 0
+ 318 0008 80B2     		uxth	r0, r0
+ 319 000a 7047     		bx	lr
+ 320              	.L36:
+ 321              		.align	2
+ 322              	.L35:
+ 323 000c 04650040 		.word	1073767684
+ 324 0010 886A0040 		.word	1073769096
+ 325              		.cfi_endproc
+ 326              	.LFE13:
+ 327              		.size	Timer_VDAC_ReadCounter, .-Timer_VDAC_ReadCounter
+ 328              		.section	.text.Timer_VDAC_SetCaptureMode,"ax",%progbits
+ 329              		.align	2
+ 330              		.global	Timer_VDAC_SetCaptureMode
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 16
+
+
+ 331              		.thumb
+ 332              		.thumb_func
+ 333              		.type	Timer_VDAC_SetCaptureMode, %function
+ 334              	Timer_VDAC_SetCaptureMode:
+ 335              	.LFB14:
+ 526:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 527:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 528:Generated_Source\PSoC5/Timer_VDAC.c **** #if(!Timer_VDAC_UsingFixedFunction) /* UDB Specific Functions */
+ 529:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 530:Generated_Source\PSoC5/Timer_VDAC.c ****     
+ 531:Generated_Source\PSoC5/Timer_VDAC.c **** /*******************************************************************************
+ 532:Generated_Source\PSoC5/Timer_VDAC.c ****  * The functions below this point are only available using the UDB
+ 533:Generated_Source\PSoC5/Timer_VDAC.c ****  * implementation.  If a feature is selected, then the API is enabled.
+ 534:Generated_Source\PSoC5/Timer_VDAC.c ****  ******************************************************************************/
+ 535:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 536:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 537:Generated_Source\PSoC5/Timer_VDAC.c **** #if (Timer_VDAC_SoftwareCaptureMode)
+ 538:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 539:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 540:Generated_Source\PSoC5/Timer_VDAC.c **** /*******************************************************************************
+ 541:Generated_Source\PSoC5/Timer_VDAC.c **** * Function Name: Timer_VDAC_SetCaptureMode
+ 542:Generated_Source\PSoC5/Timer_VDAC.c **** ********************************************************************************
+ 543:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 544:Generated_Source\PSoC5/Timer_VDAC.c **** * Summary:
+ 545:Generated_Source\PSoC5/Timer_VDAC.c **** *  This function sets the capture mode to either rising or falling edge.
+ 546:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 547:Generated_Source\PSoC5/Timer_VDAC.c **** * Parameters:
+ 548:Generated_Source\PSoC5/Timer_VDAC.c **** *  captureMode: This parameter sets the capture mode of the UDB capture feature
+ 549:Generated_Source\PSoC5/Timer_VDAC.c **** *  The parameter values are defined using the
+ 550:Generated_Source\PSoC5/Timer_VDAC.c **** *  #define Timer_VDAC__B_TIMER__CM_NONE 0
+ 551:Generated_Source\PSoC5/Timer_VDAC.c **** #define Timer_VDAC__B_TIMER__CM_RISINGEDGE 1
+ 552:Generated_Source\PSoC5/Timer_VDAC.c **** #define Timer_VDAC__B_TIMER__CM_FALLINGEDGE 2
+ 553:Generated_Source\PSoC5/Timer_VDAC.c **** #define Timer_VDAC__B_TIMER__CM_EITHEREDGE 3
+ 554:Generated_Source\PSoC5/Timer_VDAC.c **** #define Timer_VDAC__B_TIMER__CM_SOFTWARE 4
+ 555:Generated_Source\PSoC5/Timer_VDAC.c ****  identifiers
+ 556:Generated_Source\PSoC5/Timer_VDAC.c **** *  The following are the possible values of the parameter
+ 557:Generated_Source\PSoC5/Timer_VDAC.c **** *  Timer_VDAC__B_TIMER__CM_NONE        - Set Capture mode to None
+ 558:Generated_Source\PSoC5/Timer_VDAC.c **** *  Timer_VDAC__B_TIMER__CM_RISINGEDGE  - Rising edge of Capture input
+ 559:Generated_Source\PSoC5/Timer_VDAC.c **** *  Timer_VDAC__B_TIMER__CM_FALLINGEDGE - Falling edge of Capture input
+ 560:Generated_Source\PSoC5/Timer_VDAC.c **** *  Timer_VDAC__B_TIMER__CM_EITHEREDGE  - Either edge of Capture input
+ 561:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 562:Generated_Source\PSoC5/Timer_VDAC.c **** * Return:
+ 563:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 564:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 565:Generated_Source\PSoC5/Timer_VDAC.c **** *******************************************************************************/
+ 566:Generated_Source\PSoC5/Timer_VDAC.c **** void Timer_VDAC_SetCaptureMode(uint8 captureMode) 
+ 567:Generated_Source\PSoC5/Timer_VDAC.c **** {
+ 336              		.loc 1 567 0
+ 337              		.cfi_startproc
+ 338              		@ args = 0, pretend = 0, frame = 0
+ 339              		@ frame_needed = 0, uses_anonymous_args = 0
+ 340              		@ link register save eliminated.
+ 341              	.LVL4:
+ 568:Generated_Source\PSoC5/Timer_VDAC.c ****     /* This must only set to two bits of the control register associated */
+ 569:Generated_Source\PSoC5/Timer_VDAC.c ****     captureMode = ((uint8)((uint8)captureMode << Timer_VDAC_CTRL_CAP_MODE_SHIFT));
+ 342              		.loc 1 569 0
+ 343 0000 4001     		lsls	r0, r0, #5
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 17
+
+
+ 344              	.LVL5:
+ 570:Generated_Source\PSoC5/Timer_VDAC.c ****     captureMode &= (Timer_VDAC_CTRL_CAP_MODE_MASK);
+ 345              		.loc 1 570 0
+ 346 0002 00F06000 		and	r0, r0, #96
+ 347              	.LVL6:
+ 571:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 572:Generated_Source\PSoC5/Timer_VDAC.c ****     #if (!Timer_VDAC_UDB_CONTROL_REG_REMOVED)
+ 573:Generated_Source\PSoC5/Timer_VDAC.c ****         /* Clear the Current Setting */
+ 574:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_CONTROL &= ((uint8)(~Timer_VDAC_CTRL_CAP_MODE_MASK));
+ 348              		.loc 1 574 0
+ 349 0006 044B     		ldr	r3, .L38
+ 350 0008 1A78     		ldrb	r2, [r3]	@ zero_extendqisi2
+ 351 000a 02F09F02 		and	r2, r2, #159
+ 352 000e 1A70     		strb	r2, [r3]
+ 575:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 576:Generated_Source\PSoC5/Timer_VDAC.c ****         /* Write The New Setting */
+ 577:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_CONTROL |= captureMode;
+ 353              		.loc 1 577 0
+ 354 0010 1A78     		ldrb	r2, [r3]	@ zero_extendqisi2
+ 355 0012 1043     		orrs	r0, r0, r2
+ 356              	.LVL7:
+ 357 0014 1870     		strb	r0, [r3]
+ 358 0016 7047     		bx	lr
+ 359              	.L39:
+ 360              		.align	2
+ 361              	.L38:
+ 362 0018 75650040 		.word	1073767797
+ 363              		.cfi_endproc
+ 364              	.LFE14:
+ 365              		.size	Timer_VDAC_SetCaptureMode, .-Timer_VDAC_SetCaptureMode
+ 366              		.section	.text.Timer_VDAC_ClearFIFO,"ax",%progbits
+ 367              		.align	2
+ 368              		.global	Timer_VDAC_ClearFIFO
+ 369              		.thumb
+ 370              		.thumb_func
+ 371              		.type	Timer_VDAC_ClearFIFO, %function
+ 372              	Timer_VDAC_ClearFIFO:
+ 373              	.LFB15:
+ 578:Generated_Source\PSoC5/Timer_VDAC.c ****     #endif /* (!Timer_VDAC_UDB_CONTROL_REG_REMOVED) */
+ 579:Generated_Source\PSoC5/Timer_VDAC.c **** }
+ 580:Generated_Source\PSoC5/Timer_VDAC.c **** #endif /* Remove API if Capture Mode is not Software Controlled */
+ 581:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 582:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 583:Generated_Source\PSoC5/Timer_VDAC.c **** #if (Timer_VDAC_SoftwareTriggerMode)
+ 584:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 585:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 586:Generated_Source\PSoC5/Timer_VDAC.c **** /*******************************************************************************
+ 587:Generated_Source\PSoC5/Timer_VDAC.c **** * Function Name: Timer_VDAC_SetTriggerMode
+ 588:Generated_Source\PSoC5/Timer_VDAC.c **** ********************************************************************************
+ 589:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 590:Generated_Source\PSoC5/Timer_VDAC.c **** * Summary:
+ 591:Generated_Source\PSoC5/Timer_VDAC.c **** *  This function sets the trigger input mode
+ 592:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 593:Generated_Source\PSoC5/Timer_VDAC.c **** * Parameters:
+ 594:Generated_Source\PSoC5/Timer_VDAC.c **** *  triggerMode: Pass one of the pre-defined Trigger Modes (except Software)
+ 595:Generated_Source\PSoC5/Timer_VDAC.c ****     #define Timer_VDAC__B_TIMER__TM_NONE 0x00u
+ 596:Generated_Source\PSoC5/Timer_VDAC.c ****     #define Timer_VDAC__B_TIMER__TM_RISINGEDGE 0x04u
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 18
+
+
+ 597:Generated_Source\PSoC5/Timer_VDAC.c ****     #define Timer_VDAC__B_TIMER__TM_FALLINGEDGE 0x08u
+ 598:Generated_Source\PSoC5/Timer_VDAC.c ****     #define Timer_VDAC__B_TIMER__TM_EITHEREDGE 0x0Cu
+ 599:Generated_Source\PSoC5/Timer_VDAC.c ****     #define Timer_VDAC__B_TIMER__TM_SOFTWARE 0x10u
+ 600:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 601:Generated_Source\PSoC5/Timer_VDAC.c **** * Return:
+ 602:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 603:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 604:Generated_Source\PSoC5/Timer_VDAC.c **** *******************************************************************************/
+ 605:Generated_Source\PSoC5/Timer_VDAC.c **** void Timer_VDAC_SetTriggerMode(uint8 triggerMode) 
+ 606:Generated_Source\PSoC5/Timer_VDAC.c **** {
+ 607:Generated_Source\PSoC5/Timer_VDAC.c ****     /* This must only set to two bits of the control register associated */
+ 608:Generated_Source\PSoC5/Timer_VDAC.c ****     triggerMode &= Timer_VDAC_CTRL_TRIG_MODE_MASK;
+ 609:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 610:Generated_Source\PSoC5/Timer_VDAC.c ****     #if (!Timer_VDAC_UDB_CONTROL_REG_REMOVED)   /* Remove assignment if control register is removed
+ 611:Generated_Source\PSoC5/Timer_VDAC.c ****     
+ 612:Generated_Source\PSoC5/Timer_VDAC.c ****         /* Clear the Current Setting */
+ 613:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_CONTROL &= ((uint8)(~Timer_VDAC_CTRL_TRIG_MODE_MASK));
+ 614:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 615:Generated_Source\PSoC5/Timer_VDAC.c ****         /* Write The New Setting */
+ 616:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_CONTROL |= (triggerMode | Timer_VDAC__B_TIMER__TM_SOFTWARE);
+ 617:Generated_Source\PSoC5/Timer_VDAC.c ****     #endif /* Remove code section if control register is not used */
+ 618:Generated_Source\PSoC5/Timer_VDAC.c **** }
+ 619:Generated_Source\PSoC5/Timer_VDAC.c **** #endif /* Remove API if Trigger Mode is not Software Controlled */
+ 620:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 621:Generated_Source\PSoC5/Timer_VDAC.c **** #if (Timer_VDAC_EnableTriggerMode)
+ 622:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 623:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 624:Generated_Source\PSoC5/Timer_VDAC.c **** /*******************************************************************************
+ 625:Generated_Source\PSoC5/Timer_VDAC.c **** * Function Name: Timer_VDAC_EnableTrigger
+ 626:Generated_Source\PSoC5/Timer_VDAC.c **** ********************************************************************************
+ 627:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 628:Generated_Source\PSoC5/Timer_VDAC.c **** * Summary:
+ 629:Generated_Source\PSoC5/Timer_VDAC.c **** *  Sets the control bit enabling Hardware Trigger mode
+ 630:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 631:Generated_Source\PSoC5/Timer_VDAC.c **** * Parameters:
+ 632:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 633:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 634:Generated_Source\PSoC5/Timer_VDAC.c **** * Return:
+ 635:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 636:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 637:Generated_Source\PSoC5/Timer_VDAC.c **** *******************************************************************************/
+ 638:Generated_Source\PSoC5/Timer_VDAC.c **** void Timer_VDAC_EnableTrigger(void) 
+ 639:Generated_Source\PSoC5/Timer_VDAC.c **** {
+ 640:Generated_Source\PSoC5/Timer_VDAC.c ****     #if (!Timer_VDAC_UDB_CONTROL_REG_REMOVED)   /* Remove assignment if control register is removed
+ 641:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_CONTROL |= Timer_VDAC_CTRL_TRIG_EN;
+ 642:Generated_Source\PSoC5/Timer_VDAC.c ****     #endif /* Remove code section if control register is not used */
+ 643:Generated_Source\PSoC5/Timer_VDAC.c **** }
+ 644:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 645:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 646:Generated_Source\PSoC5/Timer_VDAC.c **** /*******************************************************************************
+ 647:Generated_Source\PSoC5/Timer_VDAC.c **** * Function Name: Timer_VDAC_DisableTrigger
+ 648:Generated_Source\PSoC5/Timer_VDAC.c **** ********************************************************************************
+ 649:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 650:Generated_Source\PSoC5/Timer_VDAC.c **** * Summary:
+ 651:Generated_Source\PSoC5/Timer_VDAC.c **** *  Clears the control bit enabling Hardware Trigger mode
+ 652:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 653:Generated_Source\PSoC5/Timer_VDAC.c **** * Parameters:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 19
+
+
+ 654:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 655:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 656:Generated_Source\PSoC5/Timer_VDAC.c **** * Return:
+ 657:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 658:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 659:Generated_Source\PSoC5/Timer_VDAC.c **** *******************************************************************************/
+ 660:Generated_Source\PSoC5/Timer_VDAC.c **** void Timer_VDAC_DisableTrigger(void) 
+ 661:Generated_Source\PSoC5/Timer_VDAC.c **** {
+ 662:Generated_Source\PSoC5/Timer_VDAC.c ****     #if (!Timer_VDAC_UDB_CONTROL_REG_REMOVED )   /* Remove assignment if control register is remove
+ 663:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_CONTROL &= ((uint8)(~Timer_VDAC_CTRL_TRIG_EN));
+ 664:Generated_Source\PSoC5/Timer_VDAC.c ****     #endif /* Remove code section if control register is not used */
+ 665:Generated_Source\PSoC5/Timer_VDAC.c **** }
+ 666:Generated_Source\PSoC5/Timer_VDAC.c **** #endif /* Remove API is Trigger Mode is set to None */
+ 667:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 668:Generated_Source\PSoC5/Timer_VDAC.c **** #if(Timer_VDAC_InterruptOnCaptureCount)
+ 669:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 670:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 671:Generated_Source\PSoC5/Timer_VDAC.c **** /*******************************************************************************
+ 672:Generated_Source\PSoC5/Timer_VDAC.c **** * Function Name: Timer_VDAC_SetInterruptCount
+ 673:Generated_Source\PSoC5/Timer_VDAC.c **** ********************************************************************************
+ 674:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 675:Generated_Source\PSoC5/Timer_VDAC.c **** * Summary:
+ 676:Generated_Source\PSoC5/Timer_VDAC.c **** *  This function sets the capture count before an interrupt is triggered.
+ 677:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 678:Generated_Source\PSoC5/Timer_VDAC.c **** * Parameters:
+ 679:Generated_Source\PSoC5/Timer_VDAC.c **** *  interruptCount:  A value between 0 and 3 is valid.  If the value is 0, then
+ 680:Generated_Source\PSoC5/Timer_VDAC.c **** *                   an interrupt will occur each time a capture occurs.
+ 681:Generated_Source\PSoC5/Timer_VDAC.c **** *                   A value of 1 to 3 will cause the interrupt
+ 682:Generated_Source\PSoC5/Timer_VDAC.c **** *                   to delay by the same number of captures.
+ 683:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 684:Generated_Source\PSoC5/Timer_VDAC.c **** * Return:
+ 685:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 686:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 687:Generated_Source\PSoC5/Timer_VDAC.c **** *******************************************************************************/
+ 688:Generated_Source\PSoC5/Timer_VDAC.c **** void Timer_VDAC_SetInterruptCount(uint8 interruptCount) 
+ 689:Generated_Source\PSoC5/Timer_VDAC.c **** {
+ 690:Generated_Source\PSoC5/Timer_VDAC.c ****     /* This must only set to two bits of the control register associated */
+ 691:Generated_Source\PSoC5/Timer_VDAC.c ****     interruptCount &= Timer_VDAC_CTRL_INTCNT_MASK;
+ 692:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 693:Generated_Source\PSoC5/Timer_VDAC.c ****     #if (!Timer_VDAC_UDB_CONTROL_REG_REMOVED)
+ 694:Generated_Source\PSoC5/Timer_VDAC.c ****         /* Clear the Current Setting */
+ 695:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_CONTROL &= ((uint8)(~Timer_VDAC_CTRL_INTCNT_MASK));
+ 696:Generated_Source\PSoC5/Timer_VDAC.c ****         /* Write The New Setting */
+ 697:Generated_Source\PSoC5/Timer_VDAC.c ****         Timer_VDAC_CONTROL |= interruptCount;
+ 698:Generated_Source\PSoC5/Timer_VDAC.c ****     #endif /* (!Timer_VDAC_UDB_CONTROL_REG_REMOVED) */
+ 699:Generated_Source\PSoC5/Timer_VDAC.c **** }
+ 700:Generated_Source\PSoC5/Timer_VDAC.c **** #endif /* Timer_VDAC_InterruptOnCaptureCount */
+ 701:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 702:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 703:Generated_Source\PSoC5/Timer_VDAC.c **** #if (Timer_VDAC_UsingHWCaptureCounter)
+ 704:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 705:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 706:Generated_Source\PSoC5/Timer_VDAC.c **** /*******************************************************************************
+ 707:Generated_Source\PSoC5/Timer_VDAC.c **** * Function Name: Timer_VDAC_SetCaptureCount
+ 708:Generated_Source\PSoC5/Timer_VDAC.c **** ********************************************************************************
+ 709:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 710:Generated_Source\PSoC5/Timer_VDAC.c **** * Summary:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 20
+
+
+ 711:Generated_Source\PSoC5/Timer_VDAC.c **** *  This function sets the capture count
+ 712:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 713:Generated_Source\PSoC5/Timer_VDAC.c **** * Parameters:
+ 714:Generated_Source\PSoC5/Timer_VDAC.c **** *  captureCount: A value between 2 and 127 inclusive is valid.  A value of 1
+ 715:Generated_Source\PSoC5/Timer_VDAC.c **** *                to 127 will cause the interrupt to delay by the same number of
+ 716:Generated_Source\PSoC5/Timer_VDAC.c **** *                captures.
+ 717:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 718:Generated_Source\PSoC5/Timer_VDAC.c **** * Return:
+ 719:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 720:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 721:Generated_Source\PSoC5/Timer_VDAC.c **** *******************************************************************************/
+ 722:Generated_Source\PSoC5/Timer_VDAC.c **** void Timer_VDAC_SetCaptureCount(uint8 captureCount) 
+ 723:Generated_Source\PSoC5/Timer_VDAC.c **** {
+ 724:Generated_Source\PSoC5/Timer_VDAC.c ****     Timer_VDAC_CAP_COUNT = captureCount;
+ 725:Generated_Source\PSoC5/Timer_VDAC.c **** }
+ 726:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 727:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 728:Generated_Source\PSoC5/Timer_VDAC.c **** /*******************************************************************************
+ 729:Generated_Source\PSoC5/Timer_VDAC.c **** * Function Name: Timer_VDAC_ReadCaptureCount
+ 730:Generated_Source\PSoC5/Timer_VDAC.c **** ********************************************************************************
+ 731:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 732:Generated_Source\PSoC5/Timer_VDAC.c **** * Summary:
+ 733:Generated_Source\PSoC5/Timer_VDAC.c **** *  This function reads the capture count setting
+ 734:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 735:Generated_Source\PSoC5/Timer_VDAC.c **** * Parameters:
+ 736:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 737:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 738:Generated_Source\PSoC5/Timer_VDAC.c **** * Return:
+ 739:Generated_Source\PSoC5/Timer_VDAC.c **** *  Returns the Capture Count Setting
+ 740:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 741:Generated_Source\PSoC5/Timer_VDAC.c **** *******************************************************************************/
+ 742:Generated_Source\PSoC5/Timer_VDAC.c **** uint8 Timer_VDAC_ReadCaptureCount(void) 
+ 743:Generated_Source\PSoC5/Timer_VDAC.c **** {
+ 744:Generated_Source\PSoC5/Timer_VDAC.c ****     return ((uint8)Timer_VDAC_CAP_COUNT);
+ 745:Generated_Source\PSoC5/Timer_VDAC.c **** }
+ 746:Generated_Source\PSoC5/Timer_VDAC.c **** #endif /* Timer_VDAC_UsingHWCaptureCounter */
+ 747:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 748:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 749:Generated_Source\PSoC5/Timer_VDAC.c **** /*******************************************************************************
+ 750:Generated_Source\PSoC5/Timer_VDAC.c **** * Function Name: Timer_VDAC_ClearFIFO
+ 751:Generated_Source\PSoC5/Timer_VDAC.c **** ********************************************************************************
+ 752:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 753:Generated_Source\PSoC5/Timer_VDAC.c **** * Summary:
+ 754:Generated_Source\PSoC5/Timer_VDAC.c **** *  This function clears all capture data from the capture FIFO
+ 755:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 756:Generated_Source\PSoC5/Timer_VDAC.c **** * Parameters:
+ 757:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 758:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 759:Generated_Source\PSoC5/Timer_VDAC.c **** * Return:
+ 760:Generated_Source\PSoC5/Timer_VDAC.c **** *  void
+ 761:Generated_Source\PSoC5/Timer_VDAC.c **** *
+ 762:Generated_Source\PSoC5/Timer_VDAC.c **** *******************************************************************************/
+ 763:Generated_Source\PSoC5/Timer_VDAC.c **** void Timer_VDAC_ClearFIFO(void) 
+ 764:Generated_Source\PSoC5/Timer_VDAC.c **** {
+ 374              		.loc 1 764 0
+ 375              		.cfi_startproc
+ 376              		@ args = 0, pretend = 0, frame = 0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 21
+
+
+ 377              		@ frame_needed = 0, uses_anonymous_args = 0
+ 378 0000 08B5     		push	{r3, lr}
+ 379              		.cfi_def_cfa_offset 8
+ 380              		.cfi_offset 3, -8
+ 381              		.cfi_offset 14, -4
+ 765:Generated_Source\PSoC5/Timer_VDAC.c ****     while(0u != (Timer_VDAC_ReadStatusRegister() & Timer_VDAC_STATUS_FIFONEMP))
+ 382              		.loc 1 765 0
+ 383 0002 01E0     		b	.L41
+ 384              	.L42:
+ 766:Generated_Source\PSoC5/Timer_VDAC.c ****     {
+ 767:Generated_Source\PSoC5/Timer_VDAC.c ****         (void)Timer_VDAC_ReadCapture();
+ 385              		.loc 1 767 0
+ 386 0004 FFF7FEFF 		bl	Timer_VDAC_ReadCapture
+ 387              	.LVL8:
+ 388              	.L41:
+ 765:Generated_Source\PSoC5/Timer_VDAC.c ****     while(0u != (Timer_VDAC_ReadStatusRegister() & Timer_VDAC_STATUS_FIFONEMP))
+ 389              		.loc 1 765 0
+ 390 0008 FFF7FEFF 		bl	Timer_VDAC_ReadStatusRegister
+ 391              	.LVL9:
+ 392 000c 10F0080F 		tst	r0, #8
+ 393 0010 F8D1     		bne	.L42
+ 768:Generated_Source\PSoC5/Timer_VDAC.c ****     }
+ 769:Generated_Source\PSoC5/Timer_VDAC.c **** }
+ 394              		.loc 1 769 0
+ 395 0012 08BD     		pop	{r3, pc}
+ 396              		.cfi_endproc
+ 397              	.LFE15:
+ 398              		.size	Timer_VDAC_ClearFIFO, .-Timer_VDAC_ClearFIFO
+ 399              		.section	.text.Timer_VDAC_Init,"ax",%progbits
+ 400              		.align	2
+ 401              		.global	Timer_VDAC_Init
+ 402              		.thumb
+ 403              		.thumb_func
+ 404              		.type	Timer_VDAC_Init, %function
+ 405              	Timer_VDAC_Init:
+ 406              	.LFB0:
+  44:Generated_Source\PSoC5/Timer_VDAC.c ****     #if(!Timer_VDAC_UsingFixedFunction)
+ 407              		.loc 1 44 0
+ 408              		.cfi_startproc
+ 409              		@ args = 0, pretend = 0, frame = 0
+ 410              		@ frame_needed = 0, uses_anonymous_args = 0
+ 411 0000 08B5     		push	{r3, lr}
+ 412              		.cfi_def_cfa_offset 8
+ 413              		.cfi_offset 3, -8
+ 414              		.cfi_offset 14, -4
+ 118:Generated_Source\PSoC5/Timer_VDAC.c ****     Timer_VDAC_WriteCounter(Timer_VDAC_INIT_PERIOD);
+ 415              		.loc 1 118 0
+ 416 0002 41F63F70 		movw	r0, #7999
+ 417 0006 FFF7FEFF 		bl	Timer_VDAC_WritePeriod
+ 418              	.LVL10:
+ 119:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 419              		.loc 1 119 0
+ 420 000a 41F63F70 		movw	r0, #7999
+ 421 000e FFF7FEFF 		bl	Timer_VDAC_WriteCounter
+ 422              	.LVL11:
+ 128:Generated_Source\PSoC5/Timer_VDAC.c ****         #endif /* Set Capture Mode for UDB implementation if capture mode is software controlled */
+ 423              		.loc 1 128 0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 22
+
+
+ 424 0012 8020     		movs	r0, #128
+ 425 0014 FFF7FEFF 		bl	Timer_VDAC_SetCaptureMode
+ 426              	.LVL12:
+ 142:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 427              		.loc 1 142 0
+ 428 0018 FFF7FEFF 		bl	CyEnterCriticalSection
+ 429              	.LVL13:
+ 145:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 430              		.loc 1 145 0
+ 431 001c 064A     		ldr	r2, .L46
+ 432 001e 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 433 0020 43F01003 		orr	r3, r3, #16
+ 434 0024 1370     		strb	r3, [r2]
+ 148:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ 435              		.loc 1 148 0
+ 436 0026 FFF7FEFF 		bl	CyExitCriticalSection
+ 437              	.LVL14:
+ 159:Generated_Source\PSoC5/Timer_VDAC.c ****     #endif /* Configure additional features of UDB implementation */
+ 438              		.loc 1 159 0
+ 439 002a FFF7FEFF 		bl	Timer_VDAC_ClearFIFO
+ 440              	.LVL15:
+ 162:Generated_Source\PSoC5/Timer_VDAC.c **** }
+ 441              		.loc 1 162 0
+ 442 002e 0020     		movs	r0, #0
+ 443 0030 FFF7FEFF 		bl	Timer_VDAC_SetInterruptMode
+ 444              	.LVL16:
+ 445 0034 08BD     		pop	{r3, pc}
+ 446              	.L47:
+ 447 0036 00BF     		.align	2
+ 448              	.L46:
+ 449 0038 95650040 		.word	1073767829
+ 450              		.cfi_endproc
+ 451              	.LFE0:
+ 452              		.size	Timer_VDAC_Init, .-Timer_VDAC_Init
+ 453              		.section	.text.Timer_VDAC_Start,"ax",%progbits
+ 454              		.align	2
+ 455              		.global	Timer_VDAC_Start
+ 456              		.thumb
+ 457              		.thumb_func
+ 458              		.type	Timer_VDAC_Start, %function
+ 459              	Timer_VDAC_Start:
+ 460              	.LFB2:
+ 216:Generated_Source\PSoC5/Timer_VDAC.c ****     if(Timer_VDAC_initVar == 0u)
+ 461              		.loc 1 216 0
+ 462              		.cfi_startproc
+ 463              		@ args = 0, pretend = 0, frame = 0
+ 464              		@ frame_needed = 0, uses_anonymous_args = 0
+ 465 0000 08B5     		push	{r3, lr}
+ 466              		.cfi_def_cfa_offset 8
+ 467              		.cfi_offset 3, -8
+ 468              		.cfi_offset 14, -4
+ 217:Generated_Source\PSoC5/Timer_VDAC.c ****     {
+ 469              		.loc 1 217 0
+ 470 0002 054B     		ldr	r3, .L51
+ 471 0004 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 472 0006 23B9     		cbnz	r3, .L49
+ 219:Generated_Source\PSoC5/Timer_VDAC.c **** 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 23
+
+
+ 473              		.loc 1 219 0
+ 474 0008 FFF7FEFF 		bl	Timer_VDAC_Init
+ 475              	.LVL17:
+ 221:Generated_Source\PSoC5/Timer_VDAC.c ****     }
+ 476              		.loc 1 221 0
+ 477 000c 0122     		movs	r2, #1
+ 478 000e 024B     		ldr	r3, .L51
+ 479 0010 1A70     		strb	r2, [r3]
+ 480              	.L49:
+ 225:Generated_Source\PSoC5/Timer_VDAC.c **** }
+ 481              		.loc 1 225 0
+ 482 0012 FFF7FEFF 		bl	Timer_VDAC_Enable
+ 483              	.LVL18:
+ 484 0016 08BD     		pop	{r3, pc}
+ 485              	.L52:
+ 486              		.align	2
+ 487              	.L51:
+ 488 0018 00000000 		.word	.LANCHOR0
+ 489              		.cfi_endproc
+ 490              	.LFE2:
+ 491              		.size	Timer_VDAC_Start, .-Timer_VDAC_Start
+ 492              		.global	Timer_VDAC_initVar
+ 493              		.bss
+ 494              		.set	.LANCHOR0,. + 0
+ 495              		.type	Timer_VDAC_initVar, %object
+ 496              		.size	Timer_VDAC_initVar, 1
+ 497              	Timer_VDAC_initVar:
+ 498 0000 00       		.space	1
+ 499              		.text
+ 500              	.Letext0:
+ 501              		.file 2 "Generated_Source\\PSoC5\\cytypes.h"
+ 502              		.file 3 "Generated_Source\\PSoC5\\CyLib.h"
+ 503              		.section	.debug_info,"",%progbits
+ 504              	.Ldebug_info0:
+ 505 0000 27030000 		.4byte	0x327
+ 506 0004 0400     		.2byte	0x4
+ 507 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 508 000a 04       		.byte	0x4
+ 509 000b 01       		.uleb128 0x1
+ 510 000c 0A010000 		.4byte	.LASF41
+ 511 0010 0C       		.byte	0xc
+ 512 0011 BD020000 		.4byte	.LASF42
+ 513 0015 9D010000 		.4byte	.LASF43
+ 514 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 515 001d 00000000 		.4byte	0
+ 516 0021 00000000 		.4byte	.Ldebug_line0
+ 517 0025 02       		.uleb128 0x2
+ 518 0026 01       		.byte	0x1
+ 519 0027 06       		.byte	0x6
+ 520 0028 79030000 		.4byte	.LASF0
+ 521 002c 02       		.uleb128 0x2
+ 522 002d 01       		.byte	0x1
+ 523 002e 08       		.byte	0x8
+ 524 002f FC000000 		.4byte	.LASF1
+ 525 0033 02       		.uleb128 0x2
+ 526 0034 02       		.byte	0x2
+ 527 0035 05       		.byte	0x5
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 24
+
+
+ 528 0036 55030000 		.4byte	.LASF2
+ 529 003a 02       		.uleb128 0x2
+ 530 003b 02       		.byte	0x2
+ 531 003c 07       		.byte	0x7
+ 532 003d 6F000000 		.4byte	.LASF3
+ 533 0041 02       		.uleb128 0x2
+ 534 0042 04       		.byte	0x4
+ 535 0043 05       		.byte	0x5
+ 536 0044 5F030000 		.4byte	.LASF4
+ 537 0048 02       		.uleb128 0x2
+ 538 0049 04       		.byte	0x4
+ 539 004a 07       		.byte	0x7
+ 540 004b D4010000 		.4byte	.LASF5
+ 541 004f 02       		.uleb128 0x2
+ 542 0050 08       		.byte	0x8
+ 543 0051 05       		.byte	0x5
+ 544 0052 1A030000 		.4byte	.LASF6
+ 545 0056 02       		.uleb128 0x2
+ 546 0057 08       		.byte	0x8
+ 547 0058 07       		.byte	0x7
+ 548 0059 E5000000 		.4byte	.LASF7
+ 549 005d 03       		.uleb128 0x3
+ 550 005e 04       		.byte	0x4
+ 551 005f 05       		.byte	0x5
+ 552 0060 696E7400 		.ascii	"int\000"
+ 553 0064 02       		.uleb128 0x2
+ 554 0065 04       		.byte	0x4
+ 555 0066 07       		.byte	0x7
+ 556 0067 9A020000 		.4byte	.LASF8
+ 557 006b 04       		.uleb128 0x4
+ 558 006c E6010000 		.4byte	.LASF9
+ 559 0070 02       		.byte	0x2
+ 560 0071 E901     		.2byte	0x1e9
+ 561 0073 2C000000 		.4byte	0x2c
+ 562 0077 04       		.uleb128 0x4
+ 563 0078 65020000 		.4byte	.LASF10
+ 564 007c 02       		.byte	0x2
+ 565 007d EA01     		.2byte	0x1ea
+ 566 007f 3A000000 		.4byte	0x3a
+ 567 0083 02       		.uleb128 0x2
+ 568 0084 04       		.byte	0x4
+ 569 0085 04       		.byte	0x4
+ 570 0086 D7000000 		.4byte	.LASF11
+ 571 008a 02       		.uleb128 0x2
+ 572 008b 08       		.byte	0x8
+ 573 008c 04       		.byte	0x4
+ 574 008d 20020000 		.4byte	.LASF12
+ 575 0091 02       		.uleb128 0x2
+ 576 0092 01       		.byte	0x1
+ 577 0093 08       		.byte	0x8
+ 578 0094 68030000 		.4byte	.LASF13
+ 579 0098 04       		.uleb128 0x4
+ 580 0099 98010000 		.4byte	.LASF14
+ 581 009d 02       		.byte	0x2
+ 582 009e 9302     		.2byte	0x293
+ 583 00a0 A4000000 		.4byte	0xa4
+ 584 00a4 05       		.uleb128 0x5
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 25
+
+
+ 585 00a5 6B000000 		.4byte	0x6b
+ 586 00a9 04       		.uleb128 0x4
+ 587 00aa 00000000 		.4byte	.LASF15
+ 588 00ae 02       		.byte	0x2
+ 589 00af 9402     		.2byte	0x294
+ 590 00b1 B5000000 		.4byte	0xb5
+ 591 00b5 05       		.uleb128 0x5
+ 592 00b6 77000000 		.4byte	0x77
+ 593 00ba 02       		.uleb128 0x2
+ 594 00bb 08       		.byte	0x8
+ 595 00bc 04       		.byte	0x4
+ 596 00bd 6D030000 		.4byte	.LASF16
+ 597 00c1 02       		.uleb128 0x2
+ 598 00c2 04       		.byte	0x4
+ 599 00c3 07       		.byte	0x7
+ 600 00c4 11030000 		.4byte	.LASF17
+ 601 00c8 06       		.uleb128 0x6
+ 602 00c9 F4010000 		.4byte	.LASF18
+ 603 00cd 01       		.byte	0x1
+ 604 00ce B4       		.byte	0xb4
+ 605 00cf 00000000 		.4byte	.LFB1
+ 606 00d3 10000000 		.4byte	.LFE1-.LFB1
+ 607 00d7 01       		.uleb128 0x1
+ 608 00d8 9C       		.byte	0x9c
+ 609 00d9 06       		.uleb128 0x6
+ 610 00da 55020000 		.4byte	.LASF19
+ 611 00de 01       		.byte	0x1
+ 612 00df F7       		.byte	0xf7
+ 613 00e0 00000000 		.4byte	.LFB3
+ 614 00e4 10000000 		.4byte	.LFE3-.LFB3
+ 615 00e8 01       		.uleb128 0x1
+ 616 00e9 9C       		.byte	0x9c
+ 617 00ea 07       		.uleb128 0x7
+ 618 00eb 30000000 		.4byte	.LASF23
+ 619 00ef 01       		.byte	0x1
+ 620 00f0 1701     		.2byte	0x117
+ 621 00f2 00000000 		.4byte	.LFB4
+ 622 00f6 0C000000 		.4byte	.LFE4-.LFB4
+ 623 00fa 01       		.uleb128 0x1
+ 624 00fb 9C       		.byte	0x9c
+ 625 00fc 0F010000 		.4byte	0x10f
+ 626 0100 08       		.uleb128 0x8
+ 627 0101 28030000 		.4byte	.LASF25
+ 628 0105 01       		.byte	0x1
+ 629 0106 1701     		.2byte	0x117
+ 630 0108 6B000000 		.4byte	0x6b
+ 631 010c 01       		.uleb128 0x1
+ 632 010d 50       		.byte	0x50
+ 633 010e 00       		.byte	0
+ 634 010f 09       		.uleb128 0x9
+ 635 0110 F6020000 		.4byte	.LASF20
+ 636 0114 01       		.byte	0x1
+ 637 0115 2E01     		.2byte	0x12e
+ 638 0117 00000000 		.4byte	.LFB5
+ 639 011b 0C000000 		.4byte	.LFE5-.LFB5
+ 640 011f 01       		.uleb128 0x1
+ 641 0120 9C       		.byte	0x9c
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 26
+
+
+ 642 0121 0A       		.uleb128 0xa
+ 643 0122 82000000 		.4byte	.LASF21
+ 644 0126 01       		.byte	0x1
+ 645 0127 4D01     		.2byte	0x14d
+ 646 0129 6B000000 		.4byte	0x6b
+ 647 012d 00000000 		.4byte	.LFB6
+ 648 0131 0C000000 		.4byte	.LFE6-.LFB6
+ 649 0135 01       		.uleb128 0x1
+ 650 0136 9C       		.byte	0x9c
+ 651 0137 0A       		.uleb128 0xa
+ 652 0138 36030000 		.4byte	.LASF22
+ 653 013c 01       		.byte	0x1
+ 654 013d 6401     		.2byte	0x164
+ 655 013f 6B000000 		.4byte	0x6b
+ 656 0143 00000000 		.4byte	.LFB7
+ 657 0147 0C000000 		.4byte	.LFE7-.LFB7
+ 658 014b 01       		.uleb128 0x1
+ 659 014c 9C       		.byte	0x9c
+ 660 014d 07       		.uleb128 0x7
+ 661 014e B7000000 		.4byte	.LASF24
+ 662 0152 01       		.byte	0x1
+ 663 0153 7B01     		.2byte	0x17b
+ 664 0155 00000000 		.4byte	.LFB8
+ 665 0159 0C000000 		.4byte	.LFE8-.LFB8
+ 666 015d 01       		.uleb128 0x1
+ 667 015e 9C       		.byte	0x9c
+ 668 015f 72010000 		.4byte	0x172
+ 669 0163 08       		.uleb128 0x8
+ 670 0164 EC010000 		.4byte	.LASF26
+ 671 0168 01       		.byte	0x1
+ 672 0169 7B01     		.2byte	0x17b
+ 673 016b 6B000000 		.4byte	0x6b
+ 674 016f 01       		.uleb128 0x1
+ 675 0170 50       		.byte	0x50
+ 676 0171 00       		.byte	0
+ 677 0172 0A       		.uleb128 0xa
+ 678 0173 27020000 		.4byte	.LASF27
+ 679 0177 01       		.byte	0x1
+ 680 0178 9501     		.2byte	0x195
+ 681 017a 77000000 		.4byte	0x77
+ 682 017e 00000000 		.4byte	.LFB9
+ 683 0182 0C000000 		.4byte	.LFE9-.LFB9
+ 684 0186 01       		.uleb128 0x1
+ 685 0187 9C       		.byte	0x9c
+ 686 0188 07       		.uleb128 0x7
+ 687 0189 6C020000 		.4byte	.LASF28
+ 688 018d 01       		.byte	0x1
+ 689 018e AF01     		.2byte	0x1af
+ 690 0190 00000000 		.4byte	.LFB10
+ 691 0194 0C000000 		.4byte	.LFE10-.LFB10
+ 692 0198 01       		.uleb128 0x1
+ 693 0199 9C       		.byte	0x9c
+ 694 019a AD010000 		.4byte	0x1ad
+ 695 019e 08       		.uleb128 0x8
+ 696 019f 58000000 		.4byte	.LASF29
+ 697 01a3 01       		.byte	0x1
+ 698 01a4 AF01     		.2byte	0x1af
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 27
+
+
+ 699 01a6 77000000 		.4byte	0x77
+ 700 01aa 01       		.uleb128 0x1
+ 701 01ab 50       		.byte	0x50
+ 702 01ac 00       		.byte	0
+ 703 01ad 0A       		.uleb128 0xa
+ 704 01ae 06000000 		.4byte	.LASF30
+ 705 01b2 01       		.byte	0x1
+ 706 01b3 C801     		.2byte	0x1c8
+ 707 01b5 77000000 		.4byte	0x77
+ 708 01b9 00000000 		.4byte	.LFB11
+ 709 01bd 0C000000 		.4byte	.LFE11-.LFB11
+ 710 01c1 01       		.uleb128 0x1
+ 711 01c2 9C       		.byte	0x9c
+ 712 01c3 07       		.uleb128 0x7
+ 713 01c4 3D020000 		.4byte	.LASF31
+ 714 01c8 01       		.byte	0x1
+ 715 01c9 E001     		.2byte	0x1e0
+ 716 01cb 00000000 		.4byte	.LFB12
+ 717 01cf 0C000000 		.4byte	.LFE12-.LFB12
+ 718 01d3 01       		.uleb128 0x1
+ 719 01d4 9C       		.byte	0x9c
+ 720 01d5 E8010000 		.4byte	0x1e8
+ 721 01d9 08       		.uleb128 0x8
+ 722 01da DD000000 		.4byte	.LASF32
+ 723 01de 01       		.byte	0x1
+ 724 01df E001     		.2byte	0x1e0
+ 725 01e1 77000000 		.4byte	0x77
+ 726 01e5 01       		.uleb128 0x1
+ 727 01e6 50       		.byte	0x50
+ 728 01e7 00       		.byte	0
+ 729 01e8 0A       		.uleb128 0xa
+ 730 01e9 A0000000 		.4byte	.LASF33
+ 731 01ed 01       		.byte	0x1
+ 732 01ee FC01     		.2byte	0x1fc
+ 733 01f0 77000000 		.4byte	0x77
+ 734 01f4 00000000 		.4byte	.LFB13
+ 735 01f8 14000000 		.4byte	.LFE13-.LFB13
+ 736 01fc 01       		.uleb128 0x1
+ 737 01fd 9C       		.byte	0x9c
+ 738 01fe 07       		.uleb128 0x7
+ 739 01ff 85030000 		.4byte	.LASF34
+ 740 0203 01       		.byte	0x1
+ 741 0204 3602     		.2byte	0x236
+ 742 0206 00000000 		.4byte	.LFB14
+ 743 020a 1C000000 		.4byte	.LFE14-.LFB14
+ 744 020e 01       		.uleb128 0x1
+ 745 020f 9C       		.byte	0x9c
+ 746 0210 25020000 		.4byte	0x225
+ 747 0214 0B       		.uleb128 0xb
+ 748 0215 4C000000 		.4byte	.LASF35
+ 749 0219 01       		.byte	0x1
+ 750 021a 3602     		.2byte	0x236
+ 751 021c 6B000000 		.4byte	0x6b
+ 752 0220 00000000 		.4byte	.LLST0
+ 753 0224 00       		.byte	0
+ 754 0225 07       		.uleb128 0x7
+ 755 0226 E1020000 		.4byte	.LASF36
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 28
+
+
+ 756 022a 01       		.byte	0x1
+ 757 022b FB02     		.2byte	0x2fb
+ 758 022d 00000000 		.4byte	.LFB15
+ 759 0231 14000000 		.4byte	.LFE15-.LFB15
+ 760 0235 01       		.uleb128 0x1
+ 761 0236 9C       		.byte	0x9c
+ 762 0237 4E020000 		.4byte	0x24e
+ 763 023b 0C       		.uleb128 0xc
+ 764 023c 08000000 		.4byte	.LVL8
+ 765 0240 AD010000 		.4byte	0x1ad
+ 766 0244 0C       		.uleb128 0xc
+ 767 0245 0C000000 		.4byte	.LVL9
+ 768 0249 21010000 		.4byte	0x121
+ 769 024d 00       		.byte	0
+ 770 024e 0D       		.uleb128 0xd
+ 771 024f 5F000000 		.4byte	.LASF37
+ 772 0253 01       		.byte	0x1
+ 773 0254 2B       		.byte	0x2b
+ 774 0255 00000000 		.4byte	.LFB0
+ 775 0259 3C000000 		.4byte	.LFE0-.LFB0
+ 776 025d 01       		.uleb128 0x1
+ 777 025e 9C       		.byte	0x9c
+ 778 025f DB020000 		.4byte	0x2db
+ 779 0263 0E       		.uleb128 0xe
+ 780 0264 06020000 		.4byte	.LASF44
+ 781 0268 01       		.byte	0x1
+ 782 0269 2F       		.byte	0x2f
+ 783 026a 6B000000 		.4byte	0x6b
+ 784 026e 1E000000 		.4byte	.LLST1
+ 785 0272 0F       		.uleb128 0xf
+ 786 0273 0A000000 		.4byte	.LVL10
+ 787 0277 88010000 		.4byte	0x188
+ 788 027b 87020000 		.4byte	0x287
+ 789 027f 10       		.uleb128 0x10
+ 790 0280 01       		.uleb128 0x1
+ 791 0281 50       		.byte	0x50
+ 792 0282 03       		.uleb128 0x3
+ 793 0283 0A       		.byte	0xa
+ 794 0284 3F1F     		.2byte	0x1f3f
+ 795 0286 00       		.byte	0
+ 796 0287 0F       		.uleb128 0xf
+ 797 0288 12000000 		.4byte	.LVL11
+ 798 028c C3010000 		.4byte	0x1c3
+ 799 0290 9C020000 		.4byte	0x29c
+ 800 0294 10       		.uleb128 0x10
+ 801 0295 01       		.uleb128 0x1
+ 802 0296 50       		.byte	0x50
+ 803 0297 03       		.uleb128 0x3
+ 804 0298 0A       		.byte	0xa
+ 805 0299 3F1F     		.2byte	0x1f3f
+ 806 029b 00       		.byte	0
+ 807 029c 0F       		.uleb128 0xf
+ 808 029d 18000000 		.4byte	.LVL12
+ 809 02a1 FE010000 		.4byte	0x1fe
+ 810 02a5 B0020000 		.4byte	0x2b0
+ 811 02a9 10       		.uleb128 0x10
+ 812 02aa 01       		.uleb128 0x1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 29
+
+
+ 813 02ab 50       		.byte	0x50
+ 814 02ac 02       		.uleb128 0x2
+ 815 02ad 09       		.byte	0x9
+ 816 02ae 80       		.byte	0x80
+ 817 02af 00       		.byte	0
+ 818 02b0 0C       		.uleb128 0xc
+ 819 02b1 1C000000 		.4byte	.LVL13
+ 820 02b5 14030000 		.4byte	0x314
+ 821 02b9 0C       		.uleb128 0xc
+ 822 02ba 2A000000 		.4byte	.LVL14
+ 823 02be 1F030000 		.4byte	0x31f
+ 824 02c2 0C       		.uleb128 0xc
+ 825 02c3 2E000000 		.4byte	.LVL15
+ 826 02c7 25020000 		.4byte	0x225
+ 827 02cb 11       		.uleb128 0x11
+ 828 02cc 34000000 		.4byte	.LVL16
+ 829 02d0 EA000000 		.4byte	0xea
+ 830 02d4 10       		.uleb128 0x10
+ 831 02d5 01       		.uleb128 0x1
+ 832 02d6 50       		.byte	0x50
+ 833 02d7 01       		.uleb128 0x1
+ 834 02d8 30       		.byte	0x30
+ 835 02d9 00       		.byte	0
+ 836 02da 00       		.byte	0
+ 837 02db 0D       		.uleb128 0xd
+ 838 02dc 9F030000 		.4byte	.LASF38
+ 839 02e0 01       		.byte	0x1
+ 840 02e1 D7       		.byte	0xd7
+ 841 02e2 00000000 		.4byte	.LFB2
+ 842 02e6 1C000000 		.4byte	.LFE2-.LFB2
+ 843 02ea 01       		.uleb128 0x1
+ 844 02eb 9C       		.byte	0x9c
+ 845 02ec 03030000 		.4byte	0x303
+ 846 02f0 0C       		.uleb128 0xc
+ 847 02f1 0C000000 		.4byte	.LVL17
+ 848 02f5 4E020000 		.4byte	0x24e
+ 849 02f9 0C       		.uleb128 0xc
+ 850 02fa 16000000 		.4byte	.LVL18
+ 851 02fe C8000000 		.4byte	0xc8
+ 852 0302 00       		.byte	0
+ 853 0303 12       		.uleb128 0x12
+ 854 0304 1D000000 		.4byte	.LASF45
+ 855 0308 01       		.byte	0x1
+ 856 0309 1A       		.byte	0x1a
+ 857 030a 6B000000 		.4byte	0x6b
+ 858 030e 05       		.uleb128 0x5
+ 859 030f 03       		.byte	0x3
+ 860 0310 00000000 		.4byte	Timer_VDAC_initVar
+ 861 0314 13       		.uleb128 0x13
+ 862 0315 83020000 		.4byte	.LASF39
+ 863 0319 83020000 		.4byte	.LASF39
+ 864 031d 03       		.byte	0x3
+ 865 031e 7D       		.byte	0x7d
+ 866 031f 13       		.uleb128 0x13
+ 867 0320 A7020000 		.4byte	.LASF40
+ 868 0324 A7020000 		.4byte	.LASF40
+ 869 0328 03       		.byte	0x3
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 30
+
+
+ 870 0329 7E       		.byte	0x7e
+ 871 032a 00       		.byte	0
+ 872              		.section	.debug_abbrev,"",%progbits
+ 873              	.Ldebug_abbrev0:
+ 874 0000 01       		.uleb128 0x1
+ 875 0001 11       		.uleb128 0x11
+ 876 0002 01       		.byte	0x1
+ 877 0003 25       		.uleb128 0x25
+ 878 0004 0E       		.uleb128 0xe
+ 879 0005 13       		.uleb128 0x13
+ 880 0006 0B       		.uleb128 0xb
+ 881 0007 03       		.uleb128 0x3
+ 882 0008 0E       		.uleb128 0xe
+ 883 0009 1B       		.uleb128 0x1b
+ 884 000a 0E       		.uleb128 0xe
+ 885 000b 55       		.uleb128 0x55
+ 886 000c 17       		.uleb128 0x17
+ 887 000d 11       		.uleb128 0x11
+ 888 000e 01       		.uleb128 0x1
+ 889 000f 10       		.uleb128 0x10
+ 890 0010 17       		.uleb128 0x17
+ 891 0011 00       		.byte	0
+ 892 0012 00       		.byte	0
+ 893 0013 02       		.uleb128 0x2
+ 894 0014 24       		.uleb128 0x24
+ 895 0015 00       		.byte	0
+ 896 0016 0B       		.uleb128 0xb
+ 897 0017 0B       		.uleb128 0xb
+ 898 0018 3E       		.uleb128 0x3e
+ 899 0019 0B       		.uleb128 0xb
+ 900 001a 03       		.uleb128 0x3
+ 901 001b 0E       		.uleb128 0xe
+ 902 001c 00       		.byte	0
+ 903 001d 00       		.byte	0
+ 904 001e 03       		.uleb128 0x3
+ 905 001f 24       		.uleb128 0x24
+ 906 0020 00       		.byte	0
+ 907 0021 0B       		.uleb128 0xb
+ 908 0022 0B       		.uleb128 0xb
+ 909 0023 3E       		.uleb128 0x3e
+ 910 0024 0B       		.uleb128 0xb
+ 911 0025 03       		.uleb128 0x3
+ 912 0026 08       		.uleb128 0x8
+ 913 0027 00       		.byte	0
+ 914 0028 00       		.byte	0
+ 915 0029 04       		.uleb128 0x4
+ 916 002a 16       		.uleb128 0x16
+ 917 002b 00       		.byte	0
+ 918 002c 03       		.uleb128 0x3
+ 919 002d 0E       		.uleb128 0xe
+ 920 002e 3A       		.uleb128 0x3a
+ 921 002f 0B       		.uleb128 0xb
+ 922 0030 3B       		.uleb128 0x3b
+ 923 0031 05       		.uleb128 0x5
+ 924 0032 49       		.uleb128 0x49
+ 925 0033 13       		.uleb128 0x13
+ 926 0034 00       		.byte	0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 31
+
+
+ 927 0035 00       		.byte	0
+ 928 0036 05       		.uleb128 0x5
+ 929 0037 35       		.uleb128 0x35
+ 930 0038 00       		.byte	0
+ 931 0039 49       		.uleb128 0x49
+ 932 003a 13       		.uleb128 0x13
+ 933 003b 00       		.byte	0
+ 934 003c 00       		.byte	0
+ 935 003d 06       		.uleb128 0x6
+ 936 003e 2E       		.uleb128 0x2e
+ 937 003f 00       		.byte	0
+ 938 0040 3F       		.uleb128 0x3f
+ 939 0041 19       		.uleb128 0x19
+ 940 0042 03       		.uleb128 0x3
+ 941 0043 0E       		.uleb128 0xe
+ 942 0044 3A       		.uleb128 0x3a
+ 943 0045 0B       		.uleb128 0xb
+ 944 0046 3B       		.uleb128 0x3b
+ 945 0047 0B       		.uleb128 0xb
+ 946 0048 27       		.uleb128 0x27
+ 947 0049 19       		.uleb128 0x19
+ 948 004a 11       		.uleb128 0x11
+ 949 004b 01       		.uleb128 0x1
+ 950 004c 12       		.uleb128 0x12
+ 951 004d 06       		.uleb128 0x6
+ 952 004e 40       		.uleb128 0x40
+ 953 004f 18       		.uleb128 0x18
+ 954 0050 9742     		.uleb128 0x2117
+ 955 0052 19       		.uleb128 0x19
+ 956 0053 00       		.byte	0
+ 957 0054 00       		.byte	0
+ 958 0055 07       		.uleb128 0x7
+ 959 0056 2E       		.uleb128 0x2e
+ 960 0057 01       		.byte	0x1
+ 961 0058 3F       		.uleb128 0x3f
+ 962 0059 19       		.uleb128 0x19
+ 963 005a 03       		.uleb128 0x3
+ 964 005b 0E       		.uleb128 0xe
+ 965 005c 3A       		.uleb128 0x3a
+ 966 005d 0B       		.uleb128 0xb
+ 967 005e 3B       		.uleb128 0x3b
+ 968 005f 05       		.uleb128 0x5
+ 969 0060 27       		.uleb128 0x27
+ 970 0061 19       		.uleb128 0x19
+ 971 0062 11       		.uleb128 0x11
+ 972 0063 01       		.uleb128 0x1
+ 973 0064 12       		.uleb128 0x12
+ 974 0065 06       		.uleb128 0x6
+ 975 0066 40       		.uleb128 0x40
+ 976 0067 18       		.uleb128 0x18
+ 977 0068 9742     		.uleb128 0x2117
+ 978 006a 19       		.uleb128 0x19
+ 979 006b 01       		.uleb128 0x1
+ 980 006c 13       		.uleb128 0x13
+ 981 006d 00       		.byte	0
+ 982 006e 00       		.byte	0
+ 983 006f 08       		.uleb128 0x8
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 32
+
+
+ 984 0070 05       		.uleb128 0x5
+ 985 0071 00       		.byte	0
+ 986 0072 03       		.uleb128 0x3
+ 987 0073 0E       		.uleb128 0xe
+ 988 0074 3A       		.uleb128 0x3a
+ 989 0075 0B       		.uleb128 0xb
+ 990 0076 3B       		.uleb128 0x3b
+ 991 0077 05       		.uleb128 0x5
+ 992 0078 49       		.uleb128 0x49
+ 993 0079 13       		.uleb128 0x13
+ 994 007a 02       		.uleb128 0x2
+ 995 007b 18       		.uleb128 0x18
+ 996 007c 00       		.byte	0
+ 997 007d 00       		.byte	0
+ 998 007e 09       		.uleb128 0x9
+ 999 007f 2E       		.uleb128 0x2e
+ 1000 0080 00       		.byte	0
+ 1001 0081 3F       		.uleb128 0x3f
+ 1002 0082 19       		.uleb128 0x19
+ 1003 0083 03       		.uleb128 0x3
+ 1004 0084 0E       		.uleb128 0xe
+ 1005 0085 3A       		.uleb128 0x3a
+ 1006 0086 0B       		.uleb128 0xb
+ 1007 0087 3B       		.uleb128 0x3b
+ 1008 0088 05       		.uleb128 0x5
+ 1009 0089 27       		.uleb128 0x27
+ 1010 008a 19       		.uleb128 0x19
+ 1011 008b 11       		.uleb128 0x11
+ 1012 008c 01       		.uleb128 0x1
+ 1013 008d 12       		.uleb128 0x12
+ 1014 008e 06       		.uleb128 0x6
+ 1015 008f 40       		.uleb128 0x40
+ 1016 0090 18       		.uleb128 0x18
+ 1017 0091 9742     		.uleb128 0x2117
+ 1018 0093 19       		.uleb128 0x19
+ 1019 0094 00       		.byte	0
+ 1020 0095 00       		.byte	0
+ 1021 0096 0A       		.uleb128 0xa
+ 1022 0097 2E       		.uleb128 0x2e
+ 1023 0098 00       		.byte	0
+ 1024 0099 3F       		.uleb128 0x3f
+ 1025 009a 19       		.uleb128 0x19
+ 1026 009b 03       		.uleb128 0x3
+ 1027 009c 0E       		.uleb128 0xe
+ 1028 009d 3A       		.uleb128 0x3a
+ 1029 009e 0B       		.uleb128 0xb
+ 1030 009f 3B       		.uleb128 0x3b
+ 1031 00a0 05       		.uleb128 0x5
+ 1032 00a1 27       		.uleb128 0x27
+ 1033 00a2 19       		.uleb128 0x19
+ 1034 00a3 49       		.uleb128 0x49
+ 1035 00a4 13       		.uleb128 0x13
+ 1036 00a5 11       		.uleb128 0x11
+ 1037 00a6 01       		.uleb128 0x1
+ 1038 00a7 12       		.uleb128 0x12
+ 1039 00a8 06       		.uleb128 0x6
+ 1040 00a9 40       		.uleb128 0x40
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 33
+
+
+ 1041 00aa 18       		.uleb128 0x18
+ 1042 00ab 9742     		.uleb128 0x2117
+ 1043 00ad 19       		.uleb128 0x19
+ 1044 00ae 00       		.byte	0
+ 1045 00af 00       		.byte	0
+ 1046 00b0 0B       		.uleb128 0xb
+ 1047 00b1 05       		.uleb128 0x5
+ 1048 00b2 00       		.byte	0
+ 1049 00b3 03       		.uleb128 0x3
+ 1050 00b4 0E       		.uleb128 0xe
+ 1051 00b5 3A       		.uleb128 0x3a
+ 1052 00b6 0B       		.uleb128 0xb
+ 1053 00b7 3B       		.uleb128 0x3b
+ 1054 00b8 05       		.uleb128 0x5
+ 1055 00b9 49       		.uleb128 0x49
+ 1056 00ba 13       		.uleb128 0x13
+ 1057 00bb 02       		.uleb128 0x2
+ 1058 00bc 17       		.uleb128 0x17
+ 1059 00bd 00       		.byte	0
+ 1060 00be 00       		.byte	0
+ 1061 00bf 0C       		.uleb128 0xc
+ 1062 00c0 898201   		.uleb128 0x4109
+ 1063 00c3 00       		.byte	0
+ 1064 00c4 11       		.uleb128 0x11
+ 1065 00c5 01       		.uleb128 0x1
+ 1066 00c6 31       		.uleb128 0x31
+ 1067 00c7 13       		.uleb128 0x13
+ 1068 00c8 00       		.byte	0
+ 1069 00c9 00       		.byte	0
+ 1070 00ca 0D       		.uleb128 0xd
+ 1071 00cb 2E       		.uleb128 0x2e
+ 1072 00cc 01       		.byte	0x1
+ 1073 00cd 3F       		.uleb128 0x3f
+ 1074 00ce 19       		.uleb128 0x19
+ 1075 00cf 03       		.uleb128 0x3
+ 1076 00d0 0E       		.uleb128 0xe
+ 1077 00d1 3A       		.uleb128 0x3a
+ 1078 00d2 0B       		.uleb128 0xb
+ 1079 00d3 3B       		.uleb128 0x3b
+ 1080 00d4 0B       		.uleb128 0xb
+ 1081 00d5 27       		.uleb128 0x27
+ 1082 00d6 19       		.uleb128 0x19
+ 1083 00d7 11       		.uleb128 0x11
+ 1084 00d8 01       		.uleb128 0x1
+ 1085 00d9 12       		.uleb128 0x12
+ 1086 00da 06       		.uleb128 0x6
+ 1087 00db 40       		.uleb128 0x40
+ 1088 00dc 18       		.uleb128 0x18
+ 1089 00dd 9742     		.uleb128 0x2117
+ 1090 00df 19       		.uleb128 0x19
+ 1091 00e0 01       		.uleb128 0x1
+ 1092 00e1 13       		.uleb128 0x13
+ 1093 00e2 00       		.byte	0
+ 1094 00e3 00       		.byte	0
+ 1095 00e4 0E       		.uleb128 0xe
+ 1096 00e5 34       		.uleb128 0x34
+ 1097 00e6 00       		.byte	0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 34
+
+
+ 1098 00e7 03       		.uleb128 0x3
+ 1099 00e8 0E       		.uleb128 0xe
+ 1100 00e9 3A       		.uleb128 0x3a
+ 1101 00ea 0B       		.uleb128 0xb
+ 1102 00eb 3B       		.uleb128 0x3b
+ 1103 00ec 0B       		.uleb128 0xb
+ 1104 00ed 49       		.uleb128 0x49
+ 1105 00ee 13       		.uleb128 0x13
+ 1106 00ef 02       		.uleb128 0x2
+ 1107 00f0 17       		.uleb128 0x17
+ 1108 00f1 00       		.byte	0
+ 1109 00f2 00       		.byte	0
+ 1110 00f3 0F       		.uleb128 0xf
+ 1111 00f4 898201   		.uleb128 0x4109
+ 1112 00f7 01       		.byte	0x1
+ 1113 00f8 11       		.uleb128 0x11
+ 1114 00f9 01       		.uleb128 0x1
+ 1115 00fa 31       		.uleb128 0x31
+ 1116 00fb 13       		.uleb128 0x13
+ 1117 00fc 01       		.uleb128 0x1
+ 1118 00fd 13       		.uleb128 0x13
+ 1119 00fe 00       		.byte	0
+ 1120 00ff 00       		.byte	0
+ 1121 0100 10       		.uleb128 0x10
+ 1122 0101 8A8201   		.uleb128 0x410a
+ 1123 0104 00       		.byte	0
+ 1124 0105 02       		.uleb128 0x2
+ 1125 0106 18       		.uleb128 0x18
+ 1126 0107 9142     		.uleb128 0x2111
+ 1127 0109 18       		.uleb128 0x18
+ 1128 010a 00       		.byte	0
+ 1129 010b 00       		.byte	0
+ 1130 010c 11       		.uleb128 0x11
+ 1131 010d 898201   		.uleb128 0x4109
+ 1132 0110 01       		.byte	0x1
+ 1133 0111 11       		.uleb128 0x11
+ 1134 0112 01       		.uleb128 0x1
+ 1135 0113 31       		.uleb128 0x31
+ 1136 0114 13       		.uleb128 0x13
+ 1137 0115 00       		.byte	0
+ 1138 0116 00       		.byte	0
+ 1139 0117 12       		.uleb128 0x12
+ 1140 0118 34       		.uleb128 0x34
+ 1141 0119 00       		.byte	0
+ 1142 011a 03       		.uleb128 0x3
+ 1143 011b 0E       		.uleb128 0xe
+ 1144 011c 3A       		.uleb128 0x3a
+ 1145 011d 0B       		.uleb128 0xb
+ 1146 011e 3B       		.uleb128 0x3b
+ 1147 011f 0B       		.uleb128 0xb
+ 1148 0120 49       		.uleb128 0x49
+ 1149 0121 13       		.uleb128 0x13
+ 1150 0122 3F       		.uleb128 0x3f
+ 1151 0123 19       		.uleb128 0x19
+ 1152 0124 02       		.uleb128 0x2
+ 1153 0125 18       		.uleb128 0x18
+ 1154 0126 00       		.byte	0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 35
+
+
+ 1155 0127 00       		.byte	0
+ 1156 0128 13       		.uleb128 0x13
+ 1157 0129 2E       		.uleb128 0x2e
+ 1158 012a 00       		.byte	0
+ 1159 012b 3F       		.uleb128 0x3f
+ 1160 012c 19       		.uleb128 0x19
+ 1161 012d 3C       		.uleb128 0x3c
+ 1162 012e 19       		.uleb128 0x19
+ 1163 012f 6E       		.uleb128 0x6e
+ 1164 0130 0E       		.uleb128 0xe
+ 1165 0131 03       		.uleb128 0x3
+ 1166 0132 0E       		.uleb128 0xe
+ 1167 0133 3A       		.uleb128 0x3a
+ 1168 0134 0B       		.uleb128 0xb
+ 1169 0135 3B       		.uleb128 0x3b
+ 1170 0136 0B       		.uleb128 0xb
+ 1171 0137 00       		.byte	0
+ 1172 0138 00       		.byte	0
+ 1173 0139 00       		.byte	0
+ 1174              		.section	.debug_loc,"",%progbits
+ 1175              	.Ldebug_loc0:
+ 1176              	.LLST0:
+ 1177 0000 00000000 		.4byte	.LVL4
+ 1178 0004 02000000 		.4byte	.LVL5
+ 1179 0008 0100     		.2byte	0x1
+ 1180 000a 50       		.byte	0x50
+ 1181 000b 02000000 		.4byte	.LVL5
+ 1182 000f 14000000 		.4byte	.LVL7
+ 1183 0013 0100     		.2byte	0x1
+ 1184 0015 50       		.byte	0x50
+ 1185 0016 00000000 		.4byte	0
+ 1186 001a 00000000 		.4byte	0
+ 1187              	.LLST1:
+ 1188 001e 1C000000 		.4byte	.LVL13
+ 1189 0022 29000000 		.4byte	.LVL14-1
+ 1190 0026 0100     		.2byte	0x1
+ 1191 0028 50       		.byte	0x50
+ 1192 0029 00000000 		.4byte	0
+ 1193 002d 00000000 		.4byte	0
+ 1194              		.section	.debug_aranges,"",%progbits
+ 1195 0000 94000000 		.4byte	0x94
+ 1196 0004 0200     		.2byte	0x2
+ 1197 0006 00000000 		.4byte	.Ldebug_info0
+ 1198 000a 04       		.byte	0x4
+ 1199 000b 00       		.byte	0
+ 1200 000c 0000     		.2byte	0
+ 1201 000e 0000     		.2byte	0
+ 1202 0010 00000000 		.4byte	.LFB1
+ 1203 0014 10000000 		.4byte	.LFE1-.LFB1
+ 1204 0018 00000000 		.4byte	.LFB3
+ 1205 001c 10000000 		.4byte	.LFE3-.LFB3
+ 1206 0020 00000000 		.4byte	.LFB4
+ 1207 0024 0C000000 		.4byte	.LFE4-.LFB4
+ 1208 0028 00000000 		.4byte	.LFB5
+ 1209 002c 0C000000 		.4byte	.LFE5-.LFB5
+ 1210 0030 00000000 		.4byte	.LFB6
+ 1211 0034 0C000000 		.4byte	.LFE6-.LFB6
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 36
+
+
+ 1212 0038 00000000 		.4byte	.LFB7
+ 1213 003c 0C000000 		.4byte	.LFE7-.LFB7
+ 1214 0040 00000000 		.4byte	.LFB8
+ 1215 0044 0C000000 		.4byte	.LFE8-.LFB8
+ 1216 0048 00000000 		.4byte	.LFB9
+ 1217 004c 0C000000 		.4byte	.LFE9-.LFB9
+ 1218 0050 00000000 		.4byte	.LFB10
+ 1219 0054 0C000000 		.4byte	.LFE10-.LFB10
+ 1220 0058 00000000 		.4byte	.LFB11
+ 1221 005c 0C000000 		.4byte	.LFE11-.LFB11
+ 1222 0060 00000000 		.4byte	.LFB12
+ 1223 0064 0C000000 		.4byte	.LFE12-.LFB12
+ 1224 0068 00000000 		.4byte	.LFB13
+ 1225 006c 14000000 		.4byte	.LFE13-.LFB13
+ 1226 0070 00000000 		.4byte	.LFB14
+ 1227 0074 1C000000 		.4byte	.LFE14-.LFB14
+ 1228 0078 00000000 		.4byte	.LFB15
+ 1229 007c 14000000 		.4byte	.LFE15-.LFB15
+ 1230 0080 00000000 		.4byte	.LFB0
+ 1231 0084 3C000000 		.4byte	.LFE0-.LFB0
+ 1232 0088 00000000 		.4byte	.LFB2
+ 1233 008c 1C000000 		.4byte	.LFE2-.LFB2
+ 1234 0090 00000000 		.4byte	0
+ 1235 0094 00000000 		.4byte	0
+ 1236              		.section	.debug_ranges,"",%progbits
+ 1237              	.Ldebug_ranges0:
+ 1238 0000 00000000 		.4byte	.LFB1
+ 1239 0004 10000000 		.4byte	.LFE1
+ 1240 0008 00000000 		.4byte	.LFB3
+ 1241 000c 10000000 		.4byte	.LFE3
+ 1242 0010 00000000 		.4byte	.LFB4
+ 1243 0014 0C000000 		.4byte	.LFE4
+ 1244 0018 00000000 		.4byte	.LFB5
+ 1245 001c 0C000000 		.4byte	.LFE5
+ 1246 0020 00000000 		.4byte	.LFB6
+ 1247 0024 0C000000 		.4byte	.LFE6
+ 1248 0028 00000000 		.4byte	.LFB7
+ 1249 002c 0C000000 		.4byte	.LFE7
+ 1250 0030 00000000 		.4byte	.LFB8
+ 1251 0034 0C000000 		.4byte	.LFE8
+ 1252 0038 00000000 		.4byte	.LFB9
+ 1253 003c 0C000000 		.4byte	.LFE9
+ 1254 0040 00000000 		.4byte	.LFB10
+ 1255 0044 0C000000 		.4byte	.LFE10
+ 1256 0048 00000000 		.4byte	.LFB11
+ 1257 004c 0C000000 		.4byte	.LFE11
+ 1258 0050 00000000 		.4byte	.LFB12
+ 1259 0054 0C000000 		.4byte	.LFE12
+ 1260 0058 00000000 		.4byte	.LFB13
+ 1261 005c 14000000 		.4byte	.LFE13
+ 1262 0060 00000000 		.4byte	.LFB14
+ 1263 0064 1C000000 		.4byte	.LFE14
+ 1264 0068 00000000 		.4byte	.LFB15
+ 1265 006c 14000000 		.4byte	.LFE15
+ 1266 0070 00000000 		.4byte	.LFB0
+ 1267 0074 3C000000 		.4byte	.LFE0
+ 1268 0078 00000000 		.4byte	.LFB2
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 37
+
+
+ 1269 007c 1C000000 		.4byte	.LFE2
+ 1270 0080 00000000 		.4byte	0
+ 1271 0084 00000000 		.4byte	0
+ 1272              		.section	.debug_line,"",%progbits
+ 1273              	.Ldebug_line0:
+ 1274 0000 88010000 		.section	.debug_str,"MS",%progbits,1
+ 1274      02005200 
+ 1274      00000201 
+ 1274      FB0E0D00 
+ 1274      01010101 
+ 1275              	.LASF15:
+ 1276 0000 72656731 		.ascii	"reg16\000"
+ 1276      3600
+ 1277              	.LASF30:
+ 1278 0006 54696D65 		.ascii	"Timer_VDAC_ReadCapture\000"
+ 1278      725F5644 
+ 1278      41435F52 
+ 1278      65616443 
+ 1278      61707475 
+ 1279              	.LASF45:
+ 1280 001d 54696D65 		.ascii	"Timer_VDAC_initVar\000"
+ 1280      725F5644 
+ 1280      41435F69 
+ 1280      6E697456 
+ 1280      617200
+ 1281              	.LASF23:
+ 1282 0030 54696D65 		.ascii	"Timer_VDAC_SetInterruptMode\000"
+ 1282      725F5644 
+ 1282      41435F53 
+ 1282      6574496E 
+ 1282      74657272 
+ 1283              	.LASF35:
+ 1284 004c 63617074 		.ascii	"captureMode\000"
+ 1284      7572654D 
+ 1284      6F646500 
+ 1285              	.LASF29:
+ 1286 0058 70657269 		.ascii	"period\000"
+ 1286      6F6400
+ 1287              	.LASF37:
+ 1288 005f 54696D65 		.ascii	"Timer_VDAC_Init\000"
+ 1288      725F5644 
+ 1288      41435F49 
+ 1288      6E697400 
+ 1289              	.LASF3:
+ 1290 006f 73686F72 		.ascii	"short unsigned int\000"
+ 1290      7420756E 
+ 1290      7369676E 
+ 1290      65642069 
+ 1290      6E7400
+ 1291              	.LASF21:
+ 1292 0082 54696D65 		.ascii	"Timer_VDAC_ReadStatusRegister\000"
+ 1292      725F5644 
+ 1292      41435F52 
+ 1292      65616453 
+ 1292      74617475 
+ 1293              	.LASF33:
+ 1294 00a0 54696D65 		.ascii	"Timer_VDAC_ReadCounter\000"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 38
+
+
+ 1294      725F5644 
+ 1294      41435F52 
+ 1294      65616443 
+ 1294      6F756E74 
+ 1295              	.LASF24:
+ 1296 00b7 54696D65 		.ascii	"Timer_VDAC_WriteControlRegister\000"
+ 1296      725F5644 
+ 1296      41435F57 
+ 1296      72697465 
+ 1296      436F6E74 
+ 1297              	.LASF11:
+ 1298 00d7 666C6F61 		.ascii	"float\000"
+ 1298      7400
+ 1299              	.LASF32:
+ 1300 00dd 636F756E 		.ascii	"counter\000"
+ 1300      74657200 
+ 1301              	.LASF7:
+ 1302 00e5 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 1302      206C6F6E 
+ 1302      6720756E 
+ 1302      7369676E 
+ 1302      65642069 
+ 1303              	.LASF1:
+ 1304 00fc 756E7369 		.ascii	"unsigned char\000"
+ 1304      676E6564 
+ 1304      20636861 
+ 1304      7200
+ 1305              	.LASF41:
+ 1306 010a 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 1306      43313120 
+ 1306      352E342E 
+ 1306      31203230 
+ 1306      31363036 
+ 1307 013d 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"
+ 1307      20726576 
+ 1307      6973696F 
+ 1307      6E203233 
+ 1307      37373135 
+ 1308 0170 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 1308      66756E63 
+ 1308      74696F6E 
+ 1308      2D736563 
+ 1308      74696F6E 
+ 1309              	.LASF14:
+ 1310 0198 72656738 		.ascii	"reg8\000"
+ 1310      00
+ 1311              	.LASF43:
+ 1312 019d 433A5C47 		.ascii	"C:\\Github\\Tesis\\src\\psoc\\ComparacionSimplifica"
+ 1312      69746875 
+ 1312      625C5465 
+ 1312      7369735C 
+ 1312      7372635C 
+ 1313 01cb 64612E63 		.ascii	"da.cydsn\000"
+ 1313      7964736E 
+ 1313      00
+ 1314              	.LASF5:
+ 1315 01d4 6C6F6E67 		.ascii	"long unsigned int\000"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 39
+
+
+ 1315      20756E73 
+ 1315      69676E65 
+ 1315      6420696E 
+ 1315      7400
+ 1316              	.LASF9:
+ 1317 01e6 75696E74 		.ascii	"uint8\000"
+ 1317      3800
+ 1318              	.LASF26:
+ 1319 01ec 636F6E74 		.ascii	"control\000"
+ 1319      726F6C00 
+ 1320              	.LASF18:
+ 1321 01f4 54696D65 		.ascii	"Timer_VDAC_Enable\000"
+ 1321      725F5644 
+ 1321      41435F45 
+ 1321      6E61626C 
+ 1321      6500
+ 1322              	.LASF44:
+ 1323 0206 54696D65 		.ascii	"Timer_VDAC_interruptState\000"
+ 1323      725F5644 
+ 1323      41435F69 
+ 1323      6E746572 
+ 1323      72757074 
+ 1324              	.LASF12:
+ 1325 0220 646F7562 		.ascii	"double\000"
+ 1325      6C6500
+ 1326              	.LASF27:
+ 1327 0227 54696D65 		.ascii	"Timer_VDAC_ReadPeriod\000"
+ 1327      725F5644 
+ 1327      41435F52 
+ 1327      65616450 
+ 1327      6572696F 
+ 1328              	.LASF31:
+ 1329 023d 54696D65 		.ascii	"Timer_VDAC_WriteCounter\000"
+ 1329      725F5644 
+ 1329      41435F57 
+ 1329      72697465 
+ 1329      436F756E 
+ 1330              	.LASF19:
+ 1331 0255 54696D65 		.ascii	"Timer_VDAC_Stop\000"
+ 1331      725F5644 
+ 1331      41435F53 
+ 1331      746F7000 
+ 1332              	.LASF10:
+ 1333 0265 75696E74 		.ascii	"uint16\000"
+ 1333      313600
+ 1334              	.LASF28:
+ 1335 026c 54696D65 		.ascii	"Timer_VDAC_WritePeriod\000"
+ 1335      725F5644 
+ 1335      41435F57 
+ 1335      72697465 
+ 1335      50657269 
+ 1336              	.LASF39:
+ 1337 0283 4379456E 		.ascii	"CyEnterCriticalSection\000"
+ 1337      74657243 
+ 1337      72697469 
+ 1337      63616C53 
+ 1337      65637469 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 40
+
+
+ 1338              	.LASF8:
+ 1339 029a 756E7369 		.ascii	"unsigned int\000"
+ 1339      676E6564 
+ 1339      20696E74 
+ 1339      00
+ 1340              	.LASF40:
+ 1341 02a7 43794578 		.ascii	"CyExitCriticalSection\000"
+ 1341      69744372 
+ 1341      69746963 
+ 1341      616C5365 
+ 1341      6374696F 
+ 1342              	.LASF42:
+ 1343 02bd 47656E65 		.ascii	"Generated_Source\\PSoC5\\Timer_VDAC.c\000"
+ 1343      72617465 
+ 1343      645F536F 
+ 1343      75726365 
+ 1343      5C50536F 
+ 1344              	.LASF36:
+ 1345 02e1 54696D65 		.ascii	"Timer_VDAC_ClearFIFO\000"
+ 1345      725F5644 
+ 1345      41435F43 
+ 1345      6C656172 
+ 1345      4649464F 
+ 1346              	.LASF20:
+ 1347 02f6 54696D65 		.ascii	"Timer_VDAC_SoftwareCapture\000"
+ 1347      725F5644 
+ 1347      41435F53 
+ 1347      6F667477 
+ 1347      61726543 
+ 1348              	.LASF17:
+ 1349 0311 73697A65 		.ascii	"sizetype\000"
+ 1349      74797065 
+ 1349      00
+ 1350              	.LASF6:
+ 1351 031a 6C6F6E67 		.ascii	"long long int\000"
+ 1351      206C6F6E 
+ 1351      6720696E 
+ 1351      7400
+ 1352              	.LASF25:
+ 1353 0328 696E7465 		.ascii	"interruptMode\000"
+ 1353      72727570 
+ 1353      744D6F64 
+ 1353      6500
+ 1354              	.LASF22:
+ 1355 0336 54696D65 		.ascii	"Timer_VDAC_ReadControlRegister\000"
+ 1355      725F5644 
+ 1355      41435F52 
+ 1355      65616443 
+ 1355      6F6E7472 
+ 1356              	.LASF2:
+ 1357 0355 73686F72 		.ascii	"short int\000"
+ 1357      7420696E 
+ 1357      7400
+ 1358              	.LASF4:
+ 1359 035f 6C6F6E67 		.ascii	"long int\000"
+ 1359      20696E74 
+ 1359      00
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccXpq6mf.s 			page 41
+
+
+ 1360              	.LASF13:
+ 1361 0368 63686172 		.ascii	"char\000"
+ 1361      00
+ 1362              	.LASF16:
+ 1363 036d 6C6F6E67 		.ascii	"long double\000"
+ 1363      20646F75 
+ 1363      626C6500 
+ 1364              	.LASF0:
+ 1365 0379 7369676E 		.ascii	"signed char\000"
+ 1365      65642063 
+ 1365      68617200 
+ 1366              	.LASF34:
+ 1367 0385 54696D65 		.ascii	"Timer_VDAC_SetCaptureMode\000"
+ 1367      725F5644 
+ 1367      41435F53 
+ 1367      65744361 
+ 1367      70747572 
+ 1368              	.LASF38:
+ 1369 039f 54696D65 		.ascii	"Timer_VDAC_Start\000"
+ 1369      725F5644 
+ 1369      41435F53 
+ 1369      74617274 
+ 1369      00
+ 1370              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran
