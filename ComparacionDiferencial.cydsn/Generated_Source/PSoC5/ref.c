@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: ref.c  
+* File Name: Ref.c  
 * Version 2.20
 *
 * Description:
@@ -15,15 +15,15 @@
 *******************************************************************************/
 
 #include "cytypes.h"
-#include "ref.h"
+#include "Ref.h"
 
 /* APIs are not generated for P15[7:6] on PSoC 5 */
 #if !(CY_PSOC5A &&\
-	 ref__PORT == 15 && ((ref__MASK & 0xC0) != 0))
+	 Ref__PORT == 15 && ((Ref__MASK & 0xC0) != 0))
 
 
 /*******************************************************************************
-* Function Name: ref_Write
+* Function Name: Ref_Write
 ****************************************************************************//**
 *
 * \brief Writes the value to the physical port (data output register), masking
@@ -52,17 +52,17 @@
 *  this function.
 *
 * \funcusage
-*  \snippet ref_SUT.c usage_ref_Write
+*  \snippet Ref_SUT.c usage_Ref_Write
 *******************************************************************************/
-void ref_Write(uint8 value)
+void Ref_Write(uint8 value)
 {
-    uint8 staticBits = (ref_DR & (uint8)(~ref_MASK));
-    ref_DR = staticBits | ((uint8)(value << ref_SHIFT) & ref_MASK);
+    uint8 staticBits = (Ref_DR & (uint8)(~Ref_MASK));
+    Ref_DR = staticBits | ((uint8)(value << Ref_SHIFT) & Ref_MASK);
 }
 
 
 /*******************************************************************************
-* Function Name: ref_SetDriveMode
+* Function Name: Ref_SetDriveMode
 ****************************************************************************//**
 *
 * \brief Sets the drive mode for each of the Pins component's pins.
@@ -85,16 +85,16 @@ void ref_Write(uint8 value)
 *  APIs (primary method) or disable interrupts around this function.
 *
 * \funcusage
-*  \snippet ref_SUT.c usage_ref_SetDriveMode
+*  \snippet Ref_SUT.c usage_Ref_SetDriveMode
 *******************************************************************************/
-void ref_SetDriveMode(uint8 mode)
+void Ref_SetDriveMode(uint8 mode)
 {
-	CyPins_SetPinDriveMode(ref_0, mode);
+	CyPins_SetPinDriveMode(Ref_0, mode);
 }
 
 
 /*******************************************************************************
-* Function Name: ref_Read
+* Function Name: Ref_Read
 ****************************************************************************//**
 *
 * \brief Reads the associated physical port (pin status register) and masks 
@@ -108,16 +108,16 @@ void ref_SetDriveMode(uint8 mode)
 *  The current value for the pins in the component as a right justified number.
 *
 * \funcusage
-*  \snippet ref_SUT.c usage_ref_Read  
+*  \snippet Ref_SUT.c usage_Ref_Read  
 *******************************************************************************/
-uint8 ref_Read(void)
+uint8 Ref_Read(void)
 {
-    return (ref_PS & ref_MASK) >> ref_SHIFT;
+    return (Ref_PS & Ref_MASK) >> Ref_SHIFT;
 }
 
 
 /*******************************************************************************
-* Function Name: ref_ReadDataReg
+* Function Name: Ref_ReadDataReg
 ****************************************************************************//**
 *
 * \brief Reads the associated physical port's data output register and masks 
@@ -126,8 +126,8 @@ uint8 ref_Read(void)
 *
 * The data output register controls the signal applied to the physical pin in 
 * conjunction with the drive mode parameter. This is not the same as the 
-* preferred ref_Read() API because the 
-* ref_ReadDataReg() reads the data register instead of the status 
+* preferred Ref_Read() API because the 
+* Ref_ReadDataReg() reads the data register instead of the status 
 * register. For output pins this is a useful function to determine the value 
 * just written to the pin.
 *
@@ -136,19 +136,19 @@ uint8 ref_Read(void)
 *  justified number for the component instance.
 *
 * \funcusage
-*  \snippet ref_SUT.c usage_ref_ReadDataReg 
+*  \snippet Ref_SUT.c usage_Ref_ReadDataReg 
 *******************************************************************************/
-uint8 ref_ReadDataReg(void)
+uint8 Ref_ReadDataReg(void)
 {
-    return (ref_DR & ref_MASK) >> ref_SHIFT;
+    return (Ref_DR & Ref_MASK) >> Ref_SHIFT;
 }
 
 
 /* If interrupt is connected for this Pins component */ 
-#if defined(ref_INTSTAT) 
+#if defined(Ref_INTSTAT) 
 
     /*******************************************************************************
-    * Function Name: ref_SetInterruptMode
+    * Function Name: Ref_SetInterruptMode
     ****************************************************************************//**
     *
     * \brief Configures the interrupt mode for each of the Pins component's
@@ -161,12 +161,12 @@ uint8 ref_ReadDataReg(void)
     * \param position
     *  The pin position as listed in the Pins component. You may OR these to be 
     *  able to configure the interrupt mode of multiple pins within a Pins 
-    *  component. Or you may use ref_INTR_ALL to configure the
+    *  component. Or you may use Ref_INTR_ALL to configure the
     *  interrupt mode of all the pins in the Pins component.       
-    *  - ref_0_INTR       (First pin in the list)
-    *  - ref_1_INTR       (Second pin in the list)
+    *  - Ref_0_INTR       (First pin in the list)
+    *  - Ref_1_INTR       (Second pin in the list)
     *  - ...
-    *  - ref_INTR_ALL     (All pins in Pins component)
+    *  - Ref_INTR_ALL     (All pins in Pins component)
     *
     * \param mode
     *  Interrupt mode for the selected pins. Valid options are documented in
@@ -182,19 +182,19 @@ uint8 ref_ReadDataReg(void)
     *  port.
     *
     * \funcusage
-    *  \snippet ref_SUT.c usage_ref_SetInterruptMode
+    *  \snippet Ref_SUT.c usage_Ref_SetInterruptMode
     *******************************************************************************/
-    void ref_SetInterruptMode(uint16 position, uint16 mode)
+    void Ref_SetInterruptMode(uint16 position, uint16 mode)
     {
-		if((position & ref_0_INTR) != 0u) 
+		if((position & Ref_0_INTR) != 0u) 
 		{ 
-			 ref_0_INTTYPE_REG = (uint8)mode; 
+			 Ref_0_INTTYPE_REG = (uint8)mode; 
 		}
     }
     
     
     /*******************************************************************************
-    * Function Name: ref_ClearInterrupt
+    * Function Name: Ref_ClearInterrupt
     ****************************************************************************//**
     *
     * \brief Clears any active interrupts attached with the component and returns 
@@ -211,11 +211,11 @@ uint8 ref_ReadDataReg(void)
     *  those associated with the Pins component.
     *
     * \funcusage
-    *  \snippet ref_SUT.c usage_ref_ClearInterrupt
+    *  \snippet Ref_SUT.c usage_Ref_ClearInterrupt
     *******************************************************************************/
-    uint8 ref_ClearInterrupt(void)
+    uint8 Ref_ClearInterrupt(void)
     {
-        return (ref_INTSTAT & ref_MASK) >> ref_SHIFT;
+        return (Ref_INTSTAT & Ref_MASK) >> Ref_SHIFT;
     }
 
 #endif /* If Interrupts Are Enabled for this Pins component */ 

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: ref.h  
+* File Name: Ref.h  
 * Version 2.20
 *
 * Description:
@@ -15,8 +15,8 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#if !defined(CY_PINS_ref_ALIASES_H) /* Pins ref_ALIASES_H */
-#define CY_PINS_ref_ALIASES_H
+#if !defined(CY_PINS_Ref_ALIASES_H) /* Pins Ref_ALIASES_H */
+#define CY_PINS_Ref_ALIASES_H
 
 #include "cytypes.h"
 #include "cyfitter.h"
@@ -25,12 +25,12 @@
 /***************************************
 *              Constants        
 ***************************************/
-#define ref_0			(ref__0__PC)
-#define ref_0_INTR	((uint16)((uint16)0x0001u << ref__0__SHIFT))
+#define Ref_0			(Ref__0__PC)
+#define Ref_0_INTR	((uint16)((uint16)0x0001u << Ref__0__SHIFT))
 
-#define ref_INTR_ALL	 ((uint16)(ref_0_INTR))
+#define Ref_INTR_ALL	 ((uint16)(Ref_0_INTR))
 
-#endif /* End Pins ref_ALIASES_H */
+#endif /* End Pins Ref_ALIASES_H */
 
 
 /* [] END OF FILE */

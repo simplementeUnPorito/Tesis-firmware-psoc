@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: ref.h  
+* File Name: Ref.h  
 * Version 2.20
 *
 * Description:
@@ -14,17 +14,17 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#if !defined(CY_PINS_ref_H) /* Pins ref_H */
-#define CY_PINS_ref_H
+#if !defined(CY_PINS_Ref_H) /* Pins Ref_H */
+#define CY_PINS_Ref_H
 
 #include "cytypes.h"
 #include "cyfitter.h"
 #include "cypins.h"
-#include "ref_aliases.h"
+#include "Ref_aliases.h"
 
 /* APIs are not generated for P15[7:6] */
 #if !(CY_PSOC5A &&\
-	 ref__PORT == 15 && ((ref__MASK & 0xC0) != 0))
+	 Ref__PORT == 15 && ((Ref__MASK & 0xC0) != 0))
 
 
 /***************************************
@@ -35,12 +35,12 @@
 * \addtogroup group_general
 * @{
 */
-void    ref_Write(uint8 value);
-void    ref_SetDriveMode(uint8 mode);
-uint8   ref_ReadDataReg(void);
-uint8   ref_Read(void);
-void    ref_SetInterruptMode(uint16 position, uint16 mode);
-uint8   ref_ClearInterrupt(void);
+void    Ref_Write(uint8 value);
+void    Ref_SetDriveMode(uint8 mode);
+uint8   Ref_ReadDataReg(void);
+uint8   Ref_Read(void);
+void    Ref_SetInterruptMode(uint16 position, uint16 mode);
+uint8   Ref_ClearInterrupt(void);
 /** @} general */
 
 /***************************************
@@ -51,44 +51,44 @@ uint8   ref_ClearInterrupt(void);
 * @{
 */
     /** \addtogroup driveMode Drive mode constants
-     * \brief Constants to be passed as "mode" parameter in the ref_SetDriveMode() function.
+     * \brief Constants to be passed as "mode" parameter in the Ref_SetDriveMode() function.
      *  @{
      */
-        #define ref_DM_ALG_HIZ         PIN_DM_ALG_HIZ
-        #define ref_DM_DIG_HIZ         PIN_DM_DIG_HIZ
-        #define ref_DM_RES_UP          PIN_DM_RES_UP
-        #define ref_DM_RES_DWN         PIN_DM_RES_DWN
-        #define ref_DM_OD_LO           PIN_DM_OD_LO
-        #define ref_DM_OD_HI           PIN_DM_OD_HI
-        #define ref_DM_STRONG          PIN_DM_STRONG
-        #define ref_DM_RES_UPDWN       PIN_DM_RES_UPDWN
+        #define Ref_DM_ALG_HIZ         PIN_DM_ALG_HIZ
+        #define Ref_DM_DIG_HIZ         PIN_DM_DIG_HIZ
+        #define Ref_DM_RES_UP          PIN_DM_RES_UP
+        #define Ref_DM_RES_DWN         PIN_DM_RES_DWN
+        #define Ref_DM_OD_LO           PIN_DM_OD_LO
+        #define Ref_DM_OD_HI           PIN_DM_OD_HI
+        #define Ref_DM_STRONG          PIN_DM_STRONG
+        #define Ref_DM_RES_UPDWN       PIN_DM_RES_UPDWN
     /** @} driveMode */
 /** @} group_constants */
     
 /* Digital Port Constants */
-#define ref_MASK               ref__MASK
-#define ref_SHIFT              ref__SHIFT
-#define ref_WIDTH              1u
+#define Ref_MASK               Ref__MASK
+#define Ref_SHIFT              Ref__SHIFT
+#define Ref_WIDTH              1u
 
 /* Interrupt constants */
-#if defined(ref__INTSTAT)
+#if defined(Ref__INTSTAT)
 /**
 * \addtogroup group_constants
 * @{
 */
     /** \addtogroup intrMode Interrupt constants
-     * \brief Constants to be passed as "mode" parameter in ref_SetInterruptMode() function.
+     * \brief Constants to be passed as "mode" parameter in Ref_SetInterruptMode() function.
      *  @{
      */
-        #define ref_INTR_NONE      (uint16)(0x0000u)
-        #define ref_INTR_RISING    (uint16)(0x0001u)
-        #define ref_INTR_FALLING   (uint16)(0x0002u)
-        #define ref_INTR_BOTH      (uint16)(0x0003u) 
+        #define Ref_INTR_NONE      (uint16)(0x0000u)
+        #define Ref_INTR_RISING    (uint16)(0x0001u)
+        #define Ref_INTR_FALLING   (uint16)(0x0002u)
+        #define Ref_INTR_BOTH      (uint16)(0x0003u) 
     /** @} intrMode */
 /** @} group_constants */
 
-    #define ref_INTR_MASK      (0x01u) 
-#endif /* (ref__INTSTAT) */
+    #define Ref_INTR_MASK      (0x01u) 
+#endif /* (Ref__INTSTAT) */
 
 
 /***************************************
@@ -97,69 +97,69 @@ uint8   ref_ClearInterrupt(void);
 
 /* Main Port Registers */
 /* Pin State */
-#define ref_PS                     (* (reg8 *) ref__PS)
+#define Ref_PS                     (* (reg8 *) Ref__PS)
 /* Data Register */
-#define ref_DR                     (* (reg8 *) ref__DR)
+#define Ref_DR                     (* (reg8 *) Ref__DR)
 /* Port Number */
-#define ref_PRT_NUM                (* (reg8 *) ref__PRT) 
+#define Ref_PRT_NUM                (* (reg8 *) Ref__PRT) 
 /* Connect to Analog Globals */                                                  
-#define ref_AG                     (* (reg8 *) ref__AG)                       
+#define Ref_AG                     (* (reg8 *) Ref__AG)                       
 /* Analog MUX bux enable */
-#define ref_AMUX                   (* (reg8 *) ref__AMUX) 
+#define Ref_AMUX                   (* (reg8 *) Ref__AMUX) 
 /* Bidirectional Enable */                                                        
-#define ref_BIE                    (* (reg8 *) ref__BIE)
+#define Ref_BIE                    (* (reg8 *) Ref__BIE)
 /* Bit-mask for Aliased Register Access */
-#define ref_BIT_MASK               (* (reg8 *) ref__BIT_MASK)
+#define Ref_BIT_MASK               (* (reg8 *) Ref__BIT_MASK)
 /* Bypass Enable */
-#define ref_BYP                    (* (reg8 *) ref__BYP)
+#define Ref_BYP                    (* (reg8 *) Ref__BYP)
 /* Port wide control signals */                                                   
-#define ref_CTL                    (* (reg8 *) ref__CTL)
+#define Ref_CTL                    (* (reg8 *) Ref__CTL)
 /* Drive Modes */
-#define ref_DM0                    (* (reg8 *) ref__DM0) 
-#define ref_DM1                    (* (reg8 *) ref__DM1)
-#define ref_DM2                    (* (reg8 *) ref__DM2) 
+#define Ref_DM0                    (* (reg8 *) Ref__DM0) 
+#define Ref_DM1                    (* (reg8 *) Ref__DM1)
+#define Ref_DM2                    (* (reg8 *) Ref__DM2) 
 /* Input Buffer Disable Override */
-#define ref_INP_DIS                (* (reg8 *) ref__INP_DIS)
+#define Ref_INP_DIS                (* (reg8 *) Ref__INP_DIS)
 /* LCD Common or Segment Drive */
-#define ref_LCD_COM_SEG            (* (reg8 *) ref__LCD_COM_SEG)
+#define Ref_LCD_COM_SEG            (* (reg8 *) Ref__LCD_COM_SEG)
 /* Enable Segment LCD */
-#define ref_LCD_EN                 (* (reg8 *) ref__LCD_EN)
+#define Ref_LCD_EN                 (* (reg8 *) Ref__LCD_EN)
 /* Slew Rate Control */
-#define ref_SLW                    (* (reg8 *) ref__SLW)
+#define Ref_SLW                    (* (reg8 *) Ref__SLW)
 
 /* DSI Port Registers */
 /* Global DSI Select Register */
-#define ref_PRTDSI__CAPS_SEL       (* (reg8 *) ref__PRTDSI__CAPS_SEL) 
+#define Ref_PRTDSI__CAPS_SEL       (* (reg8 *) Ref__PRTDSI__CAPS_SEL) 
 /* Double Sync Enable */
-#define ref_PRTDSI__DBL_SYNC_IN    (* (reg8 *) ref__PRTDSI__DBL_SYNC_IN) 
+#define Ref_PRTDSI__DBL_SYNC_IN    (* (reg8 *) Ref__PRTDSI__DBL_SYNC_IN) 
 /* Output Enable Select Drive Strength */
-#define ref_PRTDSI__OE_SEL0        (* (reg8 *) ref__PRTDSI__OE_SEL0) 
-#define ref_PRTDSI__OE_SEL1        (* (reg8 *) ref__PRTDSI__OE_SEL1) 
+#define Ref_PRTDSI__OE_SEL0        (* (reg8 *) Ref__PRTDSI__OE_SEL0) 
+#define Ref_PRTDSI__OE_SEL1        (* (reg8 *) Ref__PRTDSI__OE_SEL1) 
 /* Port Pin Output Select Registers */
-#define ref_PRTDSI__OUT_SEL0       (* (reg8 *) ref__PRTDSI__OUT_SEL0) 
-#define ref_PRTDSI__OUT_SEL1       (* (reg8 *) ref__PRTDSI__OUT_SEL1) 
+#define Ref_PRTDSI__OUT_SEL0       (* (reg8 *) Ref__PRTDSI__OUT_SEL0) 
+#define Ref_PRTDSI__OUT_SEL1       (* (reg8 *) Ref__PRTDSI__OUT_SEL1) 
 /* Sync Output Enable Registers */
-#define ref_PRTDSI__SYNC_OUT       (* (reg8 *) ref__PRTDSI__SYNC_OUT) 
+#define Ref_PRTDSI__SYNC_OUT       (* (reg8 *) Ref__PRTDSI__SYNC_OUT) 
 
 /* SIO registers */
-#if defined(ref__SIO_CFG)
-    #define ref_SIO_HYST_EN        (* (reg8 *) ref__SIO_HYST_EN)
-    #define ref_SIO_REG_HIFREQ     (* (reg8 *) ref__SIO_REG_HIFREQ)
-    #define ref_SIO_CFG            (* (reg8 *) ref__SIO_CFG)
-    #define ref_SIO_DIFF           (* (reg8 *) ref__SIO_DIFF)
-#endif /* (ref__SIO_CFG) */
+#if defined(Ref__SIO_CFG)
+    #define Ref_SIO_HYST_EN        (* (reg8 *) Ref__SIO_HYST_EN)
+    #define Ref_SIO_REG_HIFREQ     (* (reg8 *) Ref__SIO_REG_HIFREQ)
+    #define Ref_SIO_CFG            (* (reg8 *) Ref__SIO_CFG)
+    #define Ref_SIO_DIFF           (* (reg8 *) Ref__SIO_DIFF)
+#endif /* (Ref__SIO_CFG) */
 
 /* Interrupt Registers */
-#if defined(ref__INTSTAT)
-    #define ref_INTSTAT            (* (reg8 *) ref__INTSTAT)
-    #define ref_SNAP               (* (reg8 *) ref__SNAP)
+#if defined(Ref__INTSTAT)
+    #define Ref_INTSTAT            (* (reg8 *) Ref__INTSTAT)
+    #define Ref_SNAP               (* (reg8 *) Ref__SNAP)
     
-	#define ref_0_INTTYPE_REG 		(* (reg8 *) ref__0__INTTYPE)
-#endif /* (ref__INTSTAT) */
+	#define Ref_0_INTTYPE_REG 		(* (reg8 *) Ref__0__INTTYPE)
+#endif /* (Ref__INTSTAT) */
 
 #endif /* CY_PSOC5A... */
 
-#endif /*  CY_PINS_ref_H */
+#endif /*  CY_PINS_Ref_H */
 
 
 /* [] END OF FILE */
