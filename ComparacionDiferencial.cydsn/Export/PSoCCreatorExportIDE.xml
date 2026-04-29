@@ -56,6 +56,7 @@
           <File BuildType="BUILD" Toolchain="">..\shared\transport_uart.h</File>
           <File BuildType="BUILD" Toolchain="">..\shared\transport_usb.h</File>
           <File BuildType="BUILD" Toolchain="">ricker_table.h</File>
+          <File BuildType="BUILD" Toolchain="">coeficientes_notch.h</File>
         </Files>
       </Folder>
       <Folder BuildType="STRICT" Path="C:\Github\Tesis\src\psoc\ComparacionDiferencial.cydsn\Generated_Source\PSoC5">
@@ -88,6 +89,13 @@
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC_n_aliases.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC_n.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC_n.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Filter.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Filter.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Filter_PM.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Filter_PVT.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Filter_PVT.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Filter_RAM_Data.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Filter_Coefficients.c</File>
           <File BuildType="BUILD" Toolchain="ARM GCC Generic">Generated_Source\PSoC5\cm3gcc.ld</File>
           <File BuildType="BUILD" Toolchain="ARM MDK Generic">Generated_Source\PSoC5\Cm3RealView.scat</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Cm3Start.c</File>
@@ -121,30 +129,39 @@
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\cycodeshareimport.ld</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\cycodeshareexport.ld</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\cycodeshareimport.scat</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC_DelSig.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC_DelSig.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC_DelSig_PM.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC_DelSig_INT.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\isr_DelSig.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\isr_DelSig.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC_DelSig_Ext_CP_Clk.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC_DelSig_Ext_CP_Clk.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC_DelSig_IRQ.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC_DelSig_IRQ.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC_DelSig_theACLK.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC_DelSig_theACLK.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\TIAOut_p_aliases.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\TIAOut_p.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\TIAOut_p.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\TIAOut_n_aliases.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\TIAOut_n.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\TIAOut_n.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\UART_PC.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\UART_PC.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\UART_PC_PM.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\UART_PC_INT.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\UART_PC_BOOT.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\UART_PC_IntClock.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\UART_PC_IntClock.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\isr_Filter.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\isr_Filter.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGA_p.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGA_p.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGA_p_PM.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGA_n.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGA_n.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGA_n_PM.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\In_p_aliases.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\In_p.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\In_p.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\In_n_aliases.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\In_n.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\In_n.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Opa_ref.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Opa_ref.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Opa_ref_PM.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Opa_comun.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Opa_comun.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Opa_comun_PM.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGAout_n_aliases.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGAout_n.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGAout_n.h</File>
@@ -175,40 +192,42 @@
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\OpaDiff_n.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\OpaDiff_n.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\OpaDiff_n_PM.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\boton_aliases.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\boton.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\boton.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Clock_Debouncer.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Clock_Debouncer.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\isr_boton.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\isr_boton.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Clock_Wave.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Clock_Wave.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Comun_aliases.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Comun.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Comun.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\TIAInI_n_aliases.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\TIAInI_n.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\TIAInI_n.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\TIAInI_p_aliases.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\TIAInI_p.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\TIAInI_p.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\WaveGenerator_aliases.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\WaveGenerator.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\WaveGenerator.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\WRef_aliases.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\WRef.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\WRef.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\WaveDAC.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\WaveDAC.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\WaveDAC_PM.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\WaveDAC_Wave1_DMA_dma.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\WaveDAC_Wave1_DMA_dma.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\WaveDAC_Wave2_DMA_dma.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\WaveDAC_Wave2_DMA_dma.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\WaveDAC_VDAC8.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\WaveDAC_VDAC8.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\WaveDAC_VDAC8_PM.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\refIn_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\refIn.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\refIn.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Input_n_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Input_n.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Input_n.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Input_p_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Input_p.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Input_p.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\refOut_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\refOut.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\refOut.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\OpaBuffer_p.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\OpaBuffer_p.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\OpaBuffer_p_PM.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\OpaBuffer_n.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\OpaBuffer_n.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\OpaBuffer_n_PM.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\BufferOut_n_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\BufferOut_n.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\BufferOut_n.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\BufferOut_p_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\BufferOut_p.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\BufferOut_p.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\InBP_n_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\InBP_n.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\InBP_n.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\InBP_p_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\InBP_p.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\InBP_p.h</File>
         </Files>
       </Folder>
       <Folder BuildType="STRICT" Path="C:\Github\Tesis\src\psoc\ComparacionDiferencial.cydsn\Export\ARM_GCC_Generic">
