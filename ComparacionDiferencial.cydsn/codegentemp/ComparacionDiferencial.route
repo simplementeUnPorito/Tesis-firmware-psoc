@@ -917,13 +917,6 @@ net \UART_PC:BUART:tx_fifo_notfull\
 	switch "Stub-:udbswitch@[UDB=(0,2)][side=top]:v95==>:udb@[UDB=(1,2)]:statusicell.status_3"
 	term   ":udb@[UDB=(1,2)]:statusicell.status_3"
 end \UART_PC:BUART:tx_fifo_notfull\
-net Net_1047
-	term   ":dfbcell.interrupt"
-	switch ":dfbcell.interrupt==>Stub-:dsiswitch_bottom@[DSI=(1,3)][side=bottom]:dsihc_bottom:v13+:dsiswitch_bottom@[DSI=(1,3)][side=bottom]:dsihc_bottom:v15"
-	switch "Stub-:dsiswitch_bottom@[DSI=(1,3)][side=bottom]:dsihc_bottom:v13+:dsiswitch_bottom@[DSI=(1,3)][side=bottom]:dsihc_bottom:v15==>:interrupt_idmux_28.in_0"
-	switch ":interrupt_idmux_28.interrupt_idmux_28__out==>:interrupt_28.interrupt"
-	term   ":interrupt_28.interrupt"
-end Net_1047
 net Net_1056
 	term   ":udb@[UDB=(0,0)]:pld1:mc3.q"
 	switch ":udb@[UDB=(0,0)]:pld1:mc3.q==>:udb@[UDB=(0,0)]:pld1:output_permute3.q_3"
@@ -939,6 +932,13 @@ net Net_1056
 	switch ":ioport12:inputs2_mux.pin7__pin_input==>:ioport12:pin7.pin_input"
 	term   ":ioport12:pin7.pin_input"
 end Net_1056
+net Net_1061
+	term   ":dfbcell.interrupt"
+	switch ":dfbcell.interrupt==>Stub-:dsiswitch_bottom@[DSI=(1,3)][side=bottom]:dsihc_bottom:v13+:dsiswitch_bottom@[DSI=(1,3)][side=bottom]:dsihc_bottom:v15"
+	switch "Stub-:dsiswitch_bottom@[DSI=(1,3)][side=bottom]:dsihc_bottom:v13+:dsiswitch_bottom@[DSI=(1,3)][side=bottom]:dsihc_bottom:v15==>:interrupt_idmux_28.in_0"
+	switch ":interrupt_idmux_28.interrupt_idmux_28__out==>:interrupt_28.interrupt"
+	term   ":interrupt_28.interrupt"
+end Net_1061
 net \ADC_DelSig:Net_93_local\
 	term   ":clockblockcell.dclk_0"
 	switch ":clockblockcell.dclk_0==>Stub-:dsiswitch_bottom@[DSI=(1,1)][side=bottom]:dsihc_bottom:v33+:dsiswitch_bottom@[DSI=(1,1)][side=bottom]:dsihc_bottom:v35"

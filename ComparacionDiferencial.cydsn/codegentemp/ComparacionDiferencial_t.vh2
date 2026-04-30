@@ -1,5 +1,5 @@
 -- Project:   C:\Github\Tesis\src\psoc\ComparacionDiferencial.cydsn\ComparacionDiferencial.cyprj
--- Generated: 04/28/2026 19:37:47
+-- Generated: 04/29/2026 14:51:14
 -- PSoC Creator  4.4
 
 ENTITY ComparacionDiferencial IS
@@ -43,12 +43,12 @@ ARCHITECTURE __DEFAULT__ OF ComparacionDiferencial IS
     SIGNAL InBP_p(0)__PA : bit;
     SIGNAL Input_n(0)__PA : bit;
     SIGNAL Input_p(0)__PA : bit;
-    SIGNAL Net_1045 : bit;
     SIGNAL Net_1046 : bit;
-    SIGNAL Net_1047 : bit;
     SIGNAL Net_1052 : bit;
     SIGNAL Net_1056 : bit;
     ATTRIBUTE placement_force OF Net_1056 : SIGNAL IS "U(0,0,B)3";
+    SIGNAL Net_1061 : bit;
+    SIGNAL Net_1062 : bit;
     SIGNAL Net_69 : bit;
     SIGNAL PGAout_n(0)__PA : bit;
     SIGNAL PGAout_p(0)__PA : bit;
@@ -2996,16 +2996,16 @@ BEGIN
             in_2 => open,
             out_1 => \Filter:Net_8\,
             out_2 => \Filter:Net_9\,
-            dmareq_1 => Net_1045,
+            dmareq_1 => Net_1062,
             dmareq_2 => Net_1046,
-            interrupt => Net_1047);
+            interrupt => Net_1061);
 
     isr_Filter:interrupt
         GENERIC MAP(
             int_type => "10",
             is_nmi => 0)
         PORT MAP(
-            interrupt => Net_1047,
+            interrupt => Net_1061,
             clock => ClockBlock_BUS_CLK);
 
     \UART_PC:BUART:sTX:TxShifter:u0\:datapathcell
