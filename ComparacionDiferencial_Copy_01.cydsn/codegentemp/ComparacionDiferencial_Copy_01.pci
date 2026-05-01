@@ -1,0 +1,36 @@
+# ComparacionDiferencial_Copy_01
+# 2026-05-01 01:20:04Z
+
+# IO_0@[IOP=(1)][IoId=(0)] is reserved: SWDDebugEnabled
+dont_use_io iocell 1 0
+# IO_1@[IOP=(1)][IoId=(1)] is reserved: SWDDebugEnabled
+dont_use_io iocell 1 1
+# IO_3@[IOP=(1)][IoId=(3)] is reserved: SWDDebugEnabled
+dont_use_io iocell 1 3
+set_io "BPout_p(0)" iocell 0 0
+set_io "ADC_p(0)" iocell 15 4
+set_io "ADC_n(0)" iocell 15 5
+set_io "FDA_n(0)" iocell 0 6
+set_io "FDA_p(0)" iocell 0 7
+set_io "LPout_p(0)" iocell 3 6
+set_io "BPout_n(0)" iocell 0 1
+set_io "LPin_p(0)" iocell 3 2
+set_io "refIn(0)" iocell 0 2
+set_io "BPin_p(0)" iocell 0 5
+set_io "BPin_n(0)" iocell 0 3
+set_io "refOut(0)" iocell 0 4
+set_io "In_n(0)" iocell 3 3
+set_io "In_p(0)" iocell 3 5
+set_io "LPin_n(0)" iocell 3 4
+set_io "LPout_n(0)" iocell 3 7
+set_io "Rx_1(0)" iocell 12 6
+set_io "Tx_1(0)" iocell 12 7
+set_location "\ADC_DelSig:DSM\" dsmodcell -1 -1 0
+set_location "\OpaLP_n:ABuf\" abufcell -1 -1 3
+set_location "\OpaLP_p:ABuf\" abufcell -1 -1 1
+set_location "\OpaBP_n:ABuf\" abufcell -1 -1 0
+set_location "\OpaBP_p:ABuf\" abufcell -1 -1 2
+set_location "\PGA_n_1:SC\" sccell -1 -1 3
+set_location "\PGA_p_1:SC\" sccell -1 -1 1
+set_location "\PGA_n_2:SC\" sccell -1 -1 2
+set_location "\PGA_p_2:SC\" sccell -1 -1 0

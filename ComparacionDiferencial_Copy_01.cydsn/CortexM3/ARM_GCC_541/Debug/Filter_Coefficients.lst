@@ -1,0 +1,898 @@
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccxzQZ8I.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"Filter_Coefficients.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.global	Filter_ChannelAFirCoefficients
+  20              		.section	.rodata
+  21              		.align	2
+  22              		.type	Filter_ChannelAFirCoefficients, %object
+  23              		.size	Filter_ChannelAFirCoefficients, 512
+  24              	Filter_ChannelAFirCoefficients:
+  25 0000 5D       		.byte	93
+  26 0001 04       		.byte	4
+  27 0002 00       		.byte	0
+  28 0003 00       		.byte	0
+  29 0004 7C       		.byte	124
+  30 0005 03       		.byte	3
+  31 0006 00       		.byte	0
+  32 0007 00       		.byte	0
+  33 0008 0C       		.byte	12
+  34 0009 01       		.byte	1
+  35 000a 00       		.byte	0
+  36 000b 00       		.byte	0
+  37 000c 18       		.byte	24
+  38 000d FD       		.byte	-3
+  39 000e FF       		.byte	-1
+  40 000f 00       		.byte	0
+  41 0010 7F       		.byte	127
+  42 0011 F8       		.byte	-8
+  43 0012 FF       		.byte	-1
+  44 0013 00       		.byte	0
+  45 0014 2C       		.byte	44
+  46 0015 F5       		.byte	-11
+  47 0016 FF       		.byte	-1
+  48 0017 00       		.byte	0
+  49 0018 A8       		.byte	-88
+  50 0019 F5       		.byte	-11
+  51 001a FF       		.byte	-1
+  52 001b 00       		.byte	0
+  53 001c DD       		.byte	-35
+  54 001d FB       		.byte	-5
+  55 001e FF       		.byte	-1
+  56 001f 00       		.byte	0
+  57 0020 90       		.byte	-112
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccxzQZ8I.s 			page 2
+
+
+  58 0021 07       		.byte	7
+  59 0022 00       		.byte	0
+  60 0023 00       		.byte	0
+  61 0024 5C       		.byte	92
+  62 0025 15       		.byte	21
+  63 0026 00       		.byte	0
+  64 0027 00       		.byte	0
+  65 0028 13       		.byte	19
+  66 0029 1F       		.byte	31
+  67 002a 00       		.byte	0
+  68 002b 00       		.byte	0
+  69 002c DC       		.byte	-36
+  70 002d 1D       		.byte	29
+  71 002e 00       		.byte	0
+  72 002f 00       		.byte	0
+  73 0030 8C       		.byte	-116
+  74 0031 0D       		.byte	13
+  75 0032 00       		.byte	0
+  76 0033 00       		.byte	0
+  77 0034 EF       		.byte	-17
+  78 0035 EF       		.byte	-17
+  79 0036 FF       		.byte	-1
+  80 0037 00       		.byte	0
+  81 0038 2A       		.byte	42
+  82 0039 CE       		.byte	-50
+  83 003a FF       		.byte	-1
+  84 003b 00       		.byte	0
+  85 003c E4       		.byte	-28
+  86 003d B6       		.byte	-74
+  87 003e FF       		.byte	-1
+  88 003f 00       		.byte	0
+  89 0040 FA       		.byte	-6
+  90 0041 B8       		.byte	-72
+  91 0042 FF       		.byte	-1
+  92 0043 00       		.byte	0
+  93 0044 54       		.byte	84
+  94 0045 DC       		.byte	-36
+  95 0046 FF       		.byte	-1
+  96 0047 00       		.byte	0
+  97 0048 C9       		.byte	-55
+  98 0049 1B       		.byte	27
+  99 004a 00       		.byte	0
+ 100 004b 00       		.byte	0
+ 101 004c 5B       		.byte	91
+ 102 004d 63       		.byte	99
+ 103 004e 00       		.byte	0
+ 104 004f 00       		.byte	0
+ 105 0050 07       		.byte	7
+ 106 0051 95       		.byte	-107
+ 107 0052 00       		.byte	0
+ 108 0053 00       		.byte	0
+ 109 0054 B7       		.byte	-73
+ 110 0055 93       		.byte	-109
+ 111 0056 00       		.byte	0
+ 112 0057 00       		.byte	0
+ 113 0058 F6       		.byte	-10
+ 114 0059 50       		.byte	80
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccxzQZ8I.s 			page 3
+
+
+ 115 005a 00       		.byte	0
+ 116 005b 00       		.byte	0
+ 117 005c B6       		.byte	-74
+ 118 005d D7       		.byte	-41
+ 119 005e FF       		.byte	-1
+ 120 005f 00       		.byte	0
+ 121 0060 62       		.byte	98
+ 122 0061 4E       		.byte	78
+ 123 0062 FF       		.byte	-1
+ 124 0063 00       		.byte	0
+ 125 0064 ED       		.byte	-19
+ 126 0065 EC       		.byte	-20
+ 127 0066 FE       		.byte	-2
+ 128 0067 00       		.byte	0
+ 129 0068 67       		.byte	103
+ 130 0069 E8       		.byte	-24
+ 131 006a FE       		.byte	-2
+ 132 006b 00       		.byte	0
+ 133 006c A0       		.byte	-96
+ 134 006d 5A       		.byte	90
+ 135 006e FF       		.byte	-1
+ 136 006f 00       		.byte	0
+ 137 0070 F5       		.byte	-11
+ 138 0071 2F       		.byte	47
+ 139 0072 00       		.byte	0
+ 140 0073 00       		.byte	0
+ 141 0074 DB       		.byte	-37
+ 142 0075 24       		.byte	36
+ 143 0076 01       		.byte	1
+ 144 0077 00       		.byte	0
+ 145 0078 FA       		.byte	-6
+ 146 0079 D7       		.byte	-41
+ 147 007a 01       		.byte	1
+ 148 007b 00       		.byte	0
+ 149 007c 8E       		.byte	-114
+ 150 007d ED       		.byte	-19
+ 151 007e 01       		.byte	1
+ 152 007f 00       		.byte	0
+ 153 0080 5F       		.byte	95
+ 154 0081 38       		.byte	56
+ 155 0082 01       		.byte	1
+ 156 0083 00       		.byte	0
+ 157 0084 A1       		.byte	-95
+ 158 0085 D7       		.byte	-41
+ 159 0086 FF       		.byte	-1
+ 160 0087 00       		.byte	0
+ 161 0088 56       		.byte	86
+ 162 0089 3A       		.byte	58
+ 163 008a FE       		.byte	-2
+ 164 008b 00       		.byte	0
+ 165 008c 26       		.byte	38
+ 166 008d 01       		.byte	1
+ 167 008e FD       		.byte	-3
+ 168 008f 00       		.byte	0
+ 169 0090 9C       		.byte	-100
+ 170 0091 C4       		.byte	-60
+ 171 0092 FC       		.byte	-4
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccxzQZ8I.s 			page 4
+
+
+ 172 0093 00       		.byte	0
+ 173 0094 F9       		.byte	-7
+ 174 0095 D2       		.byte	-46
+ 175 0096 FD       		.byte	-3
+ 176 0097 00       		.byte	0
+ 177 0098 00       		.byte	0
+ 178 0099 00       		.byte	0
+ 179 009a 00       		.byte	0
+ 180 009b 00       		.byte	0
+ 181 009c BD       		.byte	-67
+ 182 009d 9E       		.byte	-98
+ 183 009e 02       		.byte	2
+ 184 009f 00       		.byte	0
+ 185 00a0 13       		.byte	19
+ 186 00a1 B0       		.byte	-80
+ 187 00a2 04       		.byte	4
+ 188 00a3 00       		.byte	0
+ 189 00a4 A8       		.byte	-88
+ 190 00a5 3C       		.byte	60
+ 191 00a6 05       		.byte	5
+ 192 00a7 00       		.byte	0
+ 193 00a8 F2       		.byte	-14
+ 194 00a9 BC       		.byte	-68
+ 195 00aa 03       		.byte	3
+ 196 00ab 00       		.byte	0
+ 197 00ac E4       		.byte	-28
+ 198 00ad 66       		.byte	102
+ 199 00ae 00       		.byte	0
+ 200 00af 00       		.byte	0
+ 201 00b0 72       		.byte	114
+ 202 00b1 3C       		.byte	60
+ 203 00b2 FC       		.byte	-4
+ 204 00b3 00       		.byte	0
+ 205 00b4 54       		.byte	84
+ 206 00b5 C9       		.byte	-55
+ 207 00b6 F8       		.byte	-8
+ 208 00b7 00       		.byte	0
+ 209 00b8 59       		.byte	89
+ 210 00b9 9C       		.byte	-100
+ 211 00ba F7       		.byte	-9
+ 212 00bb 00       		.byte	0
+ 213 00bc 49       		.byte	73
+ 214 00bd A6       		.byte	-90
+ 215 00be F9       		.byte	-7
+ 216 00bf 00       		.byte	0
+ 217 00c0 02       		.byte	2
+ 218 00c1 BA       		.byte	-70
+ 219 00c2 FE       		.byte	-2
+ 220 00c3 00       		.byte	0
+ 221 00c4 73       		.byte	115
+ 222 00c5 66       		.byte	102
+ 223 00c6 05       		.byte	5
+ 224 00c7 00       		.byte	0
+ 225 00c8 2B       		.byte	43
+ 226 00c9 49       		.byte	73
+ 227 00ca 0B       		.byte	11
+ 228 00cb 00       		.byte	0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccxzQZ8I.s 			page 5
+
+
+ 229 00cc BE       		.byte	-66
+ 230 00cd CE       		.byte	-50
+ 231 00ce 0D       		.byte	13
+ 232 00cf 00       		.byte	0
+ 233 00d0 97       		.byte	-105
+ 234 00d1 2A       		.byte	42
+ 235 00d2 0B       		.byte	11
+ 236 00d3 00       		.byte	0
+ 237 00d4 F9       		.byte	-7
+ 238 00d5 32       		.byte	50
+ 239 00d6 03       		.byte	3
+ 240 00d7 00       		.byte	0
+ 241 00d8 FF       		.byte	-1
+ 242 00d9 CB       		.byte	-53
+ 243 00da F7       		.byte	-9
+ 244 00db 00       		.byte	0
+ 245 00dc D0       		.byte	-48
+ 246 00dd A9       		.byte	-87
+ 247 00de EC       		.byte	-20
+ 248 00df 00       		.byte	0
+ 249 00e0 3B       		.byte	59
+ 250 00e1 67       		.byte	103
+ 251 00e2 E6       		.byte	-26
+ 252 00e3 00       		.byte	0
+ 253 00e4 D3       		.byte	-45
+ 254 00e5 29       		.byte	41
+ 255 00e6 E9       		.byte	-23
+ 256 00e7 00       		.byte	0
+ 257 00e8 99       		.byte	-103
+ 258 00e9 3A       		.byte	58
+ 259 00ea F7       		.byte	-9
+ 260 00eb 00       		.byte	0
+ 261 00ec 7B       		.byte	123
+ 262 00ed 08       		.byte	8
+ 263 00ee 10       		.byte	16
+ 264 00ef 00       		.byte	0
+ 265 00f0 54       		.byte	84
+ 266 00f1 F1       		.byte	-15
+ 267 00f2 2F       		.byte	47
+ 268 00f3 00       		.byte	0
+ 269 00f4 F1       		.byte	-15
+ 270 00f5 F3       		.byte	-13
+ 271 00f6 50       		.byte	80
+ 272 00f7 00       		.byte	0
+ 273 00f8 7B       		.byte	123
+ 274 00f9 24       		.byte	36
+ 275 00fa 6C       		.byte	108
+ 276 00fb 00       		.byte	0
+ 277 00fc 39       		.byte	57
+ 278 00fd 7C       		.byte	124
+ 279 00fe 7B       		.byte	123
+ 280 00ff 00       		.byte	0
+ 281 0100 39       		.byte	57
+ 282 0101 7C       		.byte	124
+ 283 0102 7B       		.byte	123
+ 284 0103 00       		.byte	0
+ 285 0104 7B       		.byte	123
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccxzQZ8I.s 			page 6
+
+
+ 286 0105 24       		.byte	36
+ 287 0106 6C       		.byte	108
+ 288 0107 00       		.byte	0
+ 289 0108 F1       		.byte	-15
+ 290 0109 F3       		.byte	-13
+ 291 010a 50       		.byte	80
+ 292 010b 00       		.byte	0
+ 293 010c 54       		.byte	84
+ 294 010d F1       		.byte	-15
+ 295 010e 2F       		.byte	47
+ 296 010f 00       		.byte	0
+ 297 0110 7B       		.byte	123
+ 298 0111 08       		.byte	8
+ 299 0112 10       		.byte	16
+ 300 0113 00       		.byte	0
+ 301 0114 99       		.byte	-103
+ 302 0115 3A       		.byte	58
+ 303 0116 F7       		.byte	-9
+ 304 0117 00       		.byte	0
+ 305 0118 D3       		.byte	-45
+ 306 0119 29       		.byte	41
+ 307 011a E9       		.byte	-23
+ 308 011b 00       		.byte	0
+ 309 011c 3B       		.byte	59
+ 310 011d 67       		.byte	103
+ 311 011e E6       		.byte	-26
+ 312 011f 00       		.byte	0
+ 313 0120 D0       		.byte	-48
+ 314 0121 A9       		.byte	-87
+ 315 0122 EC       		.byte	-20
+ 316 0123 00       		.byte	0
+ 317 0124 FF       		.byte	-1
+ 318 0125 CB       		.byte	-53
+ 319 0126 F7       		.byte	-9
+ 320 0127 00       		.byte	0
+ 321 0128 F9       		.byte	-7
+ 322 0129 32       		.byte	50
+ 323 012a 03       		.byte	3
+ 324 012b 00       		.byte	0
+ 325 012c 97       		.byte	-105
+ 326 012d 2A       		.byte	42
+ 327 012e 0B       		.byte	11
+ 328 012f 00       		.byte	0
+ 329 0130 BE       		.byte	-66
+ 330 0131 CE       		.byte	-50
+ 331 0132 0D       		.byte	13
+ 332 0133 00       		.byte	0
+ 333 0134 2B       		.byte	43
+ 334 0135 49       		.byte	73
+ 335 0136 0B       		.byte	11
+ 336 0137 00       		.byte	0
+ 337 0138 73       		.byte	115
+ 338 0139 66       		.byte	102
+ 339 013a 05       		.byte	5
+ 340 013b 00       		.byte	0
+ 341 013c 02       		.byte	2
+ 342 013d BA       		.byte	-70
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccxzQZ8I.s 			page 7
+
+
+ 343 013e FE       		.byte	-2
+ 344 013f 00       		.byte	0
+ 345 0140 49       		.byte	73
+ 346 0141 A6       		.byte	-90
+ 347 0142 F9       		.byte	-7
+ 348 0143 00       		.byte	0
+ 349 0144 59       		.byte	89
+ 350 0145 9C       		.byte	-100
+ 351 0146 F7       		.byte	-9
+ 352 0147 00       		.byte	0
+ 353 0148 54       		.byte	84
+ 354 0149 C9       		.byte	-55
+ 355 014a F8       		.byte	-8
+ 356 014b 00       		.byte	0
+ 357 014c 72       		.byte	114
+ 358 014d 3C       		.byte	60
+ 359 014e FC       		.byte	-4
+ 360 014f 00       		.byte	0
+ 361 0150 E4       		.byte	-28
+ 362 0151 66       		.byte	102
+ 363 0152 00       		.byte	0
+ 364 0153 00       		.byte	0
+ 365 0154 F2       		.byte	-14
+ 366 0155 BC       		.byte	-68
+ 367 0156 03       		.byte	3
+ 368 0157 00       		.byte	0
+ 369 0158 A8       		.byte	-88
+ 370 0159 3C       		.byte	60
+ 371 015a 05       		.byte	5
+ 372 015b 00       		.byte	0
+ 373 015c 13       		.byte	19
+ 374 015d B0       		.byte	-80
+ 375 015e 04       		.byte	4
+ 376 015f 00       		.byte	0
+ 377 0160 BD       		.byte	-67
+ 378 0161 9E       		.byte	-98
+ 379 0162 02       		.byte	2
+ 380 0163 00       		.byte	0
+ 381 0164 00       		.byte	0
+ 382 0165 00       		.byte	0
+ 383 0166 00       		.byte	0
+ 384 0167 00       		.byte	0
+ 385 0168 F9       		.byte	-7
+ 386 0169 D2       		.byte	-46
+ 387 016a FD       		.byte	-3
+ 388 016b 00       		.byte	0
+ 389 016c 9C       		.byte	-100
+ 390 016d C4       		.byte	-60
+ 391 016e FC       		.byte	-4
+ 392 016f 00       		.byte	0
+ 393 0170 26       		.byte	38
+ 394 0171 01       		.byte	1
+ 395 0172 FD       		.byte	-3
+ 396 0173 00       		.byte	0
+ 397 0174 56       		.byte	86
+ 398 0175 3A       		.byte	58
+ 399 0176 FE       		.byte	-2
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccxzQZ8I.s 			page 8
+
+
+ 400 0177 00       		.byte	0
+ 401 0178 A1       		.byte	-95
+ 402 0179 D7       		.byte	-41
+ 403 017a FF       		.byte	-1
+ 404 017b 00       		.byte	0
+ 405 017c 5F       		.byte	95
+ 406 017d 38       		.byte	56
+ 407 017e 01       		.byte	1
+ 408 017f 00       		.byte	0
+ 409 0180 8E       		.byte	-114
+ 410 0181 ED       		.byte	-19
+ 411 0182 01       		.byte	1
+ 412 0183 00       		.byte	0
+ 413 0184 FA       		.byte	-6
+ 414 0185 D7       		.byte	-41
+ 415 0186 01       		.byte	1
+ 416 0187 00       		.byte	0
+ 417 0188 DB       		.byte	-37
+ 418 0189 24       		.byte	36
+ 419 018a 01       		.byte	1
+ 420 018b 00       		.byte	0
+ 421 018c F5       		.byte	-11
+ 422 018d 2F       		.byte	47
+ 423 018e 00       		.byte	0
+ 424 018f 00       		.byte	0
+ 425 0190 A0       		.byte	-96
+ 426 0191 5A       		.byte	90
+ 427 0192 FF       		.byte	-1
+ 428 0193 00       		.byte	0
+ 429 0194 67       		.byte	103
+ 430 0195 E8       		.byte	-24
+ 431 0196 FE       		.byte	-2
+ 432 0197 00       		.byte	0
+ 433 0198 ED       		.byte	-19
+ 434 0199 EC       		.byte	-20
+ 435 019a FE       		.byte	-2
+ 436 019b 00       		.byte	0
+ 437 019c 62       		.byte	98
+ 438 019d 4E       		.byte	78
+ 439 019e FF       		.byte	-1
+ 440 019f 00       		.byte	0
+ 441 01a0 B6       		.byte	-74
+ 442 01a1 D7       		.byte	-41
+ 443 01a2 FF       		.byte	-1
+ 444 01a3 00       		.byte	0
+ 445 01a4 F6       		.byte	-10
+ 446 01a5 50       		.byte	80
+ 447 01a6 00       		.byte	0
+ 448 01a7 00       		.byte	0
+ 449 01a8 B7       		.byte	-73
+ 450 01a9 93       		.byte	-109
+ 451 01aa 00       		.byte	0
+ 452 01ab 00       		.byte	0
+ 453 01ac 07       		.byte	7
+ 454 01ad 95       		.byte	-107
+ 455 01ae 00       		.byte	0
+ 456 01af 00       		.byte	0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccxzQZ8I.s 			page 9
+
+
+ 457 01b0 5B       		.byte	91
+ 458 01b1 63       		.byte	99
+ 459 01b2 00       		.byte	0
+ 460 01b3 00       		.byte	0
+ 461 01b4 C9       		.byte	-55
+ 462 01b5 1B       		.byte	27
+ 463 01b6 00       		.byte	0
+ 464 01b7 00       		.byte	0
+ 465 01b8 54       		.byte	84
+ 466 01b9 DC       		.byte	-36
+ 467 01ba FF       		.byte	-1
+ 468 01bb 00       		.byte	0
+ 469 01bc FA       		.byte	-6
+ 470 01bd B8       		.byte	-72
+ 471 01be FF       		.byte	-1
+ 472 01bf 00       		.byte	0
+ 473 01c0 E4       		.byte	-28
+ 474 01c1 B6       		.byte	-74
+ 475 01c2 FF       		.byte	-1
+ 476 01c3 00       		.byte	0
+ 477 01c4 2A       		.byte	42
+ 478 01c5 CE       		.byte	-50
+ 479 01c6 FF       		.byte	-1
+ 480 01c7 00       		.byte	0
+ 481 01c8 EF       		.byte	-17
+ 482 01c9 EF       		.byte	-17
+ 483 01ca FF       		.byte	-1
+ 484 01cb 00       		.byte	0
+ 485 01cc 8C       		.byte	-116
+ 486 01cd 0D       		.byte	13
+ 487 01ce 00       		.byte	0
+ 488 01cf 00       		.byte	0
+ 489 01d0 DC       		.byte	-36
+ 490 01d1 1D       		.byte	29
+ 491 01d2 00       		.byte	0
+ 492 01d3 00       		.byte	0
+ 493 01d4 13       		.byte	19
+ 494 01d5 1F       		.byte	31
+ 495 01d6 00       		.byte	0
+ 496 01d7 00       		.byte	0
+ 497 01d8 5C       		.byte	92
+ 498 01d9 15       		.byte	21
+ 499 01da 00       		.byte	0
+ 500 01db 00       		.byte	0
+ 501 01dc 90       		.byte	-112
+ 502 01dd 07       		.byte	7
+ 503 01de 00       		.byte	0
+ 504 01df 00       		.byte	0
+ 505 01e0 DD       		.byte	-35
+ 506 01e1 FB       		.byte	-5
+ 507 01e2 FF       		.byte	-1
+ 508 01e3 00       		.byte	0
+ 509 01e4 A8       		.byte	-88
+ 510 01e5 F5       		.byte	-11
+ 511 01e6 FF       		.byte	-1
+ 512 01e7 00       		.byte	0
+ 513 01e8 2C       		.byte	44
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccxzQZ8I.s 			page 10
+
+
+ 514 01e9 F5       		.byte	-11
+ 515 01ea FF       		.byte	-1
+ 516 01eb 00       		.byte	0
+ 517 01ec 7F       		.byte	127
+ 518 01ed F8       		.byte	-8
+ 519 01ee FF       		.byte	-1
+ 520 01ef 00       		.byte	0
+ 521 01f0 18       		.byte	24
+ 522 01f1 FD       		.byte	-3
+ 523 01f2 FF       		.byte	-1
+ 524 01f3 00       		.byte	0
+ 525 01f4 0C       		.byte	12
+ 526 01f5 01       		.byte	1
+ 527 01f6 00       		.byte	0
+ 528 01f7 00       		.byte	0
+ 529 01f8 7C       		.byte	124
+ 530 01f9 03       		.byte	3
+ 531 01fa 00       		.byte	0
+ 532 01fb 00       		.byte	0
+ 533 01fc 5D       		.byte	93
+ 534 01fd 04       		.byte	4
+ 535 01fe 00       		.byte	0
+ 536 01ff 00       		.byte	0
+ 537              		.text
+ 538              	.Letext0:
+ 539              		.file 1 "Generated_Source\\PSoC5\\cytypes.h"
+ 540              		.file 2 "Generated_Source\\PSoC5\\Filter_Coefficients.c"
+ 541              		.section	.debug_info,"",%progbits
+ 542              	.Ldebug_info0:
+ 543 0000 BB000000 		.4byte	0xbb
+ 544 0004 0400     		.2byte	0x4
+ 545 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 546 000a 04       		.byte	0x4
+ 547 000b 01       		.uleb128 0x1
+ 548 000c 1B000000 		.4byte	.LASF14
+ 549 0010 0C       		.byte	0xc
+ 550 0011 9C010000 		.4byte	.LASF15
+ 551 0015 DE000000 		.4byte	.LASF16
+ 552 0019 00000000 		.4byte	.Ldebug_line0
+ 553 001d 02       		.uleb128 0x2
+ 554 001e 04       		.byte	0x4
+ 555 001f 05       		.byte	0x5
+ 556 0020 696E7400 		.ascii	"int\000"
+ 557 0024 03       		.uleb128 0x3
+ 558 0025 04       		.byte	0x4
+ 559 0026 07       		.byte	0x7
+ 560 0027 0E000000 		.4byte	.LASF0
+ 561 002b 03       		.uleb128 0x3
+ 562 002c 08       		.byte	0x8
+ 563 002d 05       		.byte	0x5
+ 564 002e 00000000 		.4byte	.LASF1
+ 565 0032 03       		.uleb128 0x3
+ 566 0033 08       		.byte	0x8
+ 567 0034 04       		.byte	0x4
+ 568 0035 5E010000 		.4byte	.LASF2
+ 569 0039 03       		.uleb128 0x3
+ 570 003a 01       		.byte	0x1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccxzQZ8I.s 			page 11
+
+
+ 571 003b 06       		.byte	0x6
+ 572 003c 52010000 		.4byte	.LASF3
+ 573 0040 03       		.uleb128 0x3
+ 574 0041 01       		.byte	0x1
+ 575 0042 08       		.byte	0x8
+ 576 0043 1C010000 		.4byte	.LASF4
+ 577 0047 03       		.uleb128 0x3
+ 578 0048 02       		.byte	0x2
+ 579 0049 05       		.byte	0x5
+ 580 004a 6A010000 		.4byte	.LASF5
+ 581 004e 03       		.uleb128 0x3
+ 582 004f 02       		.byte	0x2
+ 583 0050 07       		.byte	0x7
+ 584 0051 3F010000 		.4byte	.LASF6
+ 585 0055 03       		.uleb128 0x3
+ 586 0056 04       		.byte	0x4
+ 587 0057 05       		.byte	0x5
+ 588 0058 2F010000 		.4byte	.LASF7
+ 589 005c 03       		.uleb128 0x3
+ 590 005d 04       		.byte	0x4
+ 591 005e 07       		.byte	0x7
+ 592 005f AF000000 		.4byte	.LASF8
+ 593 0063 03       		.uleb128 0x3
+ 594 0064 08       		.byte	0x8
+ 595 0065 07       		.byte	0x7
+ 596 0066 C1000000 		.4byte	.LASF9
+ 597 006a 03       		.uleb128 0x3
+ 598 006b 04       		.byte	0x4
+ 599 006c 07       		.byte	0x7
+ 600 006d 93010000 		.4byte	.LASF10
+ 601 0071 03       		.uleb128 0x3
+ 602 0072 01       		.byte	0x1
+ 603 0073 08       		.byte	0x8
+ 604 0074 2A010000 		.4byte	.LASF11
+ 605 0078 04       		.uleb128 0x4
+ 606 0079 A9000000 		.4byte	.LASF17
+ 607 007d 01       		.byte	0x1
+ 608 007e E901     		.2byte	0x1e9
+ 609 0080 40000000 		.4byte	0x40
+ 610 0084 03       		.uleb128 0x3
+ 611 0085 04       		.byte	0x4
+ 612 0086 04       		.byte	0x4
+ 613 0087 D8000000 		.4byte	.LASF12
+ 614 008b 03       		.uleb128 0x3
+ 615 008c 08       		.byte	0x8
+ 616 008d 04       		.byte	0x4
+ 617 008e 38010000 		.4byte	.LASF13
+ 618 0092 05       		.uleb128 0x5
+ 619 0093 A3000000 		.4byte	0xa3
+ 620 0097 A3000000 		.4byte	0xa3
+ 621 009b 06       		.uleb128 0x6
+ 622 009c 6A000000 		.4byte	0x6a
+ 623 00a0 FF01     		.2byte	0x1ff
+ 624 00a2 00       		.byte	0
+ 625 00a3 07       		.uleb128 0x7
+ 626 00a4 78000000 		.4byte	0x78
+ 627 00a8 08       		.uleb128 0x8
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccxzQZ8I.s 			page 12
+
+
+ 628 00a9 74010000 		.4byte	.LASF18
+ 629 00ad 02       		.byte	0x2
+ 630 00ae 11       		.byte	0x11
+ 631 00af B9000000 		.4byte	0xb9
+ 632 00b3 05       		.uleb128 0x5
+ 633 00b4 03       		.byte	0x3
+ 634 00b5 00000000 		.4byte	Filter_ChannelAFirCoefficients
+ 635 00b9 07       		.uleb128 0x7
+ 636 00ba 92000000 		.4byte	0x92
+ 637 00be 00       		.byte	0
+ 638              		.section	.debug_abbrev,"",%progbits
+ 639              	.Ldebug_abbrev0:
+ 640 0000 01       		.uleb128 0x1
+ 641 0001 11       		.uleb128 0x11
+ 642 0002 01       		.byte	0x1
+ 643 0003 25       		.uleb128 0x25
+ 644 0004 0E       		.uleb128 0xe
+ 645 0005 13       		.uleb128 0x13
+ 646 0006 0B       		.uleb128 0xb
+ 647 0007 03       		.uleb128 0x3
+ 648 0008 0E       		.uleb128 0xe
+ 649 0009 1B       		.uleb128 0x1b
+ 650 000a 0E       		.uleb128 0xe
+ 651 000b 10       		.uleb128 0x10
+ 652 000c 17       		.uleb128 0x17
+ 653 000d 00       		.byte	0
+ 654 000e 00       		.byte	0
+ 655 000f 02       		.uleb128 0x2
+ 656 0010 24       		.uleb128 0x24
+ 657 0011 00       		.byte	0
+ 658 0012 0B       		.uleb128 0xb
+ 659 0013 0B       		.uleb128 0xb
+ 660 0014 3E       		.uleb128 0x3e
+ 661 0015 0B       		.uleb128 0xb
+ 662 0016 03       		.uleb128 0x3
+ 663 0017 08       		.uleb128 0x8
+ 664 0018 00       		.byte	0
+ 665 0019 00       		.byte	0
+ 666 001a 03       		.uleb128 0x3
+ 667 001b 24       		.uleb128 0x24
+ 668 001c 00       		.byte	0
+ 669 001d 0B       		.uleb128 0xb
+ 670 001e 0B       		.uleb128 0xb
+ 671 001f 3E       		.uleb128 0x3e
+ 672 0020 0B       		.uleb128 0xb
+ 673 0021 03       		.uleb128 0x3
+ 674 0022 0E       		.uleb128 0xe
+ 675 0023 00       		.byte	0
+ 676 0024 00       		.byte	0
+ 677 0025 04       		.uleb128 0x4
+ 678 0026 16       		.uleb128 0x16
+ 679 0027 00       		.byte	0
+ 680 0028 03       		.uleb128 0x3
+ 681 0029 0E       		.uleb128 0xe
+ 682 002a 3A       		.uleb128 0x3a
+ 683 002b 0B       		.uleb128 0xb
+ 684 002c 3B       		.uleb128 0x3b
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccxzQZ8I.s 			page 13
+
+
+ 685 002d 05       		.uleb128 0x5
+ 686 002e 49       		.uleb128 0x49
+ 687 002f 13       		.uleb128 0x13
+ 688 0030 00       		.byte	0
+ 689 0031 00       		.byte	0
+ 690 0032 05       		.uleb128 0x5
+ 691 0033 01       		.uleb128 0x1
+ 692 0034 01       		.byte	0x1
+ 693 0035 49       		.uleb128 0x49
+ 694 0036 13       		.uleb128 0x13
+ 695 0037 01       		.uleb128 0x1
+ 696 0038 13       		.uleb128 0x13
+ 697 0039 00       		.byte	0
+ 698 003a 00       		.byte	0
+ 699 003b 06       		.uleb128 0x6
+ 700 003c 21       		.uleb128 0x21
+ 701 003d 00       		.byte	0
+ 702 003e 49       		.uleb128 0x49
+ 703 003f 13       		.uleb128 0x13
+ 704 0040 2F       		.uleb128 0x2f
+ 705 0041 05       		.uleb128 0x5
+ 706 0042 00       		.byte	0
+ 707 0043 00       		.byte	0
+ 708 0044 07       		.uleb128 0x7
+ 709 0045 26       		.uleb128 0x26
+ 710 0046 00       		.byte	0
+ 711 0047 49       		.uleb128 0x49
+ 712 0048 13       		.uleb128 0x13
+ 713 0049 00       		.byte	0
+ 714 004a 00       		.byte	0
+ 715 004b 08       		.uleb128 0x8
+ 716 004c 34       		.uleb128 0x34
+ 717 004d 00       		.byte	0
+ 718 004e 03       		.uleb128 0x3
+ 719 004f 0E       		.uleb128 0xe
+ 720 0050 3A       		.uleb128 0x3a
+ 721 0051 0B       		.uleb128 0xb
+ 722 0052 3B       		.uleb128 0x3b
+ 723 0053 0B       		.uleb128 0xb
+ 724 0054 49       		.uleb128 0x49
+ 725 0055 13       		.uleb128 0x13
+ 726 0056 3F       		.uleb128 0x3f
+ 727 0057 19       		.uleb128 0x19
+ 728 0058 02       		.uleb128 0x2
+ 729 0059 18       		.uleb128 0x18
+ 730 005a 00       		.byte	0
+ 731 005b 00       		.byte	0
+ 732 005c 00       		.byte	0
+ 733              		.section	.debug_aranges,"",%progbits
+ 734 0000 14000000 		.4byte	0x14
+ 735 0004 0200     		.2byte	0x2
+ 736 0006 00000000 		.4byte	.Ldebug_info0
+ 737 000a 04       		.byte	0x4
+ 738 000b 00       		.byte	0
+ 739 000c 0000     		.2byte	0
+ 740 000e 0000     		.2byte	0
+ 741 0010 00000000 		.4byte	0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccxzQZ8I.s 			page 14
+
+
+ 742 0014 00000000 		.4byte	0
+ 743              		.section	.debug_line,"",%progbits
+ 744              	.Ldebug_line0:
+ 745 0000 56000000 		.section	.debug_str,"MS",%progbits,1
+ 745      02005000 
+ 745      00000201 
+ 745      FB0E0D00 
+ 745      01010101 
+ 746              	.LASF1:
+ 747 0000 6C6F6E67 		.ascii	"long long int\000"
+ 747      206C6F6E 
+ 747      6720696E 
+ 747      7400
+ 748              	.LASF0:
+ 749 000e 756E7369 		.ascii	"unsigned int\000"
+ 749      676E6564 
+ 749      20696E74 
+ 749      00
+ 750              	.LASF14:
+ 751 001b 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 751      43313120 
+ 751      352E342E 
+ 751      31203230 
+ 751      31363036 
+ 752 004e 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"
+ 752      20726576 
+ 752      6973696F 
+ 752      6E203233 
+ 752      37373135 
+ 753 0081 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 753      66756E63 
+ 753      74696F6E 
+ 753      2D736563 
+ 753      74696F6E 
+ 754              	.LASF17:
+ 755 00a9 75696E74 		.ascii	"uint8\000"
+ 755      3800
+ 756              	.LASF8:
+ 757 00af 6C6F6E67 		.ascii	"long unsigned int\000"
+ 757      20756E73 
+ 757      69676E65 
+ 757      6420696E 
+ 757      7400
+ 758              	.LASF9:
+ 759 00c1 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 759      206C6F6E 
+ 759      6720756E 
+ 759      7369676E 
+ 759      65642069 
+ 760              	.LASF12:
+ 761 00d8 666C6F61 		.ascii	"float\000"
+ 761      7400
+ 762              	.LASF16:
+ 763 00de 433A5C47 		.ascii	"C:\\Github\\Tesis\\src\\psoc\\ComparacionDiferencia"
+ 763      69746875 
+ 763      625C5465 
+ 763      7369735C 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccxzQZ8I.s 			page 15
+
+
+ 763      7372635C 
+ 764 010c 6C5F436F 		.ascii	"l_Copy_01.cydsn\000"
+ 764      70795F30 
+ 764      312E6379 
+ 764      64736E00 
+ 765              	.LASF4:
+ 766 011c 756E7369 		.ascii	"unsigned char\000"
+ 766      676E6564 
+ 766      20636861 
+ 766      7200
+ 767              	.LASF11:
+ 768 012a 63686172 		.ascii	"char\000"
+ 768      00
+ 769              	.LASF7:
+ 770 012f 6C6F6E67 		.ascii	"long int\000"
+ 770      20696E74 
+ 770      00
+ 771              	.LASF13:
+ 772 0138 646F7562 		.ascii	"double\000"
+ 772      6C6500
+ 773              	.LASF6:
+ 774 013f 73686F72 		.ascii	"short unsigned int\000"
+ 774      7420756E 
+ 774      7369676E 
+ 774      65642069 
+ 774      6E7400
+ 775              	.LASF3:
+ 776 0152 7369676E 		.ascii	"signed char\000"
+ 776      65642063 
+ 776      68617200 
+ 777              	.LASF2:
+ 778 015e 6C6F6E67 		.ascii	"long double\000"
+ 778      20646F75 
+ 778      626C6500 
+ 779              	.LASF5:
+ 780 016a 73686F72 		.ascii	"short int\000"
+ 780      7420696E 
+ 780      7400
+ 781              	.LASF18:
+ 782 0174 46696C74 		.ascii	"Filter_ChannelAFirCoefficients\000"
+ 782      65725F43 
+ 782      68616E6E 
+ 782      656C4146 
+ 782      6972436F 
+ 783              	.LASF10:
+ 784 0193 73697A65 		.ascii	"sizetype\000"
+ 784      74797065 
+ 784      00
+ 785              	.LASF15:
+ 786 019c 47656E65 		.ascii	"Generated_Source\\PSoC5\\Filter_Coefficients.c\000"
+ 786      72617465 
+ 786      645F536F 
+ 786      75726365 
+ 786      5C50536F 
+ 787              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran
