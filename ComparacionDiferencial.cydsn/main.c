@@ -117,7 +117,7 @@ int main(void)
             g_filter_ready = 0u;
             CyExitCriticalSection(saved);
 
-            notch_out = fir_notch(flt);
+            //notch_out = fir_notch(flt);
 
             pkt[0] = 0x56u;
             pkt[1] = 0x00u;
@@ -130,9 +130,9 @@ int main(void)
                 dbg_cnt = (dbg_cnt + 1u) & 0x00FFFFFFu;
             }
 #else
-            pkt[2] = (uint8)((notch_out >> 16) & 0xFFu);
-            pkt[3] = (uint8)((notch_out >>  8) & 0xFFu);
-            pkt[4] = (uint8)( notch_out        & 0xFFu);
+            pkt[2] = (uint8)((ds >> 16) & 0xFFu);
+            pkt[3] = (uint8)((ds >>  8) & 0xFFu);
+            pkt[4] = (uint8)(ds       & 0xFFu);
 #endif
             UART_PC_PutArray(pkt, 5u);
 

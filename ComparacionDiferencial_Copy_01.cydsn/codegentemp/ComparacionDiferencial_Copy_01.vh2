@@ -2,7 +2,7 @@
 --	Conversion of ComparacionDiferencial_Copy_01.v to vh2:
 --
 --	Cypress Semiconductor - WARP Version 6.3 IR 41
---	Thu Apr 30 22:20:01 2026
+--	Mon May 04 21:02:52 2026
 --
 
 USE cypress.cypress.all;
@@ -163,8 +163,8 @@ SIGNAL tmpIO_0__In_p_net_0 : bit;
 TERMINAL tmpSIOVREF__In_p_net_0 : bit;
 TERMINAL Net_1190 : bit;
 SIGNAL tmpINTERRUPT_0__In_p_net_0 : bit;
-TERMINAL Net_778 : bit;
 TERMINAL Net_777 : bit;
+TERMINAL Net_778 : bit;
 TERMINAL \PGA_n_1:Net_17\ : bit;
 SIGNAL \PGA_n_1:Net_37\ : bit;
 SIGNAL \PGA_n_1:Net_40\ : bit;
@@ -1009,7 +1009,7 @@ ADC_n:cy_psoc3_pins_v1_10
 		id=>"ac3f5e87-ab78-49da-9484-ce1001bd2697/edd15f43-b66b-457b-be3a-5342345270c8",
 		source_clock_id=>"61737EF6-3B74-48f9-8B91-F7473A442AE7",
 		divisor=>0,
-		period=>"976562500",
+		period=>"651041666.666667",
 		is_direct=>'0',
 		is_digital=>'0')
 	PORT MAP(clock_out=>\ADC_DelSig:Net_488\,
@@ -1927,16 +1927,16 @@ R_3:cy_annotation_universal_v1_0
 		port_names=>"T1, T2",
 		width=>2)
 	PORT MAP(connect=>(Net_1212, Net_1190));
-C_5:cy_annotation_universal_v1_0
-	GENERIC MAP(comp_name=>"Capacitor_v1_0",
+R_20:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Resistor_v1_0",
 		port_names=>"T1, T2",
 		width=>2)
-	PORT MAP(connect=>(Net_1190, Net_778));
-C_6:cy_annotation_universal_v1_0
-	GENERIC MAP(comp_name=>"Capacitor_v1_0",
+	PORT MAP(connect=>(Net_777, Net_1189));
+R_19:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Resistor_v1_0",
 		port_names=>"T1, T2",
 		width=>2)
-	PORT MAP(connect=>(Net_1189, Net_777));
+	PORT MAP(connect=>(Net_778, Net_1190));
 \PGA_n_1:SC\:cy_psoc3_scblock_v1_0
 	GENERIC MAP(cy_registers=>"")
 	PORT MAP(vref=>\PGA_n_1:Net_17\,

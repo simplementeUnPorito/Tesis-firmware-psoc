@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 1
 
 
    1              		.syntax unified
@@ -58,7 +58,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 1
   28:main.c        **** 
   29:main.c        **** /*
   30:main.c        ****  * DEBUG = 1: envia rampa 0,1,2,3... en vez de datos reales.
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 2
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 2
 
 
   31:main.c        ****  *   - Si MATLAB muestra una rampa suave → byte order y alineacion correctos.
@@ -118,7 +118,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 1
   51:main.c        **** {
   62              		.loc 1 51 0
   63              		.cfi_startproc
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 3
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 3
 
 
   64              		@ args = 0, pretend = 0, frame = 0
@@ -178,7 +178,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 1
   67:main.c        ****     for (i = 0u; i <= (uint16)FILTER_ORDER; i++)
   68:main.c        ****     {
   69:main.c        ****         acc += (double)fir_buf[idx] * filter_coeffs[i];
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 4
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 4
 
 
   70:main.c        ****         idx = (idx == 0u) ? (uint16)FILTER_ORDER : (idx - 1u);
@@ -194,14 +194,13 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 1
  104              		.cfi_startproc
  105              		@ args = 0, pretend = 0, frame = 8
  106              		@ frame_needed = 0, uses_anonymous_args = 0
- 107 0000 70B5     		push	{r4, r5, r6, lr}
- 108              		.cfi_def_cfa_offset 16
- 109              		.cfi_offset 4, -16
- 110              		.cfi_offset 5, -12
- 111              		.cfi_offset 6, -8
- 112              		.cfi_offset 14, -4
- 113 0002 82B0     		sub	sp, sp, #8
- 114              		.cfi_def_cfa_offset 24
+ 107 0000 30B5     		push	{r4, r5, lr}
+ 108              		.cfi_def_cfa_offset 12
+ 109              		.cfi_offset 4, -12
+ 110              		.cfi_offset 5, -8
+ 111              		.cfi_offset 14, -4
+ 112 0002 83B0     		sub	sp, sp, #12
+ 113              		.cfi_def_cfa_offset 24
   79:main.c        ****     static uint16 hb_count = 0u;
   80:main.c        ****     uint8  pkt[5u];
   81:main.c        ****     int32  notch_out;
@@ -209,2450 +208,2452 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 1
   83:main.c        ****     uint8  saved;
   84:main.c        **** 
   85:main.c        ****     CyGlobalIntEnable;
- 115              		.loc 1 85 0
- 116              		.syntax unified
- 117              	@ 85 "main.c" 1
- 118 0004 62B6     		CPSIE   i
- 119              	@ 0 "" 2
+ 114              		.loc 1 85 0
+ 115              		.syntax unified
+ 116              	@ 85 "main.c" 1
+ 117 0004 62B6     		CPSIE   i
+ 118              	@ 0 "" 2
   86:main.c        **** 
   87:main.c        ****     UART_PC_Start();
- 120              		.loc 1 87 0
- 121              		.thumb
- 122              		.syntax unified
- 123 0006 FFF7FEFF 		bl	UART_PC_Start
- 124              	.LVL4:
+ 119              		.loc 1 87 0
+ 120              		.thumb
+ 121              		.syntax unified
+ 122 0006 FFF7FEFF 		bl	UART_PC_Start
+ 123              	.LVL4:
   88:main.c        **** 
   89:main.c        ****     /* Front-end analogico diferencial */
   90:main.c        ****     PGA_p_1_Start();
- 125              		.loc 1 90 0
- 126 000a FFF7FEFF 		bl	PGA_p_1_Start
- 127              	.LVL5:
+ 124              		.loc 1 90 0
+ 125 000a FFF7FEFF 		bl	PGA_p_1_Start
+ 126              	.LVL5:
   91:main.c        ****     PGA_p_2_Start();
- 128              		.loc 1 91 0
- 129 000e FFF7FEFF 		bl	PGA_p_2_Start
- 130              	.LVL6:
+ 127              		.loc 1 91 0
+ 128 000e FFF7FEFF 		bl	PGA_p_2_Start
+ 129              	.LVL6:
   92:main.c        ****     
   93:main.c        ****     PGA_n_1_Start();
- 131              		.loc 1 93 0
- 132 0012 FFF7FEFF 		bl	PGA_n_1_Start
- 133              	.LVL7:
+ 130              		.loc 1 93 0
+ 131 0012 FFF7FEFF 		bl	PGA_n_1_Start
+ 132              	.LVL7:
   94:main.c        ****     PGA_n_2_Start();
- 134              		.loc 1 94 0
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 5
+ 133              		.loc 1 94 0
+ 134 0016 FFF7FEFF 		bl	PGA_n_2_Start
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 5
 
 
- 135 0016 FFF7FEFF 		bl	PGA_n_2_Start
- 136              	.LVL8:
+ 135              	.LVL8:
   95:main.c        ****     
   96:main.c        ****     
   97:main.c        ****     OpaBP_p_Start();
- 137              		.loc 1 97 0
- 138 001a FFF7FEFF 		bl	OpaBP_p_Start
- 139              	.LVL9:
+ 136              		.loc 1 97 0
+ 137 001a FFF7FEFF 		bl	OpaBP_p_Start
+ 138              	.LVL9:
   98:main.c        ****     OpaBP_n_Start();
- 140              		.loc 1 98 0
- 141 001e FFF7FEFF 		bl	OpaBP_n_Start
- 142              	.LVL10:
+ 139              		.loc 1 98 0
+ 140 001e FFF7FEFF 		bl	OpaBP_n_Start
+ 141              	.LVL10:
   99:main.c        ****     
  100:main.c        ****     OpaLP_p_Start();
- 143              		.loc 1 100 0
- 144 0022 FFF7FEFF 		bl	OpaLP_p_Start
- 145              	.LVL11:
+ 142              		.loc 1 100 0
+ 143 0022 FFF7FEFF 		bl	OpaLP_p_Start
+ 144              	.LVL11:
  101:main.c        ****     OpaLP_n_Start();
- 146              		.loc 1 101 0
- 147 0026 FFF7FEFF 		bl	OpaLP_n_Start
- 148              	.LVL12:
+ 145              		.loc 1 101 0
+ 146 0026 FFF7FEFF 		bl	OpaLP_n_Start
+ 147              	.LVL12:
  102:main.c        **** 
  103:main.c        ****     /* Filter DFB */
  104:main.c        ****     Filter_Start();
- 149              		.loc 1 104 0
- 150 002a FFF7FEFF 		bl	Filter_Start
- 151              	.LVL13:
+ 148              		.loc 1 104 0
+ 149 002a FFF7FEFF 		bl	Filter_Start
+ 150              	.LVL13:
  105:main.c        ****     Filter_SetCoherency(Filter_CHANNEL_A, Filter_KEY_LOW);
- 152              		.loc 1 105 0
- 153 002e 0021     		movs	r1, #0
- 154 0030 0846     		mov	r0, r1
- 155 0032 FFF7FEFF 		bl	Filter_SetCoherency
- 156              	.LVL14:
+ 151              		.loc 1 105 0
+ 152 002e 0021     		movs	r1, #0
+ 153 0030 0846     		mov	r0, r1
+ 154 0032 FFF7FEFF 		bl	Filter_SetCoherency
+ 155              	.LVL14:
  106:main.c        ****     Filter_SetDalign(Filter_STAGEA_DALIGN, 0u);
- 157              		.loc 1 106 0
- 158 0036 0021     		movs	r1, #0
- 159 0038 0120     		movs	r0, #1
- 160 003a FFF7FEFF 		bl	Filter_SetDalign
- 161              	.LVL15:
+ 156              		.loc 1 106 0
+ 157 0036 0021     		movs	r1, #0
+ 158 0038 0120     		movs	r0, #1
+ 159 003a FFF7FEFF 		bl	Filter_SetDalign
+ 160              	.LVL15:
  107:main.c        ****     Filter_SetDalign(Filter_HOLDA_DALIGN,  0u);
- 162              		.loc 1 107 0
- 163 003e 0021     		movs	r1, #0
- 164 0040 0420     		movs	r0, #4
- 165 0042 FFF7FEFF 		bl	Filter_SetDalign
- 166              	.LVL16:
+ 161              		.loc 1 107 0
+ 162 003e 0021     		movs	r1, #0
+ 163 0040 0420     		movs	r0, #4
+ 164 0042 FFF7FEFF 		bl	Filter_SetDalign
+ 165              	.LVL16:
  108:main.c        **** 
  109:main.c        ****     /* ADC_DelSig — modo Continuous */
  110:main.c        ****     ADC_DelSig_Start();
- 167              		.loc 1 110 0
- 168 0046 FFF7FEFF 		bl	ADC_DelSig_Start
- 169              	.LVL17:
+ 166              		.loc 1 110 0
+ 167 0046 FFF7FEFF 		bl	ADC_DelSig_Start
+ 168              	.LVL17:
  111:main.c        ****     ADC_DelSig_StartConvert();
- 170              		.loc 1 111 0
- 171 004a FFF7FEFF 		bl	ADC_DelSig_StartConvert
- 172              	.LVL18:
+ 169              		.loc 1 111 0
+ 170 004a FFF7FEFF 		bl	ADC_DelSig_StartConvert
+ 171              	.LVL18:
  112:main.c        ****     isr_DelSig_StartEx(isr_DelSigReady);
- 173              		.loc 1 112 0
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 6
+ 172              		.loc 1 112 0
+ 173 004e 2248     		ldr	r0, .L16
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 6
 
 
- 174 004e 2048     		ldr	r0, .L16
- 175 0050 FFF7FEFF 		bl	isr_DelSig_StartEx
- 176              	.LVL19:
+ 174 0050 FFF7FEFF 		bl	isr_DelSig_StartEx
+ 175              	.LVL19:
  113:main.c        ****     isr_Filter_StartEx(isr_FilterReady);
- 177              		.loc 1 113 0
- 178 0054 1F48     		ldr	r0, .L16+4
- 179 0056 FFF7FEFF 		bl	isr_Filter_StartEx
- 180              	.LVL20:
- 181              	.L12:
+ 176              		.loc 1 113 0
+ 177 0054 2148     		ldr	r0, .L16+4
+ 178 0056 FFF7FEFF 		bl	isr_Filter_StartEx
+ 179              	.LVL20:
+ 180              	.L12:
  114:main.c        **** 
  115:main.c        ****     for(;;)
  116:main.c        ****     {
  117:main.c        ****         if (g_filter_ready)
- 182              		.loc 1 117 0
- 183 005a 1F4B     		ldr	r3, .L16+8
- 184 005c 1B7A     		ldrb	r3, [r3, #8]	@ zero_extendqisi2
- 185 005e 13F0FF0F 		tst	r3, #255
- 186 0062 FAD0     		beq	.L12
+ 181              		.loc 1 117 0
+ 182 005a 214B     		ldr	r3, .L16+8
+ 183 005c 1B7A     		ldrb	r3, [r3, #8]	@ zero_extendqisi2
+ 184 005e 13F0FF0F 		tst	r3, #255
+ 185 0062 FAD0     		beq	.L12
  118:main.c        ****         {
  119:main.c        ****             saved = CyEnterCriticalSection();
- 187              		.loc 1 119 0
- 188 0064 FFF7FEFF 		bl	CyEnterCriticalSection
- 189              	.LVL21:
+ 186              		.loc 1 119 0
+ 187 0064 FFF7FEFF 		bl	CyEnterCriticalSection
+ 188              	.LVL21:
  120:main.c        ****             flt            = g_flt;
- 190              		.loc 1 120 0
- 191 0068 1B4C     		ldr	r4, .L16+8
- 192 006a 6568     		ldr	r5, [r4, #4]
- 193              	.LVL22:
+ 189              		.loc 1 120 0
+ 190 0068 1D4C     		ldr	r4, .L16+8
+ 191 006a 6368     		ldr	r3, [r4, #4]
  121:main.c        ****             g_filter_ready = 0u;
- 194              		.loc 1 121 0
- 195 006c 0026     		movs	r6, #0
- 196 006e 2672     		strb	r6, [r4, #8]
+ 192              		.loc 1 121 0
+ 193 006c 0025     		movs	r5, #0
+ 194 006e 2572     		strb	r5, [r4, #8]
  122:main.c        ****             CyExitCriticalSection(saved);
- 197              		.loc 1 122 0
- 198 0070 FFF7FEFF 		bl	CyExitCriticalSection
- 199              	.LVL23:
+ 195              		.loc 1 122 0
+ 196 0070 FFF7FEFF 		bl	CyExitCriticalSection
+ 197              	.LVL22:
  123:main.c        **** 
  124:main.c        ****             //notch_out = fir_notch(flt);
  125:main.c        **** 
  126:main.c        ****             pkt[0] = 0x56u;
- 200              		.loc 1 126 0
- 201 0074 5623     		movs	r3, #86
- 202 0076 8DF80030 		strb	r3, [sp]
+ 198              		.loc 1 126 0
+ 199 0074 5623     		movs	r3, #86
+ 200 0076 8DF80030 		strb	r3, [sp]
  127:main.c        ****             pkt[1] = 0x00u;
- 203              		.loc 1 127 0
- 204 007a 8DF80160 		strb	r6, [sp, #1]
+ 201              		.loc 1 127 0
+ 202 007a 8DF80150 		strb	r5, [sp, #1]
  128:main.c        **** #if DEBUG
  129:main.c        ****             {
  130:main.c        ****                 static uint32 dbg_cnt = 0u;
  131:main.c        ****                 pkt[2] = (uint8)((dbg_cnt >> 16) & 0xFFu);
- 132:main.c        ****                 pkt[3] = (uint8)((dbg_cnt >>  8) & 0xFFu);
+ 132:main.c        ****                 pkt[3] = (uint8)((d7vbg_cnt >>  8) & 0xFFu);
  133:main.c        ****                 pkt[4] = (uint8)( dbg_cnt        & 0xFFu);
  134:main.c        ****                 dbg_cnt = (dbg_cnt + 1u) & 0x00FFFFFFu;
  135:main.c        ****             }
  136:main.c        **** #else
- 137:main.c        ****             pkt[2] = (uint8)((flt >> 16) & 0xFFu);
- 205              		.loc 1 137 0
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 7
+ 137:main.c        ****             pkt[2] = (uint8)((ds>> 16) & 0xFFu);
+ 203              		.loc 1 137 0
+ 204 007e 2368     		ldr	r3, [r4]
+ 205 0080 C3F30743 		ubfx	r3, r3, #16, #8
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 7
 
 
- 206 007e C5F30743 		ubfx	r3, r5, #16, #8
- 207 0082 8DF80230 		strb	r3, [sp, #2]
- 138:main.c        ****             pkt[3] = (uint8)((flt >>  8) & 0xFFu);
- 208              		.loc 1 138 0
- 209 0086 C5F30723 		ubfx	r3, r5, #8, #8
- 210 008a 8DF80330 		strb	r3, [sp, #3]
- 139:main.c        ****             pkt[4] = (uint8)( flt        & 0xFFu);
+ 206 0084 8DF80230 		strb	r3, [sp, #2]
+ 138:main.c        ****             pkt[3] = (uint8)((ds >>  8) & 0xFFu);
+ 207              		.loc 1 138 0
+ 208 0088 2368     		ldr	r3, [r4]
+ 209 008a C3F30723 		ubfx	r3, r3, #8, #8
+ 210 008e 8DF80330 		strb	r3, [sp, #3]
+ 139:main.c        ****             pkt[4] = (uint8)(ds & 0xFFu);
  211              		.loc 1 139 0
- 212 008e 8DF80450 		strb	r5, [sp, #4]
+ 212 0092 2368     		ldr	r3, [r4]
+ 213 0094 8DF80430 		strb	r3, [sp, #4]
  140:main.c        **** #endif
  141:main.c        ****             UART_PC_PutArray(pkt, 5u);
- 213              		.loc 1 141 0
- 214 0092 0521     		movs	r1, #5
- 215 0094 6846     		mov	r0, sp
- 216 0096 FFF7FEFF 		bl	UART_PC_PutArray
- 217              	.LVL24:
+ 214              		.loc 1 141 0
+ 215 0098 0521     		movs	r1, #5
+ 216 009a 6846     		mov	r0, sp
+ 217 009c FFF7FEFF 		bl	UART_PC_PutArray
+ 218              	.LVL23:
  142:main.c        **** 
  143:main.c        ****             if (++hb_count >= 3000u)
- 218              		.loc 1 143 0
- 219 009a 6389     		ldrh	r3, [r4, #10]
- 220 009c 0133     		adds	r3, r3, #1
- 221 009e 9BB2     		uxth	r3, r3
- 222 00a0 6381     		strh	r3, [r4, #10]	@ movhi
- 223 00a2 40F6B732 		movw	r2, #2999
- 224 00a6 9342     		cmp	r3, r2
- 225 00a8 D7D9     		bls	.L12
+ 219              		.loc 1 143 0
+ 220 00a0 6389     		ldrh	r3, [r4, #10]
+ 221 00a2 0133     		adds	r3, r3, #1
+ 222 00a4 9BB2     		uxth	r3, r3
+ 223 00a6 6381     		strh	r3, [r4, #10]	@ movhi
+ 224 00a8 40F6B732 		movw	r2, #2999
+ 225 00ac 9342     		cmp	r3, r2
+ 226 00ae D4D9     		bls	.L12
  144:main.c        ****             {
  145:main.c        ****                 hb_count = 0u;
- 226              		.loc 1 145 0
- 227 00aa 2246     		mov	r2, r4
- 228 00ac 5681     		strh	r6, [r2, #10]	@ movhi
+ 227              		.loc 1 145 0
+ 228 00b0 2246     		mov	r2, r4
+ 229 00b2 5581     		strh	r5, [r2, #10]	@ movhi
  146:main.c        ****                 pkt[0] = 0x56u; pkt[1] = 0x01u;
- 229              		.loc 1 146 0
- 230 00ae 5622     		movs	r2, #86
- 231 00b0 8DF80020 		strb	r2, [sp]
- 232 00b4 0122     		movs	r2, #1
- 233 00b6 8DF80120 		strb	r2, [sp, #1]
+ 230              		.loc 1 146 0
+ 231 00b4 5622     		movs	r2, #86
+ 232 00b6 8DF80020 		strb	r2, [sp]
+ 233 00ba 0122     		movs	r2, #1
+ 234 00bc 8DF80120 		strb	r2, [sp, #1]
  147:main.c        ****                 pkt[2] = 0u;    pkt[3] = 0u;   pkt[4] = 0u;
- 234              		.loc 1 147 0
- 235 00ba 8DF80260 		strb	r6, [sp, #2]
- 236 00be 8DF80360 		strb	r6, [sp, #3]
- 237 00c2 8DF80460 		strb	r6, [sp, #4]
+ 235              		.loc 1 147 0
+ 236 00c0 8DF80250 		strb	r5, [sp, #2]
+ 237 00c4 8DF80350 		strb	r5, [sp, #3]
+ 238 00c8 8DF80450 		strb	r5, [sp, #4]
  148:main.c        ****                 UART_PC_PutArray(pkt, 5u);
- 238              		.loc 1 148 0
- 239 00c6 0521     		movs	r1, #5
- 240 00c8 6846     		mov	r0, sp
- 241 00ca FFF7FEFF 		bl	UART_PC_PutArray
- 242              	.LVL25:
- 243 00ce C4E7     		b	.L12
- 244              	.L17:
- 245              		.align	2
- 246              	.L16:
- 247 00d0 00000000 		.word	isr_DelSigReady
- 248 00d4 00000000 		.word	isr_FilterReady
- 249 00d8 00000000 		.word	.LANCHOR0
- 250              		.cfi_endproc
- 251              	.LFE66:
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 8
-
-
- 252              		.size	main, .-main
- 253              		.global	filter_coeffs
- 254              		.data
- 255              		.align	3
- 256              		.type	filter_coeffs, %object
- 257              		.size	filter_coeffs, 3720
- 258              	filter_coeffs:
- 259 0000 8E799A62 		.word	1654290830
- 260 0004 19FB083F 		.word	1057553177
- 261 0008 7604ECB4 		.word	-1259600778
- 262 000c 3340103F 		.word	1058029619
- 263 0010 F6B3D8CA 		.word	-891767818
- 264 0014 BCCC123F 		.word	1058196668
- 265 0018 2E4E6FF1 		.word	-244363730
- 266 001c 7595133F 		.word	1058248053
- 267 0020 E892EEE2 		.word	-487681304
- 268 0024 7B2F123F 		.word	1058156411
- 269 0028 0D32C52C 		.word	751120909
- 270 002c 86CB0C3F 		.word	1057803142
- 271 0030 1CA39B08 		.word	144417564
- 272 0034 6A8F003F 		.word	1057001322
- 273 0038 BB2F8597 		.word	-1752879173
- 274 003c A57DA83E 		.word	1051229605
- 275 0040 89B35ECD 		.word	-849431671
- 276 0044 A66E02BF 		.word	-1090359642
- 277 0048 4FA2970B 		.word	194486863
- 278 004c 0D0913BF 		.word	-1089271539
- 279 0050 8C35C772 		.word	1925657996
- 280 0054 A52E1CBF 		.word	-1088672091
- 281 0058 99F7F808 		.word	150534041
- 282 005c 6DC021BF 		.word	-1088307091
- 283 0060 EC23B196 		.word	-1766775828
- 284 0064 EDF323BF 		.word	-1088162835
- 285 0068 1927C124 		.word	616638233
- 286 006c 433F24BF 		.word	-1088143549
- 287 0070 C9289C4B 		.word	1268525257
- 288 0074 D55922BF 		.word	-1088267819
- 289 0078 11A1F9C8 		.word	-923164399
- 290 007c 22651CBF 		.word	-1088658142
- 291 0080 28045AE3 		.word	-480639960
- 292 0084 BFE10FBF 		.word	-1089478209
- 293 0088 7FF7D259 		.word	1506998143
- 294 008c 3368ACBE 		.word	-1095997389
- 295 0090 3F0A9A53 		.word	1402604095
- 296 0094 3168113F 		.word	1058105393
- 297 0098 F6D0C777 		.word	2009583862
- 298 009c 529C213F 		.word	1059167314
- 299 00a0 376D65FA 		.word	-94016201
- 300 00a4 2CA4293F 		.word	1059693612
- 301 00a8 B60A44CD 		.word	-851178826
- 302 00ac 67D12F3F 		.word	1060098407
- 303 00b0 857BC121 		.word	566328197
- 304 00b4 CDA1313F 		.word	1060217293
- 305 00b8 F8D6E5B7 		.word	-1209673992
- 306 00bc 08A8313F 		.word	1060218888
- 307 00c0 9211A2FC 		.word	-56487534
- 308 00c4 589A2F3F 		.word	1060084312
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 9
-
-
- 309 00c8 CEEAC3F2 		.word	-222041394
- 310 00cc 5226283F 		.word	1059595858
- 311 00d0 8C8B5277 		.word	2001898380
- 312 00d4 6FC21A3F 		.word	1058718319
- 313 00d8 9B9AD460 		.word	1624545947
- 314 00dc D1A4AF3E 		.word	1051698385
- 315 00e0 BF660B86 		.word	-2046073153
- 316 00e4 15E01CBF 		.word	-1088626667
- 317 00e8 436E7CAA 		.word	-1434685885
- 318 00ec 9EDE2CBF 		.word	-1087578466
- 319 00f0 FBC36C04 		.word	74236923
- 320 00f4 27CF34BF 		.word	-1087058137
- 321 00f8 EE632740 		.word	1076323310
- 322 00fc BB9539BF 		.word	-1086745157
- 323 0100 D064FF71 		.word	1912562896
- 324 0104 E11B3CBF 		.word	-1086579743
- 325 0108 AC04D6C8 		.word	-925498196
- 326 010c 96E93BBF 		.word	-1086592618
- 327 0110 9E936827 		.word	661164958
- 328 0114 14C738BF 		.word	-1086798060
- 329 0118 662438DC 		.word	-600300442
- 330 011c 4AC832BF 		.word	-1087190966
- 331 0120 E97C24C8 		.word	-937132823
- 332 0124 25A224BF 		.word	-1088118235
- 333 0128 999DA070 		.word	1889574297
- 334 012c DDFFB0BE 		.word	-1095696419
- 335 0130 9C99D53B 		.word	1003854236
- 336 0134 AE12263F 		.word	1059459758
- 337 0138 A6506FA4 		.word	-1536208730
- 338 013c E3E4353F 		.word	1060496611
- 339 0140 E3459D2B 		.word	731727331
- 340 0144 DD583F3F 		.word	1061116125
- 341 0148 276227B3 		.word	-1289264601
- 342 014c 9F25433F 		.word	1061365151
- 343 0150 878E6280 		.word	-2141024633
- 344 0154 01E8443F 		.word	1061480449
- 345 0158 AC1E5398 		.word	-1739383124
- 346 015c DEA2443F 		.word	1061462750
- 347 0160 3A2C73DA 		.word	-629986246
- 348 0164 2E36423F 		.word	1061303854
- 349 0168 EC851AB0 		.word	-1340439060
- 350 016c 2A733B3F 		.word	1060860714
- 351 0170 BBB53443 		.word	1127527867
- 352 0174 B2F72D3F 		.word	1059977138
- 353 0178 96314941 		.word	1095315862
- 354 017c 8FA8B13E 		.word	1051830415
- 355 0180 E81470AE 		.word	-1368386328
- 356 0184 BED62FBF 		.word	-1087383874
- 357 0188 FF11FE97 		.word	-1744956929
- 358 018c A6653FBF 		.word	-1086364250
- 359 0190 A01364AD 		.word	-1385950304
- 360 0194 885C46BF 		.word	-1085907832
- 361 0198 F4D529EA 		.word	-366357004
- 362 019c 1D2F4BBF 		.word	-1085591779
- 363 01a0 C9DD4341 		.word	1094966729
- 364 01a4 C88A4DBF 		.word	-1085437240
- 365 01a8 E4EAD1DC 		.word	-590222620
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 10
-
-
- 366 01ac CF064DBF 		.word	-1085471025
- 367 01b0 956DC00D 		.word	230714773
- 368 01b4 2B8049BF 		.word	-1085702101
- 369 01b8 6FD0341C 		.word	473223279
- 370 01bc B12143BF 		.word	-1086119503
- 371 01c0 22873897 		.word	-1757903070
- 372 01c4 3CC934BF 		.word	-1087059652
- 373 01c8 1011DFC4 		.word	-992014064
- 374 01cc 24C0B1BE 		.word	-1095647196
- 375 01d0 8E3C06F2 		.word	-234472306
- 376 01d4 0FF5353F 		.word	1060500751
- 377 01d8 25D8D9F6 		.word	-153495515
- 378 01dc DF8D453F 		.word	1061522911
- 379 01e0 ACE2C0A1 		.word	-1581194580
- 380 01e4 DC934E3F 		.word	1062114268
- 381 01e8 619A0AEA 		.word	-368403871
- 382 01ec 7F83523F 		.word	1062372223
- 383 01f0 49013042 		.word	1110442313
- 384 01f4 1C0B543F 		.word	1062472476
- 385 01f8 50B02B23 		.word	590065744
- 386 01fc DB9E533F 		.word	1062444763
- 387 0200 97CEBF26 		.word	650104471
- 388 0204 8E2C513F 		.word	1062284430
- 389 0208 8DFBDBF1 		.word	-237241459
- 390 020c C9AC493F 		.word	1061792969
- 391 0210 1D1FC304 		.word	79896349
- 392 0214 7DC93B3F 		.word	1060882813
- 393 0218 4CA082CC 		.word	-863854516
- 394 021c E842B13E 		.word	1051804392
- 395 0220 5EC79019 		.word	428918622
- 396 0224 D4343DBF 		.word	-1086507820
- 397 0228 D7E61478 		.word	2014635735
- 398 022c 63904CBF 		.word	-1085501341
- 399 0230 5FBBA796 		.word	-1767392417
- 400 0234 5F3154BF 		.word	-1085001377
- 401 0238 BF28081A 		.word	436742335
- 402 023c 785F58BF 		.word	-1084727432
- 403 0240 0D429F48 		.word	1218396685
- 404 0244 A14D5ABF 		.word	-1084600927
- 405 0248 6DE02E43 		.word	1127145581
- 406 024c 0CAB59BF 		.word	-1084642548
- 407 0250 263F48D3 		.word	-750239962
- 408 0254 FF6556BF 		.word	-1084856833
- 409 0258 F41EEDC5 		.word	-974315788
- 410 025c ECB050BF 		.word	-1085230868
- 411 0260 8120A11E 		.word	513876097
- 412 0264 6F0142BF 		.word	-1086193297
- 413 0268 521C6195 		.word	-1788797870
- 414 026c 4536B0BE 		.word	-1095748027
- 415 0270 2C7BAA04 		.word	78281516
- 416 0274 58D7423F 		.word	1061345112
- 417 0278 D874280A 		.word	170423512
- 418 027c 905E523F 		.word	1062362768
- 419 0280 59E99BAC 		.word	-1399068327
- 420 0284 BFE5593F 		.word	1062856127
- 421 0288 705AAFDA 		.word	-626042256
- 422 028c EF2B5F3F 		.word	1063201775
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 11
-
-
- 423 0290 623F8B0A 		.word	176897890
- 424 0294 40C6603F 		.word	1063306816
- 425 0298 6F192BBE 		.word	-1104471697
- 426 029c 5253603F 		.word	1063277394
- 427 02a0 73CBDE43 		.word	1138674547
- 428 02a4 806A5C3F 		.word	1063021184
- 429 02a8 90CB16D5 		.word	-719926384
- 430 02ac 791E553F 		.word	1062542969
- 431 02b0 D57AD891 		.word	-1848083755
- 432 02b4 07B8463F 		.word	1061599239
- 433 02b8 73E17897 		.word	-1753685645
- 434 02bc 3151AD3E 		.word	1051545905
- 435 02c0 E3885CA9 		.word	-1453553437
- 436 02c4 5EAD47BF 		.word	-1085821602
- 437 02c8 3EC6FA1F 		.word	536528446
- 438 02cc B40557BF 		.word	-1084815948
- 439 02d0 0410A8F3 		.word	-207089660
- 440 02d4 213060BF 		.word	-1084215263
- 441 02d8 D75CAAF9 		.word	-106275625
- 442 02dc F86F63BF 		.word	-1084002312
- 443 02e0 BFF05AA4 		.word	-1537544001
- 444 02e4 A2DE64BF 		.word	-1083908446
- 445 02e8 F70850D6 		.word	-699397897
- 446 02ec 5C4364BF 		.word	-1083948196
- 447 02f0 4A600F21 		.word	554655818
- 448 02f4 F69761BF 		.word	-1084123146
- 449 02f8 AF7ABBCD 		.word	-843351377
- 450 02fc 11175ABF 		.word	-1084614895
- 451 0300 02E8FE60 		.word	1627318274
- 452 0304 82FF4BBF 		.word	-1085538430
- 453 0308 FBA073C2 		.word	-1032609541
- 454 030c BE60A9BE 		.word	-1096195906
- 455 0310 9D2AC11F 		.word	532753053
- 456 0314 11124D3F 		.word	1062015505
- 457 0318 6819C5CD 		.word	-842720920
- 458 031c 17335C3F 		.word	1063006999
- 459 0320 7CFD74FC 		.word	-59441796
- 460 0324 C9C8633F 		.word	1063504073
- 461 0328 D06AA3DD 		.word	-576492848
- 462 032c 37B4673F 		.word	1063760951
- 463 0330 7A30D813 		.word	332935290
- 464 0334 6A65693F 		.word	1063871850
- 465 0338 00180661 		.word	1627789312
- 466 033c 179B683F 		.word	1063820055
- 467 0340 2AD7B004 		.word	78698282
- 468 0344 B951653F 		.word	1063604665
- 469 0348 F0D15EB7 		.word	-1218522640
- 470 034c 678C5F3F 		.word	1063226471
- 471 0350 63A905FF 		.word	-16406173
- 472 0354 18E4503F 		.word	1062265880
- 473 0358 7DC831A0 		.word	-1607350147
- 474 035c 8AD5A43E 		.word	1050989962
- 475 0360 5A540C5F 		.word	1594643546
- 476 0364 277A51BF 		.word	-1085179353
- 477 0368 A684ABAC 		.word	-1398045530
- 478 036c EAEA60BF 		.word	-1084167446
- 479 0370 E9492B02 		.word	36391401
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 12
-
-
- 480 0374 C9B067BF 		.word	-1083723575
- 481 0378 00D46FD8 		.word	-663759872
- 482 037c 05546CBF 		.word	-1083419643
- 483 0380 15A328C7 		.word	-953638123
- 484 0384 9D4A6EBF 		.word	-1083290979
- 485 0388 2DD16BAF 		.word	-1351888595
- 486 038c D04A6DBF 		.word	-1083356464
- 487 0390 A3D523F4 		.word	-198978141
- 488 0394 C15469BF 		.word	-1083616063
- 489 0398 02610B08 		.word	134963458
- 490 039c EDB462BF 		.word	-1084050195
- 491 03a0 6C9A275B 		.word	1529322092
- 492 03a4 E3FD53BF 		.word	-1085014557
- 493 03a8 C00789D2 		.word	-762771520
- 494 03ac C6E69FBE 		.word	-1096816954
- 495 03b0 4EFF3EF3 		.word	-213975218
- 496 03b4 2D9E543F 		.word	1062510125
- 497 03b8 B1B00F69 		.word	1762635953
- 498 03bc 63EB633F 		.word	1063512931
- 499 03c0 4E11AF64 		.word	1689194830
- 500 03c4 C8D76B3F 		.word	1064032200
- 501 03c8 0D5A5394 		.word	-1806476787
- 502 03cc D99D703F 		.word	1064345049
- 503 03d0 7E0F262A 		.word	707137406
- 504 03d4 85BC713F 		.word	1064418437
- 505 03d8 AB9EFF0C 		.word	218078891
- 506 03dc F31E713F 		.word	1064378099
- 507 03e0 9BD65EB9 		.word	-1184967013
- 508 03e4 1D8F6D3F 		.word	1064144669
- 509 03e8 556ACC7E 		.word	2127325781
- 510 03ec 61CA653F 		.word	1063635553
- 511 03f0 CE2ED597 		.word	-1747636530
- 512 03f4 D53E573F 		.word	1062682325
- 513 03f8 67019576 		.word	1989476711
- 514 03fc C905963E 		.word	1050019273
- 515 0400 0C6C2F27 		.word	657419276
- 516 0404 29E657BF 		.word	-1084758487
- 517 0408 6ED9564F 		.word	1331091822
- 518 040c 7C0C67BF 		.word	-1083765636
- 519 0410 76A9141F 		.word	521447798
- 520 0414 BF1470BF 		.word	-1083173697
- 521 0418 4AB92C75 		.word	1965865290
- 522 041c 7C2973BF 		.word	-1082971780
- 523 0420 3F111CE1 		.word	-518254273
- 524 0424 5B6B74BF 		.word	-1082889381
- 525 0428 C16B9A8D 		.word	-1919259711
- 526 042c 9DAD73BF 		.word	-1082937955
- 527 0430 047D2CD3 		.word	-752059132
- 528 0434 8BF570BF 		.word	-1083116149
- 529 0438 59D43ECE 		.word	-834743207
- 530 043c 8DF668BF 		.word	-1083640179
- 531 0440 C10BA107 		.word	127994817
- 532 0444 DC955ABF 		.word	-1084582436
- 533 0448 AC2DD4FE 		.word	-19649108
- 534 044c 8F3189BE 		.word	-1098305137
- 535 0450 9C2AB80F 		.word	263727772
- 536 0454 74405B3F 		.word	1062944884
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 13
-
-
- 537 0458 AFE19C22 		.word	580706735
- 538 045c 373D6A3F 		.word	1063927095
- 539 0460 1A361A11 		.word	286930458
- 540 0464 1D47723F 		.word	1064453917
- 541 0468 52AFF269 		.word	1777512274
- 542 046c D2BE753F 		.word	1064681170
- 543 0470 E8BAE456 		.word	1457830632
- 544 0474 D222773F 		.word	1064772306
- 545 0478 263BCCBD 		.word	-1110688986
- 546 047c F842763F 		.word	1064715000
- 547 0480 725215B8 		.word	-1206562190
- 548 0484 ED27733F 		.word	1064511469
- 549 0488 78E72447 		.word	1193600888
- 550 048c 37276C3F 		.word	1064052535
- 551 0490 4CA39D1F 		.word	530424652
- 552 0494 9DEF5D3F 		.word	1063120797
- 553 0498 CBCC1AFF 		.word	-15020853
- 554 049c 9196703E 		.word	1047565969
- 555 04a0 83659918 		.word	412706179
- 556 04a4 44995EBF 		.word	-1084319420
- 557 04a8 926179C2 		.word	-1032232558
- 558 04ac 996A6DBF 		.word	-1083348327
- 559 04b0 4BC1B1E5 		.word	-441335477
- 560 04b4 D27574BF 		.word	-1082886702
- 561 04b8 82924AA2 		.word	-1572171134
- 562 04bc 404E78BF 		.word	-1082634688
- 563 04c0 BAFC7D06 		.word	108919994
- 564 04c4 60D279BF 		.word	-1082535328
- 565 04c8 0A791A1F 		.word	521828618
- 566 04cc 2ECF78BF 		.word	-1082601682
- 567 04d0 726EEC26 		.word	653028978
- 568 04d4 245175BF 		.word	-1082830556
- 569 04d8 AAEA3185 		.word	-2060326230
- 570 04dc 88486FBF 		.word	-1083225976
- 571 04e0 BEFE978C 		.word	-1936195906
- 572 04e4 909B60BF 		.word	-1084187760
- 573 04e8 5E24DD75 		.word	1977427038
- 574 04ec A410673E 		.word	1046941860
- 575 04f0 B0010624 		.word	604373424
- 576 04f4 ACED603F 		.word	1063316908
- 577 04f8 3721BDC4 		.word	-994238153
- 578 04fc 2B40703F 		.word	1064321067
- 579 0500 68BEA408 		.word	145014376
- 580 0504 D992763F 		.word	1064735449
- 581 0508 F7154E26 		.word	642651639
- 582 050c 38C77A3F 		.word	1065011000
- 583 0510 54FEFCAE 		.word	-1359151532
- 584 0514 8B687C3F 		.word	1065117835
- 585 0518 D23DC5A0 		.word	-1597686318
- 586 051c 91417B3F 		.word	1065042321
- 587 0520 FA5C6842 		.word	1114135802
- 588 0524 F662773F 		.word	1064788726
- 589 0528 F155984C 		.word	1285051889
- 590 052c E522713F 		.word	1064379109
- 591 0530 1ADFB074 		.word	1957748506
- 592 0534 4B2B623F 		.word	1063398219
- 593 0538 1E458EE7 		.word	-410106594
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 14
-
-
- 594 053c 9E5280BE 		.word	-1098886498
- 595 0540 5990A8FD 		.word	-39284647
- 596 0544 617862BF 		.word	-1084065695
- 597 0548 F2485001 		.word	22038770
- 598 054c CAB471BF 		.word	-1083067190
- 599 0550 578AD4CC 		.word	-858486185
- 600 0554 D28F78BF 		.word	-1082617902
- 601 0558 6B08D97C 		.word	2094598251
- 602 055c D6187DBF 		.word	-1082320682
- 603 0560 C91512CB 		.word	-888007223
- 604 0564 95D37EBF 		.word	-1082207339
- 605 0568 49E22F25 		.word	623895113
- 606 056c 45897DBF 		.word	-1082291899
- 607 0570 099BABEB 		.word	-341075191
- 608 0574 0E4F79BF 		.word	-1082568946
- 609 0578 33116223 		.word	593629491
- 610 057c 198572BF 		.word	-1083013863
- 611 0580 EBFE4FB3 		.word	-1286603029
- 612 0584 169C63BF 		.word	-1083991018
- 613 0588 AAD1DA4B 		.word	1272631722
- 614 058c 14FB863E 		.word	1049033492
- 615 0590 067D65C5 		.word	-983204602
- 616 0594 E5E1633F 		.word	1063510501
- 617 0598 8EB5D9DC 		.word	-589711986
- 618 059c DA08733F 		.word	1064503514
- 619 05a0 6E8A582E 		.word	777554542
- 620 05a4 A05E7A3F 		.word	1064984224
- 621 05a8 929611C1 		.word	-1055811950
- 622 05ac 91327F3F 		.word	1065300625
- 623 05b0 3A153F19 		.word	423564602
- 624 05b4 1781803F 		.word	1065386263
- 625 05b8 2B2B11D2 		.word	-770626773
- 626 05bc E5957F3F 		.word	1065326053
- 627 05c0 26B20999 		.word	-1727417818
- 628 05c4 90077B3F 		.word	1065027472
- 629 05c8 5E7CD8A7 		.word	-1478984610
- 630 05cc DBC0733F 		.word	1064550619
- 631 05d0 C402B9FB 		.word	-71761212
- 632 05d4 7AE3643F 		.word	1063576442
- 633 05d8 F2BE0727 		.word	654819058
- 634 05dc D1A489BE 		.word	-1098275631
- 635 05e0 1922C8F3 		.word	-204987879
- 636 05e4 E31F65BF 		.word	-1083891741
- 637 05e8 E968E555 		.word	1441097961
- 638 05ec 9F3274BF 		.word	-1082903905
- 639 05f0 40BB9AB8 		.word	-1197819072
- 640 05f4 F2F17BBF 		.word	-1082396174
- 641 05f8 3FEAC3C4 		.word	-993793473
- 642 05fc 738280BF 		.word	-1082097037
- 643 0600 6850ABE2 		.word	-492089240
- 644 0604 157281BF 		.word	-1082035691
- 645 0608 548D5B37 		.word	928746836
- 646 060c 1DAC80BF 		.word	-1082086371
- 647 0610 36D42E52 		.word	1378800694
- 648 0614 A97F7CBF 		.word	-1082359895
- 649 0618 BDAD3A70 		.word	1882893757
- 650 061c F5CC74BF 		.word	-1082864395
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 15
-
-
- 651 0620 6530D9A0 		.word	-1596379035
- 652 0624 E2F765BF 		.word	-1083836446
- 653 0628 F0E2D42B 		.word	735372016
- 654 062c F484883E 		.word	1049134324
- 655 0630 163170C4 		.word	-999280362
- 656 0634 0229663F 		.word	1063659778
- 657 0638 206BEB9C 		.word	-1662293216
- 658 063c 4F29753F 		.word	1064642895
- 659 0640 2D8336E5 		.word	-449412307
- 660 0644 DD3D7D3F 		.word	1065172445
- 661 0648 4BCA67CC 		.word	-865613237
- 662 064c 0241813F 		.word	1065435394
- 663 0650 DB9C754F 		.word	1333107931
- 664 0654 9E35823F 		.word	1065498014
- 665 0658 6759DFE1 		.word	-505456281
- 666 065c 6C61813F 		.word	1065443692
- 667 0660 DC6DD91E 		.word	517565916
- 668 0664 1FAC7D3F 		.word	1065200671
- 669 0668 8FBCF9F7 		.word	-134628209
- 670 066c 60A1753F 		.word	1064673632
- 671 0670 352C490E 		.word	239676469
- 672 0674 03D1663F 		.word	1063702787
- 673 0678 59255E80 		.word	-2141313703
- 674 067c 381A84BE 		.word	-1098638792
- 675 0680 0D088B7A 		.word	2055931917
- 676 0684 49F566BF 		.word	-1083771575
- 677 0688 477B1242 		.word	1108507463
- 678 068c 7CE575BF 		.word	-1082792580
- 679 0690 462F6057 		.word	1465921350
- 680 0694 5B387EBF 		.word	-1082247077
- 681 0698 38C65EB7 		.word	-1218525640
- 682 069c 31CF81BF 		.word	-1082011855
- 683 06a0 E527B4BE 		.word	-1095489563
- 684 06a4 C2C582BF 		.word	-1081948734
- 685 06a8 0FD12215 		.word	354603279
- 686 06ac 60E581BF 		.word	-1082006176
- 687 06b0 8EB0CC72 		.word	1926017166
- 688 06b4 CD837EBF 		.word	-1082227763
- 689 06b8 7B92E766 		.word	1726452347
- 690 06bc A43776BF 		.word	-1082771548
- 691 06c0 95E496C3 		.word	-1013521259
- 692 06c4 396867BF 		.word	-1083742151
- 693 06c8 523BAA7D 		.word	2108308306
- 694 06cc 7E467A3E 		.word	1048200830
- 695 06d0 0BFBECED 		.word	-303236341
- 696 06d4 797E673F 		.word	1063747193
- 697 06d8 B1BB78E3 		.word	-478626895
- 698 06dc 6161763F 		.word	1064722785
- 699 06e0 2D619FDC 		.word	-593534675
- 700 06e4 BBD97E3F 		.word	1065277883
- 701 06e8 09AF883D 		.word	1032367881
- 702 06ec A228823F 		.word	1065494690
- 703 06f0 883ACCE5 		.word	-439600504
- 704 06f4 131E833F 		.word	1065557523
- 705 06f8 7259511E 		.word	508647794
- 706 06fc E633823F 		.word	1065497574
- 707 0700 9D226FD3 		.word	-747691363
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 16
-
-
- 708 0704 0C007F3F 		.word	1065287692
- 709 0708 52A29116 		.word	378643026
- 710 070c 1B8B763F 		.word	1064733467
- 711 0710 67FE68CA 		.word	-899088793
- 712 0714 D7B8673F 		.word	1063762135
- 713 0718 2FFD9931 		.word	832175407
- 714 071c 464062BE 		.word	-1100857274
- 715 0720 84A54887 		.word	-2025282172
- 716 0724 57C067BF 		.word	-1083719593
- 717 0728 6D4D3AD2 		.word	-767931027
- 718 072c 2A9976BF 		.word	-1082746582
- 719 0730 EC651810 		.word	270034412
- 720 0734 FF1C7FBF 		.word	-1082188545
- 721 0738 4389DCEE 		.word	-287536829
- 722 073c 8D4A82BF 		.word	-1081980275
- 723 0740 560DFDB1 		.word	-1308816042
- 724 0744 10B3EF3F 		.word	1072673552
- 725 0748 4389DCEE 		.word	-287536829
- 726 074c 8D4A82BF 		.word	-1081980275
- 727 0750 EC651810 		.word	270034412
- 728 0754 FF1C7FBF 		.word	-1082188545
- 729 0758 6D4D3AD2 		.word	-767931027
- 730 075c 2A9976BF 		.word	-1082746582
- 731 0760 84A54887 		.word	-2025282172
- 732 0764 57C067BF 		.word	-1083719593
- 733 0768 2FFD9931 		.word	832175407
- 734 076c 464062BE 		.word	-1100857274
- 735 0770 67FE68CA 		.word	-899088793
- 736 0774 D7B8673F 		.word	1063762135
- 737 0778 52A29116 		.word	378643026
- 738 077c 1B8B763F 		.word	1064733467
- 739 0780 9D226FD3 		.word	-747691363
- 740 0784 0C007F3F 		.word	1065287692
- 741 0788 7259511E 		.word	508647794
- 742 078c E633823F 		.word	1065497574
- 743 0790 883ACCE5 		.word	-439600504
- 744 0794 131E833F 		.word	1065557523
- 745 0798 09AF883D 		.word	1032367881
- 746 079c A228823F 		.word	1065494690
- 747 07a0 2D619FDC 		.word	-593534675
- 748 07a4 BBD97E3F 		.word	1065277883
- 749 07a8 B1BB78E3 		.word	-478626895
- 750 07ac 6161763F 		.word	1064722785
- 751 07b0 0BFBECED 		.word	-303236341
- 752 07b4 797E673F 		.word	1063747193
- 753 07b8 523BAA7D 		.word	2108308306
- 754 07bc 7E467A3E 		.word	1048200830
- 755 07c0 95E496C3 		.word	-1013521259
- 756 07c4 396867BF 		.word	-1083742151
- 757 07c8 7B92E766 		.word	1726452347
- 758 07cc A43776BF 		.word	-1082771548
- 759 07d0 8EB0CC72 		.word	1926017166
- 760 07d4 CD837EBF 		.word	-1082227763
- 761 07d8 0FD12215 		.word	354603279
- 762 07dc 60E581BF 		.word	-1082006176
- 763 07e0 E527B4BE 		.word	-1095489563
- 764 07e4 C2C582BF 		.word	-1081948734
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 17
-
-
- 765 07e8 38C65EB7 		.word	-1218525640
- 766 07ec 31CF81BF 		.word	-1082011855
- 767 07f0 462F6057 		.word	1465921350
- 768 07f4 5B387EBF 		.word	-1082247077
- 769 07f8 477B1242 		.word	1108507463
- 770 07fc 7CE575BF 		.word	-1082792580
- 771 0800 0D088B7A 		.word	2055931917
- 772 0804 49F566BF 		.word	-1083771575
- 773 0808 59255E80 		.word	-2141313703
- 774 080c 381A84BE 		.word	-1098638792
- 775 0810 352C490E 		.word	239676469
- 776 0814 03D1663F 		.word	1063702787
- 777 0818 8FBCF9F7 		.word	-134628209
- 778 081c 60A1753F 		.word	1064673632
- 779 0820 DC6DD91E 		.word	517565916
- 780 0824 1FAC7D3F 		.word	1065200671
- 781 0828 6759DFE1 		.word	-505456281
- 782 082c 6C61813F 		.word	1065443692
- 783 0830 DB9C754F 		.word	1333107931
- 784 0834 9E35823F 		.word	1065498014
- 785 0838 4BCA67CC 		.word	-865613237
- 786 083c 0241813F 		.word	1065435394
- 787 0840 2D8336E5 		.word	-449412307
- 788 0844 DD3D7D3F 		.word	1065172445
- 789 0848 206BEB9C 		.word	-1662293216
- 790 084c 4F29753F 		.word	1064642895
- 791 0850 163170C4 		.word	-999280362
- 792 0854 0229663F 		.word	1063659778
- 793 0858 F0E2D42B 		.word	735372016
- 794 085c F484883E 		.word	1049134324
- 795 0860 6530D9A0 		.word	-1596379035
- 796 0864 E2F765BF 		.word	-1083836446
- 797 0868 BDAD3A70 		.word	1882893757
- 798 086c F5CC74BF 		.word	-1082864395
- 799 0870 36D42E52 		.word	1378800694
- 800 0874 A97F7CBF 		.word	-1082359895
- 801 0878 548D5B37 		.word	928746836
- 802 087c 1DAC80BF 		.word	-1082086371
- 803 0880 6850ABE2 		.word	-492089240
- 804 0884 157281BF 		.word	-1082035691
- 805 0888 3FEAC3C4 		.word	-993793473
- 806 088c 738280BF 		.word	-1082097037
- 807 0890 40BB9AB8 		.word	-1197819072
- 808 0894 F2F17BBF 		.word	-1082396174
- 809 0898 E968E555 		.word	1441097961
- 810 089c 9F3274BF 		.word	-1082903905
- 811 08a0 1922C8F3 		.word	-204987879
- 812 08a4 E31F65BF 		.word	-1083891741
- 813 08a8 F2BE0727 		.word	654819058
- 814 08ac D1A489BE 		.word	-1098275631
- 815 08b0 C402B9FB 		.word	-71761212
- 816 08b4 7AE3643F 		.word	1063576442
- 817 08b8 5E7CD8A7 		.word	-1478984610
- 818 08bc DBC0733F 		.word	1064550619
- 819 08c0 26B20999 		.word	-1727417818
- 820 08c4 90077B3F 		.word	1065027472
- 821 08c8 2B2B11D2 		.word	-770626773
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 18
-
-
- 822 08cc E5957F3F 		.word	1065326053
- 823 08d0 3A153F19 		.word	423564602
- 824 08d4 1781803F 		.word	1065386263
- 825 08d8 929611C1 		.word	-1055811950
- 826 08dc 91327F3F 		.word	1065300625
- 827 08e0 6E8A582E 		.word	777554542
- 828 08e4 A05E7A3F 		.word	1064984224
- 829 08e8 8EB5D9DC 		.word	-589711986
- 830 08ec DA08733F 		.word	1064503514
- 831 08f0 067D65C5 		.word	-983204602
- 832 08f4 E5E1633F 		.word	1063510501
- 833 08f8 AAD1DA4B 		.word	1272631722
- 834 08fc 14FB863E 		.word	1049033492
- 835 0900 EBFE4FB3 		.word	-1286603029
- 836 0904 169C63BF 		.word	-1083991018
- 837 0908 33116223 		.word	593629491
- 838 090c 198572BF 		.word	-1083013863
- 839 0910 099BABEB 		.word	-341075191
- 840 0914 0E4F79BF 		.word	-1082568946
- 841 0918 49E22F25 		.word	623895113
- 842 091c 45897DBF 		.word	-1082291899
- 843 0920 C91512CB 		.word	-888007223
- 844 0924 95D37EBF 		.word	-1082207339
- 845 0928 6B08D97C 		.word	2094598251
- 846 092c D6187DBF 		.word	-1082320682
- 847 0930 578AD4CC 		.word	-858486185
- 848 0934 D28F78BF 		.word	-1082617902
- 849 0938 F2485001 		.word	22038770
- 850 093c CAB471BF 		.word	-1083067190
- 851 0940 5990A8FD 		.word	-39284647
- 852 0944 617862BF 		.word	-1084065695
- 853 0948 1E458EE7 		.word	-410106594
- 854 094c 9E5280BE 		.word	-1098886498
- 855 0950 1ADFB074 		.word	1957748506
- 856 0954 4B2B623F 		.word	1063398219
- 857 0958 F155984C 		.word	1285051889
- 858 095c E522713F 		.word	1064379109
- 859 0960 FA5C6842 		.word	1114135802
- 860 0964 F662773F 		.word	1064788726
- 861 0968 D23DC5A0 		.word	-1597686318
- 862 096c 91417B3F 		.word	1065042321
- 863 0970 54FEFCAE 		.word	-1359151532
- 864 0974 8B687C3F 		.word	1065117835
- 865 0978 F7154E26 		.word	642651639
- 866 097c 38C77A3F 		.word	1065011000
- 867 0980 68BEA408 		.word	145014376
- 868 0984 D992763F 		.word	1064735449
- 869 0988 3721BDC4 		.word	-994238153
- 870 098c 2B40703F 		.word	1064321067
- 871 0990 B0010624 		.word	604373424
- 872 0994 ACED603F 		.word	1063316908
- 873 0998 5E24DD75 		.word	1977427038
- 874 099c A410673E 		.word	1046941860
- 875 09a0 BEFE978C 		.word	-1936195906
- 876 09a4 909B60BF 		.word	-1084187760
- 877 09a8 AAEA3185 		.word	-2060326230
- 878 09ac 88486FBF 		.word	-1083225976
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 19
-
-
- 879 09b0 726EEC26 		.word	653028978
- 880 09b4 245175BF 		.word	-1082830556
- 881 09b8 0A791A1F 		.word	521828618
- 882 09bc 2ECF78BF 		.word	-1082601682
- 883 09c0 BAFC7D06 		.word	108919994
- 884 09c4 60D279BF 		.word	-1082535328
- 885 09c8 82924AA2 		.word	-1572171134
- 886 09cc 404E78BF 		.word	-1082634688
- 887 09d0 4BC1B1E5 		.word	-441335477
- 888 09d4 D27574BF 		.word	-1082886702
- 889 09d8 926179C2 		.word	-1032232558
- 890 09dc 996A6DBF 		.word	-1083348327
- 891 09e0 83659918 		.word	412706179
- 892 09e4 44995EBF 		.word	-1084319420
- 893 09e8 CBCC1AFF 		.word	-15020853
- 894 09ec 9196703E 		.word	1047565969
- 895 09f0 4CA39D1F 		.word	530424652
- 896 09f4 9DEF5D3F 		.word	1063120797
- 897 09f8 78E72447 		.word	1193600888
- 898 09fc 37276C3F 		.word	1064052535
- 899 0a00 725215B8 		.word	-1206562190
- 900 0a04 ED27733F 		.word	1064511469
- 901 0a08 263BCCBD 		.word	-1110688986
- 902 0a0c F842763F 		.word	1064715000
- 903 0a10 E8BAE456 		.word	1457830632
- 904 0a14 D222773F 		.word	1064772306
- 905 0a18 52AFF269 		.word	1777512274
- 906 0a1c D2BE753F 		.word	1064681170
- 907 0a20 1A361A11 		.word	286930458
- 908 0a24 1D47723F 		.word	1064453917
- 909 0a28 AFE19C22 		.word	580706735
- 910 0a2c 373D6A3F 		.word	1063927095
- 911 0a30 9C2AB80F 		.word	263727772
- 912 0a34 74405B3F 		.word	1062944884
- 913 0a38 AC2DD4FE 		.word	-19649108
- 914 0a3c 8F3189BE 		.word	-1098305137
- 915 0a40 C10BA107 		.word	127994817
- 916 0a44 DC955ABF 		.word	-1084582436
- 917 0a48 59D43ECE 		.word	-834743207
- 918 0a4c 8DF668BF 		.word	-1083640179
- 919 0a50 047D2CD3 		.word	-752059132
- 920 0a54 8BF570BF 		.word	-1083116149
- 921 0a58 C16B9A8D 		.word	-1919259711
- 922 0a5c 9DAD73BF 		.word	-1082937955
- 923 0a60 3F111CE1 		.word	-518254273
- 924 0a64 5B6B74BF 		.word	-1082889381
- 925 0a68 4AB92C75 		.word	1965865290
- 926 0a6c 7C2973BF 		.word	-1082971780
- 927 0a70 76A9141F 		.word	521447798
- 928 0a74 BF1470BF 		.word	-1083173697
- 929 0a78 6ED9564F 		.word	1331091822
- 930 0a7c 7C0C67BF 		.word	-1083765636
- 931 0a80 0C6C2F27 		.word	657419276
- 932 0a84 29E657BF 		.word	-1084758487
- 933 0a88 67019576 		.word	1989476711
- 934 0a8c C905963E 		.word	1050019273
- 935 0a90 CE2ED597 		.word	-1747636530
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 20
-
-
- 936 0a94 D53E573F 		.word	1062682325
- 937 0a98 556ACC7E 		.word	2127325781
- 938 0a9c 61CA653F 		.word	1063635553
- 939 0aa0 9BD65EB9 		.word	-1184967013
- 940 0aa4 1D8F6D3F 		.word	1064144669
- 941 0aa8 AB9EFF0C 		.word	218078891
- 942 0aac F31E713F 		.word	1064378099
- 943 0ab0 7E0F262A 		.word	707137406
- 944 0ab4 85BC713F 		.word	1064418437
- 945 0ab8 0D5A5394 		.word	-1806476787
- 946 0abc D99D703F 		.word	1064345049
- 947 0ac0 4E11AF64 		.word	1689194830
- 948 0ac4 C8D76B3F 		.word	1064032200
- 949 0ac8 B1B00F69 		.word	1762635953
- 950 0acc 63EB633F 		.word	1063512931
- 951 0ad0 4EFF3EF3 		.word	-213975218
- 952 0ad4 2D9E543F 		.word	1062510125
- 953 0ad8 C00789D2 		.word	-762771520
- 954 0adc C6E69FBE 		.word	-1096816954
- 955 0ae0 6C9A275B 		.word	1529322092
- 956 0ae4 E3FD53BF 		.word	-1085014557
- 957 0ae8 02610B08 		.word	134963458
- 958 0aec EDB462BF 		.word	-1084050195
- 959 0af0 A3D523F4 		.word	-198978141
- 960 0af4 C15469BF 		.word	-1083616063
- 961 0af8 2DD16BAF 		.word	-1351888595
- 962 0afc D04A6DBF 		.word	-1083356464
- 963 0b00 15A328C7 		.word	-953638123
- 964 0b04 9D4A6EBF 		.word	-1083290979
- 965 0b08 00D46FD8 		.word	-663759872
- 966 0b0c 05546CBF 		.word	-1083419643
- 967 0b10 E9492B02 		.word	36391401
- 968 0b14 C9B067BF 		.word	-1083723575
- 969 0b18 A684ABAC 		.word	-1398045530
- 970 0b1c EAEA60BF 		.word	-1084167446
- 971 0b20 5A540C5F 		.word	1594643546
- 972 0b24 277A51BF 		.word	-1085179353
- 973 0b28 7DC831A0 		.word	-1607350147
- 974 0b2c 8AD5A43E 		.word	1050989962
- 975 0b30 63A905FF 		.word	-16406173
- 976 0b34 18E4503F 		.word	1062265880
- 977 0b38 F0D15EB7 		.word	-1218522640
- 978 0b3c 678C5F3F 		.word	1063226471
- 979 0b40 2AD7B004 		.word	78698282
- 980 0b44 B951653F 		.word	1063604665
- 981 0b48 00180661 		.word	1627789312
- 982 0b4c 179B683F 		.word	1063820055
- 983 0b50 7A30D813 		.word	332935290
- 984 0b54 6A65693F 		.word	1063871850
- 985 0b58 D06AA3DD 		.word	-576492848
- 986 0b5c 37B4673F 		.word	1063760951
- 987 0b60 7CFD74FC 		.word	-59441796
- 988 0b64 C9C8633F 		.word	1063504073
- 989 0b68 6819C5CD 		.word	-842720920
- 990 0b6c 17335C3F 		.word	1063006999
- 991 0b70 9D2AC11F 		.word	532753053
- 992 0b74 11124D3F 		.word	1062015505
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 21
-
-
- 993 0b78 FBA073C2 		.word	-1032609541
- 994 0b7c BE60A9BE 		.word	-1096195906
- 995 0b80 02E8FE60 		.word	1627318274
- 996 0b84 82FF4BBF 		.word	-1085538430
- 997 0b88 AF7ABBCD 		.word	-843351377
- 998 0b8c 11175ABF 		.word	-1084614895
- 999 0b90 4A600F21 		.word	554655818
- 1000 0b94 F69761BF 		.word	-1084123146
- 1001 0b98 F70850D6 		.word	-699397897
- 1002 0b9c 5C4364BF 		.word	-1083948196
- 1003 0ba0 BFF05AA4 		.word	-1537544001
- 1004 0ba4 A2DE64BF 		.word	-1083908446
- 1005 0ba8 D75CAAF9 		.word	-106275625
- 1006 0bac F86F63BF 		.word	-1084002312
- 1007 0bb0 0410A8F3 		.word	-207089660
- 1008 0bb4 213060BF 		.word	-1084215263
- 1009 0bb8 3EC6FA1F 		.word	536528446
- 1010 0bbc B40557BF 		.word	-1084815948
- 1011 0bc0 E3885CA9 		.word	-1453553437
- 1012 0bc4 5EAD47BF 		.word	-1085821602
- 1013 0bc8 73E17897 		.word	-1753685645
- 1014 0bcc 3151AD3E 		.word	1051545905
- 1015 0bd0 D57AD891 		.word	-1848083755
- 1016 0bd4 07B8463F 		.word	1061599239
- 1017 0bd8 90CB16D5 		.word	-719926384
- 1018 0bdc 791E553F 		.word	1062542969
- 1019 0be0 73CBDE43 		.word	1138674547
- 1020 0be4 806A5C3F 		.word	1063021184
- 1021 0be8 6F192BBE 		.word	-1104471697
- 1022 0bec 5253603F 		.word	1063277394
- 1023 0bf0 623F8B0A 		.word	176897890
- 1024 0bf4 40C6603F 		.word	1063306816
- 1025 0bf8 705AAFDA 		.word	-626042256
- 1026 0bfc EF2B5F3F 		.word	1063201775
- 1027 0c00 59E99BAC 		.word	-1399068327
- 1028 0c04 BFE5593F 		.word	1062856127
- 1029 0c08 D874280A 		.word	170423512
- 1030 0c0c 905E523F 		.word	1062362768
- 1031 0c10 2C7BAA04 		.word	78281516
- 1032 0c14 58D7423F 		.word	1061345112
- 1033 0c18 521C6195 		.word	-1788797870
- 1034 0c1c 4536B0BE 		.word	-1095748027
- 1035 0c20 8120A11E 		.word	513876097
- 1036 0c24 6F0142BF 		.word	-1086193297
- 1037 0c28 F41EEDC5 		.word	-974315788
- 1038 0c2c ECB050BF 		.word	-1085230868
- 1039 0c30 263F48D3 		.word	-750239962
- 1040 0c34 FF6556BF 		.word	-1084856833
- 1041 0c38 6DE02E43 		.word	1127145581
- 1042 0c3c 0CAB59BF 		.word	-1084642548
- 1043 0c40 0D429F48 		.word	1218396685
- 1044 0c44 A14D5ABF 		.word	-1084600927
- 1045 0c48 BF28081A 		.word	436742335
- 1046 0c4c 785F58BF 		.word	-1084727432
- 1047 0c50 5FBBA796 		.word	-1767392417
- 1048 0c54 5F3154BF 		.word	-1085001377
- 1049 0c58 D7E61478 		.word	2014635735
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 22
-
-
- 1050 0c5c 63904CBF 		.word	-1085501341
- 1051 0c60 5EC79019 		.word	428918622
- 1052 0c64 D4343DBF 		.word	-1086507820
- 1053 0c68 4CA082CC 		.word	-863854516
- 1054 0c6c E842B13E 		.word	1051804392
- 1055 0c70 1D1FC304 		.word	79896349
- 1056 0c74 7DC93B3F 		.word	1060882813
- 1057 0c78 8DFBDBF1 		.word	-237241459
- 1058 0c7c C9AC493F 		.word	1061792969
- 1059 0c80 97CEBF26 		.word	650104471
- 1060 0c84 8E2C513F 		.word	1062284430
- 1061 0c88 50B02B23 		.word	590065744
- 1062 0c8c DB9E533F 		.word	1062444763
- 1063 0c90 49013042 		.word	1110442313
- 1064 0c94 1C0B543F 		.word	1062472476
- 1065 0c98 619A0AEA 		.word	-368403871
- 1066 0c9c 7F83523F 		.word	1062372223
- 1067 0ca0 ACE2C0A1 		.word	-1581194580
- 1068 0ca4 DC934E3F 		.word	1062114268
- 1069 0ca8 25D8D9F6 		.word	-153495515
- 1070 0cac DF8D453F 		.word	1061522911
- 1071 0cb0 8E3C06F2 		.word	-234472306
- 1072 0cb4 0FF5353F 		.word	1060500751
- 1073 0cb8 1011DFC4 		.word	-992014064
- 1074 0cbc 24C0B1BE 		.word	-1095647196
- 1075 0cc0 22873897 		.word	-1757903070
- 1076 0cc4 3CC934BF 		.word	-1087059652
- 1077 0cc8 6FD0341C 		.word	473223279
- 1078 0ccc B12143BF 		.word	-1086119503
- 1079 0cd0 956DC00D 		.word	230714773
- 1080 0cd4 2B8049BF 		.word	-1085702101
- 1081 0cd8 E4EAD1DC 		.word	-590222620
- 1082 0cdc CF064DBF 		.word	-1085471025
- 1083 0ce0 C9DD4341 		.word	1094966729
- 1084 0ce4 C88A4DBF 		.word	-1085437240
- 1085 0ce8 F4D529EA 		.word	-366357004
- 1086 0cec 1D2F4BBF 		.word	-1085591779
- 1087 0cf0 A01364AD 		.word	-1385950304
- 1088 0cf4 885C46BF 		.word	-1085907832
- 1089 0cf8 FF11FE97 		.word	-1744956929
- 1090 0cfc A6653FBF 		.word	-1086364250
- 1091 0d00 E81470AE 		.word	-1368386328
- 1092 0d04 BED62FBF 		.word	-1087383874
- 1093 0d08 96314941 		.word	1095315862
- 1094 0d0c 8FA8B13E 		.word	1051830415
- 1095 0d10 BBB53443 		.word	1127527867
- 1096 0d14 B2F72D3F 		.word	1059977138
- 1097 0d18 EC851AB0 		.word	-1340439060
- 1098 0d1c 2A733B3F 		.word	1060860714
- 1099 0d20 3A2C73DA 		.word	-629986246
- 1100 0d24 2E36423F 		.word	1061303854
- 1101 0d28 AC1E5398 		.word	-1739383124
- 1102 0d2c DEA2443F 		.word	1061462750
- 1103 0d30 878E6280 		.word	-2141024633
- 1104 0d34 01E8443F 		.word	1061480449
- 1105 0d38 276227B3 		.word	-1289264601
- 1106 0d3c 9F25433F 		.word	1061365151
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 23
-
-
- 1107 0d40 E3459D2B 		.word	731727331
- 1108 0d44 DD583F3F 		.word	1061116125
- 1109 0d48 A6506FA4 		.word	-1536208730
- 1110 0d4c E3E4353F 		.word	1060496611
- 1111 0d50 9C99D53B 		.word	1003854236
- 1112 0d54 AE12263F 		.word	1059459758
- 1113 0d58 999DA070 		.word	1889574297
- 1114 0d5c DDFFB0BE 		.word	-1095696419
- 1115 0d60 E97C24C8 		.word	-937132823
- 1116 0d64 25A224BF 		.word	-1088118235
- 1117 0d68 662438DC 		.word	-600300442
- 1118 0d6c 4AC832BF 		.word	-1087190966
- 1119 0d70 9E936827 		.word	661164958
- 1120 0d74 14C738BF 		.word	-1086798060
- 1121 0d78 AC04D6C8 		.word	-925498196
- 1122 0d7c 96E93BBF 		.word	-1086592618
- 1123 0d80 D064FF71 		.word	1912562896
- 1124 0d84 E11B3CBF 		.word	-1086579743
- 1125 0d88 EE632740 		.word	1076323310
- 1126 0d8c BB9539BF 		.word	-1086745157
- 1127 0d90 FBC36C04 		.word	74236923
- 1128 0d94 27CF34BF 		.word	-1087058137
- 1129 0d98 436E7CAA 		.word	-1434685885
- 1130 0d9c 9EDE2CBF 		.word	-1087578466
- 1131 0da0 BF660B86 		.word	-2046073153
- 1132 0da4 15E01CBF 		.word	-1088626667
- 1133 0da8 9B9AD460 		.word	1624545947
- 1134 0dac D1A4AF3E 		.word	1051698385
- 1135 0db0 8C8B5277 		.word	2001898380
- 1136 0db4 6FC21A3F 		.word	1058718319
- 1137 0db8 CEEAC3F2 		.word	-222041394
- 1138 0dbc 5226283F 		.word	1059595858
- 1139 0dc0 9211A2FC 		.word	-56487534
- 1140 0dc4 589A2F3F 		.word	1060084312
- 1141 0dc8 F8D6E5B7 		.word	-1209673992
- 1142 0dcc 08A8313F 		.word	1060218888
- 1143 0dd0 857BC121 		.word	566328197
- 1144 0dd4 CDA1313F 		.word	1060217293
- 1145 0dd8 B60A44CD 		.word	-851178826
- 1146 0ddc 67D12F3F 		.word	1060098407
- 1147 0de0 376D65FA 		.word	-94016201
- 1148 0de4 2CA4293F 		.word	1059693612
- 1149 0de8 F6D0C777 		.word	2009583862
- 1150 0dec 529C213F 		.word	1059167314
- 1151 0df0 3F0A9A53 		.word	1402604095
- 1152 0df4 3168113F 		.word	1058105393
- 1153 0df8 7FF7D259 		.word	1506998143
- 1154 0dfc 3368ACBE 		.word	-1095997389
- 1155 0e00 28045AE3 		.word	-480639960
- 1156 0e04 BFE10FBF 		.word	-1089478209
- 1157 0e08 11A1F9C8 		.word	-923164399
- 1158 0e0c 22651CBF 		.word	-1088658142
- 1159 0e10 C9289C4B 		.word	1268525257
- 1160 0e14 D55922BF 		.word	-1088267819
- 1161 0e18 1927C124 		.word	616638233
- 1162 0e1c 433F24BF 		.word	-1088143549
- 1163 0e20 EC23B196 		.word	-1766775828
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 24
-
-
- 1164 0e24 EDF323BF 		.word	-1088162835
- 1165 0e28 99F7F808 		.word	150534041
- 1166 0e2c 6DC021BF 		.word	-1088307091
- 1167 0e30 8C35C772 		.word	1925657996
- 1168 0e34 A52E1CBF 		.word	-1088672091
- 1169 0e38 4FA2970B 		.word	194486863
- 1170 0e3c 0D0913BF 		.word	-1089271539
- 1171 0e40 89B35ECD 		.word	-849431671
- 1172 0e44 A66E02BF 		.word	-1090359642
- 1173 0e48 BB2F8597 		.word	-1752879173
- 1174 0e4c A57DA83E 		.word	1051229605
- 1175 0e50 1CA39B08 		.word	144417564
- 1176 0e54 6A8F003F 		.word	1057001322
- 1177 0e58 0D32C52C 		.word	751120909
- 1178 0e5c 86CB0C3F 		.word	1057803142
- 1179 0e60 E892EEE2 		.word	-487681304
- 1180 0e64 7B2F123F 		.word	1058156411
- 1181 0e68 2E4E6FF1 		.word	-244363730
- 1182 0e6c 7595133F 		.word	1058248053
- 1183 0e70 F6B3D8CA 		.word	-891767818
- 1184 0e74 BCCC123F 		.word	1058196668
- 1185 0e78 7604ECB4 		.word	-1259600778
- 1186 0e7c 3340103F 		.word	1058029619
- 1187 0e80 8E799A62 		.word	1654290830
- 1188 0e84 19FB083F 		.word	1057553177
- 1189              		.bss
- 1190              		.align	2
- 1191              		.set	.LANCHOR0,. + 0
- 1192              		.type	ds, %object
- 1193              		.size	ds, 4
- 1194              	ds:
- 1195 0000 00000000 		.space	4
- 1196              		.type	g_flt, %object
- 1197              		.size	g_flt, 4
- 1198              	g_flt:
- 1199 0004 00000000 		.space	4
- 1200              		.type	g_filter_ready, %object
- 1201              		.size	g_filter_ready, 1
- 1202              	g_filter_ready:
- 1203 0008 00       		.space	1
- 1204 0009 00       		.space	1
- 1205              		.type	hb_count.6289, %object
- 1206              		.size	hb_count.6289, 2
- 1207              	hb_count.6289:
- 1208 000a 0000     		.space	2
- 1209              		.text
- 1210              	.Letext0:
- 1211              		.file 2 "c:\\program files (x86)\\cypress\\psoc creator\\4.4\\psoc creator\\import\\gnu\\arm\\5.4.
- 1212              		.file 3 "c:\\program files (x86)\\cypress\\psoc creator\\4.4\\psoc creator\\import\\gnu\\arm\\5.4.
- 1213              		.file 4 "Generated_Source\\PSoC5/cytypes.h"
- 1214              		.file 5 "Generated_Source\\PSoC5/core_cm3.h"
- 1215              		.file 6 "coeficientes_notch.h"
- 1216              		.file 7 "Generated_Source\\PSoC5/ADC_DelSig.h"
- 1217              		.file 8 "Generated_Source\\PSoC5/Filter.h"
- 1218              		.file 9 "Generated_Source\\PSoC5/UART_PC.h"
- 1219              		.file 10 "Generated_Source\\PSoC5/PGA_p_1.h"
- 1220              		.file 11 "Generated_Source\\PSoC5/PGA_p_2.h"
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 25
-
-
- 1221              		.file 12 "Generated_Source\\PSoC5/PGA_n_1.h"
- 1222              		.file 13 "Generated_Source\\PSoC5/PGA_n_2.h"
- 1223              		.file 14 "Generated_Source\\PSoC5/OpaBP_p.h"
- 1224              		.file 15 "Generated_Source\\PSoC5/OpaBP_n.h"
- 1225              		.file 16 "Generated_Source\\PSoC5/OpaLP_p.h"
- 1226              		.file 17 "Generated_Source\\PSoC5/OpaLP_n.h"
- 1227              		.file 18 "Generated_Source\\PSoC5/isr_DelSig.h"
- 1228              		.file 19 "Generated_Source\\PSoC5/isr_Filter.h"
- 1229              		.file 20 "Generated_Source\\PSoC5/CyLib.h"
- 1230              		.section	.debug_info,"",%progbits
- 1231              	.Ldebug_info0:
- 1232 0000 26040000 		.4byte	0x426
- 1233 0004 0400     		.2byte	0x4
- 1234 0006 00000000 		.4byte	.Ldebug_abbrev0
- 1235 000a 04       		.byte	0x4
- 1236 000b 01       		.uleb128 0x1
- 1237 000c 87000000 		.4byte	.LASF50
- 1238 0010 0C       		.byte	0xc
- 1239 0011 BD020000 		.4byte	.LASF51
- 1240 0015 61010000 		.4byte	.LASF52
- 1241 0019 00000000 		.4byte	.Ldebug_ranges0+0
- 1242 001d 00000000 		.4byte	0
- 1243 0021 00000000 		.4byte	.Ldebug_line0
- 1244 0025 02       		.uleb128 0x2
- 1245 0026 01       		.byte	0x1
- 1246 0027 06       		.byte	0x6
- 1247 0028 5B030000 		.4byte	.LASF0
- 1248 002c 02       		.uleb128 0x2
- 1249 002d 01       		.byte	0x1
- 1250 002e 08       		.byte	0x8
- 1251 002f 79000000 		.4byte	.LASF1
- 1252 0033 02       		.uleb128 0x2
- 1253 0034 02       		.byte	0x2
- 1254 0035 05       		.byte	0x5
- 1255 0036 02030000 		.4byte	.LASF2
- 1256 003a 02       		.uleb128 0x2
- 1257 003b 02       		.byte	0x2
- 1258 003c 07       		.byte	0x7
- 1259 003d 67030000 		.4byte	.LASF3
- 1260 0041 03       		.uleb128 0x3
- 1261 0042 13000000 		.4byte	.LASF9
- 1262 0046 02       		.byte	0x2
- 1263 0047 3F       		.byte	0x3f
- 1264 0048 4C000000 		.4byte	0x4c
- 1265 004c 02       		.uleb128 0x2
- 1266 004d 04       		.byte	0x4
- 1267 004e 05       		.byte	0x5
- 1268 004f 41030000 		.4byte	.LASF4
- 1269 0053 02       		.uleb128 0x2
- 1270 0054 04       		.byte	0x4
- 1271 0055 07       		.byte	0x7
- 1272 0056 22010000 		.4byte	.LASF5
- 1273 005a 02       		.uleb128 0x2
- 1274 005b 08       		.byte	0x8
- 1275 005c 05       		.byte	0x5
- 1276 005d AF020000 		.4byte	.LASF6
- 1277 0061 02       		.uleb128 0x2
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 26
-
-
- 1278 0062 08       		.byte	0x8
- 1279 0063 07       		.byte	0x7
- 1280 0064 26020000 		.4byte	.LASF7
- 1281 0068 04       		.uleb128 0x4
- 1282 0069 04       		.byte	0x4
- 1283 006a 05       		.byte	0x5
- 1284 006b 696E7400 		.ascii	"int\000"
- 1285 006f 02       		.uleb128 0x2
- 1286 0070 04       		.byte	0x4
- 1287 0071 07       		.byte	0x7
- 1288 0072 0B020000 		.4byte	.LASF8
- 1289 0076 03       		.uleb128 0x3
- 1290 0077 46000000 		.4byte	.LASF10
- 1291 007b 03       		.byte	0x3
- 1292 007c 2C       		.byte	0x2c
- 1293 007d 41000000 		.4byte	0x41
- 1294 0081 05       		.uleb128 0x5
- 1295 0082 32000000 		.4byte	.LASF11
- 1296 0086 04       		.byte	0x4
- 1297 0087 E901     		.2byte	0x1e9
- 1298 0089 2C000000 		.4byte	0x2c
- 1299 008d 05       		.uleb128 0x5
- 1300 008e C9010000 		.4byte	.LASF12
- 1301 0092 04       		.byte	0x4
- 1302 0093 EA01     		.2byte	0x1ea
- 1303 0095 3A000000 		.4byte	0x3a
- 1304 0099 05       		.uleb128 0x5
- 1305 009a DE010000 		.4byte	.LASF13
- 1306 009e 04       		.byte	0x4
- 1307 009f EB01     		.2byte	0x1eb
- 1308 00a1 53000000 		.4byte	0x53
- 1309 00a5 05       		.uleb128 0x5
- 1310 00a6 34010000 		.4byte	.LASF14
- 1311 00aa 04       		.byte	0x4
- 1312 00ab EE01     		.2byte	0x1ee
- 1313 00ad 4C000000 		.4byte	0x4c
- 1314 00b1 02       		.uleb128 0x2
- 1315 00b2 04       		.byte	0x4
- 1316 00b3 04       		.byte	0x4
- 1317 00b4 4E000000 		.4byte	.LASF15
- 1318 00b8 02       		.uleb128 0x2
- 1319 00b9 08       		.byte	0x8
- 1320 00ba 04       		.byte	0x4
- 1321 00bb 2B000000 		.4byte	.LASF16
- 1322 00bf 02       		.uleb128 0x2
- 1323 00c0 01       		.byte	0x1
- 1324 00c1 08       		.byte	0x8
- 1325 00c2 C4020000 		.4byte	.LASF17
- 1326 00c6 06       		.uleb128 0x6
- 1327 00c7 81000000 		.4byte	0x81
- 1328 00cb 02       		.uleb128 0x2
- 1329 00cc 08       		.byte	0x8
- 1330 00cd 04       		.byte	0x4
- 1331 00ce AF010000 		.4byte	.LASF18
- 1332 00d2 02       		.uleb128 0x2
- 1333 00d3 04       		.byte	0x4
- 1334 00d4 07       		.byte	0x7
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 27
-
-
- 1335 00d5 93020000 		.4byte	.LASF19
- 1336 00d9 07       		.uleb128 0x7
- 1337 00da 3D020000 		.4byte	.LASF20
- 1338 00de 01       		.byte	0x1
- 1339 00df 2B       		.byte	0x2b
- 1340 00e0 00000000 		.4byte	.LFB63
- 1341 00e4 18000000 		.4byte	.LFE63-.LFB63
- 1342 00e8 01       		.uleb128 0x1
- 1343 00e9 9C       		.byte	0x9c
- 1344 00ea 07010000 		.4byte	0x107
- 1345 00ee 08       		.uleb128 0x8
- 1346 00ef 06000000 		.4byte	.LVL0
- 1347 00f3 37030000 		.4byte	0x337
- 1348 00f7 09       		.uleb128 0x9
- 1349 00f8 12000000 		.4byte	.LVL1
- 1350 00fc 42030000 		.4byte	0x342
- 1351 0100 0A       		.uleb128 0xa
- 1352 0101 01       		.uleb128 0x1
- 1353 0102 50       		.byte	0x50
- 1354 0103 01       		.uleb128 0x1
- 1355 0104 30       		.byte	0x30
- 1356 0105 00       		.byte	0
- 1357 0106 00       		.byte	0
- 1358 0107 07       		.uleb128 0x7
- 1359 0108 9F010000 		.4byte	.LASF21
- 1360 010c 01       		.byte	0x1
- 1361 010d 32       		.byte	0x32
- 1362 010e 00000000 		.4byte	.LFB64
- 1363 0112 20000000 		.4byte	.LFE64-.LFB64
- 1364 0116 01       		.uleb128 0x1
- 1365 0117 9C       		.byte	0x9c
- 1366 0118 3B010000 		.4byte	0x13b
- 1367 011c 0B       		.uleb128 0xb
- 1368 011d 72617700 		.ascii	"raw\000"
- 1369 0121 01       		.byte	0x1
- 1370 0122 34       		.byte	0x34
- 1371 0123 99000000 		.4byte	0x99
- 1372 0127 00000000 		.4byte	.LLST0
- 1373 012b 09       		.uleb128 0x9
- 1374 012c 08000000 		.4byte	.LVL2
- 1375 0130 4D030000 		.4byte	0x34d
- 1376 0134 0A       		.uleb128 0xa
- 1377 0135 01       		.uleb128 0x1
- 1378 0136 50       		.byte	0x50
- 1379 0137 01       		.uleb128 0x1
- 1380 0138 30       		.byte	0x30
- 1381 0139 00       		.byte	0
- 1382 013a 00       		.byte	0
- 1383 013b 0C       		.uleb128 0xc
- 1384 013c E5010000 		.4byte	.LASF53
- 1385 0140 01       		.byte	0x1
- 1386 0141 4D       		.byte	0x4d
- 1387 0142 68000000 		.4byte	0x68
- 1388 0146 00000000 		.4byte	.LFB66
- 1389 014a DC000000 		.4byte	.LFE66-.LFB66
- 1390 014e 01       		.uleb128 0x1
- 1391 014f 9C       		.byte	0x9c
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 28
-
-
- 1392 0150 BD020000 		.4byte	0x2bd
- 1393 0154 0D       		.uleb128 0xd
- 1394 0155 DD020000 		.4byte	.LASF22
- 1395 0159 01       		.byte	0x1
- 1396 015a 4F       		.byte	0x4f
- 1397 015b 8D000000 		.4byte	0x8d
- 1398 015f 05       		.uleb128 0x5
- 1399 0160 03       		.byte	0x3
- 1400 0161 0A000000 		.4byte	hb_count.6289
- 1401 0165 0E       		.uleb128 0xe
- 1402 0166 706B7400 		.ascii	"pkt\000"
- 1403 016a 01       		.byte	0x1
- 1404 016b 50       		.byte	0x50
- 1405 016c BD020000 		.4byte	0x2bd
- 1406 0170 02       		.uleb128 0x2
- 1407 0171 91       		.byte	0x91
- 1408 0172 68       		.sleb128 -24
- 1409 0173 0F       		.uleb128 0xf
- 1410 0174 01020000 		.4byte	.LASF54
- 1411 0178 01       		.byte	0x1
- 1412 0179 51       		.byte	0x51
- 1413 017a A5000000 		.4byte	0xa5
- 1414 017e 0E       		.uleb128 0xe
- 1415 017f 666C7400 		.ascii	"flt\000"
- 1416 0183 01       		.byte	0x1
- 1417 0184 52       		.byte	0x52
- 1418 0185 A5000000 		.4byte	0xa5
- 1419 0189 01       		.uleb128 0x1
- 1420 018a 55       		.byte	0x55
- 1421 018b 10       		.uleb128 0x10
- 1422 018c 3A010000 		.4byte	.LASF23
- 1423 0190 01       		.byte	0x1
- 1424 0191 53       		.byte	0x53
- 1425 0192 81000000 		.4byte	0x81
- 1426 0196 13000000 		.4byte	.LLST1
- 1427 019a 08       		.uleb128 0x8
- 1428 019b 0A000000 		.4byte	.LVL4
- 1429 019f 58030000 		.4byte	0x358
- 1430 01a3 08       		.uleb128 0x8
- 1431 01a4 0E000000 		.4byte	.LVL5
- 1432 01a8 63030000 		.4byte	0x363
- 1433 01ac 08       		.uleb128 0x8
- 1434 01ad 12000000 		.4byte	.LVL6
- 1435 01b1 6E030000 		.4byte	0x36e
- 1436 01b5 08       		.uleb128 0x8
- 1437 01b6 16000000 		.4byte	.LVL7
- 1438 01ba 79030000 		.4byte	0x379
- 1439 01be 08       		.uleb128 0x8
- 1440 01bf 1A000000 		.4byte	.LVL8
- 1441 01c3 84030000 		.4byte	0x384
- 1442 01c7 08       		.uleb128 0x8
- 1443 01c8 1E000000 		.4byte	.LVL9
- 1444 01cc 8F030000 		.4byte	0x38f
- 1445 01d0 08       		.uleb128 0x8
- 1446 01d1 22000000 		.4byte	.LVL10
- 1447 01d5 9A030000 		.4byte	0x39a
- 1448 01d9 08       		.uleb128 0x8
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 29
-
-
- 1449 01da 26000000 		.4byte	.LVL11
- 1450 01de A5030000 		.4byte	0x3a5
- 1451 01e2 08       		.uleb128 0x8
- 1452 01e3 2A000000 		.4byte	.LVL12
- 1453 01e7 B0030000 		.4byte	0x3b0
- 1454 01eb 08       		.uleb128 0x8
- 1455 01ec 2E000000 		.4byte	.LVL13
- 1456 01f0 BB030000 		.4byte	0x3bb
- 1457 01f4 11       		.uleb128 0x11
- 1458 01f5 36000000 		.4byte	.LVL14
- 1459 01f9 C6030000 		.4byte	0x3c6
- 1460 01fd 0C020000 		.4byte	0x20c
- 1461 0201 0A       		.uleb128 0xa
- 1462 0202 01       		.uleb128 0x1
- 1463 0203 50       		.byte	0x50
- 1464 0204 01       		.uleb128 0x1
- 1465 0205 30       		.byte	0x30
- 1466 0206 0A       		.uleb128 0xa
- 1467 0207 01       		.uleb128 0x1
- 1468 0208 51       		.byte	0x51
- 1469 0209 01       		.uleb128 0x1
- 1470 020a 30       		.byte	0x30
- 1471 020b 00       		.byte	0
- 1472 020c 11       		.uleb128 0x11
- 1473 020d 3E000000 		.4byte	.LVL15
- 1474 0211 D1030000 		.4byte	0x3d1
- 1475 0215 24020000 		.4byte	0x224
- 1476 0219 0A       		.uleb128 0xa
- 1477 021a 01       		.uleb128 0x1
- 1478 021b 50       		.byte	0x50
- 1479 021c 01       		.uleb128 0x1
- 1480 021d 31       		.byte	0x31
- 1481 021e 0A       		.uleb128 0xa
- 1482 021f 01       		.uleb128 0x1
- 1483 0220 51       		.byte	0x51
- 1484 0221 01       		.uleb128 0x1
- 1485 0222 30       		.byte	0x30
- 1486 0223 00       		.byte	0
- 1487 0224 11       		.uleb128 0x11
- 1488 0225 46000000 		.4byte	.LVL16
- 1489 0229 D1030000 		.4byte	0x3d1
- 1490 022d 3C020000 		.4byte	0x23c
- 1491 0231 0A       		.uleb128 0xa
- 1492 0232 01       		.uleb128 0x1
- 1493 0233 50       		.byte	0x50
- 1494 0234 01       		.uleb128 0x1
- 1495 0235 34       		.byte	0x34
- 1496 0236 0A       		.uleb128 0xa
- 1497 0237 01       		.uleb128 0x1
- 1498 0238 51       		.byte	0x51
- 1499 0239 01       		.uleb128 0x1
- 1500 023a 30       		.byte	0x30
- 1501 023b 00       		.byte	0
- 1502 023c 08       		.uleb128 0x8
- 1503 023d 4A000000 		.4byte	.LVL17
- 1504 0241 DC030000 		.4byte	0x3dc
- 1505 0245 08       		.uleb128 0x8
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 30
-
-
- 1506 0246 4E000000 		.4byte	.LVL18
- 1507 024a E7030000 		.4byte	0x3e7
- 1508 024e 11       		.uleb128 0x11
- 1509 024f 54000000 		.4byte	.LVL19
- 1510 0253 F2030000 		.4byte	0x3f2
- 1511 0257 65020000 		.4byte	0x265
- 1512 025b 0A       		.uleb128 0xa
- 1513 025c 01       		.uleb128 0x1
- 1514 025d 50       		.byte	0x50
- 1515 025e 05       		.uleb128 0x5
- 1516 025f 03       		.byte	0x3
- 1517 0260 00000000 		.4byte	isr_DelSigReady
- 1518 0264 00       		.byte	0
- 1519 0265 11       		.uleb128 0x11
- 1520 0266 5A000000 		.4byte	.LVL20
- 1521 026a FD030000 		.4byte	0x3fd
- 1522 026e 7C020000 		.4byte	0x27c
- 1523 0272 0A       		.uleb128 0xa
- 1524 0273 01       		.uleb128 0x1
- 1525 0274 50       		.byte	0x50
- 1526 0275 05       		.uleb128 0x5
- 1527 0276 03       		.byte	0x3
- 1528 0277 00000000 		.4byte	isr_FilterReady
- 1529 027b 00       		.byte	0
- 1530 027c 08       		.uleb128 0x8
- 1531 027d 68000000 		.4byte	.LVL21
- 1532 0281 08040000 		.4byte	0x408
- 1533 0285 08       		.uleb128 0x8
- 1534 0286 74000000 		.4byte	.LVL23
- 1535 028a 13040000 		.4byte	0x413
- 1536 028e 11       		.uleb128 0x11
- 1537 028f 9A000000 		.4byte	.LVL24
- 1538 0293 1E040000 		.4byte	0x41e
- 1539 0297 A7020000 		.4byte	0x2a7
- 1540 029b 0A       		.uleb128 0xa
- 1541 029c 01       		.uleb128 0x1
- 1542 029d 50       		.byte	0x50
- 1543 029e 02       		.uleb128 0x2
- 1544 029f 7D       		.byte	0x7d
- 1545 02a0 00       		.sleb128 0
- 1546 02a1 0A       		.uleb128 0xa
- 1547 02a2 01       		.uleb128 0x1
- 1548 02a3 51       		.byte	0x51
- 1549 02a4 01       		.uleb128 0x1
- 1550 02a5 35       		.byte	0x35
- 1551 02a6 00       		.byte	0
- 1552 02a7 09       		.uleb128 0x9
- 1553 02a8 CE000000 		.4byte	.LVL25
- 1554 02ac 1E040000 		.4byte	0x41e
- 1555 02b0 0A       		.uleb128 0xa
- 1556 02b1 01       		.uleb128 0x1
- 1557 02b2 50       		.byte	0x50
- 1558 02b3 02       		.uleb128 0x2
- 1559 02b4 7D       		.byte	0x7d
- 1560 02b5 00       		.sleb128 0
- 1561 02b6 0A       		.uleb128 0xa
- 1562 02b7 01       		.uleb128 0x1
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 31
-
-
- 1563 02b8 51       		.byte	0x51
- 1564 02b9 01       		.uleb128 0x1
- 1565 02ba 35       		.byte	0x35
- 1566 02bb 00       		.byte	0
- 1567 02bc 00       		.byte	0
- 1568 02bd 12       		.uleb128 0x12
- 1569 02be 81000000 		.4byte	0x81
- 1570 02c2 CD020000 		.4byte	0x2cd
- 1571 02c6 13       		.uleb128 0x13
- 1572 02c7 D2000000 		.4byte	0xd2
- 1573 02cb 04       		.byte	0x4
- 1574 02cc 00       		.byte	0
- 1575 02cd 0D       		.uleb128 0xd
- 1576 02ce 5B010000 		.4byte	.LASF24
- 1577 02d2 01       		.byte	0x1
- 1578 02d3 27       		.byte	0x27
- 1579 02d4 DE020000 		.4byte	0x2de
- 1580 02d8 05       		.uleb128 0x5
- 1581 02d9 03       		.byte	0x3
- 1582 02da 04000000 		.4byte	g_flt
- 1583 02de 06       		.uleb128 0x6
- 1584 02df A5000000 		.4byte	0xa5
- 1585 02e3 0D       		.uleb128 0xd
- 1586 02e4 7A030000 		.4byte	.LASF25
- 1587 02e8 01       		.byte	0x1
- 1588 02e9 28       		.byte	0x28
- 1589 02ea C6000000 		.4byte	0xc6
- 1590 02ee 05       		.uleb128 0x5
- 1591 02ef 03       		.byte	0x3
- 1592 02f0 08000000 		.4byte	g_filter_ready
- 1593 02f4 0E       		.uleb128 0xe
- 1594 02f5 647300   		.ascii	"ds\000"
- 1595 02f8 01       		.byte	0x1
- 1596 02f9 29       		.byte	0x29
- 1597 02fa DE020000 		.4byte	0x2de
- 1598 02fe 05       		.uleb128 0x5
- 1599 02ff 03       		.byte	0x3
- 1600 0300 00000000 		.4byte	ds
- 1601 0304 14       		.uleb128 0x14
- 1602 0305 4E010000 		.4byte	.LASF26
- 1603 0309 05       		.byte	0x5
- 1604 030a 1207     		.2byte	0x712
- 1605 030c 10030000 		.4byte	0x310
- 1606 0310 06       		.uleb128 0x6
- 1607 0311 76000000 		.4byte	0x76
- 1608 0315 12       		.uleb128 0x12
- 1609 0316 B8000000 		.4byte	0xb8
- 1610 031a 26030000 		.4byte	0x326
- 1611 031e 15       		.uleb128 0x15
- 1612 031f D2000000 		.4byte	0xd2
- 1613 0323 D001     		.2byte	0x1d0
- 1614 0325 00       		.byte	0
- 1615 0326 16       		.uleb128 0x16
- 1616 0327 0C030000 		.4byte	.LASF27
- 1617 032b 06       		.byte	0x6
- 1618 032c 06       		.byte	0x6
- 1619 032d 15030000 		.4byte	0x315
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 32
-
-
- 1620 0331 05       		.uleb128 0x5
- 1621 0332 03       		.byte	0x3
- 1622 0333 00000000 		.4byte	filter_coeffs
- 1623 0337 17       		.uleb128 0x17
- 1624 0338 62000000 		.4byte	.LASF28
- 1625 033c 62000000 		.4byte	.LASF28
- 1626 0340 07       		.byte	0x7
- 1627 0341 42       		.byte	0x42
- 1628 0342 17       		.uleb128 0x17
- 1629 0343 84020000 		.4byte	.LASF29
- 1630 0347 84020000 		.4byte	.LASF29
- 1631 034b 08       		.byte	0x8
- 1632 034c 43       		.byte	0x43
- 1633 034d 17       		.uleb128 0x17
- 1634 034e E6020000 		.4byte	.LASF30
- 1635 0352 E6020000 		.4byte	.LASF30
- 1636 0356 08       		.byte	0x8
- 1637 0357 40       		.byte	0x40
- 1638 0358 17       		.uleb128 0x17
- 1639 0359 38000000 		.4byte	.LASF31
- 1640 035d 38000000 		.4byte	.LASF31
- 1641 0361 09       		.byte	0x9
- 1642 0362 54       		.byte	0x54
- 1643 0363 17       		.uleb128 0x17
- 1644 0364 40010000 		.4byte	.LASF32
- 1645 0368 40010000 		.4byte	.LASF32
- 1646 036c 0A       		.byte	0xa
- 1647 036d 3E       		.byte	0x3e
- 1648 036e 17       		.uleb128 0x17
- 1649 036f BB010000 		.4byte	.LASF33
- 1650 0373 BB010000 		.4byte	.LASF33
- 1651 0377 0B       		.byte	0xb
- 1652 0378 3E       		.byte	0x3e
- 1653 0379 17       		.uleb128 0x17
- 1654 037a 4D020000 		.4byte	.LASF34
- 1655 037e 4D020000 		.4byte	.LASF34
- 1656 0382 0C       		.byte	0xc
- 1657 0383 3E       		.byte	0x3e
- 1658 0384 17       		.uleb128 0x17
- 1659 0385 54000000 		.4byte	.LASF35
- 1660 0389 54000000 		.4byte	.LASF35
- 1661 038d 0D       		.byte	0xd
- 1662 038e 3E       		.byte	0x3e
- 1663 038f 17       		.uleb128 0x17
- 1664 0390 1D000000 		.4byte	.LASF36
- 1665 0394 1D000000 		.4byte	.LASF36
- 1666 0398 0E       		.byte	0xe
- 1667 0399 33       		.byte	0x33
- 1668 039a 17       		.uleb128 0x17
- 1669 039b D0010000 		.4byte	.LASF37
- 1670 039f D0010000 		.4byte	.LASF37
- 1671 03a3 0F       		.byte	0xf
- 1672 03a4 33       		.byte	0x33
- 1673 03a5 17       		.uleb128 0x17
- 1674 03a6 F4020000 		.4byte	.LASF38
- 1675 03aa F4020000 		.4byte	.LASF38
- 1676 03ae 10       		.byte	0x10
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 33
-
-
- 1677 03af 33       		.byte	0x33
- 1678 03b0 17       		.uleb128 0x17
- 1679 03b1 18020000 		.4byte	.LASF39
- 1680 03b5 18020000 		.4byte	.LASF39
- 1681 03b9 11       		.byte	0x11
- 1682 03ba 33       		.byte	0x33
- 1683 03bb 17       		.uleb128 0x17
- 1684 03bc 15010000 		.4byte	.LASF40
- 1685 03c0 15010000 		.4byte	.LASF40
- 1686 03c4 08       		.byte	0x8
- 1687 03c5 3C       		.byte	0x3c
- 1688 03c6 17       		.uleb128 0x17
- 1689 03c7 C9020000 		.4byte	.LASF41
- 1690 03cb C9020000 		.4byte	.LASF41
- 1691 03cf 08       		.byte	0x8
- 1692 03d0 4A       		.byte	0x4a
- 1693 03d1 17       		.uleb128 0x17
- 1694 03d2 4A030000 		.4byte	.LASF42
- 1695 03d6 4A030000 		.4byte	.LASF42
- 1696 03da 08       		.byte	0x8
- 1697 03db 4C       		.byte	0x4c
- 1698 03dc 17       		.uleb128 0x17
- 1699 03dd 30030000 		.4byte	.LASF43
- 1700 03e1 30030000 		.4byte	.LASF43
- 1701 03e5 07       		.byte	0x7
- 1702 03e6 3A       		.byte	0x3a
- 1703 03e7 17       		.uleb128 0x17
- 1704 03e8 6C020000 		.4byte	.LASF44
- 1705 03ec 6C020000 		.4byte	.LASF44
- 1706 03f0 07       		.byte	0x7
- 1707 03f1 3D       		.byte	0x3d
- 1708 03f2 17       		.uleb128 0x17
- 1709 03f3 9C020000 		.4byte	.LASF45
- 1710 03f7 9C020000 		.4byte	.LASF45
- 1711 03fb 12       		.byte	0x12
- 1712 03fc 18       		.byte	0x18
- 1713 03fd 17       		.uleb128 0x17
- 1714 03fe 00000000 		.4byte	.LASF46
- 1715 0402 00000000 		.4byte	.LASF46
- 1716 0406 13       		.byte	0x13
- 1717 0407 18       		.byte	0x18
- 1718 0408 17       		.uleb128 0x17
- 1719 0409 EA010000 		.4byte	.LASF47
- 1720 040d EA010000 		.4byte	.LASF47
- 1721 0411 14       		.byte	0x14
- 1722 0412 7D       		.byte	0x7d
- 1723 0413 17       		.uleb128 0x17
- 1724 0414 1A030000 		.4byte	.LASF48
- 1725 0418 1A030000 		.4byte	.LASF48
- 1726 041c 14       		.byte	0x14
- 1727 041d 7E       		.byte	0x7e
- 1728 041e 17       		.uleb128 0x17
- 1729 041f 5B020000 		.4byte	.LASF49
- 1730 0423 5B020000 		.4byte	.LASF49
- 1731 0427 09       		.byte	0x9
- 1732 0428 8C       		.byte	0x8c
- 1733 0429 00       		.byte	0
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 34
-
-
- 1734              		.section	.debug_abbrev,"",%progbits
- 1735              	.Ldebug_abbrev0:
- 1736 0000 01       		.uleb128 0x1
- 1737 0001 11       		.uleb128 0x11
- 1738 0002 01       		.byte	0x1
- 1739 0003 25       		.uleb128 0x25
- 1740 0004 0E       		.uleb128 0xe
- 1741 0005 13       		.uleb128 0x13
- 1742 0006 0B       		.uleb128 0xb
- 1743 0007 03       		.uleb128 0x3
- 1744 0008 0E       		.uleb128 0xe
- 1745 0009 1B       		.uleb128 0x1b
- 1746 000a 0E       		.uleb128 0xe
- 1747 000b 55       		.uleb128 0x55
- 1748 000c 17       		.uleb128 0x17
- 1749 000d 11       		.uleb128 0x11
- 1750 000e 01       		.uleb128 0x1
- 1751 000f 10       		.uleb128 0x10
- 1752 0010 17       		.uleb128 0x17
- 1753 0011 00       		.byte	0
- 1754 0012 00       		.byte	0
- 1755 0013 02       		.uleb128 0x2
- 1756 0014 24       		.uleb128 0x24
- 1757 0015 00       		.byte	0
- 1758 0016 0B       		.uleb128 0xb
- 1759 0017 0B       		.uleb128 0xb
- 1760 0018 3E       		.uleb128 0x3e
- 1761 0019 0B       		.uleb128 0xb
- 1762 001a 03       		.uleb128 0x3
- 1763 001b 0E       		.uleb128 0xe
- 1764 001c 00       		.byte	0
- 1765 001d 00       		.byte	0
- 1766 001e 03       		.uleb128 0x3
- 1767 001f 16       		.uleb128 0x16
- 1768 0020 00       		.byte	0
- 1769 0021 03       		.uleb128 0x3
- 1770 0022 0E       		.uleb128 0xe
- 1771 0023 3A       		.uleb128 0x3a
- 1772 0024 0B       		.uleb128 0xb
- 1773 0025 3B       		.uleb128 0x3b
- 1774 0026 0B       		.uleb128 0xb
- 1775 0027 49       		.uleb128 0x49
- 1776 0028 13       		.uleb128 0x13
- 1777 0029 00       		.byte	0
- 1778 002a 00       		.byte	0
- 1779 002b 04       		.uleb128 0x4
- 1780 002c 24       		.uleb128 0x24
- 1781 002d 00       		.byte	0
- 1782 002e 0B       		.uleb128 0xb
- 1783 002f 0B       		.uleb128 0xb
- 1784 0030 3E       		.uleb128 0x3e
- 1785 0031 0B       		.uleb128 0xb
- 1786 0032 03       		.uleb128 0x3
- 1787 0033 08       		.uleb128 0x8
- 1788 0034 00       		.byte	0
- 1789 0035 00       		.byte	0
- 1790 0036 05       		.uleb128 0x5
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 35
-
-
- 1791 0037 16       		.uleb128 0x16
- 1792 0038 00       		.byte	0
- 1793 0039 03       		.uleb128 0x3
- 1794 003a 0E       		.uleb128 0xe
- 1795 003b 3A       		.uleb128 0x3a
- 1796 003c 0B       		.uleb128 0xb
- 1797 003d 3B       		.uleb128 0x3b
- 1798 003e 05       		.uleb128 0x5
- 1799 003f 49       		.uleb128 0x49
- 1800 0040 13       		.uleb128 0x13
- 1801 0041 00       		.byte	0
- 1802 0042 00       		.byte	0
- 1803 0043 06       		.uleb128 0x6
- 1804 0044 35       		.uleb128 0x35
- 1805 0045 00       		.byte	0
- 1806 0046 49       		.uleb128 0x49
- 1807 0047 13       		.uleb128 0x13
- 1808 0048 00       		.byte	0
- 1809 0049 00       		.byte	0
- 1810 004a 07       		.uleb128 0x7
- 1811 004b 2E       		.uleb128 0x2e
- 1812 004c 01       		.byte	0x1
- 1813 004d 3F       		.uleb128 0x3f
- 1814 004e 19       		.uleb128 0x19
- 1815 004f 03       		.uleb128 0x3
- 1816 0050 0E       		.uleb128 0xe
- 1817 0051 3A       		.uleb128 0x3a
- 1818 0052 0B       		.uleb128 0xb
- 1819 0053 3B       		.uleb128 0x3b
- 1820 0054 0B       		.uleb128 0xb
- 1821 0055 27       		.uleb128 0x27
- 1822 0056 19       		.uleb128 0x19
- 1823 0057 11       		.uleb128 0x11
- 1824 0058 01       		.uleb128 0x1
- 1825 0059 12       		.uleb128 0x12
- 1826 005a 06       		.uleb128 0x6
- 1827 005b 40       		.uleb128 0x40
- 1828 005c 18       		.uleb128 0x18
- 1829 005d 9742     		.uleb128 0x2117
- 1830 005f 19       		.uleb128 0x19
- 1831 0060 01       		.uleb128 0x1
- 1832 0061 13       		.uleb128 0x13
- 1833 0062 00       		.byte	0
- 1834 0063 00       		.byte	0
- 1835 0064 08       		.uleb128 0x8
- 1836 0065 898201   		.uleb128 0x4109
- 1837 0068 00       		.byte	0
- 1838 0069 11       		.uleb128 0x11
- 1839 006a 01       		.uleb128 0x1
- 1840 006b 31       		.uleb128 0x31
- 1841 006c 13       		.uleb128 0x13
- 1842 006d 00       		.byte	0
- 1843 006e 00       		.byte	0
- 1844 006f 09       		.uleb128 0x9
- 1845 0070 898201   		.uleb128 0x4109
- 1846 0073 01       		.byte	0x1
- 1847 0074 11       		.uleb128 0x11
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 36
-
-
- 1848 0075 01       		.uleb128 0x1
- 1849 0076 31       		.uleb128 0x31
- 1850 0077 13       		.uleb128 0x13
- 1851 0078 00       		.byte	0
- 1852 0079 00       		.byte	0
- 1853 007a 0A       		.uleb128 0xa
- 1854 007b 8A8201   		.uleb128 0x410a
- 1855 007e 00       		.byte	0
- 1856 007f 02       		.uleb128 0x2
- 1857 0080 18       		.uleb128 0x18
- 1858 0081 9142     		.uleb128 0x2111
- 1859 0083 18       		.uleb128 0x18
- 1860 0084 00       		.byte	0
- 1861 0085 00       		.byte	0
- 1862 0086 0B       		.uleb128 0xb
- 1863 0087 34       		.uleb128 0x34
- 1864 0088 00       		.byte	0
- 1865 0089 03       		.uleb128 0x3
- 1866 008a 08       		.uleb128 0x8
- 1867 008b 3A       		.uleb128 0x3a
- 1868 008c 0B       		.uleb128 0xb
- 1869 008d 3B       		.uleb128 0x3b
- 1870 008e 0B       		.uleb128 0xb
- 1871 008f 49       		.uleb128 0x49
- 1872 0090 13       		.uleb128 0x13
- 1873 0091 02       		.uleb128 0x2
- 1874 0092 17       		.uleb128 0x17
- 1875 0093 00       		.byte	0
- 1876 0094 00       		.byte	0
- 1877 0095 0C       		.uleb128 0xc
- 1878 0096 2E       		.uleb128 0x2e
- 1879 0097 01       		.byte	0x1
- 1880 0098 3F       		.uleb128 0x3f
- 1881 0099 19       		.uleb128 0x19
- 1882 009a 03       		.uleb128 0x3
- 1883 009b 0E       		.uleb128 0xe
- 1884 009c 3A       		.uleb128 0x3a
- 1885 009d 0B       		.uleb128 0xb
- 1886 009e 3B       		.uleb128 0x3b
- 1887 009f 0B       		.uleb128 0xb
- 1888 00a0 27       		.uleb128 0x27
- 1889 00a1 19       		.uleb128 0x19
- 1890 00a2 49       		.uleb128 0x49
- 1891 00a3 13       		.uleb128 0x13
- 1892 00a4 8701     		.uleb128 0x87
- 1893 00a6 19       		.uleb128 0x19
- 1894 00a7 11       		.uleb128 0x11
- 1895 00a8 01       		.uleb128 0x1
- 1896 00a9 12       		.uleb128 0x12
- 1897 00aa 06       		.uleb128 0x6
- 1898 00ab 40       		.uleb128 0x40
- 1899 00ac 18       		.uleb128 0x18
- 1900 00ad 9742     		.uleb128 0x2117
- 1901 00af 19       		.uleb128 0x19
- 1902 00b0 01       		.uleb128 0x1
- 1903 00b1 13       		.uleb128 0x13
- 1904 00b2 00       		.byte	0
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 37
-
-
- 1905 00b3 00       		.byte	0
- 1906 00b4 0D       		.uleb128 0xd
- 1907 00b5 34       		.uleb128 0x34
- 1908 00b6 00       		.byte	0
- 1909 00b7 03       		.uleb128 0x3
- 1910 00b8 0E       		.uleb128 0xe
- 1911 00b9 3A       		.uleb128 0x3a
- 1912 00ba 0B       		.uleb128 0xb
- 1913 00bb 3B       		.uleb128 0x3b
- 1914 00bc 0B       		.uleb128 0xb
- 1915 00bd 49       		.uleb128 0x49
- 1916 00be 13       		.uleb128 0x13
- 1917 00bf 02       		.uleb128 0x2
- 1918 00c0 18       		.uleb128 0x18
- 1919 00c1 00       		.byte	0
- 1920 00c2 00       		.byte	0
- 1921 00c3 0E       		.uleb128 0xe
- 1922 00c4 34       		.uleb128 0x34
- 1923 00c5 00       		.byte	0
- 1924 00c6 03       		.uleb128 0x3
- 1925 00c7 08       		.uleb128 0x8
- 1926 00c8 3A       		.uleb128 0x3a
- 1927 00c9 0B       		.uleb128 0xb
- 1928 00ca 3B       		.uleb128 0x3b
- 1929 00cb 0B       		.uleb128 0xb
- 1930 00cc 49       		.uleb128 0x49
- 1931 00cd 13       		.uleb128 0x13
- 1932 00ce 02       		.uleb128 0x2
- 1933 00cf 18       		.uleb128 0x18
- 1934 00d0 00       		.byte	0
- 1935 00d1 00       		.byte	0
- 1936 00d2 0F       		.uleb128 0xf
- 1937 00d3 34       		.uleb128 0x34
- 1938 00d4 00       		.byte	0
- 1939 00d5 03       		.uleb128 0x3
- 1940 00d6 0E       		.uleb128 0xe
- 1941 00d7 3A       		.uleb128 0x3a
- 1942 00d8 0B       		.uleb128 0xb
- 1943 00d9 3B       		.uleb128 0x3b
- 1944 00da 0B       		.uleb128 0xb
- 1945 00db 49       		.uleb128 0x49
- 1946 00dc 13       		.uleb128 0x13
- 1947 00dd 00       		.byte	0
- 1948 00de 00       		.byte	0
- 1949 00df 10       		.uleb128 0x10
- 1950 00e0 34       		.uleb128 0x34
- 1951 00e1 00       		.byte	0
- 1952 00e2 03       		.uleb128 0x3
- 1953 00e3 0E       		.uleb128 0xe
- 1954 00e4 3A       		.uleb128 0x3a
- 1955 00e5 0B       		.uleb128 0xb
- 1956 00e6 3B       		.uleb128 0x3b
- 1957 00e7 0B       		.uleb128 0xb
- 1958 00e8 49       		.uleb128 0x49
- 1959 00e9 13       		.uleb128 0x13
- 1960 00ea 02       		.uleb128 0x2
- 1961 00eb 17       		.uleb128 0x17
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 38
-
-
- 1962 00ec 00       		.byte	0
- 1963 00ed 00       		.byte	0
- 1964 00ee 11       		.uleb128 0x11
- 1965 00ef 898201   		.uleb128 0x4109
- 1966 00f2 01       		.byte	0x1
- 1967 00f3 11       		.uleb128 0x11
- 1968 00f4 01       		.uleb128 0x1
- 1969 00f5 31       		.uleb128 0x31
- 1970 00f6 13       		.uleb128 0x13
- 1971 00f7 01       		.uleb128 0x1
- 1972 00f8 13       		.uleb128 0x13
- 1973 00f9 00       		.byte	0
- 1974 00fa 00       		.byte	0
- 1975 00fb 12       		.uleb128 0x12
- 1976 00fc 01       		.uleb128 0x1
- 1977 00fd 01       		.byte	0x1
- 1978 00fe 49       		.uleb128 0x49
- 1979 00ff 13       		.uleb128 0x13
- 1980 0100 01       		.uleb128 0x1
- 1981 0101 13       		.uleb128 0x13
- 1982 0102 00       		.byte	0
- 1983 0103 00       		.byte	0
- 1984 0104 13       		.uleb128 0x13
- 1985 0105 21       		.uleb128 0x21
- 1986 0106 00       		.byte	0
- 1987 0107 49       		.uleb128 0x49
- 1988 0108 13       		.uleb128 0x13
- 1989 0109 2F       		.uleb128 0x2f
- 1990 010a 0B       		.uleb128 0xb
- 1991 010b 00       		.byte	0
- 1992 010c 00       		.byte	0
- 1993 010d 14       		.uleb128 0x14
- 1994 010e 34       		.uleb128 0x34
- 1995 010f 00       		.byte	0
- 1996 0110 03       		.uleb128 0x3
- 1997 0111 0E       		.uleb128 0xe
- 1998 0112 3A       		.uleb128 0x3a
- 1999 0113 0B       		.uleb128 0xb
- 2000 0114 3B       		.uleb128 0x3b
- 2001 0115 05       		.uleb128 0x5
- 2002 0116 49       		.uleb128 0x49
- 2003 0117 13       		.uleb128 0x13
- 2004 0118 3F       		.uleb128 0x3f
- 2005 0119 19       		.uleb128 0x19
- 2006 011a 3C       		.uleb128 0x3c
- 2007 011b 19       		.uleb128 0x19
- 2008 011c 00       		.byte	0
- 2009 011d 00       		.byte	0
- 2010 011e 15       		.uleb128 0x15
- 2011 011f 21       		.uleb128 0x21
- 2012 0120 00       		.byte	0
- 2013 0121 49       		.uleb128 0x49
- 2014 0122 13       		.uleb128 0x13
- 2015 0123 2F       		.uleb128 0x2f
- 2016 0124 05       		.uleb128 0x5
- 2017 0125 00       		.byte	0
- 2018 0126 00       		.byte	0
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 39
-
-
- 2019 0127 16       		.uleb128 0x16
- 2020 0128 34       		.uleb128 0x34
- 2021 0129 00       		.byte	0
- 2022 012a 03       		.uleb128 0x3
- 2023 012b 0E       		.uleb128 0xe
- 2024 012c 3A       		.uleb128 0x3a
- 2025 012d 0B       		.uleb128 0xb
- 2026 012e 3B       		.uleb128 0x3b
- 2027 012f 0B       		.uleb128 0xb
- 2028 0130 49       		.uleb128 0x49
- 2029 0131 13       		.uleb128 0x13
- 2030 0132 3F       		.uleb128 0x3f
- 2031 0133 19       		.uleb128 0x19
- 2032 0134 02       		.uleb128 0x2
- 2033 0135 18       		.uleb128 0x18
- 2034 0136 00       		.byte	0
- 2035 0137 00       		.byte	0
- 2036 0138 17       		.uleb128 0x17
- 2037 0139 2E       		.uleb128 0x2e
- 2038 013a 00       		.byte	0
- 2039 013b 3F       		.uleb128 0x3f
- 2040 013c 19       		.uleb128 0x19
- 2041 013d 3C       		.uleb128 0x3c
- 2042 013e 19       		.uleb128 0x19
- 2043 013f 6E       		.uleb128 0x6e
- 2044 0140 0E       		.uleb128 0xe
- 2045 0141 03       		.uleb128 0x3
- 2046 0142 0E       		.uleb128 0xe
- 2047 0143 3A       		.uleb128 0x3a
- 2048 0144 0B       		.uleb128 0xb
- 2049 0145 3B       		.uleb128 0x3b
- 2050 0146 0B       		.uleb128 0xb
- 2051 0147 00       		.byte	0
- 2052 0148 00       		.byte	0
- 2053 0149 00       		.byte	0
- 2054              		.section	.debug_loc,"",%progbits
- 2055              	.Ldebug_loc0:
- 2056              	.LLST0:
- 2057 0000 08000000 		.4byte	.LVL2
- 2058 0004 12000000 		.4byte	.LVL3
- 2059 0008 0100     		.2byte	0x1
- 2060 000a 50       		.byte	0x50
- 2061 000b 00000000 		.4byte	0
- 2062 000f 00000000 		.4byte	0
- 2063              	.LLST1:
- 2064 0013 68000000 		.4byte	.LVL21
- 2065 0017 73000000 		.4byte	.LVL23-1
- 2066 001b 0100     		.2byte	0x1
- 2067 001d 50       		.byte	0x50
- 2068 001e 00000000 		.4byte	0
- 2069 0022 00000000 		.4byte	0
- 2070              		.section	.debug_aranges,"",%progbits
- 2071 0000 2C000000 		.4byte	0x2c
- 2072 0004 0200     		.2byte	0x2
- 2073 0006 00000000 		.4byte	.Ldebug_info0
- 2074 000a 04       		.byte	0x4
- 2075 000b 00       		.byte	0
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 40
-
-
- 2076 000c 0000     		.2byte	0
- 2077 000e 0000     		.2byte	0
- 2078 0010 00000000 		.4byte	.LFB63
- 2079 0014 18000000 		.4byte	.LFE63-.LFB63
- 2080 0018 00000000 		.4byte	.LFB64
- 2081 001c 20000000 		.4byte	.LFE64-.LFB64
- 2082 0020 00000000 		.4byte	.LFB66
- 2083 0024 DC000000 		.4byte	.LFE66-.LFB66
- 2084 0028 00000000 		.4byte	0
- 2085 002c 00000000 		.4byte	0
- 2086              		.section	.debug_ranges,"",%progbits
- 2087              	.Ldebug_ranges0:
- 2088 0000 00000000 		.4byte	.LFB63
- 2089 0004 18000000 		.4byte	.LFE63
- 2090 0008 00000000 		.4byte	.LFB64
- 2091 000c 20000000 		.4byte	.LFE64
- 2092 0010 00000000 		.4byte	.LFB66
- 2093 0014 DC000000 		.4byte	.LFE66
- 2094 0018 00000000 		.4byte	0
- 2095 001c 00000000 		.4byte	0
- 2096              		.section	.debug_line,"",%progbits
- 2097              	.Ldebug_line0:
- 2098 0000 8D020000 		.section	.debug_str,"MS",%progbits,1
- 2098      02002002 
- 2098      00000201 
- 2098      FB0E0D00 
- 2098      01010101 
- 2099              	.LASF46:
- 2100 0000 6973725F 		.ascii	"isr_Filter_StartEx\000"
- 2100      46696C74 
- 2100      65725F53 
- 2100      74617274 
- 2100      457800
- 2101              	.LASF9:
- 2102 0013 5F5F696E 		.ascii	"__int32_t\000"
- 2102      7433325F 
- 2102      7400
- 2103              	.LASF36:
- 2104 001d 4F706142 		.ascii	"OpaBP_p_Start\000"
- 2104      505F705F 
- 2104      53746172 
- 2104      7400
- 2105              	.LASF16:
- 2106 002b 646F7562 		.ascii	"double\000"
- 2106      6C6500
- 2107              	.LASF11:
- 2108 0032 75696E74 		.ascii	"uint8\000"
- 2108      3800
- 2109              	.LASF31:
- 2110 0038 55415254 		.ascii	"UART_PC_Start\000"
- 2110      5F50435F 
- 2110      53746172 
- 2110      7400
- 2111              	.LASF10:
- 2112 0046 696E7433 		.ascii	"int32_t\000"
- 2112      325F7400 
- 2113              	.LASF15:
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 41
-
-
- 2114 004e 666C6F61 		.ascii	"float\000"
- 2114      7400
- 2115              	.LASF35:
- 2116 0054 5047415F 		.ascii	"PGA_n_2_Start\000"
- 2116      6E5F325F 
- 2116      53746172 
- 2116      7400
- 2117              	.LASF28:
- 2118 0062 4144435F 		.ascii	"ADC_DelSig_GetResult32\000"
- 2118      44656C53 
- 2118      69675F47 
- 2118      65745265 
- 2118      73756C74 
- 2119              	.LASF1:
- 2120 0079 756E7369 		.ascii	"unsigned char\000"
- 2120      676E6564 
- 2120      20636861 
- 2120      7200
- 2121              	.LASF50:
- 2122 0087 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
- 2122      43313120 
- 2122      352E342E 
- 2122      31203230 
- 2122      31363036 
- 2123 00ba 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"
- 2123      20726576 
- 2123      6973696F 
- 2123      6E203233 
- 2123      37373135 
- 2124 00ed 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
- 2124      66756E63 
- 2124      74696F6E 
- 2124      2D736563 
- 2124      74696F6E 
- 2125              	.LASF40:
- 2126 0115 46696C74 		.ascii	"Filter_Start\000"
- 2126      65725F53 
- 2126      74617274 
- 2126      00
- 2127              	.LASF5:
- 2128 0122 6C6F6E67 		.ascii	"long unsigned int\000"
- 2128      20756E73 
- 2128      69676E65 
- 2128      6420696E 
- 2128      7400
- 2129              	.LASF14:
- 2130 0134 696E7433 		.ascii	"int32\000"
- 2130      3200
- 2131              	.LASF23:
- 2132 013a 73617665 		.ascii	"saved\000"
- 2132      6400
- 2133              	.LASF32:
- 2134 0140 5047415F 		.ascii	"PGA_p_1_Start\000"
- 2134      705F315F 
- 2134      53746172 
- 2134      7400
- 2135              	.LASF26:
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 42
-
-
- 2136 014e 49544D5F 		.ascii	"ITM_RxBuffer\000"
- 2136      52784275 
- 2136      66666572 
- 2136      00
- 2137              	.LASF24:
- 2138 015b 675F666C 		.ascii	"g_flt\000"
- 2138      7400
- 2139              	.LASF52:
- 2140 0161 433A5C47 		.ascii	"C:\\Github\\Tesis\\src\\psoc\\ComparacionDiferencia"
- 2140      69746875 
- 2140      625C5465 
- 2140      7369735C 
- 2140      7372635C 
- 2141 018f 6C5F436F 		.ascii	"l_Copy_01.cydsn\000"
- 2141      70795F30 
- 2141      312E6379 
- 2141      64736E00 
- 2142              	.LASF21:
- 2143 019f 6973725F 		.ascii	"isr_FilterReady\000"
- 2143      46696C74 
- 2143      65725265 
- 2143      61647900 
- 2144              	.LASF18:
- 2145 01af 6C6F6E67 		.ascii	"long double\000"
- 2145      20646F75 
- 2145      626C6500 
- 2146              	.LASF33:
- 2147 01bb 5047415F 		.ascii	"PGA_p_2_Start\000"
- 2147      705F325F 
- 2147      53746172 
- 2147      7400
- 2148              	.LASF12:
- 2149 01c9 75696E74 		.ascii	"uint16\000"
- 2149      313600
- 2150              	.LASF37:
- 2151 01d0 4F706142 		.ascii	"OpaBP_n_Start\000"
- 2151      505F6E5F 
- 2151      53746172 
- 2151      7400
- 2152              	.LASF13:
- 2153 01de 75696E74 		.ascii	"uint32\000"
- 2153      333200
- 2154              	.LASF53:
- 2155 01e5 6D61696E 		.ascii	"main\000"
- 2155      00
- 2156              	.LASF47:
- 2157 01ea 4379456E 		.ascii	"CyEnterCriticalSection\000"
- 2157      74657243 
- 2157      72697469 
- 2157      63616C53 
- 2157      65637469 
- 2158              	.LASF54:
- 2159 0201 6E6F7463 		.ascii	"notch_out\000"
- 2159      685F6F75 
- 2159      7400
- 2160              	.LASF8:
- 2161 020b 756E7369 		.ascii	"unsigned int\000"
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 43
-
-
- 2161      676E6564 
- 2161      20696E74 
- 2161      00
- 2162              	.LASF39:
- 2163 0218 4F70614C 		.ascii	"OpaLP_n_Start\000"
- 2163      505F6E5F 
- 2163      53746172 
- 2163      7400
- 2164              	.LASF7:
- 2165 0226 6C6F6E67 		.ascii	"long long unsigned int\000"
- 2165      206C6F6E 
- 2165      6720756E 
- 2165      7369676E 
- 2165      65642069 
- 2166              	.LASF20:
- 2167 023d 6973725F 		.ascii	"isr_DelSigReady\000"
- 2167      44656C53 
- 2167      69675265 
- 2167      61647900 
- 2168              	.LASF34:
- 2169 024d 5047415F 		.ascii	"PGA_n_1_Start\000"
- 2169      6E5F315F 
- 2169      53746172 
- 2169      7400
- 2170              	.LASF49:
- 2171 025b 55415254 		.ascii	"UART_PC_PutArray\000"
- 2171      5F50435F 
- 2171      50757441 
- 2171      72726179 
- 2171      00
- 2172              	.LASF44:
- 2173 026c 4144435F 		.ascii	"ADC_DelSig_StartConvert\000"
- 2173      44656C53 
- 2173      69675F53 
- 2173      74617274 
- 2173      436F6E76 
- 2174              	.LASF29:
- 2175 0284 46696C74 		.ascii	"Filter_Write24\000"
- 2175      65725F57 
- 2175      72697465 
- 2175      323400
- 2176              	.LASF19:
- 2177 0293 73697A65 		.ascii	"sizetype\000"
- 2177      74797065 
- 2177      00
- 2178              	.LASF45:
- 2179 029c 6973725F 		.ascii	"isr_DelSig_StartEx\000"
- 2179      44656C53 
- 2179      69675F53 
- 2179      74617274 
- 2179      457800
- 2180              	.LASF6:
- 2181 02af 6C6F6E67 		.ascii	"long long int\000"
- 2181      206C6F6E 
- 2181      6720696E 
- 2181      7400
- 2182              	.LASF51:
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 44
-
-
- 2183 02bd 6D61696E 		.ascii	"main.c\000"
- 2183      2E6300
- 2184              	.LASF17:
- 2185 02c4 63686172 		.ascii	"char\000"
- 2185      00
- 2186              	.LASF41:
- 2187 02c9 46696C74 		.ascii	"Filter_SetCoherency\000"
- 2187      65725F53 
- 2187      6574436F 
- 2187      68657265 
- 2187      6E637900 
- 2188              	.LASF22:
- 2189 02dd 68625F63 		.ascii	"hb_count\000"
- 2189      6F756E74 
- 2189      00
- 2190              	.LASF30:
- 2191 02e6 46696C74 		.ascii	"Filter_Read24\000"
- 2191      65725F52 
- 2191      65616432 
- 2191      3400
- 2192              	.LASF38:
- 2193 02f4 4F70614C 		.ascii	"OpaLP_p_Start\000"
- 2193      505F705F 
- 2193      53746172 
- 2193      7400
- 2194              	.LASF2:
- 2195 0302 73686F72 		.ascii	"short int\000"
- 2195      7420696E 
- 2195      7400
- 2196              	.LASF27:
- 2197 030c 66696C74 		.ascii	"filter_coeffs\000"
- 2197      65725F63 
- 2197      6F656666 
- 2197      7300
- 2198              	.LASF48:
- 2199 031a 43794578 		.ascii	"CyExitCriticalSection\000"
- 2199      69744372 
- 2199      69746963 
- 2199      616C5365 
- 2199      6374696F 
- 2200              	.LASF43:
- 2201 0330 4144435F 		.ascii	"ADC_DelSig_Start\000"
- 2201      44656C53 
- 2201      69675F53 
- 2201      74617274 
- 2201      00
- 2202              	.LASF4:
- 2203 0341 6C6F6E67 		.ascii	"long int\000"
- 2203      20696E74 
- 2203      00
- 2204              	.LASF42:
- 2205 034a 46696C74 		.ascii	"Filter_SetDalign\000"
- 2205      65725F53 
- 2205      65744461 
- 2205      6C69676E 
- 2205      00
- 2206              	.LASF0:
-ARM GAS  C:\Users\elias\AppData\Local\Temp\cce8cVLR.s 			page 45
-
-
- 2207 035b 7369676E 		.ascii	"signed char\000"
- 2207      65642063 
- 2207      68617200 
- 2208              	.LASF3:
- 2209 0367 73686F72 		.ascii	"short unsigned int\000"
- 2209      7420756E 
- 2209      7369676E 
- 2209      65642069 
- 2209      6E7400
- 2210              	.LASF25:
- 2211 037a 675F6669 		.ascii	"g_filter_ready\000"
- 2211      6C746572 
- 2211      5F726561 
- 2211      647900
- 2212              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran
+ 239              		.loc 1 148 0
+ 240 00cc 0521     		movs	r1, #5
+ 241 00ce 6846     		mov	r0, sp
+ 242 00d0 FFF7FEFF 		bl	UART_PC_PutArray
+ 243              	.LVL24:
+ 244 00d4 C1E7     		b	.L12
+ 245              	.L17:
+ 246 00d6 00BF     		.align	2
+ 247              	.L16:
+ 248 00d8 00000000 		.word	isr_DelSigReady
+ 249 00dc 00000000 		.word	isr_FilterReady
+ 250 00e0 00000000 		.word	.LANCHOR0
+ 251              		.cfi_endproc
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 8
+
+
+ 252              	.LFE66:
+ 253              		.size	main, .-main
+ 254              		.global	filter_coeffs
+ 255              		.data
+ 256              		.align	3
+ 257              		.type	filter_coeffs, %object
+ 258              		.size	filter_coeffs, 3720
+ 259              	filter_coeffs:
+ 260 0000 8E799A62 		.word	1654290830
+ 261 0004 19FB083F 		.word	1057553177
+ 262 0008 7604ECB4 		.word	-1259600778
+ 263 000c 3340103F 		.word	1058029619
+ 264 0010 F6B3D8CA 		.word	-891767818
+ 265 0014 BCCC123F 		.word	1058196668
+ 266 0018 2E4E6FF1 		.word	-244363730
+ 267 001c 7595133F 		.word	1058248053
+ 268 0020 E892EEE2 		.word	-487681304
+ 269 0024 7B2F123F 		.word	1058156411
+ 270 0028 0D32C52C 		.word	751120909
+ 271 002c 86CB0C3F 		.word	1057803142
+ 272 0030 1CA39B08 		.word	144417564
+ 273 0034 6A8F003F 		.word	1057001322
+ 274 0038 BB2F8597 		.word	-1752879173
+ 275 003c A57DA83E 		.word	1051229605
+ 276 0040 89B35ECD 		.word	-849431671
+ 277 0044 A66E02BF 		.word	-1090359642
+ 278 0048 4FA2970B 		.word	194486863
+ 279 004c 0D0913BF 		.word	-1089271539
+ 280 0050 8C35C772 		.word	1925657996
+ 281 0054 A52E1CBF 		.word	-1088672091
+ 282 0058 99F7F808 		.word	150534041
+ 283 005c 6DC021BF 		.word	-1088307091
+ 284 0060 EC23B196 		.word	-1766775828
+ 285 0064 EDF323BF 		.word	-1088162835
+ 286 0068 1927C124 		.word	616638233
+ 287 006c 433F24BF 		.word	-1088143549
+ 288 0070 C9289C4B 		.word	1268525257
+ 289 0074 D55922BF 		.word	-1088267819
+ 290 0078 11A1F9C8 		.word	-923164399
+ 291 007c 22651CBF 		.word	-1088658142
+ 292 0080 28045AE3 		.word	-480639960
+ 293 0084 BFE10FBF 		.word	-1089478209
+ 294 0088 7FF7D259 		.word	1506998143
+ 295 008c 3368ACBE 		.word	-1095997389
+ 296 0090 3F0A9A53 		.word	1402604095
+ 297 0094 3168113F 		.word	1058105393
+ 298 0098 F6D0C777 		.word	2009583862
+ 299 009c 529C213F 		.word	1059167314
+ 300 00a0 376D65FA 		.word	-94016201
+ 301 00a4 2CA4293F 		.word	1059693612
+ 302 00a8 B60A44CD 		.word	-851178826
+ 303 00ac 67D12F3F 		.word	1060098407
+ 304 00b0 857BC121 		.word	566328197
+ 305 00b4 CDA1313F 		.word	1060217293
+ 306 00b8 F8D6E5B7 		.word	-1209673992
+ 307 00bc 08A8313F 		.word	1060218888
+ 308 00c0 9211A2FC 		.word	-56487534
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 9
+
+
+ 309 00c4 589A2F3F 		.word	1060084312
+ 310 00c8 CEEAC3F2 		.word	-222041394
+ 311 00cc 5226283F 		.word	1059595858
+ 312 00d0 8C8B5277 		.word	2001898380
+ 313 00d4 6FC21A3F 		.word	1058718319
+ 314 00d8 9B9AD460 		.word	1624545947
+ 315 00dc D1A4AF3E 		.word	1051698385
+ 316 00e0 BF660B86 		.word	-2046073153
+ 317 00e4 15E01CBF 		.word	-1088626667
+ 318 00e8 436E7CAA 		.word	-1434685885
+ 319 00ec 9EDE2CBF 		.word	-1087578466
+ 320 00f0 FBC36C04 		.word	74236923
+ 321 00f4 27CF34BF 		.word	-1087058137
+ 322 00f8 EE632740 		.word	1076323310
+ 323 00fc BB9539BF 		.word	-1086745157
+ 324 0100 D064FF71 		.word	1912562896
+ 325 0104 E11B3CBF 		.word	-1086579743
+ 326 0108 AC04D6C8 		.word	-925498196
+ 327 010c 96E93BBF 		.word	-1086592618
+ 328 0110 9E936827 		.word	661164958
+ 329 0114 14C738BF 		.word	-1086798060
+ 330 0118 662438DC 		.word	-600300442
+ 331 011c 4AC832BF 		.word	-1087190966
+ 332 0120 E97C24C8 		.word	-937132823
+ 333 0124 25A224BF 		.word	-1088118235
+ 334 0128 999DA070 		.word	1889574297
+ 335 012c DDFFB0BE 		.word	-1095696419
+ 336 0130 9C99D53B 		.word	1003854236
+ 337 0134 AE12263F 		.word	1059459758
+ 338 0138 A6506FA4 		.word	-1536208730
+ 339 013c E3E4353F 		.word	1060496611
+ 340 0140 E3459D2B 		.word	731727331
+ 341 0144 DD583F3F 		.word	1061116125
+ 342 0148 276227B3 		.word	-1289264601
+ 343 014c 9F25433F 		.word	1061365151
+ 344 0150 878E6280 		.word	-2141024633
+ 345 0154 01E8443F 		.word	1061480449
+ 346 0158 AC1E5398 		.word	-1739383124
+ 347 015c DEA2443F 		.word	1061462750
+ 348 0160 3A2C73DA 		.word	-629986246
+ 349 0164 2E36423F 		.word	1061303854
+ 350 0168 EC851AB0 		.word	-1340439060
+ 351 016c 2A733B3F 		.word	1060860714
+ 352 0170 BBB53443 		.word	1127527867
+ 353 0174 B2F72D3F 		.word	1059977138
+ 354 0178 96314941 		.word	1095315862
+ 355 017c 8FA8B13E 		.word	1051830415
+ 356 0180 E81470AE 		.word	-1368386328
+ 357 0184 BED62FBF 		.word	-1087383874
+ 358 0188 FF11FE97 		.word	-1744956929
+ 359 018c A6653FBF 		.word	-1086364250
+ 360 0190 A01364AD 		.word	-1385950304
+ 361 0194 885C46BF 		.word	-1085907832
+ 362 0198 F4D529EA 		.word	-366357004
+ 363 019c 1D2F4BBF 		.word	-1085591779
+ 364 01a0 C9DD4341 		.word	1094966729
+ 365 01a4 C88A4DBF 		.word	-1085437240
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 10
+
+
+ 366 01a8 E4EAD1DC 		.word	-590222620
+ 367 01ac CF064DBF 		.word	-1085471025
+ 368 01b0 956DC00D 		.word	230714773
+ 369 01b4 2B8049BF 		.word	-1085702101
+ 370 01b8 6FD0341C 		.word	473223279
+ 371 01bc B12143BF 		.word	-1086119503
+ 372 01c0 22873897 		.word	-1757903070
+ 373 01c4 3CC934BF 		.word	-1087059652
+ 374 01c8 1011DFC4 		.word	-992014064
+ 375 01cc 24C0B1BE 		.word	-1095647196
+ 376 01d0 8E3C06F2 		.word	-234472306
+ 377 01d4 0FF5353F 		.word	1060500751
+ 378 01d8 25D8D9F6 		.word	-153495515
+ 379 01dc DF8D453F 		.word	1061522911
+ 380 01e0 ACE2C0A1 		.word	-1581194580
+ 381 01e4 DC934E3F 		.word	1062114268
+ 382 01e8 619A0AEA 		.word	-368403871
+ 383 01ec 7F83523F 		.word	1062372223
+ 384 01f0 49013042 		.word	1110442313
+ 385 01f4 1C0B543F 		.word	1062472476
+ 386 01f8 50B02B23 		.word	590065744
+ 387 01fc DB9E533F 		.word	1062444763
+ 388 0200 97CEBF26 		.word	650104471
+ 389 0204 8E2C513F 		.word	1062284430
+ 390 0208 8DFBDBF1 		.word	-237241459
+ 391 020c C9AC493F 		.word	1061792969
+ 392 0210 1D1FC304 		.word	79896349
+ 393 0214 7DC93B3F 		.word	1060882813
+ 394 0218 4CA082CC 		.word	-863854516
+ 395 021c E842B13E 		.word	1051804392
+ 396 0220 5EC79019 		.word	428918622
+ 397 0224 D4343DBF 		.word	-1086507820
+ 398 0228 D7E61478 		.word	2014635735
+ 399 022c 63904CBF 		.word	-1085501341
+ 400 0230 5FBBA796 		.word	-1767392417
+ 401 0234 5F3154BF 		.word	-1085001377
+ 402 0238 BF28081A 		.word	436742335
+ 403 023c 785F58BF 		.word	-1084727432
+ 404 0240 0D429F48 		.word	1218396685
+ 405 0244 A14D5ABF 		.word	-1084600927
+ 406 0248 6DE02E43 		.word	1127145581
+ 407 024c 0CAB59BF 		.word	-1084642548
+ 408 0250 263F48D3 		.word	-750239962
+ 409 0254 FF6556BF 		.word	-1084856833
+ 410 0258 F41EEDC5 		.word	-974315788
+ 411 025c ECB050BF 		.word	-1085230868
+ 412 0260 8120A11E 		.word	513876097
+ 413 0264 6F0142BF 		.word	-1086193297
+ 414 0268 521C6195 		.word	-1788797870
+ 415 026c 4536B0BE 		.word	-1095748027
+ 416 0270 2C7BAA04 		.word	78281516
+ 417 0274 58D7423F 		.word	1061345112
+ 418 0278 D874280A 		.word	170423512
+ 419 027c 905E523F 		.word	1062362768
+ 420 0280 59E99BAC 		.word	-1399068327
+ 421 0284 BFE5593F 		.word	1062856127
+ 422 0288 705AAFDA 		.word	-626042256
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 11
+
+
+ 423 028c EF2B5F3F 		.word	1063201775
+ 424 0290 623F8B0A 		.word	176897890
+ 425 0294 40C6603F 		.word	1063306816
+ 426 0298 6F192BBE 		.word	-1104471697
+ 427 029c 5253603F 		.word	1063277394
+ 428 02a0 73CBDE43 		.word	1138674547
+ 429 02a4 806A5C3F 		.word	1063021184
+ 430 02a8 90CB16D5 		.word	-719926384
+ 431 02ac 791E553F 		.word	1062542969
+ 432 02b0 D57AD891 		.word	-1848083755
+ 433 02b4 07B8463F 		.word	1061599239
+ 434 02b8 73E17897 		.word	-1753685645
+ 435 02bc 3151AD3E 		.word	1051545905
+ 436 02c0 E3885CA9 		.word	-1453553437
+ 437 02c4 5EAD47BF 		.word	-1085821602
+ 438 02c8 3EC6FA1F 		.word	536528446
+ 439 02cc B40557BF 		.word	-1084815948
+ 440 02d0 0410A8F3 		.word	-207089660
+ 441 02d4 213060BF 		.word	-1084215263
+ 442 02d8 D75CAAF9 		.word	-106275625
+ 443 02dc F86F63BF 		.word	-1084002312
+ 444 02e0 BFF05AA4 		.word	-1537544001
+ 445 02e4 A2DE64BF 		.word	-1083908446
+ 446 02e8 F70850D6 		.word	-699397897
+ 447 02ec 5C4364BF 		.word	-1083948196
+ 448 02f0 4A600F21 		.word	554655818
+ 449 02f4 F69761BF 		.word	-1084123146
+ 450 02f8 AF7ABBCD 		.word	-843351377
+ 451 02fc 11175ABF 		.word	-1084614895
+ 452 0300 02E8FE60 		.word	1627318274
+ 453 0304 82FF4BBF 		.word	-1085538430
+ 454 0308 FBA073C2 		.word	-1032609541
+ 455 030c BE60A9BE 		.word	-1096195906
+ 456 0310 9D2AC11F 		.word	532753053
+ 457 0314 11124D3F 		.word	1062015505
+ 458 0318 6819C5CD 		.word	-842720920
+ 459 031c 17335C3F 		.word	1063006999
+ 460 0320 7CFD74FC 		.word	-59441796
+ 461 0324 C9C8633F 		.word	1063504073
+ 462 0328 D06AA3DD 		.word	-576492848
+ 463 032c 37B4673F 		.word	1063760951
+ 464 0330 7A30D813 		.word	332935290
+ 465 0334 6A65693F 		.word	1063871850
+ 466 0338 00180661 		.word	1627789312
+ 467 033c 179B683F 		.word	1063820055
+ 468 0340 2AD7B004 		.word	78698282
+ 469 0344 B951653F 		.word	1063604665
+ 470 0348 F0D15EB7 		.word	-1218522640
+ 471 034c 678C5F3F 		.word	1063226471
+ 472 0350 63A905FF 		.word	-16406173
+ 473 0354 18E4503F 		.word	1062265880
+ 474 0358 7DC831A0 		.word	-1607350147
+ 475 035c 8AD5A43E 		.word	1050989962
+ 476 0360 5A540C5F 		.word	1594643546
+ 477 0364 277A51BF 		.word	-1085179353
+ 478 0368 A684ABAC 		.word	-1398045530
+ 479 036c EAEA60BF 		.word	-1084167446
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 12
+
+
+ 480 0370 E9492B02 		.word	36391401
+ 481 0374 C9B067BF 		.word	-1083723575
+ 482 0378 00D46FD8 		.word	-663759872
+ 483 037c 05546CBF 		.word	-1083419643
+ 484 0380 15A328C7 		.word	-953638123
+ 485 0384 9D4A6EBF 		.word	-1083290979
+ 486 0388 2DD16BAF 		.word	-1351888595
+ 487 038c D04A6DBF 		.word	-1083356464
+ 488 0390 A3D523F4 		.word	-198978141
+ 489 0394 C15469BF 		.word	-1083616063
+ 490 0398 02610B08 		.word	134963458
+ 491 039c EDB462BF 		.word	-1084050195
+ 492 03a0 6C9A275B 		.word	1529322092
+ 493 03a4 E3FD53BF 		.word	-1085014557
+ 494 03a8 C00789D2 		.word	-762771520
+ 495 03ac C6E69FBE 		.word	-1096816954
+ 496 03b0 4EFF3EF3 		.word	-213975218
+ 497 03b4 2D9E543F 		.word	1062510125
+ 498 03b8 B1B00F69 		.word	1762635953
+ 499 03bc 63EB633F 		.word	1063512931
+ 500 03c0 4E11AF64 		.word	1689194830
+ 501 03c4 C8D76B3F 		.word	1064032200
+ 502 03c8 0D5A5394 		.word	-1806476787
+ 503 03cc D99D703F 		.word	1064345049
+ 504 03d0 7E0F262A 		.word	707137406
+ 505 03d4 85BC713F 		.word	1064418437
+ 506 03d8 AB9EFF0C 		.word	218078891
+ 507 03dc F31E713F 		.word	1064378099
+ 508 03e0 9BD65EB9 		.word	-1184967013
+ 509 03e4 1D8F6D3F 		.word	1064144669
+ 510 03e8 556ACC7E 		.word	2127325781
+ 511 03ec 61CA653F 		.word	1063635553
+ 512 03f0 CE2ED597 		.word	-1747636530
+ 513 03f4 D53E573F 		.word	1062682325
+ 514 03f8 67019576 		.word	1989476711
+ 515 03fc C905963E 		.word	1050019273
+ 516 0400 0C6C2F27 		.word	657419276
+ 517 0404 29E657BF 		.word	-1084758487
+ 518 0408 6ED9564F 		.word	1331091822
+ 519 040c 7C0C67BF 		.word	-1083765636
+ 520 0410 76A9141F 		.word	521447798
+ 521 0414 BF1470BF 		.word	-1083173697
+ 522 0418 4AB92C75 		.word	1965865290
+ 523 041c 7C2973BF 		.word	-1082971780
+ 524 0420 3F111CE1 		.word	-518254273
+ 525 0424 5B6B74BF 		.word	-1082889381
+ 526 0428 C16B9A8D 		.word	-1919259711
+ 527 042c 9DAD73BF 		.word	-1082937955
+ 528 0430 047D2CD3 		.word	-752059132
+ 529 0434 8BF570BF 		.word	-1083116149
+ 530 0438 59D43ECE 		.word	-834743207
+ 531 043c 8DF668BF 		.word	-1083640179
+ 532 0440 C10BA107 		.word	127994817
+ 533 0444 DC955ABF 		.word	-1084582436
+ 534 0448 AC2DD4FE 		.word	-19649108
+ 535 044c 8F3189BE 		.word	-1098305137
+ 536 0450 9C2AB80F 		.word	263727772
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 13
+
+
+ 537 0454 74405B3F 		.word	1062944884
+ 538 0458 AFE19C22 		.word	580706735
+ 539 045c 373D6A3F 		.word	1063927095
+ 540 0460 1A361A11 		.word	286930458
+ 541 0464 1D47723F 		.word	1064453917
+ 542 0468 52AFF269 		.word	1777512274
+ 543 046c D2BE753F 		.word	1064681170
+ 544 0470 E8BAE456 		.word	1457830632
+ 545 0474 D222773F 		.word	1064772306
+ 546 0478 263BCCBD 		.word	-1110688986
+ 547 047c F842763F 		.word	1064715000
+ 548 0480 725215B8 		.word	-1206562190
+ 549 0484 ED27733F 		.word	1064511469
+ 550 0488 78E72447 		.word	1193600888
+ 551 048c 37276C3F 		.word	1064052535
+ 552 0490 4CA39D1F 		.word	530424652
+ 553 0494 9DEF5D3F 		.word	1063120797
+ 554 0498 CBCC1AFF 		.word	-15020853
+ 555 049c 9196703E 		.word	1047565969
+ 556 04a0 83659918 		.word	412706179
+ 557 04a4 44995EBF 		.word	-1084319420
+ 558 04a8 926179C2 		.word	-1032232558
+ 559 04ac 996A6DBF 		.word	-1083348327
+ 560 04b0 4BC1B1E5 		.word	-441335477
+ 561 04b4 D27574BF 		.word	-1082886702
+ 562 04b8 82924AA2 		.word	-1572171134
+ 563 04bc 404E78BF 		.word	-1082634688
+ 564 04c0 BAFC7D06 		.word	108919994
+ 565 04c4 60D279BF 		.word	-1082535328
+ 566 04c8 0A791A1F 		.word	521828618
+ 567 04cc 2ECF78BF 		.word	-1082601682
+ 568 04d0 726EEC26 		.word	653028978
+ 569 04d4 245175BF 		.word	-1082830556
+ 570 04d8 AAEA3185 		.word	-2060326230
+ 571 04dc 88486FBF 		.word	-1083225976
+ 572 04e0 BEFE978C 		.word	-1936195906
+ 573 04e4 909B60BF 		.word	-1084187760
+ 574 04e8 5E24DD75 		.word	1977427038
+ 575 04ec A410673E 		.word	1046941860
+ 576 04f0 B0010624 		.word	604373424
+ 577 04f4 ACED603F 		.word	1063316908
+ 578 04f8 3721BDC4 		.word	-994238153
+ 579 04fc 2B40703F 		.word	1064321067
+ 580 0500 68BEA408 		.word	145014376
+ 581 0504 D992763F 		.word	1064735449
+ 582 0508 F7154E26 		.word	642651639
+ 583 050c 38C77A3F 		.word	1065011000
+ 584 0510 54FEFCAE 		.word	-1359151532
+ 585 0514 8B687C3F 		.word	1065117835
+ 586 0518 D23DC5A0 		.word	-1597686318
+ 587 051c 91417B3F 		.word	1065042321
+ 588 0520 FA5C6842 		.word	1114135802
+ 589 0524 F662773F 		.word	1064788726
+ 590 0528 F155984C 		.word	1285051889
+ 591 052c E522713F 		.word	1064379109
+ 592 0530 1ADFB074 		.word	1957748506
+ 593 0534 4B2B623F 		.word	1063398219
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 14
+
+
+ 594 0538 1E458EE7 		.word	-410106594
+ 595 053c 9E5280BE 		.word	-1098886498
+ 596 0540 5990A8FD 		.word	-39284647
+ 597 0544 617862BF 		.word	-1084065695
+ 598 0548 F2485001 		.word	22038770
+ 599 054c CAB471BF 		.word	-1083067190
+ 600 0550 578AD4CC 		.word	-858486185
+ 601 0554 D28F78BF 		.word	-1082617902
+ 602 0558 6B08D97C 		.word	2094598251
+ 603 055c D6187DBF 		.word	-1082320682
+ 604 0560 C91512CB 		.word	-888007223
+ 605 0564 95D37EBF 		.word	-1082207339
+ 606 0568 49E22F25 		.word	623895113
+ 607 056c 45897DBF 		.word	-1082291899
+ 608 0570 099BABEB 		.word	-341075191
+ 609 0574 0E4F79BF 		.word	-1082568946
+ 610 0578 33116223 		.word	593629491
+ 611 057c 198572BF 		.word	-1083013863
+ 612 0580 EBFE4FB3 		.word	-1286603029
+ 613 0584 169C63BF 		.word	-1083991018
+ 614 0588 AAD1DA4B 		.word	1272631722
+ 615 058c 14FB863E 		.word	1049033492
+ 616 0590 067D65C5 		.word	-983204602
+ 617 0594 E5E1633F 		.word	1063510501
+ 618 0598 8EB5D9DC 		.word	-589711986
+ 619 059c DA08733F 		.word	1064503514
+ 620 05a0 6E8A582E 		.word	777554542
+ 621 05a4 A05E7A3F 		.word	1064984224
+ 622 05a8 929611C1 		.word	-1055811950
+ 623 05ac 91327F3F 		.word	1065300625
+ 624 05b0 3A153F19 		.word	423564602
+ 625 05b4 1781803F 		.word	1065386263
+ 626 05b8 2B2B11D2 		.word	-770626773
+ 627 05bc E5957F3F 		.word	1065326053
+ 628 05c0 26B20999 		.word	-1727417818
+ 629 05c4 90077B3F 		.word	1065027472
+ 630 05c8 5E7CD8A7 		.word	-1478984610
+ 631 05cc DBC0733F 		.word	1064550619
+ 632 05d0 C402B9FB 		.word	-71761212
+ 633 05d4 7AE3643F 		.word	1063576442
+ 634 05d8 F2BE0727 		.word	654819058
+ 635 05dc D1A489BE 		.word	-1098275631
+ 636 05e0 1922C8F3 		.word	-204987879
+ 637 05e4 E31F65BF 		.word	-1083891741
+ 638 05e8 E968E555 		.word	1441097961
+ 639 05ec 9F3274BF 		.word	-1082903905
+ 640 05f0 40BB9AB8 		.word	-1197819072
+ 641 05f4 F2F17BBF 		.word	-1082396174
+ 642 05f8 3FEAC3C4 		.word	-993793473
+ 643 05fc 738280BF 		.word	-1082097037
+ 644 0600 6850ABE2 		.word	-492089240
+ 645 0604 157281BF 		.word	-1082035691
+ 646 0608 548D5B37 		.word	928746836
+ 647 060c 1DAC80BF 		.word	-1082086371
+ 648 0610 36D42E52 		.word	1378800694
+ 649 0614 A97F7CBF 		.word	-1082359895
+ 650 0618 BDAD3A70 		.word	1882893757
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 15
+
+
+ 651 061c F5CC74BF 		.word	-1082864395
+ 652 0620 6530D9A0 		.word	-1596379035
+ 653 0624 E2F765BF 		.word	-1083836446
+ 654 0628 F0E2D42B 		.word	735372016
+ 655 062c F484883E 		.word	1049134324
+ 656 0630 163170C4 		.word	-999280362
+ 657 0634 0229663F 		.word	1063659778
+ 658 0638 206BEB9C 		.word	-1662293216
+ 659 063c 4F29753F 		.word	1064642895
+ 660 0640 2D8336E5 		.word	-449412307
+ 661 0644 DD3D7D3F 		.word	1065172445
+ 662 0648 4BCA67CC 		.word	-865613237
+ 663 064c 0241813F 		.word	1065435394
+ 664 0650 DB9C754F 		.word	1333107931
+ 665 0654 9E35823F 		.word	1065498014
+ 666 0658 6759DFE1 		.word	-505456281
+ 667 065c 6C61813F 		.word	1065443692
+ 668 0660 DC6DD91E 		.word	517565916
+ 669 0664 1FAC7D3F 		.word	1065200671
+ 670 0668 8FBCF9F7 		.word	-134628209
+ 671 066c 60A1753F 		.word	1064673632
+ 672 0670 352C490E 		.word	239676469
+ 673 0674 03D1663F 		.word	1063702787
+ 674 0678 59255E80 		.word	-2141313703
+ 675 067c 381A84BE 		.word	-1098638792
+ 676 0680 0D088B7A 		.word	2055931917
+ 677 0684 49F566BF 		.word	-1083771575
+ 678 0688 477B1242 		.word	1108507463
+ 679 068c 7CE575BF 		.word	-1082792580
+ 680 0690 462F6057 		.word	1465921350
+ 681 0694 5B387EBF 		.word	-1082247077
+ 682 0698 38C65EB7 		.word	-1218525640
+ 683 069c 31CF81BF 		.word	-1082011855
+ 684 06a0 E527B4BE 		.word	-1095489563
+ 685 06a4 C2C582BF 		.word	-1081948734
+ 686 06a8 0FD12215 		.word	354603279
+ 687 06ac 60E581BF 		.word	-1082006176
+ 688 06b0 8EB0CC72 		.word	1926017166
+ 689 06b4 CD837EBF 		.word	-1082227763
+ 690 06b8 7B92E766 		.word	1726452347
+ 691 06bc A43776BF 		.word	-1082771548
+ 692 06c0 95E496C3 		.word	-1013521259
+ 693 06c4 396867BF 		.word	-1083742151
+ 694 06c8 523BAA7D 		.word	2108308306
+ 695 06cc 7E467A3E 		.word	1048200830
+ 696 06d0 0BFBECED 		.word	-303236341
+ 697 06d4 797E673F 		.word	1063747193
+ 698 06d8 B1BB78E3 		.word	-478626895
+ 699 06dc 6161763F 		.word	1064722785
+ 700 06e0 2D619FDC 		.word	-593534675
+ 701 06e4 BBD97E3F 		.word	1065277883
+ 702 06e8 09AF883D 		.word	1032367881
+ 703 06ec A228823F 		.word	1065494690
+ 704 06f0 883ACCE5 		.word	-439600504
+ 705 06f4 131E833F 		.word	1065557523
+ 706 06f8 7259511E 		.word	508647794
+ 707 06fc E633823F 		.word	1065497574
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 16
+
+
+ 708 0700 9D226FD3 		.word	-747691363
+ 709 0704 0C007F3F 		.word	1065287692
+ 710 0708 52A29116 		.word	378643026
+ 711 070c 1B8B763F 		.word	1064733467
+ 712 0710 67FE68CA 		.word	-899088793
+ 713 0714 D7B8673F 		.word	1063762135
+ 714 0718 2FFD9931 		.word	832175407
+ 715 071c 464062BE 		.word	-1100857274
+ 716 0720 84A54887 		.word	-2025282172
+ 717 0724 57C067BF 		.word	-1083719593
+ 718 0728 6D4D3AD2 		.word	-767931027
+ 719 072c 2A9976BF 		.word	-1082746582
+ 720 0730 EC651810 		.word	270034412
+ 721 0734 FF1C7FBF 		.word	-1082188545
+ 722 0738 4389DCEE 		.word	-287536829
+ 723 073c 8D4A82BF 		.word	-1081980275
+ 724 0740 560DFDB1 		.word	-1308816042
+ 725 0744 10B3EF3F 		.word	1072673552
+ 726 0748 4389DCEE 		.word	-287536829
+ 727 074c 8D4A82BF 		.word	-1081980275
+ 728 0750 EC651810 		.word	270034412
+ 729 0754 FF1C7FBF 		.word	-1082188545
+ 730 0758 6D4D3AD2 		.word	-767931027
+ 731 075c 2A9976BF 		.word	-1082746582
+ 732 0760 84A54887 		.word	-2025282172
+ 733 0764 57C067BF 		.word	-1083719593
+ 734 0768 2FFD9931 		.word	832175407
+ 735 076c 464062BE 		.word	-1100857274
+ 736 0770 67FE68CA 		.word	-899088793
+ 737 0774 D7B8673F 		.word	1063762135
+ 738 0778 52A29116 		.word	378643026
+ 739 077c 1B8B763F 		.word	1064733467
+ 740 0780 9D226FD3 		.word	-747691363
+ 741 0784 0C007F3F 		.word	1065287692
+ 742 0788 7259511E 		.word	508647794
+ 743 078c E633823F 		.word	1065497574
+ 744 0790 883ACCE5 		.word	-439600504
+ 745 0794 131E833F 		.word	1065557523
+ 746 0798 09AF883D 		.word	1032367881
+ 747 079c A228823F 		.word	1065494690
+ 748 07a0 2D619FDC 		.word	-593534675
+ 749 07a4 BBD97E3F 		.word	1065277883
+ 750 07a8 B1BB78E3 		.word	-478626895
+ 751 07ac 6161763F 		.word	1064722785
+ 752 07b0 0BFBECED 		.word	-303236341
+ 753 07b4 797E673F 		.word	1063747193
+ 754 07b8 523BAA7D 		.word	2108308306
+ 755 07bc 7E467A3E 		.word	1048200830
+ 756 07c0 95E496C3 		.word	-1013521259
+ 757 07c4 396867BF 		.word	-1083742151
+ 758 07c8 7B92E766 		.word	1726452347
+ 759 07cc A43776BF 		.word	-1082771548
+ 760 07d0 8EB0CC72 		.word	1926017166
+ 761 07d4 CD837EBF 		.word	-1082227763
+ 762 07d8 0FD12215 		.word	354603279
+ 763 07dc 60E581BF 		.word	-1082006176
+ 764 07e0 E527B4BE 		.word	-1095489563
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 17
+
+
+ 765 07e4 C2C582BF 		.word	-1081948734
+ 766 07e8 38C65EB7 		.word	-1218525640
+ 767 07ec 31CF81BF 		.word	-1082011855
+ 768 07f0 462F6057 		.word	1465921350
+ 769 07f4 5B387EBF 		.word	-1082247077
+ 770 07f8 477B1242 		.word	1108507463
+ 771 07fc 7CE575BF 		.word	-1082792580
+ 772 0800 0D088B7A 		.word	2055931917
+ 773 0804 49F566BF 		.word	-1083771575
+ 774 0808 59255E80 		.word	-2141313703
+ 775 080c 381A84BE 		.word	-1098638792
+ 776 0810 352C490E 		.word	239676469
+ 777 0814 03D1663F 		.word	1063702787
+ 778 0818 8FBCF9F7 		.word	-134628209
+ 779 081c 60A1753F 		.word	1064673632
+ 780 0820 DC6DD91E 		.word	517565916
+ 781 0824 1FAC7D3F 		.word	1065200671
+ 782 0828 6759DFE1 		.word	-505456281
+ 783 082c 6C61813F 		.word	1065443692
+ 784 0830 DB9C754F 		.word	1333107931
+ 785 0834 9E35823F 		.word	1065498014
+ 786 0838 4BCA67CC 		.word	-865613237
+ 787 083c 0241813F 		.word	1065435394
+ 788 0840 2D8336E5 		.word	-449412307
+ 789 0844 DD3D7D3F 		.word	1065172445
+ 790 0848 206BEB9C 		.word	-1662293216
+ 791 084c 4F29753F 		.word	1064642895
+ 792 0850 163170C4 		.word	-999280362
+ 793 0854 0229663F 		.word	1063659778
+ 794 0858 F0E2D42B 		.word	735372016
+ 795 085c F484883E 		.word	1049134324
+ 796 0860 6530D9A0 		.word	-1596379035
+ 797 0864 E2F765BF 		.word	-1083836446
+ 798 0868 BDAD3A70 		.word	1882893757
+ 799 086c F5CC74BF 		.word	-1082864395
+ 800 0870 36D42E52 		.word	1378800694
+ 801 0874 A97F7CBF 		.word	-1082359895
+ 802 0878 548D5B37 		.word	928746836
+ 803 087c 1DAC80BF 		.word	-1082086371
+ 804 0880 6850ABE2 		.word	-492089240
+ 805 0884 157281BF 		.word	-1082035691
+ 806 0888 3FEAC3C4 		.word	-993793473
+ 807 088c 738280BF 		.word	-1082097037
+ 808 0890 40BB9AB8 		.word	-1197819072
+ 809 0894 F2F17BBF 		.word	-1082396174
+ 810 0898 E968E555 		.word	1441097961
+ 811 089c 9F3274BF 		.word	-1082903905
+ 812 08a0 1922C8F3 		.word	-204987879
+ 813 08a4 E31F65BF 		.word	-1083891741
+ 814 08a8 F2BE0727 		.word	654819058
+ 815 08ac D1A489BE 		.word	-1098275631
+ 816 08b0 C402B9FB 		.word	-71761212
+ 817 08b4 7AE3643F 		.word	1063576442
+ 818 08b8 5E7CD8A7 		.word	-1478984610
+ 819 08bc DBC0733F 		.word	1064550619
+ 820 08c0 26B20999 		.word	-1727417818
+ 821 08c4 90077B3F 		.word	1065027472
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 18
+
+
+ 822 08c8 2B2B11D2 		.word	-770626773
+ 823 08cc E5957F3F 		.word	1065326053
+ 824 08d0 3A153F19 		.word	423564602
+ 825 08d4 1781803F 		.word	1065386263
+ 826 08d8 929611C1 		.word	-1055811950
+ 827 08dc 91327F3F 		.word	1065300625
+ 828 08e0 6E8A582E 		.word	777554542
+ 829 08e4 A05E7A3F 		.word	1064984224
+ 830 08e8 8EB5D9DC 		.word	-589711986
+ 831 08ec DA08733F 		.word	1064503514
+ 832 08f0 067D65C5 		.word	-983204602
+ 833 08f4 E5E1633F 		.word	1063510501
+ 834 08f8 AAD1DA4B 		.word	1272631722
+ 835 08fc 14FB863E 		.word	1049033492
+ 836 0900 EBFE4FB3 		.word	-1286603029
+ 837 0904 169C63BF 		.word	-1083991018
+ 838 0908 33116223 		.word	593629491
+ 839 090c 198572BF 		.word	-1083013863
+ 840 0910 099BABEB 		.word	-341075191
+ 841 0914 0E4F79BF 		.word	-1082568946
+ 842 0918 49E22F25 		.word	623895113
+ 843 091c 45897DBF 		.word	-1082291899
+ 844 0920 C91512CB 		.word	-888007223
+ 845 0924 95D37EBF 		.word	-1082207339
+ 846 0928 6B08D97C 		.word	2094598251
+ 847 092c D6187DBF 		.word	-1082320682
+ 848 0930 578AD4CC 		.word	-858486185
+ 849 0934 D28F78BF 		.word	-1082617902
+ 850 0938 F2485001 		.word	22038770
+ 851 093c CAB471BF 		.word	-1083067190
+ 852 0940 5990A8FD 		.word	-39284647
+ 853 0944 617862BF 		.word	-1084065695
+ 854 0948 1E458EE7 		.word	-410106594
+ 855 094c 9E5280BE 		.word	-1098886498
+ 856 0950 1ADFB074 		.word	1957748506
+ 857 0954 4B2B623F 		.word	1063398219
+ 858 0958 F155984C 		.word	1285051889
+ 859 095c E522713F 		.word	1064379109
+ 860 0960 FA5C6842 		.word	1114135802
+ 861 0964 F662773F 		.word	1064788726
+ 862 0968 D23DC5A0 		.word	-1597686318
+ 863 096c 91417B3F 		.word	1065042321
+ 864 0970 54FEFCAE 		.word	-1359151532
+ 865 0974 8B687C3F 		.word	1065117835
+ 866 0978 F7154E26 		.word	642651639
+ 867 097c 38C77A3F 		.word	1065011000
+ 868 0980 68BEA408 		.word	145014376
+ 869 0984 D992763F 		.word	1064735449
+ 870 0988 3721BDC4 		.word	-994238153
+ 871 098c 2B40703F 		.word	1064321067
+ 872 0990 B0010624 		.word	604373424
+ 873 0994 ACED603F 		.word	1063316908
+ 874 0998 5E24DD75 		.word	1977427038
+ 875 099c A410673E 		.word	1046941860
+ 876 09a0 BEFE978C 		.word	-1936195906
+ 877 09a4 909B60BF 		.word	-1084187760
+ 878 09a8 AAEA3185 		.word	-2060326230
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 19
+
+
+ 879 09ac 88486FBF 		.word	-1083225976
+ 880 09b0 726EEC26 		.word	653028978
+ 881 09b4 245175BF 		.word	-1082830556
+ 882 09b8 0A791A1F 		.word	521828618
+ 883 09bc 2ECF78BF 		.word	-1082601682
+ 884 09c0 BAFC7D06 		.word	108919994
+ 885 09c4 60D279BF 		.word	-1082535328
+ 886 09c8 82924AA2 		.word	-1572171134
+ 887 09cc 404E78BF 		.word	-1082634688
+ 888 09d0 4BC1B1E5 		.word	-441335477
+ 889 09d4 D27574BF 		.word	-1082886702
+ 890 09d8 926179C2 		.word	-1032232558
+ 891 09dc 996A6DBF 		.word	-1083348327
+ 892 09e0 83659918 		.word	412706179
+ 893 09e4 44995EBF 		.word	-1084319420
+ 894 09e8 CBCC1AFF 		.word	-15020853
+ 895 09ec 9196703E 		.word	1047565969
+ 896 09f0 4CA39D1F 		.word	530424652
+ 897 09f4 9DEF5D3F 		.word	1063120797
+ 898 09f8 78E72447 		.word	1193600888
+ 899 09fc 37276C3F 		.word	1064052535
+ 900 0a00 725215B8 		.word	-1206562190
+ 901 0a04 ED27733F 		.word	1064511469
+ 902 0a08 263BCCBD 		.word	-1110688986
+ 903 0a0c F842763F 		.word	1064715000
+ 904 0a10 E8BAE456 		.word	1457830632
+ 905 0a14 D222773F 		.word	1064772306
+ 906 0a18 52AFF269 		.word	1777512274
+ 907 0a1c D2BE753F 		.word	1064681170
+ 908 0a20 1A361A11 		.word	286930458
+ 909 0a24 1D47723F 		.word	1064453917
+ 910 0a28 AFE19C22 		.word	580706735
+ 911 0a2c 373D6A3F 		.word	1063927095
+ 912 0a30 9C2AB80F 		.word	263727772
+ 913 0a34 74405B3F 		.word	1062944884
+ 914 0a38 AC2DD4FE 		.word	-19649108
+ 915 0a3c 8F3189BE 		.word	-1098305137
+ 916 0a40 C10BA107 		.word	127994817
+ 917 0a44 DC955ABF 		.word	-1084582436
+ 918 0a48 59D43ECE 		.word	-834743207
+ 919 0a4c 8DF668BF 		.word	-1083640179
+ 920 0a50 047D2CD3 		.word	-752059132
+ 921 0a54 8BF570BF 		.word	-1083116149
+ 922 0a58 C16B9A8D 		.word	-1919259711
+ 923 0a5c 9DAD73BF 		.word	-1082937955
+ 924 0a60 3F111CE1 		.word	-518254273
+ 925 0a64 5B6B74BF 		.word	-1082889381
+ 926 0a68 4AB92C75 		.word	1965865290
+ 927 0a6c 7C2973BF 		.word	-1082971780
+ 928 0a70 76A9141F 		.word	521447798
+ 929 0a74 BF1470BF 		.word	-1083173697
+ 930 0a78 6ED9564F 		.word	1331091822
+ 931 0a7c 7C0C67BF 		.word	-1083765636
+ 932 0a80 0C6C2F27 		.word	657419276
+ 933 0a84 29E657BF 		.word	-1084758487
+ 934 0a88 67019576 		.word	1989476711
+ 935 0a8c C905963E 		.word	1050019273
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 20
+
+
+ 936 0a90 CE2ED597 		.word	-1747636530
+ 937 0a94 D53E573F 		.word	1062682325
+ 938 0a98 556ACC7E 		.word	2127325781
+ 939 0a9c 61CA653F 		.word	1063635553
+ 940 0aa0 9BD65EB9 		.word	-1184967013
+ 941 0aa4 1D8F6D3F 		.word	1064144669
+ 942 0aa8 AB9EFF0C 		.word	218078891
+ 943 0aac F31E713F 		.word	1064378099
+ 944 0ab0 7E0F262A 		.word	707137406
+ 945 0ab4 85BC713F 		.word	1064418437
+ 946 0ab8 0D5A5394 		.word	-1806476787
+ 947 0abc D99D703F 		.word	1064345049
+ 948 0ac0 4E11AF64 		.word	1689194830
+ 949 0ac4 C8D76B3F 		.word	1064032200
+ 950 0ac8 B1B00F69 		.word	1762635953
+ 951 0acc 63EB633F 		.word	1063512931
+ 952 0ad0 4EFF3EF3 		.word	-213975218
+ 953 0ad4 2D9E543F 		.word	1062510125
+ 954 0ad8 C00789D2 		.word	-762771520
+ 955 0adc C6E69FBE 		.word	-1096816954
+ 956 0ae0 6C9A275B 		.word	1529322092
+ 957 0ae4 E3FD53BF 		.word	-1085014557
+ 958 0ae8 02610B08 		.word	134963458
+ 959 0aec EDB462BF 		.word	-1084050195
+ 960 0af0 A3D523F4 		.word	-198978141
+ 961 0af4 C15469BF 		.word	-1083616063
+ 962 0af8 2DD16BAF 		.word	-1351888595
+ 963 0afc D04A6DBF 		.word	-1083356464
+ 964 0b00 15A328C7 		.word	-953638123
+ 965 0b04 9D4A6EBF 		.word	-1083290979
+ 966 0b08 00D46FD8 		.word	-663759872
+ 967 0b0c 05546CBF 		.word	-1083419643
+ 968 0b10 E9492B02 		.word	36391401
+ 969 0b14 C9B067BF 		.word	-1083723575
+ 970 0b18 A684ABAC 		.word	-1398045530
+ 971 0b1c EAEA60BF 		.word	-1084167446
+ 972 0b20 5A540C5F 		.word	1594643546
+ 973 0b24 277A51BF 		.word	-1085179353
+ 974 0b28 7DC831A0 		.word	-1607350147
+ 975 0b2c 8AD5A43E 		.word	1050989962
+ 976 0b30 63A905FF 		.word	-16406173
+ 977 0b34 18E4503F 		.word	1062265880
+ 978 0b38 F0D15EB7 		.word	-1218522640
+ 979 0b3c 678C5F3F 		.word	1063226471
+ 980 0b40 2AD7B004 		.word	78698282
+ 981 0b44 B951653F 		.word	1063604665
+ 982 0b48 00180661 		.word	1627789312
+ 983 0b4c 179B683F 		.word	1063820055
+ 984 0b50 7A30D813 		.word	332935290
+ 985 0b54 6A65693F 		.word	1063871850
+ 986 0b58 D06AA3DD 		.word	-576492848
+ 987 0b5c 37B4673F 		.word	1063760951
+ 988 0b60 7CFD74FC 		.word	-59441796
+ 989 0b64 C9C8633F 		.word	1063504073
+ 990 0b68 6819C5CD 		.word	-842720920
+ 991 0b6c 17335C3F 		.word	1063006999
+ 992 0b70 9D2AC11F 		.word	532753053
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 21
+
+
+ 993 0b74 11124D3F 		.word	1062015505
+ 994 0b78 FBA073C2 		.word	-1032609541
+ 995 0b7c BE60A9BE 		.word	-1096195906
+ 996 0b80 02E8FE60 		.word	1627318274
+ 997 0b84 82FF4BBF 		.word	-1085538430
+ 998 0b88 AF7ABBCD 		.word	-843351377
+ 999 0b8c 11175ABF 		.word	-1084614895
+ 1000 0b90 4A600F21 		.word	554655818
+ 1001 0b94 F69761BF 		.word	-1084123146
+ 1002 0b98 F70850D6 		.word	-699397897
+ 1003 0b9c 5C4364BF 		.word	-1083948196
+ 1004 0ba0 BFF05AA4 		.word	-1537544001
+ 1005 0ba4 A2DE64BF 		.word	-1083908446
+ 1006 0ba8 D75CAAF9 		.word	-106275625
+ 1007 0bac F86F63BF 		.word	-1084002312
+ 1008 0bb0 0410A8F3 		.word	-207089660
+ 1009 0bb4 213060BF 		.word	-1084215263
+ 1010 0bb8 3EC6FA1F 		.word	536528446
+ 1011 0bbc B40557BF 		.word	-1084815948
+ 1012 0bc0 E3885CA9 		.word	-1453553437
+ 1013 0bc4 5EAD47BF 		.word	-1085821602
+ 1014 0bc8 73E17897 		.word	-1753685645
+ 1015 0bcc 3151AD3E 		.word	1051545905
+ 1016 0bd0 D57AD891 		.word	-1848083755
+ 1017 0bd4 07B8463F 		.word	1061599239
+ 1018 0bd8 90CB16D5 		.word	-719926384
+ 1019 0bdc 791E553F 		.word	1062542969
+ 1020 0be0 73CBDE43 		.word	1138674547
+ 1021 0be4 806A5C3F 		.word	1063021184
+ 1022 0be8 6F192BBE 		.word	-1104471697
+ 1023 0bec 5253603F 		.word	1063277394
+ 1024 0bf0 623F8B0A 		.word	176897890
+ 1025 0bf4 40C6603F 		.word	1063306816
+ 1026 0bf8 705AAFDA 		.word	-626042256
+ 1027 0bfc EF2B5F3F 		.word	1063201775
+ 1028 0c00 59E99BAC 		.word	-1399068327
+ 1029 0c04 BFE5593F 		.word	1062856127
+ 1030 0c08 D874280A 		.word	170423512
+ 1031 0c0c 905E523F 		.word	1062362768
+ 1032 0c10 2C7BAA04 		.word	78281516
+ 1033 0c14 58D7423F 		.word	1061345112
+ 1034 0c18 521C6195 		.word	-1788797870
+ 1035 0c1c 4536B0BE 		.word	-1095748027
+ 1036 0c20 8120A11E 		.word	513876097
+ 1037 0c24 6F0142BF 		.word	-1086193297
+ 1038 0c28 F41EEDC5 		.word	-974315788
+ 1039 0c2c ECB050BF 		.word	-1085230868
+ 1040 0c30 263F48D3 		.word	-750239962
+ 1041 0c34 FF6556BF 		.word	-1084856833
+ 1042 0c38 6DE02E43 		.word	1127145581
+ 1043 0c3c 0CAB59BF 		.word	-1084642548
+ 1044 0c40 0D429F48 		.word	1218396685
+ 1045 0c44 A14D5ABF 		.word	-1084600927
+ 1046 0c48 BF28081A 		.word	436742335
+ 1047 0c4c 785F58BF 		.word	-1084727432
+ 1048 0c50 5FBBA796 		.word	-1767392417
+ 1049 0c54 5F3154BF 		.word	-1085001377
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 22
+
+
+ 1050 0c58 D7E61478 		.word	2014635735
+ 1051 0c5c 63904CBF 		.word	-1085501341
+ 1052 0c60 5EC79019 		.word	428918622
+ 1053 0c64 D4343DBF 		.word	-1086507820
+ 1054 0c68 4CA082CC 		.word	-863854516
+ 1055 0c6c E842B13E 		.word	1051804392
+ 1056 0c70 1D1FC304 		.word	79896349
+ 1057 0c74 7DC93B3F 		.word	1060882813
+ 1058 0c78 8DFBDBF1 		.word	-237241459
+ 1059 0c7c C9AC493F 		.word	1061792969
+ 1060 0c80 97CEBF26 		.word	650104471
+ 1061 0c84 8E2C513F 		.word	1062284430
+ 1062 0c88 50B02B23 		.word	590065744
+ 1063 0c8c DB9E533F 		.word	1062444763
+ 1064 0c90 49013042 		.word	1110442313
+ 1065 0c94 1C0B543F 		.word	1062472476
+ 1066 0c98 619A0AEA 		.word	-368403871
+ 1067 0c9c 7F83523F 		.word	1062372223
+ 1068 0ca0 ACE2C0A1 		.word	-1581194580
+ 1069 0ca4 DC934E3F 		.word	1062114268
+ 1070 0ca8 25D8D9F6 		.word	-153495515
+ 1071 0cac DF8D453F 		.word	1061522911
+ 1072 0cb0 8E3C06F2 		.word	-234472306
+ 1073 0cb4 0FF5353F 		.word	1060500751
+ 1074 0cb8 1011DFC4 		.word	-992014064
+ 1075 0cbc 24C0B1BE 		.word	-1095647196
+ 1076 0cc0 22873897 		.word	-1757903070
+ 1077 0cc4 3CC934BF 		.word	-1087059652
+ 1078 0cc8 6FD0341C 		.word	473223279
+ 1079 0ccc B12143BF 		.word	-1086119503
+ 1080 0cd0 956DC00D 		.word	230714773
+ 1081 0cd4 2B8049BF 		.word	-1085702101
+ 1082 0cd8 E4EAD1DC 		.word	-590222620
+ 1083 0cdc CF064DBF 		.word	-1085471025
+ 1084 0ce0 C9DD4341 		.word	1094966729
+ 1085 0ce4 C88A4DBF 		.word	-1085437240
+ 1086 0ce8 F4D529EA 		.word	-366357004
+ 1087 0cec 1D2F4BBF 		.word	-1085591779
+ 1088 0cf0 A01364AD 		.word	-1385950304
+ 1089 0cf4 885C46BF 		.word	-1085907832
+ 1090 0cf8 FF11FE97 		.word	-1744956929
+ 1091 0cfc A6653FBF 		.word	-1086364250
+ 1092 0d00 E81470AE 		.word	-1368386328
+ 1093 0d04 BED62FBF 		.word	-1087383874
+ 1094 0d08 96314941 		.word	1095315862
+ 1095 0d0c 8FA8B13E 		.word	1051830415
+ 1096 0d10 BBB53443 		.word	1127527867
+ 1097 0d14 B2F72D3F 		.word	1059977138
+ 1098 0d18 EC851AB0 		.word	-1340439060
+ 1099 0d1c 2A733B3F 		.word	1060860714
+ 1100 0d20 3A2C73DA 		.word	-629986246
+ 1101 0d24 2E36423F 		.word	1061303854
+ 1102 0d28 AC1E5398 		.word	-1739383124
+ 1103 0d2c DEA2443F 		.word	1061462750
+ 1104 0d30 878E6280 		.word	-2141024633
+ 1105 0d34 01E8443F 		.word	1061480449
+ 1106 0d38 276227B3 		.word	-1289264601
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 23
+
+
+ 1107 0d3c 9F25433F 		.word	1061365151
+ 1108 0d40 E3459D2B 		.word	731727331
+ 1109 0d44 DD583F3F 		.word	1061116125
+ 1110 0d48 A6506FA4 		.word	-1536208730
+ 1111 0d4c E3E4353F 		.word	1060496611
+ 1112 0d50 9C99D53B 		.word	1003854236
+ 1113 0d54 AE12263F 		.word	1059459758
+ 1114 0d58 999DA070 		.word	1889574297
+ 1115 0d5c DDFFB0BE 		.word	-1095696419
+ 1116 0d60 E97C24C8 		.word	-937132823
+ 1117 0d64 25A224BF 		.word	-1088118235
+ 1118 0d68 662438DC 		.word	-600300442
+ 1119 0d6c 4AC832BF 		.word	-1087190966
+ 1120 0d70 9E936827 		.word	661164958
+ 1121 0d74 14C738BF 		.word	-1086798060
+ 1122 0d78 AC04D6C8 		.word	-925498196
+ 1123 0d7c 96E93BBF 		.word	-1086592618
+ 1124 0d80 D064FF71 		.word	1912562896
+ 1125 0d84 E11B3CBF 		.word	-1086579743
+ 1126 0d88 EE632740 		.word	1076323310
+ 1127 0d8c BB9539BF 		.word	-1086745157
+ 1128 0d90 FBC36C04 		.word	74236923
+ 1129 0d94 27CF34BF 		.word	-1087058137
+ 1130 0d98 436E7CAA 		.word	-1434685885
+ 1131 0d9c 9EDE2CBF 		.word	-1087578466
+ 1132 0da0 BF660B86 		.word	-2046073153
+ 1133 0da4 15E01CBF 		.word	-1088626667
+ 1134 0da8 9B9AD460 		.word	1624545947
+ 1135 0dac D1A4AF3E 		.word	1051698385
+ 1136 0db0 8C8B5277 		.word	2001898380
+ 1137 0db4 6FC21A3F 		.word	1058718319
+ 1138 0db8 CEEAC3F2 		.word	-222041394
+ 1139 0dbc 5226283F 		.word	1059595858
+ 1140 0dc0 9211A2FC 		.word	-56487534
+ 1141 0dc4 589A2F3F 		.word	1060084312
+ 1142 0dc8 F8D6E5B7 		.word	-1209673992
+ 1143 0dcc 08A8313F 		.word	1060218888
+ 1144 0dd0 857BC121 		.word	566328197
+ 1145 0dd4 CDA1313F 		.word	1060217293
+ 1146 0dd8 B60A44CD 		.word	-851178826
+ 1147 0ddc 67D12F3F 		.word	1060098407
+ 1148 0de0 376D65FA 		.word	-94016201
+ 1149 0de4 2CA4293F 		.word	1059693612
+ 1150 0de8 F6D0C777 		.word	2009583862
+ 1151 0dec 529C213F 		.word	1059167314
+ 1152 0df0 3F0A9A53 		.word	1402604095
+ 1153 0df4 3168113F 		.word	1058105393
+ 1154 0df8 7FF7D259 		.word	1506998143
+ 1155 0dfc 3368ACBE 		.word	-1095997389
+ 1156 0e00 28045AE3 		.word	-480639960
+ 1157 0e04 BFE10FBF 		.word	-1089478209
+ 1158 0e08 11A1F9C8 		.word	-923164399
+ 1159 0e0c 22651CBF 		.word	-1088658142
+ 1160 0e10 C9289C4B 		.word	1268525257
+ 1161 0e14 D55922BF 		.word	-1088267819
+ 1162 0e18 1927C124 		.word	616638233
+ 1163 0e1c 433F24BF 		.word	-1088143549
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 24
+
+
+ 1164 0e20 EC23B196 		.word	-1766775828
+ 1165 0e24 EDF323BF 		.word	-1088162835
+ 1166 0e28 99F7F808 		.word	150534041
+ 1167 0e2c 6DC021BF 		.word	-1088307091
+ 1168 0e30 8C35C772 		.word	1925657996
+ 1169 0e34 A52E1CBF 		.word	-1088672091
+ 1170 0e38 4FA2970B 		.word	194486863
+ 1171 0e3c 0D0913BF 		.word	-1089271539
+ 1172 0e40 89B35ECD 		.word	-849431671
+ 1173 0e44 A66E02BF 		.word	-1090359642
+ 1174 0e48 BB2F8597 		.word	-1752879173
+ 1175 0e4c A57DA83E 		.word	1051229605
+ 1176 0e50 1CA39B08 		.word	144417564
+ 1177 0e54 6A8F003F 		.word	1057001322
+ 1178 0e58 0D32C52C 		.word	751120909
+ 1179 0e5c 86CB0C3F 		.word	1057803142
+ 1180 0e60 E892EEE2 		.word	-487681304
+ 1181 0e64 7B2F123F 		.word	1058156411
+ 1182 0e68 2E4E6FF1 		.word	-244363730
+ 1183 0e6c 7595133F 		.word	1058248053
+ 1184 0e70 F6B3D8CA 		.word	-891767818
+ 1185 0e74 BCCC123F 		.word	1058196668
+ 1186 0e78 7604ECB4 		.word	-1259600778
+ 1187 0e7c 3340103F 		.word	1058029619
+ 1188 0e80 8E799A62 		.word	1654290830
+ 1189 0e84 19FB083F 		.word	1057553177
+ 1190              		.bss
+ 1191              		.align	2
+ 1192              		.set	.LANCHOR0,. + 0
+ 1193              		.type	ds, %object
+ 1194              		.size	ds, 4
+ 1195              	ds:
+ 1196 0000 00000000 		.space	4
+ 1197              		.type	g_flt, %object
+ 1198              		.size	g_flt, 4
+ 1199              	g_flt:
+ 1200 0004 00000000 		.space	4
+ 1201              		.type	g_filter_ready, %object
+ 1202              		.size	g_filter_ready, 1
+ 1203              	g_filter_ready:
+ 1204 0008 00       		.space	1
+ 1205 0009 00       		.space	1
+ 1206              		.type	hb_count.6289, %object
+ 1207              		.size	hb_count.6289, 2
+ 1208              	hb_count.6289:
+ 1209 000a 0000     		.space	2
+ 1210              		.text
+ 1211              	.Letext0:
+ 1212              		.file 2 "c:\\program files (x86)\\cypress\\psoc creator\\4.4\\psoc creator\\import\\gnu\\arm\\5.4.
+ 1213              		.file 3 "c:\\program files (x86)\\cypress\\psoc creator\\4.4\\psoc creator\\import\\gnu\\arm\\5.4.
+ 1214              		.file 4 "Generated_Source\\PSoC5/cytypes.h"
+ 1215              		.file 5 "Generated_Source\\PSoC5/core_cm3.h"
+ 1216              		.file 6 "coeficientes_notch.h"
+ 1217              		.file 7 "Generated_Source\\PSoC5/ADC_DelSig.h"
+ 1218              		.file 8 "Generated_Source\\PSoC5/Filter.h"
+ 1219              		.file 9 "Generated_Source\\PSoC5/UART_PC.h"
+ 1220              		.file 10 "Generated_Source\\PSoC5/PGA_p_1.h"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 25
+
+
+ 1221              		.file 11 "Generated_Source\\PSoC5/PGA_p_2.h"
+ 1222              		.file 12 "Generated_Source\\PSoC5/PGA_n_1.h"
+ 1223              		.file 13 "Generated_Source\\PSoC5/PGA_n_2.h"
+ 1224              		.file 14 "Generated_Source\\PSoC5/OpaBP_p.h"
+ 1225              		.file 15 "Generated_Source\\PSoC5/OpaBP_n.h"
+ 1226              		.file 16 "Generated_Source\\PSoC5/OpaLP_p.h"
+ 1227              		.file 17 "Generated_Source\\PSoC5/OpaLP_n.h"
+ 1228              		.file 18 "Generated_Source\\PSoC5/isr_DelSig.h"
+ 1229              		.file 19 "Generated_Source\\PSoC5/isr_Filter.h"
+ 1230              		.file 20 "Generated_Source\\PSoC5/CyLib.h"
+ 1231              		.section	.debug_info,"",%progbits
+ 1232              	.Ldebug_info0:
+ 1233 0000 26040000 		.4byte	0x426
+ 1234 0004 0400     		.2byte	0x4
+ 1235 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 1236 000a 04       		.byte	0x4
+ 1237 000b 01       		.uleb128 0x1
+ 1238 000c 87000000 		.4byte	.LASF50
+ 1239 0010 0C       		.byte	0xc
+ 1240 0011 BD020000 		.4byte	.LASF51
+ 1241 0015 61010000 		.4byte	.LASF52
+ 1242 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 1243 001d 00000000 		.4byte	0
+ 1244 0021 00000000 		.4byte	.Ldebug_line0
+ 1245 0025 02       		.uleb128 0x2
+ 1246 0026 01       		.byte	0x1
+ 1247 0027 06       		.byte	0x6
+ 1248 0028 5B030000 		.4byte	.LASF0
+ 1249 002c 02       		.uleb128 0x2
+ 1250 002d 01       		.byte	0x1
+ 1251 002e 08       		.byte	0x8
+ 1252 002f 79000000 		.4byte	.LASF1
+ 1253 0033 02       		.uleb128 0x2
+ 1254 0034 02       		.byte	0x2
+ 1255 0035 05       		.byte	0x5
+ 1256 0036 02030000 		.4byte	.LASF2
+ 1257 003a 02       		.uleb128 0x2
+ 1258 003b 02       		.byte	0x2
+ 1259 003c 07       		.byte	0x7
+ 1260 003d 67030000 		.4byte	.LASF3
+ 1261 0041 03       		.uleb128 0x3
+ 1262 0042 13000000 		.4byte	.LASF9
+ 1263 0046 02       		.byte	0x2
+ 1264 0047 3F       		.byte	0x3f
+ 1265 0048 4C000000 		.4byte	0x4c
+ 1266 004c 02       		.uleb128 0x2
+ 1267 004d 04       		.byte	0x4
+ 1268 004e 05       		.byte	0x5
+ 1269 004f 41030000 		.4byte	.LASF4
+ 1270 0053 02       		.uleb128 0x2
+ 1271 0054 04       		.byte	0x4
+ 1272 0055 07       		.byte	0x7
+ 1273 0056 22010000 		.4byte	.LASF5
+ 1274 005a 02       		.uleb128 0x2
+ 1275 005b 08       		.byte	0x8
+ 1276 005c 05       		.byte	0x5
+ 1277 005d AF020000 		.4byte	.LASF6
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 26
+
+
+ 1278 0061 02       		.uleb128 0x2
+ 1279 0062 08       		.byte	0x8
+ 1280 0063 07       		.byte	0x7
+ 1281 0064 26020000 		.4byte	.LASF7
+ 1282 0068 04       		.uleb128 0x4
+ 1283 0069 04       		.byte	0x4
+ 1284 006a 05       		.byte	0x5
+ 1285 006b 696E7400 		.ascii	"int\000"
+ 1286 006f 02       		.uleb128 0x2
+ 1287 0070 04       		.byte	0x4
+ 1288 0071 07       		.byte	0x7
+ 1289 0072 0B020000 		.4byte	.LASF8
+ 1290 0076 03       		.uleb128 0x3
+ 1291 0077 46000000 		.4byte	.LASF10
+ 1292 007b 03       		.byte	0x3
+ 1293 007c 2C       		.byte	0x2c
+ 1294 007d 41000000 		.4byte	0x41
+ 1295 0081 05       		.uleb128 0x5
+ 1296 0082 32000000 		.4byte	.LASF11
+ 1297 0086 04       		.byte	0x4
+ 1298 0087 E901     		.2byte	0x1e9
+ 1299 0089 2C000000 		.4byte	0x2c
+ 1300 008d 05       		.uleb128 0x5
+ 1301 008e C9010000 		.4byte	.LASF12
+ 1302 0092 04       		.byte	0x4
+ 1303 0093 EA01     		.2byte	0x1ea
+ 1304 0095 3A000000 		.4byte	0x3a
+ 1305 0099 05       		.uleb128 0x5
+ 1306 009a DE010000 		.4byte	.LASF13
+ 1307 009e 04       		.byte	0x4
+ 1308 009f EB01     		.2byte	0x1eb
+ 1309 00a1 53000000 		.4byte	0x53
+ 1310 00a5 05       		.uleb128 0x5
+ 1311 00a6 34010000 		.4byte	.LASF14
+ 1312 00aa 04       		.byte	0x4
+ 1313 00ab EE01     		.2byte	0x1ee
+ 1314 00ad 4C000000 		.4byte	0x4c
+ 1315 00b1 02       		.uleb128 0x2
+ 1316 00b2 04       		.byte	0x4
+ 1317 00b3 04       		.byte	0x4
+ 1318 00b4 4E000000 		.4byte	.LASF15
+ 1319 00b8 02       		.uleb128 0x2
+ 1320 00b9 08       		.byte	0x8
+ 1321 00ba 04       		.byte	0x4
+ 1322 00bb 2B000000 		.4byte	.LASF16
+ 1323 00bf 02       		.uleb128 0x2
+ 1324 00c0 01       		.byte	0x1
+ 1325 00c1 08       		.byte	0x8
+ 1326 00c2 C4020000 		.4byte	.LASF17
+ 1327 00c6 06       		.uleb128 0x6
+ 1328 00c7 81000000 		.4byte	0x81
+ 1329 00cb 02       		.uleb128 0x2
+ 1330 00cc 08       		.byte	0x8
+ 1331 00cd 04       		.byte	0x4
+ 1332 00ce AF010000 		.4byte	.LASF18
+ 1333 00d2 02       		.uleb128 0x2
+ 1334 00d3 04       		.byte	0x4
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 27
+
+
+ 1335 00d4 07       		.byte	0x7
+ 1336 00d5 93020000 		.4byte	.LASF19
+ 1337 00d9 07       		.uleb128 0x7
+ 1338 00da 3D020000 		.4byte	.LASF20
+ 1339 00de 01       		.byte	0x1
+ 1340 00df 2B       		.byte	0x2b
+ 1341 00e0 00000000 		.4byte	.LFB63
+ 1342 00e4 18000000 		.4byte	.LFE63-.LFB63
+ 1343 00e8 01       		.uleb128 0x1
+ 1344 00e9 9C       		.byte	0x9c
+ 1345 00ea 07010000 		.4byte	0x107
+ 1346 00ee 08       		.uleb128 0x8
+ 1347 00ef 06000000 		.4byte	.LVL0
+ 1348 00f3 37030000 		.4byte	0x337
+ 1349 00f7 09       		.uleb128 0x9
+ 1350 00f8 12000000 		.4byte	.LVL1
+ 1351 00fc 42030000 		.4byte	0x342
+ 1352 0100 0A       		.uleb128 0xa
+ 1353 0101 01       		.uleb128 0x1
+ 1354 0102 50       		.byte	0x50
+ 1355 0103 01       		.uleb128 0x1
+ 1356 0104 30       		.byte	0x30
+ 1357 0105 00       		.byte	0
+ 1358 0106 00       		.byte	0
+ 1359 0107 07       		.uleb128 0x7
+ 1360 0108 9F010000 		.4byte	.LASF21
+ 1361 010c 01       		.byte	0x1
+ 1362 010d 32       		.byte	0x32
+ 1363 010e 00000000 		.4byte	.LFB64
+ 1364 0112 20000000 		.4byte	.LFE64-.LFB64
+ 1365 0116 01       		.uleb128 0x1
+ 1366 0117 9C       		.byte	0x9c
+ 1367 0118 3B010000 		.4byte	0x13b
+ 1368 011c 0B       		.uleb128 0xb
+ 1369 011d 72617700 		.ascii	"raw\000"
+ 1370 0121 01       		.byte	0x1
+ 1371 0122 34       		.byte	0x34
+ 1372 0123 99000000 		.4byte	0x99
+ 1373 0127 00000000 		.4byte	.LLST0
+ 1374 012b 09       		.uleb128 0x9
+ 1375 012c 08000000 		.4byte	.LVL2
+ 1376 0130 4D030000 		.4byte	0x34d
+ 1377 0134 0A       		.uleb128 0xa
+ 1378 0135 01       		.uleb128 0x1
+ 1379 0136 50       		.byte	0x50
+ 1380 0137 01       		.uleb128 0x1
+ 1381 0138 30       		.byte	0x30
+ 1382 0139 00       		.byte	0
+ 1383 013a 00       		.byte	0
+ 1384 013b 0C       		.uleb128 0xc
+ 1385 013c E5010000 		.4byte	.LASF53
+ 1386 0140 01       		.byte	0x1
+ 1387 0141 4D       		.byte	0x4d
+ 1388 0142 68000000 		.4byte	0x68
+ 1389 0146 00000000 		.4byte	.LFB66
+ 1390 014a E4000000 		.4byte	.LFE66-.LFB66
+ 1391 014e 01       		.uleb128 0x1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 28
+
+
+ 1392 014f 9C       		.byte	0x9c
+ 1393 0150 BD020000 		.4byte	0x2bd
+ 1394 0154 0D       		.uleb128 0xd
+ 1395 0155 DD020000 		.4byte	.LASF22
+ 1396 0159 01       		.byte	0x1
+ 1397 015a 4F       		.byte	0x4f
+ 1398 015b 8D000000 		.4byte	0x8d
+ 1399 015f 05       		.uleb128 0x5
+ 1400 0160 03       		.byte	0x3
+ 1401 0161 0A000000 		.4byte	hb_count.6289
+ 1402 0165 0E       		.uleb128 0xe
+ 1403 0166 706B7400 		.ascii	"pkt\000"
+ 1404 016a 01       		.byte	0x1
+ 1405 016b 50       		.byte	0x50
+ 1406 016c BD020000 		.4byte	0x2bd
+ 1407 0170 02       		.uleb128 0x2
+ 1408 0171 91       		.byte	0x91
+ 1409 0172 68       		.sleb128 -24
+ 1410 0173 0F       		.uleb128 0xf
+ 1411 0174 01020000 		.4byte	.LASF54
+ 1412 0178 01       		.byte	0x1
+ 1413 0179 51       		.byte	0x51
+ 1414 017a A5000000 		.4byte	0xa5
+ 1415 017e 0E       		.uleb128 0xe
+ 1416 017f 666C7400 		.ascii	"flt\000"
+ 1417 0183 01       		.byte	0x1
+ 1418 0184 52       		.byte	0x52
+ 1419 0185 A5000000 		.4byte	0xa5
+ 1420 0189 01       		.uleb128 0x1
+ 1421 018a 53       		.byte	0x53
+ 1422 018b 10       		.uleb128 0x10
+ 1423 018c 3A010000 		.4byte	.LASF23
+ 1424 0190 01       		.byte	0x1
+ 1425 0191 53       		.byte	0x53
+ 1426 0192 81000000 		.4byte	0x81
+ 1427 0196 13000000 		.4byte	.LLST1
+ 1428 019a 08       		.uleb128 0x8
+ 1429 019b 0A000000 		.4byte	.LVL4
+ 1430 019f 58030000 		.4byte	0x358
+ 1431 01a3 08       		.uleb128 0x8
+ 1432 01a4 0E000000 		.4byte	.LVL5
+ 1433 01a8 63030000 		.4byte	0x363
+ 1434 01ac 08       		.uleb128 0x8
+ 1435 01ad 12000000 		.4byte	.LVL6
+ 1436 01b1 6E030000 		.4byte	0x36e
+ 1437 01b5 08       		.uleb128 0x8
+ 1438 01b6 16000000 		.4byte	.LVL7
+ 1439 01ba 79030000 		.4byte	0x379
+ 1440 01be 08       		.uleb128 0x8
+ 1441 01bf 1A000000 		.4byte	.LVL8
+ 1442 01c3 84030000 		.4byte	0x384
+ 1443 01c7 08       		.uleb128 0x8
+ 1444 01c8 1E000000 		.4byte	.LVL9
+ 1445 01cc 8F030000 		.4byte	0x38f
+ 1446 01d0 08       		.uleb128 0x8
+ 1447 01d1 22000000 		.4byte	.LVL10
+ 1448 01d5 9A030000 		.4byte	0x39a
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 29
+
+
+ 1449 01d9 08       		.uleb128 0x8
+ 1450 01da 26000000 		.4byte	.LVL11
+ 1451 01de A5030000 		.4byte	0x3a5
+ 1452 01e2 08       		.uleb128 0x8
+ 1453 01e3 2A000000 		.4byte	.LVL12
+ 1454 01e7 B0030000 		.4byte	0x3b0
+ 1455 01eb 08       		.uleb128 0x8
+ 1456 01ec 2E000000 		.4byte	.LVL13
+ 1457 01f0 BB030000 		.4byte	0x3bb
+ 1458 01f4 11       		.uleb128 0x11
+ 1459 01f5 36000000 		.4byte	.LVL14
+ 1460 01f9 C6030000 		.4byte	0x3c6
+ 1461 01fd 0C020000 		.4byte	0x20c
+ 1462 0201 0A       		.uleb128 0xa
+ 1463 0202 01       		.uleb128 0x1
+ 1464 0203 50       		.byte	0x50
+ 1465 0204 01       		.uleb128 0x1
+ 1466 0205 30       		.byte	0x30
+ 1467 0206 0A       		.uleb128 0xa
+ 1468 0207 01       		.uleb128 0x1
+ 1469 0208 51       		.byte	0x51
+ 1470 0209 01       		.uleb128 0x1
+ 1471 020a 30       		.byte	0x30
+ 1472 020b 00       		.byte	0
+ 1473 020c 11       		.uleb128 0x11
+ 1474 020d 3E000000 		.4byte	.LVL15
+ 1475 0211 D1030000 		.4byte	0x3d1
+ 1476 0215 24020000 		.4byte	0x224
+ 1477 0219 0A       		.uleb128 0xa
+ 1478 021a 01       		.uleb128 0x1
+ 1479 021b 50       		.byte	0x50
+ 1480 021c 01       		.uleb128 0x1
+ 1481 021d 31       		.byte	0x31
+ 1482 021e 0A       		.uleb128 0xa
+ 1483 021f 01       		.uleb128 0x1
+ 1484 0220 51       		.byte	0x51
+ 1485 0221 01       		.uleb128 0x1
+ 1486 0222 30       		.byte	0x30
+ 1487 0223 00       		.byte	0
+ 1488 0224 11       		.uleb128 0x11
+ 1489 0225 46000000 		.4byte	.LVL16
+ 1490 0229 D1030000 		.4byte	0x3d1
+ 1491 022d 3C020000 		.4byte	0x23c
+ 1492 0231 0A       		.uleb128 0xa
+ 1493 0232 01       		.uleb128 0x1
+ 1494 0233 50       		.byte	0x50
+ 1495 0234 01       		.uleb128 0x1
+ 1496 0235 34       		.byte	0x34
+ 1497 0236 0A       		.uleb128 0xa
+ 1498 0237 01       		.uleb128 0x1
+ 1499 0238 51       		.byte	0x51
+ 1500 0239 01       		.uleb128 0x1
+ 1501 023a 30       		.byte	0x30
+ 1502 023b 00       		.byte	0
+ 1503 023c 08       		.uleb128 0x8
+ 1504 023d 4A000000 		.4byte	.LVL17
+ 1505 0241 DC030000 		.4byte	0x3dc
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 30
+
+
+ 1506 0245 08       		.uleb128 0x8
+ 1507 0246 4E000000 		.4byte	.LVL18
+ 1508 024a E7030000 		.4byte	0x3e7
+ 1509 024e 11       		.uleb128 0x11
+ 1510 024f 54000000 		.4byte	.LVL19
+ 1511 0253 F2030000 		.4byte	0x3f2
+ 1512 0257 65020000 		.4byte	0x265
+ 1513 025b 0A       		.uleb128 0xa
+ 1514 025c 01       		.uleb128 0x1
+ 1515 025d 50       		.byte	0x50
+ 1516 025e 05       		.uleb128 0x5
+ 1517 025f 03       		.byte	0x3
+ 1518 0260 00000000 		.4byte	isr_DelSigReady
+ 1519 0264 00       		.byte	0
+ 1520 0265 11       		.uleb128 0x11
+ 1521 0266 5A000000 		.4byte	.LVL20
+ 1522 026a FD030000 		.4byte	0x3fd
+ 1523 026e 7C020000 		.4byte	0x27c
+ 1524 0272 0A       		.uleb128 0xa
+ 1525 0273 01       		.uleb128 0x1
+ 1526 0274 50       		.byte	0x50
+ 1527 0275 05       		.uleb128 0x5
+ 1528 0276 03       		.byte	0x3
+ 1529 0277 00000000 		.4byte	isr_FilterReady
+ 1530 027b 00       		.byte	0
+ 1531 027c 08       		.uleb128 0x8
+ 1532 027d 68000000 		.4byte	.LVL21
+ 1533 0281 08040000 		.4byte	0x408
+ 1534 0285 08       		.uleb128 0x8
+ 1535 0286 74000000 		.4byte	.LVL22
+ 1536 028a 13040000 		.4byte	0x413
+ 1537 028e 11       		.uleb128 0x11
+ 1538 028f A0000000 		.4byte	.LVL23
+ 1539 0293 1E040000 		.4byte	0x41e
+ 1540 0297 A7020000 		.4byte	0x2a7
+ 1541 029b 0A       		.uleb128 0xa
+ 1542 029c 01       		.uleb128 0x1
+ 1543 029d 50       		.byte	0x50
+ 1544 029e 02       		.uleb128 0x2
+ 1545 029f 7D       		.byte	0x7d
+ 1546 02a0 00       		.sleb128 0
+ 1547 02a1 0A       		.uleb128 0xa
+ 1548 02a2 01       		.uleb128 0x1
+ 1549 02a3 51       		.byte	0x51
+ 1550 02a4 01       		.uleb128 0x1
+ 1551 02a5 35       		.byte	0x35
+ 1552 02a6 00       		.byte	0
+ 1553 02a7 09       		.uleb128 0x9
+ 1554 02a8 D4000000 		.4byte	.LVL24
+ 1555 02ac 1E040000 		.4byte	0x41e
+ 1556 02b0 0A       		.uleb128 0xa
+ 1557 02b1 01       		.uleb128 0x1
+ 1558 02b2 50       		.byte	0x50
+ 1559 02b3 02       		.uleb128 0x2
+ 1560 02b4 7D       		.byte	0x7d
+ 1561 02b5 00       		.sleb128 0
+ 1562 02b6 0A       		.uleb128 0xa
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 31
+
+
+ 1563 02b7 01       		.uleb128 0x1
+ 1564 02b8 51       		.byte	0x51
+ 1565 02b9 01       		.uleb128 0x1
+ 1566 02ba 35       		.byte	0x35
+ 1567 02bb 00       		.byte	0
+ 1568 02bc 00       		.byte	0
+ 1569 02bd 12       		.uleb128 0x12
+ 1570 02be 81000000 		.4byte	0x81
+ 1571 02c2 CD020000 		.4byte	0x2cd
+ 1572 02c6 13       		.uleb128 0x13
+ 1573 02c7 D2000000 		.4byte	0xd2
+ 1574 02cb 04       		.byte	0x4
+ 1575 02cc 00       		.byte	0
+ 1576 02cd 0D       		.uleb128 0xd
+ 1577 02ce 5B010000 		.4byte	.LASF24
+ 1578 02d2 01       		.byte	0x1
+ 1579 02d3 27       		.byte	0x27
+ 1580 02d4 DE020000 		.4byte	0x2de
+ 1581 02d8 05       		.uleb128 0x5
+ 1582 02d9 03       		.byte	0x3
+ 1583 02da 04000000 		.4byte	g_flt
+ 1584 02de 06       		.uleb128 0x6
+ 1585 02df A5000000 		.4byte	0xa5
+ 1586 02e3 0D       		.uleb128 0xd
+ 1587 02e4 7A030000 		.4byte	.LASF25
+ 1588 02e8 01       		.byte	0x1
+ 1589 02e9 28       		.byte	0x28
+ 1590 02ea C6000000 		.4byte	0xc6
+ 1591 02ee 05       		.uleb128 0x5
+ 1592 02ef 03       		.byte	0x3
+ 1593 02f0 08000000 		.4byte	g_filter_ready
+ 1594 02f4 0E       		.uleb128 0xe
+ 1595 02f5 647300   		.ascii	"ds\000"
+ 1596 02f8 01       		.byte	0x1
+ 1597 02f9 29       		.byte	0x29
+ 1598 02fa DE020000 		.4byte	0x2de
+ 1599 02fe 05       		.uleb128 0x5
+ 1600 02ff 03       		.byte	0x3
+ 1601 0300 00000000 		.4byte	ds
+ 1602 0304 14       		.uleb128 0x14
+ 1603 0305 4E010000 		.4byte	.LASF26
+ 1604 0309 05       		.byte	0x5
+ 1605 030a 1207     		.2byte	0x712
+ 1606 030c 10030000 		.4byte	0x310
+ 1607 0310 06       		.uleb128 0x6
+ 1608 0311 76000000 		.4byte	0x76
+ 1609 0315 12       		.uleb128 0x12
+ 1610 0316 B8000000 		.4byte	0xb8
+ 1611 031a 26030000 		.4byte	0x326
+ 1612 031e 15       		.uleb128 0x15
+ 1613 031f D2000000 		.4byte	0xd2
+ 1614 0323 D001     		.2byte	0x1d0
+ 1615 0325 00       		.byte	0
+ 1616 0326 16       		.uleb128 0x16
+ 1617 0327 0C030000 		.4byte	.LASF27
+ 1618 032b 06       		.byte	0x6
+ 1619 032c 06       		.byte	0x6
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 32
+
+
+ 1620 032d 15030000 		.4byte	0x315
+ 1621 0331 05       		.uleb128 0x5
+ 1622 0332 03       		.byte	0x3
+ 1623 0333 00000000 		.4byte	filter_coeffs
+ 1624 0337 17       		.uleb128 0x17
+ 1625 0338 62000000 		.4byte	.LASF28
+ 1626 033c 62000000 		.4byte	.LASF28
+ 1627 0340 07       		.byte	0x7
+ 1628 0341 42       		.byte	0x42
+ 1629 0342 17       		.uleb128 0x17
+ 1630 0343 84020000 		.4byte	.LASF29
+ 1631 0347 84020000 		.4byte	.LASF29
+ 1632 034b 08       		.byte	0x8
+ 1633 034c 43       		.byte	0x43
+ 1634 034d 17       		.uleb128 0x17
+ 1635 034e E6020000 		.4byte	.LASF30
+ 1636 0352 E6020000 		.4byte	.LASF30
+ 1637 0356 08       		.byte	0x8
+ 1638 0357 40       		.byte	0x40
+ 1639 0358 17       		.uleb128 0x17
+ 1640 0359 38000000 		.4byte	.LASF31
+ 1641 035d 38000000 		.4byte	.LASF31
+ 1642 0361 09       		.byte	0x9
+ 1643 0362 54       		.byte	0x54
+ 1644 0363 17       		.uleb128 0x17
+ 1645 0364 40010000 		.4byte	.LASF32
+ 1646 0368 40010000 		.4byte	.LASF32
+ 1647 036c 0A       		.byte	0xa
+ 1648 036d 3E       		.byte	0x3e
+ 1649 036e 17       		.uleb128 0x17
+ 1650 036f BB010000 		.4byte	.LASF33
+ 1651 0373 BB010000 		.4byte	.LASF33
+ 1652 0377 0B       		.byte	0xb
+ 1653 0378 3E       		.byte	0x3e
+ 1654 0379 17       		.uleb128 0x17
+ 1655 037a 4D020000 		.4byte	.LASF34
+ 1656 037e 4D020000 		.4byte	.LASF34
+ 1657 0382 0C       		.byte	0xc
+ 1658 0383 3E       		.byte	0x3e
+ 1659 0384 17       		.uleb128 0x17
+ 1660 0385 54000000 		.4byte	.LASF35
+ 1661 0389 54000000 		.4byte	.LASF35
+ 1662 038d 0D       		.byte	0xd
+ 1663 038e 3E       		.byte	0x3e
+ 1664 038f 17       		.uleb128 0x17
+ 1665 0390 1D000000 		.4byte	.LASF36
+ 1666 0394 1D000000 		.4byte	.LASF36
+ 1667 0398 0E       		.byte	0xe
+ 1668 0399 33       		.byte	0x33
+ 1669 039a 17       		.uleb128 0x17
+ 1670 039b D0010000 		.4byte	.LASF37
+ 1671 039f D0010000 		.4byte	.LASF37
+ 1672 03a3 0F       		.byte	0xf
+ 1673 03a4 33       		.byte	0x33
+ 1674 03a5 17       		.uleb128 0x17
+ 1675 03a6 F4020000 		.4byte	.LASF38
+ 1676 03aa F4020000 		.4byte	.LASF38
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 33
+
+
+ 1677 03ae 10       		.byte	0x10
+ 1678 03af 33       		.byte	0x33
+ 1679 03b0 17       		.uleb128 0x17
+ 1680 03b1 18020000 		.4byte	.LASF39
+ 1681 03b5 18020000 		.4byte	.LASF39
+ 1682 03b9 11       		.byte	0x11
+ 1683 03ba 33       		.byte	0x33
+ 1684 03bb 17       		.uleb128 0x17
+ 1685 03bc 15010000 		.4byte	.LASF40
+ 1686 03c0 15010000 		.4byte	.LASF40
+ 1687 03c4 08       		.byte	0x8
+ 1688 03c5 3C       		.byte	0x3c
+ 1689 03c6 17       		.uleb128 0x17
+ 1690 03c7 C9020000 		.4byte	.LASF41
+ 1691 03cb C9020000 		.4byte	.LASF41
+ 1692 03cf 08       		.byte	0x8
+ 1693 03d0 4A       		.byte	0x4a
+ 1694 03d1 17       		.uleb128 0x17
+ 1695 03d2 4A030000 		.4byte	.LASF42
+ 1696 03d6 4A030000 		.4byte	.LASF42
+ 1697 03da 08       		.byte	0x8
+ 1698 03db 4C       		.byte	0x4c
+ 1699 03dc 17       		.uleb128 0x17
+ 1700 03dd 30030000 		.4byte	.LASF43
+ 1701 03e1 30030000 		.4byte	.LASF43
+ 1702 03e5 07       		.byte	0x7
+ 1703 03e6 3A       		.byte	0x3a
+ 1704 03e7 17       		.uleb128 0x17
+ 1705 03e8 6C020000 		.4byte	.LASF44
+ 1706 03ec 6C020000 		.4byte	.LASF44
+ 1707 03f0 07       		.byte	0x7
+ 1708 03f1 3D       		.byte	0x3d
+ 1709 03f2 17       		.uleb128 0x17
+ 1710 03f3 9C020000 		.4byte	.LASF45
+ 1711 03f7 9C020000 		.4byte	.LASF45
+ 1712 03fb 12       		.byte	0x12
+ 1713 03fc 18       		.byte	0x18
+ 1714 03fd 17       		.uleb128 0x17
+ 1715 03fe 00000000 		.4byte	.LASF46
+ 1716 0402 00000000 		.4byte	.LASF46
+ 1717 0406 13       		.byte	0x13
+ 1718 0407 18       		.byte	0x18
+ 1719 0408 17       		.uleb128 0x17
+ 1720 0409 EA010000 		.4byte	.LASF47
+ 1721 040d EA010000 		.4byte	.LASF47
+ 1722 0411 14       		.byte	0x14
+ 1723 0412 7D       		.byte	0x7d
+ 1724 0413 17       		.uleb128 0x17
+ 1725 0414 1A030000 		.4byte	.LASF48
+ 1726 0418 1A030000 		.4byte	.LASF48
+ 1727 041c 14       		.byte	0x14
+ 1728 041d 7E       		.byte	0x7e
+ 1729 041e 17       		.uleb128 0x17
+ 1730 041f 5B020000 		.4byte	.LASF49
+ 1731 0423 5B020000 		.4byte	.LASF49
+ 1732 0427 09       		.byte	0x9
+ 1733 0428 8C       		.byte	0x8c
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 34
+
+
+ 1734 0429 00       		.byte	0
+ 1735              		.section	.debug_abbrev,"",%progbits
+ 1736              	.Ldebug_abbrev0:
+ 1737 0000 01       		.uleb128 0x1
+ 1738 0001 11       		.uleb128 0x11
+ 1739 0002 01       		.byte	0x1
+ 1740 0003 25       		.uleb128 0x25
+ 1741 0004 0E       		.uleb128 0xe
+ 1742 0005 13       		.uleb128 0x13
+ 1743 0006 0B       		.uleb128 0xb
+ 1744 0007 03       		.uleb128 0x3
+ 1745 0008 0E       		.uleb128 0xe
+ 1746 0009 1B       		.uleb128 0x1b
+ 1747 000a 0E       		.uleb128 0xe
+ 1748 000b 55       		.uleb128 0x55
+ 1749 000c 17       		.uleb128 0x17
+ 1750 000d 11       		.uleb128 0x11
+ 1751 000e 01       		.uleb128 0x1
+ 1752 000f 10       		.uleb128 0x10
+ 1753 0010 17       		.uleb128 0x17
+ 1754 0011 00       		.byte	0
+ 1755 0012 00       		.byte	0
+ 1756 0013 02       		.uleb128 0x2
+ 1757 0014 24       		.uleb128 0x24
+ 1758 0015 00       		.byte	0
+ 1759 0016 0B       		.uleb128 0xb
+ 1760 0017 0B       		.uleb128 0xb
+ 1761 0018 3E       		.uleb128 0x3e
+ 1762 0019 0B       		.uleb128 0xb
+ 1763 001a 03       		.uleb128 0x3
+ 1764 001b 0E       		.uleb128 0xe
+ 1765 001c 00       		.byte	0
+ 1766 001d 00       		.byte	0
+ 1767 001e 03       		.uleb128 0x3
+ 1768 001f 16       		.uleb128 0x16
+ 1769 0020 00       		.byte	0
+ 1770 0021 03       		.uleb128 0x3
+ 1771 0022 0E       		.uleb128 0xe
+ 1772 0023 3A       		.uleb128 0x3a
+ 1773 0024 0B       		.uleb128 0xb
+ 1774 0025 3B       		.uleb128 0x3b
+ 1775 0026 0B       		.uleb128 0xb
+ 1776 0027 49       		.uleb128 0x49
+ 1777 0028 13       		.uleb128 0x13
+ 1778 0029 00       		.byte	0
+ 1779 002a 00       		.byte	0
+ 1780 002b 04       		.uleb128 0x4
+ 1781 002c 24       		.uleb128 0x24
+ 1782 002d 00       		.byte	0
+ 1783 002e 0B       		.uleb128 0xb
+ 1784 002f 0B       		.uleb128 0xb
+ 1785 0030 3E       		.uleb128 0x3e
+ 1786 0031 0B       		.uleb128 0xb
+ 1787 0032 03       		.uleb128 0x3
+ 1788 0033 08       		.uleb128 0x8
+ 1789 0034 00       		.byte	0
+ 1790 0035 00       		.byte	0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 35
+
+
+ 1791 0036 05       		.uleb128 0x5
+ 1792 0037 16       		.uleb128 0x16
+ 1793 0038 00       		.byte	0
+ 1794 0039 03       		.uleb128 0x3
+ 1795 003a 0E       		.uleb128 0xe
+ 1796 003b 3A       		.uleb128 0x3a
+ 1797 003c 0B       		.uleb128 0xb
+ 1798 003d 3B       		.uleb128 0x3b
+ 1799 003e 05       		.uleb128 0x5
+ 1800 003f 49       		.uleb128 0x49
+ 1801 0040 13       		.uleb128 0x13
+ 1802 0041 00       		.byte	0
+ 1803 0042 00       		.byte	0
+ 1804 0043 06       		.uleb128 0x6
+ 1805 0044 35       		.uleb128 0x35
+ 1806 0045 00       		.byte	0
+ 1807 0046 49       		.uleb128 0x49
+ 1808 0047 13       		.uleb128 0x13
+ 1809 0048 00       		.byte	0
+ 1810 0049 00       		.byte	0
+ 1811 004a 07       		.uleb128 0x7
+ 1812 004b 2E       		.uleb128 0x2e
+ 1813 004c 01       		.byte	0x1
+ 1814 004d 3F       		.uleb128 0x3f
+ 1815 004e 19       		.uleb128 0x19
+ 1816 004f 03       		.uleb128 0x3
+ 1817 0050 0E       		.uleb128 0xe
+ 1818 0051 3A       		.uleb128 0x3a
+ 1819 0052 0B       		.uleb128 0xb
+ 1820 0053 3B       		.uleb128 0x3b
+ 1821 0054 0B       		.uleb128 0xb
+ 1822 0055 27       		.uleb128 0x27
+ 1823 0056 19       		.uleb128 0x19
+ 1824 0057 11       		.uleb128 0x11
+ 1825 0058 01       		.uleb128 0x1
+ 1826 0059 12       		.uleb128 0x12
+ 1827 005a 06       		.uleb128 0x6
+ 1828 005b 40       		.uleb128 0x40
+ 1829 005c 18       		.uleb128 0x18
+ 1830 005d 9742     		.uleb128 0x2117
+ 1831 005f 19       		.uleb128 0x19
+ 1832 0060 01       		.uleb128 0x1
+ 1833 0061 13       		.uleb128 0x13
+ 1834 0062 00       		.byte	0
+ 1835 0063 00       		.byte	0
+ 1836 0064 08       		.uleb128 0x8
+ 1837 0065 898201   		.uleb128 0x4109
+ 1838 0068 00       		.byte	0
+ 1839 0069 11       		.uleb128 0x11
+ 1840 006a 01       		.uleb128 0x1
+ 1841 006b 31       		.uleb128 0x31
+ 1842 006c 13       		.uleb128 0x13
+ 1843 006d 00       		.byte	0
+ 1844 006e 00       		.byte	0
+ 1845 006f 09       		.uleb128 0x9
+ 1846 0070 898201   		.uleb128 0x4109
+ 1847 0073 01       		.byte	0x1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 36
+
+
+ 1848 0074 11       		.uleb128 0x11
+ 1849 0075 01       		.uleb128 0x1
+ 1850 0076 31       		.uleb128 0x31
+ 1851 0077 13       		.uleb128 0x13
+ 1852 0078 00       		.byte	0
+ 1853 0079 00       		.byte	0
+ 1854 007a 0A       		.uleb128 0xa
+ 1855 007b 8A8201   		.uleb128 0x410a
+ 1856 007e 00       		.byte	0
+ 1857 007f 02       		.uleb128 0x2
+ 1858 0080 18       		.uleb128 0x18
+ 1859 0081 9142     		.uleb128 0x2111
+ 1860 0083 18       		.uleb128 0x18
+ 1861 0084 00       		.byte	0
+ 1862 0085 00       		.byte	0
+ 1863 0086 0B       		.uleb128 0xb
+ 1864 0087 34       		.uleb128 0x34
+ 1865 0088 00       		.byte	0
+ 1866 0089 03       		.uleb128 0x3
+ 1867 008a 08       		.uleb128 0x8
+ 1868 008b 3A       		.uleb128 0x3a
+ 1869 008c 0B       		.uleb128 0xb
+ 1870 008d 3B       		.uleb128 0x3b
+ 1871 008e 0B       		.uleb128 0xb
+ 1872 008f 49       		.uleb128 0x49
+ 1873 0090 13       		.uleb128 0x13
+ 1874 0091 02       		.uleb128 0x2
+ 1875 0092 17       		.uleb128 0x17
+ 1876 0093 00       		.byte	0
+ 1877 0094 00       		.byte	0
+ 1878 0095 0C       		.uleb128 0xc
+ 1879 0096 2E       		.uleb128 0x2e
+ 1880 0097 01       		.byte	0x1
+ 1881 0098 3F       		.uleb128 0x3f
+ 1882 0099 19       		.uleb128 0x19
+ 1883 009a 03       		.uleb128 0x3
+ 1884 009b 0E       		.uleb128 0xe
+ 1885 009c 3A       		.uleb128 0x3a
+ 1886 009d 0B       		.uleb128 0xb
+ 1887 009e 3B       		.uleb128 0x3b
+ 1888 009f 0B       		.uleb128 0xb
+ 1889 00a0 27       		.uleb128 0x27
+ 1890 00a1 19       		.uleb128 0x19
+ 1891 00a2 49       		.uleb128 0x49
+ 1892 00a3 13       		.uleb128 0x13
+ 1893 00a4 8701     		.uleb128 0x87
+ 1894 00a6 19       		.uleb128 0x19
+ 1895 00a7 11       		.uleb128 0x11
+ 1896 00a8 01       		.uleb128 0x1
+ 1897 00a9 12       		.uleb128 0x12
+ 1898 00aa 06       		.uleb128 0x6
+ 1899 00ab 40       		.uleb128 0x40
+ 1900 00ac 18       		.uleb128 0x18
+ 1901 00ad 9742     		.uleb128 0x2117
+ 1902 00af 19       		.uleb128 0x19
+ 1903 00b0 01       		.uleb128 0x1
+ 1904 00b1 13       		.uleb128 0x13
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 37
+
+
+ 1905 00b2 00       		.byte	0
+ 1906 00b3 00       		.byte	0
+ 1907 00b4 0D       		.uleb128 0xd
+ 1908 00b5 34       		.uleb128 0x34
+ 1909 00b6 00       		.byte	0
+ 1910 00b7 03       		.uleb128 0x3
+ 1911 00b8 0E       		.uleb128 0xe
+ 1912 00b9 3A       		.uleb128 0x3a
+ 1913 00ba 0B       		.uleb128 0xb
+ 1914 00bb 3B       		.uleb128 0x3b
+ 1915 00bc 0B       		.uleb128 0xb
+ 1916 00bd 49       		.uleb128 0x49
+ 1917 00be 13       		.uleb128 0x13
+ 1918 00bf 02       		.uleb128 0x2
+ 1919 00c0 18       		.uleb128 0x18
+ 1920 00c1 00       		.byte	0
+ 1921 00c2 00       		.byte	0
+ 1922 00c3 0E       		.uleb128 0xe
+ 1923 00c4 34       		.uleb128 0x34
+ 1924 00c5 00       		.byte	0
+ 1925 00c6 03       		.uleb128 0x3
+ 1926 00c7 08       		.uleb128 0x8
+ 1927 00c8 3A       		.uleb128 0x3a
+ 1928 00c9 0B       		.uleb128 0xb
+ 1929 00ca 3B       		.uleb128 0x3b
+ 1930 00cb 0B       		.uleb128 0xb
+ 1931 00cc 49       		.uleb128 0x49
+ 1932 00cd 13       		.uleb128 0x13
+ 1933 00ce 02       		.uleb128 0x2
+ 1934 00cf 18       		.uleb128 0x18
+ 1935 00d0 00       		.byte	0
+ 1936 00d1 00       		.byte	0
+ 1937 00d2 0F       		.uleb128 0xf
+ 1938 00d3 34       		.uleb128 0x34
+ 1939 00d4 00       		.byte	0
+ 1940 00d5 03       		.uleb128 0x3
+ 1941 00d6 0E       		.uleb128 0xe
+ 1942 00d7 3A       		.uleb128 0x3a
+ 1943 00d8 0B       		.uleb128 0xb
+ 1944 00d9 3B       		.uleb128 0x3b
+ 1945 00da 0B       		.uleb128 0xb
+ 1946 00db 49       		.uleb128 0x49
+ 1947 00dc 13       		.uleb128 0x13
+ 1948 00dd 00       		.byte	0
+ 1949 00de 00       		.byte	0
+ 1950 00df 10       		.uleb128 0x10
+ 1951 00e0 34       		.uleb128 0x34
+ 1952 00e1 00       		.byte	0
+ 1953 00e2 03       		.uleb128 0x3
+ 1954 00e3 0E       		.uleb128 0xe
+ 1955 00e4 3A       		.uleb128 0x3a
+ 1956 00e5 0B       		.uleb128 0xb
+ 1957 00e6 3B       		.uleb128 0x3b
+ 1958 00e7 0B       		.uleb128 0xb
+ 1959 00e8 49       		.uleb128 0x49
+ 1960 00e9 13       		.uleb128 0x13
+ 1961 00ea 02       		.uleb128 0x2
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 38
+
+
+ 1962 00eb 17       		.uleb128 0x17
+ 1963 00ec 00       		.byte	0
+ 1964 00ed 00       		.byte	0
+ 1965 00ee 11       		.uleb128 0x11
+ 1966 00ef 898201   		.uleb128 0x4109
+ 1967 00f2 01       		.byte	0x1
+ 1968 00f3 11       		.uleb128 0x11
+ 1969 00f4 01       		.uleb128 0x1
+ 1970 00f5 31       		.uleb128 0x31
+ 1971 00f6 13       		.uleb128 0x13
+ 1972 00f7 01       		.uleb128 0x1
+ 1973 00f8 13       		.uleb128 0x13
+ 1974 00f9 00       		.byte	0
+ 1975 00fa 00       		.byte	0
+ 1976 00fb 12       		.uleb128 0x12
+ 1977 00fc 01       		.uleb128 0x1
+ 1978 00fd 01       		.byte	0x1
+ 1979 00fe 49       		.uleb128 0x49
+ 1980 00ff 13       		.uleb128 0x13
+ 1981 0100 01       		.uleb128 0x1
+ 1982 0101 13       		.uleb128 0x13
+ 1983 0102 00       		.byte	0
+ 1984 0103 00       		.byte	0
+ 1985 0104 13       		.uleb128 0x13
+ 1986 0105 21       		.uleb128 0x21
+ 1987 0106 00       		.byte	0
+ 1988 0107 49       		.uleb128 0x49
+ 1989 0108 13       		.uleb128 0x13
+ 1990 0109 2F       		.uleb128 0x2f
+ 1991 010a 0B       		.uleb128 0xb
+ 1992 010b 00       		.byte	0
+ 1993 010c 00       		.byte	0
+ 1994 010d 14       		.uleb128 0x14
+ 1995 010e 34       		.uleb128 0x34
+ 1996 010f 00       		.byte	0
+ 1997 0110 03       		.uleb128 0x3
+ 1998 0111 0E       		.uleb128 0xe
+ 1999 0112 3A       		.uleb128 0x3a
+ 2000 0113 0B       		.uleb128 0xb
+ 2001 0114 3B       		.uleb128 0x3b
+ 2002 0115 05       		.uleb128 0x5
+ 2003 0116 49       		.uleb128 0x49
+ 2004 0117 13       		.uleb128 0x13
+ 2005 0118 3F       		.uleb128 0x3f
+ 2006 0119 19       		.uleb128 0x19
+ 2007 011a 3C       		.uleb128 0x3c
+ 2008 011b 19       		.uleb128 0x19
+ 2009 011c 00       		.byte	0
+ 2010 011d 00       		.byte	0
+ 2011 011e 15       		.uleb128 0x15
+ 2012 011f 21       		.uleb128 0x21
+ 2013 0120 00       		.byte	0
+ 2014 0121 49       		.uleb128 0x49
+ 2015 0122 13       		.uleb128 0x13
+ 2016 0123 2F       		.uleb128 0x2f
+ 2017 0124 05       		.uleb128 0x5
+ 2018 0125 00       		.byte	0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 39
+
+
+ 2019 0126 00       		.byte	0
+ 2020 0127 16       		.uleb128 0x16
+ 2021 0128 34       		.uleb128 0x34
+ 2022 0129 00       		.byte	0
+ 2023 012a 03       		.uleb128 0x3
+ 2024 012b 0E       		.uleb128 0xe
+ 2025 012c 3A       		.uleb128 0x3a
+ 2026 012d 0B       		.uleb128 0xb
+ 2027 012e 3B       		.uleb128 0x3b
+ 2028 012f 0B       		.uleb128 0xb
+ 2029 0130 49       		.uleb128 0x49
+ 2030 0131 13       		.uleb128 0x13
+ 2031 0132 3F       		.uleb128 0x3f
+ 2032 0133 19       		.uleb128 0x19
+ 2033 0134 02       		.uleb128 0x2
+ 2034 0135 18       		.uleb128 0x18
+ 2035 0136 00       		.byte	0
+ 2036 0137 00       		.byte	0
+ 2037 0138 17       		.uleb128 0x17
+ 2038 0139 2E       		.uleb128 0x2e
+ 2039 013a 00       		.byte	0
+ 2040 013b 3F       		.uleb128 0x3f
+ 2041 013c 19       		.uleb128 0x19
+ 2042 013d 3C       		.uleb128 0x3c
+ 2043 013e 19       		.uleb128 0x19
+ 2044 013f 6E       		.uleb128 0x6e
+ 2045 0140 0E       		.uleb128 0xe
+ 2046 0141 03       		.uleb128 0x3
+ 2047 0142 0E       		.uleb128 0xe
+ 2048 0143 3A       		.uleb128 0x3a
+ 2049 0144 0B       		.uleb128 0xb
+ 2050 0145 3B       		.uleb128 0x3b
+ 2051 0146 0B       		.uleb128 0xb
+ 2052 0147 00       		.byte	0
+ 2053 0148 00       		.byte	0
+ 2054 0149 00       		.byte	0
+ 2055              		.section	.debug_loc,"",%progbits
+ 2056              	.Ldebug_loc0:
+ 2057              	.LLST0:
+ 2058 0000 08000000 		.4byte	.LVL2
+ 2059 0004 12000000 		.4byte	.LVL3
+ 2060 0008 0100     		.2byte	0x1
+ 2061 000a 50       		.byte	0x50
+ 2062 000b 00000000 		.4byte	0
+ 2063 000f 00000000 		.4byte	0
+ 2064              	.LLST1:
+ 2065 0013 68000000 		.4byte	.LVL21
+ 2066 0017 73000000 		.4byte	.LVL22-1
+ 2067 001b 0100     		.2byte	0x1
+ 2068 001d 50       		.byte	0x50
+ 2069 001e 00000000 		.4byte	0
+ 2070 0022 00000000 		.4byte	0
+ 2071              		.section	.debug_aranges,"",%progbits
+ 2072 0000 2C000000 		.4byte	0x2c
+ 2073 0004 0200     		.2byte	0x2
+ 2074 0006 00000000 		.4byte	.Ldebug_info0
+ 2075 000a 04       		.byte	0x4
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 40
+
+
+ 2076 000b 00       		.byte	0
+ 2077 000c 0000     		.2byte	0
+ 2078 000e 0000     		.2byte	0
+ 2079 0010 00000000 		.4byte	.LFB63
+ 2080 0014 18000000 		.4byte	.LFE63-.LFB63
+ 2081 0018 00000000 		.4byte	.LFB64
+ 2082 001c 20000000 		.4byte	.LFE64-.LFB64
+ 2083 0020 00000000 		.4byte	.LFB66
+ 2084 0024 E4000000 		.4byte	.LFE66-.LFB66
+ 2085 0028 00000000 		.4byte	0
+ 2086 002c 00000000 		.4byte	0
+ 2087              		.section	.debug_ranges,"",%progbits
+ 2088              	.Ldebug_ranges0:
+ 2089 0000 00000000 		.4byte	.LFB63
+ 2090 0004 18000000 		.4byte	.LFE63
+ 2091 0008 00000000 		.4byte	.LFB64
+ 2092 000c 20000000 		.4byte	.LFE64
+ 2093 0010 00000000 		.4byte	.LFB66
+ 2094 0014 E4000000 		.4byte	.LFE66
+ 2095 0018 00000000 		.4byte	0
+ 2096 001c 00000000 		.4byte	0
+ 2097              		.section	.debug_line,"",%progbits
+ 2098              	.Ldebug_line0:
+ 2099 0000 8D020000 		.section	.debug_str,"MS",%progbits,1
+ 2099      02002002 
+ 2099      00000201 
+ 2099      FB0E0D00 
+ 2099      01010101 
+ 2100              	.LASF46:
+ 2101 0000 6973725F 		.ascii	"isr_Filter_StartEx\000"
+ 2101      46696C74 
+ 2101      65725F53 
+ 2101      74617274 
+ 2101      457800
+ 2102              	.LASF9:
+ 2103 0013 5F5F696E 		.ascii	"__int32_t\000"
+ 2103      7433325F 
+ 2103      7400
+ 2104              	.LASF36:
+ 2105 001d 4F706142 		.ascii	"OpaBP_p_Start\000"
+ 2105      505F705F 
+ 2105      53746172 
+ 2105      7400
+ 2106              	.LASF16:
+ 2107 002b 646F7562 		.ascii	"double\000"
+ 2107      6C6500
+ 2108              	.LASF11:
+ 2109 0032 75696E74 		.ascii	"uint8\000"
+ 2109      3800
+ 2110              	.LASF31:
+ 2111 0038 55415254 		.ascii	"UART_PC_Start\000"
+ 2111      5F50435F 
+ 2111      53746172 
+ 2111      7400
+ 2112              	.LASF10:
+ 2113 0046 696E7433 		.ascii	"int32_t\000"
+ 2113      325F7400 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 41
+
+
+ 2114              	.LASF15:
+ 2115 004e 666C6F61 		.ascii	"float\000"
+ 2115      7400
+ 2116              	.LASF35:
+ 2117 0054 5047415F 		.ascii	"PGA_n_2_Start\000"
+ 2117      6E5F325F 
+ 2117      53746172 
+ 2117      7400
+ 2118              	.LASF28:
+ 2119 0062 4144435F 		.ascii	"ADC_DelSig_GetResult32\000"
+ 2119      44656C53 
+ 2119      69675F47 
+ 2119      65745265 
+ 2119      73756C74 
+ 2120              	.LASF1:
+ 2121 0079 756E7369 		.ascii	"unsigned char\000"
+ 2121      676E6564 
+ 2121      20636861 
+ 2121      7200
+ 2122              	.LASF50:
+ 2123 0087 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 2123      43313120 
+ 2123      352E342E 
+ 2123      31203230 
+ 2123      31363036 
+ 2124 00ba 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"
+ 2124      20726576 
+ 2124      6973696F 
+ 2124      6E203233 
+ 2124      37373135 
+ 2125 00ed 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 2125      66756E63 
+ 2125      74696F6E 
+ 2125      2D736563 
+ 2125      74696F6E 
+ 2126              	.LASF40:
+ 2127 0115 46696C74 		.ascii	"Filter_Start\000"
+ 2127      65725F53 
+ 2127      74617274 
+ 2127      00
+ 2128              	.LASF5:
+ 2129 0122 6C6F6E67 		.ascii	"long unsigned int\000"
+ 2129      20756E73 
+ 2129      69676E65 
+ 2129      6420696E 
+ 2129      7400
+ 2130              	.LASF14:
+ 2131 0134 696E7433 		.ascii	"int32\000"
+ 2131      3200
+ 2132              	.LASF23:
+ 2133 013a 73617665 		.ascii	"saved\000"
+ 2133      6400
+ 2134              	.LASF32:
+ 2135 0140 5047415F 		.ascii	"PGA_p_1_Start\000"
+ 2135      705F315F 
+ 2135      53746172 
+ 2135      7400
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 42
+
+
+ 2136              	.LASF26:
+ 2137 014e 49544D5F 		.ascii	"ITM_RxBuffer\000"
+ 2137      52784275 
+ 2137      66666572 
+ 2137      00
+ 2138              	.LASF24:
+ 2139 015b 675F666C 		.ascii	"g_flt\000"
+ 2139      7400
+ 2140              	.LASF52:
+ 2141 0161 433A5C47 		.ascii	"C:\\Github\\Tesis\\src\\psoc\\ComparacionDiferencia"
+ 2141      69746875 
+ 2141      625C5465 
+ 2141      7369735C 
+ 2141      7372635C 
+ 2142 018f 6C5F436F 		.ascii	"l_Copy_01.cydsn\000"
+ 2142      70795F30 
+ 2142      312E6379 
+ 2142      64736E00 
+ 2143              	.LASF21:
+ 2144 019f 6973725F 		.ascii	"isr_FilterReady\000"
+ 2144      46696C74 
+ 2144      65725265 
+ 2144      61647900 
+ 2145              	.LASF18:
+ 2146 01af 6C6F6E67 		.ascii	"long double\000"
+ 2146      20646F75 
+ 2146      626C6500 
+ 2147              	.LASF33:
+ 2148 01bb 5047415F 		.ascii	"PGA_p_2_Start\000"
+ 2148      705F325F 
+ 2148      53746172 
+ 2148      7400
+ 2149              	.LASF12:
+ 2150 01c9 75696E74 		.ascii	"uint16\000"
+ 2150      313600
+ 2151              	.LASF37:
+ 2152 01d0 4F706142 		.ascii	"OpaBP_n_Start\000"
+ 2152      505F6E5F 
+ 2152      53746172 
+ 2152      7400
+ 2153              	.LASF13:
+ 2154 01de 75696E74 		.ascii	"uint32\000"
+ 2154      333200
+ 2155              	.LASF53:
+ 2156 01e5 6D61696E 		.ascii	"main\000"
+ 2156      00
+ 2157              	.LASF47:
+ 2158 01ea 4379456E 		.ascii	"CyEnterCriticalSection\000"
+ 2158      74657243 
+ 2158      72697469 
+ 2158      63616C53 
+ 2158      65637469 
+ 2159              	.LASF54:
+ 2160 0201 6E6F7463 		.ascii	"notch_out\000"
+ 2160      685F6F75 
+ 2160      7400
+ 2161              	.LASF8:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 43
+
+
+ 2162 020b 756E7369 		.ascii	"unsigned int\000"
+ 2162      676E6564 
+ 2162      20696E74 
+ 2162      00
+ 2163              	.LASF39:
+ 2164 0218 4F70614C 		.ascii	"OpaLP_n_Start\000"
+ 2164      505F6E5F 
+ 2164      53746172 
+ 2164      7400
+ 2165              	.LASF7:
+ 2166 0226 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 2166      206C6F6E 
+ 2166      6720756E 
+ 2166      7369676E 
+ 2166      65642069 
+ 2167              	.LASF20:
+ 2168 023d 6973725F 		.ascii	"isr_DelSigReady\000"
+ 2168      44656C53 
+ 2168      69675265 
+ 2168      61647900 
+ 2169              	.LASF34:
+ 2170 024d 5047415F 		.ascii	"PGA_n_1_Start\000"
+ 2170      6E5F315F 
+ 2170      53746172 
+ 2170      7400
+ 2171              	.LASF49:
+ 2172 025b 55415254 		.ascii	"UART_PC_PutArray\000"
+ 2172      5F50435F 
+ 2172      50757441 
+ 2172      72726179 
+ 2172      00
+ 2173              	.LASF44:
+ 2174 026c 4144435F 		.ascii	"ADC_DelSig_StartConvert\000"
+ 2174      44656C53 
+ 2174      69675F53 
+ 2174      74617274 
+ 2174      436F6E76 
+ 2175              	.LASF29:
+ 2176 0284 46696C74 		.ascii	"Filter_Write24\000"
+ 2176      65725F57 
+ 2176      72697465 
+ 2176      323400
+ 2177              	.LASF19:
+ 2178 0293 73697A65 		.ascii	"sizetype\000"
+ 2178      74797065 
+ 2178      00
+ 2179              	.LASF45:
+ 2180 029c 6973725F 		.ascii	"isr_DelSig_StartEx\000"
+ 2180      44656C53 
+ 2180      69675F53 
+ 2180      74617274 
+ 2180      457800
+ 2181              	.LASF6:
+ 2182 02af 6C6F6E67 		.ascii	"long long int\000"
+ 2182      206C6F6E 
+ 2182      6720696E 
+ 2182      7400
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 44
+
+
+ 2183              	.LASF51:
+ 2184 02bd 6D61696E 		.ascii	"main.c\000"
+ 2184      2E6300
+ 2185              	.LASF17:
+ 2186 02c4 63686172 		.ascii	"char\000"
+ 2186      00
+ 2187              	.LASF41:
+ 2188 02c9 46696C74 		.ascii	"Filter_SetCoherency\000"
+ 2188      65725F53 
+ 2188      6574436F 
+ 2188      68657265 
+ 2188      6E637900 
+ 2189              	.LASF22:
+ 2190 02dd 68625F63 		.ascii	"hb_count\000"
+ 2190      6F756E74 
+ 2190      00
+ 2191              	.LASF30:
+ 2192 02e6 46696C74 		.ascii	"Filter_Read24\000"
+ 2192      65725F52 
+ 2192      65616432 
+ 2192      3400
+ 2193              	.LASF38:
+ 2194 02f4 4F70614C 		.ascii	"OpaLP_p_Start\000"
+ 2194      505F705F 
+ 2194      53746172 
+ 2194      7400
+ 2195              	.LASF2:
+ 2196 0302 73686F72 		.ascii	"short int\000"
+ 2196      7420696E 
+ 2196      7400
+ 2197              	.LASF27:
+ 2198 030c 66696C74 		.ascii	"filter_coeffs\000"
+ 2198      65725F63 
+ 2198      6F656666 
+ 2198      7300
+ 2199              	.LASF48:
+ 2200 031a 43794578 		.ascii	"CyExitCriticalSection\000"
+ 2200      69744372 
+ 2200      69746963 
+ 2200      616C5365 
+ 2200      6374696F 
+ 2201              	.LASF43:
+ 2202 0330 4144435F 		.ascii	"ADC_DelSig_Start\000"
+ 2202      44656C53 
+ 2202      69675F53 
+ 2202      74617274 
+ 2202      00
+ 2203              	.LASF4:
+ 2204 0341 6C6F6E67 		.ascii	"long int\000"
+ 2204      20696E74 
+ 2204      00
+ 2205              	.LASF42:
+ 2206 034a 46696C74 		.ascii	"Filter_SetDalign\000"
+ 2206      65725F53 
+ 2206      65744461 
+ 2206      6C69676E 
+ 2206      00
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccnV8HOw.s 			page 45
+
+
+ 2207              	.LASF0:
+ 2208 035b 7369676E 		.ascii	"signed char\000"
+ 2208      65642063 
+ 2208      68617200 
+ 2209              	.LASF3:
+ 2210 0367 73686F72 		.ascii	"short unsigned int\000"
+ 2210      7420756E 
+ 2210      7369676E 
+ 2210      65642069 
+ 2210      6E7400
+ 2211              	.LASF25:
+ 2212 037a 675F6669 		.ascii	"g_filter_ready\000"
+ 2212      6C746572 
+ 2212      5F726561 
+ 2212      647900
+ 2213              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

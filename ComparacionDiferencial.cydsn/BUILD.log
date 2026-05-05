@@ -1,4 +1,4 @@
---------------- Build Started: 04/29/2026 14:50:57 Project: ComparacionDiferencial, Configuration: ARM GCC 5.4-2016-q2-update Debug ---------------
+--------------- Build Started: 05/04/2026 19:39:00 Project: ComparacionDiferencial, Configuration: ARM GCC 5.4-2016-q2-update Debug ---------------
 cydsfit.exe -.appdatapath "C:\Users\elias\AppData\Local\Cypress Semiconductor\PSoC Creator\4.4" -.fdsnotice -.fdswarpdepfile=warp_dependencies.txt -.fdselabdepfile=elab_dependencies.txt -.fdsbldfile=generated_files.txt -.fdsreffile=referenced_files.txt -p C:\Github\Tesis\src\psoc\ComparacionDiferencial.cydsn\ComparacionDiferencial.cyprj -d CY8C5888LTI-LP097 -s C:\Github\Tesis\src\psoc\ComparacionDiferencial.cydsn\Generated_Source\PSoC5 -- -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE
 Elaborating Design...
 ADD: fit.M0029: information: Voltage Reference Information: Vref 'Vdda/2' is connected to terminal 'analog_0' of 'refOut' but no direct hardware connection exists.
@@ -20,11 +20,6 @@ Static timing analysis...
 API Generation...
 Dependency Generation...
 Cleanup...
-arm-none-eabi-gcc.exe -mcpu=cortex-m3 -mthumb -I..\shared -I. -IGenerated_Source\PSoC5 -Wa,-alh=.\CortexM3\ARM_GCC_541\Debug/main.lst -g -D DEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Og -c main.c -o .\CortexM3\ARM_GCC_541\Debug\main.o
-main.c:36:0: warning: "DEBUG" redefined
- #define DEBUG 0
- ^
-<command-line>:0:0: note: this is the location of the previous definition
 arm-none-eabi-gcc.exe -mcpu=cortex-m3 -mthumb -I..\shared -I. -IGenerated_Source\PSoC5 -Wa,-alh=.\CortexM3\ARM_GCC_541\Debug/Filter_RAM_Data.lst -g -D DEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Og -c Generated_Source\PSoC5\Filter_RAM_Data.c -o .\CortexM3\ARM_GCC_541\Debug\Filter_RAM_Data.o
 arm-none-eabi-gcc.exe -mcpu=cortex-m3 -mthumb -I..\shared -I. -IGenerated_Source\PSoC5 -Wa,-alh=.\CortexM3\ARM_GCC_541\Debug/Filter_Coefficients.lst -g -D DEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Og -c Generated_Source\PSoC5\Filter_Coefficients.c -o .\CortexM3\ARM_GCC_541\Debug\Filter_Coefficients.o
 arm-none-eabi-ar.exe -rs .\CortexM3\ARM_GCC_541\Debug\ComparacionDiferencial.a .\CortexM3\ARM_GCC_541\Debug\TIA_p.o .\CortexM3\ARM_GCC_541\Debug\TIA_p_PM.o .\CortexM3\ARM_GCC_541\Debug\TIA_n.o .\CortexM3\ARM_GCC_541\Debug\TIA_n_PM.o .\CortexM3\ARM_GCC_541\Debug\ADC_p.o .\CortexM3\ARM_GCC_541\Debug\ADC_n.o .\CortexM3\ARM_GCC_541\Debug\Filter.o .\CortexM3\ARM_GCC_541\Debug\Filter_PM.o .\CortexM3\ARM_GCC_541\Debug\Filter_PVT.o .\CortexM3\ARM_GCC_541\Debug\Filter_RAM_Data.o .\CortexM3\ARM_GCC_541\Debug\Filter_Coefficients.o .\CortexM3\ARM_GCC_541\Debug\CyDmac.o .\CortexM3\ARM_GCC_541\Debug\CyFlash.o .\CortexM3\ARM_GCC_541\Debug\CyLib.o .\CortexM3\ARM_GCC_541\Debug\cyPm.o .\CortexM3\ARM_GCC_541\Debug\CySpc.o .\CortexM3\ARM_GCC_541\Debug\cyutils.o .\CortexM3\ARM_GCC_541\Debug\cy_em_eeprom.o .\CortexM3\ARM_GCC_541\Debug\ADC_DelSig.o .\CortexM3\ARM_GCC_541\Debug\ADC_DelSig_PM.o .\CortexM3\ARM_GCC_541\Debug\ADC_DelSig_INT.o .\CortexM3\ARM_GCC_541\Debug\isr_DelSig.o .\CortexM3\ARM_GCC_541\Debug\ADC_DelSig_Ext_CP_Clk.o .\CortexM3\ARM_GCC_541\Debug\ADC_DelSig_IRQ.o .\CortexM3\ARM_GCC_541\Debug\ADC_DelSig_theACLK.o .\CortexM3\ARM_GCC_541\Debug\TIAOut_p.o .\CortexM3\ARM_GCC_541\Debug\TIAOut_n.o .\CortexM3\ARM_GCC_541\Debug\UART_PC.o .\CortexM3\ARM_GCC_541\Debug\UART_PC_PM.o .\CortexM3\ARM_GCC_541\Debug\UART_PC_INT.o .\CortexM3\ARM_GCC_541\Debug\UART_PC_BOOT.o .\CortexM3\ARM_GCC_541\Debug\UART_PC_IntClock.o .\CortexM3\ARM_GCC_541\Debug\isr_Filter.o .\CortexM3\ARM_GCC_541\Debug\PGA_p.o .\CortexM3\ARM_GCC_541\Debug\PGA_p_PM.o .\CortexM3\ARM_GCC_541\Debug\PGA_n.o .\CortexM3\ARM_GCC_541\Debug\PGA_n_PM.o .\CortexM3\ARM_GCC_541\Debug\PGAout_n.o .\CortexM3\ARM_GCC_541\Debug\PGAout_p.o .\CortexM3\ARM_GCC_541\Debug\DiffInNI_p.o .\CortexM3\ARM_GCC_541\Debug\DiffInNI_n.o .\CortexM3\ARM_GCC_541\Debug\DiffInI_n.o .\CortexM3\ARM_GCC_541\Debug\DiffOut_n.o .\CortexM3\ARM_GCC_541\Debug\DiffInI_p.o .\CortexM3\ARM_GCC_541\Debug\DiffOut_p.o .\CortexM3\ARM_GCC_541\Debug\OpaDiff_p.o .\CortexM3\ARM_GCC_541\Debug\OpaDiff_p_PM.o .\CortexM3\ARM_GCC_541\Debug\OpaDiff_n.o .\CortexM3\ARM_GCC_541\Debug\OpaDiff_n_PM.o .\CortexM3\ARM_GCC_541\Debug\TIAInI_n.o .\CortexM3\ARM_GCC_541\Debug\TIAInI_p.o .\CortexM3\ARM_GCC_541\Debug\refIn.o .\CortexM3\ARM_GCC_541\Debug\Input_n.o .\CortexM3\ARM_GCC_541\Debug\Input_p.o .\CortexM3\ARM_GCC_541\Debug\refOut.o .\CortexM3\ARM_GCC_541\Debug\OpaBuffer_p.o .\CortexM3\ARM_GCC_541\Debug\OpaBuffer_p_PM.o .\CortexM3\ARM_GCC_541\Debug\OpaBuffer_n.o .\CortexM3\ARM_GCC_541\Debug\OpaBuffer_n_PM.o .\CortexM3\ARM_GCC_541\Debug\BufferOut_n.o .\CortexM3\ARM_GCC_541\Debug\BufferOut_p.o .\CortexM3\ARM_GCC_541\Debug\InBP_n.o .\CortexM3\ARM_GCC_541\Debug\InBP_p.o .\CortexM3\ARM_GCC_541\Debug\CyBootAsmGnu.o
@@ -35,6 +30,6 @@ No ELF section .cychecksum found, creating one
 Application checksum calculated and stored in ELF section .cychecksum
 Checksum calculated and stored in ELF section .cymeta
 cyelftool.exe -S C:\Github\Tesis\src\psoc\ComparacionDiferencial.cydsn\CortexM3\ARM_GCC_541\Debug\ComparacionDiferencial.elf
-Flash used: 13326 of 262144 bytes (5.1%).
-SRAM used: 8153 of 65536 bytes (12.4%). Stack: 2048 bytes. Heap: 128 bytes.
---------------- Build Succeeded: 04/29/2026 14:51:20 ---------------
+Flash used: 7446 of 262144 bytes (2.8%).
+SRAM used: 2569 of 65536 bytes (3.9%). Stack: 2048 bytes. Heap: 128 bytes.
+--------------- Build Succeeded: 05/04/2026 19:39:10 ---------------

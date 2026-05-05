@@ -129,14 +129,14 @@ int main(void)
             {
                 static uint32 dbg_cnt = 0u;
                 pkt[2] = (uint8)((dbg_cnt >> 16) & 0xFFu);
-                pkt[3] = (uint8)((dbg_cnt >>  8) & 0xFFu);
+                pkt[3] = (uint8)((d7vbg_cnt >>  8) & 0xFFu);
                 pkt[4] = (uint8)( dbg_cnt        & 0xFFu);
                 dbg_cnt = (dbg_cnt + 1u) & 0x00FFFFFFu;
             }
 #else
-            pkt[2] = (uint8)((flt >> 16) & 0xFFu);
-            pkt[3] = (uint8)((flt >>  8) & 0xFFu);
-            pkt[4] = (uint8)( flt        & 0xFFu);
+            pkt[2] = (uint8)((ds>> 16) & 0xFFu);
+            pkt[3] = (uint8)((ds >>  8) & 0xFFu);
+            pkt[4] = (uint8)(ds & 0xFFu);
 #endif
             UART_PC_PutArray(pkt, 5u);
 

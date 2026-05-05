@@ -1,3 +1,3 @@
 # Component constraints for C:\Github\Tesis\src\psoc\ComparacionDiferencial.cydsn\TopDesign\TopDesign.cysch
 # Project: C:\Github\Tesis\src\psoc\ComparacionDiferencial.cydsn\ComparacionDiferencial.cyprj
-# Date: Wed, 29 Apr 2026 17:51:02 GMT
+# Date: Mon, 04 May 2026 22:39:02 GMT
