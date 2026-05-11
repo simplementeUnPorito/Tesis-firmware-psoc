@@ -2,7 +2,7 @@
 --	Conversion of DiferencialConRrefs_Copy_01.v to vh2:
 --
 --	Cypress Semiconductor - WARP Version 6.3 IR 41
---	Sun May 10 19:19:32 2026
+--	Sun May 10 22:47:44 2026
 --
 
 USE cypress.cypress.all;
@@ -21,20 +21,20 @@ TERMINAL tmpSIOVREF__BPout_p_net_0 : bit;
 TERMINAL Net_1113 : bit;
 SIGNAL one : bit;
 SIGNAL tmpINTERRUPT_0__BPout_p_net_0 : bit;
-TERMINAL Net_1187 : bit;
+TERMINAL Net_1669 : bit;
 TERMINAL Net_206 : bit;
 TERMINAL Net_1183 : bit;
 TERMINAL Net_1202 : bit;
 TERMINAL Net_1457 : bit;
 SIGNAL tmpOE__ADC_p_net_0 : bit;
 SIGNAL tmpFB_0__ADC_p_net_0 : bit;
-TERMINAL Net_142 : bit;
+TERMINAL Net_1677 : bit;
 SIGNAL tmpIO_0__ADC_p_net_0 : bit;
 TERMINAL tmpSIOVREF__ADC_p_net_0 : bit;
 SIGNAL tmpINTERRUPT_0__ADC_p_net_0 : bit;
 SIGNAL tmpOE__ADC_n_net_0 : bit;
 SIGNAL tmpFB_0__ADC_n_net_0 : bit;
-TERMINAL Net_143 : bit;
+TERMINAL Net_1676 : bit;
 SIGNAL tmpIO_0__ADC_n_net_0 : bit;
 TERMINAL tmpSIOVREF__ADC_n_net_0 : bit;
 SIGNAL tmpINTERRUPT_0__ADC_n_net_0 : bit;
@@ -91,7 +91,7 @@ TERMINAL Net_1372 : bit;
 SIGNAL tmpINTERRUPT_0__FDA_p_net_0 : bit;
 SIGNAL tmpOE__LPout_p_net_0 : bit;
 SIGNAL tmpFB_0__LPout_p_net_0 : bit;
-TERMINAL Net_1419 : bit;
+TERMINAL Net_1670 : bit;
 SIGNAL tmpIO_0__LPout_p_net_0 : bit;
 TERMINAL tmpSIOVREF__LPout_p_net_0 : bit;
 SIGNAL tmpINTERRUPT_0__LPout_p_net_0 : bit;
@@ -121,7 +121,7 @@ SIGNAL \TIA_n:Net_52\ : bit;
 SIGNAL \TIA_n:Net_38\ : bit;
 SIGNAL \TIA_n:Net_39\ : bit;
 SIGNAL \TIA_n:Net_60\ : bit;
-TERMINAL Net_1379 : bit;
+TERMINAL Net_1668 : bit;
 TERMINAL Net_1458 : bit;
 SIGNAL tmpOE__LPin_p_net_0 : bit;
 SIGNAL tmpFB_0__LPin_p_net_0 : bit;
@@ -812,7 +812,7 @@ R_5:cy_annotation_universal_v1_0
 	GENERIC MAP(comp_name=>"Resistor_v1_0",
 		port_names=>"T1, T2",
 		width=>2)
-	PORT MAP(connect=>(Net_1187, Net_206));
+	PORT MAP(connect=>(Net_1669, Net_206));
 R_6:cy_annotation_universal_v1_0
 	GENERIC MAP(comp_name=>"Resistor_v1_0",
 		port_names=>"T1, T2",
@@ -887,7 +887,7 @@ ADC_p:cy_psoc3_pins_v1_10
 	PORT MAP(oe=>(tmpOE__BPout_p_net_0),
 		y=>(zero),
 		fb=>(tmpFB_0__ADC_p_net_0),
-		analog=>Net_142,
+		analog=>Net_1677,
 		io=>(tmpIO_0__ADC_p_net_0),
 		siovref=>(tmpSIOVREF__ADC_p_net_0),
 		annotation=>Net_206,
@@ -957,7 +957,7 @@ ADC_n:cy_psoc3_pins_v1_10
 	PORT MAP(oe=>(tmpOE__BPout_p_net_0),
 		y=>(zero),
 		fb=>(tmpFB_0__ADC_n_net_0),
-		analog=>Net_143,
+		analog=>Net_1676,
 		io=>(tmpIO_0__ADC_n_net_0),
 		siovref=>(tmpSIOVREF__ADC_n_net_0),
 		annotation=>Net_1202,
@@ -984,7 +984,7 @@ ADC_n:cy_psoc3_pins_v1_10
 	GENERIC MAP(cy_registers=>"",
 		resolution=>18)
 	PORT MAP(aclock=>\ADC_DelSig:Net_488\,
-		vplus=>Net_142,
+		vplus=>Net_1677,
 		vminus=>\ADC_DelSig:Net_520\,
 		modbit=>zero,
 		reset_udb=>zero,
@@ -1034,7 +1034,7 @@ ADC_n:cy_psoc3_pins_v1_10
 	GENERIC MAP(sig_width=>1,
 		is_net_join=>'0')
 	PORT MAP(signal1=>\ADC_DelSig:Net_520\,
-		signal2=>Net_143);
+		signal2=>Net_1676);
 \ADC_DelSig:IRQ\:cy_isr_v1_0
 	GENERIC MAP(int_type=>"10",
 		is_nmi=>'0')
@@ -1265,10 +1265,10 @@ LPout_p:cy_psoc3_pins_v1_10
 	PORT MAP(oe=>(tmpOE__BPout_p_net_0),
 		y=>(zero),
 		fb=>(tmpFB_0__LPout_p_net_0),
-		analog=>Net_1419,
+		analog=>Net_1670,
 		io=>(tmpIO_0__LPout_p_net_0),
 		siovref=>(tmpSIOVREF__LPout_p_net_0),
-		annotation=>Net_1187,
+		annotation=>Net_1669,
 		in_clock=>zero,
 		in_clock_en=>tmpOE__BPout_p_net_0,
 		in_reset=>zero,
@@ -1450,7 +1450,7 @@ R_14:cy_annotation_universal_v1_0
 		clk_udb=>zero,
 		dyn_cntl=>zero,
 		modout_sync=>\TIA_n:Net_60\,
-		vout=>Net_1379);
+		vout=>Net_1668);
 R_9:cy_annotation_universal_v1_0
 	GENERIC MAP(comp_name=>"Resistor_v1_0",
 		port_names=>"T1, T2",
@@ -1785,7 +1785,7 @@ C_9:cy_annotation_universal_v1_0
 		clk_udb=>zero,
 		dyn_cntl=>zero,
 		modout_sync=>\TIA_p:Net_60\,
-		vout=>Net_1419);
+		vout=>Net_1670);
 GND_1:cy_annotation_universal_v1_0
 	GENERIC MAP(comp_name=>"Gnd_v1_0",
 		port_names=>"T1",
@@ -1800,7 +1800,7 @@ C_10:cy_annotation_universal_v1_0
 	GENERIC MAP(comp_name=>"Capacitor_v1_0",
 		port_names=>"T1, T2",
 		width=>2)
-	PORT MAP(connect=>(Net_1187, Net_1120));
+	PORT MAP(connect=>(Net_1669, Net_1120));
 R_18:cy_annotation_universal_v1_0
 	GENERIC MAP(comp_name=>"Resistor_v1_0",
 		port_names=>"T1, T2",
@@ -2239,7 +2239,7 @@ LPout_n:cy_psoc3_pins_v1_10
 	PORT MAP(oe=>(tmpOE__BPout_p_net_0),
 		y=>(zero),
 		fb=>(tmpFB_0__LPout_n_net_0),
-		analog=>Net_1379,
+		analog=>Net_1668,
 		io=>(tmpIO_0__LPout_n_net_0),
 		siovref=>(tmpSIOVREF__LPout_n_net_0),
 		annotation=>Net_1183,

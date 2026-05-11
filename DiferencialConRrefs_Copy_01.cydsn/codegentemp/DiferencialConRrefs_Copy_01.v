@@ -1,6 +1,6 @@
 // ======================================================================
 // DiferencialConRrefs_Copy_01.v generated from TopDesign.cysch
-// 05/10/2026 at 19:19
+// 05/10/2026 at 22:47
 // This file is auto generated. ANY EDITS YOU MAKE MAY BE LOST WHEN THIS FILE IS REGENERATED!!!
 // ======================================================================
 
@@ -944,13 +944,16 @@ module top ;
     electrical  Net_1354;
     electrical  Net_1090;
     electrical  Net_1384;
-    electrical  Net_1419;
+    electrical  Net_1670;
     electrical  Net_1124;
-          wire  Net_1383;
-    electrical  Net_1382;
-          wire  Net_1381;
-          wire  Net_1380;
+          wire  Net_1556;
+    electrical  Net_1555;
+          wire  Net_1554;
+          wire  Net_1553;
     electrical  Net_1132;
+    electrical  Net_1668;
+    electrical  Net_1677;
+          wire  Net_1211;
     electrical  Net_1540;
     electrical  Net_1533;
     electrical  Net_1486;
@@ -960,11 +963,9 @@ module top ;
     electrical  Net_1448;
     electrical  Net_1397;
     electrical  Net_1369;
-    electrical  Net_142;
     electrical  Net_206;
-    electrical  Net_1187;
+    electrical  Net_1669;
     electrical  Net_1410;
-    electrical  Net_1379;
     electrical  Net_1120;
     electrical  Net_1314;
     electrical  Net_1405;
@@ -980,8 +981,7 @@ module top ;
     electrical  Net_1111;
     electrical  Net_1183;
     electrical  Net_1202;
-    electrical  Net_143;
-          wire  Net_1211;
+    electrical  Net_1676;
     electrical  Net_777;
     electrical  Net_778;
     electrical  Net_1190;
@@ -1067,7 +1067,7 @@ module top ;
 
     cy_annotation_universal_v1_0 R_5 (
         .connect({
-            Net_1187,
+            Net_1669,
             Net_206
         })
     );
@@ -1168,7 +1168,7 @@ module top ;
 		 (.oe(tmpOE__ADC_p_net),
 		  .y({1'b0}),
 		  .fb({tmpFB_0__ADC_p_net[0:0]}),
-		  .analog({Net_142}),
+		  .analog({Net_1677}),
 		  .io({tmpIO_0__ADC_p_net[0:0]}),
 		  .siovref(tmpSIOVREF__ADC_p_net),
 		  .interrupt({tmpINTERRUPT_0__ADC_p_net[0:0]}),
@@ -1245,7 +1245,7 @@ module top ;
 		 (.oe(tmpOE__ADC_n_net),
 		  .y({1'b0}),
 		  .fb({tmpFB_0__ADC_n_net[0:0]}),
-		  .analog({Net_143}),
+		  .analog({Net_1676}),
 		  .io({tmpIO_0__ADC_n_net[0:0]}),
 		  .siovref(tmpSIOVREF__ADC_n_net),
 		  .interrupt({tmpINTERRUPT_0__ADC_n_net[0:0]}),
@@ -1263,10 +1263,10 @@ module top ;
         .aclk(1'b0),
         .eoc(Net_1211),
         .mi(1'b0),
-        .nVref(Net_1382),
+        .nVref(Net_1555),
         .soc(1'b1),
-        .vminus(Net_143),
-        .vplus(Net_142));
+        .vminus(Net_1676),
+        .vplus(Net_1677));
 
     cy_annotation_universal_v1_0 R_8 (
         .connect({
@@ -1505,11 +1505,11 @@ module top ;
 		 (.oe(tmpOE__LPout_p_net),
 		  .y({1'b0}),
 		  .fb({tmpFB_0__LPout_p_net[0:0]}),
-		  .analog({Net_1419}),
+		  .analog({Net_1670}),
 		  .io({tmpIO_0__LPout_p_net[0:0]}),
 		  .siovref(tmpSIOVREF__LPout_p_net),
 		  .interrupt({tmpINTERRUPT_0__LPout_p_net[0:0]}),
-		  .annotation({Net_1187}),
+		  .annotation({Net_1669}),
 		  .in_clock({1'b0}),
 		  .in_clock_en({1'b1}),
 		  .in_reset({1'b0}),
@@ -1711,7 +1711,7 @@ module top ;
 
     TIA_v2_0_2 TIA_n (
         .Iin(Net_1410),
-        .Vout(Net_1379),
+        .Vout(Net_1668),
         .Vref(Net_1411));
 
     cy_annotation_universal_v1_0 R_9 (
@@ -2086,7 +2086,7 @@ module top ;
 
     TIA_v2_0_5 TIA_p (
         .Iin(Net_1422),
-        .Vout(Net_1419),
+        .Vout(Net_1670),
         .Vref(Net_1441));
 
     cy_annotation_universal_v1_0 GND_1 (
@@ -2110,7 +2110,7 @@ module top ;
 
     cy_annotation_universal_v1_0 C_10 (
         .connect({
-            Net_1187,
+            Net_1669,
             Net_1120
         })
     );
@@ -2607,7 +2607,7 @@ module top ;
 		 (.oe(tmpOE__LPout_n_net),
 		  .y({1'b0}),
 		  .fb({tmpFB_0__LPout_n_net[0:0]}),
-		  .analog({Net_1379}),
+		  .analog({Net_1668}),
 		  .io({tmpIO_0__LPout_n_net[0:0]}),
 		  .siovref(tmpSIOVREF__LPout_n_net),
 		  .interrupt({tmpINTERRUPT_0__LPout_n_net[0:0]}),
