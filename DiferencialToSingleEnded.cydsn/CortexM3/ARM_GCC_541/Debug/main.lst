@@ -1,0 +1,3814 @@
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"main.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.isr_DelSigReady,"ax",%progbits
+  20              		.align	2
+  21              		.global	isr_DelSigReady
+  22              		.thumb
+  23              		.thumb_func
+  24              		.type	isr_DelSigReady, %function
+  25              	isr_DelSigReady:
+  26              	.LFB63:
+  27              		.file 1 "main.c"
+   1:main.c        **** /*******************************************************************************
+   2:main.c        **** * main.c — Geofono single-ended
+   3:main.c        **** *
+   4:main.c        **** * TX (5 bytes):
+   5:main.c        **** *   Data:      [0x56][0x00][b2][b1][b0]
+   6:main.c        **** *   Heartbeat: [0x56][0x01][pga_code][vdac_val][tx_mode]
+   7:main.c        **** *   Cfg-ADC:   [0x56][0x02][res][fsH][fsL]
+   8:main.c        **** *   Cfg-PGA:   [0x56][0x03][pga_code][vrefH][vrefL]
+   9:main.c        **** *   Cfg-VREF:  [0x56][0x04][pgavdac_code][vdac_val][0x00]
+  10:main.c        **** *   ACK:       [0x56][0x07][cmd][val][0x00]
+  11:main.c        **** *
+  12:main.c        **** * RX — 4 bytes con checksum XOR: [0xAB][cmd][param][cmd^param]
+  13:main.c        **** *   0xAB 0xA5 0x00 0xA5  -> send_config()
+  14:main.c        **** *   0xAB 0xA1 <en>   <cs>-> stream_enabled (0=off,1=on)
+  15:main.c        **** *   0xAB 0xA6 <code> <cs>-> PGAgain_SetGain(code)   LED toggle
+  16:main.c        **** *   0xAB 0xA8 <mode> <cs>-> tx_mode (0=crudo,1=flt)
+  17:main.c        **** *   0xAB 0xA9 <code> <cs>-> PGAvdac_SetGain(code)   LED toggle
+  18:main.c        **** *   0xAB 0xAA <v>    <cs>-> VDAC_SetValue(v)         LED toggle
+  19:main.c        **** *
+  20:main.c        **** * DEBUG:
+  21:main.c        **** *   #define DEBUG 1  ->  rampa creciente en lugar de ADC
+  22:main.c        **** *   #define DEBUG 0  ->  datos reales del ADC
+  23:main.c        **** *******************************************************************************/
+  24:main.c        **** 
+  25:main.c        **** #include "project.h"
+  26:main.c        **** 
+  27:main.c        **** /* -------------------------------------------------------------------------- */
+  28:main.c        **** #define DEBUG              0
+  29:main.c        **** 
+  30:main.c        **** /* ADC_CFG1_SRATE y ADC_CFG1_RESOLUTION vienen de ADC.h (generado).
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 2
+
+
+  31:main.c        ****  * ADC_CFG1_INPUT_RANGE_VALUE = 2.5 (float) → half-rango en mV = 2500.
+  32:main.c        ****  * Se calcula en send_config() para no repetir el literal. */
+  33:main.c        **** #define HB_PERIOD          1000u      /* heartbeat cada N muestras (~1 s a 1000 SPS) */
+  34:main.c        **** #define DEBUG_PERIOD_US    1000u      /* DEBUG=1: rampa UART independiente del ADC */
+  35:main.c        **** #define VDAC_INIT_VALUE    0x94u
+  36:main.c        **** #define TIMEOUT_COUNTS     240000u    /* 10 ms @ 24 MHz */
+  37:main.c        **** 
+  38:main.c        **** /* -------------------------------------------------------------------------- */
+  39:main.c        **** static volatile int32 g_adc_raw      = 0;
+  40:main.c        **** static volatile uint8 g_sample_ready = 0u;
+  41:main.c        **** static volatile int32 g_flt          = 0;
+  42:main.c        **** static volatile uint8 g_filter_ready = 0u;
+  43:main.c        **** 
+  44:main.c        **** static uint8 g_pga_code = PGAgain_DEFAULT_GAIN;
+  45:main.c        **** static uint8 g_pgavdac_code = PGAvdac_DEFAULT_GAIN;
+  46:main.c        **** static uint8 g_vdac_val = VDAC_INIT_VALUE;
+  47:main.c        **** static uint8 tx_mode    = 0u;
+  48:main.c        **** static uint8 stream_enabled = 0u;
+  49:main.c        **** 
+  50:main.c        **** /*
+  51:main.c        ****  * Protocolo RX — 4 estados:
+  52:main.c        ****  *   0: esperar 0xAB
+  53:main.c        ****  *   1: esperar cmd  (0xA1 / 0xA5 / 0xA6 / 0xA8 / 0xA9 / 0xAA)
+  54:main.c        ****  *   2: esperar param
+  55:main.c        ****  *   3: esperar checksum (cmd ^ param) — si valido, ejecutar
+  56:main.c        ****  *
+  57:main.c        ****  * Fix watchdog: rx_watchdog_start/stop llaman isr_Timer_ClearPending()
+  58:main.c        ****  * para evitar que una interrupcion pendiente reinicie rx_state justo
+  59:main.c        ****  * despues de limpiar watchdog_rx, borrando el contexto del comando.
+  60:main.c        ****  */
+  61:main.c        **** static volatile uint8 rx_state    = 0u;
+  62:main.c        **** static volatile uint8 rx_cmd      = 0u;
+  63:main.c        **** static volatile uint8 rx_param    = 0u;
+  64:main.c        **** static volatile uint8 watchdog_rx = 0u;
+  65:main.c        **** 
+  66:main.c        **** /* -------------------------------------------------------------------------- */
+  67:main.c        **** 
+  68:main.c        **** CY_ISR(isr_DelSigReady)
+  69:main.c        **** {
+  28              		.loc 1 69 0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32 0000 08B5     		push	{r3, lr}
+  33              		.cfi_def_cfa_offset 8
+  34              		.cfi_offset 3, -8
+  35              		.cfi_offset 14, -4
+  70:main.c        ****     g_adc_raw      = ADC_GetResult32();
+  36              		.loc 1 70 0
+  37 0002 FFF7FEFF 		bl	ADC_GetResult32
+  38              	.LVL0:
+  39 0006 044B     		ldr	r3, .L3
+  40 0008 1860     		str	r0, [r3]
+  71:main.c        ****     g_sample_ready = 1u;
+  41              		.loc 1 71 0
+  42 000a 0122     		movs	r2, #1
+  43 000c 1A71     		strb	r2, [r3, #4]
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 3
+
+
+  72:main.c        ****     Filter_Write24(Filter_CHANNEL_A, (uint32)g_adc_raw);
+  44              		.loc 1 72 0
+  45 000e 1968     		ldr	r1, [r3]
+  46 0010 0020     		movs	r0, #0
+  47 0012 FFF7FEFF 		bl	Filter_Write24
+  48              	.LVL1:
+  49 0016 08BD     		pop	{r3, pc}
+  50              	.L4:
+  51              		.align	2
+  52              	.L3:
+  53 0018 00000000 		.word	.LANCHOR0
+  54              		.cfi_endproc
+  55              	.LFE63:
+  56              		.size	isr_DelSigReady, .-isr_DelSigReady
+  57              		.section	.text.isr_FilterReady,"ax",%progbits
+  58              		.align	2
+  59              		.global	isr_FilterReady
+  60              		.thumb
+  61              		.thumb_func
+  62              		.type	isr_FilterReady, %function
+  63              	isr_FilterReady:
+  64              	.LFB64:
+  73:main.c        **** }
+  74:main.c        **** 
+  75:main.c        **** CY_ISR(isr_FilterReady)
+  76:main.c        **** {
+  65              		.loc 1 76 0
+  66              		.cfi_startproc
+  67              		@ args = 0, pretend = 0, frame = 0
+  68              		@ frame_needed = 0, uses_anonymous_args = 0
+  69 0000 08B5     		push	{r3, lr}
+  70              		.cfi_def_cfa_offset 8
+  71              		.cfi_offset 3, -8
+  72              		.cfi_offset 14, -4
+  77:main.c        ****     uint32 r = Filter_Read24(Filter_CHANNEL_A);
+  73              		.loc 1 77 0
+  74 0002 0020     		movs	r0, #0
+  75 0004 FFF7FEFF 		bl	Filter_Read24
+  76              	.LVL2:
+  78:main.c        ****     g_flt = (r & 0x800000u) ? (int32)(r | 0xFF000000u) : (int32)r;
+  77              		.loc 1 78 0
+  78 0008 10F4000F 		tst	r0, #8388608
+  79 000c 01D0     		beq	.L7
+  80              		.loc 1 78 0 is_stmt 0 discriminator 1
+  81 000e 40F07F40 		orr	r0, r0, #-16777216
+  82              	.LVL3:
+  83              	.L7:
+  84              		.loc 1 78 0 discriminator 4
+  85 0012 024B     		ldr	r3, .L9
+  86 0014 9860     		str	r0, [r3, #8]
+  79:main.c        ****     g_filter_ready = 1u;
+  87              		.loc 1 79 0 is_stmt 1 discriminator 4
+  88 0016 0122     		movs	r2, #1
+  89 0018 1A73     		strb	r2, [r3, #12]
+  90 001a 08BD     		pop	{r3, pc}
+  91              	.L10:
+  92              		.align	2
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 4
+
+
+  93              	.L9:
+  94 001c 00000000 		.word	.LANCHOR0
+  95              		.cfi_endproc
+  96              	.LFE64:
+  97              		.size	isr_FilterReady, .-isr_FilterReady
+  98              		.section	.text.isr_Timer,"ax",%progbits
+  99              		.align	2
+ 100              		.global	isr_Timer
+ 101              		.thumb
+ 102              		.thumb_func
+ 103              		.type	isr_Timer, %function
+ 104              	isr_Timer:
+ 105              	.LFB65:
+  80:main.c        **** }
+  81:main.c        **** 
+  82:main.c        **** CY_ISR(isr_Timer)
+  83:main.c        **** {
+ 106              		.loc 1 83 0
+ 107              		.cfi_startproc
+ 108              		@ args = 0, pretend = 0, frame = 0
+ 109              		@ frame_needed = 0, uses_anonymous_args = 0
+ 110 0000 08B5     		push	{r3, lr}
+ 111              		.cfi_def_cfa_offset 8
+ 112              		.cfi_offset 3, -8
+ 113              		.cfi_offset 14, -4
+  84:main.c        ****     Timer_ReadStatusRegister();
+ 114              		.loc 1 84 0
+ 115 0002 FFF7FEFF 		bl	Timer_ReadStatusRegister
+ 116              	.LVL4:
+  85:main.c        ****     watchdog_rx = 1u;
+ 117              		.loc 1 85 0
+ 118 0006 0122     		movs	r2, #1
+ 119 0008 014B     		ldr	r3, .L13
+ 120 000a 5A73     		strb	r2, [r3, #13]
+ 121 000c 08BD     		pop	{r3, pc}
+ 122              	.L14:
+ 123 000e 00BF     		.align	2
+ 124              	.L13:
+ 125 0010 00000000 		.word	.LANCHOR0
+ 126              		.cfi_endproc
+ 127              	.LFE65:
+ 128              		.size	isr_Timer, .-isr_Timer
+ 129              		.section	.text.PGAgain_Set,"ax",%progbits
+ 130              		.align	2
+ 131              		.thumb
+ 132              		.thumb_func
+ 133              		.type	PGAgain_Set, %function
+ 134              	PGAgain_Set:
+ 135              	.LFB71:
+  86:main.c        **** }
+  87:main.c        **** 
+  88:main.c        **** /* -------------------------------------------------------------------------- */
+  89:main.c        **** 
+  90:main.c        **** static void rx_watchdog_start(void)
+  91:main.c        **** {
+  92:main.c        ****     Timer_Stop();
+  93:main.c        ****     Timer_ReadStatusRegister();    /* limpiar flag de overflow */
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 5
+
+
+  94:main.c        ****     isr_Timer_ClearPending();      /* limpiar pending en NVIC — evita falsa disparo */
+  95:main.c        ****     Timer_WritePeriod(TIMEOUT_COUNTS);
+  96:main.c        ****     watchdog_rx = 0u;
+  97:main.c        ****     Timer_Start();
+  98:main.c        **** }
+  99:main.c        **** 
+ 100:main.c        **** static void rx_watchdog_stop(void)
+ 101:main.c        **** {
+ 102:main.c        ****     Timer_Stop();
+ 103:main.c        ****     Timer_ReadStatusRegister();
+ 104:main.c        ****     isr_Timer_ClearPending();
+ 105:main.c        ****     watchdog_rx = 0u;
+ 106:main.c        **** }
+ 107:main.c        **** 
+ 108:main.c        **** static void led_toggle(void)
+ 109:main.c        **** {
+ 110:main.c        ****     LED_Write(LED_Read() ^ 0x01u);
+ 111:main.c        **** }
+ 112:main.c        **** 
+ 113:main.c        **** static void send_config(void)
+ 114:main.c        **** {
+ 115:main.c        ****     uint8  cfg[5u];
+ 116:main.c        ****     uint16 fs_rep       = (uint16)ADC_CFG1_SRATE;
+ 117:main.c        ****     /* Derivado de ADC_CFG1_INPUT_RANGE_VALUE (float, ej. 2.5) → 2500 mV */
+ 118:main.c        ****     uint16 vref_halfmv  = (uint16)((float32)ADC_CFG1_INPUT_RANGE_VALUE * 1000.0f);
+ 119:main.c        **** 
+ 120:main.c        ****     cfg[0] = 0x56u; cfg[1] = 0x02u;
+ 121:main.c        ****     cfg[2] = (uint8)ADC_CFG1_RESOLUTION;
+ 122:main.c        ****     cfg[3] = (uint8)((fs_rep      >> 8u) & 0xFFu);
+ 123:main.c        ****     cfg[4] = (uint8)( fs_rep             & 0xFFu);
+ 124:main.c        ****     UART_PC_PutArray(cfg, 5u);
+ 125:main.c        **** 
+ 126:main.c        ****     cfg[1] = 0x03u;
+ 127:main.c        ****     cfg[2] = g_pga_code;
+ 128:main.c        ****     cfg[3] = (uint8)((vref_halfmv >> 8u) & 0xFFu);
+ 129:main.c        ****     cfg[4] = (uint8)( vref_halfmv        & 0xFFu);
+ 130:main.c        ****     UART_PC_PutArray(cfg, 5u);
+ 131:main.c        **** 
+ 132:main.c        ****     cfg[1] = 0x04u;
+ 133:main.c        ****     cfg[2] = g_pgavdac_code;
+ 134:main.c        ****     cfg[3] = g_vdac_val;
+ 135:main.c        ****     cfg[4] = 0x00u;
+ 136:main.c        ****     UART_PC_PutArray(cfg, 5u);
+ 137:main.c        **** }
+ 138:main.c        **** 
+ 139:main.c        **** static void send_ack(uint8 cmd, uint8 val)
+ 140:main.c        **** {
+ 141:main.c        ****     uint8 ack[5u] = {0x56u, 0x07u, cmd, val, 0x00u};
+ 142:main.c        ****     UART_PC_PutArray(ack, 5u);
+ 143:main.c        **** }
+ 144:main.c        **** 
+ 145:main.c        **** static void PGAgain_Set(uint8 code)
+ 146:main.c        **** {
+ 136              		.loc 1 146 0
+ 137              		.cfi_startproc
+ 138              		@ args = 0, pretend = 0, frame = 0
+ 139              		@ frame_needed = 0, uses_anonymous_args = 0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 6
+
+
+ 140              	.LVL5:
+ 147:main.c        ****     if (code <= 8u)
+ 141              		.loc 1 147 0
+ 142 0000 0828     		cmp	r0, #8
+ 143 0002 05D8     		bhi	.L18
+ 146:main.c        ****     if (code <= 8u)
+ 144              		.loc 1 146 0
+ 145 0004 08B5     		push	{r3, lr}
+ 146              		.cfi_def_cfa_offset 8
+ 147              		.cfi_offset 3, -8
+ 148              		.cfi_offset 14, -4
+ 148:main.c        ****     {
+ 149:main.c        ****         g_pga_code = code;
+ 149              		.loc 1 149 0
+ 150 0006 034B     		ldr	r3, .L19
+ 151 0008 1870     		strb	r0, [r3]
+ 150:main.c        ****         PGAgain_SetGain(code);
+ 152              		.loc 1 150 0
+ 153 000a FFF7FEFF 		bl	PGAgain_SetGain
+ 154              	.LVL6:
+ 155 000e 08BD     		pop	{r3, pc}
+ 156              	.LVL7:
+ 157              	.L18:
+ 158              		.cfi_def_cfa_offset 0
+ 159              		.cfi_restore 3
+ 160              		.cfi_restore 14
+ 161 0010 7047     		bx	lr
+ 162              	.L20:
+ 163 0012 00BF     		.align	2
+ 164              	.L19:
+ 165 0014 00000000 		.word	.LANCHOR1
+ 166              		.cfi_endproc
+ 167              	.LFE71:
+ 168              		.size	PGAgain_Set, .-PGAgain_Set
+ 169              		.section	.text.PGAvdac_Set,"ax",%progbits
+ 170              		.align	2
+ 171              		.thumb
+ 172              		.thumb_func
+ 173              		.type	PGAvdac_Set, %function
+ 174              	PGAvdac_Set:
+ 175              	.LFB72:
+ 151:main.c        ****     }
+ 152:main.c        **** }
+ 153:main.c        **** 
+ 154:main.c        **** static void PGAvdac_Set(uint8 code)
+ 155:main.c        **** {
+ 176              		.loc 1 155 0
+ 177              		.cfi_startproc
+ 178              		@ args = 0, pretend = 0, frame = 0
+ 179              		@ frame_needed = 0, uses_anonymous_args = 0
+ 180              	.LVL8:
+ 156:main.c        ****     if (code <= 8u)
+ 181              		.loc 1 156 0
+ 182 0000 0828     		cmp	r0, #8
+ 183 0002 05D8     		bhi	.L24
+ 155:main.c        ****     if (code <= 8u)
+ 184              		.loc 1 155 0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 7
+
+
+ 185 0004 08B5     		push	{r3, lr}
+ 186              		.cfi_def_cfa_offset 8
+ 187              		.cfi_offset 3, -8
+ 188              		.cfi_offset 14, -4
+ 157:main.c        ****     {
+ 158:main.c        ****         g_pgavdac_code = code;
+ 189              		.loc 1 158 0
+ 190 0006 034B     		ldr	r3, .L25
+ 191 0008 9873     		strb	r0, [r3, #14]
+ 159:main.c        ****         PGAvdac_SetGain(code);
+ 192              		.loc 1 159 0
+ 193 000a FFF7FEFF 		bl	PGAvdac_SetGain
+ 194              	.LVL9:
+ 195 000e 08BD     		pop	{r3, pc}
+ 196              	.LVL10:
+ 197              	.L24:
+ 198              		.cfi_def_cfa_offset 0
+ 199              		.cfi_restore 3
+ 200              		.cfi_restore 14
+ 201 0010 7047     		bx	lr
+ 202              	.L26:
+ 203 0012 00BF     		.align	2
+ 204              	.L25:
+ 205 0014 00000000 		.word	.LANCHOR0
+ 206              		.cfi_endproc
+ 207              	.LFE72:
+ 208              		.size	PGAvdac_Set, .-PGAvdac_Set
+ 209              		.section	.text.send_ack,"ax",%progbits
+ 210              		.align	2
+ 211              		.thumb
+ 212              		.thumb_func
+ 213              		.type	send_ack, %function
+ 214              	send_ack:
+ 215              	.LFB70:
+ 140:main.c        ****     uint8 ack[5u] = {0x56u, 0x07u, cmd, val, 0x00u};
+ 216              		.loc 1 140 0
+ 217              		.cfi_startproc
+ 218              		@ args = 0, pretend = 0, frame = 8
+ 219              		@ frame_needed = 0, uses_anonymous_args = 0
+ 220              	.LVL11:
+ 221 0000 00B5     		push	{lr}
+ 222              		.cfi_def_cfa_offset 4
+ 223              		.cfi_offset 14, -4
+ 224 0002 83B0     		sub	sp, sp, #12
+ 225              		.cfi_def_cfa_offset 16
+ 141:main.c        ****     UART_PC_PutArray(ack, 5u);
+ 226              		.loc 1 141 0
+ 227 0004 5623     		movs	r3, #86
+ 228 0006 8DF80030 		strb	r3, [sp]
+ 229 000a 0723     		movs	r3, #7
+ 230 000c 8DF80130 		strb	r3, [sp, #1]
+ 231 0010 8DF80200 		strb	r0, [sp, #2]
+ 232 0014 8DF80310 		strb	r1, [sp, #3]
+ 233 0018 0023     		movs	r3, #0
+ 234 001a 8DF80430 		strb	r3, [sp, #4]
+ 142:main.c        **** }
+ 235              		.loc 1 142 0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 8
+
+
+ 236 001e 0521     		movs	r1, #5
+ 237              	.LVL12:
+ 238 0020 6846     		mov	r0, sp
+ 239              	.LVL13:
+ 240 0022 FFF7FEFF 		bl	UART_PC_PutArray
+ 241              	.LVL14:
+ 143:main.c        **** 
+ 242              		.loc 1 143 0
+ 243 0026 03B0     		add	sp, sp, #12
+ 244              		.cfi_def_cfa_offset 4
+ 245              		@ sp needed
+ 246 0028 5DF804FB 		ldr	pc, [sp], #4
+ 247              		.cfi_endproc
+ 248              	.LFE70:
+ 249              		.size	send_ack, .-send_ack
+ 250              		.section	.text.send_config,"ax",%progbits
+ 251              		.align	2
+ 252              		.thumb
+ 253              		.thumb_func
+ 254              		.type	send_config, %function
+ 255              	send_config:
+ 256              	.LFB69:
+ 114:main.c        ****     uint8  cfg[5u];
+ 257              		.loc 1 114 0
+ 258              		.cfi_startproc
+ 259              		@ args = 0, pretend = 0, frame = 8
+ 260              		@ frame_needed = 0, uses_anonymous_args = 0
+ 261 0000 10B5     		push	{r4, lr}
+ 262              		.cfi_def_cfa_offset 8
+ 263              		.cfi_offset 4, -8
+ 264              		.cfi_offset 14, -4
+ 265 0002 82B0     		sub	sp, sp, #8
+ 266              		.cfi_def_cfa_offset 16
+ 267              	.LVL15:
+ 120:main.c        ****     cfg[2] = (uint8)ADC_CFG1_RESOLUTION;
+ 268              		.loc 1 120 0
+ 269 0004 5623     		movs	r3, #86
+ 270 0006 8DF80030 		strb	r3, [sp]
+ 271 000a 0223     		movs	r3, #2
+ 272 000c 8DF80130 		strb	r3, [sp, #1]
+ 121:main.c        ****     cfg[3] = (uint8)((fs_rep      >> 8u) & 0xFFu);
+ 273              		.loc 1 121 0
+ 274 0010 1223     		movs	r3, #18
+ 275 0012 8DF80230 		strb	r3, [sp, #2]
+ 122:main.c        ****     cfg[4] = (uint8)( fs_rep             & 0xFFu);
+ 276              		.loc 1 122 0
+ 277 0016 0324     		movs	r4, #3
+ 278 0018 8DF80340 		strb	r4, [sp, #3]
+ 123:main.c        ****     UART_PC_PutArray(cfg, 5u);
+ 279              		.loc 1 123 0
+ 280 001c E823     		movs	r3, #232
+ 281 001e 8DF80430 		strb	r3, [sp, #4]
+ 124:main.c        **** 
+ 282              		.loc 1 124 0
+ 283 0022 0521     		movs	r1, #5
+ 284 0024 6846     		mov	r0, sp
+ 285 0026 FFF7FEFF 		bl	UART_PC_PutArray
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 9
+
+
+ 286              	.LVL16:
+ 126:main.c        ****     cfg[2] = g_pga_code;
+ 287              		.loc 1 126 0
+ 288 002a 8DF80140 		strb	r4, [sp, #1]
+ 127:main.c        ****     cfg[3] = (uint8)((vref_halfmv >> 8u) & 0xFFu);
+ 289              		.loc 1 127 0
+ 290 002e 104C     		ldr	r4, .L31
+ 291 0030 2378     		ldrb	r3, [r4]	@ zero_extendqisi2
+ 292 0032 8DF80230 		strb	r3, [sp, #2]
+ 128:main.c        ****     cfg[4] = (uint8)( vref_halfmv        & 0xFFu);
+ 293              		.loc 1 128 0
+ 294 0036 0923     		movs	r3, #9
+ 295 0038 8DF80330 		strb	r3, [sp, #3]
+ 129:main.c        ****     UART_PC_PutArray(cfg, 5u);
+ 296              		.loc 1 129 0
+ 297 003c C423     		movs	r3, #196
+ 298 003e 8DF80430 		strb	r3, [sp, #4]
+ 130:main.c        **** 
+ 299              		.loc 1 130 0
+ 300 0042 0521     		movs	r1, #5
+ 301 0044 6846     		mov	r0, sp
+ 302 0046 FFF7FEFF 		bl	UART_PC_PutArray
+ 303              	.LVL17:
+ 132:main.c        ****     cfg[2] = g_pgavdac_code;
+ 304              		.loc 1 132 0
+ 305 004a 0423     		movs	r3, #4
+ 306 004c 8DF80130 		strb	r3, [sp, #1]
+ 133:main.c        ****     cfg[3] = g_vdac_val;
+ 307              		.loc 1 133 0
+ 308 0050 084B     		ldr	r3, .L31+4
+ 309 0052 9B7B     		ldrb	r3, [r3, #14]	@ zero_extendqisi2
+ 310 0054 8DF80230 		strb	r3, [sp, #2]
+ 134:main.c        ****     cfg[4] = 0x00u;
+ 311              		.loc 1 134 0
+ 312 0058 6378     		ldrb	r3, [r4, #1]	@ zero_extendqisi2
+ 313 005a 8DF80330 		strb	r3, [sp, #3]
+ 135:main.c        ****     UART_PC_PutArray(cfg, 5u);
+ 314              		.loc 1 135 0
+ 315 005e 0023     		movs	r3, #0
+ 316 0060 8DF80430 		strb	r3, [sp, #4]
+ 136:main.c        **** }
+ 317              		.loc 1 136 0
+ 318 0064 0521     		movs	r1, #5
+ 319 0066 6846     		mov	r0, sp
+ 320 0068 FFF7FEFF 		bl	UART_PC_PutArray
+ 321              	.LVL18:
+ 137:main.c        **** 
+ 322              		.loc 1 137 0
+ 323 006c 02B0     		add	sp, sp, #8
+ 324              		.cfi_def_cfa_offset 8
+ 325              		@ sp needed
+ 326 006e 10BD     		pop	{r4, pc}
+ 327              	.L32:
+ 328              		.align	2
+ 329              	.L31:
+ 330 0070 00000000 		.word	.LANCHOR1
+ 331 0074 00000000 		.word	.LANCHOR0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 10
+
+
+ 332              		.cfi_endproc
+ 333              	.LFE69:
+ 334              		.size	send_config, .-send_config
+ 335              		.section	.text.rx_watchdog_stop,"ax",%progbits
+ 336              		.align	2
+ 337              		.thumb
+ 338              		.thumb_func
+ 339              		.type	rx_watchdog_stop, %function
+ 340              	rx_watchdog_stop:
+ 341              	.LFB67:
+ 101:main.c        ****     Timer_Stop();
+ 342              		.loc 1 101 0
+ 343              		.cfi_startproc
+ 344              		@ args = 0, pretend = 0, frame = 0
+ 345              		@ frame_needed = 0, uses_anonymous_args = 0
+ 346 0000 08B5     		push	{r3, lr}
+ 347              		.cfi_def_cfa_offset 8
+ 348              		.cfi_offset 3, -8
+ 349              		.cfi_offset 14, -4
+ 102:main.c        ****     Timer_ReadStatusRegister();
+ 350              		.loc 1 102 0
+ 351 0002 FFF7FEFF 		bl	Timer_Stop
+ 352              	.LVL19:
+ 103:main.c        ****     isr_Timer_ClearPending();
+ 353              		.loc 1 103 0
+ 354 0006 FFF7FEFF 		bl	Timer_ReadStatusRegister
+ 355              	.LVL20:
+ 104:main.c        ****     watchdog_rx = 0u;
+ 356              		.loc 1 104 0
+ 357 000a FFF7FEFF 		bl	isr_Timer_ClearPending
+ 358              	.LVL21:
+ 105:main.c        **** }
+ 359              		.loc 1 105 0
+ 360 000e 0022     		movs	r2, #0
+ 361 0010 014B     		ldr	r3, .L35
+ 362 0012 5A73     		strb	r2, [r3, #13]
+ 363 0014 08BD     		pop	{r3, pc}
+ 364              	.L36:
+ 365 0016 00BF     		.align	2
+ 366              	.L35:
+ 367 0018 00000000 		.word	.LANCHOR0
+ 368              		.cfi_endproc
+ 369              	.LFE67:
+ 370              		.size	rx_watchdog_stop, .-rx_watchdog_stop
+ 371              		.section	.text.rx_watchdog_start,"ax",%progbits
+ 372              		.align	2
+ 373              		.thumb
+ 374              		.thumb_func
+ 375              		.type	rx_watchdog_start, %function
+ 376              	rx_watchdog_start:
+ 377              	.LFB66:
+  91:main.c        ****     Timer_Stop();
+ 378              		.loc 1 91 0
+ 379              		.cfi_startproc
+ 380              		@ args = 0, pretend = 0, frame = 0
+ 381              		@ frame_needed = 0, uses_anonymous_args = 0
+ 382 0000 08B5     		push	{r3, lr}
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 11
+
+
+ 383              		.cfi_def_cfa_offset 8
+ 384              		.cfi_offset 3, -8
+ 385              		.cfi_offset 14, -4
+  92:main.c        ****     Timer_ReadStatusRegister();    /* limpiar flag de overflow */
+ 386              		.loc 1 92 0
+ 387 0002 FFF7FEFF 		bl	Timer_Stop
+ 388              	.LVL22:
+  93:main.c        ****     isr_Timer_ClearPending();      /* limpiar pending en NVIC — evita falsa disparo */
+ 389              		.loc 1 93 0
+ 390 0006 FFF7FEFF 		bl	Timer_ReadStatusRegister
+ 391              	.LVL23:
+  94:main.c        ****     Timer_WritePeriod(TIMEOUT_COUNTS);
+ 392              		.loc 1 94 0
+ 393 000a FFF7FEFF 		bl	isr_Timer_ClearPending
+ 394              	.LVL24:
+  95:main.c        ****     watchdog_rx = 0u;
+ 395              		.loc 1 95 0
+ 396 000e 0448     		ldr	r0, .L39
+ 397 0010 FFF7FEFF 		bl	Timer_WritePeriod
+ 398              	.LVL25:
+  96:main.c        ****     Timer_Start();
+ 399              		.loc 1 96 0
+ 400 0014 0022     		movs	r2, #0
+ 401 0016 034B     		ldr	r3, .L39+4
+ 402 0018 5A73     		strb	r2, [r3, #13]
+  97:main.c        **** }
+ 403              		.loc 1 97 0
+ 404 001a FFF7FEFF 		bl	Timer_Start
+ 405              	.LVL26:
+ 406 001e 08BD     		pop	{r3, pc}
+ 407              	.L40:
+ 408              		.align	2
+ 409              	.L39:
+ 410 0020 80A90300 		.word	240000
+ 411 0024 00000000 		.word	.LANCHOR0
+ 412              		.cfi_endproc
+ 413              	.LFE66:
+ 414              		.size	rx_watchdog_start, .-rx_watchdog_start
+ 415              		.section	.text.led_toggle,"ax",%progbits
+ 416              		.align	2
+ 417              		.thumb
+ 418              		.thumb_func
+ 419              		.type	led_toggle, %function
+ 420              	led_toggle:
+ 421              	.LFB68:
+ 109:main.c        ****     LED_Write(LED_Read() ^ 0x01u);
+ 422              		.loc 1 109 0
+ 423              		.cfi_startproc
+ 424              		@ args = 0, pretend = 0, frame = 0
+ 425              		@ frame_needed = 0, uses_anonymous_args = 0
+ 426 0000 08B5     		push	{r3, lr}
+ 427              		.cfi_def_cfa_offset 8
+ 428              		.cfi_offset 3, -8
+ 429              		.cfi_offset 14, -4
+ 110:main.c        **** }
+ 430              		.loc 1 110 0
+ 431 0002 FFF7FEFF 		bl	LED_Read
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 12
+
+
+ 432              	.LVL27:
+ 433 0006 80F00100 		eor	r0, r0, #1
+ 434 000a C0B2     		uxtb	r0, r0
+ 435 000c FFF7FEFF 		bl	LED_Write
+ 436              	.LVL28:
+ 437 0010 08BD     		pop	{r3, pc}
+ 438              		.cfi_endproc
+ 439              	.LFE68:
+ 440              		.size	led_toggle, .-led_toggle
+ 441              		.section	.text.main,"ax",%progbits
+ 442              		.align	2
+ 443              		.global	main
+ 444              		.thumb
+ 445              		.thumb_func
+ 446              		.type	main, %function
+ 447              	main:
+ 448              	.LFB73:
+ 160:main.c        ****     }
+ 161:main.c        **** }
+ 162:main.c        **** 
+ 163:main.c        **** /* -------------------------------------------------------------------------- */
+ 164:main.c        **** 
+ 165:main.c        **** int main(void)
+ 166:main.c        **** {
+ 449              		.loc 1 166 0
+ 450              		.cfi_startproc
+ 451              		@ args = 0, pretend = 0, frame = 8
+ 452              		@ frame_needed = 0, uses_anonymous_args = 0
+ 453 0000 70B5     		push	{r4, r5, r6, lr}
+ 454              		.cfi_def_cfa_offset 16
+ 455              		.cfi_offset 4, -16
+ 456              		.cfi_offset 5, -12
+ 457              		.cfi_offset 6, -8
+ 458              		.cfi_offset 14, -4
+ 459 0002 82B0     		sub	sp, sp, #8
+ 460              		.cfi_def_cfa_offset 24
+ 167:main.c        ****     static uint16 hb_count = 0u;
+ 168:main.c        **** #if DEBUG
+ 169:main.c        ****     static uint32 dbg_cnt  = 0u;
+ 170:main.c        **** #endif
+ 171:main.c        **** 
+ 172:main.c        ****     uint8 pkt[5u];
+ 173:main.c        **** #if !DEBUG
+ 174:main.c        ****     int32 raw;
+ 175:main.c        **** #endif
+ 176:main.c        ****     uint8 saved, rx;
+ 177:main.c        **** 
+ 178:main.c        ****     CyGlobalIntEnable;
+ 461              		.loc 1 178 0
+ 462              		.syntax unified
+ 463              	@ 178 "main.c" 1
+ 464 0004 62B6     		CPSIE   i
+ 465              	@ 0 "" 2
+ 179:main.c        **** 
+ 180:main.c        ****     UART_PC_Start();
+ 466              		.loc 1 180 0
+ 467              		.thumb
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 13
+
+
+ 468              		.syntax unified
+ 469 0006 FFF7FEFF 		bl	UART_PC_Start
+ 470              	.LVL29:
+ 181:main.c        ****     OPAref_Start();
+ 471              		.loc 1 181 0
+ 472 000a FFF7FEFF 		bl	OPAref_Start
+ 473              	.LVL30:
+ 182:main.c        **** 
+ 183:main.c        ****     PGAp_Start();  PGAn_Start();
+ 474              		.loc 1 183 0
+ 475 000e FFF7FEFF 		bl	PGAp_Start
+ 476              	.LVL31:
+ 477 0012 FFF7FEFF 		bl	PGAn_Start
+ 478              	.LVL32:
+ 184:main.c        ****     PGAp_SetGain(PGAp_GAIN_02);
+ 479              		.loc 1 184 0
+ 480 0016 0120     		movs	r0, #1
+ 481 0018 FFF7FEFF 		bl	PGAp_SetGain
+ 482              	.LVL33:
+ 185:main.c        ****     PGAn_SetGain(PGAp_GAIN_02);
+ 483              		.loc 1 185 0
+ 484 001c 0120     		movs	r0, #1
+ 485 001e FFF7FEFF 		bl	PGAn_SetGain
+ 486              	.LVL34:
+ 186:main.c        **** 
+ 187:main.c        ****     LPF_1_Start(); LPF_2_Start();
+ 487              		.loc 1 187 0
+ 488 0022 FFF7FEFF 		bl	LPF_1_Start
+ 489              	.LVL35:
+ 490 0026 FFF7FEFF 		bl	LPF_2_Start
+ 491              	.LVL36:
+ 188:main.c        **** 
+ 189:main.c        ****     PGAgain_Start();
+ 492              		.loc 1 189 0
+ 493 002a FFF7FEFF 		bl	PGAgain_Start
+ 494              	.LVL37:
+ 190:main.c        ****     PGAgain_SetGain(g_pga_code);
+ 495              		.loc 1 190 0
+ 496 002e 6B4B     		ldr	r3, .L69
+ 497 0030 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 498 0032 FFF7FEFF 		bl	PGAgain_SetGain
+ 499              	.LVL38:
+ 191:main.c        **** 
+ 192:main.c        ****     OPAbp_Start();
+ 500              		.loc 1 192 0
+ 501 0036 FFF7FEFF 		bl	OPAbp_Start
+ 502              	.LVL39:
+ 193:main.c        ****     OPAadder_Start();
+ 503              		.loc 1 193 0
+ 504 003a FFF7FEFF 		bl	OPAadder_Start
+ 505              	.LVL40:
+ 194:main.c        ****     PGAvdac_Start();
+ 506              		.loc 1 194 0
+ 507 003e FFF7FEFF 		bl	PGAvdac_Start
+ 508              	.LVL41:
+ 195:main.c        ****     PGAvdac_SetGain(g_pgavdac_code);
+ 509              		.loc 1 195 0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 14
+
+
+ 510 0042 674B     		ldr	r3, .L69+4
+ 511 0044 987B     		ldrb	r0, [r3, #14]	@ zero_extendqisi2
+ 512 0046 FFF7FEFF 		bl	PGAvdac_SetGain
+ 513              	.LVL42:
+ 196:main.c        ****     OPAlp_Start();
+ 514              		.loc 1 196 0
+ 515 004a FFF7FEFF 		bl	OPAlp_Start
+ 516              	.LVL43:
+ 197:main.c        **** 
+ 198:main.c        ****     VDAC_Start();
+ 517              		.loc 1 198 0
+ 518 004e FFF7FEFF 		bl	VDAC_Start
+ 519              	.LVL44:
+ 199:main.c        ****     VDAC_SetValue(VDAC_INIT_VALUE);
+ 520              		.loc 1 199 0
+ 521 0052 9420     		movs	r0, #148
+ 522 0054 FFF7FEFF 		bl	VDAC_SetValue
+ 523              	.LVL45:
+ 200:main.c        **** 
+ 201:main.c        ****     Filter_Start();
+ 524              		.loc 1 201 0
+ 525 0058 FFF7FEFF 		bl	Filter_Start
+ 526              	.LVL46:
+ 202:main.c        ****     Filter_SetCoherency(Filter_CHANNEL_A, Filter_KEY_LOW);
+ 527              		.loc 1 202 0
+ 528 005c 0021     		movs	r1, #0
+ 529 005e 0846     		mov	r0, r1
+ 530 0060 FFF7FEFF 		bl	Filter_SetCoherency
+ 531              	.LVL47:
+ 203:main.c        ****     Filter_SetDalign(Filter_STAGEA_DALIGN, 0u);
+ 532              		.loc 1 203 0
+ 533 0064 0021     		movs	r1, #0
+ 534 0066 0120     		movs	r0, #1
+ 535 0068 FFF7FEFF 		bl	Filter_SetDalign
+ 536              	.LVL48:
+ 204:main.c        ****     Filter_SetDalign(Filter_HOLDA_DALIGN,  0u);
+ 537              		.loc 1 204 0
+ 538 006c 0021     		movs	r1, #0
+ 539 006e 0420     		movs	r0, #4
+ 540 0070 FFF7FEFF 		bl	Filter_SetDalign
+ 541              	.LVL49:
+ 205:main.c        **** 
+ 206:main.c        ****     ADC_Start();
+ 542              		.loc 1 206 0
+ 543 0074 FFF7FEFF 		bl	ADC_Start
+ 544              	.LVL50:
+ 207:main.c        ****     ADC_StartConvert();
+ 545              		.loc 1 207 0
+ 546 0078 FFF7FEFF 		bl	ADC_StartConvert
+ 547              	.LVL51:
+ 208:main.c        ****     isr_DelSig_StartEx(isr_DelSigReady);
+ 548              		.loc 1 208 0
+ 549 007c 5948     		ldr	r0, .L69+8
+ 550 007e FFF7FEFF 		bl	isr_DelSig_StartEx
+ 551              	.LVL52:
+ 209:main.c        ****     isr_Filter_StartEx(isr_FilterReady);
+ 552              		.loc 1 209 0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 15
+
+
+ 553 0082 5948     		ldr	r0, .L69+12
+ 554 0084 FFF7FEFF 		bl	isr_Filter_StartEx
+ 555              	.LVL53:
+ 210:main.c        **** 
+ 211:main.c        ****     isr_Timer_StartEx(isr_Timer);
+ 556              		.loc 1 211 0
+ 557 0088 5848     		ldr	r0, .L69+16
+ 558 008a FFF7FEFF 		bl	isr_Timer_StartEx
+ 559              	.LVL54:
+ 212:main.c        ****     LED_Write(0u);
+ 560              		.loc 1 212 0
+ 561 008e 0020     		movs	r0, #0
+ 562 0090 FFF7FEFF 		bl	LED_Write
+ 563              	.LVL55:
+ 213:main.c        **** 
+ 214:main.c        ****     CyDelay(10u);
+ 564              		.loc 1 214 0
+ 565 0094 0A20     		movs	r0, #10
+ 566 0096 FFF7FEFF 		bl	CyDelay
+ 567              	.LVL56:
+ 215:main.c        ****     send_config();
+ 568              		.loc 1 215 0
+ 569 009a FFF7FEFF 		bl	send_config
+ 570              	.LVL57:
+ 571              	.L44:
+ 216:main.c        **** 
+ 217:main.c        ****     for (;;)
+ 218:main.c        ****     {
+ 219:main.c        ****         /* ==== Watchdog RX ================================================ */
+ 220:main.c        ****         if (watchdog_rx)
+ 572              		.loc 1 220 0
+ 573 009e 504B     		ldr	r3, .L69+4
+ 574 00a0 5B7B     		ldrb	r3, [r3, #13]	@ zero_extendqisi2
+ 575 00a2 13F0FF0F 		tst	r3, #255
+ 576 00a6 00F0A680 		beq	.L46
+ 221:main.c        ****         {
+ 222:main.c        ****             watchdog_rx = 0u;
+ 577              		.loc 1 222 0
+ 578 00aa 4D4B     		ldr	r3, .L69+4
+ 579 00ac 0022     		movs	r2, #0
+ 580 00ae 5A73     		strb	r2, [r3, #13]
+ 223:main.c        ****             rx_state    = 0u;
+ 581              		.loc 1 223 0
+ 582 00b0 DA73     		strb	r2, [r3, #15]
+ 224:main.c        ****             rx_cmd      = 0u;
+ 583              		.loc 1 224 0
+ 584 00b2 1A74     		strb	r2, [r3, #16]
+ 225:main.c        ****             rx_param    = 0u;
+ 585              		.loc 1 225 0
+ 586 00b4 5A74     		strb	r2, [r3, #17]
+ 587 00b6 9EE0     		b	.L46
+ 588              	.L65:
+ 226:main.c        ****         }
+ 227:main.c        **** 
+ 228:main.c        ****         /* ==== RX — protocolo 4 bytes con checksum ======================== */
+ 229:main.c        ****         while (UART_PC_GetRxBufferSize() > 0u)
+ 230:main.c        ****         {
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 16
+
+
+ 231:main.c        ****             rx = UART_PC_ReadRxData();
+ 589              		.loc 1 231 0
+ 590 00b8 FFF7FEFF 		bl	UART_PC_ReadRxData
+ 591              	.LVL58:
+ 592 00bc 0446     		mov	r4, r0
+ 593              	.LVL59:
+ 232:main.c        **** 
+ 233:main.c        ****             switch (rx_state)
+ 594              		.loc 1 233 0
+ 595 00be 484B     		ldr	r3, .L69+4
+ 596 00c0 DB7B     		ldrb	r3, [r3, #15]	@ zero_extendqisi2
+ 597 00c2 DBB2     		uxtb	r3, r3
+ 598 00c4 032B     		cmp	r3, #3
+ 599 00c6 00F29380 		bhi	.L47
+ 600 00ca DFE803F0 		tbb	[pc, r3]
+ 601              	.L49:
+ 602 00ce 02       		.byte	(.L48-.L49)/2
+ 603 00cf 0B       		.byte	(.L50-.L49)/2
+ 604 00d0 23       		.byte	(.L51-.L49)/2
+ 605 00d1 2A       		.byte	(.L52-.L49)/2
+ 606              		.p2align 1
+ 607              	.L48:
+ 234:main.c        ****             {
+ 235:main.c        ****                 case 0u:    /* esperar guard 0xAB */
+ 236:main.c        ****                     if (rx == 0xABu)
+ 608              		.loc 1 236 0
+ 609 00d2 AB28     		cmp	r0, #171
+ 610 00d4 40F08F80 		bne	.L46
+ 237:main.c        ****                     {
+ 238:main.c        ****                         rx_state = 1u;
+ 611              		.loc 1 238 0
+ 612 00d8 0122     		movs	r2, #1
+ 613 00da 414B     		ldr	r3, .L69+4
+ 614 00dc DA73     		strb	r2, [r3, #15]
+ 239:main.c        ****                         rx_watchdog_start();
+ 615              		.loc 1 239 0
+ 616 00de FFF7FEFF 		bl	rx_watchdog_start
+ 617              	.LVL60:
+ 618 00e2 88E0     		b	.L46
+ 619              	.LVL61:
+ 620              	.L50:
+ 240:main.c        ****                     }
+ 241:main.c        ****                     break;
+ 242:main.c        **** 
+ 243:main.c        ****                 case 1u:    /* esperar comando */
+ 244:main.c        ****                     rx_watchdog_start();
+ 621              		.loc 1 244 0
+ 622 00e4 FFF7FEFF 		bl	rx_watchdog_start
+ 623              	.LVL62:
+ 245:main.c        ****                     switch (rx)
+ 624              		.loc 1 245 0
+ 625 00e8 A4F1A103 		sub	r3, r4, #161
+ 626 00ec 092B     		cmp	r3, #9
+ 627 00ee 0BD8     		bhi	.L54
+ 628 00f0 DFE803F0 		tbb	[pc, r3]
+ 629              	.L56:
+ 630 00f4 05       		.byte	(.L55-.L56)/2
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 17
+
+
+ 631 00f5 0A       		.byte	(.L54-.L56)/2
+ 632 00f6 0A       		.byte	(.L54-.L56)/2
+ 633 00f7 0A       		.byte	(.L54-.L56)/2
+ 634 00f8 05       		.byte	(.L55-.L56)/2
+ 635 00f9 05       		.byte	(.L55-.L56)/2
+ 636 00fa 0A       		.byte	(.L54-.L56)/2
+ 637 00fb 05       		.byte	(.L55-.L56)/2
+ 638 00fc 05       		.byte	(.L55-.L56)/2
+ 639 00fd 05       		.byte	(.L55-.L56)/2
+ 640              		.p2align 1
+ 641              	.L55:
+ 246:main.c        ****                     {
+ 247:main.c        ****                         case 0xA5u:
+ 248:main.c        ****                         case 0xA1u:
+ 249:main.c        ****                         case 0xA6u:
+ 250:main.c        ****                         case 0xA8u:
+ 251:main.c        ****                         case 0xA9u:
+ 252:main.c        ****                         case 0xAAu:
+ 253:main.c        ****                             rx_cmd   = rx;
+ 642              		.loc 1 253 0
+ 643 00fe 384B     		ldr	r3, .L69+4
+ 644 0100 1C74     		strb	r4, [r3, #16]
+ 254:main.c        ****                             rx_state = 2u;
+ 645              		.loc 1 254 0
+ 646 0102 0222     		movs	r2, #2
+ 647 0104 DA73     		strb	r2, [r3, #15]
+ 255:main.c        ****                             break;
+ 648              		.loc 1 255 0
+ 649 0106 76E0     		b	.L46
+ 650              	.L54:
+ 256:main.c        ****                         default:
+ 257:main.c        ****                             rx_watchdog_stop();
+ 651              		.loc 1 257 0
+ 652 0108 FFF7FEFF 		bl	rx_watchdog_stop
+ 653              	.LVL63:
+ 258:main.c        ****                             rx_state = 0u;
+ 654              		.loc 1 258 0
+ 655 010c 0022     		movs	r2, #0
+ 656 010e 344B     		ldr	r3, .L69+4
+ 657 0110 DA73     		strb	r2, [r3, #15]
+ 259:main.c        ****                             break;
+ 658              		.loc 1 259 0
+ 659 0112 70E0     		b	.L46
+ 660              	.LVL64:
+ 661              	.L51:
+ 260:main.c        ****                     }
+ 261:main.c        ****                     break;
+ 262:main.c        **** 
+ 263:main.c        ****                 case 2u:    /* esperar parametro */
+ 264:main.c        ****                     rx_param = rx;
+ 662              		.loc 1 264 0
+ 663 0114 324B     		ldr	r3, .L69+4
+ 664 0116 5874     		strb	r0, [r3, #17]
+ 265:main.c        ****                     rx_state = 3u;
+ 665              		.loc 1 265 0
+ 666 0118 0322     		movs	r2, #3
+ 667 011a DA73     		strb	r2, [r3, #15]
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 18
+
+
+ 266:main.c        ****                     rx_watchdog_start();
+ 668              		.loc 1 266 0
+ 669 011c FFF7FEFF 		bl	rx_watchdog_start
+ 670              	.LVL65:
+ 267:main.c        ****                     break;
+ 671              		.loc 1 267 0
+ 672 0120 69E0     		b	.L46
+ 673              	.LVL66:
+ 674              	.L52:
+ 268:main.c        **** 
+ 269:main.c        ****                 case 3u:    /* esperar checksum — validar y ejecutar */
+ 270:main.c        ****                     rx_watchdog_stop();
+ 675              		.loc 1 270 0
+ 676 0122 FFF7FEFF 		bl	rx_watchdog_stop
+ 677              	.LVL67:
+ 271:main.c        ****                     rx_state = 0u;
+ 678              		.loc 1 271 0
+ 679 0126 2E4A     		ldr	r2, .L69+4
+ 680 0128 0023     		movs	r3, #0
+ 681 012a D373     		strb	r3, [r2, #15]
+ 272:main.c        **** 
+ 273:main.c        ****                     if (rx != (uint8)(rx_cmd ^ rx_param)) { break; }
+ 682              		.loc 1 273 0
+ 683 012c 137C     		ldrb	r3, [r2, #16]	@ zero_extendqisi2
+ 684 012e 527C     		ldrb	r2, [r2, #17]	@ zero_extendqisi2
+ 685 0130 5340     		eors	r3, r3, r2
+ 686 0132 9C42     		cmp	r4, r3
+ 687 0134 5FD1     		bne	.L46
+ 274:main.c        **** 
+ 275:main.c        ****                     switch (rx_cmd)
+ 688              		.loc 1 275 0
+ 689 0136 2A4B     		ldr	r3, .L69+4
+ 690 0138 1B7C     		ldrb	r3, [r3, #16]	@ zero_extendqisi2
+ 691 013a A13B     		subs	r3, r3, #161
+ 692 013c 092B     		cmp	r3, #9
+ 693 013e 5AD8     		bhi	.L46
+ 694 0140 DFE803F0 		tbb	[pc, r3]
+ 695              	.L58:
+ 696 0144 08       		.byte	(.L57-.L58)/2
+ 697 0145 59       		.byte	(.L46-.L58)/2
+ 698 0146 59       		.byte	(.L46-.L58)/2
+ 699 0147 59       		.byte	(.L46-.L58)/2
+ 700 0148 05       		.byte	(.L59-.L58)/2
+ 701 0149 1A       		.byte	(.L60-.L58)/2
+ 702 014a 59       		.byte	(.L46-.L58)/2
+ 703 014b 23       		.byte	(.L61-.L58)/2
+ 704 014c 2F       		.byte	(.L62-.L58)/2
+ 705 014d 3C       		.byte	(.L63-.L58)/2
+ 706              		.p2align 1
+ 707              	.L59:
+ 276:main.c        ****                     {
+ 277:main.c        ****                         case 0xA5u:
+ 278:main.c        ****                             send_config();
+ 708              		.loc 1 278 0
+ 709 014e FFF7FEFF 		bl	send_config
+ 710              	.LVL68:
+ 279:main.c        ****                             break;
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 19
+
+
+ 711              		.loc 1 279 0
+ 712 0152 50E0     		b	.L46
+ 713              	.L57:
+ 280:main.c        **** 
+ 281:main.c        ****                         case 0xA1u:
+ 282:main.c        ****                             stream_enabled = (rx_param == 0u) ? 0u : 1u;
+ 714              		.loc 1 282 0
+ 715 0154 224C     		ldr	r4, .L69+4
+ 716 0156 637C     		ldrb	r3, [r4, #17]	@ zero_extendqisi2
+ 717 0158 13F0FF0F 		tst	r3, #255
+ 718 015c 14BF     		ite	ne
+ 719 015e 0121     		movne	r1, #1
+ 720 0160 0021     		moveq	r1, #0
+ 721 0162 A174     		strb	r1, [r4, #18]
+ 283:main.c        **** #if DEBUG
+ 284:main.c        ****                             if (stream_enabled != 0u)
+ 285:main.c        ****                             {
+ 286:main.c        ****                                 dbg_cnt = 0u;
+ 287:main.c        ****                             }
+ 288:main.c        **** #endif
+ 289:main.c        ****                             send_ack(0xA1u, stream_enabled);
+ 722              		.loc 1 289 0
+ 723 0164 A120     		movs	r0, #161
+ 724 0166 FFF7FEFF 		bl	send_ack
+ 725              	.LVL69:
+ 290:main.c        ****                             if (stream_enabled != 0u)
+ 726              		.loc 1 290 0
+ 727 016a A37C     		ldrb	r3, [r4, #18]	@ zero_extendqisi2
+ 728 016c 0BB1     		cbz	r3, .L64
+ 291:main.c        ****                             {
+ 292:main.c        ****                                 send_config();
+ 729              		.loc 1 292 0
+ 730 016e FFF7FEFF 		bl	send_config
+ 731              	.LVL70:
+ 732              	.L64:
+ 293:main.c        ****                             }
+ 294:main.c        ****                             led_toggle();
+ 733              		.loc 1 294 0
+ 734 0172 FFF7FEFF 		bl	led_toggle
+ 735              	.LVL71:
+ 295:main.c        ****                             break;
+ 736              		.loc 1 295 0
+ 737 0176 3EE0     		b	.L46
+ 738              	.L60:
+ 296:main.c        **** 
+ 297:main.c        ****                         case 0xA6u:
+ 298:main.c        ****                             PGAgain_Set(rx_param);
+ 739              		.loc 1 298 0
+ 740 0178 194B     		ldr	r3, .L69+4
+ 741 017a 587C     		ldrb	r0, [r3, #17]	@ zero_extendqisi2
+ 742 017c FFF7FEFF 		bl	PGAgain_Set
+ 743              	.LVL72:
+ 299:main.c        ****                             send_config();
+ 744              		.loc 1 299 0
+ 745 0180 FFF7FEFF 		bl	send_config
+ 746              	.LVL73:
+ 300:main.c        ****                             led_toggle();
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 20
+
+
+ 747              		.loc 1 300 0
+ 748 0184 FFF7FEFF 		bl	led_toggle
+ 749              	.LVL74:
+ 301:main.c        ****                             break;
+ 750              		.loc 1 301 0
+ 751 0188 35E0     		b	.L46
+ 752              	.L61:
+ 302:main.c        **** 
+ 303:main.c        ****                         case 0xA8u:
+ 304:main.c        ****                             tx_mode = (rx_param == 0u) ? 0u : 1u;
+ 753              		.loc 1 304 0
+ 754 018a 154B     		ldr	r3, .L69+4
+ 755 018c 5A7C     		ldrb	r2, [r3, #17]	@ zero_extendqisi2
+ 756 018e 12F0FF0F 		tst	r2, #255
+ 757 0192 14BF     		ite	ne
+ 758 0194 0121     		movne	r1, #1
+ 759 0196 0021     		moveq	r1, #0
+ 760 0198 D974     		strb	r1, [r3, #19]
+ 305:main.c        ****                             send_ack(0xA8u, tx_mode);
+ 761              		.loc 1 305 0
+ 762 019a A820     		movs	r0, #168
+ 763 019c FFF7FEFF 		bl	send_ack
+ 764              	.LVL75:
+ 306:main.c        ****                             break;
+ 765              		.loc 1 306 0
+ 766 01a0 29E0     		b	.L46
+ 767              	.L62:
+ 307:main.c        **** 
+ 308:main.c        ****                         case 0xA9u:
+ 309:main.c        ****                             PGAvdac_Set(rx_param);
+ 768              		.loc 1 309 0
+ 769 01a2 0F4C     		ldr	r4, .L69+4
+ 770 01a4 607C     		ldrb	r0, [r4, #17]	@ zero_extendqisi2
+ 771 01a6 FFF7FEFF 		bl	PGAvdac_Set
+ 772              	.LVL76:
+ 310:main.c        ****                             send_ack(0xA9u, g_pgavdac_code);
+ 773              		.loc 1 310 0
+ 774 01aa A17B     		ldrb	r1, [r4, #14]	@ zero_extendqisi2
+ 775 01ac A920     		movs	r0, #169
+ 776 01ae FFF7FEFF 		bl	send_ack
+ 777              	.LVL77:
+ 311:main.c        ****                             send_config();
+ 778              		.loc 1 311 0
+ 779 01b2 FFF7FEFF 		bl	send_config
+ 780              	.LVL78:
+ 312:main.c        ****                             led_toggle();
+ 781              		.loc 1 312 0
+ 782 01b6 FFF7FEFF 		bl	led_toggle
+ 783              	.LVL79:
+ 313:main.c        ****                             break;
+ 784              		.loc 1 313 0
+ 785 01ba 1CE0     		b	.L46
+ 786              	.L63:
+ 314:main.c        **** 
+ 315:main.c        ****                         case 0xAAu:
+ 316:main.c        ****                             VDAC_SetValue(rx_param);
+ 787              		.loc 1 316 0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 21
+
+
+ 788 01bc 084C     		ldr	r4, .L69+4
+ 789 01be 607C     		ldrb	r0, [r4, #17]	@ zero_extendqisi2
+ 790 01c0 FFF7FEFF 		bl	VDAC_SetValue
+ 791              	.LVL80:
+ 317:main.c        ****                             g_vdac_val = rx_param;
+ 792              		.loc 1 317 0
+ 793 01c4 627C     		ldrb	r2, [r4, #17]	@ zero_extendqisi2
+ 794 01c6 054B     		ldr	r3, .L69
+ 795 01c8 5A70     		strb	r2, [r3, #1]
+ 318:main.c        ****                             send_ack(0xAAu, rx_param);
+ 796              		.loc 1 318 0
+ 797 01ca 617C     		ldrb	r1, [r4, #17]	@ zero_extendqisi2
+ 798 01cc AA20     		movs	r0, #170
+ 799 01ce FFF7FEFF 		bl	send_ack
+ 800              	.LVL81:
+ 319:main.c        ****                             send_config();
+ 801              		.loc 1 319 0
+ 802 01d2 FFF7FEFF 		bl	send_config
+ 803              	.LVL82:
+ 320:main.c        ****                             led_toggle();
+ 804              		.loc 1 320 0
+ 805 01d6 FFF7FEFF 		bl	led_toggle
+ 806              	.LVL83:
+ 321:main.c        ****                             break;
+ 807              		.loc 1 321 0
+ 808 01da 0CE0     		b	.L46
+ 809              	.L70:
+ 810              		.align	2
+ 811              	.L69:
+ 812 01dc 00000000 		.word	.LANCHOR1
+ 813 01e0 00000000 		.word	.LANCHOR0
+ 814 01e4 00000000 		.word	isr_DelSigReady
+ 815 01e8 00000000 		.word	isr_FilterReady
+ 816 01ec 00000000 		.word	isr_Timer
+ 817              	.LVL84:
+ 818              	.L47:
+ 322:main.c        **** 
+ 323:main.c        ****                         default:
+ 324:main.c        ****                             break;
+ 325:main.c        ****                     }
+ 326:main.c        ****                     break;
+ 327:main.c        **** 
+ 328:main.c        ****                 default:
+ 329:main.c        ****                     rx_state = 0u;
+ 819              		.loc 1 329 0
+ 820 01f0 0022     		movs	r2, #0
+ 821 01f2 4B4B     		ldr	r3, .L71
+ 822 01f4 DA73     		strb	r2, [r3, #15]
+ 823              	.LVL85:
+ 824              	.L46:
+ 229:main.c        ****         {
+ 825              		.loc 1 229 0
+ 826 01f6 FFF7FEFF 		bl	UART_PC_GetRxBufferSize
+ 827              	.LVL86:
+ 828 01fa 0028     		cmp	r0, #0
+ 829 01fc 7FF45CAF 		bne	.L65
+ 330:main.c        ****                     break;
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 22
+
+
+ 331:main.c        ****             }
+ 332:main.c        ****         }
+ 333:main.c        **** 
+ 334:main.c        **** #if DEBUG
+ 335:main.c        ****         /* ==== DEBUG: rampa UART autosuficiente ============================ */
+ 336:main.c        ****         if (stream_enabled != 0u)
+ 337:main.c        ****         {
+ 338:main.c        ****             pkt[0] = 0x56u; pkt[1] = 0x00u;
+ 339:main.c        ****             pkt[2] = (uint8)((dbg_cnt >> 16u) & 0xFFu);
+ 340:main.c        ****             pkt[3] = (uint8)((dbg_cnt >>  8u) & 0xFFu);
+ 341:main.c        ****             pkt[4] = (uint8)( dbg_cnt          & 0xFFu);
+ 342:main.c        ****             dbg_cnt = (dbg_cnt + 1u) & 0x00FFFFFFu;
+ 343:main.c        ****             UART_PC_PutArray(pkt, 5u);
+ 344:main.c        **** 
+ 345:main.c        ****             if (++hb_count >= HB_PERIOD)
+ 346:main.c        ****             {
+ 347:main.c        ****                 hb_count = 0u;
+ 348:main.c        ****                 pkt[0]=0x56u; pkt[1]=0x01u;
+ 349:main.c        ****                 pkt[2]=g_pga_code; pkt[3]=g_vdac_val; pkt[4]=tx_mode;
+ 350:main.c        ****                 UART_PC_PutArray(pkt, 5u);
+ 351:main.c        ****             }
+ 352:main.c        **** 
+ 353:main.c        ****             CyDelayUs(DEBUG_PERIOD_US);
+ 354:main.c        ****         }
+ 355:main.c        **** #else
+ 356:main.c        ****         /* ==== TX crudo (tx_mode == 0) ==================================== */
+ 357:main.c        ****         if (stream_enabled != 0u && tx_mode == 0u && g_sample_ready)
+ 830              		.loc 1 357 0
+ 831 0200 474B     		ldr	r3, .L71
+ 832 0202 9B7C     		ldrb	r3, [r3, #18]	@ zero_extendqisi2
+ 833 0204 002B     		cmp	r3, #0
+ 834 0206 40D0     		beq	.L66
+ 835              		.loc 1 357 0 is_stmt 0 discriminator 1
+ 836 0208 454B     		ldr	r3, .L71
+ 837 020a DB7C     		ldrb	r3, [r3, #19]	@ zero_extendqisi2
+ 838 020c 002B     		cmp	r3, #0
+ 839 020e 3CD1     		bne	.L66
+ 840              		.loc 1 357 0 discriminator 2
+ 841 0210 434B     		ldr	r3, .L71
+ 842 0212 1B79     		ldrb	r3, [r3, #4]	@ zero_extendqisi2
+ 843 0214 13F0FF0F 		tst	r3, #255
+ 844 0218 37D0     		beq	.L66
+ 358:main.c        ****         {
+ 359:main.c        ****             saved = CyEnterCriticalSection();
+ 845              		.loc 1 359 0 is_stmt 1
+ 846 021a FFF7FEFF 		bl	CyEnterCriticalSection
+ 847              	.LVL87:
+ 360:main.c        ****             raw            = g_adc_raw;
+ 848              		.loc 1 360 0
+ 849 021e 404C     		ldr	r4, .L71
+ 850 0220 2568     		ldr	r5, [r4]
+ 851              	.LVL88:
+ 361:main.c        ****             g_sample_ready = 0u;
+ 852              		.loc 1 361 0
+ 853 0222 0026     		movs	r6, #0
+ 854 0224 2671     		strb	r6, [r4, #4]
+ 362:main.c        ****             CyExitCriticalSection(saved);
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 23
+
+
+ 855              		.loc 1 362 0
+ 856 0226 FFF7FEFF 		bl	CyExitCriticalSection
+ 857              	.LVL89:
+ 363:main.c        **** 
+ 364:main.c        ****             pkt[0] = 0x56u; pkt[1] = 0x00u;
+ 858              		.loc 1 364 0
+ 859 022a 5623     		movs	r3, #86
+ 860 022c 8DF80030 		strb	r3, [sp]
+ 861 0230 8DF80160 		strb	r6, [sp, #1]
+ 365:main.c        ****             pkt[2] = (uint8)((raw >> 16u) & 0xFFu);
+ 862              		.loc 1 365 0
+ 863 0234 C5F30743 		ubfx	r3, r5, #16, #8
+ 864 0238 8DF80230 		strb	r3, [sp, #2]
+ 366:main.c        ****             pkt[3] = (uint8)((raw >>  8u) & 0xFFu);
+ 865              		.loc 1 366 0
+ 866 023c C5F30723 		ubfx	r3, r5, #8, #8
+ 867 0240 8DF80330 		strb	r3, [sp, #3]
+ 367:main.c        ****             pkt[4] = (uint8)( raw         & 0xFFu);
+ 868              		.loc 1 367 0
+ 869 0244 8DF80450 		strb	r5, [sp, #4]
+ 368:main.c        ****             UART_PC_PutArray(pkt, 5u);
+ 870              		.loc 1 368 0
+ 871 0248 0521     		movs	r1, #5
+ 872 024a 6846     		mov	r0, sp
+ 873 024c FFF7FEFF 		bl	UART_PC_PutArray
+ 874              	.LVL90:
+ 369:main.c        **** 
+ 370:main.c        ****             if (++hb_count >= HB_PERIOD)
+ 875              		.loc 1 370 0
+ 876 0250 A38A     		ldrh	r3, [r4, #20]
+ 877 0252 0133     		adds	r3, r3, #1
+ 878 0254 9BB2     		uxth	r3, r3
+ 879 0256 A382     		strh	r3, [r4, #20]	@ movhi
+ 880 0258 B3F57A7F 		cmp	r3, #1000
+ 881 025c 15D3     		bcc	.L66
+ 371:main.c        ****             {
+ 372:main.c        ****                 hb_count = 0u;
+ 882              		.loc 1 372 0
+ 883 025e 2346     		mov	r3, r4
+ 884 0260 9E82     		strh	r6, [r3, #20]	@ movhi
+ 373:main.c        ****                 pkt[0]=0x56u; pkt[1]=0x01u;
+ 885              		.loc 1 373 0
+ 886 0262 5622     		movs	r2, #86
+ 887 0264 8DF80020 		strb	r2, [sp]
+ 888 0268 0122     		movs	r2, #1
+ 889 026a 8DF80120 		strb	r2, [sp, #1]
+ 374:main.c        ****                 pkt[2]=g_pga_code; pkt[3]=g_vdac_val; pkt[4]=tx_mode;
+ 890              		.loc 1 374 0
+ 891 026e 2D4A     		ldr	r2, .L71+4
+ 892 0270 1178     		ldrb	r1, [r2]	@ zero_extendqisi2
+ 893 0272 8DF80210 		strb	r1, [sp, #2]
+ 894 0276 5278     		ldrb	r2, [r2, #1]	@ zero_extendqisi2
+ 895 0278 8DF80320 		strb	r2, [sp, #3]
+ 896 027c E37C     		ldrb	r3, [r4, #19]	@ zero_extendqisi2
+ 897 027e 8DF80430 		strb	r3, [sp, #4]
+ 375:main.c        ****                 UART_PC_PutArray(pkt, 5u);
+ 898              		.loc 1 375 0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 24
+
+
+ 899 0282 0521     		movs	r1, #5
+ 900 0284 6846     		mov	r0, sp
+ 901 0286 FFF7FEFF 		bl	UART_PC_PutArray
+ 902              	.LVL91:
+ 903              	.L66:
+ 376:main.c        ****             }
+ 377:main.c        ****         }
+ 378:main.c        **** 
+ 379:main.c        ****         /* ==== TX filtrado (tx_mode == 1) ================================= */
+ 380:main.c        ****         if (stream_enabled != 0u && tx_mode == 1u && g_filter_ready)
+ 904              		.loc 1 380 0
+ 905 028a 254B     		ldr	r3, .L71
+ 906 028c 9B7C     		ldrb	r3, [r3, #18]	@ zero_extendqisi2
+ 907 028e 002B     		cmp	r3, #0
+ 908 0290 3FF405AF 		beq	.L44
+ 909              		.loc 1 380 0 is_stmt 0 discriminator 1
+ 910 0294 224B     		ldr	r3, .L71
+ 911 0296 DB7C     		ldrb	r3, [r3, #19]	@ zero_extendqisi2
+ 912 0298 012B     		cmp	r3, #1
+ 913 029a 7FF400AF 		bne	.L44
+ 914              		.loc 1 380 0 discriminator 2
+ 915 029e 204B     		ldr	r3, .L71
+ 916 02a0 1B7B     		ldrb	r3, [r3, #12]	@ zero_extendqisi2
+ 917 02a2 13F0FF0F 		tst	r3, #255
+ 918 02a6 3FF4FAAE 		beq	.L44
+ 381:main.c        ****         {
+ 382:main.c        ****             saved = CyEnterCriticalSection();
+ 919              		.loc 1 382 0 is_stmt 1
+ 920 02aa FFF7FEFF 		bl	CyEnterCriticalSection
+ 921              	.LVL92:
+ 383:main.c        ****             raw            = g_flt;
+ 922              		.loc 1 383 0
+ 923 02ae 1C4C     		ldr	r4, .L71
+ 924 02b0 A568     		ldr	r5, [r4, #8]
+ 925              	.LVL93:
+ 384:main.c        ****             g_filter_ready = 0u;
+ 926              		.loc 1 384 0
+ 927 02b2 0026     		movs	r6, #0
+ 928 02b4 2673     		strb	r6, [r4, #12]
+ 385:main.c        ****             CyExitCriticalSection(saved);
+ 929              		.loc 1 385 0
+ 930 02b6 FFF7FEFF 		bl	CyExitCriticalSection
+ 931              	.LVL94:
+ 386:main.c        **** 
+ 387:main.c        ****             pkt[0] = 0x56u; pkt[1] = 0x00u;
+ 932              		.loc 1 387 0
+ 933 02ba 5623     		movs	r3, #86
+ 934 02bc 8DF80030 		strb	r3, [sp]
+ 935 02c0 8DF80160 		strb	r6, [sp, #1]
+ 388:main.c        ****             pkt[2] = (uint8)((raw >> 16u) & 0xFFu);
+ 936              		.loc 1 388 0
+ 937 02c4 C5F30743 		ubfx	r3, r5, #16, #8
+ 938 02c8 8DF80230 		strb	r3, [sp, #2]
+ 389:main.c        ****             pkt[3] = (uint8)((raw >>  8u) & 0xFFu);
+ 939              		.loc 1 389 0
+ 940 02cc C5F30723 		ubfx	r3, r5, #8, #8
+ 941 02d0 8DF80330 		strb	r3, [sp, #3]
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 25
+
+
+ 390:main.c        ****             pkt[4] = (uint8)( raw         & 0xFFu);
+ 942              		.loc 1 390 0
+ 943 02d4 8DF80450 		strb	r5, [sp, #4]
+ 391:main.c        ****             UART_PC_PutArray(pkt, 5u);
+ 944              		.loc 1 391 0
+ 945 02d8 0521     		movs	r1, #5
+ 946 02da 6846     		mov	r0, sp
+ 947 02dc FFF7FEFF 		bl	UART_PC_PutArray
+ 948              	.LVL95:
+ 392:main.c        **** 
+ 393:main.c        ****             if (++hb_count >= HB_PERIOD)
+ 949              		.loc 1 393 0
+ 950 02e0 A38A     		ldrh	r3, [r4, #20]
+ 951 02e2 0133     		adds	r3, r3, #1
+ 952 02e4 9BB2     		uxth	r3, r3
+ 953 02e6 A382     		strh	r3, [r4, #20]	@ movhi
+ 954 02e8 B3F57A7F 		cmp	r3, #1000
+ 955 02ec FFF4D7AE 		bcc	.L44
+ 394:main.c        ****             {
+ 395:main.c        ****                 hb_count = 0u;
+ 956              		.loc 1 395 0
+ 957 02f0 2346     		mov	r3, r4
+ 958 02f2 9E82     		strh	r6, [r3, #20]	@ movhi
+ 396:main.c        ****                 pkt[0]=0x56u; pkt[1]=0x01u;
+ 959              		.loc 1 396 0
+ 960 02f4 5622     		movs	r2, #86
+ 961 02f6 8DF80020 		strb	r2, [sp]
+ 962 02fa 0122     		movs	r2, #1
+ 963 02fc 8DF80120 		strb	r2, [sp, #1]
+ 397:main.c        ****                 pkt[2]=g_pga_code; pkt[3]=g_vdac_val; pkt[4]=tx_mode;
+ 964              		.loc 1 397 0
+ 965 0300 084A     		ldr	r2, .L71+4
+ 966 0302 1178     		ldrb	r1, [r2]	@ zero_extendqisi2
+ 967 0304 8DF80210 		strb	r1, [sp, #2]
+ 968 0308 5278     		ldrb	r2, [r2, #1]	@ zero_extendqisi2
+ 969 030a 8DF80320 		strb	r2, [sp, #3]
+ 970 030e E37C     		ldrb	r3, [r4, #19]	@ zero_extendqisi2
+ 971 0310 8DF80430 		strb	r3, [sp, #4]
+ 398:main.c        ****                 UART_PC_PutArray(pkt, 5u);
+ 972              		.loc 1 398 0
+ 973 0314 0521     		movs	r1, #5
+ 974 0316 6846     		mov	r0, sp
+ 975 0318 FFF7FEFF 		bl	UART_PC_PutArray
+ 976              	.LVL96:
+ 977 031c BFE6     		b	.L44
+ 978              	.L72:
+ 979 031e 00BF     		.align	2
+ 980              	.L71:
+ 981 0320 00000000 		.word	.LANCHOR0
+ 982 0324 00000000 		.word	.LANCHOR1
+ 983              		.cfi_endproc
+ 984              	.LFE73:
+ 985              		.size	main, .-main
+ 986              		.data
+ 987              		.set	.LANCHOR1,. + 0
+ 988              		.type	g_pga_code, %object
+ 989              		.size	g_pga_code, 1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 26
+
+
+ 990              	g_pga_code:
+ 991 0000 03       		.byte	3
+ 992              		.type	g_vdac_val, %object
+ 993              		.size	g_vdac_val, 1
+ 994              	g_vdac_val:
+ 995 0001 94       		.byte	-108
+ 996              		.bss
+ 997              		.align	2
+ 998              		.set	.LANCHOR0,. + 0
+ 999              		.type	g_adc_raw, %object
+ 1000              		.size	g_adc_raw, 4
+ 1001              	g_adc_raw:
+ 1002 0000 00000000 		.space	4
+ 1003              		.type	g_sample_ready, %object
+ 1004              		.size	g_sample_ready, 1
+ 1005              	g_sample_ready:
+ 1006 0004 00       		.space	1
+ 1007 0005 000000   		.space	3
+ 1008              		.type	g_flt, %object
+ 1009              		.size	g_flt, 4
+ 1010              	g_flt:
+ 1011 0008 00000000 		.space	4
+ 1012              		.type	g_filter_ready, %object
+ 1013              		.size	g_filter_ready, 1
+ 1014              	g_filter_ready:
+ 1015 000c 00       		.space	1
+ 1016              		.type	watchdog_rx, %object
+ 1017              		.size	watchdog_rx, 1
+ 1018              	watchdog_rx:
+ 1019 000d 00       		.space	1
+ 1020              		.type	g_pgavdac_code, %object
+ 1021              		.size	g_pgavdac_code, 1
+ 1022              	g_pgavdac_code:
+ 1023 000e 00       		.space	1
+ 1024              		.type	rx_state, %object
+ 1025              		.size	rx_state, 1
+ 1026              	rx_state:
+ 1027 000f 00       		.space	1
+ 1028              		.type	rx_cmd, %object
+ 1029              		.size	rx_cmd, 1
+ 1030              	rx_cmd:
+ 1031 0010 00       		.space	1
+ 1032              		.type	rx_param, %object
+ 1033              		.size	rx_param, 1
+ 1034              	rx_param:
+ 1035 0011 00       		.space	1
+ 1036              		.type	stream_enabled, %object
+ 1037              		.size	stream_enabled, 1
+ 1038              	stream_enabled:
+ 1039 0012 00       		.space	1
+ 1040              		.type	tx_mode, %object
+ 1041              		.size	tx_mode, 1
+ 1042              	tx_mode:
+ 1043 0013 00       		.space	1
+ 1044              		.type	hb_count.6428, %object
+ 1045              		.size	hb_count.6428, 2
+ 1046              	hb_count.6428:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 27
+
+
+ 1047 0014 0000     		.space	2
+ 1048              		.text
+ 1049              	.Letext0:
+ 1050              		.file 2 "c:\\program files (x86)\\cypress\\psoc creator\\4.4\\psoc creator\\import\\gnu\\arm\\5.4.
+ 1051              		.file 3 "c:\\program files (x86)\\cypress\\psoc creator\\4.4\\psoc creator\\import\\gnu\\arm\\5.4.
+ 1052              		.file 4 "Generated_Source\\PSoC5/cytypes.h"
+ 1053              		.file 5 "Generated_Source\\PSoC5/ADC.h"
+ 1054              		.file 6 "Generated_Source\\PSoC5/Filter.h"
+ 1055              		.file 7 "Generated_Source\\PSoC5/Timer.h"
+ 1056              		.file 8 "Generated_Source\\PSoC5/PGAgain.h"
+ 1057              		.file 9 "Generated_Source\\PSoC5/PGAvdac.h"
+ 1058              		.file 10 "Generated_Source\\PSoC5/UART_PC.h"
+ 1059              		.file 11 "Generated_Source\\PSoC5/isr_Timer.h"
+ 1060              		.file 12 "Generated_Source\\PSoC5/LED.h"
+ 1061              		.file 13 "Generated_Source\\PSoC5/OPAref.h"
+ 1062              		.file 14 "Generated_Source\\PSoC5/PGAp.h"
+ 1063              		.file 15 "Generated_Source\\PSoC5/PGAn.h"
+ 1064              		.file 16 "Generated_Source\\PSoC5/LPF_1.h"
+ 1065              		.file 17 "Generated_Source\\PSoC5/LPF_2.h"
+ 1066              		.file 18 "Generated_Source\\PSoC5/OPAbp.h"
+ 1067              		.file 19 "Generated_Source\\PSoC5/OPAadder.h"
+ 1068              		.file 20 "Generated_Source\\PSoC5/OPAlp.h"
+ 1069              		.file 21 "Generated_Source\\PSoC5/VDAC.h"
+ 1070              		.file 22 "Generated_Source\\PSoC5/isr_DelSig.h"
+ 1071              		.file 23 "Generated_Source\\PSoC5/isr_Filter.h"
+ 1072              		.file 24 "Generated_Source\\PSoC5/CyLib.h"
+ 1073              		.file 25 "Generated_Source\\PSoC5/core_cm3.h"
+ 1074              		.section	.debug_info,"",%progbits
+ 1075              	.Ldebug_info0:
+ 1076 0000 7C090000 		.4byte	0x97c
+ 1077 0004 0400     		.2byte	0x4
+ 1078 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 1079 000a 04       		.byte	0x4
+ 1080 000b 01       		.uleb128 0x1
+ 1081 000c A4040000 		.4byte	.LASF90
+ 1082 0010 0C       		.byte	0xc
+ 1083 0011 AF030000 		.4byte	.LASF91
+ 1084 0015 1F020000 		.4byte	.LASF92
+ 1085 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 1086 001d 00000000 		.4byte	0
+ 1087 0021 00000000 		.4byte	.Ldebug_line0
+ 1088 0025 02       		.uleb128 0x2
+ 1089 0026 01       		.byte	0x1
+ 1090 0027 06       		.byte	0x6
+ 1091 0028 E6020000 		.4byte	.LASF0
+ 1092 002c 02       		.uleb128 0x2
+ 1093 002d 01       		.byte	0x1
+ 1094 002e 08       		.byte	0x8
+ 1095 002f C8020000 		.4byte	.LASF1
+ 1096 0033 02       		.uleb128 0x2
+ 1097 0034 02       		.byte	0x2
+ 1098 0035 05       		.byte	0x5
+ 1099 0036 A9000000 		.4byte	.LASF2
+ 1100 003a 02       		.uleb128 0x2
+ 1101 003b 02       		.byte	0x2
+ 1102 003c 07       		.byte	0x7
+ 1103 003d 56030000 		.4byte	.LASF3
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 28
+
+
+ 1104 0041 03       		.uleb128 0x3
+ 1105 0042 3B040000 		.4byte	.LASF9
+ 1106 0046 02       		.byte	0x2
+ 1107 0047 3F       		.byte	0x3f
+ 1108 0048 4C000000 		.4byte	0x4c
+ 1109 004c 02       		.uleb128 0x2
+ 1110 004d 04       		.byte	0x4
+ 1111 004e 05       		.byte	0x5
+ 1112 004f F6010000 		.4byte	.LASF4
+ 1113 0053 02       		.uleb128 0x2
+ 1114 0054 04       		.byte	0x4
+ 1115 0055 07       		.byte	0x7
+ 1116 0056 B6030000 		.4byte	.LASF5
+ 1117 005a 02       		.uleb128 0x2
+ 1118 005b 08       		.byte	0x8
+ 1119 005c 05       		.byte	0x5
+ 1120 005d A7010000 		.4byte	.LASF6
+ 1121 0061 02       		.uleb128 0x2
+ 1122 0062 08       		.byte	0x8
+ 1123 0063 07       		.byte	0x7
+ 1124 0064 F2020000 		.4byte	.LASF7
+ 1125 0068 04       		.uleb128 0x4
+ 1126 0069 04       		.byte	0x4
+ 1127 006a 05       		.byte	0x5
+ 1128 006b 696E7400 		.ascii	"int\000"
+ 1129 006f 02       		.uleb128 0x2
+ 1130 0070 04       		.byte	0x4
+ 1131 0071 07       		.byte	0x7
+ 1132 0072 19030000 		.4byte	.LASF8
+ 1133 0076 03       		.uleb128 0x3
+ 1134 0077 6E030000 		.4byte	.LASF10
+ 1135 007b 03       		.byte	0x3
+ 1136 007c 2C       		.byte	0x2c
+ 1137 007d 41000000 		.4byte	0x41
+ 1138 0081 05       		.uleb128 0x5
+ 1139 0082 9C030000 		.4byte	.LASF11
+ 1140 0086 04       		.byte	0x4
+ 1141 0087 E901     		.2byte	0x1e9
+ 1142 0089 2C000000 		.4byte	0x2c
+ 1143 008d 05       		.uleb128 0x5
+ 1144 008e 54010000 		.4byte	.LASF12
+ 1145 0092 04       		.byte	0x4
+ 1146 0093 EA01     		.2byte	0x1ea
+ 1147 0095 3A000000 		.4byte	0x3a
+ 1148 0099 05       		.uleb128 0x5
+ 1149 009a A8030000 		.4byte	.LASF13
+ 1150 009e 04       		.byte	0x4
+ 1151 009f EB01     		.2byte	0x1eb
+ 1152 00a1 53000000 		.4byte	0x53
+ 1153 00a5 05       		.uleb128 0x5
+ 1154 00a6 C8030000 		.4byte	.LASF14
+ 1155 00aa 04       		.byte	0x4
+ 1156 00ab EE01     		.2byte	0x1ee
+ 1157 00ad 4C000000 		.4byte	0x4c
+ 1158 00b1 05       		.uleb128 0x5
+ 1159 00b2 5F050000 		.4byte	.LASF15
+ 1160 00b6 04       		.byte	0x4
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 29
+
+
+ 1161 00b7 EF01     		.2byte	0x1ef
+ 1162 00b9 BD000000 		.4byte	0xbd
+ 1163 00bd 02       		.uleb128 0x2
+ 1164 00be 04       		.byte	0x4
+ 1165 00bf 04       		.byte	0x4
+ 1166 00c0 A1010000 		.4byte	.LASF16
+ 1167 00c4 02       		.uleb128 0x2
+ 1168 00c5 08       		.byte	0x8
+ 1169 00c6 04       		.byte	0x4
+ 1170 00c7 CE030000 		.4byte	.LASF17
+ 1171 00cb 02       		.uleb128 0x2
+ 1172 00cc 01       		.byte	0x1
+ 1173 00cd 08       		.byte	0x8
+ 1174 00ce DE010000 		.4byte	.LASF18
+ 1175 00d2 06       		.uleb128 0x6
+ 1176 00d3 81000000 		.4byte	0x81
+ 1177 00d7 02       		.uleb128 0x2
+ 1178 00d8 08       		.byte	0x8
+ 1179 00d9 04       		.byte	0x4
+ 1180 00da FA000000 		.4byte	.LASF19
+ 1181 00de 02       		.uleb128 0x2
+ 1182 00df 04       		.byte	0x4
+ 1183 00e0 07       		.byte	0x7
+ 1184 00e1 52040000 		.4byte	.LASF20
+ 1185 00e5 07       		.uleb128 0x7
+ 1186 00e6 D6020000 		.4byte	.LASF21
+ 1187 00ea 01       		.byte	0x1
+ 1188 00eb 44       		.byte	0x44
+ 1189 00ec 00000000 		.4byte	.LFB63
+ 1190 00f0 1C000000 		.4byte	.LFE63-.LFB63
+ 1191 00f4 01       		.uleb128 0x1
+ 1192 00f5 9C       		.byte	0x9c
+ 1193 00f6 13010000 		.4byte	0x113
+ 1194 00fa 08       		.uleb128 0x8
+ 1195 00fb 06000000 		.4byte	.LVL0
+ 1196 00ff BC070000 		.4byte	0x7bc
+ 1197 0103 09       		.uleb128 0x9
+ 1198 0104 16000000 		.4byte	.LVL1
+ 1199 0108 C7070000 		.4byte	0x7c7
+ 1200 010c 0A       		.uleb128 0xa
+ 1201 010d 01       		.uleb128 0x1
+ 1202 010e 50       		.byte	0x50
+ 1203 010f 01       		.uleb128 0x1
+ 1204 0110 30       		.byte	0x30
+ 1205 0111 00       		.byte	0
+ 1206 0112 00       		.byte	0
+ 1207 0113 07       		.uleb128 0x7
+ 1208 0114 18000000 		.4byte	.LASF22
+ 1209 0118 01       		.byte	0x1
+ 1210 0119 4B       		.byte	0x4b
+ 1211 011a 00000000 		.4byte	.LFB64
+ 1212 011e 20000000 		.4byte	.LFE64-.LFB64
+ 1213 0122 01       		.uleb128 0x1
+ 1214 0123 9C       		.byte	0x9c
+ 1215 0124 45010000 		.4byte	0x145
+ 1216 0128 0B       		.uleb128 0xb
+ 1217 0129 7200     		.ascii	"r\000"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 30
+
+
+ 1218 012b 01       		.byte	0x1
+ 1219 012c 4D       		.byte	0x4d
+ 1220 012d 99000000 		.4byte	0x99
+ 1221 0131 00000000 		.4byte	.LLST0
+ 1222 0135 09       		.uleb128 0x9
+ 1223 0136 08000000 		.4byte	.LVL2
+ 1224 013a D2070000 		.4byte	0x7d2
+ 1225 013e 0A       		.uleb128 0xa
+ 1226 013f 01       		.uleb128 0x1
+ 1227 0140 50       		.byte	0x50
+ 1228 0141 01       		.uleb128 0x1
+ 1229 0142 30       		.byte	0x30
+ 1230 0143 00       		.byte	0
+ 1231 0144 00       		.byte	0
+ 1232 0145 07       		.uleb128 0x7
+ 1233 0146 88000000 		.4byte	.LASF23
+ 1234 014a 01       		.byte	0x1
+ 1235 014b 52       		.byte	0x52
+ 1236 014c 00000000 		.4byte	.LFB65
+ 1237 0150 14000000 		.4byte	.LFE65-.LFB65
+ 1238 0154 01       		.uleb128 0x1
+ 1239 0155 9C       		.byte	0x9c
+ 1240 0156 64010000 		.4byte	0x164
+ 1241 015a 08       		.uleb128 0x8
+ 1242 015b 06000000 		.4byte	.LVL4
+ 1243 015f DD070000 		.4byte	0x7dd
+ 1244 0163 00       		.byte	0
+ 1245 0164 0C       		.uleb128 0xc
+ 1246 0165 9D000000 		.4byte	.LASF24
+ 1247 0169 01       		.byte	0x1
+ 1248 016a 91       		.byte	0x91
+ 1249 016b 00000000 		.4byte	.LFB71
+ 1250 016f 18000000 		.4byte	.LFE71-.LFB71
+ 1251 0173 01       		.uleb128 0x1
+ 1252 0174 9C       		.byte	0x9c
+ 1253 0175 92010000 		.4byte	0x192
+ 1254 0179 0D       		.uleb128 0xd
+ 1255 017a 3E030000 		.4byte	.LASF26
+ 1256 017e 01       		.byte	0x1
+ 1257 017f 91       		.byte	0x91
+ 1258 0180 81000000 		.4byte	0x81
+ 1259 0184 13000000 		.4byte	.LLST1
+ 1260 0188 08       		.uleb128 0x8
+ 1261 0189 0E000000 		.4byte	.LVL6
+ 1262 018d E8070000 		.4byte	0x7e8
+ 1263 0191 00       		.byte	0
+ 1264 0192 0C       		.uleb128 0xc
+ 1265 0193 7C000000 		.4byte	.LASF25
+ 1266 0197 01       		.byte	0x1
+ 1267 0198 9A       		.byte	0x9a
+ 1268 0199 00000000 		.4byte	.LFB72
+ 1269 019d 18000000 		.4byte	.LFE72-.LFB72
+ 1270 01a1 01       		.uleb128 0x1
+ 1271 01a2 9C       		.byte	0x9c
+ 1272 01a3 C0010000 		.4byte	0x1c0
+ 1273 01a7 0D       		.uleb128 0xd
+ 1274 01a8 3E030000 		.4byte	.LASF26
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 31
+
+
+ 1275 01ac 01       		.byte	0x1
+ 1276 01ad 9A       		.byte	0x9a
+ 1277 01ae 81000000 		.4byte	0x81
+ 1278 01b2 3F000000 		.4byte	.LLST2
+ 1279 01b6 08       		.uleb128 0x8
+ 1280 01b7 0E000000 		.4byte	.LVL9
+ 1281 01bb F3070000 		.4byte	0x7f3
+ 1282 01bf 00       		.byte	0
+ 1283 01c0 0C       		.uleb128 0xc
+ 1284 01c1 26030000 		.4byte	.LASF27
+ 1285 01c5 01       		.byte	0x1
+ 1286 01c6 8B       		.byte	0x8b
+ 1287 01c7 00000000 		.4byte	.LFB70
+ 1288 01cb 2C000000 		.4byte	.LFE70-.LFB70
+ 1289 01cf 01       		.uleb128 0x1
+ 1290 01d0 9C       		.byte	0x9c
+ 1291 01d1 17020000 		.4byte	0x217
+ 1292 01d5 0E       		.uleb128 0xe
+ 1293 01d6 636D6400 		.ascii	"cmd\000"
+ 1294 01da 01       		.byte	0x1
+ 1295 01db 8B       		.byte	0x8b
+ 1296 01dc 81000000 		.4byte	0x81
+ 1297 01e0 6B000000 		.4byte	.LLST3
+ 1298 01e4 0E       		.uleb128 0xe
+ 1299 01e5 76616C00 		.ascii	"val\000"
+ 1300 01e9 01       		.byte	0x1
+ 1301 01ea 8B       		.byte	0x8b
+ 1302 01eb 81000000 		.4byte	0x81
+ 1303 01ef 98000000 		.4byte	.LLST4
+ 1304 01f3 0F       		.uleb128 0xf
+ 1305 01f4 61636B00 		.ascii	"ack\000"
+ 1306 01f8 01       		.byte	0x1
+ 1307 01f9 8D       		.byte	0x8d
+ 1308 01fa 17020000 		.4byte	0x217
+ 1309 01fe 02       		.uleb128 0x2
+ 1310 01ff 91       		.byte	0x91
+ 1311 0200 70       		.sleb128 -16
+ 1312 0201 09       		.uleb128 0x9
+ 1313 0202 26000000 		.4byte	.LVL14
+ 1314 0206 FE070000 		.4byte	0x7fe
+ 1315 020a 0A       		.uleb128 0xa
+ 1316 020b 01       		.uleb128 0x1
+ 1317 020c 50       		.byte	0x50
+ 1318 020d 02       		.uleb128 0x2
+ 1319 020e 7D       		.byte	0x7d
+ 1320 020f 00       		.sleb128 0
+ 1321 0210 0A       		.uleb128 0xa
+ 1322 0211 01       		.uleb128 0x1
+ 1323 0212 51       		.byte	0x51
+ 1324 0213 01       		.uleb128 0x1
+ 1325 0214 35       		.byte	0x35
+ 1326 0215 00       		.byte	0
+ 1327 0216 00       		.byte	0
+ 1328 0217 10       		.uleb128 0x10
+ 1329 0218 81000000 		.4byte	0x81
+ 1330 021c 27020000 		.4byte	0x227
+ 1331 0220 11       		.uleb128 0x11
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 32
+
+
+ 1332 0221 DE000000 		.4byte	0xde
+ 1333 0225 04       		.byte	0x4
+ 1334 0226 00       		.byte	0
+ 1335 0227 0C       		.uleb128 0xc
+ 1336 0228 69010000 		.4byte	.LASF28
+ 1337 022c 01       		.byte	0x1
+ 1338 022d 71       		.byte	0x71
+ 1339 022e 00000000 		.4byte	.LFB69
+ 1340 0232 78000000 		.4byte	.LFE69-.LFB69
+ 1341 0236 01       		.uleb128 0x1
+ 1342 0237 9C       		.byte	0x9c
+ 1343 0238 AC020000 		.4byte	0x2ac
+ 1344 023c 0F       		.uleb128 0xf
+ 1345 023d 63666700 		.ascii	"cfg\000"
+ 1346 0241 01       		.byte	0x1
+ 1347 0242 73       		.byte	0x73
+ 1348 0243 17020000 		.4byte	0x217
+ 1349 0247 02       		.uleb128 0x2
+ 1350 0248 91       		.byte	0x91
+ 1351 0249 70       		.sleb128 -16
+ 1352 024a 12       		.uleb128 0x12
+ 1353 024b 9A010000 		.4byte	.LASF29
+ 1354 024f 01       		.byte	0x1
+ 1355 0250 74       		.byte	0x74
+ 1356 0251 8D000000 		.4byte	0x8d
+ 1357 0255 E803     		.2byte	0x3e8
+ 1358 0257 12       		.uleb128 0x12
+ 1359 0258 2F040000 		.4byte	.LASF30
+ 1360 025c 01       		.byte	0x1
+ 1361 025d 76       		.byte	0x76
+ 1362 025e 8D000000 		.4byte	0x8d
+ 1363 0262 C409     		.2byte	0x9c4
+ 1364 0264 13       		.uleb128 0x13
+ 1365 0265 2A000000 		.4byte	.LVL16
+ 1366 0269 FE070000 		.4byte	0x7fe
+ 1367 026d 7D020000 		.4byte	0x27d
+ 1368 0271 0A       		.uleb128 0xa
+ 1369 0272 01       		.uleb128 0x1
+ 1370 0273 50       		.byte	0x50
+ 1371 0274 02       		.uleb128 0x2
+ 1372 0275 7D       		.byte	0x7d
+ 1373 0276 00       		.sleb128 0
+ 1374 0277 0A       		.uleb128 0xa
+ 1375 0278 01       		.uleb128 0x1
+ 1376 0279 51       		.byte	0x51
+ 1377 027a 01       		.uleb128 0x1
+ 1378 027b 35       		.byte	0x35
+ 1379 027c 00       		.byte	0
+ 1380 027d 13       		.uleb128 0x13
+ 1381 027e 4A000000 		.4byte	.LVL17
+ 1382 0282 FE070000 		.4byte	0x7fe
+ 1383 0286 96020000 		.4byte	0x296
+ 1384 028a 0A       		.uleb128 0xa
+ 1385 028b 01       		.uleb128 0x1
+ 1386 028c 50       		.byte	0x50
+ 1387 028d 02       		.uleb128 0x2
+ 1388 028e 7D       		.byte	0x7d
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 33
+
+
+ 1389 028f 00       		.sleb128 0
+ 1390 0290 0A       		.uleb128 0xa
+ 1391 0291 01       		.uleb128 0x1
+ 1392 0292 51       		.byte	0x51
+ 1393 0293 01       		.uleb128 0x1
+ 1394 0294 35       		.byte	0x35
+ 1395 0295 00       		.byte	0
+ 1396 0296 09       		.uleb128 0x9
+ 1397 0297 6C000000 		.4byte	.LVL18
+ 1398 029b FE070000 		.4byte	0x7fe
+ 1399 029f 0A       		.uleb128 0xa
+ 1400 02a0 01       		.uleb128 0x1
+ 1401 02a1 50       		.byte	0x50
+ 1402 02a2 02       		.uleb128 0x2
+ 1403 02a3 7D       		.byte	0x7d
+ 1404 02a4 00       		.sleb128 0
+ 1405 02a5 0A       		.uleb128 0xa
+ 1406 02a6 01       		.uleb128 0x1
+ 1407 02a7 51       		.byte	0x51
+ 1408 02a8 01       		.uleb128 0x1
+ 1409 02a9 35       		.byte	0x35
+ 1410 02aa 00       		.byte	0
+ 1411 02ab 00       		.byte	0
+ 1412 02ac 0C       		.uleb128 0xc
+ 1413 02ad E9000000 		.4byte	.LASF31
+ 1414 02b1 01       		.byte	0x1
+ 1415 02b2 64       		.byte	0x64
+ 1416 02b3 00000000 		.4byte	.LFB67
+ 1417 02b7 1C000000 		.4byte	.LFE67-.LFB67
+ 1418 02bb 01       		.uleb128 0x1
+ 1419 02bc 9C       		.byte	0x9c
+ 1420 02bd DD020000 		.4byte	0x2dd
+ 1421 02c1 08       		.uleb128 0x8
+ 1422 02c2 06000000 		.4byte	.LVL19
+ 1423 02c6 09080000 		.4byte	0x809
+ 1424 02ca 08       		.uleb128 0x8
+ 1425 02cb 0A000000 		.4byte	.LVL20
+ 1426 02cf DD070000 		.4byte	0x7dd
+ 1427 02d3 08       		.uleb128 0x8
+ 1428 02d4 0E000000 		.4byte	.LVL21
+ 1429 02d8 14080000 		.4byte	0x814
+ 1430 02dc 00       		.byte	0
+ 1431 02dd 0C       		.uleb128 0xc
+ 1432 02de 92040000 		.4byte	.LASF32
+ 1433 02e2 01       		.byte	0x1
+ 1434 02e3 5A       		.byte	0x5a
+ 1435 02e4 00000000 		.4byte	.LFB66
+ 1436 02e8 28000000 		.4byte	.LFE66-.LFB66
+ 1437 02ec 01       		.uleb128 0x1
+ 1438 02ed 9C       		.byte	0x9c
+ 1439 02ee 2E030000 		.4byte	0x32e
+ 1440 02f2 08       		.uleb128 0x8
+ 1441 02f3 06000000 		.4byte	.LVL22
+ 1442 02f7 09080000 		.4byte	0x809
+ 1443 02fb 08       		.uleb128 0x8
+ 1444 02fc 0A000000 		.4byte	.LVL23
+ 1445 0300 DD070000 		.4byte	0x7dd
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 34
+
+
+ 1446 0304 08       		.uleb128 0x8
+ 1447 0305 0E000000 		.4byte	.LVL24
+ 1448 0309 14080000 		.4byte	0x814
+ 1449 030d 13       		.uleb128 0x13
+ 1450 030e 14000000 		.4byte	.LVL25
+ 1451 0312 1F080000 		.4byte	0x81f
+ 1452 0316 24030000 		.4byte	0x324
+ 1453 031a 0A       		.uleb128 0xa
+ 1454 031b 01       		.uleb128 0x1
+ 1455 031c 50       		.byte	0x50
+ 1456 031d 05       		.uleb128 0x5
+ 1457 031e 0C       		.byte	0xc
+ 1458 031f 80A90300 		.4byte	0x3a980
+ 1459 0323 00       		.byte	0
+ 1460 0324 08       		.uleb128 0x8
+ 1461 0325 1E000000 		.4byte	.LVL26
+ 1462 0329 2A080000 		.4byte	0x82a
+ 1463 032d 00       		.byte	0
+ 1464 032e 0C       		.uleb128 0xc
+ 1465 032f 8F010000 		.4byte	.LASF33
+ 1466 0333 01       		.byte	0x1
+ 1467 0334 6C       		.byte	0x6c
+ 1468 0335 00000000 		.4byte	.LFB68
+ 1469 0339 12000000 		.4byte	.LFE68-.LFB68
+ 1470 033d 01       		.uleb128 0x1
+ 1471 033e 9C       		.byte	0x9c
+ 1472 033f 56030000 		.4byte	0x356
+ 1473 0343 08       		.uleb128 0x8
+ 1474 0344 06000000 		.4byte	.LVL27
+ 1475 0348 35080000 		.4byte	0x835
+ 1476 034c 08       		.uleb128 0x8
+ 1477 034d 10000000 		.4byte	.LVL28
+ 1478 0351 40080000 		.4byte	0x840
+ 1479 0355 00       		.byte	0
+ 1480 0356 14       		.uleb128 0x14
+ 1481 0357 69030000 		.4byte	.LASF93
+ 1482 035b 01       		.byte	0x1
+ 1483 035c A5       		.byte	0xa5
+ 1484 035d 68000000 		.4byte	0x68
+ 1485 0361 00000000 		.4byte	.LFB73
+ 1486 0365 28030000 		.4byte	.LFE73-.LFB73
+ 1487 0369 01       		.uleb128 0x1
+ 1488 036a 9C       		.byte	0x9c
+ 1489 036b C9060000 		.4byte	0x6c9
+ 1490 036f 15       		.uleb128 0x15
+ 1491 0370 4B010000 		.4byte	.LASF34
+ 1492 0374 01       		.byte	0x1
+ 1493 0375 A7       		.byte	0xa7
+ 1494 0376 8D000000 		.4byte	0x8d
+ 1495 037a 05       		.uleb128 0x5
+ 1496 037b 03       		.byte	0x3
+ 1497 037c 14000000 		.4byte	hb_count.6428
+ 1498 0380 0F       		.uleb128 0xf
+ 1499 0381 706B7400 		.ascii	"pkt\000"
+ 1500 0385 01       		.byte	0x1
+ 1501 0386 AC       		.byte	0xac
+ 1502 0387 17020000 		.4byte	0x217
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 35
+
+
+ 1503 038b 02       		.uleb128 0x2
+ 1504 038c 91       		.byte	0x91
+ 1505 038d 68       		.sleb128 -24
+ 1506 038e 0B       		.uleb128 0xb
+ 1507 038f 72617700 		.ascii	"raw\000"
+ 1508 0393 01       		.byte	0x1
+ 1509 0394 AE       		.byte	0xae
+ 1510 0395 A5000000 		.4byte	0xa5
+ 1511 0399 C5000000 		.4byte	.LLST5
+ 1512 039d 16       		.uleb128 0x16
+ 1513 039e A2030000 		.4byte	.LASF35
+ 1514 03a2 01       		.byte	0x1
+ 1515 03a3 B0       		.byte	0xb0
+ 1516 03a4 81000000 		.4byte	0x81
+ 1517 03a8 E3000000 		.4byte	.LLST6
+ 1518 03ac 0B       		.uleb128 0xb
+ 1519 03ad 727800   		.ascii	"rx\000"
+ 1520 03b0 01       		.byte	0x1
+ 1521 03b1 B0       		.byte	0xb0
+ 1522 03b2 81000000 		.4byte	0x81
+ 1523 03b6 01010000 		.4byte	.LLST7
+ 1524 03ba 08       		.uleb128 0x8
+ 1525 03bb 0A000000 		.4byte	.LVL29
+ 1526 03bf 4B080000 		.4byte	0x84b
+ 1527 03c3 08       		.uleb128 0x8
+ 1528 03c4 0E000000 		.4byte	.LVL30
+ 1529 03c8 56080000 		.4byte	0x856
+ 1530 03cc 08       		.uleb128 0x8
+ 1531 03cd 12000000 		.4byte	.LVL31
+ 1532 03d1 61080000 		.4byte	0x861
+ 1533 03d5 08       		.uleb128 0x8
+ 1534 03d6 16000000 		.4byte	.LVL32
+ 1535 03da 6C080000 		.4byte	0x86c
+ 1536 03de 13       		.uleb128 0x13
+ 1537 03df 1C000000 		.4byte	.LVL33
+ 1538 03e3 77080000 		.4byte	0x877
+ 1539 03e7 F1030000 		.4byte	0x3f1
+ 1540 03eb 0A       		.uleb128 0xa
+ 1541 03ec 01       		.uleb128 0x1
+ 1542 03ed 50       		.byte	0x50
+ 1543 03ee 01       		.uleb128 0x1
+ 1544 03ef 31       		.byte	0x31
+ 1545 03f0 00       		.byte	0
+ 1546 03f1 13       		.uleb128 0x13
+ 1547 03f2 22000000 		.4byte	.LVL34
+ 1548 03f6 82080000 		.4byte	0x882
+ 1549 03fa 04040000 		.4byte	0x404
+ 1550 03fe 0A       		.uleb128 0xa
+ 1551 03ff 01       		.uleb128 0x1
+ 1552 0400 50       		.byte	0x50
+ 1553 0401 01       		.uleb128 0x1
+ 1554 0402 31       		.byte	0x31
+ 1555 0403 00       		.byte	0
+ 1556 0404 08       		.uleb128 0x8
+ 1557 0405 26000000 		.4byte	.LVL35
+ 1558 0409 8D080000 		.4byte	0x88d
+ 1559 040d 08       		.uleb128 0x8
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 36
+
+
+ 1560 040e 2A000000 		.4byte	.LVL36
+ 1561 0412 98080000 		.4byte	0x898
+ 1562 0416 08       		.uleb128 0x8
+ 1563 0417 2E000000 		.4byte	.LVL37
+ 1564 041b A3080000 		.4byte	0x8a3
+ 1565 041f 08       		.uleb128 0x8
+ 1566 0420 36000000 		.4byte	.LVL38
+ 1567 0424 E8070000 		.4byte	0x7e8
+ 1568 0428 08       		.uleb128 0x8
+ 1569 0429 3A000000 		.4byte	.LVL39
+ 1570 042d AE080000 		.4byte	0x8ae
+ 1571 0431 08       		.uleb128 0x8
+ 1572 0432 3E000000 		.4byte	.LVL40
+ 1573 0436 B9080000 		.4byte	0x8b9
+ 1574 043a 08       		.uleb128 0x8
+ 1575 043b 42000000 		.4byte	.LVL41
+ 1576 043f C4080000 		.4byte	0x8c4
+ 1577 0443 08       		.uleb128 0x8
+ 1578 0444 4A000000 		.4byte	.LVL42
+ 1579 0448 F3070000 		.4byte	0x7f3
+ 1580 044c 08       		.uleb128 0x8
+ 1581 044d 4E000000 		.4byte	.LVL43
+ 1582 0451 CF080000 		.4byte	0x8cf
+ 1583 0455 08       		.uleb128 0x8
+ 1584 0456 52000000 		.4byte	.LVL44
+ 1585 045a DA080000 		.4byte	0x8da
+ 1586 045e 13       		.uleb128 0x13
+ 1587 045f 58000000 		.4byte	.LVL45
+ 1588 0463 E5080000 		.4byte	0x8e5
+ 1589 0467 72040000 		.4byte	0x472
+ 1590 046b 0A       		.uleb128 0xa
+ 1591 046c 01       		.uleb128 0x1
+ 1592 046d 50       		.byte	0x50
+ 1593 046e 02       		.uleb128 0x2
+ 1594 046f 09       		.byte	0x9
+ 1595 0470 94       		.byte	0x94
+ 1596 0471 00       		.byte	0
+ 1597 0472 08       		.uleb128 0x8
+ 1598 0473 5C000000 		.4byte	.LVL46
+ 1599 0477 F0080000 		.4byte	0x8f0
+ 1600 047b 13       		.uleb128 0x13
+ 1601 047c 64000000 		.4byte	.LVL47
+ 1602 0480 FB080000 		.4byte	0x8fb
+ 1603 0484 93040000 		.4byte	0x493
+ 1604 0488 0A       		.uleb128 0xa
+ 1605 0489 01       		.uleb128 0x1
+ 1606 048a 50       		.byte	0x50
+ 1607 048b 01       		.uleb128 0x1
+ 1608 048c 30       		.byte	0x30
+ 1609 048d 0A       		.uleb128 0xa
+ 1610 048e 01       		.uleb128 0x1
+ 1611 048f 51       		.byte	0x51
+ 1612 0490 01       		.uleb128 0x1
+ 1613 0491 30       		.byte	0x30
+ 1614 0492 00       		.byte	0
+ 1615 0493 13       		.uleb128 0x13
+ 1616 0494 6C000000 		.4byte	.LVL48
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 37
+
+
+ 1617 0498 06090000 		.4byte	0x906
+ 1618 049c AB040000 		.4byte	0x4ab
+ 1619 04a0 0A       		.uleb128 0xa
+ 1620 04a1 01       		.uleb128 0x1
+ 1621 04a2 50       		.byte	0x50
+ 1622 04a3 01       		.uleb128 0x1
+ 1623 04a4 31       		.byte	0x31
+ 1624 04a5 0A       		.uleb128 0xa
+ 1625 04a6 01       		.uleb128 0x1
+ 1626 04a7 51       		.byte	0x51
+ 1627 04a8 01       		.uleb128 0x1
+ 1628 04a9 30       		.byte	0x30
+ 1629 04aa 00       		.byte	0
+ 1630 04ab 13       		.uleb128 0x13
+ 1631 04ac 74000000 		.4byte	.LVL49
+ 1632 04b0 06090000 		.4byte	0x906
+ 1633 04b4 C3040000 		.4byte	0x4c3
+ 1634 04b8 0A       		.uleb128 0xa
+ 1635 04b9 01       		.uleb128 0x1
+ 1636 04ba 50       		.byte	0x50
+ 1637 04bb 01       		.uleb128 0x1
+ 1638 04bc 34       		.byte	0x34
+ 1639 04bd 0A       		.uleb128 0xa
+ 1640 04be 01       		.uleb128 0x1
+ 1641 04bf 51       		.byte	0x51
+ 1642 04c0 01       		.uleb128 0x1
+ 1643 04c1 30       		.byte	0x30
+ 1644 04c2 00       		.byte	0
+ 1645 04c3 08       		.uleb128 0x8
+ 1646 04c4 78000000 		.4byte	.LVL50
+ 1647 04c8 11090000 		.4byte	0x911
+ 1648 04cc 08       		.uleb128 0x8
+ 1649 04cd 7C000000 		.4byte	.LVL51
+ 1650 04d1 1C090000 		.4byte	0x91c
+ 1651 04d5 13       		.uleb128 0x13
+ 1652 04d6 82000000 		.4byte	.LVL52
+ 1653 04da 27090000 		.4byte	0x927
+ 1654 04de EC040000 		.4byte	0x4ec
+ 1655 04e2 0A       		.uleb128 0xa
+ 1656 04e3 01       		.uleb128 0x1
+ 1657 04e4 50       		.byte	0x50
+ 1658 04e5 05       		.uleb128 0x5
+ 1659 04e6 03       		.byte	0x3
+ 1660 04e7 00000000 		.4byte	isr_DelSigReady
+ 1661 04eb 00       		.byte	0
+ 1662 04ec 13       		.uleb128 0x13
+ 1663 04ed 88000000 		.4byte	.LVL53
+ 1664 04f1 32090000 		.4byte	0x932
+ 1665 04f5 03050000 		.4byte	0x503
+ 1666 04f9 0A       		.uleb128 0xa
+ 1667 04fa 01       		.uleb128 0x1
+ 1668 04fb 50       		.byte	0x50
+ 1669 04fc 05       		.uleb128 0x5
+ 1670 04fd 03       		.byte	0x3
+ 1671 04fe 00000000 		.4byte	isr_FilterReady
+ 1672 0502 00       		.byte	0
+ 1673 0503 13       		.uleb128 0x13
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 38
+
+
+ 1674 0504 8E000000 		.4byte	.LVL54
+ 1675 0508 3D090000 		.4byte	0x93d
+ 1676 050c 1A050000 		.4byte	0x51a
+ 1677 0510 0A       		.uleb128 0xa
+ 1678 0511 01       		.uleb128 0x1
+ 1679 0512 50       		.byte	0x50
+ 1680 0513 05       		.uleb128 0x5
+ 1681 0514 03       		.byte	0x3
+ 1682 0515 00000000 		.4byte	isr_Timer
+ 1683 0519 00       		.byte	0
+ 1684 051a 13       		.uleb128 0x13
+ 1685 051b 94000000 		.4byte	.LVL55
+ 1686 051f 40080000 		.4byte	0x840
+ 1687 0523 2D050000 		.4byte	0x52d
+ 1688 0527 0A       		.uleb128 0xa
+ 1689 0528 01       		.uleb128 0x1
+ 1690 0529 50       		.byte	0x50
+ 1691 052a 01       		.uleb128 0x1
+ 1692 052b 30       		.byte	0x30
+ 1693 052c 00       		.byte	0
+ 1694 052d 13       		.uleb128 0x13
+ 1695 052e 9A000000 		.4byte	.LVL56
+ 1696 0532 48090000 		.4byte	0x948
+ 1697 0536 40050000 		.4byte	0x540
+ 1698 053a 0A       		.uleb128 0xa
+ 1699 053b 01       		.uleb128 0x1
+ 1700 053c 50       		.byte	0x50
+ 1701 053d 01       		.uleb128 0x1
+ 1702 053e 3A       		.byte	0x3a
+ 1703 053f 00       		.byte	0
+ 1704 0540 08       		.uleb128 0x8
+ 1705 0541 9E000000 		.4byte	.LVL57
+ 1706 0545 27020000 		.4byte	0x227
+ 1707 0549 08       		.uleb128 0x8
+ 1708 054a BC000000 		.4byte	.LVL58
+ 1709 054e 53090000 		.4byte	0x953
+ 1710 0552 08       		.uleb128 0x8
+ 1711 0553 E2000000 		.4byte	.LVL60
+ 1712 0557 DD020000 		.4byte	0x2dd
+ 1713 055b 08       		.uleb128 0x8
+ 1714 055c E8000000 		.4byte	.LVL62
+ 1715 0560 DD020000 		.4byte	0x2dd
+ 1716 0564 08       		.uleb128 0x8
+ 1717 0565 0C010000 		.4byte	.LVL63
+ 1718 0569 AC020000 		.4byte	0x2ac
+ 1719 056d 08       		.uleb128 0x8
+ 1720 056e 20010000 		.4byte	.LVL65
+ 1721 0572 DD020000 		.4byte	0x2dd
+ 1722 0576 08       		.uleb128 0x8
+ 1723 0577 26010000 		.4byte	.LVL67
+ 1724 057b AC020000 		.4byte	0x2ac
+ 1725 057f 08       		.uleb128 0x8
+ 1726 0580 52010000 		.4byte	.LVL68
+ 1727 0584 27020000 		.4byte	0x227
+ 1728 0588 13       		.uleb128 0x13
+ 1729 0589 6A010000 		.4byte	.LVL69
+ 1730 058d C0010000 		.4byte	0x1c0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 39
+
+
+ 1731 0591 9C050000 		.4byte	0x59c
+ 1732 0595 0A       		.uleb128 0xa
+ 1733 0596 01       		.uleb128 0x1
+ 1734 0597 50       		.byte	0x50
+ 1735 0598 02       		.uleb128 0x2
+ 1736 0599 09       		.byte	0x9
+ 1737 059a A1       		.byte	0xa1
+ 1738 059b 00       		.byte	0
+ 1739 059c 08       		.uleb128 0x8
+ 1740 059d 72010000 		.4byte	.LVL70
+ 1741 05a1 27020000 		.4byte	0x227
+ 1742 05a5 08       		.uleb128 0x8
+ 1743 05a6 76010000 		.4byte	.LVL71
+ 1744 05aa 2E030000 		.4byte	0x32e
+ 1745 05ae 08       		.uleb128 0x8
+ 1746 05af 80010000 		.4byte	.LVL72
+ 1747 05b3 64010000 		.4byte	0x164
+ 1748 05b7 08       		.uleb128 0x8
+ 1749 05b8 84010000 		.4byte	.LVL73
+ 1750 05bc 27020000 		.4byte	0x227
+ 1751 05c0 08       		.uleb128 0x8
+ 1752 05c1 88010000 		.4byte	.LVL74
+ 1753 05c5 2E030000 		.4byte	0x32e
+ 1754 05c9 13       		.uleb128 0x13
+ 1755 05ca A0010000 		.4byte	.LVL75
+ 1756 05ce C0010000 		.4byte	0x1c0
+ 1757 05d2 DD050000 		.4byte	0x5dd
+ 1758 05d6 0A       		.uleb128 0xa
+ 1759 05d7 01       		.uleb128 0x1
+ 1760 05d8 50       		.byte	0x50
+ 1761 05d9 02       		.uleb128 0x2
+ 1762 05da 09       		.byte	0x9
+ 1763 05db A8       		.byte	0xa8
+ 1764 05dc 00       		.byte	0
+ 1765 05dd 08       		.uleb128 0x8
+ 1766 05de AA010000 		.4byte	.LVL76
+ 1767 05e2 92010000 		.4byte	0x192
+ 1768 05e6 13       		.uleb128 0x13
+ 1769 05e7 B2010000 		.4byte	.LVL77
+ 1770 05eb C0010000 		.4byte	0x1c0
+ 1771 05ef FA050000 		.4byte	0x5fa
+ 1772 05f3 0A       		.uleb128 0xa
+ 1773 05f4 01       		.uleb128 0x1
+ 1774 05f5 50       		.byte	0x50
+ 1775 05f6 02       		.uleb128 0x2
+ 1776 05f7 09       		.byte	0x9
+ 1777 05f8 A9       		.byte	0xa9
+ 1778 05f9 00       		.byte	0
+ 1779 05fa 08       		.uleb128 0x8
+ 1780 05fb B6010000 		.4byte	.LVL78
+ 1781 05ff 27020000 		.4byte	0x227
+ 1782 0603 08       		.uleb128 0x8
+ 1783 0604 BA010000 		.4byte	.LVL79
+ 1784 0608 2E030000 		.4byte	0x32e
+ 1785 060c 08       		.uleb128 0x8
+ 1786 060d C4010000 		.4byte	.LVL80
+ 1787 0611 E5080000 		.4byte	0x8e5
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 40
+
+
+ 1788 0615 13       		.uleb128 0x13
+ 1789 0616 D2010000 		.4byte	.LVL81
+ 1790 061a C0010000 		.4byte	0x1c0
+ 1791 061e 29060000 		.4byte	0x629
+ 1792 0622 0A       		.uleb128 0xa
+ 1793 0623 01       		.uleb128 0x1
+ 1794 0624 50       		.byte	0x50
+ 1795 0625 02       		.uleb128 0x2
+ 1796 0626 09       		.byte	0x9
+ 1797 0627 AA       		.byte	0xaa
+ 1798 0628 00       		.byte	0
+ 1799 0629 08       		.uleb128 0x8
+ 1800 062a D6010000 		.4byte	.LVL82
+ 1801 062e 27020000 		.4byte	0x227
+ 1802 0632 08       		.uleb128 0x8
+ 1803 0633 DA010000 		.4byte	.LVL83
+ 1804 0637 2E030000 		.4byte	0x32e
+ 1805 063b 08       		.uleb128 0x8
+ 1806 063c FA010000 		.4byte	.LVL86
+ 1807 0640 5E090000 		.4byte	0x95e
+ 1808 0644 08       		.uleb128 0x8
+ 1809 0645 1E020000 		.4byte	.LVL87
+ 1810 0649 69090000 		.4byte	0x969
+ 1811 064d 08       		.uleb128 0x8
+ 1812 064e 2A020000 		.4byte	.LVL89
+ 1813 0652 74090000 		.4byte	0x974
+ 1814 0656 13       		.uleb128 0x13
+ 1815 0657 50020000 		.4byte	.LVL90
+ 1816 065b FE070000 		.4byte	0x7fe
+ 1817 065f 6F060000 		.4byte	0x66f
+ 1818 0663 0A       		.uleb128 0xa
+ 1819 0664 01       		.uleb128 0x1
+ 1820 0665 50       		.byte	0x50
+ 1821 0666 02       		.uleb128 0x2
+ 1822 0667 7D       		.byte	0x7d
+ 1823 0668 00       		.sleb128 0
+ 1824 0669 0A       		.uleb128 0xa
+ 1825 066a 01       		.uleb128 0x1
+ 1826 066b 51       		.byte	0x51
+ 1827 066c 01       		.uleb128 0x1
+ 1828 066d 35       		.byte	0x35
+ 1829 066e 00       		.byte	0
+ 1830 066f 13       		.uleb128 0x13
+ 1831 0670 8A020000 		.4byte	.LVL91
+ 1832 0674 FE070000 		.4byte	0x7fe
+ 1833 0678 88060000 		.4byte	0x688
+ 1834 067c 0A       		.uleb128 0xa
+ 1835 067d 01       		.uleb128 0x1
+ 1836 067e 50       		.byte	0x50
+ 1837 067f 02       		.uleb128 0x2
+ 1838 0680 7D       		.byte	0x7d
+ 1839 0681 00       		.sleb128 0
+ 1840 0682 0A       		.uleb128 0xa
+ 1841 0683 01       		.uleb128 0x1
+ 1842 0684 51       		.byte	0x51
+ 1843 0685 01       		.uleb128 0x1
+ 1844 0686 35       		.byte	0x35
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 41
+
+
+ 1845 0687 00       		.byte	0
+ 1846 0688 08       		.uleb128 0x8
+ 1847 0689 AE020000 		.4byte	.LVL92
+ 1848 068d 69090000 		.4byte	0x969
+ 1849 0691 08       		.uleb128 0x8
+ 1850 0692 BA020000 		.4byte	.LVL94
+ 1851 0696 74090000 		.4byte	0x974
+ 1852 069a 13       		.uleb128 0x13
+ 1853 069b E0020000 		.4byte	.LVL95
+ 1854 069f FE070000 		.4byte	0x7fe
+ 1855 06a3 B3060000 		.4byte	0x6b3
+ 1856 06a7 0A       		.uleb128 0xa
+ 1857 06a8 01       		.uleb128 0x1
+ 1858 06a9 50       		.byte	0x50
+ 1859 06aa 02       		.uleb128 0x2
+ 1860 06ab 7D       		.byte	0x7d
+ 1861 06ac 00       		.sleb128 0
+ 1862 06ad 0A       		.uleb128 0xa
+ 1863 06ae 01       		.uleb128 0x1
+ 1864 06af 51       		.byte	0x51
+ 1865 06b0 01       		.uleb128 0x1
+ 1866 06b1 35       		.byte	0x35
+ 1867 06b2 00       		.byte	0
+ 1868 06b3 09       		.uleb128 0x9
+ 1869 06b4 1C030000 		.4byte	.LVL96
+ 1870 06b8 FE070000 		.4byte	0x7fe
+ 1871 06bc 0A       		.uleb128 0xa
+ 1872 06bd 01       		.uleb128 0x1
+ 1873 06be 50       		.byte	0x50
+ 1874 06bf 02       		.uleb128 0x2
+ 1875 06c0 7D       		.byte	0x7d
+ 1876 06c1 00       		.sleb128 0
+ 1877 06c2 0A       		.uleb128 0xa
+ 1878 06c3 01       		.uleb128 0x1
+ 1879 06c4 51       		.byte	0x51
+ 1880 06c5 01       		.uleb128 0x1
+ 1881 06c6 35       		.byte	0x35
+ 1882 06c7 00       		.byte	0
+ 1883 06c8 00       		.byte	0
+ 1884 06c9 15       		.uleb128 0x15
+ 1885 06ca 63020000 		.4byte	.LASF36
+ 1886 06ce 01       		.byte	0x1
+ 1887 06cf 27       		.byte	0x27
+ 1888 06d0 DA060000 		.4byte	0x6da
+ 1889 06d4 05       		.uleb128 0x5
+ 1890 06d5 03       		.byte	0x3
+ 1891 06d6 00000000 		.4byte	g_adc_raw
+ 1892 06da 06       		.uleb128 0x6
+ 1893 06db A5000000 		.4byte	0xa5
+ 1894 06df 15       		.uleb128 0x15
+ 1895 06e0 8D030000 		.4byte	.LASF37
+ 1896 06e4 01       		.byte	0x1
+ 1897 06e5 28       		.byte	0x28
+ 1898 06e6 D2000000 		.4byte	0xd2
+ 1899 06ea 05       		.uleb128 0x5
+ 1900 06eb 03       		.byte	0x3
+ 1901 06ec 04000000 		.4byte	g_sample_ready
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 42
+
+
+ 1902 06f0 15       		.uleb128 0x15
+ 1903 06f1 75010000 		.4byte	.LASF38
+ 1904 06f5 01       		.byte	0x1
+ 1905 06f6 29       		.byte	0x29
+ 1906 06f7 DA060000 		.4byte	0x6da
+ 1907 06fb 05       		.uleb128 0x5
+ 1908 06fc 03       		.byte	0x3
+ 1909 06fd 08000000 		.4byte	g_flt
+ 1910 0701 15       		.uleb128 0x15
+ 1911 0702 CF010000 		.4byte	.LASF39
+ 1912 0706 01       		.byte	0x1
+ 1913 0707 2A       		.byte	0x2a
+ 1914 0708 D2000000 		.4byte	0xd2
+ 1915 070c 05       		.uleb128 0x5
+ 1916 070d 03       		.byte	0x3
+ 1917 070e 0C000000 		.4byte	g_filter_ready
+ 1918 0712 15       		.uleb128 0x15
+ 1919 0713 54050000 		.4byte	.LASF40
+ 1920 0717 01       		.byte	0x1
+ 1921 0718 2C       		.byte	0x2c
+ 1922 0719 81000000 		.4byte	0x81
+ 1923 071d 05       		.uleb128 0x5
+ 1924 071e 03       		.byte	0x3
+ 1925 071f 00000000 		.4byte	g_pga_code
+ 1926 0723 15       		.uleb128 0x15
+ 1927 0724 2F030000 		.4byte	.LASF41
+ 1928 0728 01       		.byte	0x1
+ 1929 0729 2D       		.byte	0x2d
+ 1930 072a 81000000 		.4byte	0x81
+ 1931 072e 05       		.uleb128 0x5
+ 1932 072f 03       		.byte	0x3
+ 1933 0730 0E000000 		.4byte	g_pgavdac_code
+ 1934 0734 15       		.uleb128 0x15
+ 1935 0735 14010000 		.4byte	.LASF42
+ 1936 0739 01       		.byte	0x1
+ 1937 073a 2E       		.byte	0x2e
+ 1938 073b 81000000 		.4byte	0x81
+ 1939 073f 05       		.uleb128 0x5
+ 1940 0740 03       		.byte	0x3
+ 1941 0741 01000000 		.4byte	g_vdac_val
+ 1942 0745 15       		.uleb128 0x15
+ 1943 0746 6D020000 		.4byte	.LASF43
+ 1944 074a 01       		.byte	0x1
+ 1945 074b 2F       		.byte	0x2f
+ 1946 074c 81000000 		.4byte	0x81
+ 1947 0750 05       		.uleb128 0x5
+ 1948 0751 03       		.byte	0x3
+ 1949 0752 13000000 		.4byte	tx_mode
+ 1950 0756 15       		.uleb128 0x15
+ 1951 0757 F8030000 		.4byte	.LASF44
+ 1952 075b 01       		.byte	0x1
+ 1953 075c 30       		.byte	0x30
+ 1954 075d 81000000 		.4byte	0x81
+ 1955 0761 05       		.uleb128 0x5
+ 1956 0762 03       		.byte	0x3
+ 1957 0763 12000000 		.4byte	stream_enabled
+ 1958 0767 15       		.uleb128 0x15
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 43
+
+
+ 1959 0768 B5010000 		.4byte	.LASF45
+ 1960 076c 01       		.byte	0x1
+ 1961 076d 3D       		.byte	0x3d
+ 1962 076e D2000000 		.4byte	0xd2
+ 1963 0772 05       		.uleb128 0x5
+ 1964 0773 03       		.byte	0x3
+ 1965 0774 0F000000 		.4byte	rx_state
+ 1966 0778 15       		.uleb128 0x15
+ 1967 0779 8B040000 		.4byte	.LASF46
+ 1968 077d 01       		.byte	0x1
+ 1969 077e 3E       		.byte	0x3e
+ 1970 077f D2000000 		.4byte	0xd2
+ 1971 0783 05       		.uleb128 0x5
+ 1972 0784 03       		.byte	0x3
+ 1973 0785 10000000 		.4byte	rx_cmd
+ 1974 0789 15       		.uleb128 0x15
+ 1975 078a E3010000 		.4byte	.LASF47
+ 1976 078e 01       		.byte	0x1
+ 1977 078f 3F       		.byte	0x3f
+ 1978 0790 D2000000 		.4byte	0xd2
+ 1979 0794 05       		.uleb128 0x5
+ 1980 0795 03       		.byte	0x3
+ 1981 0796 11000000 		.4byte	rx_param
+ 1982 079a 15       		.uleb128 0x15
+ 1983 079b 66000000 		.4byte	.LASF48
+ 1984 079f 01       		.byte	0x1
+ 1985 07a0 40       		.byte	0x40
+ 1986 07a1 D2000000 		.4byte	0xd2
+ 1987 07a5 05       		.uleb128 0x5
+ 1988 07a6 03       		.byte	0x3
+ 1989 07a7 0D000000 		.4byte	watchdog_rx
+ 1990 07ab 17       		.uleb128 0x17
+ 1991 07ac 07040000 		.4byte	.LASF94
+ 1992 07b0 19       		.byte	0x19
+ 1993 07b1 1207     		.2byte	0x712
+ 1994 07b3 B7070000 		.4byte	0x7b7
+ 1995 07b7 06       		.uleb128 0x6
+ 1996 07b8 76000000 		.4byte	0x76
+ 1997 07bc 18       		.uleb128 0x18
+ 1998 07bd 09030000 		.4byte	.LASF49
+ 1999 07c1 09030000 		.4byte	.LASF49
+ 2000 07c5 05       		.byte	0x5
+ 2001 07c6 42       		.byte	0x42
+ 2002 07c7 18       		.uleb128 0x18
+ 2003 07c8 5B040000 		.4byte	.LASF50
+ 2004 07cc 5B040000 		.4byte	.LASF50
+ 2005 07d0 06       		.byte	0x6
+ 2006 07d1 43       		.byte	0x43
+ 2007 07d2 18       		.uleb128 0x18
+ 2008 07d3 11020000 		.4byte	.LASF51
+ 2009 07d7 11020000 		.4byte	.LASF51
+ 2010 07db 06       		.byte	0x6
+ 2011 07dc 40       		.byte	0x40
+ 2012 07dd 18       		.uleb128 0x18
+ 2013 07de 28000000 		.4byte	.LASF52
+ 2014 07e2 28000000 		.4byte	.LASF52
+ 2015 07e6 07       		.byte	0x7
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 44
+
+
+ 2016 07e7 5E       		.byte	0x5e
+ 2017 07e8 18       		.uleb128 0x18
+ 2018 07e9 D5030000 		.4byte	.LASF53
+ 2019 07ed D5030000 		.4byte	.LASF53
+ 2020 07f1 08       		.byte	0x8
+ 2021 07f2 41       		.byte	0x41
+ 2022 07f3 18       		.uleb128 0x18
+ 2023 07f4 7B040000 		.4byte	.LASF54
+ 2024 07f8 7B040000 		.4byte	.LASF54
+ 2025 07fc 09       		.byte	0x9
+ 2026 07fd 41       		.byte	0x41
+ 2027 07fe 18       		.uleb128 0x18
+ 2028 07ff BE010000 		.4byte	.LASF55
+ 2029 0803 BE010000 		.4byte	.LASF55
+ 2030 0807 0A       		.byte	0xa
+ 2031 0808 8C       		.byte	0x8c
+ 2032 0809 18       		.uleb128 0x18
+ 2033 080a 40010000 		.4byte	.LASF56
+ 2034 080e 40010000 		.4byte	.LASF56
+ 2035 0812 07       		.byte	0x7
+ 2036 0813 5B       		.byte	0x5b
+ 2037 0814 18       		.uleb128 0x18
+ 2038 0815 A4020000 		.4byte	.LASF57
+ 2039 0819 A4020000 		.4byte	.LASF57
+ 2040 081d 0B       		.byte	0xb
+ 2041 081e 28       		.byte	0x28
+ 2042 081f 18       		.uleb128 0x18
+ 2043 0820 D7000000 		.4byte	.LASF58
+ 2044 0824 D7000000 		.4byte	.LASF58
+ 2045 0828 07       		.byte	0x7
+ 2046 0829 68       		.byte	0x68
+ 2047 082a 18       		.uleb128 0x18
+ 2048 082b 14040000 		.4byte	.LASF59
+ 2049 082f 14040000 		.4byte	.LASF59
+ 2050 0833 07       		.byte	0x7
+ 2051 0834 5A       		.byte	0x5a
+ 2052 0835 18       		.uleb128 0x18
+ 2053 0836 32050000 		.4byte	.LASF60
+ 2054 083a 32050000 		.4byte	.LASF60
+ 2055 083e 0C       		.byte	0xc
+ 2056 083f 29       		.byte	0x29
+ 2057 0840 18       		.uleb128 0x18
+ 2058 0841 72000000 		.4byte	.LASF61
+ 2059 0845 72000000 		.4byte	.LASF61
+ 2060 0849 0C       		.byte	0xc
+ 2061 084a 26       		.byte	0x26
+ 2062 084b 18       		.uleb128 0x18
+ 2063 084c 5B010000 		.4byte	.LASF62
+ 2064 0850 5B010000 		.4byte	.LASF62
+ 2065 0854 0A       		.byte	0xa
+ 2066 0855 54       		.byte	0x54
+ 2067 0856 18       		.uleb128 0x18
+ 2068 0857 BB020000 		.4byte	.LASF63
+ 2069 085b BB020000 		.4byte	.LASF63
+ 2070 085f 0D       		.byte	0xd
+ 2071 0860 33       		.byte	0x33
+ 2072 0861 18       		.uleb128 0x18
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 45
+
+
+ 2073 0862 35010000 		.4byte	.LASF64
+ 2074 0866 35010000 		.4byte	.LASF64
+ 2075 086a 0E       		.byte	0xe
+ 2076 086b 3E       		.byte	0x3e
+ 2077 086c 18       		.uleb128 0x18
+ 2078 086d BF000000 		.4byte	.LASF65
+ 2079 0871 BF000000 		.4byte	.LASF65
+ 2080 0875 0F       		.byte	0xf
+ 2081 0876 3E       		.byte	0x3e
+ 2082 0877 18       		.uleb128 0x18
+ 2083 0878 CA000000 		.4byte	.LASF66
+ 2084 087c CA000000 		.4byte	.LASF66
+ 2085 0880 0E       		.byte	0xe
+ 2086 0881 41       		.byte	0x41
+ 2087 0882 18       		.uleb128 0x18
+ 2088 0883 4D000000 		.4byte	.LASF67
+ 2089 0887 4D000000 		.4byte	.LASF67
+ 2090 088b 0F       		.byte	0xf
+ 2091 088c 41       		.byte	0x41
+ 2092 088d 18       		.uleb128 0x18
+ 2093 088e 5A000000 		.4byte	.LASF68
+ 2094 0892 5A000000 		.4byte	.LASF68
+ 2095 0896 10       		.byte	0x10
+ 2096 0897 32       		.byte	0x32
+ 2097 0898 18       		.uleb128 0x18
+ 2098 0899 57020000 		.4byte	.LASF69
+ 2099 089d 57020000 		.4byte	.LASF69
+ 2100 08a1 11       		.byte	0x11
+ 2101 08a2 32       		.byte	0x32
+ 2102 08a3 18       		.uleb128 0x18
+ 2103 08a4 75020000 		.4byte	.LASF70
+ 2104 08a8 75020000 		.4byte	.LASF70
+ 2105 08ac 08       		.byte	0x8
+ 2106 08ad 3E       		.byte	0x3e
+ 2107 08ae 18       		.uleb128 0x18
+ 2108 08af B3000000 		.4byte	.LASF71
+ 2109 08b3 B3000000 		.4byte	.LASF71
+ 2110 08b7 12       		.byte	0x12
+ 2111 08b8 33       		.byte	0x33
+ 2112 08b9 18       		.uleb128 0x18
+ 2113 08ba 20040000 		.4byte	.LASF72
+ 2114 08be 20040000 		.4byte	.LASF72
+ 2115 08c2 13       		.byte	0x13
+ 2116 08c3 33       		.byte	0x33
+ 2117 08c4 18       		.uleb128 0x18
+ 2118 08c5 83020000 		.4byte	.LASF73
+ 2119 08c9 83020000 		.4byte	.LASF73
+ 2120 08cd 09       		.byte	0x9
+ 2121 08ce 3E       		.byte	0x3e
+ 2122 08cf 18       		.uleb128 0x18
+ 2123 08d0 41000000 		.4byte	.LASF74
+ 2124 08d4 41000000 		.4byte	.LASF74
+ 2125 08d8 14       		.byte	0x14
+ 2126 08d9 33       		.byte	0x33
+ 2127 08da 18       		.uleb128 0x18
+ 2128 08db 92000000 		.4byte	.LASF75
+ 2129 08df 92000000 		.4byte	.LASF75
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 46
+
+
+ 2130 08e3 15       		.byte	0x15
+ 2131 08e4 33       		.byte	0x33
+ 2132 08e5 18       		.uleb128 0x18
+ 2133 08e6 06010000 		.4byte	.LASF76
+ 2134 08ea 06010000 		.4byte	.LASF76
+ 2135 08ee 15       		.byte	0x15
+ 2136 08ef 37       		.byte	0x37
+ 2137 08f0 18       		.uleb128 0x18
+ 2138 08f1 45040000 		.4byte	.LASF77
+ 2139 08f5 45040000 		.4byte	.LASF77
+ 2140 08f9 06       		.byte	0x6
+ 2141 08fa 3C       		.byte	0x3c
+ 2142 08fb 18       		.uleb128 0x18
+ 2143 08fc 7B010000 		.4byte	.LASF78
+ 2144 0900 7B010000 		.4byte	.LASF78
+ 2145 0904 06       		.byte	0x6
+ 2146 0905 4A       		.byte	0x4a
+ 2147 0906 18       		.uleb128 0x18
+ 2148 0907 43050000 		.4byte	.LASF79
+ 2149 090b 43050000 		.4byte	.LASF79
+ 2150 090f 06       		.byte	0x6
+ 2151 0910 4C       		.byte	0x4c
+ 2152 0911 18       		.uleb128 0x18
+ 2153 0912 EC010000 		.4byte	.LASF80
+ 2154 0916 EC010000 		.4byte	.LASF80
+ 2155 091a 05       		.byte	0x5
+ 2156 091b 3A       		.byte	0x3a
+ 2157 091c 18       		.uleb128 0x18
+ 2158 091d 6A040000 		.4byte	.LASF81
+ 2159 0921 6A040000 		.4byte	.LASF81
+ 2160 0925 05       		.byte	0x5
+ 2161 0926 3D       		.byte	0x3d
+ 2162 0927 18       		.uleb128 0x18
+ 2163 0928 43030000 		.4byte	.LASF82
+ 2164 092c 43030000 		.4byte	.LASF82
+ 2165 0930 16       		.byte	0x16
+ 2166 0931 18       		.byte	0x18
+ 2167 0932 18       		.uleb128 0x18
+ 2168 0933 91020000 		.4byte	.LASF83
+ 2169 0937 91020000 		.4byte	.LASF83
+ 2170 093b 17       		.byte	0x17
+ 2171 093c 18       		.byte	0x18
+ 2172 093d 18       		.uleb128 0x18
+ 2173 093e FF010000 		.4byte	.LASF84
+ 2174 0942 FF010000 		.4byte	.LASF84
+ 2175 0946 0B       		.byte	0xb
+ 2176 0947 18       		.byte	0x18
+ 2177 0948 18       		.uleb128 0x18
+ 2178 0949 3B050000 		.4byte	.LASF85
+ 2179 094d 3B050000 		.4byte	.LASF85
+ 2180 0951 18       		.byte	0x18
+ 2181 0952 76       		.byte	0x76
+ 2182 0953 18       		.uleb128 0x18
+ 2183 0954 E5030000 		.4byte	.LASF86
+ 2184 0958 E5030000 		.4byte	.LASF86
+ 2185 095c 0A       		.byte	0xa
+ 2186 095d 6F       		.byte	0x6f
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 47
+
+
+ 2187 095e 18       		.uleb128 0x18
+ 2188 095f 00000000 		.4byte	.LASF87
+ 2189 0963 00000000 		.4byte	.LASF87
+ 2190 0967 0A       		.byte	0xa
+ 2191 0968 73       		.byte	0x73
+ 2192 0969 18       		.uleb128 0x18
+ 2193 096a 76030000 		.4byte	.LASF88
+ 2194 096e 76030000 		.4byte	.LASF88
+ 2195 0972 18       		.byte	0x18
+ 2196 0973 7D       		.byte	0x7d
+ 2197 0974 18       		.uleb128 0x18
+ 2198 0975 1F010000 		.4byte	.LASF89
+ 2199 0979 1F010000 		.4byte	.LASF89
+ 2200 097d 18       		.byte	0x18
+ 2201 097e 7E       		.byte	0x7e
+ 2202 097f 00       		.byte	0
+ 2203              		.section	.debug_abbrev,"",%progbits
+ 2204              	.Ldebug_abbrev0:
+ 2205 0000 01       		.uleb128 0x1
+ 2206 0001 11       		.uleb128 0x11
+ 2207 0002 01       		.byte	0x1
+ 2208 0003 25       		.uleb128 0x25
+ 2209 0004 0E       		.uleb128 0xe
+ 2210 0005 13       		.uleb128 0x13
+ 2211 0006 0B       		.uleb128 0xb
+ 2212 0007 03       		.uleb128 0x3
+ 2213 0008 0E       		.uleb128 0xe
+ 2214 0009 1B       		.uleb128 0x1b
+ 2215 000a 0E       		.uleb128 0xe
+ 2216 000b 55       		.uleb128 0x55
+ 2217 000c 17       		.uleb128 0x17
+ 2218 000d 11       		.uleb128 0x11
+ 2219 000e 01       		.uleb128 0x1
+ 2220 000f 10       		.uleb128 0x10
+ 2221 0010 17       		.uleb128 0x17
+ 2222 0011 00       		.byte	0
+ 2223 0012 00       		.byte	0
+ 2224 0013 02       		.uleb128 0x2
+ 2225 0014 24       		.uleb128 0x24
+ 2226 0015 00       		.byte	0
+ 2227 0016 0B       		.uleb128 0xb
+ 2228 0017 0B       		.uleb128 0xb
+ 2229 0018 3E       		.uleb128 0x3e
+ 2230 0019 0B       		.uleb128 0xb
+ 2231 001a 03       		.uleb128 0x3
+ 2232 001b 0E       		.uleb128 0xe
+ 2233 001c 00       		.byte	0
+ 2234 001d 00       		.byte	0
+ 2235 001e 03       		.uleb128 0x3
+ 2236 001f 16       		.uleb128 0x16
+ 2237 0020 00       		.byte	0
+ 2238 0021 03       		.uleb128 0x3
+ 2239 0022 0E       		.uleb128 0xe
+ 2240 0023 3A       		.uleb128 0x3a
+ 2241 0024 0B       		.uleb128 0xb
+ 2242 0025 3B       		.uleb128 0x3b
+ 2243 0026 0B       		.uleb128 0xb
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 48
+
+
+ 2244 0027 49       		.uleb128 0x49
+ 2245 0028 13       		.uleb128 0x13
+ 2246 0029 00       		.byte	0
+ 2247 002a 00       		.byte	0
+ 2248 002b 04       		.uleb128 0x4
+ 2249 002c 24       		.uleb128 0x24
+ 2250 002d 00       		.byte	0
+ 2251 002e 0B       		.uleb128 0xb
+ 2252 002f 0B       		.uleb128 0xb
+ 2253 0030 3E       		.uleb128 0x3e
+ 2254 0031 0B       		.uleb128 0xb
+ 2255 0032 03       		.uleb128 0x3
+ 2256 0033 08       		.uleb128 0x8
+ 2257 0034 00       		.byte	0
+ 2258 0035 00       		.byte	0
+ 2259 0036 05       		.uleb128 0x5
+ 2260 0037 16       		.uleb128 0x16
+ 2261 0038 00       		.byte	0
+ 2262 0039 03       		.uleb128 0x3
+ 2263 003a 0E       		.uleb128 0xe
+ 2264 003b 3A       		.uleb128 0x3a
+ 2265 003c 0B       		.uleb128 0xb
+ 2266 003d 3B       		.uleb128 0x3b
+ 2267 003e 05       		.uleb128 0x5
+ 2268 003f 49       		.uleb128 0x49
+ 2269 0040 13       		.uleb128 0x13
+ 2270 0041 00       		.byte	0
+ 2271 0042 00       		.byte	0
+ 2272 0043 06       		.uleb128 0x6
+ 2273 0044 35       		.uleb128 0x35
+ 2274 0045 00       		.byte	0
+ 2275 0046 49       		.uleb128 0x49
+ 2276 0047 13       		.uleb128 0x13
+ 2277 0048 00       		.byte	0
+ 2278 0049 00       		.byte	0
+ 2279 004a 07       		.uleb128 0x7
+ 2280 004b 2E       		.uleb128 0x2e
+ 2281 004c 01       		.byte	0x1
+ 2282 004d 3F       		.uleb128 0x3f
+ 2283 004e 19       		.uleb128 0x19
+ 2284 004f 03       		.uleb128 0x3
+ 2285 0050 0E       		.uleb128 0xe
+ 2286 0051 3A       		.uleb128 0x3a
+ 2287 0052 0B       		.uleb128 0xb
+ 2288 0053 3B       		.uleb128 0x3b
+ 2289 0054 0B       		.uleb128 0xb
+ 2290 0055 27       		.uleb128 0x27
+ 2291 0056 19       		.uleb128 0x19
+ 2292 0057 11       		.uleb128 0x11
+ 2293 0058 01       		.uleb128 0x1
+ 2294 0059 12       		.uleb128 0x12
+ 2295 005a 06       		.uleb128 0x6
+ 2296 005b 40       		.uleb128 0x40
+ 2297 005c 18       		.uleb128 0x18
+ 2298 005d 9742     		.uleb128 0x2117
+ 2299 005f 19       		.uleb128 0x19
+ 2300 0060 01       		.uleb128 0x1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 49
+
+
+ 2301 0061 13       		.uleb128 0x13
+ 2302 0062 00       		.byte	0
+ 2303 0063 00       		.byte	0
+ 2304 0064 08       		.uleb128 0x8
+ 2305 0065 898201   		.uleb128 0x4109
+ 2306 0068 00       		.byte	0
+ 2307 0069 11       		.uleb128 0x11
+ 2308 006a 01       		.uleb128 0x1
+ 2309 006b 31       		.uleb128 0x31
+ 2310 006c 13       		.uleb128 0x13
+ 2311 006d 00       		.byte	0
+ 2312 006e 00       		.byte	0
+ 2313 006f 09       		.uleb128 0x9
+ 2314 0070 898201   		.uleb128 0x4109
+ 2315 0073 01       		.byte	0x1
+ 2316 0074 11       		.uleb128 0x11
+ 2317 0075 01       		.uleb128 0x1
+ 2318 0076 31       		.uleb128 0x31
+ 2319 0077 13       		.uleb128 0x13
+ 2320 0078 00       		.byte	0
+ 2321 0079 00       		.byte	0
+ 2322 007a 0A       		.uleb128 0xa
+ 2323 007b 8A8201   		.uleb128 0x410a
+ 2324 007e 00       		.byte	0
+ 2325 007f 02       		.uleb128 0x2
+ 2326 0080 18       		.uleb128 0x18
+ 2327 0081 9142     		.uleb128 0x2111
+ 2328 0083 18       		.uleb128 0x18
+ 2329 0084 00       		.byte	0
+ 2330 0085 00       		.byte	0
+ 2331 0086 0B       		.uleb128 0xb
+ 2332 0087 34       		.uleb128 0x34
+ 2333 0088 00       		.byte	0
+ 2334 0089 03       		.uleb128 0x3
+ 2335 008a 08       		.uleb128 0x8
+ 2336 008b 3A       		.uleb128 0x3a
+ 2337 008c 0B       		.uleb128 0xb
+ 2338 008d 3B       		.uleb128 0x3b
+ 2339 008e 0B       		.uleb128 0xb
+ 2340 008f 49       		.uleb128 0x49
+ 2341 0090 13       		.uleb128 0x13
+ 2342 0091 02       		.uleb128 0x2
+ 2343 0092 17       		.uleb128 0x17
+ 2344 0093 00       		.byte	0
+ 2345 0094 00       		.byte	0
+ 2346 0095 0C       		.uleb128 0xc
+ 2347 0096 2E       		.uleb128 0x2e
+ 2348 0097 01       		.byte	0x1
+ 2349 0098 03       		.uleb128 0x3
+ 2350 0099 0E       		.uleb128 0xe
+ 2351 009a 3A       		.uleb128 0x3a
+ 2352 009b 0B       		.uleb128 0xb
+ 2353 009c 3B       		.uleb128 0x3b
+ 2354 009d 0B       		.uleb128 0xb
+ 2355 009e 27       		.uleb128 0x27
+ 2356 009f 19       		.uleb128 0x19
+ 2357 00a0 11       		.uleb128 0x11
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 50
+
+
+ 2358 00a1 01       		.uleb128 0x1
+ 2359 00a2 12       		.uleb128 0x12
+ 2360 00a3 06       		.uleb128 0x6
+ 2361 00a4 40       		.uleb128 0x40
+ 2362 00a5 18       		.uleb128 0x18
+ 2363 00a6 9742     		.uleb128 0x2117
+ 2364 00a8 19       		.uleb128 0x19
+ 2365 00a9 01       		.uleb128 0x1
+ 2366 00aa 13       		.uleb128 0x13
+ 2367 00ab 00       		.byte	0
+ 2368 00ac 00       		.byte	0
+ 2369 00ad 0D       		.uleb128 0xd
+ 2370 00ae 05       		.uleb128 0x5
+ 2371 00af 00       		.byte	0
+ 2372 00b0 03       		.uleb128 0x3
+ 2373 00b1 0E       		.uleb128 0xe
+ 2374 00b2 3A       		.uleb128 0x3a
+ 2375 00b3 0B       		.uleb128 0xb
+ 2376 00b4 3B       		.uleb128 0x3b
+ 2377 00b5 0B       		.uleb128 0xb
+ 2378 00b6 49       		.uleb128 0x49
+ 2379 00b7 13       		.uleb128 0x13
+ 2380 00b8 02       		.uleb128 0x2
+ 2381 00b9 17       		.uleb128 0x17
+ 2382 00ba 00       		.byte	0
+ 2383 00bb 00       		.byte	0
+ 2384 00bc 0E       		.uleb128 0xe
+ 2385 00bd 05       		.uleb128 0x5
+ 2386 00be 00       		.byte	0
+ 2387 00bf 03       		.uleb128 0x3
+ 2388 00c0 08       		.uleb128 0x8
+ 2389 00c1 3A       		.uleb128 0x3a
+ 2390 00c2 0B       		.uleb128 0xb
+ 2391 00c3 3B       		.uleb128 0x3b
+ 2392 00c4 0B       		.uleb128 0xb
+ 2393 00c5 49       		.uleb128 0x49
+ 2394 00c6 13       		.uleb128 0x13
+ 2395 00c7 02       		.uleb128 0x2
+ 2396 00c8 17       		.uleb128 0x17
+ 2397 00c9 00       		.byte	0
+ 2398 00ca 00       		.byte	0
+ 2399 00cb 0F       		.uleb128 0xf
+ 2400 00cc 34       		.uleb128 0x34
+ 2401 00cd 00       		.byte	0
+ 2402 00ce 03       		.uleb128 0x3
+ 2403 00cf 08       		.uleb128 0x8
+ 2404 00d0 3A       		.uleb128 0x3a
+ 2405 00d1 0B       		.uleb128 0xb
+ 2406 00d2 3B       		.uleb128 0x3b
+ 2407 00d3 0B       		.uleb128 0xb
+ 2408 00d4 49       		.uleb128 0x49
+ 2409 00d5 13       		.uleb128 0x13
+ 2410 00d6 02       		.uleb128 0x2
+ 2411 00d7 18       		.uleb128 0x18
+ 2412 00d8 00       		.byte	0
+ 2413 00d9 00       		.byte	0
+ 2414 00da 10       		.uleb128 0x10
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 51
+
+
+ 2415 00db 01       		.uleb128 0x1
+ 2416 00dc 01       		.byte	0x1
+ 2417 00dd 49       		.uleb128 0x49
+ 2418 00de 13       		.uleb128 0x13
+ 2419 00df 01       		.uleb128 0x1
+ 2420 00e0 13       		.uleb128 0x13
+ 2421 00e1 00       		.byte	0
+ 2422 00e2 00       		.byte	0
+ 2423 00e3 11       		.uleb128 0x11
+ 2424 00e4 21       		.uleb128 0x21
+ 2425 00e5 00       		.byte	0
+ 2426 00e6 49       		.uleb128 0x49
+ 2427 00e7 13       		.uleb128 0x13
+ 2428 00e8 2F       		.uleb128 0x2f
+ 2429 00e9 0B       		.uleb128 0xb
+ 2430 00ea 00       		.byte	0
+ 2431 00eb 00       		.byte	0
+ 2432 00ec 12       		.uleb128 0x12
+ 2433 00ed 34       		.uleb128 0x34
+ 2434 00ee 00       		.byte	0
+ 2435 00ef 03       		.uleb128 0x3
+ 2436 00f0 0E       		.uleb128 0xe
+ 2437 00f1 3A       		.uleb128 0x3a
+ 2438 00f2 0B       		.uleb128 0xb
+ 2439 00f3 3B       		.uleb128 0x3b
+ 2440 00f4 0B       		.uleb128 0xb
+ 2441 00f5 49       		.uleb128 0x49
+ 2442 00f6 13       		.uleb128 0x13
+ 2443 00f7 1C       		.uleb128 0x1c
+ 2444 00f8 05       		.uleb128 0x5
+ 2445 00f9 00       		.byte	0
+ 2446 00fa 00       		.byte	0
+ 2447 00fb 13       		.uleb128 0x13
+ 2448 00fc 898201   		.uleb128 0x4109
+ 2449 00ff 01       		.byte	0x1
+ 2450 0100 11       		.uleb128 0x11
+ 2451 0101 01       		.uleb128 0x1
+ 2452 0102 31       		.uleb128 0x31
+ 2453 0103 13       		.uleb128 0x13
+ 2454 0104 01       		.uleb128 0x1
+ 2455 0105 13       		.uleb128 0x13
+ 2456 0106 00       		.byte	0
+ 2457 0107 00       		.byte	0
+ 2458 0108 14       		.uleb128 0x14
+ 2459 0109 2E       		.uleb128 0x2e
+ 2460 010a 01       		.byte	0x1
+ 2461 010b 3F       		.uleb128 0x3f
+ 2462 010c 19       		.uleb128 0x19
+ 2463 010d 03       		.uleb128 0x3
+ 2464 010e 0E       		.uleb128 0xe
+ 2465 010f 3A       		.uleb128 0x3a
+ 2466 0110 0B       		.uleb128 0xb
+ 2467 0111 3B       		.uleb128 0x3b
+ 2468 0112 0B       		.uleb128 0xb
+ 2469 0113 27       		.uleb128 0x27
+ 2470 0114 19       		.uleb128 0x19
+ 2471 0115 49       		.uleb128 0x49
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 52
+
+
+ 2472 0116 13       		.uleb128 0x13
+ 2473 0117 8701     		.uleb128 0x87
+ 2474 0119 19       		.uleb128 0x19
+ 2475 011a 11       		.uleb128 0x11
+ 2476 011b 01       		.uleb128 0x1
+ 2477 011c 12       		.uleb128 0x12
+ 2478 011d 06       		.uleb128 0x6
+ 2479 011e 40       		.uleb128 0x40
+ 2480 011f 18       		.uleb128 0x18
+ 2481 0120 9742     		.uleb128 0x2117
+ 2482 0122 19       		.uleb128 0x19
+ 2483 0123 01       		.uleb128 0x1
+ 2484 0124 13       		.uleb128 0x13
+ 2485 0125 00       		.byte	0
+ 2486 0126 00       		.byte	0
+ 2487 0127 15       		.uleb128 0x15
+ 2488 0128 34       		.uleb128 0x34
+ 2489 0129 00       		.byte	0
+ 2490 012a 03       		.uleb128 0x3
+ 2491 012b 0E       		.uleb128 0xe
+ 2492 012c 3A       		.uleb128 0x3a
+ 2493 012d 0B       		.uleb128 0xb
+ 2494 012e 3B       		.uleb128 0x3b
+ 2495 012f 0B       		.uleb128 0xb
+ 2496 0130 49       		.uleb128 0x49
+ 2497 0131 13       		.uleb128 0x13
+ 2498 0132 02       		.uleb128 0x2
+ 2499 0133 18       		.uleb128 0x18
+ 2500 0134 00       		.byte	0
+ 2501 0135 00       		.byte	0
+ 2502 0136 16       		.uleb128 0x16
+ 2503 0137 34       		.uleb128 0x34
+ 2504 0138 00       		.byte	0
+ 2505 0139 03       		.uleb128 0x3
+ 2506 013a 0E       		.uleb128 0xe
+ 2507 013b 3A       		.uleb128 0x3a
+ 2508 013c 0B       		.uleb128 0xb
+ 2509 013d 3B       		.uleb128 0x3b
+ 2510 013e 0B       		.uleb128 0xb
+ 2511 013f 49       		.uleb128 0x49
+ 2512 0140 13       		.uleb128 0x13
+ 2513 0141 02       		.uleb128 0x2
+ 2514 0142 17       		.uleb128 0x17
+ 2515 0143 00       		.byte	0
+ 2516 0144 00       		.byte	0
+ 2517 0145 17       		.uleb128 0x17
+ 2518 0146 34       		.uleb128 0x34
+ 2519 0147 00       		.byte	0
+ 2520 0148 03       		.uleb128 0x3
+ 2521 0149 0E       		.uleb128 0xe
+ 2522 014a 3A       		.uleb128 0x3a
+ 2523 014b 0B       		.uleb128 0xb
+ 2524 014c 3B       		.uleb128 0x3b
+ 2525 014d 05       		.uleb128 0x5
+ 2526 014e 49       		.uleb128 0x49
+ 2527 014f 13       		.uleb128 0x13
+ 2528 0150 3F       		.uleb128 0x3f
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 53
+
+
+ 2529 0151 19       		.uleb128 0x19
+ 2530 0152 3C       		.uleb128 0x3c
+ 2531 0153 19       		.uleb128 0x19
+ 2532 0154 00       		.byte	0
+ 2533 0155 00       		.byte	0
+ 2534 0156 18       		.uleb128 0x18
+ 2535 0157 2E       		.uleb128 0x2e
+ 2536 0158 00       		.byte	0
+ 2537 0159 3F       		.uleb128 0x3f
+ 2538 015a 19       		.uleb128 0x19
+ 2539 015b 3C       		.uleb128 0x3c
+ 2540 015c 19       		.uleb128 0x19
+ 2541 015d 6E       		.uleb128 0x6e
+ 2542 015e 0E       		.uleb128 0xe
+ 2543 015f 03       		.uleb128 0x3
+ 2544 0160 0E       		.uleb128 0xe
+ 2545 0161 3A       		.uleb128 0x3a
+ 2546 0162 0B       		.uleb128 0xb
+ 2547 0163 3B       		.uleb128 0x3b
+ 2548 0164 0B       		.uleb128 0xb
+ 2549 0165 00       		.byte	0
+ 2550 0166 00       		.byte	0
+ 2551 0167 00       		.byte	0
+ 2552              		.section	.debug_loc,"",%progbits
+ 2553              	.Ldebug_loc0:
+ 2554              	.LLST0:
+ 2555 0000 08000000 		.4byte	.LVL2
+ 2556 0004 12000000 		.4byte	.LVL3
+ 2557 0008 0100     		.2byte	0x1
+ 2558 000a 50       		.byte	0x50
+ 2559 000b 00000000 		.4byte	0
+ 2560 000f 00000000 		.4byte	0
+ 2561              	.LLST1:
+ 2562 0013 00000000 		.4byte	.LVL5
+ 2563 0017 0D000000 		.4byte	.LVL6-1
+ 2564 001b 0100     		.2byte	0x1
+ 2565 001d 50       		.byte	0x50
+ 2566 001e 0D000000 		.4byte	.LVL6-1
+ 2567 0022 10000000 		.4byte	.LVL7
+ 2568 0026 0400     		.2byte	0x4
+ 2569 0028 F3       		.byte	0xf3
+ 2570 0029 01       		.uleb128 0x1
+ 2571 002a 50       		.byte	0x50
+ 2572 002b 9F       		.byte	0x9f
+ 2573 002c 10000000 		.4byte	.LVL7
+ 2574 0030 18000000 		.4byte	.LFE71
+ 2575 0034 0100     		.2byte	0x1
+ 2576 0036 50       		.byte	0x50
+ 2577 0037 00000000 		.4byte	0
+ 2578 003b 00000000 		.4byte	0
+ 2579              	.LLST2:
+ 2580 003f 00000000 		.4byte	.LVL8
+ 2581 0043 0D000000 		.4byte	.LVL9-1
+ 2582 0047 0100     		.2byte	0x1
+ 2583 0049 50       		.byte	0x50
+ 2584 004a 0D000000 		.4byte	.LVL9-1
+ 2585 004e 10000000 		.4byte	.LVL10
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 54
+
+
+ 2586 0052 0400     		.2byte	0x4
+ 2587 0054 F3       		.byte	0xf3
+ 2588 0055 01       		.uleb128 0x1
+ 2589 0056 50       		.byte	0x50
+ 2590 0057 9F       		.byte	0x9f
+ 2591 0058 10000000 		.4byte	.LVL10
+ 2592 005c 18000000 		.4byte	.LFE72
+ 2593 0060 0100     		.2byte	0x1
+ 2594 0062 50       		.byte	0x50
+ 2595 0063 00000000 		.4byte	0
+ 2596 0067 00000000 		.4byte	0
+ 2597              	.LLST3:
+ 2598 006b 00000000 		.4byte	.LVL11
+ 2599 006f 22000000 		.4byte	.LVL13
+ 2600 0073 0100     		.2byte	0x1
+ 2601 0075 50       		.byte	0x50
+ 2602 0076 22000000 		.4byte	.LVL13
+ 2603 007a 25000000 		.4byte	.LVL14-1
+ 2604 007e 0200     		.2byte	0x2
+ 2605 0080 91       		.byte	0x91
+ 2606 0081 72       		.sleb128 -14
+ 2607 0082 25000000 		.4byte	.LVL14-1
+ 2608 0086 2C000000 		.4byte	.LFE70
+ 2609 008a 0400     		.2byte	0x4
+ 2610 008c F3       		.byte	0xf3
+ 2611 008d 01       		.uleb128 0x1
+ 2612 008e 50       		.byte	0x50
+ 2613 008f 9F       		.byte	0x9f
+ 2614 0090 00000000 		.4byte	0
+ 2615 0094 00000000 		.4byte	0
+ 2616              	.LLST4:
+ 2617 0098 00000000 		.4byte	.LVL11
+ 2618 009c 20000000 		.4byte	.LVL12
+ 2619 00a0 0100     		.2byte	0x1
+ 2620 00a2 51       		.byte	0x51
+ 2621 00a3 20000000 		.4byte	.LVL12
+ 2622 00a7 25000000 		.4byte	.LVL14-1
+ 2623 00ab 0200     		.2byte	0x2
+ 2624 00ad 91       		.byte	0x91
+ 2625 00ae 73       		.sleb128 -13
+ 2626 00af 25000000 		.4byte	.LVL14-1
+ 2627 00b3 2C000000 		.4byte	.LFE70
+ 2628 00b7 0400     		.2byte	0x4
+ 2629 00b9 F3       		.byte	0xf3
+ 2630 00ba 01       		.uleb128 0x1
+ 2631 00bb 51       		.byte	0x51
+ 2632 00bc 9F       		.byte	0x9f
+ 2633 00bd 00000000 		.4byte	0
+ 2634 00c1 00000000 		.4byte	0
+ 2635              	.LLST5:
+ 2636 00c5 22020000 		.4byte	.LVL88
+ 2637 00c9 8A020000 		.4byte	.LVL91
+ 2638 00cd 0100     		.2byte	0x1
+ 2639 00cf 55       		.byte	0x55
+ 2640 00d0 B2020000 		.4byte	.LVL93
+ 2641 00d4 28030000 		.4byte	.LFE73
+ 2642 00d8 0100     		.2byte	0x1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 55
+
+
+ 2643 00da 55       		.byte	0x55
+ 2644 00db 00000000 		.4byte	0
+ 2645 00df 00000000 		.4byte	0
+ 2646              	.LLST6:
+ 2647 00e3 1E020000 		.4byte	.LVL87
+ 2648 00e7 29020000 		.4byte	.LVL89-1
+ 2649 00eb 0100     		.2byte	0x1
+ 2650 00ed 50       		.byte	0x50
+ 2651 00ee AE020000 		.4byte	.LVL92
+ 2652 00f2 B9020000 		.4byte	.LVL94-1
+ 2653 00f6 0100     		.2byte	0x1
+ 2654 00f8 50       		.byte	0x50
+ 2655 00f9 00000000 		.4byte	0
+ 2656 00fd 00000000 		.4byte	0
+ 2657              	.LLST7:
+ 2658 0101 BE000000 		.4byte	.LVL59
+ 2659 0105 E1000000 		.4byte	.LVL60-1
+ 2660 0109 0100     		.2byte	0x1
+ 2661 010b 50       		.byte	0x50
+ 2662 010c E4000000 		.4byte	.LVL61
+ 2663 0110 E7000000 		.4byte	.LVL62-1
+ 2664 0114 0100     		.2byte	0x1
+ 2665 0116 50       		.byte	0x50
+ 2666 0117 14010000 		.4byte	.LVL64
+ 2667 011b 1F010000 		.4byte	.LVL65-1
+ 2668 011f 0100     		.2byte	0x1
+ 2669 0121 50       		.byte	0x50
+ 2670 0122 22010000 		.4byte	.LVL66
+ 2671 0126 25010000 		.4byte	.LVL67-1
+ 2672 012a 0100     		.2byte	0x1
+ 2673 012c 50       		.byte	0x50
+ 2674 012d F0010000 		.4byte	.LVL84
+ 2675 0131 F6010000 		.4byte	.LVL85
+ 2676 0135 0100     		.2byte	0x1
+ 2677 0137 50       		.byte	0x50
+ 2678 0138 00000000 		.4byte	0
+ 2679 013c 00000000 		.4byte	0
+ 2680              		.section	.debug_aranges,"",%progbits
+ 2681 0000 6C000000 		.4byte	0x6c
+ 2682 0004 0200     		.2byte	0x2
+ 2683 0006 00000000 		.4byte	.Ldebug_info0
+ 2684 000a 04       		.byte	0x4
+ 2685 000b 00       		.byte	0
+ 2686 000c 0000     		.2byte	0
+ 2687 000e 0000     		.2byte	0
+ 2688 0010 00000000 		.4byte	.LFB63
+ 2689 0014 1C000000 		.4byte	.LFE63-.LFB63
+ 2690 0018 00000000 		.4byte	.LFB64
+ 2691 001c 20000000 		.4byte	.LFE64-.LFB64
+ 2692 0020 00000000 		.4byte	.LFB65
+ 2693 0024 14000000 		.4byte	.LFE65-.LFB65
+ 2694 0028 00000000 		.4byte	.LFB71
+ 2695 002c 18000000 		.4byte	.LFE71-.LFB71
+ 2696 0030 00000000 		.4byte	.LFB72
+ 2697 0034 18000000 		.4byte	.LFE72-.LFB72
+ 2698 0038 00000000 		.4byte	.LFB70
+ 2699 003c 2C000000 		.4byte	.LFE70-.LFB70
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 56
+
+
+ 2700 0040 00000000 		.4byte	.LFB69
+ 2701 0044 78000000 		.4byte	.LFE69-.LFB69
+ 2702 0048 00000000 		.4byte	.LFB67
+ 2703 004c 1C000000 		.4byte	.LFE67-.LFB67
+ 2704 0050 00000000 		.4byte	.LFB66
+ 2705 0054 28000000 		.4byte	.LFE66-.LFB66
+ 2706 0058 00000000 		.4byte	.LFB68
+ 2707 005c 12000000 		.4byte	.LFE68-.LFB68
+ 2708 0060 00000000 		.4byte	.LFB73
+ 2709 0064 28030000 		.4byte	.LFE73-.LFB73
+ 2710 0068 00000000 		.4byte	0
+ 2711 006c 00000000 		.4byte	0
+ 2712              		.section	.debug_ranges,"",%progbits
+ 2713              	.Ldebug_ranges0:
+ 2714 0000 00000000 		.4byte	.LFB63
+ 2715 0004 1C000000 		.4byte	.LFE63
+ 2716 0008 00000000 		.4byte	.LFB64
+ 2717 000c 20000000 		.4byte	.LFE64
+ 2718 0010 00000000 		.4byte	.LFB65
+ 2719 0014 14000000 		.4byte	.LFE65
+ 2720 0018 00000000 		.4byte	.LFB71
+ 2721 001c 18000000 		.4byte	.LFE71
+ 2722 0020 00000000 		.4byte	.LFB72
+ 2723 0024 18000000 		.4byte	.LFE72
+ 2724 0028 00000000 		.4byte	.LFB70
+ 2725 002c 2C000000 		.4byte	.LFE70
+ 2726 0030 00000000 		.4byte	.LFB69
+ 2727 0034 78000000 		.4byte	.LFE69
+ 2728 0038 00000000 		.4byte	.LFB67
+ 2729 003c 1C000000 		.4byte	.LFE67
+ 2730 0040 00000000 		.4byte	.LFB66
+ 2731 0044 28000000 		.4byte	.LFE66
+ 2732 0048 00000000 		.4byte	.LFB68
+ 2733 004c 12000000 		.4byte	.LFE68
+ 2734 0050 00000000 		.4byte	.LFB73
+ 2735 0054 28030000 		.4byte	.LFE73
+ 2736 0058 00000000 		.4byte	0
+ 2737 005c 00000000 		.4byte	0
+ 2738              		.section	.debug_line,"",%progbits
+ 2739              	.Ldebug_line0:
+ 2740 0000 BE030000 		.section	.debug_str,"MS",%progbits,1
+ 2740      02003A02 
+ 2740      00000201 
+ 2740      FB0E0D00 
+ 2740      01010101 
+ 2741              	.LASF87:
+ 2742 0000 55415254 		.ascii	"UART_PC_GetRxBufferSize\000"
+ 2742      5F50435F 
+ 2742      47657452 
+ 2742      78427566 
+ 2742      66657253 
+ 2743              	.LASF22:
+ 2744 0018 6973725F 		.ascii	"isr_FilterReady\000"
+ 2744      46696C74 
+ 2744      65725265 
+ 2744      61647900 
+ 2745              	.LASF52:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 57
+
+
+ 2746 0028 54696D65 		.ascii	"Timer_ReadStatusRegister\000"
+ 2746      725F5265 
+ 2746      61645374 
+ 2746      61747573 
+ 2746      52656769 
+ 2747              	.LASF74:
+ 2748 0041 4F50416C 		.ascii	"OPAlp_Start\000"
+ 2748      705F5374 
+ 2748      61727400 
+ 2749              	.LASF67:
+ 2750 004d 5047416E 		.ascii	"PGAn_SetGain\000"
+ 2750      5F536574 
+ 2750      4761696E 
+ 2750      00
+ 2751              	.LASF68:
+ 2752 005a 4C50465F 		.ascii	"LPF_1_Start\000"
+ 2752      315F5374 
+ 2752      61727400 
+ 2753              	.LASF48:
+ 2754 0066 77617463 		.ascii	"watchdog_rx\000"
+ 2754      68646F67 
+ 2754      5F727800 
+ 2755              	.LASF61:
+ 2756 0072 4C45445F 		.ascii	"LED_Write\000"
+ 2756      57726974 
+ 2756      6500
+ 2757              	.LASF25:
+ 2758 007c 50474176 		.ascii	"PGAvdac_Set\000"
+ 2758      6461635F 
+ 2758      53657400 
+ 2759              	.LASF23:
+ 2760 0088 6973725F 		.ascii	"isr_Timer\000"
+ 2760      54696D65 
+ 2760      7200
+ 2761              	.LASF75:
+ 2762 0092 56444143 		.ascii	"VDAC_Start\000"
+ 2762      5F537461 
+ 2762      727400
+ 2763              	.LASF24:
+ 2764 009d 50474167 		.ascii	"PGAgain_Set\000"
+ 2764      61696E5F 
+ 2764      53657400 
+ 2765              	.LASF2:
+ 2766 00a9 73686F72 		.ascii	"short int\000"
+ 2766      7420696E 
+ 2766      7400
+ 2767              	.LASF71:
+ 2768 00b3 4F504162 		.ascii	"OPAbp_Start\000"
+ 2768      705F5374 
+ 2768      61727400 
+ 2769              	.LASF65:
+ 2770 00bf 5047416E 		.ascii	"PGAn_Start\000"
+ 2770      5F537461 
+ 2770      727400
+ 2771              	.LASF66:
+ 2772 00ca 50474170 		.ascii	"PGAp_SetGain\000"
+ 2772      5F536574 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 58
+
+
+ 2772      4761696E 
+ 2772      00
+ 2773              	.LASF58:
+ 2774 00d7 54696D65 		.ascii	"Timer_WritePeriod\000"
+ 2774      725F5772 
+ 2774      69746550 
+ 2774      6572696F 
+ 2774      6400
+ 2775              	.LASF31:
+ 2776 00e9 72785F77 		.ascii	"rx_watchdog_stop\000"
+ 2776      61746368 
+ 2776      646F675F 
+ 2776      73746F70 
+ 2776      00
+ 2777              	.LASF19:
+ 2778 00fa 6C6F6E67 		.ascii	"long double\000"
+ 2778      20646F75 
+ 2778      626C6500 
+ 2779              	.LASF76:
+ 2780 0106 56444143 		.ascii	"VDAC_SetValue\000"
+ 2780      5F536574 
+ 2780      56616C75 
+ 2780      6500
+ 2781              	.LASF42:
+ 2782 0114 675F7664 		.ascii	"g_vdac_val\000"
+ 2782      61635F76 
+ 2782      616C00
+ 2783              	.LASF89:
+ 2784 011f 43794578 		.ascii	"CyExitCriticalSection\000"
+ 2784      69744372 
+ 2784      69746963 
+ 2784      616C5365 
+ 2784      6374696F 
+ 2785              	.LASF64:
+ 2786 0135 50474170 		.ascii	"PGAp_Start\000"
+ 2786      5F537461 
+ 2786      727400
+ 2787              	.LASF56:
+ 2788 0140 54696D65 		.ascii	"Timer_Stop\000"
+ 2788      725F5374 
+ 2788      6F7000
+ 2789              	.LASF34:
+ 2790 014b 68625F63 		.ascii	"hb_count\000"
+ 2790      6F756E74 
+ 2790      00
+ 2791              	.LASF12:
+ 2792 0154 75696E74 		.ascii	"uint16\000"
+ 2792      313600
+ 2793              	.LASF62:
+ 2794 015b 55415254 		.ascii	"UART_PC_Start\000"
+ 2794      5F50435F 
+ 2794      53746172 
+ 2794      7400
+ 2795              	.LASF28:
+ 2796 0169 73656E64 		.ascii	"send_config\000"
+ 2796      5F636F6E 
+ 2796      66696700 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 59
+
+
+ 2797              	.LASF38:
+ 2798 0175 675F666C 		.ascii	"g_flt\000"
+ 2798      7400
+ 2799              	.LASF78:
+ 2800 017b 46696C74 		.ascii	"Filter_SetCoherency\000"
+ 2800      65725F53 
+ 2800      6574436F 
+ 2800      68657265 
+ 2800      6E637900 
+ 2801              	.LASF33:
+ 2802 018f 6C65645F 		.ascii	"led_toggle\000"
+ 2802      746F6767 
+ 2802      6C6500
+ 2803              	.LASF29:
+ 2804 019a 66735F72 		.ascii	"fs_rep\000"
+ 2804      657000
+ 2805              	.LASF16:
+ 2806 01a1 666C6F61 		.ascii	"float\000"
+ 2806      7400
+ 2807              	.LASF6:
+ 2808 01a7 6C6F6E67 		.ascii	"long long int\000"
+ 2808      206C6F6E 
+ 2808      6720696E 
+ 2808      7400
+ 2809              	.LASF45:
+ 2810 01b5 72785F73 		.ascii	"rx_state\000"
+ 2810      74617465 
+ 2810      00
+ 2811              	.LASF55:
+ 2812 01be 55415254 		.ascii	"UART_PC_PutArray\000"
+ 2812      5F50435F 
+ 2812      50757441 
+ 2812      72726179 
+ 2812      00
+ 2813              	.LASF39:
+ 2814 01cf 675F6669 		.ascii	"g_filter_ready\000"
+ 2814      6C746572 
+ 2814      5F726561 
+ 2814      647900
+ 2815              	.LASF18:
+ 2816 01de 63686172 		.ascii	"char\000"
+ 2816      00
+ 2817              	.LASF47:
+ 2818 01e3 72785F70 		.ascii	"rx_param\000"
+ 2818      6172616D 
+ 2818      00
+ 2819              	.LASF80:
+ 2820 01ec 4144435F 		.ascii	"ADC_Start\000"
+ 2820      53746172 
+ 2820      7400
+ 2821              	.LASF4:
+ 2822 01f6 6C6F6E67 		.ascii	"long int\000"
+ 2822      20696E74 
+ 2822      00
+ 2823              	.LASF84:
+ 2824 01ff 6973725F 		.ascii	"isr_Timer_StartEx\000"
+ 2824      54696D65 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 60
+
+
+ 2824      725F5374 
+ 2824      61727445 
+ 2824      7800
+ 2825              	.LASF51:
+ 2826 0211 46696C74 		.ascii	"Filter_Read24\000"
+ 2826      65725F52 
+ 2826      65616432 
+ 2826      3400
+ 2827              	.LASF92:
+ 2828 021f 433A5C47 		.ascii	"C:\\Github\\Tesis\\src\\psoc\\DiferencialToSingleEn"
+ 2828      69746875 
+ 2828      625C5465 
+ 2828      7369735C 
+ 2828      7372635C 
+ 2829 024d 6465642E 		.ascii	"ded.cydsn\000"
+ 2829      63796473 
+ 2829      6E00
+ 2830              	.LASF69:
+ 2831 0257 4C50465F 		.ascii	"LPF_2_Start\000"
+ 2831      325F5374 
+ 2831      61727400 
+ 2832              	.LASF36:
+ 2833 0263 675F6164 		.ascii	"g_adc_raw\000"
+ 2833      635F7261 
+ 2833      7700
+ 2834              	.LASF43:
+ 2835 026d 74785F6D 		.ascii	"tx_mode\000"
+ 2835      6F646500 
+ 2836              	.LASF70:
+ 2837 0275 50474167 		.ascii	"PGAgain_Start\000"
+ 2837      61696E5F 
+ 2837      53746172 
+ 2837      7400
+ 2838              	.LASF73:
+ 2839 0283 50474176 		.ascii	"PGAvdac_Start\000"
+ 2839      6461635F 
+ 2839      53746172 
+ 2839      7400
+ 2840              	.LASF83:
+ 2841 0291 6973725F 		.ascii	"isr_Filter_StartEx\000"
+ 2841      46696C74 
+ 2841      65725F53 
+ 2841      74617274 
+ 2841      457800
+ 2842              	.LASF57:
+ 2843 02a4 6973725F 		.ascii	"isr_Timer_ClearPending\000"
+ 2843      54696D65 
+ 2843      725F436C 
+ 2843      65617250 
+ 2843      656E6469 
+ 2844              	.LASF63:
+ 2845 02bb 4F504172 		.ascii	"OPAref_Start\000"
+ 2845      65665F53 
+ 2845      74617274 
+ 2845      00
+ 2846              	.LASF1:
+ 2847 02c8 756E7369 		.ascii	"unsigned char\000"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 61
+
+
+ 2847      676E6564 
+ 2847      20636861 
+ 2847      7200
+ 2848              	.LASF21:
+ 2849 02d6 6973725F 		.ascii	"isr_DelSigReady\000"
+ 2849      44656C53 
+ 2849      69675265 
+ 2849      61647900 
+ 2850              	.LASF0:
+ 2851 02e6 7369676E 		.ascii	"signed char\000"
+ 2851      65642063 
+ 2851      68617200 
+ 2852              	.LASF7:
+ 2853 02f2 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 2853      206C6F6E 
+ 2853      6720756E 
+ 2853      7369676E 
+ 2853      65642069 
+ 2854              	.LASF49:
+ 2855 0309 4144435F 		.ascii	"ADC_GetResult32\000"
+ 2855      47657452 
+ 2855      6573756C 
+ 2855      74333200 
+ 2856              	.LASF8:
+ 2857 0319 756E7369 		.ascii	"unsigned int\000"
+ 2857      676E6564 
+ 2857      20696E74 
+ 2857      00
+ 2858              	.LASF27:
+ 2859 0326 73656E64 		.ascii	"send_ack\000"
+ 2859      5F61636B 
+ 2859      00
+ 2860              	.LASF41:
+ 2861 032f 675F7067 		.ascii	"g_pgavdac_code\000"
+ 2861      61766461 
+ 2861      635F636F 
+ 2861      646500
+ 2862              	.LASF26:
+ 2863 033e 636F6465 		.ascii	"code\000"
+ 2863      00
+ 2864              	.LASF82:
+ 2865 0343 6973725F 		.ascii	"isr_DelSig_StartEx\000"
+ 2865      44656C53 
+ 2865      69675F53 
+ 2865      74617274 
+ 2865      457800
+ 2866              	.LASF3:
+ 2867 0356 73686F72 		.ascii	"short unsigned int\000"
+ 2867      7420756E 
+ 2867      7369676E 
+ 2867      65642069 
+ 2867      6E7400
+ 2868              	.LASF93:
+ 2869 0369 6D61696E 		.ascii	"main\000"
+ 2869      00
+ 2870              	.LASF10:
+ 2871 036e 696E7433 		.ascii	"int32_t\000"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 62
+
+
+ 2871      325F7400 
+ 2872              	.LASF88:
+ 2873 0376 4379456E 		.ascii	"CyEnterCriticalSection\000"
+ 2873      74657243 
+ 2873      72697469 
+ 2873      63616C53 
+ 2873      65637469 
+ 2874              	.LASF37:
+ 2875 038d 675F7361 		.ascii	"g_sample_ready\000"
+ 2875      6D706C65 
+ 2875      5F726561 
+ 2875      647900
+ 2876              	.LASF11:
+ 2877 039c 75696E74 		.ascii	"uint8\000"
+ 2877      3800
+ 2878              	.LASF35:
+ 2879 03a2 73617665 		.ascii	"saved\000"
+ 2879      6400
+ 2880              	.LASF13:
+ 2881 03a8 75696E74 		.ascii	"uint32\000"
+ 2881      333200
+ 2882              	.LASF91:
+ 2883 03af 6D61696E 		.ascii	"main.c\000"
+ 2883      2E6300
+ 2884              	.LASF5:
+ 2885 03b6 6C6F6E67 		.ascii	"long unsigned int\000"
+ 2885      20756E73 
+ 2885      69676E65 
+ 2885      6420696E 
+ 2885      7400
+ 2886              	.LASF14:
+ 2887 03c8 696E7433 		.ascii	"int32\000"
+ 2887      3200
+ 2888              	.LASF17:
+ 2889 03ce 646F7562 		.ascii	"double\000"
+ 2889      6C6500
+ 2890              	.LASF53:
+ 2891 03d5 50474167 		.ascii	"PGAgain_SetGain\000"
+ 2891      61696E5F 
+ 2891      53657447 
+ 2891      61696E00 
+ 2892              	.LASF86:
+ 2893 03e5 55415254 		.ascii	"UART_PC_ReadRxData\000"
+ 2893      5F50435F 
+ 2893      52656164 
+ 2893      52784461 
+ 2893      746100
+ 2894              	.LASF44:
+ 2895 03f8 73747265 		.ascii	"stream_enabled\000"
+ 2895      616D5F65 
+ 2895      6E61626C 
+ 2895      656400
+ 2896              	.LASF94:
+ 2897 0407 49544D5F 		.ascii	"ITM_RxBuffer\000"
+ 2897      52784275 
+ 2897      66666572 
+ 2897      00
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 63
+
+
+ 2898              	.LASF59:
+ 2899 0414 54696D65 		.ascii	"Timer_Start\000"
+ 2899      725F5374 
+ 2899      61727400 
+ 2900              	.LASF72:
+ 2901 0420 4F504161 		.ascii	"OPAadder_Start\000"
+ 2901      64646572 
+ 2901      5F537461 
+ 2901      727400
+ 2902              	.LASF30:
+ 2903 042f 76726566 		.ascii	"vref_halfmv\000"
+ 2903      5F68616C 
+ 2903      666D7600 
+ 2904              	.LASF9:
+ 2905 043b 5F5F696E 		.ascii	"__int32_t\000"
+ 2905      7433325F 
+ 2905      7400
+ 2906              	.LASF77:
+ 2907 0445 46696C74 		.ascii	"Filter_Start\000"
+ 2907      65725F53 
+ 2907      74617274 
+ 2907      00
+ 2908              	.LASF20:
+ 2909 0452 73697A65 		.ascii	"sizetype\000"
+ 2909      74797065 
+ 2909      00
+ 2910              	.LASF50:
+ 2911 045b 46696C74 		.ascii	"Filter_Write24\000"
+ 2911      65725F57 
+ 2911      72697465 
+ 2911      323400
+ 2912              	.LASF81:
+ 2913 046a 4144435F 		.ascii	"ADC_StartConvert\000"
+ 2913      53746172 
+ 2913      74436F6E 
+ 2913      76657274 
+ 2913      00
+ 2914              	.LASF54:
+ 2915 047b 50474176 		.ascii	"PGAvdac_SetGain\000"
+ 2915      6461635F 
+ 2915      53657447 
+ 2915      61696E00 
+ 2916              	.LASF46:
+ 2917 048b 72785F63 		.ascii	"rx_cmd\000"
+ 2917      6D6400
+ 2918              	.LASF32:
+ 2919 0492 72785F77 		.ascii	"rx_watchdog_start\000"
+ 2919      61746368 
+ 2919      646F675F 
+ 2919      73746172 
+ 2919      7400
+ 2920              	.LASF90:
+ 2921 04a4 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 2921      43313120 
+ 2921      352E342E 
+ 2921      31203230 
+ 2921      31363036 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccrvb34e.s 			page 64
+
+
+ 2922 04d7 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"
+ 2922      20726576 
+ 2922      6973696F 
+ 2922      6E203233 
+ 2922      37373135 
+ 2923 050a 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 2923      66756E63 
+ 2923      74696F6E 
+ 2923      2D736563 
+ 2923      74696F6E 
+ 2924              	.LASF60:
+ 2925 0532 4C45445F 		.ascii	"LED_Read\000"
+ 2925      52656164 
+ 2925      00
+ 2926              	.LASF85:
+ 2927 053b 43794465 		.ascii	"CyDelay\000"
+ 2927      6C617900 
+ 2928              	.LASF79:
+ 2929 0543 46696C74 		.ascii	"Filter_SetDalign\000"
+ 2929      65725F53 
+ 2929      65744461 
+ 2929      6C69676E 
+ 2929      00
+ 2930              	.LASF40:
+ 2931 0554 675F7067 		.ascii	"g_pga_code\000"
+ 2931      615F636F 
+ 2931      646500
+ 2932              	.LASF15:
+ 2933 055f 666C6F61 		.ascii	"float32\000"
+ 2933      74333200 
+ 2934              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran
