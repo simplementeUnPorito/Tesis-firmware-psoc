@@ -75,7 +75,8 @@ CY_ISR(isr_DelSigReady)
 CY_ISR(isr_FilterReady)
 {
     uint32 r = Filter_Read24(Filter_CHANNEL_A);
-    g_flt = (r & 0x800000u) ? (int32)(r | 0xFF000000u) : (int32)r;
+    //g_flt = (r & 0x800000u) ? (int32)(r | 0xFF000000u) : (int32)r;
+    g_flt = r;
     g_filter_ready = 1u;
 }
 

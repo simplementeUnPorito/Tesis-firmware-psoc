@@ -766,7 +766,7 @@ END GROUP
                 0x00000800                ee_size = (CY_APPL_LOADABLE && ! (CY_EE_IN_BTLDR))?(CY_EE_SIZE / CY_APPL_MAX):CY_EE_SIZE
                 [!provide]                PROVIDE (CY_ECC_OFFSET, ecc_offset)
 
-.text           0x00000000     0x1efe
+.text           0x00000000     0x1ee6
  CREATE_OBJECT_SYMBOLS
                 0x00000000                PROVIDE (__cy_interrupt_vector, RomVectors)
  *(.romvectors)
@@ -787,507 +787,506 @@ END GROUP
                 0x00000084       0x1c .\CortexM3\ARM_GCC_541\Debug\main.o
                 0x00000084                isr_DelSigReady
  .text.isr_FilterReady
-                0x000000a0       0x20 .\CortexM3\ARM_GCC_541\Debug\main.o
+                0x000000a0       0x18 .\CortexM3\ARM_GCC_541\Debug\main.o
                 0x000000a0                isr_FilterReady
  .text.isr_Timer
-                0x000000c0       0x14 .\CortexM3\ARM_GCC_541\Debug\main.o
-                0x000000c0                isr_Timer
+                0x000000b8       0x14 .\CortexM3\ARM_GCC_541\Debug\main.o
+                0x000000b8                isr_Timer
  .text.PGAgain_Set
-                0x000000d4       0x18 .\CortexM3\ARM_GCC_541\Debug\main.o
+                0x000000cc       0x18 .\CortexM3\ARM_GCC_541\Debug\main.o
  .text.PGAvdac_Set
-                0x000000ec       0x18 .\CortexM3\ARM_GCC_541\Debug\main.o
+                0x000000e4       0x18 .\CortexM3\ARM_GCC_541\Debug\main.o
  .text.send_ack
-                0x00000104       0x2c .\CortexM3\ARM_GCC_541\Debug\main.o
+                0x000000fc       0x2c .\CortexM3\ARM_GCC_541\Debug\main.o
  .text.send_config
-                0x00000130       0x78 .\CortexM3\ARM_GCC_541\Debug\main.o
+                0x00000128       0x78 .\CortexM3\ARM_GCC_541\Debug\main.o
  .text.rx_watchdog_stop
-                0x000001a8       0x1c .\CortexM3\ARM_GCC_541\Debug\main.o
+                0x000001a0       0x1c .\CortexM3\ARM_GCC_541\Debug\main.o
  .text.rx_watchdog_start
-                0x000001c4       0x28 .\CortexM3\ARM_GCC_541\Debug\main.o
+                0x000001bc       0x28 .\CortexM3\ARM_GCC_541\Debug\main.o
  .text.led_toggle
-                0x000001ec       0x14 .\CortexM3\ARM_GCC_541\Debug\main.o
- .text.main     0x00000200      0x328 .\CortexM3\ARM_GCC_541\Debug\main.o
-                0x00000200                main
+                0x000001e4       0x14 .\CortexM3\ARM_GCC_541\Debug\main.o
+ .text.main     0x000001f8      0x328 .\CortexM3\ARM_GCC_541\Debug\main.o
+                0x000001f8                main
  .text.CyClockStartupError
-                0x00000528        0x4 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
+                0x00000520        0x4 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
  .text.cfg_write_bytes32
-                0x0000052c       0x34 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
+                0x00000524       0x34 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
  .text.AnalogSetDefault
-                0x00000560      0x108 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
+                0x00000558      0x108 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
  .text.CYMEMZERO
-                0x00000668        0xc .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
+                0x00000660        0xc .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
  .text.CYCONFIGCPY
-                0x00000674        0x8 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
+                0x0000066c        0x8 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
  .text.ClockSetup
-                0x0000067c       0xe8 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
+                0x00000674       0xe8 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
  .text.cyfitter_cfg
-                0x00000764      0x13c .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
-                0x00000764                cyfitter_cfg
+                0x0000075c      0x13c .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
+                0x0000075c                cyfitter_cfg
  .text.IntDefaultHandler
-                0x000008a0       0x10 .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
-                0x000008a0                IntDefaultHandler
- .text.Start_c  0x000008b0       0x4c .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
-                0x000008b0                Start_c
+                0x00000898       0x10 .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
+                0x00000898                IntDefaultHandler
+ .text.Start_c  0x000008a8       0x4c .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
+                0x000008a8                Start_c
  .text.initialize_psoc
-                0x000008fc       0x68 .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
-                0x000008fc                initialize_psoc
+                0x000008f4       0x68 .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
+                0x000008f4                initialize_psoc
  .text.Filter_Init
-                0x00000964       0xd0 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter.o)
-                0x00000964                Filter_Init
+                0x0000095c       0xd0 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter.o)
+                0x0000095c                Filter_Init
  .text.Filter_Enable
-                0x00000a34       0x28 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter.o)
-                0x00000a34                Filter_Enable
+                0x00000a2c       0x28 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter.o)
+                0x00000a2c                Filter_Enable
  .text.Filter_Start
-                0x00000a5c       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter.o)
-                0x00000a5c                Filter_Start
+                0x00000a54       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter.o)
+                0x00000a54                Filter_Start
  .text.Filter_Read24
-                0x00000a78       0x20 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter.o)
-                0x00000a78                Filter_Read24
+                0x00000a70       0x20 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter.o)
+                0x00000a70                Filter_Read24
  .text.Filter_Write24
-                0x00000a98       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter.o)
-                0x00000a98                Filter_Write24
+                0x00000a90       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter.o)
+                0x00000a90                Filter_Write24
  .text.Filter_SetCoherency
-                0x00000ab4       0x48 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter.o)
-                0x00000ab4                Filter_SetCoherency
+                0x00000aac       0x48 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter.o)
+                0x00000aac                Filter_SetCoherency
  .text.Filter_SetDalign
-                0x00000afc       0x20 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter.o)
-                0x00000afc                Filter_SetDalign
+                0x00000af4       0x20 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter.o)
+                0x00000af4                Filter_SetDalign
  .text.Filter_SetInterruptMode
-                0x00000b1c       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter_PVT.o)
-                0x00000b1c                Filter_SetInterruptMode
+                0x00000b14       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter_PVT.o)
+                0x00000b14                Filter_SetInterruptMode
  .text.Filter_SetDMAMode
-                0x00000b2c       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter_PVT.o)
-                0x00000b2c                Filter_SetDMAMode
- .text.CyHalt   0x00000b3c        0x4 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyLib.o)
-                0x00000b3c                CyHalt
- .text.CyDelay  0x00000b40       0x2c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyLib.o)
-                0x00000b40                CyDelay
+                0x00000b24       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter_PVT.o)
+                0x00000b24                Filter_SetDMAMode
+ .text.CyHalt   0x00000b34        0x4 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyLib.o)
+                0x00000b34                CyHalt
+ .text.CyDelay  0x00000b38       0x2c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyLib.o)
+                0x00000b38                CyDelay
  .text.CyDelayUs
-                0x00000b6c       0x14 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyLib.o)
-                0x00000b6c                CyDelayUs
+                0x00000b64       0x14 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyLib.o)
+                0x00000b64                CyDelayUs
  .text.CyIntSetVector
-                0x00000b80       0x28 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyLib.o)
-                0x00000b80                CyIntSetVector
+                0x00000b78       0x28 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyLib.o)
+                0x00000b78                CyIntSetVector
  .text.CyIntSetPriority
-                0x00000ba8       0x30 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyLib.o)
-                0x00000ba8                CyIntSetPriority
+                0x00000ba0       0x30 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyLib.o)
+                0x00000ba0                CyIntSetPriority
  .text.isr_DelSig_SetVector
-                0x00000bd8        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_DelSig.o)
-                0x00000bd8                isr_DelSig_SetVector
+                0x00000bd0        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_DelSig.o)
+                0x00000bd0                isr_DelSig_SetVector
  .text.isr_DelSig_SetPriority
-                0x00000be4       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_DelSig.o)
-                0x00000be4                isr_DelSig_SetPriority
+                0x00000bdc       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_DelSig.o)
+                0x00000bdc                isr_DelSig_SetPriority
  .text.isr_DelSig_Enable
-                0x00000bf4        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_DelSig.o)
-                0x00000bf4                isr_DelSig_Enable
+                0x00000bec        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_DelSig.o)
+                0x00000bec                isr_DelSig_Enable
  .text.isr_DelSig_Disable
-                0x00000c00        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_DelSig.o)
-                0x00000c00                isr_DelSig_Disable
+                0x00000bf8        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_DelSig.o)
+                0x00000bf8                isr_DelSig_Disable
  .text.isr_DelSig_StartEx
-                0x00000c0c       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_DelSig.o)
-                0x00000c0c                isr_DelSig_StartEx
+                0x00000c04       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_DelSig.o)
+                0x00000c04                isr_DelSig_StartEx
  .text.isr_Timer_SetVector
-                0x00000c28        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Timer.o)
-                0x00000c28                isr_Timer_SetVector
+                0x00000c20        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Timer.o)
+                0x00000c20                isr_Timer_SetVector
  .text.isr_Timer_SetPriority
-                0x00000c34       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Timer.o)
-                0x00000c34                isr_Timer_SetPriority
+                0x00000c2c       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Timer.o)
+                0x00000c2c                isr_Timer_SetPriority
  .text.isr_Timer_Enable
-                0x00000c44        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Timer.o)
-                0x00000c44                isr_Timer_Enable
+                0x00000c3c        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Timer.o)
+                0x00000c3c                isr_Timer_Enable
  .text.isr_Timer_Disable
-                0x00000c50        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Timer.o)
-                0x00000c50                isr_Timer_Disable
+                0x00000c48        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Timer.o)
+                0x00000c48                isr_Timer_Disable
  .text.isr_Timer_StartEx
-                0x00000c5c       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Timer.o)
-                0x00000c5c                isr_Timer_StartEx
+                0x00000c54       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Timer.o)
+                0x00000c54                isr_Timer_StartEx
  .text.isr_Timer_ClearPending
-                0x00000c78        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Timer.o)
-                0x00000c78                isr_Timer_ClearPending
+                0x00000c70        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Timer.o)
+                0x00000c70                isr_Timer_ClearPending
  .text.UART_PC_Init
-                0x00000c84       0x5c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC.o)
-                0x00000c84                UART_PC_Init
+                0x00000c7c       0x5c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC.o)
+                0x00000c7c                UART_PC_Init
  .text.UART_PC_Enable
-                0x00000ce0       0x50 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC.o)
-                0x00000ce0                UART_PC_Enable
+                0x00000cd8       0x50 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC.o)
+                0x00000cd8                UART_PC_Enable
  .text.UART_PC_Start
-                0x00000d30       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC.o)
-                0x00000d30                UART_PC_Start
+                0x00000d28       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC.o)
+                0x00000d28                UART_PC_Start
  .text.UART_PC_ReadRxData
-                0x00000d4c       0x64 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC.o)
-                0x00000d4c                UART_PC_ReadRxData
+                0x00000d44       0x64 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC.o)
+                0x00000d44                UART_PC_ReadRxData
  .text.UART_PC_GetRxBufferSize
-                0x00000db0       0x60 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC.o)
-                0x00000db0                UART_PC_GetRxBufferSize
+                0x00000da8       0x60 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC.o)
+                0x00000da8                UART_PC_GetRxBufferSize
  .text.UART_PC_PutChar
-                0x00000e10       0x70 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC.o)
-                0x00000e10                UART_PC_PutChar
+                0x00000e08       0x70 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC.o)
+                0x00000e08                UART_PC_PutChar
  .text.UART_PC_PutArray
-                0x00000e80       0x28 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC.o)
-                0x00000e80                UART_PC_PutArray
+                0x00000e78       0x28 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC.o)
+                0x00000e78                UART_PC_PutArray
  .text.UART_PC_RXISR
-                0x00000ea8       0x98 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC_INT.o)
-                0x00000ea8                UART_PC_RXISR
+                0x00000ea0       0x98 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC_INT.o)
+                0x00000ea0                UART_PC_RXISR
  .text.UART_PC_TXISR
-                0x00000f40       0x58 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC_INT.o)
-                0x00000f40                UART_PC_TXISR
+                0x00000f38       0x58 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC_INT.o)
+                0x00000f38                UART_PC_TXISR
  .text.UART_PC_IntClock_Start
-                0x00000f98       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC_IntClock.o)
-                0x00000f98                UART_PC_IntClock_Start
+                0x00000f90       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC_IntClock.o)
+                0x00000f90                UART_PC_IntClock_Start
  .text.isr_Filter_SetVector
-                0x00000fb4       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Filter.o)
-                0x00000fb4                isr_Filter_SetVector
+                0x00000fac       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Filter.o)
+                0x00000fac                isr_Filter_SetVector
  .text.isr_Filter_SetPriority
-                0x00000fc4       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Filter.o)
-                0x00000fc4                isr_Filter_SetPriority
+                0x00000fbc       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Filter.o)
+                0x00000fbc                isr_Filter_SetPriority
  .text.isr_Filter_Enable
-                0x00000fd4       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Filter.o)
-                0x00000fd4                isr_Filter_Enable
+                0x00000fcc       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Filter.o)
+                0x00000fcc                isr_Filter_Enable
  .text.isr_Filter_Disable
-                0x00000fe4       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Filter.o)
-                0x00000fe4                isr_Filter_Disable
+                0x00000fdc       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Filter.o)
+                0x00000fdc                isr_Filter_Disable
  .text.isr_Filter_StartEx
-                0x00000ff4       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Filter.o)
-                0x00000ff4                isr_Filter_StartEx
+                0x00000fec       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Filter.o)
+                0x00000fec                isr_Filter_StartEx
  .text.Timer_Enable
-                0x00001010       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Timer.o)
-                0x00001010                Timer_Enable
+                0x00001008       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Timer.o)
+                0x00001008                Timer_Enable
  .text.Timer_Stop
-                0x00001020       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Timer.o)
-                0x00001020                Timer_Stop
+                0x00001018       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Timer.o)
+                0x00001018                Timer_Stop
  .text.Timer_SetInterruptMode
-                0x00001030        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Timer.o)
-                0x00001030                Timer_SetInterruptMode
+                0x00001028        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Timer.o)
+                0x00001028                Timer_SetInterruptMode
  .text.Timer_ReadStatusRegister
-                0x0000103c        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Timer.o)
-                0x0000103c                Timer_ReadStatusRegister
+                0x00001034        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Timer.o)
+                0x00001034                Timer_ReadStatusRegister
  .text.Timer_WritePeriod
-                0x00001048        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Timer.o)
-                0x00001048                Timer_WritePeriod
+                0x00001040        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Timer.o)
+                0x00001040                Timer_WritePeriod
  .text.Timer_ReadCapture
-                0x00001054        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Timer.o)
-                0x00001054                Timer_ReadCapture
+                0x0000104c        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Timer.o)
+                0x0000104c                Timer_ReadCapture
  .text.Timer_WriteCounter
-                0x00001060        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Timer.o)
-                0x00001060                Timer_WriteCounter
+                0x00001058        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Timer.o)
+                0x00001058                Timer_WriteCounter
  .text.Timer_ClearFIFO
-                0x0000106c       0x14 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Timer.o)
-                0x0000106c                Timer_ClearFIFO
+                0x00001064       0x14 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Timer.o)
+                0x00001064                Timer_ClearFIFO
  .text.Timer_Init
-                0x00001080       0x30 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Timer.o)
-                0x00001080                Timer_Init
+                0x00001078       0x30 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Timer.o)
+                0x00001078                Timer_Init
  .text.Timer_Start
-                0x000010b0       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Timer.o)
-                0x000010b0                Timer_Start
+                0x000010a8       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Timer.o)
+                0x000010a8                Timer_Start
  .text.LED_Write
-                0x000010cc       0x18 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LED.o)
-                0x000010cc                LED_Write
+                0x000010c4       0x18 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LED.o)
+                0x000010c4                LED_Write
  .text.LED_Read
-                0x000010e4       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LED.o)
-                0x000010e4                LED_Read
+                0x000010dc       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LED.o)
+                0x000010dc                LED_Read
  .text.VDAC_Enable
-                0x000010f4       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(VDAC.o)
-                0x000010f4                VDAC_Enable
+                0x000010ec       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(VDAC.o)
+                0x000010ec                VDAC_Enable
  .text.VDAC_SetSpeed
-                0x00001110       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(VDAC.o)
-                0x00001110                VDAC_SetSpeed
+                0x00001108       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(VDAC.o)
+                0x00001108                VDAC_SetSpeed
  .text.VDAC_SetValue
-                0x0000112c        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(VDAC.o)
-                0x0000112c                VDAC_SetValue
+                0x00001124        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(VDAC.o)
+                0x00001124                VDAC_SetValue
  .text.VDAC_DacTrim
-                0x00001138       0x24 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(VDAC.o)
-                0x00001138                VDAC_DacTrim
+                0x00001130       0x24 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(VDAC.o)
+                0x00001130                VDAC_DacTrim
  .text.VDAC_SetRange
-                0x0000115c       0x20 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(VDAC.o)
-                0x0000115c                VDAC_SetRange
+                0x00001154       0x20 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(VDAC.o)
+                0x00001154                VDAC_SetRange
  .text.VDAC_Init
-                0x0000117c       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(VDAC.o)
-                0x0000117c                VDAC_Init
+                0x00001174       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(VDAC.o)
+                0x00001174                VDAC_Init
  .text.VDAC_Start
-                0x00001198       0x24 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(VDAC.o)
-                0x00001198                VDAC_Start
+                0x00001190       0x24 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(VDAC.o)
+                0x00001190                VDAC_Start
  .text.OPAbp_Enable
-                0x000011bc       0x28 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAbp.o)
-                0x000011bc                OPAbp_Enable
+                0x000011b4       0x28 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAbp.o)
+                0x000011b4                OPAbp_Enable
  .text.OPAbp_SetPower
-                0x000011e4       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAbp.o)
-                0x000011e4                OPAbp_SetPower
+                0x000011dc       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAbp.o)
+                0x000011dc                OPAbp_SetPower
  .text.OPAbp_Init
-                0x00001200        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAbp.o)
-                0x00001200                OPAbp_Init
+                0x000011f8        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAbp.o)
+                0x000011f8                OPAbp_Init
  .text.OPAbp_Start
-                0x0000120c       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAbp.o)
-                0x0000120c                OPAbp_Start
+                0x00001204       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAbp.o)
+                0x00001204                OPAbp_Start
  .text.OPAlp_Enable
-                0x00001228       0x28 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAlp.o)
-                0x00001228                OPAlp_Enable
+                0x00001220       0x28 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAlp.o)
+                0x00001220                OPAlp_Enable
  .text.OPAlp_SetPower
-                0x00001250       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAlp.o)
-                0x00001250                OPAlp_SetPower
+                0x00001248       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAlp.o)
+                0x00001248                OPAlp_SetPower
  .text.OPAlp_Init
-                0x0000126c        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAlp.o)
-                0x0000126c                OPAlp_Init
+                0x00001264        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAlp.o)
+                0x00001264                OPAlp_Init
  .text.OPAlp_Start
-                0x00001278       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAlp.o)
-                0x00001278                OPAlp_Start
+                0x00001270       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAlp.o)
+                0x00001270                OPAlp_Start
  .text.OPAadder_Enable
-                0x00001294       0x28 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAadder.o)
-                0x00001294                OPAadder_Enable
+                0x0000128c       0x28 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAadder.o)
+                0x0000128c                OPAadder_Enable
  .text.OPAadder_SetPower
-                0x000012bc       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAadder.o)
-                0x000012bc                OPAadder_SetPower
+                0x000012b4       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAadder.o)
+                0x000012b4                OPAadder_SetPower
  .text.OPAadder_Init
-                0x000012d8        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAadder.o)
-                0x000012d8                OPAadder_Init
+                0x000012d0        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAadder.o)
+                0x000012d0                OPAadder_Init
  .text.OPAadder_Start
-                0x000012e4       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAadder.o)
-                0x000012e4                OPAadder_Start
+                0x000012dc       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAadder.o)
+                0x000012dc                OPAadder_Start
  .text.ADC_GainCompensation
-                0x00001300       0xdc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC.o)
+                0x000012f8       0xdc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC.o)
  .text.ADC_SetDSMRef0Reg
-                0x000013dc       0x4c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC.o)
+                0x000013d4       0x4c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC.o)
  .text.ADC_InitConfig
-                0x00001428       0xec .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC.o)
+                0x00001420       0xe0 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC.o)
  .text.ADC_Init
-                0x00001514       0xc4 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC.o)
-                0x00001514                ADC_Init
+                0x00001500       0xc4 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC.o)
+                0x00001500                ADC_Init
  .text.ADC_Enable
-                0x000015d8       0xd8 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC.o)
-                0x000015d8                ADC_Enable
+                0x000015c4       0xd8 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC.o)
+                0x000015c4                ADC_Enable
  .text.ADC_Start
-                0x000016b0       0x28 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC.o)
-                0x000016b0                ADC_Start
+                0x0000169c       0x28 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC.o)
+                0x0000169c                ADC_Start
  .text.ADC_StartConvert
-                0x000016d8       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC.o)
-                0x000016d8                ADC_StartConvert
+                0x000016c4       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC.o)
+                0x000016c4                ADC_StartConvert
  .text.ADC_GetResult32
-                0x000016e8       0x6c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC.o)
-                0x000016e8                ADC_GetResult32
+                0x000016d4       0x6c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC.o)
+                0x000016d4                ADC_GetResult32
  .text.ADC_ISR1
-                0x00001754        0x4 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_INT.o)
-                0x00001754                ADC_ISR1
+                0x00001740        0x4 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_INT.o)
+                0x00001740                ADC_ISR1
  .text.PGAgain_Enable
-                0x00001758       0x28 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAgain.o)
-                0x00001758                PGAgain_Enable
+                0x00001744       0x28 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAgain.o)
+                0x00001744                PGAgain_Enable
  .text.PGAgain_SetPower
-                0x00001780       0x18 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAgain.o)
-                0x00001780                PGAgain_SetPower
+                0x0000176c       0x18 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAgain.o)
+                0x0000176c                PGAgain_SetPower
  .text.PGAgain_SetGain
-                0x00001798       0x78 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAgain.o)
-                0x00001798                PGAgain_SetGain
+                0x00001784       0x78 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAgain.o)
+                0x00001784                PGAgain_SetGain
  .text.PGAgain_Init
-                0x00001810       0x34 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAgain.o)
-                0x00001810                PGAgain_Init
+                0x000017fc       0x34 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAgain.o)
+                0x000017fc                PGAgain_Init
  .text.PGAgain_Start
-                0x00001844       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAgain.o)
-                0x00001844                PGAgain_Start
+                0x00001830       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAgain.o)
+                0x00001830                PGAgain_Start
  .text.PGAvdac_Enable
-                0x00001860       0x28 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAvdac.o)
-                0x00001860                PGAvdac_Enable
+                0x0000184c       0x28 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAvdac.o)
+                0x0000184c                PGAvdac_Enable
  .text.PGAvdac_SetPower
-                0x00001888       0x18 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAvdac.o)
-                0x00001888                PGAvdac_SetPower
+                0x00001874       0x18 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAvdac.o)
+                0x00001874                PGAvdac_SetPower
  .text.PGAvdac_SetGain
-                0x000018a0       0x78 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAvdac.o)
-                0x000018a0                PGAvdac_SetGain
+                0x0000188c       0x78 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAvdac.o)
+                0x0000188c                PGAvdac_SetGain
  .text.PGAvdac_Init
-                0x00001918       0x34 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAvdac.o)
-                0x00001918                PGAvdac_Init
+                0x00001904       0x34 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAvdac.o)
+                0x00001904                PGAvdac_Init
  .text.PGAvdac_Start
-                0x0000194c       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAvdac.o)
-                0x0000194c                PGAvdac_Start
+                0x00001938       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAvdac.o)
+                0x00001938                PGAvdac_Start
  .text.PGAn_Enable
-                0x00001968       0x28 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAn.o)
-                0x00001968                PGAn_Enable
+                0x00001954       0x28 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAn.o)
+                0x00001954                PGAn_Enable
  .text.PGAn_SetPower
-                0x00001990       0x18 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAn.o)
-                0x00001990                PGAn_SetPower
+                0x0000197c       0x18 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAn.o)
+                0x0000197c                PGAn_SetPower
  .text.PGAn_SetGain
-                0x000019a8       0x78 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAn.o)
-                0x000019a8                PGAn_SetGain
+                0x00001994       0x78 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAn.o)
+                0x00001994                PGAn_SetGain
  .text.PGAn_Init
-                0x00001a20       0x34 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAn.o)
-                0x00001a20                PGAn_Init
+                0x00001a0c       0x34 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAn.o)
+                0x00001a0c                PGAn_Init
  .text.PGAn_Start
-                0x00001a54       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAn.o)
-                0x00001a54                PGAn_Start
+                0x00001a40       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAn.o)
+                0x00001a40                PGAn_Start
  .text.PGAp_Enable
-                0x00001a70       0x28 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAp.o)
-                0x00001a70                PGAp_Enable
+                0x00001a5c       0x28 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAp.o)
+                0x00001a5c                PGAp_Enable
  .text.PGAp_SetPower
-                0x00001a98       0x18 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAp.o)
-                0x00001a98                PGAp_SetPower
+                0x00001a84       0x18 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAp.o)
+                0x00001a84                PGAp_SetPower
  .text.PGAp_SetGain
-                0x00001ab0       0x78 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAp.o)
-                0x00001ab0                PGAp_SetGain
+                0x00001a9c       0x78 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAp.o)
+                0x00001a9c                PGAp_SetGain
  .text.PGAp_Init
-                0x00001b28       0x34 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAp.o)
-                0x00001b28                PGAp_Init
+                0x00001b14       0x34 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAp.o)
+                0x00001b14                PGAp_Init
  .text.PGAp_Start
-                0x00001b5c       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAp.o)
-                0x00001b5c                PGAp_Start
+                0x00001b48       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAp.o)
+                0x00001b48                PGAp_Start
  .text.ADC_Ext_CP_Clk_GetDividerRegister
-                0x00001b78        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_Ext_CP_Clk.o)
-                0x00001b78                ADC_Ext_CP_Clk_GetDividerRegister
+                0x00001b64        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_Ext_CP_Clk.o)
+                0x00001b64                ADC_Ext_CP_Clk_GetDividerRegister
  .text.ADC_Ext_CP_Clk_SetModeRegister
-                0x00001b84       0x14 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_Ext_CP_Clk.o)
-                0x00001b84                ADC_Ext_CP_Clk_SetModeRegister
+                0x00001b70       0x14 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_Ext_CP_Clk.o)
+                0x00001b70                ADC_Ext_CP_Clk_SetModeRegister
  .text.ADC_Ext_CP_Clk_GetSourceRegister
-                0x00001b98       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_Ext_CP_Clk.o)
-                0x00001b98                ADC_Ext_CP_Clk_GetSourceRegister
+                0x00001b84       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_Ext_CP_Clk.o)
+                0x00001b84                ADC_Ext_CP_Clk_GetSourceRegister
  .text.ADC_Ext_CP_Clk_SetDividerRegister
-                0x00001ba8       0xd8 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_Ext_CP_Clk.o)
-                0x00001ba8                ADC_Ext_CP_Clk_SetDividerRegister
+                0x00001b94       0xd8 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_Ext_CP_Clk.o)
+                0x00001b94                ADC_Ext_CP_Clk_SetDividerRegister
  .text.ADC_theACLK_GetDividerRegister
-                0x00001c80        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_theACLK.o)
-                0x00001c80                ADC_theACLK_GetDividerRegister
+                0x00001c6c        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_theACLK.o)
+                0x00001c6c                ADC_theACLK_GetDividerRegister
  .text.ADC_theACLK_SetModeRegister
-                0x00001c8c       0x14 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_theACLK.o)
-                0x00001c8c                ADC_theACLK_SetModeRegister
+                0x00001c78       0x14 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_theACLK.o)
+                0x00001c78                ADC_theACLK_SetModeRegister
  .text.ADC_theACLK_GetSourceRegister
-                0x00001ca0       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_theACLK.o)
-                0x00001ca0                ADC_theACLK_GetSourceRegister
+                0x00001c8c       0x10 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_theACLK.o)
+                0x00001c8c                ADC_theACLK_GetSourceRegister
  .text.ADC_theACLK_SetDividerRegister
-                0x00001cb0       0xd8 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_theACLK.o)
-                0x00001cb0                ADC_theACLK_SetDividerRegister
+                0x00001c9c       0xd8 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_theACLK.o)
+                0x00001c9c                ADC_theACLK_SetDividerRegister
  .text.OPAref_Enable
-                0x00001d88       0x28 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAref.o)
-                0x00001d88                OPAref_Enable
+                0x00001d74       0x28 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAref.o)
+                0x00001d74                OPAref_Enable
  .text.OPAref_SetPower
-                0x00001db0       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAref.o)
-                0x00001db0                OPAref_SetPower
+                0x00001d9c       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAref.o)
+                0x00001d9c                OPAref_SetPower
  .text.OPAref_Init
-                0x00001dcc        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAref.o)
-                0x00001dcc                OPAref_Init
+                0x00001db8        0xc .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAref.o)
+                0x00001db8                OPAref_Init
  .text.OPAref_Start
-                0x00001dd8       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAref.o)
-                0x00001dd8                OPAref_Start
+                0x00001dc4       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAref.o)
+                0x00001dc4                OPAref_Start
  .text.LPF_1_SetCutoffFreq
-                0x00001df4       0x18 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LPF_1.o)
-                0x00001df4                LPF_1_SetCutoffFreq
+                0x00001de0       0x18 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LPF_1.o)
+                0x00001de0                LPF_1_SetCutoffFreq
  .text.LPF_1_Start
-                0x00001e0c       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LPF_1.o)
-                0x00001e0c                LPF_1_Start
+                0x00001df8       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LPF_1.o)
+                0x00001df8                LPF_1_Start
  .text.LPF_2_SetCutoffFreq
-                0x00001e28       0x18 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LPF_2.o)
-                0x00001e28                LPF_2_SetCutoffFreq
+                0x00001e14       0x18 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LPF_2.o)
+                0x00001e14                LPF_2_SetCutoffFreq
  .text.LPF_2_Start
-                0x00001e40       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LPF_2.o)
-                0x00001e40                LPF_2_Start
- *fill*         0x00001e5c        0x4 
- .text          0x00001e60       0x20 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyBootAsmGnu.o)
-                0x00001e60                CyDelayCycles
-                0x00001e70                CyEnterCriticalSection
-                0x00001e78                CyExitCriticalSection
- .text.__errno  0x00001e80        0xc c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-errno.o)
-                0x00001e80                __errno
+                0x00001e2c       0x1c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LPF_2.o)
+                0x00001e2c                LPF_2_Start
+ .text          0x00001e48       0x20 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyBootAsmGnu.o)
+                0x00001e48                CyDelayCycles
+                0x00001e58                CyEnterCriticalSection
+                0x00001e60                CyExitCriticalSection
+ .text.__errno  0x00001e68        0xc c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-errno.o)
+                0x00001e68                __errno
  .text.__libc_init_array
-                0x00001e8c       0x4c c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-init.o)
-                0x00001e8c                __libc_init_array
- .text.memcpy   0x00001ed8       0x16 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-memcpy-stub.o)
-                0x00001ed8                memcpy
- .text.memset   0x00001eee       0x10 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-memset.o)
-                0x00001eee                memset
+                0x00001e74       0x4c c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-init.o)
+                0x00001e74                __libc_init_array
+ .text.memcpy   0x00001ec0       0x16 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-memcpy-stub.o)
+                0x00001ec0                memcpy
+ .text.memset   0x00001ed6       0x10 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-memset.o)
+                0x00001ed6                memset
  *(.plt)
  *(.gnu.warning)
  *(.glue_7t)
- .glue_7t       0x00001efe        0x0 linker stubs
+ .glue_7t       0x00001ee6        0x0 linker stubs
  *(.glue_7)
- .glue_7        0x00001efe        0x0 linker stubs
+ .glue_7        0x00001ee6        0x0 linker stubs
  *(.vfp11_veneer)
- .vfp11_veneer  0x00001efe        0x0 linker stubs
+ .vfp11_veneer  0x00001ee6        0x0 linker stubs
  *(.bootloader)
  *(.ARM.extab* .gnu.linkonce.armextab.*)
  *(.gcc_except_table)
 
-.v4_bx          0x00001f00        0x0
- .v4_bx         0x00001f00        0x0 linker stubs
+.v4_bx          0x00001ee8        0x0
+ .v4_bx         0x00001ee8        0x0 linker stubs
 
-.iplt           0x00001f00        0x0
- .iplt          0x00001f00        0x0 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtbegin.o
+.iplt           0x00001ee8        0x0
+ .iplt          0x00001ee8        0x0 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtbegin.o
 
 .eh_frame_hdr
  *(.eh_frame_hdr)
 
-.eh_frame       0x00001f00        0x4
+.eh_frame       0x00001ee8        0x4
  *(.eh_frame)
- .eh_frame      0x00001f00        0x0 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtbegin.o
- .eh_frame      0x00001f00        0x4 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtend.o
+ .eh_frame      0x00001ee8        0x0 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtbegin.o
+ .eh_frame      0x00001ee8        0x4 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtend.o
                 [!provide]                PROVIDE (__exidx_start, .)
 
 .ARM.exidx
  *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-                0x00001f04                __exidx_end = .
+                0x00001eec                __exidx_end = .
 
-.rodata         0x00001f04      0x70c
+.rodata         0x00001eec      0x70c
  *(.rodata .rodata.* .gnu.linkonce.r.*)
- .rodata        0x00001f04       0x36 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
- *fill*         0x00001f3a        0x2 
- .rodata        0x00001f3c      0x640 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter_RAM_Data.o)
-                0x00001f3c                Filter_cfsm
-                0x0000203c                Filter_acu
-                0x0000207c                Filter_data_b
-                0x0000227c                Filter_data_a
-                0x0000247c                Filter_control
- .rodata        0x0000257c       0x15 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAgain.o)
+ .rodata        0x00001eec       0x36 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
+ *fill*         0x00001f22        0x2 
+ .rodata        0x00001f24      0x640 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter_RAM_Data.o)
+                0x00001f24                Filter_cfsm
+                0x00002024                Filter_acu
+                0x00002064                Filter_data_b
+                0x00002264                Filter_data_a
+                0x00002464                Filter_control
+ .rodata        0x00002564       0x15 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAgain.o)
+ *fill*         0x00002579        0x3 
+ .rodata        0x0000257c       0x15 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAvdac.o)
  *fill*         0x00002591        0x3 
- .rodata        0x00002594       0x15 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAvdac.o)
+ .rodata        0x00002594       0x15 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAn.o)
  *fill*         0x000025a9        0x3 
- .rodata        0x000025ac       0x15 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAn.o)
- *fill*         0x000025c1        0x3 
- .rodata        0x000025c4       0x15 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAp.o)
+ .rodata        0x000025ac       0x15 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAp.o)
  .rodata.str1.1
-                0x000025d9        0x2 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-impure.o)
-                0x000025dc                . = ALIGN (0x4)
- *fill*         0x000025db        0x1 
+                0x000025c1        0x2 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-impure.o)
+                0x000025c4                . = ALIGN (0x4)
+ *fill*         0x000025c3        0x1 
  *(.init)
- .init          0x000025dc        0x4 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crti.o
-                0x000025dc                _init
- .init          0x000025e0        0x8 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtn.o
-                0x000025e8                . = ALIGN (0x4)
-                0x000025e8                __preinit_array_start = .
+ .init          0x000025c4        0x4 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crti.o
+                0x000025c4                _init
+ .init          0x000025c8        0x8 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtn.o
+                0x000025d0                . = ALIGN (0x4)
+                0x000025d0                __preinit_array_start = .
  *(.preinit_array)
-                0x000025e8                __preinit_array_end = .
-                0x000025e8                . = ALIGN (0x4)
-                0x000025e8                __init_array_start = .
+                0x000025d0                __preinit_array_end = .
+                0x000025d0                . = ALIGN (0x4)
+                0x000025d0                __init_array_start = .
  *(SORT(.init_array.*))
  *(.init_array)
- .init_array    0x000025e8        0x4 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtbegin.o
- .init_array    0x000025ec        0x4 .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
-                0x000025f0                __init_array_end = .
-                0x000025f0                . = ALIGN (0x4)
+ .init_array    0x000025d0        0x4 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtbegin.o
+ .init_array    0x000025d4        0x4 .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
+                0x000025d8                __init_array_end = .
+                0x000025d8                . = ALIGN (0x4)
  *(.fini)
- .fini          0x000025f0        0x4 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crti.o
-                0x000025f0                _fini
- .fini          0x000025f4        0x8 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtn.o
-                0x000025fc                . = ALIGN (0x4)
-                0x000025fc                __fini_array_start = .
+ .fini          0x000025d8        0x4 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crti.o
+                0x000025d8                _fini
+ .fini          0x000025dc        0x8 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtn.o
+                0x000025e4                . = ALIGN (0x4)
+                0x000025e4                __fini_array_start = .
  *(.fini_array)
- .fini_array    0x000025fc        0x4 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtbegin.o
+ .fini_array    0x000025e4        0x4 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtbegin.o
  *(SORT(.fini_array.*))
-                0x00002600                __fini_array_end = .
-                0x00002600                . = ALIGN (0x4)
+                0x000025e8                __fini_array_end = .
+                0x000025e8                . = ALIGN (0x4)
  *crtbegin.o(.ctors)
  *(EXCLUDE_FILE(*crtend.o) .ctors)
  *(SORT(.ctors.*))
  *crtend.o(.ctors)
-                0x00002600                . = ALIGN (0x4)
+                0x000025e8                . = ALIGN (0x4)
  *crtbegin.o(.dtors)
  *(EXCLUDE_FILE(*crtend.o) .dtors)
  *(SORT(.dtors.*))
  *crtend.o(.dtors)
-                0x00002600                . = ALIGN (0x4)
-                0x00002600                __cy_regions = .
-                0x00002600        0x4 LONG 0x2610 __cy_region_init_ram
-                0x00002604        0x4 LONG 0x1fff80c8 __cy_region_start_data
-                0x00002608        0x4 LONG 0x80 __cy_region_init_size_ram
-                0x0000260c        0x4 LONG 0x120 __cy_region_zero_size_ram
-                0x00002610                __cy_regions_end = .
-                0x00002610                . = ALIGN (0x8)
-                0x00002610                _etext = .
+                0x000025e8                . = ALIGN (0x4)
+                0x000025e8                __cy_regions = .
+                0x000025e8        0x4 LONG 0x25f8 __cy_region_init_ram
+                0x000025ec        0x4 LONG 0x1fff80c8 __cy_region_start_data
+                0x000025f0        0x4 LONG 0x80 __cy_region_init_size_ram
+                0x000025f4        0x4 LONG 0x120 __cy_region_zero_size_ram
+                0x000025f8                __cy_regions_end = .
+                0x000025f8                . = ALIGN (0x8)
+                0x000025f8                _etext = .
 
 .cy_checksum_exclude
-                0x00002610        0x0
+                0x000025f8        0x0
  *(.cy_checksum_exclude)
 
 .ramvectors     0x1fff8000       0xc0
@@ -1301,7 +1300,7 @@ END GROUP
  .noinit        0x1fff80c0        0x1 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyLib.o)
                 0x1fff80c0                CyResetStatus
 
-.data           0x1fff80c8       0x80 load address 0x00002610
+.data           0x1fff80c8       0x80 load address 0x000025f8
                 0x1fff80c8                __cy_region_start_data = .
  *(.jcr)
  .jcr           0x1fff80c8        0x0 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtbegin.o
@@ -1329,10 +1328,10 @@ END GROUP
  *(.ram)
                 0x1fff8148                _edata = .
 
-.igot.plt       0x1fff8148        0x0 load address 0x00002690
+.igot.plt       0x1fff8148        0x0 load address 0x00002678
  .igot.plt      0x1fff8148        0x0 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtbegin.o
 
-.bss            0x1fff8148      0x120 load address 0x00002690
+.bss            0x1fff8148      0x120 load address 0x00002678
                 0x1fff8148                PROVIDE (__bss_start__, .)
  *(.shbss)
  *(.bss .bss.* .gnu.linkonce.b.*)
@@ -1394,11 +1393,11 @@ END GROUP
                 0x1fff8268                __end = .
                 0x1fff8268                PROVIDE (end, .)
                 0x1fff8268                PROVIDE (__bss_end__, .)
-                0x00002610                __cy_region_init_ram = LOADADDR (.data)
+                0x000025f8                __cy_region_init_ram = LOADADDR (.data)
                 0x00000080                __cy_region_init_size_ram = (_edata - ADDR (.data))
                 0x00000120                __cy_region_zero_size_ram = (_end - _edata)
 
-.heap           0x1fff8268       0x80 load address 0x00002690
+.heap           0x1fff8268       0x80 load address 0x00002678
                 0x1fff8268                . = _end
                 0x1fff82e8                . = (. + 0x80)
  *fill*         0x1fff8268       0x80 
@@ -1449,8 +1448,8 @@ END GROUP
  .cymeta        0x90500000        0xc .\CortexM3\ARM_GCC_541\Debug\cymetadata.o
                 0x90500000                cy_metadata
 
-.rel.dyn        0x00002690        0x0 load address 0x9050000c
- .rel.iplt      0x00002690        0x0 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtbegin.o
+.rel.dyn        0x00002678        0x0 load address 0x9050000c
+ .rel.iplt      0x00002678        0x0 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtbegin.o
 
 .stab
  *(.stab)
@@ -1546,43 +1545,43 @@ END GROUP
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x00000000     0x7e20
+.debug_info     0x00000000     0x7e1e
  *(.debug_info .gnu.linkonce.wi.*)
- .debug_info    0x00000000      0x980 .\CortexM3\ARM_GCC_541\Debug\main.o
- .debug_info    0x00000980      0x604 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
- .debug_info    0x00000f84      0x136 .\CortexM3\ARM_GCC_541\Debug\cymetadata.o
- .debug_info    0x000010ba      0x3bb .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
- .debug_info    0x00001475      0x4b4 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter.o)
- .debug_info    0x00001929       0xf2 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter_PVT.o)
- .debug_info    0x00001a1b      0x137 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter_RAM_Data.o)
- .debug_info    0x00001b52     0x1374 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyLib.o)
- .debug_info    0x00002ec6      0xa2a .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(cyPm.o)
- .debug_info    0x000038f0      0x2d2 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_DelSig.o)
- .debug_info    0x00003bc2      0x2d2 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Timer.o)
- .debug_info    0x00003e94      0x7be .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC.o)
- .debug_info    0x00004652      0x196 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC_INT.o)
- .debug_info    0x000047e8      0x283 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC_IntClock.o)
- .debug_info    0x00004a6b      0x2d2 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Filter.o)
- .debug_info    0x00004d3d      0x2ee .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Timer.o)
- .debug_info    0x0000502b      0x11f .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LED.o)
- .debug_info    0x0000514a      0x1de .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(VDAC.o)
- .debug_info    0x00005328      0x151 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAbp.o)
- .debug_info    0x00005479      0x151 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAlp.o)
- .debug_info    0x000055ca      0x151 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAadder.o)
- .debug_info    0x0000571b      0x9fb .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC.o)
- .debug_info    0x00006116       0xd3 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_INT.o)
- .debug_info    0x000061e9      0x1d3 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAgain.o)
- .debug_info    0x000063bc      0x1d3 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAvdac.o)
- .debug_info    0x0000658f      0x1d3 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAn.o)
- .debug_info    0x00006762      0x1d3 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAp.o)
- .debug_info    0x00006935      0x283 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_Ext_CP_Clk.o)
- .debug_info    0x00006bb8      0x2c4 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_theACLK.o)
- .debug_info    0x00006e7c      0x151 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAref.o)
- .debug_info    0x00006fcd      0x118 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LPF_1.o)
- .debug_info    0x000070e5      0x118 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LPF_2.o)
- .debug_info    0x000071fd       0x86 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyBootAsmGnu.o)
- .debug_info    0x00007283      0x64d .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyFlash.o)
- .debug_info    0x000078d0      0x550 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CySpc.o)
+ .debug_info    0x00000000      0x97e .\CortexM3\ARM_GCC_541\Debug\main.o
+ .debug_info    0x0000097e      0x604 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
+ .debug_info    0x00000f82      0x136 .\CortexM3\ARM_GCC_541\Debug\cymetadata.o
+ .debug_info    0x000010b8      0x3bb .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
+ .debug_info    0x00001473      0x4b4 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter.o)
+ .debug_info    0x00001927       0xf2 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter_PVT.o)
+ .debug_info    0x00001a19      0x137 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter_RAM_Data.o)
+ .debug_info    0x00001b50     0x1374 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyLib.o)
+ .debug_info    0x00002ec4      0xa2a .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(cyPm.o)
+ .debug_info    0x000038ee      0x2d2 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_DelSig.o)
+ .debug_info    0x00003bc0      0x2d2 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Timer.o)
+ .debug_info    0x00003e92      0x7be .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC.o)
+ .debug_info    0x00004650      0x196 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC_INT.o)
+ .debug_info    0x000047e6      0x283 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC_IntClock.o)
+ .debug_info    0x00004a69      0x2d2 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Filter.o)
+ .debug_info    0x00004d3b      0x2ee .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Timer.o)
+ .debug_info    0x00005029      0x11f .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LED.o)
+ .debug_info    0x00005148      0x1de .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(VDAC.o)
+ .debug_info    0x00005326      0x151 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAbp.o)
+ .debug_info    0x00005477      0x151 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAlp.o)
+ .debug_info    0x000055c8      0x151 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAadder.o)
+ .debug_info    0x00005719      0x9fb .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC.o)
+ .debug_info    0x00006114       0xd3 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_INT.o)
+ .debug_info    0x000061e7      0x1d3 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAgain.o)
+ .debug_info    0x000063ba      0x1d3 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAvdac.o)
+ .debug_info    0x0000658d      0x1d3 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAn.o)
+ .debug_info    0x00006760      0x1d3 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAp.o)
+ .debug_info    0x00006933      0x283 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_Ext_CP_Clk.o)
+ .debug_info    0x00006bb6      0x2c4 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_theACLK.o)
+ .debug_info    0x00006e7a      0x151 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAref.o)
+ .debug_info    0x00006fcb      0x118 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LPF_1.o)
+ .debug_info    0x000070e3      0x118 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LPF_2.o)
+ .debug_info    0x000071fb       0x86 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyBootAsmGnu.o)
+ .debug_info    0x00007281      0x64d .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyFlash.o)
+ .debug_info    0x000078ce      0x550 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CySpc.o)
 
 .debug_abbrev   0x00000000     0x268d
  *(.debug_abbrev)
@@ -1622,45 +1621,45 @@ END GROUP
  .debug_abbrev  0x00002352      0x1a7 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyFlash.o)
  .debug_abbrev  0x000024f9      0x194 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CySpc.o)
 
-.debug_line     0x00000000     0x35aa
+.debug_line     0x00000000     0x3598
  *(.debug_line)
- .debug_line    0x00000000      0x3c2 .\CortexM3\ARM_GCC_541\Debug\main.o
- .debug_line    0x000003c2      0x220 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
- .debug_line    0x000005e2      0x141 .\CortexM3\ARM_GCC_541\Debug\cymetadata.o
- .debug_line    0x00000723      0x234 .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
- .debug_line    0x00000957      0x172 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter.o)
- .debug_line    0x00000ac9       0x74 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter_PVT.o)
- .debug_line    0x00000b3d       0x56 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter_RAM_Data.o)
- .debug_line    0x00000b93      0x816 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyLib.o)
- .debug_line    0x000013a9      0x367 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(cyPm.o)
- .debug_line    0x00001710      0x137 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_DelSig.o)
- .debug_line    0x00001847      0x136 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Timer.o)
- .debug_line    0x0000197d      0x341 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC.o)
- .debug_line    0x00001cbe       0xab .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC_INT.o)
- .debug_line    0x00001d69      0x17f .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC_IntClock.o)
- .debug_line    0x00001ee8      0x137 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Filter.o)
- .debug_line    0x0000201f      0x170 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Timer.o)
- .debug_line    0x0000218f       0x90 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LED.o)
- .debug_line    0x0000221f       0xe1 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(VDAC.o)
- .debug_line    0x00002300       0xa8 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAbp.o)
- .debug_line    0x000023a8       0xa8 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAlp.o)
- .debug_line    0x00002450       0xab .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAadder.o)
- .debug_line    0x000024fb      0x358 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC.o)
- .debug_line    0x00002853       0x80 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_INT.o)
- .debug_line    0x000028d3       0xce .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAgain.o)
- .debug_line    0x000029a1       0xce .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAvdac.o)
- .debug_line    0x00002a6f       0xcb .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAn.o)
- .debug_line    0x00002b3a       0xcb .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAp.o)
- .debug_line    0x00002c05      0x17d .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_Ext_CP_Clk.o)
- .debug_line    0x00002d82      0x19d .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_theACLK.o)
- .debug_line    0x00002f1f       0xa9 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAref.o)
- .debug_line    0x00002fc8       0x81 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LPF_1.o)
- .debug_line    0x00003049       0x81 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LPF_2.o)
- .debug_line    0x000030ca       0x66 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyBootAsmGnu.o)
- .debug_line    0x00003130      0x21a .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyFlash.o)
- .debug_line    0x0000334a      0x260 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CySpc.o)
+ .debug_line    0x00000000      0x3b2 .\CortexM3\ARM_GCC_541\Debug\main.o
+ .debug_line    0x000003b2      0x220 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
+ .debug_line    0x000005d2      0x141 .\CortexM3\ARM_GCC_541\Debug\cymetadata.o
+ .debug_line    0x00000713      0x234 .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
+ .debug_line    0x00000947      0x172 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter.o)
+ .debug_line    0x00000ab9       0x74 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter_PVT.o)
+ .debug_line    0x00000b2d       0x56 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter_RAM_Data.o)
+ .debug_line    0x00000b83      0x816 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyLib.o)
+ .debug_line    0x00001399      0x367 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(cyPm.o)
+ .debug_line    0x00001700      0x137 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_DelSig.o)
+ .debug_line    0x00001837      0x136 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Timer.o)
+ .debug_line    0x0000196d      0x341 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC.o)
+ .debug_line    0x00001cae       0xab .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC_INT.o)
+ .debug_line    0x00001d59      0x17f .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC_IntClock.o)
+ .debug_line    0x00001ed8      0x137 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Filter.o)
+ .debug_line    0x0000200f      0x170 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Timer.o)
+ .debug_line    0x0000217f       0x90 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LED.o)
+ .debug_line    0x0000220f       0xe1 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(VDAC.o)
+ .debug_line    0x000022f0       0xa8 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAbp.o)
+ .debug_line    0x00002398       0xa8 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAlp.o)
+ .debug_line    0x00002440       0xab .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAadder.o)
+ .debug_line    0x000024eb      0x356 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC.o)
+ .debug_line    0x00002841       0x80 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_INT.o)
+ .debug_line    0x000028c1       0xce .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAgain.o)
+ .debug_line    0x0000298f       0xce .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAvdac.o)
+ .debug_line    0x00002a5d       0xcb .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAn.o)
+ .debug_line    0x00002b28       0xcb .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAp.o)
+ .debug_line    0x00002bf3      0x17d .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_Ext_CP_Clk.o)
+ .debug_line    0x00002d70      0x19d .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_theACLK.o)
+ .debug_line    0x00002f0d       0xa9 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAref.o)
+ .debug_line    0x00002fb6       0x81 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LPF_1.o)
+ .debug_line    0x00003037       0x81 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LPF_2.o)
+ .debug_line    0x000030b8       0x66 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyBootAsmGnu.o)
+ .debug_line    0x0000311e      0x21a .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyFlash.o)
+ .debug_line    0x00003338      0x260 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CySpc.o)
 
-.debug_frame    0x00000000     0x2380
+.debug_frame    0x00000000     0x237c
  *(.debug_frame)
  .debug_frame   0x00000000      0x158 .\CortexM3\ARM_GCC_541\Debug\main.o
  .debug_frame   0x00000158       0xfc .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
@@ -1681,24 +1680,24 @@ END GROUP
  .debug_frame   0x00001610       0x78 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAbp.o)
  .debug_frame   0x00001688       0x78 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAlp.o)
  .debug_frame   0x00001700       0x78 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAadder.o)
- .debug_frame   0x00001778      0x288 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC.o)
- .debug_frame   0x00001a00       0x50 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_INT.o)
- .debug_frame   0x00001a50       0x9c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAgain.o)
- .debug_frame   0x00001aec       0x9c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAvdac.o)
- .debug_frame   0x00001b88       0x9c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAn.o)
- .debug_frame   0x00001c24       0x9c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAp.o)
- .debug_frame   0x00001cc0       0xe0 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_Ext_CP_Clk.o)
- .debug_frame   0x00001da0      0x100 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_theACLK.o)
- .debug_frame   0x00001ea0       0x78 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAref.o)
- .debug_frame   0x00001f18       0x4c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LPF_1.o)
- .debug_frame   0x00001f64       0x4c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LPF_2.o)
- .debug_frame   0x00001fb0      0x194 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyFlash.o)
- .debug_frame   0x00002144      0x180 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CySpc.o)
- .debug_frame   0x000022c4       0x20 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-errno.o)
- .debug_frame   0x000022e4       0x28 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-exit.o)
- .debug_frame   0x0000230c       0x2c c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-init.o)
- .debug_frame   0x00002338       0x28 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-memcpy-stub.o)
- .debug_frame   0x00002360       0x20 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-memset.o)
+ .debug_frame   0x00001778      0x284 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC.o)
+ .debug_frame   0x000019fc       0x50 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_INT.o)
+ .debug_frame   0x00001a4c       0x9c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAgain.o)
+ .debug_frame   0x00001ae8       0x9c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAvdac.o)
+ .debug_frame   0x00001b84       0x9c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAn.o)
+ .debug_frame   0x00001c20       0x9c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAp.o)
+ .debug_frame   0x00001cbc       0xe0 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_Ext_CP_Clk.o)
+ .debug_frame   0x00001d9c      0x100 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_theACLK.o)
+ .debug_frame   0x00001e9c       0x78 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAref.o)
+ .debug_frame   0x00001f14       0x4c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LPF_1.o)
+ .debug_frame   0x00001f60       0x4c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LPF_2.o)
+ .debug_frame   0x00001fac      0x194 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyFlash.o)
+ .debug_frame   0x00002140      0x180 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CySpc.o)
+ .debug_frame   0x000022c0       0x20 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-errno.o)
+ .debug_frame   0x000022e0       0x28 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-exit.o)
+ .debug_frame   0x00002308       0x2c c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-init.o)
+ .debug_frame   0x00002334       0x28 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-memcpy-stub.o)
+ .debug_frame   0x0000235c       0x20 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-memset.o)
 
 .debug_str      0x00000000     0x2c91
  *(.debug_str)
@@ -1771,39 +1770,39 @@ END GROUP
  .debug_str     0x00002be5       0xac .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CySpc.o)
                                 0x32e (size before relaxing)
 
-.debug_loc      0x00000000     0x304d
+.debug_loc      0x00000000     0x302f
  *(.debug_loc)
- .debug_loc     0x00000000      0x140 .\CortexM3\ARM_GCC_541\Debug\main.o
- .debug_loc     0x00000140      0x259 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
- .debug_loc     0x00000399      0x144 .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
- .debug_loc     0x000004dd      0x24b .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter.o)
- .debug_loc     0x00000728       0x3c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter_PVT.o)
- .debug_loc     0x00000764      0xa11 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyLib.o)
- .debug_loc     0x00001175      0x1e4 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(cyPm.o)
- .debug_loc     0x00001359       0x56 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_DelSig.o)
- .debug_loc     0x000013af       0x56 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Timer.o)
- .debug_loc     0x00001405      0x36c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC.o)
- .debug_loc     0x00001771       0x45 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC_INT.o)
- .debug_loc     0x000017b6      0x128 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC_IntClock.o)
- .debug_loc     0x000018de       0x56 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Filter.o)
- .debug_loc     0x00001934       0x13 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Timer.o)
- .debug_loc     0x00001947       0x42 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LED.o)
- .debug_loc     0x00001989       0x79 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(VDAC.o)
- .debug_loc     0x00001a02       0x21 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAbp.o)
- .debug_loc     0x00001a23       0x21 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAlp.o)
- .debug_loc     0x00001a44       0x21 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAadder.o)
- .debug_loc     0x00001a65      0x6d5 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC.o)
- .debug_loc     0x0000213a       0x60 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAgain.o)
- .debug_loc     0x0000219a       0x60 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAvdac.o)
- .debug_loc     0x000021fa       0x60 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAn.o)
- .debug_loc     0x0000225a       0x60 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAp.o)
- .debug_loc     0x000022ba      0x12c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_Ext_CP_Clk.o)
- .debug_loc     0x000023e6      0x14d .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_theACLK.o)
- .debug_loc     0x00002533       0x21 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAref.o)
- .debug_loc     0x00002554       0x21 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LPF_1.o)
- .debug_loc     0x00002575       0x21 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LPF_2.o)
- .debug_loc     0x00002596      0x3b2 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyFlash.o)
- .debug_loc     0x00002948      0x705 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CySpc.o)
+ .debug_loc     0x00000000      0x12d .\CortexM3\ARM_GCC_541\Debug\main.o
+ .debug_loc     0x0000012d      0x259 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
+ .debug_loc     0x00000386      0x144 .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
+ .debug_loc     0x000004ca      0x24b .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter.o)
+ .debug_loc     0x00000715       0x3c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Filter_PVT.o)
+ .debug_loc     0x00000751      0xa11 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyLib.o)
+ .debug_loc     0x00001162      0x1e4 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(cyPm.o)
+ .debug_loc     0x00001346       0x56 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_DelSig.o)
+ .debug_loc     0x0000139c       0x56 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Timer.o)
+ .debug_loc     0x000013f2      0x36c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC.o)
+ .debug_loc     0x0000175e       0x45 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC_INT.o)
+ .debug_loc     0x000017a3      0x128 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(UART_PC_IntClock.o)
+ .debug_loc     0x000018cb       0x56 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(isr_Filter.o)
+ .debug_loc     0x00001921       0x13 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(Timer.o)
+ .debug_loc     0x00001934       0x42 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LED.o)
+ .debug_loc     0x00001976       0x79 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(VDAC.o)
+ .debug_loc     0x000019ef       0x21 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAbp.o)
+ .debug_loc     0x00001a10       0x21 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAlp.o)
+ .debug_loc     0x00001a31       0x21 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAadder.o)
+ .debug_loc     0x00001a52      0x6ca .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC.o)
+ .debug_loc     0x0000211c       0x60 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAgain.o)
+ .debug_loc     0x0000217c       0x60 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAvdac.o)
+ .debug_loc     0x000021dc       0x60 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAn.o)
+ .debug_loc     0x0000223c       0x60 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(PGAp.o)
+ .debug_loc     0x0000229c      0x12c .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_Ext_CP_Clk.o)
+ .debug_loc     0x000023c8      0x14d .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(ADC_theACLK.o)
+ .debug_loc     0x00002515       0x21 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(OPAref.o)
+ .debug_loc     0x00002536       0x21 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LPF_1.o)
+ .debug_loc     0x00002557       0x21 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(LPF_2.o)
+ .debug_loc     0x00002578      0x3b2 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CyFlash.o)
+ .debug_loc     0x0000292a      0x705 .\CortexM3\ARM_GCC_541\Debug\DiferencialToSingleEnded.a(CySpc.o)
 
 .debug_macinfo
  *(.debug_macinfo)

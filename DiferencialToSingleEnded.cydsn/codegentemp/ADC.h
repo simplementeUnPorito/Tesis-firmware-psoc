@@ -100,7 +100,7 @@ CY_ISR_PROTO(ADC_ISR4);
 #define ADC_CFG1_INPUT_RANGE        (5u)
 #define ADC_CFG1_SRATE              (1000u)
 #define ADC_CFG1_REFERENCE          (5u)
-#define ADC_CFG1_BUFFER_GAIN        (2u)
+#define ADC_CFG1_BUFFER_GAIN        (1u)
 #define ADC_CFG1_CONV_MODE          (2u)
 #define ADC_CFG1_INPUT_RANGE_VALUE  (2.5)
 #define ADC_DEFAULT_STROBE                     (0u)
@@ -1339,7 +1339,7 @@ extern volatile int32 ADC_CountsPerVolt;
 /* Default Config
 * ADC_CFG1 Sample Rate: 1000 Samples per Second
 * ADC_CFG1 Conversion Mode: 2
-* ADC_CFG1 Input Buffer Gain: 2
+* ADC_CFG1 Input Buffer Gain: 1
 * ADC_CFG1 Reference: 5
 * ADC_CFG1 Input Range: 5
 * ADC_CFG1 Resolution: 18 bits
@@ -1387,10 +1387,10 @@ extern volatile int32 ADC_CountsPerVolt;
 #define ADC_CFG1_DSM_DEM1           (0x00u)
 #define ADC_CFG1_DSM_MISC           (0x00u)
 #define ADC_CFG1_DSM_CLK            (0x18u)
-#define ADC_CFG1_DSM_BUF0           (0x05u)
-#define ADC_CFG1_DSM_BUF1           (0x05u)
+#define ADC_CFG1_DSM_BUF0           (0x02u)
+#define ADC_CFG1_DSM_BUF1           (0x02u)
 #define ADC_CFG1_DSM_BUF2           (0x00u)
-#define ADC_CFG1_DSM_BUF3           (0x0Au)
+#define ADC_CFG1_DSM_BUF3           (0x00u)
 #define ADC_CFG1_DSM_OUT0           (0x00u)
 #define ADC_CFG1_DSM_OUT1           (0x00u)
 #define ADC_CFG1_DSM_SW3            (0x00u)
