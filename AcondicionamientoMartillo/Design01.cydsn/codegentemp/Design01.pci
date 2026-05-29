@@ -1,5 +1,5 @@
 # Design01
-# 2026-05-28 17:01:26Z
+# 2026-05-28 20:37:50Z
 
 # IO_0@[IOP=(1)][IoId=(0)] is reserved: SWDDebugEnabled
 dont_use_io iocell 1 0
@@ -7,17 +7,15 @@ dont_use_io iocell 1 0
 dont_use_io iocell 1 1
 # IO_3@[IOP=(1)][IoId=(3)] is reserved: SWDDebugEnabled
 dont_use_io iocell 1 3
-set_io "Dedicated_Output" iocell 0 0
+set_io "Dedicated_Output" iocell 3 7
+set_io "Vlpf(0)" iocell 0 4
 set_io "Vin(0)" iocell 0 2
-set_io "Vin_1(0)" iocell 3 6
-set_io "Dedicated_Output_1" iocell 0 1
+set_io "Vref(0)" iocell 3 6
+set_io "Vpga(0)" iocell 15 4
 set_location "\ADC:DSM\" dsmodcell -1 -1 0
-set_io "Dedicated_Output_2" iocell 3 7
-set_location "\PGA_1:SC\" sccell -1 -1 2
-set_location "\Opa_ref:ABuf\" abufcell -1 -1 2
-set_location "\Opa_buff_3:ABuf\" abufcell -1 -1 1
-set_location "\Opa_buff_2:ABuf\" abufcell -1 -1 0
-set_location "\LPF_1:cy_psoc3_lpf_1\" lpfcell -1 -1 1
-set_location "\LPF_2:cy_psoc3_lpf_1\" lpfcell -1 -1 0
-set_location "\VDAC:viDAC8\" vidaccell -1 -1 0
-set_location "\Opa_buff_1:ABuf\" abufcell -1 -1 3
+set_location "\PGA:SC\" sccell -1 -1 2
+set_location "\Opa_ref:ABuf\" abufcell -1 -1 3
+set_location "\LPF_ref:cy_psoc3_lpf_1\" lpfcell -1 -1 1
+set_location "\LPF_ADC:cy_psoc3_lpf_1\" lpfcell -1 -1 0
+set_location "\VDAC:viDAC8\" vidaccell -1 -1 1
+set_location "\PGA_ref:SC\" sccell -1 -1 3
