@@ -1,110 +1,100 @@
 /*******************************************************************************
-* main.c — Geofono single-ended con transporte SPI esclavo hacia ESP32
+* main.c — Geofono single-ended, transporte por UART hacia el ESP esclavo.
 *
-* TX UART (5 bytes, se mantiene para debug/MATLAB serie):
-*   Data:      [0x56][0x00][b2][b1][b0]
-*   Heartbeat: [0x56][0x01][pga_code][vdac_val][tx_mode]
-*   Cfg-ADC:   [0x56][0x02][res][fsH][fsL]
-*   Cfg-PGA:   [0x56][0x03][pga_code][vrefH][vrefL]
-*   Cfg-VREF:  [0x56][0x04][pgavdac_code][vdac_val][0x00]
-*   ACK:       [0x56][0x07][cmd][val][0x00]
+* Cadena: MATLAB → maestro → esclavo (ESP-NOW) → PSoC (UART).
+* El PSoC muestrea N lotes de 30 muestras RAW (sin Filter) y los envía en
+* tiempo real al ESP esclavo por UART. El arranque del muestreo es por el pin
+* digital SYNC_IN (lo maneja el ESP esclavo).
 *
-* RX UART — 4 bytes con checksum XOR: [0xAB][cmd][param][cmd^param]
-*   (comandos idénticos a la versión original)
+* ───────────────────────────────────────────────────────────────────────────
+*  REQUISITOS EN PSOC CREATOR (TopDesign.cysch / .cydwr) — PENDIENTE (usuario):
+*    1. RENOMBRAR el componente UART  "UART_PC"  ->  "UART".
+*    2. QUITAR el componente "Filter" (FIR) y su ISR "isr_Filter".
+*    3. QUITAR el componente "SPI Slave (SPIS_1)" y el pin "DATA_READY".
+*    4. CONSERVAR el pin digital input "SYNC_IN" con interrupt
+*       "Rising and Falling edges" e ISR "isr_SyncIn".
+*    5. CABLEAR la UART al ESP esclavo:
+*         UART.TX (PSoC)  ->  RX del ESP esclavo
+*         UART.RX (PSoC)  <-  TX del ESP esclavo
+*       Baud sugerido: 460800 u 921600 (debe coincidir con PSOC_UART_BAUD del
+*       firmware del esclavo). El batch es de 95 bytes a ~34 lotes/s.
+*       Configurar TX Buffer Size >= 96 y RX Buffer Size >= 16 (modo Interrupt)
+*       para que UART_PutArray no bloquee y no se pierdan muestras entre lotes.
+*    6. CONSERVAR: ADC (DelSig), VDAC, PGAgain, PGAvdac, OPA*, LPF_1/2, Timer,
+*       LED, isr_DelSig, isr_Timer.
+* ───────────────────────────────────────────────────────────────────────────
 *
-* SPI ESCLAVO (ESP32 = maestro):
-*   Frame 306 bytes: [0xAB][n_lo][n_hi][seq_lo][seq_hi][flags]
-*                    + 30 muestras × 10 bytes
-*   Pin DATA_READY (salida): HIGH = frame listo, lo baja el PSoC tras SPI_DONE.
+* TX UART (al ESP) — frame de datos RAW (95 bytes):
+*   [0xAB][n=30][seq_lo][seq_hi] + 30×3 bytes (raw LE: b0,b1,b2) + [crc XOR]
 *
-*   REQUISITOS EN PSOC CREATOR (TopDesign.cysch):
-*     1. Agregar componente "SPI Slave (SPIS)" → nombre: SPIS_1
-*        - Mode: Mode 00 (CPOL=0, CPHA=0)
-*        - TX Buffer Size: 320 (o mayor)
-*        - Interrupt: ninguno requerido (polling en main)
-*     2. Agregar "Digital Output Pin" → nombre: DATA_READY
-*        - Conectar al puerto físico elegido
-*     3. Conectar pines del SPIS_1:
-*        - SCLK ← ESP GPIO 18
-*        - MISO → ESP GPIO 19
-*        - MOSI ← ESP GPIO 23
-*        - SS   ← ESP GPIO 5
-*        - DATA_READY → ESP GPIO 4
-*
-* DEBUG:
-*   #define DEBUG 1  ->  rampa creciente en lugar de ADC
-*   #define DEBUG 0  ->  datos reales del ADC
+* RX UART (del ESP) — comandos con checksum XOR:
+*   1 parámetro : [0xAB][cmd][param][cmd^param]
+*       0xA5 enviar config (no-op, reservado)   0xA6 set PGAgain (0-8)
+*       0xA9 set PGAvdac (0-8)                   0xAA set VDAC (0-255)
+*       0xB1 pre-start/arm (espera SYNC)         0xB2 ver/capture-now (N autónomo)
+*       0xB3 debug PSoC rampa (0/1)
+*   2 parámetros: [0xAB][0xA3][n_lo][n_hi][0xA3^n_lo^n_hi]
+*       0xA3 set N (lotes, 16 bits)
 *******************************************************************************/
 
 #include "project.h"
 
 /* -------------------------------------------------------------------------- */
-#define DEBUG              1
-
-#define HB_PERIOD          1000u
-#define DEBUG_PERIOD_US    1000u
 #define VDAC_INIT_VALUE    0x94u
 #define TIMEOUT_COUNTS     240000u    /* 10 ms @ 24 MHz */
 
-/* SPI batch */
-#define SPI_BATCH_SIZE     30u
-#define SPI_FRAME_BYTES    (6u + SPI_BATCH_SIZE * 10u)   /* 306 */
+#define BATCH_SAMPLES      30u
+#define FRAME_BYTES        (4u + BATCH_SAMPLES * 3u + 1u)   /* 95 */
+
+/* Estados del PSoC */
+#define PSOC_IDLE          0u
+#define PSOC_ARMED         1u   /* armado: espera flanco SYNC para muestrear */
+#define PSOC_SAMPLING      2u
 
 /* -------------------------------------------------------------------------- */
-/* Muestras para UART (legado) */
-static volatile int32 g_adc_raw      = 0;
-static volatile uint8 g_sample_ready = 0u;
-static volatile int32 g_flt          = 0;
-static volatile uint8 g_filter_ready = 0u;
+/* Muestra ADC cruda */
+static volatile int32  g_adc_raw       = 0;
 
-/* Batch SPI — doble buffer implícito: g_spi_fill se usa solo cuando
- * g_spi_ready == 0, por lo que el array no necesita protección adicional. */
-static volatile int32  g_spi_raw [SPI_BATCH_SIZE];
-static volatile int32  g_spi_flt [SPI_BATCH_SIZE];
-static volatile uint8  g_spi_gain[SPI_BATCH_SIZE];
-static volatile uint16 g_spi_fill  = 0u;
-static volatile uint8  g_spi_ready = 0u;   /* batch completo, listo para SPI */
-static          uint16 g_spi_seq   = 0u;
+/* Lote en construcción */
+static volatile int32  g_batch_raw[BATCH_SAMPLES];
+static volatile uint16 g_batch_fill    = 0u;
+static volatile uint8  g_batch_ready   = 0u;
+static          uint16 g_seq           = 0u;
 
-static uint8 g_pga_code     = PGAgain_DEFAULT_GAIN;
-static uint8 g_pgavdac_code = PGAvdac_DEFAULT_GAIN;
-static uint8 g_vdac_val     = VDAC_INIT_VALUE;
-static uint8 tx_mode        = 0u;
-static uint8 stream_enabled = 1u;
+/* Configuración / estado */
+static uint8  g_pga_code     = PGAgain_DEFAULT_GAIN;
+static uint8  g_pgavdac_code = PGAvdac_DEFAULT_GAIN;
+static uint8  g_vdac_val     = VDAC_INIT_VALUE;
+
+static volatile uint8  g_state        = PSOC_IDLE;
+static          uint16 g_n_batches    = 0u;     /* lotes a capturar (16 bits) */
+static volatile uint16 g_batches_sent = 0u;
+static volatile uint8  g_debug_psoc   = 0u;     /* 1 = rampa en vez de ADC */
+static          uint32 g_dbg_cnt      = 0u;
 
 /* RX UART */
 static volatile uint8 rx_state    = 0u;
 static volatile uint8 rx_cmd      = 0u;
-static volatile uint8 rx_param    = 0u;
+static volatile uint8 rx_p1       = 0u;
+static volatile uint8 rx_p2       = 0u;
 static volatile uint8 watchdog_rx = 0u;
 
 /* -------------------------------------------------------------------------- */
 
 CY_ISR(isr_DelSigReady)
 {
-    g_adc_raw      = ADC_GetResult32();
-    g_sample_ready = 1u;
-    Filter_Write24(Filter_CHANNEL_A, (uint32)g_adc_raw);
+    g_adc_raw = ADC_GetResult32();
 
-    /* Acumular muestra en batch SPI */
-    if (g_spi_fill < SPI_BATCH_SIZE && g_spi_ready == 0u)
+    if (g_state == PSOC_SAMPLING && g_batch_ready == 0u &&
+        g_batch_fill < BATCH_SAMPLES)
     {
-        g_spi_raw [g_spi_fill] = g_adc_raw;
-        g_spi_flt [g_spi_fill] = g_flt;       /* último valor filtrado disponible */
-        g_spi_gain[g_spi_fill] = g_pga_code;
-        g_spi_fill++;
-        if (g_spi_fill >= SPI_BATCH_SIZE)
+        g_batch_raw[g_batch_fill] = g_adc_raw;
+        g_batch_fill++;
+        if (g_batch_fill >= BATCH_SAMPLES)
         {
-            g_spi_ready = 1u;                  /* señal para main loop */
+            g_batch_ready = 1u;
         }
     }
-}
-
-CY_ISR(isr_FilterReady)
-{
-    uint32 r = Filter_Read24(Filter_CHANNEL_A);
-    g_flt = r;
-    g_filter_ready = 1u;
 }
 
 CY_ISR(isr_Timer)
@@ -114,34 +104,35 @@ CY_ISR(isr_Timer)
 }
 
 /*
- * isr_SyncIn — flanco en el pin SYNC_IN del ESP esclavo.
- *
- * REQUIERE EN PSOC CREATOR (TopDesign):
- *   - Pin digital input "SYNC_IN" con interrupt "Rising and Falling edges"
- *   - ISR "isr_SyncIn" conectado al pin
- *
- * Flanco de subida (SYNC_IN=1): reinicia buffer y arranca el ADC.
- * Flanco de bajada (SYNC_IN=0): para el ADC y limpia el buffer.
+ * isr_SyncIn — flanco en el pin SYNC_IN (lo maneja el ESP esclavo).
+ *   Subida  : si está ARMED -> arranca muestreo (SAMPLING).
+ *   Bajada  : para el muestreo.
  */
 CY_ISR(isr_SyncIn)
 {
     uint8 saved;
     if (SYNC_IN_Read())     /* flanco de subida → START */
     {
-        saved = CyEnterCriticalSection();
-        g_spi_fill  = 0u;
-        g_spi_ready = 0u;
-        CyExitCriticalSection(saved);
-        ADC_StartConvert();
+        if (g_state == PSOC_ARMED)
+        {
+            saved = CyEnterCriticalSection();
+            g_batch_fill    = 0u;
+            g_batch_ready   = 0u;
+            g_batches_sent  = 0u;
+            g_dbg_cnt       = 0u;
+            g_state         = PSOC_SAMPLING;
+            CyExitCriticalSection(saved);
+            ADC_StartConvert();
+        }
     }
     else                    /* flanco de bajada → STOP */
     {
         ADC_StopConvert();
         saved = CyEnterCriticalSection();
-        g_spi_fill  = 0u;
-        g_spi_ready = 0u;
+        g_batch_fill  = 0u;
+        g_batch_ready = 0u;
+        g_state       = PSOC_IDLE;
         CyExitCriticalSection(saved);
-        DATA_READY_Write(0u);
     }
 }
 
@@ -170,37 +161,6 @@ static void led_toggle(void)
     LED_Write(LED_Read() ^ 0x01u);
 }
 
-static void send_config(void)
-{
-    uint8  cfg[5u];
-    uint16 fs_rep      = (uint16)ADC_CFG1_SRATE;
-    uint16 vref_halfmv = (uint16)((float32)ADC_CFG1_INPUT_RANGE_VALUE * 1000.0f);
-
-    cfg[0] = 0x56u; cfg[1] = 0x02u;
-    cfg[2] = (uint8)ADC_CFG1_RESOLUTION;
-    cfg[3] = (uint8)((fs_rep      >> 8u) & 0xFFu);
-    cfg[4] = (uint8)( fs_rep             & 0xFFu);
-    UART_PC_PutArray(cfg, 5u);
-
-    cfg[1] = 0x03u;
-    cfg[2] = g_pga_code;
-    cfg[3] = (uint8)((vref_halfmv >> 8u) & 0xFFu);
-    cfg[4] = (uint8)( vref_halfmv        & 0xFFu);
-    UART_PC_PutArray(cfg, 5u);
-
-    cfg[1] = 0x04u;
-    cfg[2] = g_pgavdac_code;
-    cfg[3] = g_vdac_val;
-    cfg[4] = 0x00u;
-    UART_PC_PutArray(cfg, 5u);
-}
-
-static void send_ack(uint8 cmd, uint8 val)
-{
-    uint8 ack[5u] = {0x56u, 0x07u, cmd, val, 0x00u};
-    UART_PC_PutArray(ack, 5u);
-}
-
 static void PGAgain_Set(uint8 code)
 {
     if (code <= 8u) { g_pga_code = code; PGAgain_SetGain(code); }
@@ -211,93 +171,85 @@ static void PGAvdac_Set(uint8 code)
     if (code <= 8u) { g_pgavdac_code = code; PGAvdac_SetGain(code); }
 }
 
-/* -------------------------------------------------------------------------- */
-
-/* Construye el frame SPI de 306 bytes y lo carga en el buffer TX del SPIS_1.
- * Llamar solo desde main loop cuando g_spi_ready == 1. */
-static void spi_build_and_send(void)
+/* Arma el PSoC para que un flanco SYNC dispare la captura de N lotes. */
+static void psoc_arm(void)
 {
-#if DEBUG
-    static uint32 dbg_spi_cnt = 0u;
-#endif
-    uint8  frame[SPI_FRAME_BYTES];
+    uint8 saved;
+    ADC_StopConvert();
+    saved = CyEnterCriticalSection();
+    g_batch_fill   = 0u;
+    g_batch_ready  = 0u;
+    g_batches_sent = 0u;
+    g_dbg_cnt      = 0u;
+    g_state        = PSOC_ARMED;
+    CyExitCriticalSection(saved);
+}
+
+/* Disparo autónomo (modo "Ver"): captura N lotes sin esperar SYNC. */
+static void psoc_capture_now(void)
+{
+    uint8 saved;
+    saved = CyEnterCriticalSection();
+    g_batch_fill   = 0u;
+    g_batch_ready  = 0u;
+    g_batches_sent = 0u;
+    g_dbg_cnt      = 0u;
+    g_state        = PSOC_SAMPLING;
+    CyExitCriticalSection(saved);
+    ADC_StartConvert();
+}
+
+/* Construye y envía el frame UART de 95 bytes (raw, 30 muestras). */
+static void uart_build_and_send(void)
+{
+    uint8  frame[FRAME_BYTES];
     uint8 *p;
     uint16 i;
-#if DEBUG
+    uint8  crc = 0u;
     int32  val;
-#else
-    int32  raw, flt;
-    uint8  gain;
-#endif
-    uint8  saved;
-
-    saved = CyEnterCriticalSection();
-    CyExitCriticalSection(saved);
 
     frame[0] = 0xABu;
-    frame[1] = (uint8)( SPI_BATCH_SIZE         & 0xFFu);
-    frame[2] = (uint8)((SPI_BATCH_SIZE >> 8u)  & 0xFFu);
-    frame[3] = (uint8)( g_spi_seq              & 0xFFu);
-    frame[4] = (uint8)((g_spi_seq  >> 8u)      & 0xFFu);
-    frame[5] = tx_mode;
+    frame[1] = (uint8)BATCH_SAMPLES;
+    frame[2] = (uint8)( g_seq        & 0xFFu);
+    frame[3] = (uint8)((g_seq >> 8u) & 0xFFu);
 
-    p = &frame[6];
-    for (i = 0u; i < SPI_BATCH_SIZE; i++, p += 10u)
+    p = &frame[4];
+    for (i = 0u; i < BATCH_SAMPLES; i++, p += 3u)
     {
-#if DEBUG
-        val = (int32)(dbg_spi_cnt & 0x00FFFFFFu);
-        dbg_spi_cnt++;
-        p[0] = (uint8)( val         & 0xFFu);
+        if (g_debug_psoc)
+        {
+            val = (int32)(g_dbg_cnt & 0x00FFFFFFu);
+            g_dbg_cnt++;
+        }
+        else
+        {
+            val = g_batch_raw[i];
+        }
+        p[0] = (uint8)( val        & 0xFFu);
         p[1] = (uint8)((val >>  8u) & 0xFFu);
-        p[2] = p[0]; p[3] = p[1];
-        p[4] = (uint8)((val >> 16u) & 0xFFu);
-        p[5] = p[0]; p[6] = p[1]; p[7] = p[4];
-        p[8] = 0u;
-        p[9] = 0u;
-#else
-        raw  = (int32)g_spi_raw [i];
-        flt  = (int32)g_spi_flt [i];
-        gain = g_spi_gain[i];
-
-        p[0] = (uint8)( raw        & 0xFFu);
-        p[1] = (uint8)((raw >> 8u) & 0xFFu);
-        p[2] = (uint8)( raw          & 0xFFu);
-        p[3] = (uint8)((raw >>  8u)  & 0xFFu);
-        p[4] = (uint8)((raw >> 16u)  & 0xFFu);
-        p[5] = (uint8)( flt          & 0xFFu);
-        p[6] = (uint8)((flt >>  8u)  & 0xFFu);
-        p[7] = (uint8)((flt >> 16u)  & 0xFFu);
-        p[8] = gain;
-        p[9] = 0x00u;
-#endif
+        p[2] = (uint8)((val >> 16u) & 0xFFu);
     }
 
-    g_spi_seq++;
+    for (i = 0u; i < (FRAME_BYTES - 1u); i++)
+    {
+        crc ^= frame[i];
+    }
+    frame[FRAME_BYTES - 1u] = crc;
 
-    SPIS_1_ClearTxBuffer();
-    SPIS_1_PutArray(frame, SPI_FRAME_BYTES);
-    DATA_READY_Write(1u);
+    g_seq++;
+    UART_PutArray(frame, FRAME_BYTES);
 }
 
 /* -------------------------------------------------------------------------- */
 
 int main(void)
 {
-    static uint16 hb_count = 0u;
-#if DEBUG
-    static uint32 dbg_cnt  = 0u;
-#endif
-
-    uint8 pkt[5u];
-#if !DEBUG
-    int32 raw;
-#endif
-    uint8 saved, rx;
+    uint8 rx;
 
     CyGlobalIntEnable;
 
-    /* Analógica — sin cambios */
-    UART_PC_Start();
+    /* Analógica — sin cambios (sin Filter) */
+    UART_Start();
     OPAref_Start();
     PGAp_Start();  PGAn_Start();
     PGAp_SetGain(PGAp_GAIN_02);
@@ -312,26 +264,16 @@ int main(void)
     OPAlp_Start();
     VDAC_Start();
     VDAC_SetValue(VDAC_INIT_VALUE);
-    Filter_Start();
-    Filter_SetCoherency(Filter_CHANNEL_A, Filter_KEY_LOW);
-    Filter_SetDalign(Filter_STAGEA_DALIGN, 0u);
-    Filter_SetDalign(Filter_HOLDA_DALIGN,  0u);
+
     ADC_Start();
-    ADC_StartConvert();
+    /* ADC en reposo: el muestreo arranca por SYNC / capture-now */
+    ADC_StopConvert();
+
     isr_DelSig_StartEx(isr_DelSigReady);
-    isr_Filter_StartEx(isr_FilterReady);
     isr_Timer_StartEx(isr_Timer);
-
-    /* SPI esclavo */
-    SPIS_1_Start();
-    DATA_READY_Write(0u);
-
-    /* GPIO hardware sync — arranque/paro del ADC por pulso externo */
     isr_SyncIn_StartEx(isr_SyncIn);
 
     LED_Write(0u);
-    CyDelay(10u);
-    send_config();
 
     for (;;)
     {
@@ -340,153 +282,93 @@ int main(void)
         {
             watchdog_rx = 0u;
             rx_state    = 0u;
-            rx_cmd      = 0u;
-            rx_param    = 0u;
         }
 
-        /* ==== RX UART — protocolo 4 bytes ================================= */
-        while (UART_PC_GetRxBufferSize() > 0u)
+        /* ==== RX UART — comandos (1 o 2 parámetros) ====================== */
+        while (UART_GetRxBufferSize() > 0u)
         {
-            rx = UART_PC_ReadRxData();
+            rx = UART_ReadRxData();
             switch (rx_state)
             {
                 case 0u:
                     if (rx == 0xABu) { rx_state = 1u; rx_watchdog_start(); }
                     break;
-                case 1u:
+
+                case 1u:    /* comando */
                     rx_watchdog_start();
                     switch (rx)
                     {
-                        case 0xA5u: case 0xA1u: case 0xA6u:
-                        case 0xA8u: case 0xA9u: case 0xAAu:
-                            rx_cmd = rx; rx_state = 2u; break;
+                        case 0xA5u: case 0xA6u: case 0xA9u: case 0xAAu:
+                        case 0xB1u: case 0xB2u: case 0xB3u:
+                            rx_cmd = rx; rx_state = 2u; break;     /* 1 parámetro */
+                        case 0xA3u:
+                            rx_cmd = rx; rx_state = 4u; break;     /* 2 parámetros */
                         default:
                             rx_watchdog_stop(); rx_state = 0u; break;
                     }
                     break;
-                case 2u:
-                    rx_param = rx; rx_state = 3u; rx_watchdog_start(); break;
-                case 3u:
+
+                case 2u:    /* param único → luego checksum */
+                    rx_p1 = rx; rx_p2 = 0u; rx_state = 3u; rx_watchdog_start();
+                    break;
+
+                case 4u:    /* primer param de comando de 2 */
+                    rx_p1 = rx; rx_state = 5u; rx_watchdog_start();
+                    break;
+
+                case 5u:    /* segundo param de comando de 2 */
+                    rx_p2 = rx; rx_state = 3u; rx_watchdog_start();
+                    break;
+
+                case 3u:    /* checksum */
                     rx_watchdog_stop(); rx_state = 0u;
-                    if (rx != (uint8)(rx_cmd ^ rx_param)) { break; }
+                    if (rx != (uint8)(rx_cmd ^ rx_p1 ^ rx_p2)) { break; }
                     switch (rx_cmd)
                     {
-                        case 0xA5u: send_config(); break;
-                        case 0xA1u:
-                            stream_enabled = (rx_param == 0u) ? 0u : 1u;
-#if DEBUG
-                            if (stream_enabled) { dbg_cnt = 0u; }
-#endif
-                            send_ack(0xA1u, stream_enabled);
-                            if (stream_enabled) { send_config(); }
-                            led_toggle(); break;
+                        case 0xA5u: /* enviar config — reservado, no-op */
+                            break;
                         case 0xA6u:
-                            PGAgain_Set(rx_param); send_config(); led_toggle(); break;
-                        case 0xA8u:
-                            tx_mode = (rx_param == 0u) ? 0u : 1u;
-                            send_ack(0xA8u, tx_mode); break;
+                            PGAgain_Set(rx_p1); led_toggle(); break;
                         case 0xA9u:
-                            PGAvdac_Set(rx_param);
-                            send_ack(0xA9u, g_pgavdac_code); send_config(); led_toggle(); break;
+                            PGAvdac_Set(rx_p1); led_toggle(); break;
                         case 0xAAu:
-                            VDAC_SetValue(rx_param); g_vdac_val = rx_param;
-                            send_ack(0xAAu, rx_param); send_config(); led_toggle(); break;
+                            VDAC_SetValue(rx_p1); g_vdac_val = rx_p1; led_toggle(); break;
+                        case 0xA3u: /* set N (16 bits) */
+                            g_n_batches = (uint16)rx_p1 | ((uint16)rx_p2 << 8u);
+                            break;
+                        case 0xB1u: /* pre-start / arm */
+                            psoc_arm(); led_toggle(); break;
+                        case 0xB2u: /* ver / capture-now */
+                            psoc_capture_now(); led_toggle(); break;
+                        case 0xB3u: /* debug PSoC rampa */
+                            g_debug_psoc = (rx_p1 == 0u) ? 0u : 1u;
+                            g_dbg_cnt = 0u; break;
                         default: break;
                     }
                     break;
+
                 default:
                     rx_state = 0u; break;
             }
         }
 
-        /* ==== SPI: enviar batch cuando está listo ========================= */
-        if (g_spi_ready && DATA_READY_Read() == 0u)
+        /* ==== TX UART: enviar lote completo ============================== */
+        if (g_batch_ready)
         {
-            spi_build_and_send();
-        }
+            uart_build_and_send();
 
-        /* Bajar DATA_READY cuando el ESP terminó de leer (SPI_DONE) */
-        if (DATA_READY_Read())
-        {
-            uint8 tx_status = SPIS_1_ReadTxStatus();
-            if (tx_status & SPIS_1_STS_SPI_DONE)
+            g_batch_ready = 0u;
+            g_batch_fill  = 0u;
+            g_batches_sent++;
+
+            /* Parada autónoma al alcanzar N lotes */
+            if (g_n_batches != 0u && g_batches_sent >= g_n_batches)
             {
-                DATA_READY_Write(0u);
-                saved = CyEnterCriticalSection();
-                g_spi_ready = 0u;
-                g_spi_fill  = 0u;    /* habilitar acumulación del siguiente batch */
-                CyExitCriticalSection(saved);
+                ADC_StopConvert();
+                g_state = PSOC_IDLE;
             }
         }
-
-#if DEBUG
-        /* ==== DEBUG: rampa UART =========================================== */
-        if (stream_enabled)
-        {
-            pkt[0]=0x56u; pkt[1]=0x00u;
-            pkt[2]=(uint8)((dbg_cnt>>16u)&0xFFu);
-            pkt[3]=(uint8)((dbg_cnt>> 8u)&0xFFu);
-            pkt[4]=(uint8)( dbg_cnt       &0xFFu);
-            dbg_cnt = (dbg_cnt + 1u) & 0x00FFFFFFu;
-            UART_PC_PutArray(pkt, 5u);
-            if (++hb_count >= HB_PERIOD)
-            {
-                hb_count=0u;
-                pkt[0]=0x56u; pkt[1]=0x01u;
-                pkt[2]=g_pga_code; pkt[3]=g_vdac_val; pkt[4]=tx_mode;
-                UART_PC_PutArray(pkt, 5u);
-            }
-            CyDelayUs(DEBUG_PERIOD_US);
-        }
-#else
-        /* ==== TX UART crudo (tx_mode == 0) ================================ */
-        if (stream_enabled && tx_mode == 0u && g_sample_ready)
-        {
-            saved = CyEnterCriticalSection();
-            raw            = g_adc_raw;
-            g_sample_ready = 0u;
-            CyExitCriticalSection(saved);
-
-            pkt[0]=0x56u; pkt[1]=0x00u;
-            pkt[2]=(uint8)((raw>>16u)&0xFFu);
-            pkt[3]=(uint8)((raw>> 8u)&0xFFu);
-            pkt[4]=(uint8)( raw      &0xFFu);
-            UART_PC_PutArray(pkt, 5u);
-
-            if (++hb_count >= HB_PERIOD)
-            {
-                hb_count=0u;
-                pkt[0]=0x56u; pkt[1]=0x01u;
-                pkt[2]=g_pga_code; pkt[3]=g_vdac_val; pkt[4]=tx_mode;
-                UART_PC_PutArray(pkt, 5u);
-            }
-        }
-
-        /* ==== TX UART filtrado (tx_mode == 1) ============================= */
-        if (stream_enabled && tx_mode == 1u && g_filter_ready)
-        {
-            saved = CyEnterCriticalSection();
-            raw            = g_flt;
-            g_filter_ready = 0u;
-            CyExitCriticalSection(saved);
-
-            pkt[0]=0x56u; pkt[1]=0x00u;
-            pkt[2]=(uint8)((raw>>16u)&0xFFu);
-            pkt[3]=(uint8)((raw>> 8u)&0xFFu);
-            pkt[4]=(uint8)( raw      &0xFFu);
-            UART_PC_PutArray(pkt, 5u);
-
-            if (++hb_count >= HB_PERIOD)
-            {
-                hb_count=0u;
-                pkt[0]=0x56u; pkt[1]=0x01u;
-                pkt[2]=g_pga_code; pkt[3]=g_vdac_val; pkt[4]=tx_mode;
-                UART_PC_PutArray(pkt, 5u);
-            }
-        }
-#endif
     }
-    return 0u;
 }
 
 /* [] END OF FILE */
