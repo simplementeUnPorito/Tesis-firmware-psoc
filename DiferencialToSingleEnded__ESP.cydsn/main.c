@@ -27,12 +27,15 @@
 * TX UART (al ESP) — frame de datos RAW (95 bytes):
 *   [0xAB][n=30][seq_lo][seq_hi] + 30×3 bytes (raw LE: b0,b1,b2) + [crc XOR]
 *
+* El muestreo SIEMPRE arranca por el flanco de subida del pin SYNC_IN (lo
+* levanta el ESP esclavo, tanto en START normal como en "Ver"). La UART solo
+* lleva N, VDAC, configuración y las muestras del ADC.
+*
 * RX UART (del ESP) — comandos con checksum XOR:
 *   1 parámetro : [0xAB][cmd][param][cmd^param]
 *       0xA5 enviar config (no-op, reservado)   0xA6 set PGAgain (0-8)
 *       0xA9 set PGAvdac (0-8)                   0xAA set VDAC (0-255)
-*       0xB1 pre-start/arm (espera SYNC)         0xB2 ver/capture-now (N autónomo)
-*       0xB3 debug PSoC rampa (0/1)
+*       0xB1 pre-start/arm (espera flanco SYNC)  0xB3 debug PSoC rampa (0/1)
 *   2 parámetros: [0xAB][0xA3][n_lo][n_hi][0xA3^n_lo^n_hi]
 *       0xA3 set N (lotes, 16 bits)
 *******************************************************************************/
@@ -185,20 +188,6 @@ static void psoc_arm(void)
     CyExitCriticalSection(saved);
 }
 
-/* Disparo autónomo (modo "Ver"): captura N lotes sin esperar SYNC. */
-static void psoc_capture_now(void)
-{
-    uint8 saved;
-    saved = CyEnterCriticalSection();
-    g_batch_fill   = 0u;
-    g_batch_ready  = 0u;
-    g_batches_sent = 0u;
-    g_dbg_cnt      = 0u;
-    g_state        = PSOC_SAMPLING;
-    CyExitCriticalSection(saved);
-    ADC_StartConvert();
-}
-
 /* Construye y envía el frame UART de 95 bytes (raw, 30 muestras). */
 static void uart_build_and_send(void)
 {
@@ -299,7 +288,7 @@ int main(void)
                     switch (rx)
                     {
                         case 0xA5u: case 0xA6u: case 0xA9u: case 0xAAu:
-                        case 0xB1u: case 0xB2u: case 0xB3u:
+                        case 0xB1u: case 0xB3u:
                             rx_cmd = rx; rx_state = 2u; break;     /* 1 parámetro */
                         case 0xA3u:
                             rx_cmd = rx; rx_state = 4u; break;     /* 2 parámetros */
@@ -336,10 +325,8 @@ int main(void)
                         case 0xA3u: /* set N (16 bits) */
                             g_n_batches = (uint16)rx_p1 | ((uint16)rx_p2 << 8u);
                             break;
-                        case 0xB1u: /* pre-start / arm */
+                        case 0xB1u: /* pre-start / arm (arranque real por flanco SYNC) */
                             psoc_arm(); led_toggle(); break;
-                        case 0xB2u: /* ver / capture-now */
-                            psoc_capture_now(); led_toggle(); break;
                         case 0xB3u: /* debug PSoC rampa */
                             g_debug_psoc = (rx_p1 == 0u) ? 0u : 1u;
                             g_dbg_cnt = 0u; break;
