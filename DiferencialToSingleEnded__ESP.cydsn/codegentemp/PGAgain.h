@@ -98,7 +98,7 @@ void PGAgain_Enable(void)                ;
 *       Initialization Values
 ***************************************/
 
-#define PGAgain_DEFAULT_GAIN             (3u)
+#define PGAgain_DEFAULT_GAIN             (5u)
 #define PGAgain_VREF_MODE                ((1u != 0x00u) ? (0x00u) : PGAgain_GNDVREF_E)
 #define PGAgain_DEFAULT_POWER            (3u)
 

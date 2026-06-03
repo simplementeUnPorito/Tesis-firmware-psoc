@@ -34,7 +34,7 @@ El arranque es **siempre por el pin** (`isr_SyncIn`), nunca por software.
 3. **Quitar** el `SPI Slave (SPIS_1)` y el pin `DATA_READY`.
 4. Conservar `SYNC_IN` (input, *rising & falling*, ISR `isr_SyncIn`).
 5. Cablear `UART.TX→RX(ESP)` y `UART.RX←TX(ESP)`; baud = `PSOC_UART_BAUD`
-   del esclavo (460800). TX buffer ≥ 96, RX buffer ≥ 16.
+   del esclavo (115200). TX buffer ≥ 96, RX buffer ≥ 16.
 
 ## Archivos
 - `main.c` — todo el firmware (init analógico, ISRs, RX comandos, TX lotes).
