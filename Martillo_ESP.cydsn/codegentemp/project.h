@@ -28,6 +28,8 @@
 #include "SYNC_IN.h"
 #include "Opa_ref.h"
 #include "PGA_ref.h"
+#include "Vin_1_aliases.h"
+#include "Vin_1.h"
 #include "Vref_aliases.h"
 #include "Vref.h"
 #include "LPF_ref.h"

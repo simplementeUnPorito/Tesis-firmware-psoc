@@ -1,13 +1,17 @@
-Loading plugins phase: Elapsed time ==> 0s.142ms
+Loading plugins phase: Elapsed time ==> 0s.144ms
 <CYPRESSTAG name="CyDsfit arguments...">
 cydsfit arguments: -.fdsnotice -.fdswarpdepfile=warp_dependencies.txt -.fdselabdepfile=elab_dependencies.txt -.fdsbldfile=generated_files.txt -.fdsreffile=referenced_files.txt -p C:\Github\Tesis\src\psoc\Martillo_ESP.cydsn\Martillo_ESP.cyprj -d CY8C5888LTI-LP097 -s C:\Github\Tesis\src\psoc\Martillo_ESP.cydsn\Generated_Source\PSoC5 -- -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE
 </CYPRESSTAG>
 <CYPRESSTAG name="Design elaboration results...">
+ADD: fit.M0029: information: Voltage Reference Information: Vref '1.024V' is connected to terminal 'vin' of '\LPF_ref:cy_psoc3_lpf_1\' but no direct hardware connection exists.
+ * C:\Github\Tesis\src\psoc\Analog_LPF_v1_0.cylib\Analog_LPF_v1_0\Analog_LPF_v1_0.cysch (Instance:cy_psoc3_lpf_1)
+ * C:\Github\Tesis\src\psoc\Martillo_ESP.cydsn\TopDesign\TopDesign.cysch (Instance:vRef_1)
+
 </CYPRESSTAG>
-Elaboration phase: Elapsed time ==> 1s.592ms
+Elaboration phase: Elapsed time ==> 1s.620ms
 <CYPRESSTAG name="HDL generation results...">
 </CYPRESSTAG>
-HDL generation phase: Elapsed time ==> 0s.043ms
+HDL generation phase: Elapsed time ==> 0s.038ms
 <CYPRESSTAG name="Synthesis results...">
 
      | | | | | | |
@@ -41,7 +45,7 @@ Options  :    -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE -ya -.fftprj=C:\Github\Tesi
 ======================================================================
 
 vlogfe V6.3 IR 41:  Verilog parser
-Mon Jun 01 19:50:02 2026
+Wed Jun 03 21:21:50 2026
 
 
 ======================================================================
@@ -51,7 +55,7 @@ Options  :    -yv2 -q10 Martillo_ESP.v
 ======================================================================
 
 vpp V6.3 IR 41:  Verilog Pre-Processor
-Mon Jun 01 19:50:02 2026
+Wed Jun 03 21:21:50 2026
 
 Flattening file 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\ZeroTerminal\ZeroTerminal.v'
 Flattening file 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\cy_analog_virtualmux_v1_0\cy_analog_virtualmux_v1_0.v'
@@ -109,7 +113,7 @@ Options  :    -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE -ya -.fftprj=C:\Github\Tesi
 ======================================================================
 
 tovif V6.3 IR 41:  High-level synthesis
-Mon Jun 01 19:50:02 2026
+Wed Jun 03 21:21:50 2026
 
 Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\warp\lib\common\std.vhd'.
 Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\warp\lib\common\cypress.vhd'.
@@ -150,7 +154,7 @@ Options  :    -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE -ya -.fftprj=C:\Github\Tesi
 ======================================================================
 
 topld V6.3 IR 41:  Synthesis and optimization
-Mon Jun 01 19:50:02 2026
+Wed Jun 03 21:21:50 2026
 
 Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\warp\lib\common\std.vhd'.
 Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\warp\lib\common\cypress.vhd'.
@@ -246,6 +250,7 @@ Aliasing \PGA_ref:Net_37\ to \VDAC:Net_83\
 Aliasing \PGA_ref:Net_40\ to \VDAC:Net_83\
 Aliasing \PGA_ref:Net_38\ to \VDAC:Net_83\
 Aliasing \PGA_ref:Net_39\ to \VDAC:Net_83\
+Aliasing tmpOE__Vin_1_net_0 to tmpOE__Vin_net_0
 Aliasing tmpOE__Vref_net_0 to tmpOE__Vin_net_0
 Aliasing \ADC:Net_482\ to \VDAC:Net_83\
 Aliasing \ADC:Net_252\ to \VDAC:Net_83\
@@ -310,142 +315,143 @@ Removing Lhs of wire \PGA_ref:Net_37\[72] = zero[4]
 Removing Lhs of wire \PGA_ref:Net_40\[73] = zero[4]
 Removing Lhs of wire \PGA_ref:Net_38\[74] = zero[4]
 Removing Lhs of wire \PGA_ref:Net_39\[75] = zero[4]
-Removing Lhs of wire tmpOE__Vref_net_0[85] = tmpOE__Vin_net_0[16]
-Removing Rhs of wire \ADC:Net_488\[107] = \ADC:Net_250\[142]
-Removing Lhs of wire \ADC:Net_481\[109] = zero[4]
-Removing Lhs of wire \ADC:Net_482\[110] = zero[4]
-Removing Lhs of wire \ADC:Net_252\[144] = zero[4]
-Removing Lhs of wire \ADC:soc\[146] = tmpOE__Vin_net_0[16]
-Removing Lhs of wire tmpOE__LED_net_0[151] = tmpOE__Vin_net_0[16]
-Removing Lhs of wire Net_12[158] = zero[4]
-Removing Rhs of wire Net_2277[162] = \Timer:Net_53\[163]
-Removing Rhs of wire Net_2277[162] = \Timer:TimerUDB:tc_reg_i\[195]
-Removing Lhs of wire \Timer:TimerUDB:ctrl_enable\[177] = \Timer:TimerUDB:control_7\[169]
-Removing Lhs of wire \Timer:TimerUDB:ctrl_cmode_1\[179] = zero[4]
-Removing Rhs of wire \Timer:TimerUDB:timer_enable\[188] = \Timer:TimerUDB:runmode_enable\[200]
-Removing Rhs of wire \Timer:TimerUDB:run_mode\[189] = \Timer:TimerUDB:hwEnable_reg\[190]
-Removing Lhs of wire \Timer:TimerUDB:trigger_enable\[192] = tmpOE__Vin_net_0[16]
-Removing Lhs of wire \Timer:TimerUDB:tc_i\[194] = \Timer:TimerUDB:status_tc\[191]
-Removing Lhs of wire \Timer:TimerUDB:hwEnable\[196] = \Timer:TimerUDB:control_7\[169]
-Removing Lhs of wire \Timer:TimerUDB:capt_fifo_load_int\[199] = \Timer:TimerUDB:capt_fifo_load\[187]
-Removing Lhs of wire \Timer:TimerUDB:status_6\[203] = zero[4]
-Removing Lhs of wire \Timer:TimerUDB:status_5\[204] = zero[4]
-Removing Lhs of wire \Timer:TimerUDB:status_4\[205] = zero[4]
-Removing Lhs of wire \Timer:TimerUDB:status_0\[206] = \Timer:TimerUDB:status_tc\[191]
-Removing Lhs of wire \Timer:TimerUDB:status_1\[207] = \Timer:TimerUDB:capt_fifo_load\[187]
-Removing Rhs of wire \Timer:TimerUDB:status_2\[208] = \Timer:TimerUDB:fifo_full\[209]
-Removing Rhs of wire \Timer:TimerUDB:status_3\[210] = \Timer:TimerUDB:fifo_nempty\[211]
-Removing Lhs of wire \Timer:TimerUDB:cs_addr_2\[213] = zero[4]
-Removing Lhs of wire \Timer:TimerUDB:cs_addr_1\[214] = \Timer:TimerUDB:trig_reg\[202]
-Removing Lhs of wire \Timer:TimerUDB:cs_addr_0\[215] = \Timer:TimerUDB:per_zero\[193]
-Removing Lhs of wire tmpOE__Rx_1_net_0[395] = tmpOE__Vin_net_0[16]
-Removing Rhs of wire Net_2334[401] = \UART:BUART:tx_interrupt_out\[421]
-Removing Rhs of wire Net_2329[405] = \UART:BUART:rx_interrupt_out\[422]
-Removing Lhs of wire \UART:Net_61\[406] = \UART:Net_9\[403]
-Removing Lhs of wire \UART:BUART:tx_hd_send_break\[410] = zero[4]
-Removing Lhs of wire \UART:BUART:HalfDuplexSend\[411] = zero[4]
-Removing Lhs of wire \UART:BUART:FinalParityType_1\[412] = zero[4]
-Removing Lhs of wire \UART:BUART:FinalParityType_0\[413] = zero[4]
-Removing Lhs of wire \UART:BUART:FinalAddrMode_2\[414] = zero[4]
-Removing Lhs of wire \UART:BUART:FinalAddrMode_1\[415] = zero[4]
-Removing Lhs of wire \UART:BUART:FinalAddrMode_0\[416] = zero[4]
-Removing Lhs of wire \UART:BUART:tx_ctrl_mark\[417] = zero[4]
-Removing Rhs of wire \UART:BUART:tx_bitclk_enable_pre\[426] = \UART:BUART:tx_bitclk_dp\[462]
-Removing Lhs of wire \UART:BUART:tx_counter_tc\[472] = \UART:BUART:tx_counter_dp\[463]
-Removing Lhs of wire \UART:BUART:tx_status_6\[473] = zero[4]
-Removing Lhs of wire \UART:BUART:tx_status_5\[474] = zero[4]
-Removing Lhs of wire \UART:BUART:tx_status_4\[475] = zero[4]
-Removing Lhs of wire \UART:BUART:tx_status_1\[477] = \UART:BUART:tx_fifo_empty\[440]
-Removing Lhs of wire \UART:BUART:tx_status_3\[479] = \UART:BUART:tx_fifo_notfull\[439]
-Removing Lhs of wire \UART:BUART:rx_count7_bit8_wire\[539] = zero[4]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:add_vv_vv_MODGEN_1_1\[546] = \UART:BUART:sRX:s23Poll:MODULE_1:g2:a0:s_1\[557]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:add_vv_vv_MODGEN_1_0\[548] = \UART:BUART:sRX:s23Poll:MODULE_1:g2:a0:s_0\[558]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:cmp_vv_vv_MODGEN_2\[549] = \UART:BUART:sRX:s23Poll:MODULE_2:g2:a0:lta_0\[574]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:cmp_vv_vv_MODGEN_3\[550] = \UART:BUART:sRX:s23Poll:MODULE_3:g2:a0:lta_0\[588]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_1:g2:a0:a_1\[551] = \UART:BUART:sRX:s23Poll:MODIN1_1\[552]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODIN1_1\[552] = \UART:BUART:pollcount_1\[545]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_1:g2:a0:a_0\[553] = \UART:BUART:sRX:s23Poll:MODIN1_0\[554]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODIN1_0\[554] = \UART:BUART:pollcount_0\[547]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_1:g2:a0:g1:z1:s0:g1:u0:c_0\[560] = tmpOE__Vin_net_0[16]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_1:g2:a0:g1:z1:s0:g1:u0:b_0\[561] = tmpOE__Vin_net_0[16]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_2:g2:a0:newa_1\[562] = \UART:BUART:pollcount_1\[545]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODIN2_1\[563] = \UART:BUART:pollcount_1\[545]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_2:g2:a0:newa_0\[564] = \UART:BUART:pollcount_0\[547]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODIN2_0\[565] = \UART:BUART:pollcount_0\[547]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_2:g2:a0:newb_1\[566] = zero[4]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_2:g2:a0:newb_0\[567] = tmpOE__Vin_net_0[16]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_2:g2:a0:dataa_1\[568] = \UART:BUART:pollcount_1\[545]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_2:g2:a0:dataa_0\[569] = \UART:BUART:pollcount_0\[547]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_2:g2:a0:datab_1\[570] = zero[4]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_2:g2:a0:datab_0\[571] = tmpOE__Vin_net_0[16]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_3:g2:a0:newa_1\[576] = \UART:BUART:pollcount_1\[545]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODIN3_1\[577] = \UART:BUART:pollcount_1\[545]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_3:g2:a0:newa_0\[578] = \UART:BUART:pollcount_0\[547]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODIN3_0\[579] = \UART:BUART:pollcount_0\[547]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_3:g2:a0:newb_1\[580] = tmpOE__Vin_net_0[16]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_3:g2:a0:newb_0\[581] = zero[4]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_3:g2:a0:dataa_1\[582] = \UART:BUART:pollcount_1\[545]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_3:g2:a0:dataa_0\[583] = \UART:BUART:pollcount_0\[547]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_3:g2:a0:datab_1\[584] = tmpOE__Vin_net_0[16]
-Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_3:g2:a0:datab_0\[585] = zero[4]
-Removing Lhs of wire \UART:BUART:rx_status_1\[592] = zero[4]
-Removing Rhs of wire \UART:BUART:rx_status_2\[593] = \UART:BUART:rx_parity_error_status\[594]
-Removing Rhs of wire \UART:BUART:rx_status_3\[595] = \UART:BUART:rx_stop_bit_error\[596]
-Removing Lhs of wire \UART:BUART:sRX:cmp_vv_vv_MODGEN_4\[606] = \UART:BUART:sRX:MODULE_4:g2:a0:lta_0\[655]
-Removing Lhs of wire \UART:BUART:sRX:cmp_vv_vv_MODGEN_5\[610] = \UART:BUART:sRX:MODULE_5:g1:a0:xneq\[677]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newa_6\[611] = zero[4]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newa_5\[612] = zero[4]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newa_4\[613] = zero[4]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newa_3\[614] = \UART:BUART:sRX:MODIN4_6\[615]
-Removing Lhs of wire \UART:BUART:sRX:MODIN4_6\[615] = \UART:BUART:rx_count_6\[534]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newa_2\[616] = \UART:BUART:sRX:MODIN4_5\[617]
-Removing Lhs of wire \UART:BUART:sRX:MODIN4_5\[617] = \UART:BUART:rx_count_5\[535]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newa_1\[618] = \UART:BUART:sRX:MODIN4_4\[619]
-Removing Lhs of wire \UART:BUART:sRX:MODIN4_4\[619] = \UART:BUART:rx_count_4\[536]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newa_0\[620] = \UART:BUART:sRX:MODIN4_3\[621]
-Removing Lhs of wire \UART:BUART:sRX:MODIN4_3\[621] = \UART:BUART:rx_count_3\[537]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newb_6\[622] = zero[4]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newb_5\[623] = zero[4]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newb_4\[624] = zero[4]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newb_3\[625] = zero[4]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newb_2\[626] = tmpOE__Vin_net_0[16]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newb_1\[627] = tmpOE__Vin_net_0[16]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newb_0\[628] = zero[4]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:dataa_6\[629] = zero[4]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:dataa_5\[630] = zero[4]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:dataa_4\[631] = zero[4]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:dataa_3\[632] = \UART:BUART:rx_count_6\[534]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:dataa_2\[633] = \UART:BUART:rx_count_5\[535]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:dataa_1\[634] = \UART:BUART:rx_count_4\[536]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:dataa_0\[635] = \UART:BUART:rx_count_3\[537]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:datab_6\[636] = zero[4]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:datab_5\[637] = zero[4]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:datab_4\[638] = zero[4]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:datab_3\[639] = zero[4]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:datab_2\[640] = tmpOE__Vin_net_0[16]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:datab_1\[641] = tmpOE__Vin_net_0[16]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:datab_0\[642] = zero[4]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_5:g1:a0:newa_0\[657] = \UART:BUART:rx_postpoll\[493]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_5:g1:a0:newb_0\[658] = \UART:BUART:rx_parity_bit\[609]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_5:g1:a0:dataa_0\[659] = \UART:BUART:rx_postpoll\[493]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_5:g1:a0:datab_0\[660] = \UART:BUART:rx_parity_bit\[609]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_5:g1:a0:gx:u0:a_0\[661] = \UART:BUART:rx_postpoll\[493]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_5:g1:a0:gx:u0:b_0\[662] = \UART:BUART:rx_parity_bit\[609]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_5:g1:a0:gx:u0:aeqb_0\[664] = tmpOE__Vin_net_0[16]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_5:g1:a0:gx:u0:eq_0\[665] = \UART:BUART:sRX:MODULE_5:g1:a0:gx:u0:xnor_array_0\[663]
-Removing Lhs of wire \UART:BUART:sRX:MODULE_5:g1:a0:gx:u0:eqi_0\[666] = \UART:BUART:sRX:MODULE_5:g1:a0:gx:u0:xnor_array_0\[663]
-Removing Lhs of wire \EdgeDetect:last\\D\[690] = Net_2338[57]
-Removing Lhs of wire \Timer:TimerUDB:capture_last\\D\[691] = zero[4]
-Removing Lhs of wire \Timer:TimerUDB:hwEnable_reg\\D\[692] = \Timer:TimerUDB:control_7\[169]
-Removing Lhs of wire \Timer:TimerUDB:tc_reg_i\\D\[693] = \Timer:TimerUDB:status_tc\[191]
-Removing Lhs of wire \Timer:TimerUDB:capture_out_reg_i\\D\[694] = \Timer:TimerUDB:capt_fifo_load\[187]
-Removing Lhs of wire \UART:BUART:reset_reg\\D\[697] = zero[4]
-Removing Lhs of wire \UART:BUART:rx_bitclk\\D\[712] = \UART:BUART:rx_bitclk_pre\[528]
-Removing Lhs of wire \UART:BUART:rx_parity_error_pre\\D\[721] = \UART:BUART:rx_parity_error_pre\[604]
-Removing Lhs of wire \UART:BUART:rx_break_status\\D\[722] = zero[4]
+Removing Lhs of wire tmpOE__Vin_1_net_0[81] = tmpOE__Vin_net_0[16]
+Removing Lhs of wire tmpOE__Vref_net_0[91] = tmpOE__Vin_net_0[16]
+Removing Rhs of wire \ADC:Net_488\[114] = \ADC:Net_250\[149]
+Removing Lhs of wire \ADC:Net_481\[116] = zero[4]
+Removing Lhs of wire \ADC:Net_482\[117] = zero[4]
+Removing Lhs of wire \ADC:Net_252\[151] = zero[4]
+Removing Lhs of wire \ADC:soc\[153] = tmpOE__Vin_net_0[16]
+Removing Lhs of wire tmpOE__LED_net_0[158] = tmpOE__Vin_net_0[16]
+Removing Lhs of wire Net_12[165] = zero[4]
+Removing Rhs of wire Net_2277[169] = \Timer:Net_53\[170]
+Removing Rhs of wire Net_2277[169] = \Timer:TimerUDB:tc_reg_i\[202]
+Removing Lhs of wire \Timer:TimerUDB:ctrl_enable\[184] = \Timer:TimerUDB:control_7\[176]
+Removing Lhs of wire \Timer:TimerUDB:ctrl_cmode_1\[186] = zero[4]
+Removing Rhs of wire \Timer:TimerUDB:timer_enable\[195] = \Timer:TimerUDB:runmode_enable\[207]
+Removing Rhs of wire \Timer:TimerUDB:run_mode\[196] = \Timer:TimerUDB:hwEnable_reg\[197]
+Removing Lhs of wire \Timer:TimerUDB:trigger_enable\[199] = tmpOE__Vin_net_0[16]
+Removing Lhs of wire \Timer:TimerUDB:tc_i\[201] = \Timer:TimerUDB:status_tc\[198]
+Removing Lhs of wire \Timer:TimerUDB:hwEnable\[203] = \Timer:TimerUDB:control_7\[176]
+Removing Lhs of wire \Timer:TimerUDB:capt_fifo_load_int\[206] = \Timer:TimerUDB:capt_fifo_load\[194]
+Removing Lhs of wire \Timer:TimerUDB:status_6\[210] = zero[4]
+Removing Lhs of wire \Timer:TimerUDB:status_5\[211] = zero[4]
+Removing Lhs of wire \Timer:TimerUDB:status_4\[212] = zero[4]
+Removing Lhs of wire \Timer:TimerUDB:status_0\[213] = \Timer:TimerUDB:status_tc\[198]
+Removing Lhs of wire \Timer:TimerUDB:status_1\[214] = \Timer:TimerUDB:capt_fifo_load\[194]
+Removing Rhs of wire \Timer:TimerUDB:status_2\[215] = \Timer:TimerUDB:fifo_full\[216]
+Removing Rhs of wire \Timer:TimerUDB:status_3\[217] = \Timer:TimerUDB:fifo_nempty\[218]
+Removing Lhs of wire \Timer:TimerUDB:cs_addr_2\[220] = zero[4]
+Removing Lhs of wire \Timer:TimerUDB:cs_addr_1\[221] = \Timer:TimerUDB:trig_reg\[209]
+Removing Lhs of wire \Timer:TimerUDB:cs_addr_0\[222] = \Timer:TimerUDB:per_zero\[200]
+Removing Lhs of wire tmpOE__Rx_1_net_0[402] = tmpOE__Vin_net_0[16]
+Removing Rhs of wire Net_2334[408] = \UART:BUART:tx_interrupt_out\[428]
+Removing Rhs of wire Net_2329[412] = \UART:BUART:rx_interrupt_out\[429]
+Removing Lhs of wire \UART:Net_61\[413] = \UART:Net_9\[410]
+Removing Lhs of wire \UART:BUART:tx_hd_send_break\[417] = zero[4]
+Removing Lhs of wire \UART:BUART:HalfDuplexSend\[418] = zero[4]
+Removing Lhs of wire \UART:BUART:FinalParityType_1\[419] = zero[4]
+Removing Lhs of wire \UART:BUART:FinalParityType_0\[420] = zero[4]
+Removing Lhs of wire \UART:BUART:FinalAddrMode_2\[421] = zero[4]
+Removing Lhs of wire \UART:BUART:FinalAddrMode_1\[422] = zero[4]
+Removing Lhs of wire \UART:BUART:FinalAddrMode_0\[423] = zero[4]
+Removing Lhs of wire \UART:BUART:tx_ctrl_mark\[424] = zero[4]
+Removing Rhs of wire \UART:BUART:tx_bitclk_enable_pre\[433] = \UART:BUART:tx_bitclk_dp\[469]
+Removing Lhs of wire \UART:BUART:tx_counter_tc\[479] = \UART:BUART:tx_counter_dp\[470]
+Removing Lhs of wire \UART:BUART:tx_status_6\[480] = zero[4]
+Removing Lhs of wire \UART:BUART:tx_status_5\[481] = zero[4]
+Removing Lhs of wire \UART:BUART:tx_status_4\[482] = zero[4]
+Removing Lhs of wire \UART:BUART:tx_status_1\[484] = \UART:BUART:tx_fifo_empty\[447]
+Removing Lhs of wire \UART:BUART:tx_status_3\[486] = \UART:BUART:tx_fifo_notfull\[446]
+Removing Lhs of wire \UART:BUART:rx_count7_bit8_wire\[546] = zero[4]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:add_vv_vv_MODGEN_1_1\[553] = \UART:BUART:sRX:s23Poll:MODULE_1:g2:a0:s_1\[564]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:add_vv_vv_MODGEN_1_0\[555] = \UART:BUART:sRX:s23Poll:MODULE_1:g2:a0:s_0\[565]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:cmp_vv_vv_MODGEN_2\[556] = \UART:BUART:sRX:s23Poll:MODULE_2:g2:a0:lta_0\[581]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:cmp_vv_vv_MODGEN_3\[557] = \UART:BUART:sRX:s23Poll:MODULE_3:g2:a0:lta_0\[595]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_1:g2:a0:a_1\[558] = \UART:BUART:sRX:s23Poll:MODIN1_1\[559]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODIN1_1\[559] = \UART:BUART:pollcount_1\[552]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_1:g2:a0:a_0\[560] = \UART:BUART:sRX:s23Poll:MODIN1_0\[561]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODIN1_0\[561] = \UART:BUART:pollcount_0\[554]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_1:g2:a0:g1:z1:s0:g1:u0:c_0\[567] = tmpOE__Vin_net_0[16]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_1:g2:a0:g1:z1:s0:g1:u0:b_0\[568] = tmpOE__Vin_net_0[16]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_2:g2:a0:newa_1\[569] = \UART:BUART:pollcount_1\[552]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODIN2_1\[570] = \UART:BUART:pollcount_1\[552]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_2:g2:a0:newa_0\[571] = \UART:BUART:pollcount_0\[554]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODIN2_0\[572] = \UART:BUART:pollcount_0\[554]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_2:g2:a0:newb_1\[573] = zero[4]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_2:g2:a0:newb_0\[574] = tmpOE__Vin_net_0[16]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_2:g2:a0:dataa_1\[575] = \UART:BUART:pollcount_1\[552]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_2:g2:a0:dataa_0\[576] = \UART:BUART:pollcount_0\[554]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_2:g2:a0:datab_1\[577] = zero[4]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_2:g2:a0:datab_0\[578] = tmpOE__Vin_net_0[16]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_3:g2:a0:newa_1\[583] = \UART:BUART:pollcount_1\[552]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODIN3_1\[584] = \UART:BUART:pollcount_1\[552]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_3:g2:a0:newa_0\[585] = \UART:BUART:pollcount_0\[554]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODIN3_0\[586] = \UART:BUART:pollcount_0\[554]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_3:g2:a0:newb_1\[587] = tmpOE__Vin_net_0[16]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_3:g2:a0:newb_0\[588] = zero[4]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_3:g2:a0:dataa_1\[589] = \UART:BUART:pollcount_1\[552]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_3:g2:a0:dataa_0\[590] = \UART:BUART:pollcount_0\[554]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_3:g2:a0:datab_1\[591] = tmpOE__Vin_net_0[16]
+Removing Lhs of wire \UART:BUART:sRX:s23Poll:MODULE_3:g2:a0:datab_0\[592] = zero[4]
+Removing Lhs of wire \UART:BUART:rx_status_1\[599] = zero[4]
+Removing Rhs of wire \UART:BUART:rx_status_2\[600] = \UART:BUART:rx_parity_error_status\[601]
+Removing Rhs of wire \UART:BUART:rx_status_3\[602] = \UART:BUART:rx_stop_bit_error\[603]
+Removing Lhs of wire \UART:BUART:sRX:cmp_vv_vv_MODGEN_4\[613] = \UART:BUART:sRX:MODULE_4:g2:a0:lta_0\[662]
+Removing Lhs of wire \UART:BUART:sRX:cmp_vv_vv_MODGEN_5\[617] = \UART:BUART:sRX:MODULE_5:g1:a0:xneq\[684]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newa_6\[618] = zero[4]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newa_5\[619] = zero[4]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newa_4\[620] = zero[4]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newa_3\[621] = \UART:BUART:sRX:MODIN4_6\[622]
+Removing Lhs of wire \UART:BUART:sRX:MODIN4_6\[622] = \UART:BUART:rx_count_6\[541]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newa_2\[623] = \UART:BUART:sRX:MODIN4_5\[624]
+Removing Lhs of wire \UART:BUART:sRX:MODIN4_5\[624] = \UART:BUART:rx_count_5\[542]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newa_1\[625] = \UART:BUART:sRX:MODIN4_4\[626]
+Removing Lhs of wire \UART:BUART:sRX:MODIN4_4\[626] = \UART:BUART:rx_count_4\[543]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newa_0\[627] = \UART:BUART:sRX:MODIN4_3\[628]
+Removing Lhs of wire \UART:BUART:sRX:MODIN4_3\[628] = \UART:BUART:rx_count_3\[544]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newb_6\[629] = zero[4]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newb_5\[630] = zero[4]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newb_4\[631] = zero[4]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newb_3\[632] = zero[4]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newb_2\[633] = tmpOE__Vin_net_0[16]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newb_1\[634] = tmpOE__Vin_net_0[16]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:newb_0\[635] = zero[4]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:dataa_6\[636] = zero[4]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:dataa_5\[637] = zero[4]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:dataa_4\[638] = zero[4]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:dataa_3\[639] = \UART:BUART:rx_count_6\[541]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:dataa_2\[640] = \UART:BUART:rx_count_5\[542]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:dataa_1\[641] = \UART:BUART:rx_count_4\[543]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:dataa_0\[642] = \UART:BUART:rx_count_3\[544]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:datab_6\[643] = zero[4]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:datab_5\[644] = zero[4]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:datab_4\[645] = zero[4]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:datab_3\[646] = zero[4]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:datab_2\[647] = tmpOE__Vin_net_0[16]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:datab_1\[648] = tmpOE__Vin_net_0[16]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_4:g2:a0:datab_0\[649] = zero[4]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_5:g1:a0:newa_0\[664] = \UART:BUART:rx_postpoll\[500]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_5:g1:a0:newb_0\[665] = \UART:BUART:rx_parity_bit\[616]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_5:g1:a0:dataa_0\[666] = \UART:BUART:rx_postpoll\[500]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_5:g1:a0:datab_0\[667] = \UART:BUART:rx_parity_bit\[616]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_5:g1:a0:gx:u0:a_0\[668] = \UART:BUART:rx_postpoll\[500]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_5:g1:a0:gx:u0:b_0\[669] = \UART:BUART:rx_parity_bit\[616]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_5:g1:a0:gx:u0:aeqb_0\[671] = tmpOE__Vin_net_0[16]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_5:g1:a0:gx:u0:eq_0\[672] = \UART:BUART:sRX:MODULE_5:g1:a0:gx:u0:xnor_array_0\[670]
+Removing Lhs of wire \UART:BUART:sRX:MODULE_5:g1:a0:gx:u0:eqi_0\[673] = \UART:BUART:sRX:MODULE_5:g1:a0:gx:u0:xnor_array_0\[670]
+Removing Lhs of wire \EdgeDetect:last\\D\[697] = Net_2338[57]
+Removing Lhs of wire \Timer:TimerUDB:capture_last\\D\[698] = zero[4]
+Removing Lhs of wire \Timer:TimerUDB:hwEnable_reg\\D\[699] = \Timer:TimerUDB:control_7\[176]
+Removing Lhs of wire \Timer:TimerUDB:tc_reg_i\\D\[700] = \Timer:TimerUDB:status_tc\[198]
+Removing Lhs of wire \Timer:TimerUDB:capture_out_reg_i\\D\[701] = \Timer:TimerUDB:capt_fifo_load\[194]
+Removing Lhs of wire \UART:BUART:reset_reg\\D\[704] = zero[4]
+Removing Lhs of wire \UART:BUART:rx_bitclk\\D\[719] = \UART:BUART:rx_bitclk_pre\[535]
+Removing Lhs of wire \UART:BUART:rx_parity_error_pre\\D\[728] = \UART:BUART:rx_parity_error_pre\[611]
+Removing Lhs of wire \UART:BUART:rx_break_status\\D\[729] = zero[4]
 
 ------------------------------------------------------
-Aliased 0 equations, 147 wires.
+Aliased 0 equations, 148 wires.
 ------------------------------------------------------
 
 ----------------------------------------------------------
@@ -597,17 +603,17 @@ Aliasing \UART:BUART:rx_status_6\ to zero
 Aliasing \UART:BUART:rx_markspace_status\\D\ to zero
 Aliasing \UART:BUART:rx_parity_error_status\\D\ to zero
 Aliasing \UART:BUART:rx_addr_match_status\\D\ to zero
-Removing Lhs of wire \Timer:TimerUDB:capt_fifo_load\[187] = zero[4]
-Removing Lhs of wire \Timer:TimerUDB:trig_reg\[202] = \Timer:TimerUDB:timer_enable\[188]
-Removing Rhs of wire \UART:BUART:rx_bitclk_enable\[492] = \UART:BUART:rx_bitclk\[540]
-Removing Lhs of wire \UART:BUART:rx_status_0\[590] = zero[4]
-Removing Lhs of wire \UART:BUART:rx_status_6\[599] = zero[4]
-Removing Lhs of wire \UART:BUART:tx_ctrl_mark_last\\D\[704] = \UART:BUART:tx_ctrl_mark_last\[483]
-Removing Lhs of wire \UART:BUART:rx_markspace_status\\D\[716] = zero[4]
-Removing Lhs of wire \UART:BUART:rx_parity_error_status\\D\[717] = zero[4]
-Removing Lhs of wire \UART:BUART:rx_addr_match_status\\D\[719] = zero[4]
-Removing Lhs of wire \UART:BUART:rx_markspace_pre\\D\[720] = \UART:BUART:rx_markspace_pre\[603]
-Removing Lhs of wire \UART:BUART:rx_parity_bit\\D\[725] = \UART:BUART:rx_parity_bit\[609]
+Removing Lhs of wire \Timer:TimerUDB:capt_fifo_load\[194] = zero[4]
+Removing Lhs of wire \Timer:TimerUDB:trig_reg\[209] = \Timer:TimerUDB:timer_enable\[195]
+Removing Rhs of wire \UART:BUART:rx_bitclk_enable\[499] = \UART:BUART:rx_bitclk\[547]
+Removing Lhs of wire \UART:BUART:rx_status_0\[597] = zero[4]
+Removing Lhs of wire \UART:BUART:rx_status_6\[606] = zero[4]
+Removing Lhs of wire \UART:BUART:tx_ctrl_mark_last\\D\[711] = \UART:BUART:tx_ctrl_mark_last\[490]
+Removing Lhs of wire \UART:BUART:rx_markspace_status\\D\[723] = zero[4]
+Removing Lhs of wire \UART:BUART:rx_parity_error_status\\D\[724] = zero[4]
+Removing Lhs of wire \UART:BUART:rx_addr_match_status\\D\[726] = zero[4]
+Removing Lhs of wire \UART:BUART:rx_markspace_pre\\D\[727] = \UART:BUART:rx_markspace_pre\[610]
+Removing Lhs of wire \UART:BUART:rx_parity_bit\\D\[732] = \UART:BUART:rx_parity_bit\[616]
 
 ------------------------------------------------------
 Aliased 0 equations, 11 wires.
@@ -646,14 +652,14 @@ CYPRESS_DIR    : C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\wa
 Warp Program   : C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\warp\bin\warp.exe
 Warp Arguments : -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE -ya -.fftprj=C:\Github\Tesis\src\psoc\Martillo_ESP.cydsn\Martillo_ESP.cyprj -dcpsoc3 Martillo_ESP.v -verilog
 </CYPRESSTAG>
-Warp synthesis phase: Elapsed time ==> 0s.881ms
+Warp synthesis phase: Elapsed time ==> 0s.999ms
 <CYPRESSTAG name="Fitter results...">
 <CYPRESSTAG name="Fitter startup details...">
-cyp3fit: V4.4.0.80, Family: PSoC3, Started at: Monday, 01 June 2026 19:50:03
+cyp3fit: V4.4.0.80, Family: PSoC3, Started at: Wednesday, 03 June 2026 21:21:51
 Options: -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE -ya -.fftprj=C:\Github\Tesis\src\psoc\Martillo_ESP.cydsn\Martillo_ESP.cyprj -d CY8C5888LTI-LP097 Martillo_ESP.v -verilog
 </CYPRESSTAG>
 <CYPRESSTAG name="Design parsing">
-Design parsing phase: Elapsed time ==> 0s.017ms
+Design parsing phase: Elapsed time ==> 0s.022ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Tech Mapping">
 <CYPRESSTAG name="Initial Mapping" icon="FILE_RPT_TECHM">
@@ -688,8 +694,6 @@ Done removing unused cells.
         EnableIn: Constant 1 was determined to be synchronous to ClockIn
         ClockOut: UART_IntClock, EnableOut: Constant 1
 </CYPRESSTAG>
-ADD: pft.M0040: information: The following 2 pin(s) will be assigned a location by the fitter: Vin(0), Vref(0)
-
 
 Removing unused cells resulting from optimization
 Done removing unused cells.
@@ -839,6 +843,9 @@ Design Equations
             pa_out => Vin(0)__PA ,
             analog_term => Net_2444 ,
             pad => Vin(0)_PAD );
+        Properties:
+        {
+        }
 
     Pin : Name = Tx_1(0)
         Attributes:
@@ -921,6 +928,46 @@ Design Equations
         {
         }
 
+    Pin : Name = Vin_1(0)
+        Attributes:
+            In Group/Port: True
+            In Sync Option: AUTO
+            Out Sync Option: AUTO
+            Interrupt generated: False
+            Interrupt mode: NONE
+            Drive mode: HI_Z_ANALOG
+            VTrip: EITHER
+            Slew: FAST
+            Input Sync needed: False
+            Output Sync needed: False
+            SC shield enabled: False
+            POR State: ANY
+            LCD Mode: COMMON
+            Register Mode: RegComb
+            CaSense Mode: NEITHER
+            Treat as pin: True
+            Is OE Registered: False
+            Uses Analog: True
+            Can contain Digital: False
+            Is SIO: False
+            SIO Output Buf: NONREGULATED
+            SIO Input Buf: SINGLE_ENDED
+            SIO HiFreq: LOW
+            SIO Hyst: DISABLED
+            SIO Vtrip: MULTIPLIER_0_5
+            SIO Multiplier Index: 0
+            SIO RefSel: VCC_IO
+            Required Capabilities: ANALOG
+            Initial Value: 0
+            IO Voltage: 0
+        PORT MAP (
+            pa_out => Vin_1(0)__PA ,
+            analog_term => Net_2 ,
+            pad => Vin_1(0)_PAD );
+        Properties:
+        {
+        }
+
     Pin : Name = Vref(0)
         Attributes:
             In Group/Port: True
@@ -958,6 +1005,9 @@ Design Equations
             analog_term => Net_2452 ,
             annotation => Net_238 ,
             pad => Vref(0)_PAD );
+        Properties:
+        {
+        }
 
     Pin : Name = LED(0)
         Attributes:
@@ -1989,7 +2039,7 @@ Analog Clocks                 :    1 :    3 :    4 : 25.00 %
 CapSense Buffers              :    0 :    2 :    2 :  0.00 %
 Digital Filter Block          :    0 :    1 :    1 :  0.00 %
 Interrupts                    :    6 :   26 :   32 : 18.75 %
-IO                            :    9 :   39 :   48 : 18.75 %
+IO                            :   10 :   38 :   48 : 20.83 %
 Segment LCD                   :    0 :    1 :    1 :  0.00 %
 CAN 2.0b                      :    0 :    1 :    1 :  0.00 %
 I2C                           :    0 :    1 :    1 :  0.00 %
@@ -2009,7 +2059,7 @@ UDB                           :      :      :      :
     Control Registers         :    1 :      :      :        
     Count7 Cells              :    1 :      :      :        
 Opamp                         :    1 :    3 :    4 : 25.00 %
-Comparator                    :    0 :    4 :    4 :  0.00 %
+Comparator                    :    1 :    3 :    4 : 25.00 %
 Delta-Sigma ADC               :    1 :    0 :    1 : 100.00 %
 LPF                           :    2 :    0 :    2 : 100.00 %
 SAR ADC                       :    0 :    2 :    2 :  0.00 %
@@ -2017,8 +2067,8 @@ Analog (SC/CT) Blocks         :    2 :    2 :    4 : 50.00 %
 DAC                           :      :      :      :        
   VIDAC                       :    1 :    3 :    4 : 25.00 %
 </CYPRESSTAG>
-Technology Mapping: Elapsed time ==> 0s.078ms
-Tech Mapping phase: Elapsed time ==> 0s.141ms
+Technology Mapping: Elapsed time ==> 0s.096ms
+Tech Mapping phase: Elapsed time ==> 0s.174ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Analog Placement">
 Info: apr.M0002: Analog signal "\ADC:Net_35\" is connected to one terminal only. (App=cydsfit)
@@ -2027,44 +2077,54 @@ IO_1@[IOP=(2)][IoId=(1)] : LED(0) (fixed)
 IO_2@[IOP=(1)][IoId=(2)] : Rx_1(0) (fixed)
 IO_6@[IOP=(12)][IoId=(6)] : SYNC_IN(0) (fixed)
 IO_5@[IOP=(1)][IoId=(5)] : Tx_1(0) (fixed)
-IO_5@[IOP=(2)][IoId=(5)] : Vin(0)
-IO_4@[IOP=(15)][IoId=(4)] : Vref(0)
+IO_3@[IOP=(3)][IoId=(3)] : Vin(0) (fixed)
+IO_4@[IOP=(15)][IoId=(4)] : Vin_1(0) (fixed)
+IO_0@[IOP=(0)][IoId=(0)] : Vref(0) (fixed)
+OpAmp[2]@[FFB(OpAmp,2)] : \Opa_ref:ABuf\ (fixed)
 DSM[0]@[FFB(DSM,0)] : \ADC:DSM\
 Vref[6]@[FFB(Vref,6)] : \ADC:vRef_2\
-LPF[0]@[FFB(LPF,0)] : \LPF_ADC:cy_psoc3_lpf_1\
-LPF[1]@[FFB(LPF,1)] : \LPF_ref:cy_psoc3_lpf_1\
-OpAmp[3]@[FFB(OpAmp,3)] : \Opa_ref:ABuf\ (OPAMP-GPIO)
-SC[0]@[FFB(SC,0)] : \PGA:SC\
-SC[1]@[FFB(SC,1)] : \PGA_ref:SC\
-VIDAC[1]@[FFB(VIDAC,1)] : \VDAC:viDAC8\
-Vref[3]@[FFB(Vref,3)] : vRef_1
-IO_7@[IOP=(3)][IoId=(7)] : Dedicated_Output (OPAMP-GPIO)
-Log: apr.M0058: The analog placement iterative improvement is 32% done. (App=cydsfit)
-Log: apr.M0058: The analog placement iterative improvement is 62% done. (App=cydsfit)
+LPF[1]@[FFB(LPF,1)] : \LPF_ADC:cy_psoc3_lpf_1\
+LPF[0]@[FFB(LPF,0)] : \LPF_ref:cy_psoc3_lpf_1\
+SC[3]@[FFB(SC,3)] : \PGA:SC\
+SC[2]@[FFB(SC,2)] : \PGA_ref:SC\
+VIDAC[3]@[FFB(VIDAC,3)] : \VDAC:viDAC8\
+Comparator[0]@[FFB(Comparator,0)] : autoVrefComparator_0
+Vref[10]@[FFB(Vref,10)] : vRef_1
+Log: apr.M0058: The analog placement iterative improvement is 35% done. (App=cydsfit)
+Log: apr.M0058: The analog placement iterative improvement is 56% done. (App=cydsfit)
+Log: apr.M0058: The analog placement iterative improvement is 98% done. (App=cydsfit)
 Analog Placement Results:
 IO_1@[IOP=(2)][IoId=(1)] : LED(0) (fixed)
 IO_2@[IOP=(1)][IoId=(2)] : Rx_1(0) (fixed)
 IO_6@[IOP=(12)][IoId=(6)] : SYNC_IN(0) (fixed)
 IO_5@[IOP=(1)][IoId=(5)] : Tx_1(0) (fixed)
-IO_7@[IOP=(1)][IoId=(7)] : Vin(0)
-IO_2@[IOP=(2)][IoId=(2)] : Vref(0)
+IO_3@[IOP=(3)][IoId=(3)] : Vin(0) (fixed)
+IO_4@[IOP=(15)][IoId=(4)] : Vin_1(0) (fixed)
+IO_0@[IOP=(0)][IoId=(0)] : Vref(0) (fixed)
+OpAmp[2]@[FFB(OpAmp,2)] : \Opa_ref:ABuf\ (fixed)
 DSM[0]@[FFB(DSM,0)] : \ADC:DSM\
 Vref[6]@[FFB(Vref,6)] : \ADC:vRef_2\
 LPF[0]@[FFB(LPF,0)] : \LPF_ADC:cy_psoc3_lpf_1\
 LPF[1]@[FFB(LPF,1)] : \LPF_ref:cy_psoc3_lpf_1\
-OpAmp[3]@[FFB(OpAmp,3)] : \Opa_ref:ABuf\ (OPAMP-GPIO)
-SC[3]@[FFB(SC,3)] : \PGA:SC\
-SC[2]@[FFB(SC,2)] : \PGA_ref:SC\
-VIDAC[3]@[FFB(VIDAC,3)] : \VDAC:viDAC8\
-Vref[3]@[FFB(Vref,3)] : vRef_1
-IO_7@[IOP=(3)][IoId=(7)] : Dedicated_Output (OPAMP-GPIO)
+SC[2]@[FFB(SC,2)] : \PGA:SC\
+SC[0]@[FFB(SC,0)] : \PGA_ref:SC\
+VIDAC[0]@[FFB(VIDAC,0)] : \VDAC:viDAC8\
+Comparator[1]@[FFB(Comparator,1)] : autoVrefComparator_0
+Vref[10]@[FFB(Vref,10)] : vRef_1
 
-Analog Placement phase: Elapsed time ==> 1s.392ms
+Analog Placement phase: Elapsed time ==> 1s.713ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Analog Routing">
-Analog Routing phase: Elapsed time ==> 0s.016ms
+Net "Net_2467" overuses wire "1.024v_vref Wire"
+Net "Net_63" overuses wire "1.024v_vref Wire"
+Net "Net_2467" overuses wire "1.024v_vref Wire"
+Net "Net_63" overuses wire "1.024v_vref Wire"
+Net "Net_2451" overuses wire "AGL[5]"
+Net "Net_63" overuses wire "AGL[5]"
+Analog Routing phase: Elapsed time ==> 0s.031ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Analog Code Generation">
+Info: apr.M0060: Comparator 'Comparator[1]@[FFB(Comparator,1)]' is powered up by analog subsystem to support an auto-enabled vref. (App=cydsfit)
 ============ Analog Final Answer Routes ============
 Dump of CyAnalogRoutingResultsDB
 Map of net to items {
@@ -2077,20 +2137,29 @@ Map of net to items {
   Net: \ADC:Net_35\ {
   }
   Net: Net_2444 {
-    sc_3_vin
-    agr7_x_sc_3_vin
+    sc_2_vin
+    agl7_x_sc_2_vin
+    agl7
+    agl7_x_agr7
     agr7
     agr7_x_p3_3
     p3_3
   }
-  Net: Net_2452 {
+  Net: Net_2 {
     sc_2_vout
-    agl4_x_sc_2_vout
-    agl4
-    agl4_x_p0_0
-    p0_0
+    agl0_x_sc_2_vout
+    agl0
+    agl0_x_lpf_0_vin
+    lpf_0_vin
+    agl0_x_p15_4
+    p15_4
   }
-  Net: Net_108 {
+  Net: Net_2452 {
+    p0_0
+    opamp_2_vminus_x_p0_0
+    opamp_2_vminus
+  }
+  Net: Net_2459 {
     lpf_0_vout
     abusl0_x_lpf_0_vout
     abusl0
@@ -2105,45 +2174,44 @@ Map of net to items {
   }
   Net: \ADC:Net_34\ {
   }
-  Net: Net_2 {
-    sc_3_vout
-    agr0_x_sc_3_vout
+  Net: Net_2467 {
+    common_vref_1024
+    comp_13_vref_1024
+    comp_1_vminus_x_comp_13_vref_1024
+    comp_1_vminus
+    agr0_x_comp_1_vminus
     agr0
-    agl0_x_agr0
-    agl0
-    agl0_x_lpf_0_vin
-    lpf_0_vin
-  }
-  Net: Net_2448 {
-    vidac_3_vout
-    amuxbusr_x_vidac_3_vout
-    amuxbusr
-    amuxbusr_x_lpf_1_vin
+    agr0_x_lpf_1_vin
     lpf_1_vin
   }
-  Net: Net_2450 {
-    opamp_3_vplus
-    abusr0_x_opamp_3_vplus
+  Net: Net_2451 {
+    opamp_2_vplus
+    agl4_x_opamp_2_vplus
+    agl4
+    agl4_x_agr4
+    agr4
+    agr4_x_vidac_3_vout
+    vidac_3_vout
+    abusr0_x_vidac_3_vout
     abusr0
     abusr0_x_lpf_1_vout
     lpf_1_vout
   }
   Net: Net_63 {
-    sc_3_vref
-    agr5_x_sc_3_vref
-    agr5
-    agr5_x_opamp_3_vminus
-    opamp_3_vminus
-    opamp_3_vminus_x_p3_7
-    p3_7
+    sc_0_vout
+    agl3_x_sc_0_vout
+    agl3
+    agl3_x_sc_2_vref
+    sc_2_vref
   }
   Net: \PGA_ref:Net_17\ {
   }
-  Net: Net_2451 {
-    common_vref_1024
-    sc_2_bgref
-    sc_2_bgref_x_sc_2_vin
-    sc_2_vin
+  Net: Net_2450 {
+    vidac_0_vout
+    agl1_x_vidac_0_vout
+    agl1
+    agl1_x_sc_0_vin
+    sc_0_vin
   }
   Net: \VDAC:Net_77\ {
   }
@@ -2155,49 +2223,57 @@ Map of net to items {
   }
 }
 Map of item to net {
-  sc_3_vin                                         -> Net_2444
-  agr7_x_sc_3_vin                                  -> Net_2444
+  sc_2_vin                                         -> Net_2444
+  agl7_x_sc_2_vin                                  -> Net_2444
+  agl7                                             -> Net_2444
+  agl7_x_agr7                                      -> Net_2444
   agr7                                             -> Net_2444
   agr7_x_p3_3                                      -> Net_2444
   p3_3                                             -> Net_2444
-  sc_2_vout                                        -> Net_2452
-  agl4_x_sc_2_vout                                 -> Net_2452
-  agl4                                             -> Net_2452
-  agl4_x_p0_0                                      -> Net_2452
-  p0_0                                             -> Net_2452
-  lpf_0_vout                                       -> Net_108
-  abusl0_x_lpf_0_vout                              -> Net_108
-  abusl0                                           -> Net_108
-  abusl0_x_dsm_0_vplus                             -> Net_108
-  dsm_0_vplus                                      -> Net_108
-  sc_3_vout                                        -> Net_2
-  agr0_x_sc_3_vout                                 -> Net_2
-  agr0                                             -> Net_2
-  agl0_x_agr0                                      -> Net_2
+  sc_2_vout                                        -> Net_2
+  agl0_x_sc_2_vout                                 -> Net_2
   agl0                                             -> Net_2
   agl0_x_lpf_0_vin                                 -> Net_2
   lpf_0_vin                                        -> Net_2
-  vidac_3_vout                                     -> Net_2448
-  amuxbusr_x_vidac_3_vout                          -> Net_2448
-  amuxbusr                                         -> Net_2448
-  amuxbusr_x_lpf_1_vin                             -> Net_2448
-  lpf_1_vin                                        -> Net_2448
-  opamp_3_vplus                                    -> Net_2450
-  abusr0_x_opamp_3_vplus                           -> Net_2450
-  abusr0                                           -> Net_2450
-  abusr0_x_lpf_1_vout                              -> Net_2450
-  lpf_1_vout                                       -> Net_2450
-  sc_3_vref                                        -> Net_63
-  agr5_x_sc_3_vref                                 -> Net_63
-  agr5                                             -> Net_63
-  agr5_x_opamp_3_vminus                            -> Net_63
-  opamp_3_vminus                                   -> Net_63
-  opamp_3_vminus_x_p3_7                            -> Net_63
-  p3_7                                             -> Net_63
-  common_vref_1024                                 -> Net_2451
-  sc_2_bgref                                       -> Net_2451
-  sc_2_bgref_x_sc_2_vin                            -> Net_2451
-  sc_2_vin                                         -> Net_2451
+  agl0_x_p15_4                                     -> Net_2
+  p15_4                                            -> Net_2
+  p0_0                                             -> Net_2452
+  opamp_2_vminus_x_p0_0                            -> Net_2452
+  opamp_2_vminus                                   -> Net_2452
+  lpf_0_vout                                       -> Net_2459
+  abusl0_x_lpf_0_vout                              -> Net_2459
+  abusl0                                           -> Net_2459
+  abusl0_x_dsm_0_vplus                             -> Net_2459
+  dsm_0_vplus                                      -> Net_2459
+  common_vref_1024                                 -> Net_2467
+  comp_13_vref_1024                                -> Net_2467
+  comp_1_vminus_x_comp_13_vref_1024                -> Net_2467
+  comp_1_vminus                                    -> Net_2467
+  agr0_x_comp_1_vminus                             -> Net_2467
+  agr0                                             -> Net_2467
+  agr0_x_lpf_1_vin                                 -> Net_2467
+  lpf_1_vin                                        -> Net_2467
+  opamp_2_vplus                                    -> Net_2451
+  agl4_x_opamp_2_vplus                             -> Net_2451
+  agl4                                             -> Net_2451
+  agl4_x_agr4                                      -> Net_2451
+  agr4                                             -> Net_2451
+  agr4_x_vidac_3_vout                              -> Net_2451
+  vidac_3_vout                                     -> Net_2451
+  abusr0_x_vidac_3_vout                            -> Net_2451
+  abusr0                                           -> Net_2451
+  abusr0_x_lpf_1_vout                              -> Net_2451
+  lpf_1_vout                                       -> Net_2451
+  sc_0_vout                                        -> Net_63
+  agl3_x_sc_0_vout                                 -> Net_63
+  agl3                                             -> Net_63
+  agl3_x_sc_2_vref                                 -> Net_63
+  sc_2_vref                                        -> Net_63
+  vidac_0_vout                                     -> Net_2450
+  agl1_x_vidac_0_vout                              -> Net_2450
+  agl1                                             -> Net_2450
+  agl1_x_sc_0_vin                                  -> Net_2450
+  sc_0_vin                                         -> Net_2450
   dsm_0_vminus                                     -> \ADC:Net_20\
   common_vssa                                      -> \ADC:Net_244\
   dsm_0_vminus_x_dsm_0_vminus_vssa                 -> AmuxNet::\ADC:AMux\
@@ -2234,11 +2310,11 @@ Dump of CyP35AnalogRoutingResultsDB
 IsVddaHalfUsedForComp = False
 IsVddaHalfUsedForSar0 = False
 IsVddaHalfUsedForSar1 = False
-Analog Code Generation phase: Elapsed time ==> 0s.205ms
+Analog Code Generation phase: Elapsed time ==> 0s.245ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Digital Placement">
 <CYPRESSTAG name="Detailed placement messages">
-I2076: Total run-time: 0.8 sec.
+I2076: Total run-time: 0.9 sec.
 
 </CYPRESSTAG>
 <CYPRESSTAG name="PLD Packing">
@@ -2262,14 +2338,14 @@ PLD Packing Summary
 <CYPRESSTAG name="Packed PLD Contents">
 Packed PLD Contents not displayed at this verbose level.</CYPRESSTAG>
 </CYPRESSTAG>
-PLD Packing: Elapsed time ==> 0s.007ms
+PLD Packing: Elapsed time ==> 0s.002ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Partitioning">
 <CYPRESSTAG name="Initial Partitioning Summary">
 Initial Partitioning Summary not displayed at this verbose level.</CYPRESSTAG>
 <CYPRESSTAG name="Final Partitioning Summary">
 Final Partitioning Summary not displayed at this verbose level.</CYPRESSTAG>
-Partitioning: Elapsed time ==> 0s.047ms
+Partitioning: Elapsed time ==> 0s.055ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Final Placement Summary">
 
@@ -3616,46 +3692,6 @@ Pin : Name = Vin(0)
     {
     }
 
-[IoId=7]: 
-Pin : Name = Dedicated_Output
-    Attributes:
-        In Group/Port: False
-        In Sync Option: AUTO
-        Out Sync Option: AUTO
-        Interrupt generated: False
-        Interrupt mode: NONE
-        Drive mode: HI_Z_ANALOG
-        VTrip: EITHER
-        Slew: FAST
-        Input Sync needed: False
-        Output Sync needed: False
-        SC shield enabled: False
-        POR State: ANY
-        LCD Mode: COMMON
-        Register Mode: RegComb
-        CaSense Mode: NEITHER
-        Treat as pin: True
-        Is OE Registered: False
-        Uses Analog: True
-        Can contain Digital: False
-        Is SIO: False
-        SIO Output Buf: NONREGULATED
-        SIO Input Buf: SINGLE_ENDED
-        SIO HiFreq: LOW
-        SIO Hyst: DISABLED
-        SIO Vtrip: MULTIPLIER_0_5
-        SIO Multiplier Index: 0
-        SIO RefSel: VCC_IO
-        Required Capabilities: ANALOG
-        Initial Value: 0
-        IO Voltage: 0
-    PORT MAP (
-        pa_out => Dedicated_Output__PA ,
-        analog_term => Net_63 );
-    Properties:
-    {
-    }
-
 Port 12 contains the following IO cells:
 [IoId=6]: 
 Pin : Name = SYNC_IN(0)
@@ -3699,6 +3735,47 @@ Pin : Name = SYNC_IN(0)
     }
 
 Port 15 contains the following IO cells:
+[IoId=4]: 
+Pin : Name = Vin_1(0)
+    Attributes:
+        In Group/Port: True
+        In Sync Option: AUTO
+        Out Sync Option: AUTO
+        Interrupt generated: False
+        Interrupt mode: NONE
+        Drive mode: HI_Z_ANALOG
+        VTrip: EITHER
+        Slew: FAST
+        Input Sync needed: False
+        Output Sync needed: False
+        SC shield enabled: False
+        POR State: ANY
+        LCD Mode: COMMON
+        Register Mode: RegComb
+        CaSense Mode: NEITHER
+        Treat as pin: True
+        Is OE Registered: False
+        Uses Analog: True
+        Can contain Digital: False
+        Is SIO: False
+        SIO Output Buf: NONREGULATED
+        SIO Input Buf: SINGLE_ENDED
+        SIO HiFreq: LOW
+        SIO Hyst: DISABLED
+        SIO Vtrip: MULTIPLIER_0_5
+        SIO Multiplier Index: 0
+        SIO RefSel: VCC_IO
+        Required Capabilities: ANALOG
+        Initial Value: 0
+        IO Voltage: 0
+    PORT MAP (
+        pa_out => Vin_1(0)__PA ,
+        analog_term => Net_2 ,
+        pad => Vin_1(0)_PAD );
+    Properties:
+    {
+    }
+
 ARM group 0: empty
 CAN group 0: empty
 Cache group 0: empty
@@ -3729,14 +3806,21 @@ Clock group 0:
         Properties:
         {
         }
-Comparator group 0: empty
+Comparator group 0: 
+    Comparator Block @ F(Comparator,1): 
+    comparatorcell: Name =autoVrefComparator_0
+        PORT MAP (
+            vminus => Net_2467 );
+        Properties:
+        {
+        }
 DFB group 0: empty
 DSM group 0: 
     DS Modulator @ F(DSM,0): 
     dsmodcell: Name =\ADC:DSM\
         PORT MAP (
             aclock => \ADC:Net_488\ ,
-            vplus => Net_108 ,
+            vplus => Net_2459 ,
             vminus => \ADC:Net_20\ ,
             reset_dec => \ADC:mod_reset\ ,
             extclk_cp_udb => \ADC:Net_93_local\ ,
@@ -3785,18 +3869,18 @@ LVD group 0: empty
 PICU group 0: empty
 PM group 0: empty
 SC group 0: 
-    SC Block @ F(SC,2): 
+    SC Block @ F(SC,0): 
     sccell: Name =\PGA_ref:SC\
         PORT MAP (
             vref => \PGA_ref:Net_17\ ,
-            vin => Net_2451 ,
+            vin => Net_2450 ,
             modout => \PGA_ref:Net_41\ ,
-            vout => Net_2452 );
+            vout => Net_63 );
         Properties:
         {
             cy_registers = ""
         }
-    SC Block @ F(SC,3): 
+    SC Block @ F(SC,2): 
     sccell: Name =\PGA:SC\
         PORT MAP (
             vref => Net_63 ,
@@ -3811,10 +3895,10 @@ SPC group 0: empty
 Timer group 0: empty
 USB group 0: empty
 VIDAC group 0: 
-    VIDAC Block @ F(VIDAC,3): 
+    VIDAC Block @ F(VIDAC,0): 
     vidaccell: Name =\VDAC:viDAC8\
         PORT MAP (
-            vout => Net_2448 ,
+            vout => Net_2450 ,
             iout => \VDAC:Net_77\ );
         Properties:
         {
@@ -3823,29 +3907,18 @@ VIDAC group 0:
             reg_data = 0
         }
 OpAmp group 0: 
-    Opamp Block @ F(OpAmp,3): 
+    Opamp Block @ F(OpAmp,2): 
     abufcell: Name =\Opa_ref:ABuf\
         PORT MAP (
-            vplus => Net_2450 ,
-            vminus => Net_63 ,
-            vout => Net_63 );
+            vplus => Net_2451 ,
+            vminus => Net_2452 ,
+            vout => Net_2452 );
         Properties:
         {
             cy_registers = ""
         }
 CsAbuf group 0: empty
 Vref group 0: 
-    Vref Block @ F(Vref,3): 
-    vrefcell: Name =vRef_1
-        PORT MAP (
-            vout => Net_2451 );
-        Properties:
-        {
-            autoenable = 1
-            guid = "89B398AD-36A8-4627-9212-707F2986319E"
-            ignoresleep = 0
-            name = "1.024V"
-        }
     Vref Block @ F(Vref,6): 
     vrefcell: Name =\ADC:vRef_2\
         PORT MAP (
@@ -3857,12 +3930,23 @@ Vref group 0:
             ignoresleep = 0
             name = "Vssa (GND)"
         }
+    Vref Block @ F(Vref,10): 
+    vrefcell: Name =vRef_1
+        PORT MAP (
+            vout => Net_2467 );
+        Properties:
+        {
+            autoenable = 1
+            guid = "89B398AD-36A8-4627-9212-707F2986319E"
+            ignoresleep = 0
+            name = "1.024V"
+        }
 LPF group 0: 
     LPF Block @ F(LPF,0): 
     lpfcell: Name =\LPF_ADC:cy_psoc3_lpf_1\
         PORT MAP (
             vin => Net_2 ,
-            vout => Net_108 );
+            vout => Net_2459 );
         Properties:
         {
             cy_registers = ""
@@ -3870,8 +3954,8 @@ LPF group 0:
     LPF Block @ F(LPF,1): 
     lpfcell: Name =\LPF_ref:cy_psoc3_lpf_1\
         PORT MAP (
-            vin => Net_2448 ,
-            vout => Net_2450 );
+            vin => Net_2467 ,
+            vout => Net_2451 );
         Properties:
         {
             cy_registers = ""
@@ -3903,51 +3987,52 @@ Blocks not positioned by the digital component placer:
 ------------------------------------------------------------
 Port Configuration report
 ------------------------------------------------------------
-     |     |       | Interrupt |                  |                  | 
-Port | Pin | Fixed |      Type |       Drive Mode |             Name | Connections
------+-----+-------+-----------+------------------+------------------+-----------------
-   0 |   0 |       |      NONE |      HI_Z_ANALOG |          Vref(0) | Analog(Net_2452)
------+-----+-------+-----------+------------------+------------------+-----------------
-   1 |   2 |     * |      NONE |     HI_Z_DIGITAL |          Rx_1(0) | FB(Net_2326)
-     |   5 |     * |      NONE |    OPEN_DRAIN_LO |          Tx_1(0) | In(Net_2330)
------+-----+-------+-----------+------------------+------------------+-----------------
-   2 |   1 |     * |      NONE |         CMOS_OUT |           LED(0) | 
------+-----+-------+-----------+------------------+------------------+-----------------
-   3 |   3 |       |      NONE |      HI_Z_ANALOG |           Vin(0) | Analog(Net_2444)
-     |   7 |       |      NONE |      HI_Z_ANALOG | Dedicated_Output | Analog(Net_63)
------+-----+-------+-----------+------------------+------------------+-----------------
-  12 |   6 |     * |      NONE |     HI_Z_DIGITAL |       SYNC_IN(0) | FB(Net_2336)
----------------------------------------------------------------------------------------
+     |     |       | Interrupt |                  |            | 
+Port | Pin | Fixed |      Type |       Drive Mode |       Name | Connections
+-----+-----+-------+-----------+------------------+------------+-----------------
+   0 |   0 |     * |      NONE |      HI_Z_ANALOG |    Vref(0) | Analog(Net_2452)
+-----+-----+-------+-----------+------------------+------------+-----------------
+   1 |   2 |     * |      NONE |     HI_Z_DIGITAL |    Rx_1(0) | FB(Net_2326)
+     |   5 |     * |      NONE |    OPEN_DRAIN_LO |    Tx_1(0) | In(Net_2330)
+-----+-----+-------+-----------+------------------+------------+-----------------
+   2 |   1 |     * |      NONE |         CMOS_OUT |     LED(0) | 
+-----+-----+-------+-----------+------------------+------------+-----------------
+   3 |   3 |     * |      NONE |      HI_Z_ANALOG |     Vin(0) | Analog(Net_2444)
+-----+-----+-------+-----------+------------------+------------+-----------------
+  12 |   6 |     * |      NONE |     HI_Z_DIGITAL | SYNC_IN(0) | FB(Net_2336)
+-----+-----+-------+-----------+------------------+------------+-----------------
+  15 |   4 |     * |      NONE |      HI_Z_ANALOG |   Vin_1(0) | Analog(Net_2)
+---------------------------------------------------------------------------------
 </CYPRESSTAG>
 </CYPRESSTAG>
 </CYPRESSTAG>
-Digital component placer commit/Report: Elapsed time ==> 0s.047ms
-Digital Placement phase: Elapsed time ==> 1s.138ms
+Digital component placer commit/Report: Elapsed time ==> 0s.055ms
+Digital Placement phase: Elapsed time ==> 1s.265ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Digital Routing">
 "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\bin/sjrouter.exe" --xml-path "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\dev\psoc5/psoc5lp/route_arch-rrg.cydata" --vh2-path "Martillo_ESP_r.vh2" --pcf-path "Martillo_ESP.pco" --des-name "Martillo_ESP" --dsf-path "Martillo_ESP.dsf" --sdc-path "Martillo_ESP.sdc" --lib-path "Martillo_ESP_r.lib"
 Routing successful.
-Digital Routing phase: Elapsed time ==> 1s.329ms
+Digital Routing phase: Elapsed time ==> 1s.512ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Bitstream Generation">
-Bitstream Generation phase: Elapsed time ==> 0s.126ms
+Bitstream Generation phase: Elapsed time ==> 0s.213ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Bitstream Verification">
-Bitstream Verification phase: Elapsed time ==> 0s.040ms
+Bitstream Verification phase: Elapsed time ==> 0s.031ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Static timing analysis">
 Timing report is in Martillo_ESP_timing.html.
-Static timing analysis phase: Elapsed time ==> 0s.314ms
+Static timing analysis phase: Elapsed time ==> 0s.260ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Data reporting">
 Data reporting phase: Elapsed time ==> 0s.000ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Database update...">
-Design database save phase: Elapsed time ==> 0s.174ms
+Design database save phase: Elapsed time ==> 0s.261ms
 </CYPRESSTAG>
-cydsfit: Elapsed time ==> 4s.912ms
+cydsfit: Elapsed time ==> 5s.755ms
 </CYPRESSTAG>
-Fitter phase: Elapsed time ==> 4s.914ms
-API generation phase: Elapsed time ==> 1s.205ms
-Dependency generation phase: Elapsed time ==> 0s.000ms
+Fitter phase: Elapsed time ==> 5s.755ms
+API generation phase: Elapsed time ==> 1s.485ms
+Dependency generation phase: Elapsed time ==> 0s.016ms
 Cleanup phase: Elapsed time ==> 0s.000ms
