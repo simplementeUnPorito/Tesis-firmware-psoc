@@ -2,7 +2,7 @@
 --	Conversion of AcondicionamientoAnalogico.v to vh2:
 --
 --	Cypress Semiconductor - WARP Version 6.3 IR 41
---	Wed Jun 03 23:42:22 2026
+--	Thu Jun 04 16:47:02 2026
 --
 
 USE cypress.cypress.all;
@@ -773,15 +773,15 @@ SIGNAL tmpIO_0__PGApin_net_0 : bit;
 TERMINAL tmpSIOVREF__PGApin_net_0 : bit;
 TERMINAL Net_2541 : bit;
 SIGNAL tmpINTERRUPT_0__PGApin_net_0 : bit;
-TERMINAL Net_239 : bit;
+TERMINAL Net_238 : bit;
+TERMINAL Net_170 : bit;
 TERMINAL Net_226 : bit;
 SIGNAL tmpOE__Vref_net_0 : bit;
 SIGNAL tmpFB_0__Vref_net_0 : bit;
 SIGNAL tmpIO_0__Vref_net_0 : bit;
 TERMINAL tmpSIOVREF__Vref_net_0 : bit;
-TERMINAL Net_238 : bit;
 SIGNAL tmpINTERRUPT_0__Vref_net_0 : bit;
-TERMINAL Net_170 : bit;
+TERMINAL Net_2658 : bit;
 TERMINAL Net_204 : bit;
 TERMINAL Net_183 : bit;
 TERMINAL Net_194 : bit;
@@ -802,7 +802,6 @@ SIGNAL tmpOE__Vin_net_0 : bit;
 SIGNAL tmpFB_0__Vin_net_0 : bit;
 SIGNAL tmpIO_0__Vin_net_0 : bit;
 TERMINAL tmpSIOVREF__Vin_net_0 : bit;
-TERMINAL Net_2634 : bit;
 SIGNAL tmpINTERRUPT_0__Vin_net_0 : bit;
 SIGNAL \EdgeDetect:last\\D\ : bit;
 SIGNAL \Timer:TimerUDB:capture_last\\D\ : bit;
@@ -2114,11 +2113,11 @@ PGApin:cy_psoc3_pins_v1_10
 		out_clock_en=>tmpOE__Tx_1_net_0,
 		out_reset=>zero,
 		interrupt=>tmpINTERRUPT_0__PGApin_net_0);
-GND_2:cy_annotation_universal_v1_0
-	GENERIC MAP(comp_name=>"Gnd_v1_0",
-		port_names=>"T1",
-		width=>1)
-	PORT MAP(connect=>Net_239);
+C_3:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Capacitor_v1_0",
+		port_names=>"T1, T2",
+		width=>2)
+	PORT MAP(connect=>(Net_238, Net_170));
 GND_1:cy_annotation_universal_v1_0
 	GENERIC MAP(comp_name=>"Gnd_v1_0",
 		port_names=>"T1",
@@ -2201,10 +2200,10 @@ vRef_1:cy_vref_v1_0
 		ignoresleep=>'0')
 	PORT MAP(vout=>Net_2635);
 D_2:cy_annotation_universal_v1_0
-	GENERIC MAP(comp_name=>"Zener_v1_0",
+	GENERIC MAP(comp_name=>"Schottky_v1_0",
 		port_names=>"A, K",
 		width=>2)
-	PORT MAP(connect=>(Net_239, Net_170));
+	PORT MAP(connect=>(Net_170, Net_2658));
 R_4:cy_annotation_universal_v1_0
 	GENERIC MAP(comp_name=>"Resistor_v1_0",
 		port_names=>"T1, T2",
@@ -2344,7 +2343,7 @@ Vin:cy_psoc3_pins_v1_10
 		analog=>Net_2633,
 		io=>(tmpIO_0__Vin_net_0),
 		siovref=>(tmpSIOVREF__Vin_net_0),
-		annotation=>Net_2634,
+		annotation=>Net_170,
 		in_clock=>zero,
 		in_clock_en=>tmpOE__Tx_1_net_0,
 		in_reset=>zero,

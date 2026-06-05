@@ -1,6 +1,6 @@
 // ======================================================================
 // AcondicionamientoAnalogico.v generated from TopDesign.cysch
-// 06/03/2026 at 23:42
+// 06/04/2026 at 16:47
 // This file is auto generated. ANY EDITS YOU MAKE MAY BE LOST WHEN THIS FILE IS REGENERATED!!!
 // ======================================================================
 
@@ -893,10 +893,10 @@ endmodule
 // top
 module top ;
 
-    electrical  Net_2634;
           wire  Net_2520;
           wire [7:0] Net_2519;
     electrical  Net_2633;
+    electrical  Net_2658;
     electrical  Net_2541;
     electrical  Net_2637;
     electrical  Net_2636;
@@ -936,7 +936,6 @@ module top ;
           wire  Net_2330;
     electrical  Net_2628;
     electrical  Net_63;
-    electrical  Net_239;
     electrical  Net_170;
     electrical  Net_204;
     electrical  Net_183;
@@ -1396,14 +1395,15 @@ module top ;
 
 	assign tmpOE__PGApin_net = (`CYDEV_CHIP_MEMBER_USED == `CYDEV_CHIP_MEMBER_3A && `CYDEV_CHIP_REVISION_USED < `CYDEV_CHIP_REVISION_3A_ES3) ? ~{1'b1} : {1'b1};
 
-    cy_annotation_universal_v1_0 GND_2 (
+    cy_annotation_universal_v1_0 C_3 (
         .connect({
-            Net_239
+            Net_238,
+            Net_170
         })
     );
-    defparam GND_2.comp_name = "Gnd_v1_0";
-    defparam GND_2.port_names = "T1";
-    defparam GND_2.width = 1;
+    defparam C_3.comp_name = "Capacitor_v1_0";
+    defparam C_3.port_names = "T1, T2";
+    defparam C_3.width = 2;
 
     cy_annotation_universal_v1_0 GND_1 (
         .connect({
@@ -1502,11 +1502,11 @@ module top ;
 
     cy_annotation_universal_v1_0 D_2 (
         .connect({
-            Net_239,
-            Net_170
+            Net_170,
+            Net_2658
         })
     );
-    defparam D_2.comp_name = "Zener_v1_0";
+    defparam D_2.comp_name = "Schottky_v1_0";
     defparam D_2.port_names = "A, K";
     defparam D_2.width = 2;
 
@@ -1681,7 +1681,7 @@ module top ;
 		  .io({tmpIO_0__Vin_net[0:0]}),
 		  .siovref(tmpSIOVREF__Vin_net),
 		  .interrupt({tmpINTERRUPT_0__Vin_net[0:0]}),
-		  .annotation({Net_2634}),
+		  .annotation({Net_170}),
 		  .in_clock({1'b0}),
 		  .in_clock_en({1'b1}),
 		  .in_reset({1'b0}),
