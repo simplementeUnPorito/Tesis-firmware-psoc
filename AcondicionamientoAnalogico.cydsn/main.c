@@ -152,6 +152,19 @@ static void uart_send_cfg_ack(uint8 cmd, uint8 val)
     UART_PutArray(frame, (uint8)sizeof(frame));
 }
 
+static void uart_send_fs_report(void)
+{
+    uint8 fs_lo = (uint8)((uint16)ADC_DEFAULT_SRATE & 0xFFu);
+    uint8 fs_hi = (uint8)(((uint16)ADC_DEFAULT_SRATE >> 8u) & 0xFFu);
+    uint8 frame[5u];
+    frame[0] = 0xABu;
+    frame[1] = 0xC3u;
+    frame[2] = fs_lo;
+    frame[3] = fs_hi;
+    frame[4] = (uint8)(0xC3u ^ fs_lo ^ fs_hi);
+    UART_PutArray(frame, (uint8)sizeof(frame));
+}
+
 static int32 adc_counts_right_aligned(int32 adcCounts)
 {
     #if(ADC_CFG1_DEC_DIV != 0)
@@ -444,7 +457,9 @@ static void uart_service(void)
                 {
                     case PSOC_CMD_PONG: break;
                     case 0xA5u:
-                        uart_send_ping(); break;
+                        uart_send_ping();
+                        uart_send_fs_report();
+                        break;
                     case 0xA6u:
                         PGAgain_Set(rx_p1);
                         uart_send_cfg_ack(0xA6u, g_pga_code);

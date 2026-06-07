@@ -50,25 +50,39 @@ set_location "ClockBlock" clockblockcell -1 -1 0
 set_location "\ADC:DSM\" dsmodcell -1 -1 0
 # Note: port 12 is the logical name for port 7
 set_io "SYNC_IN(0)" iocell 12 6
-set_location "\VDAC:viDAC8\" vidaccell -1 -1 1
+set_location "\VDAC:viDAC8\" vidaccell -1 -1 2
 set_location "\Timer:TimerUDB:sCTRLReg:SyncCtl:ctrlreg\" controlcell 2 0 6 
 set_location "isr_SyncIn" interrupt -1 -1 3
 set_location "isr_Timer" interrupt -1 -1 4
-set_location "\LPF_ADC:cy_psoc3_lpf_1\" lpfcell -1 -1 1
-set_location "\LPF_ref:cy_psoc3_lpf_1\" lpfcell -1 -1 0
+set_location "\LPF_1:cy_psoc3_lpf_1\" lpfcell -1 -1 1
+set_location "\LPF_2:cy_psoc3_lpf_1\" lpfcell -1 -1 0
 set_io "Rx_1(0)" iocell 1 2
-set_location "\Opa_ref:ABuf\" abufcell -1 -1 2
+set_location "\OPAref:ABuf\" abufcell -1 -1 2
+set_location "\OPAadder:ABuf\" abufcell -1 -1 1
+set_location "\OPAlp:ABuf\" abufcell -1 -1 3
+set_location "\OPAbp:ABuf\" abufcell -1 -1 0
 set_io "Tx_1(0)" iocell 1 5
 set_location "\Sync:genblk1[0]:INST\" synccell 0 0 5 0
-set_location "\ADC:IRQ\" interrupt -1 -1 29
 set_location "isr_DelSig" interrupt -1 -1 2
+set_location "\ADC:IRQ\" interrupt -1 -1 29
 set_location "\UART:RXInternalInterrupt\" interrupt -1 -1 0
 set_location "\UART:TXInternalInterrupt\" interrupt -1 -1 1
-set_location "\PGA_ref:SC\" sccell -1 -1 1
-set_location "\PGA:SC\" sccell -1 -1 3
-# Note: port 15 is the logical name for port 8
-set_io "PGApin(0)" iocell 15 0
-set_io "Vref(0)" iocell 0 0
-set_io "Vin(0)" iocell 3 3
+set_location "\PGAgain:SC\" sccell -1 -1 1
+set_location "\PGAvdac:SC\" sccell -1 -1 2
+set_location "\PGAn:SC\" sccell -1 -1 0
+set_location "\PGAp:SC\" sccell -1 -1 3
+set_io "LPo(0)" iocell 3 7
+set_io "LPm(0)" iocell 3 2
+set_io "LPp(0)" iocell 3 3
+set_io "ADDERm(0)" iocell 3 4
+set_io "REF(0)" iocell 0 0
+set_io "VDACo(0)" iocell 0 6
+set_io "ADDERp(0)" iocell 3 5
+set_io "BPp(0)" iocell 0 2
+set_io "BPm(0)" iocell 0 3
+set_io "ADDERo(0)" iocell 3 6
+set_io "BPo(0)" iocell 0 1
+set_io "SEo(0)" iocell 0 7
+set_io "INn(0)" iocell 0 5
+set_io "INp(0)" iocell 0 4
 set_location "ClockBlock_100k__SYNC_1" synccell 3 0 5 1
-set_location "autoVrefComparator_0" comparatorcell -1 -1 3
