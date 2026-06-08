@@ -1,9 +1,9 @@
-Loading plugins phase: Elapsed time ==> 0s.223ms
+Loading plugins phase: Elapsed time ==> 0s.163ms
 <CYPRESSTAG name="CyDsfit arguments...">
 cydsfit arguments: -.fdsnotice -.fdswarpdepfile=warp_dependencies.txt -.fdselabdepfile=elab_dependencies.txt -.fdsbldfile=generated_files.txt -.fdsreffile=referenced_files.txt -p C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\AcondicionamientoAnalogico.cyprj -d CY8C5888LTI-LP097 -s C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\Generated_Source\PSoC5 -- -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE
 </CYPRESSTAG>
 <CYPRESSTAG name="Design elaboration results...">
-ADD: fit.M0029: information: Voltage Reference Information: Vref 'Vdda/2' is connected to terminal 'vin' of '\LPF_2:cy_psoc3_lpf_1\' but no direct hardware connection exists.
+ADD: fit.M0029: information: Voltage Reference Information: Vref '1.024V' is connected to terminal 'vin' of '\LPF_ref:cy_psoc3_lpf_1\' but no direct hardware connection exists.
  * C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\TopDesign\TopDesign.cysch (Instance:vRef_1)
  * C:\Github\Tesis\src\psoc\Analog_LPF_v1_0.cylib\Analog_LPF_v1_0\Analog_LPF_v1_0.cysch (Instance:cy_psoc3_lpf_1)
 
@@ -11,7 +11,7 @@ ADD: fit.M0029: information: Voltage Reference Information: Vref 'Vdda/2' is con
 Elaboration phase: Elapsed time ==> 1s.849ms
 <CYPRESSTAG name="HDL generation results...">
 </CYPRESSTAG>
-HDL generation phase: Elapsed time ==> 0s.060ms
+HDL generation phase: Elapsed time ==> 0s.039ms
 <CYPRESSTAG name="Synthesis results...">
 
      | | | | | | |
@@ -45,7 +45,7 @@ Options  :    -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE -ya -.fftprj=C:\Github\Tesi
 ======================================================================
 
 vlogfe V6.3 IR 41:  Verilog parser
-Fri Jun 05 23:56:27 2026
+Mon Jun 08 17:23:44 2026
 
 
 ======================================================================
@@ -55,7 +55,7 @@ Options  :    -yv2 -q10 AcondicionamientoAnalogico.v
 ======================================================================
 
 vpp V6.3 IR 41:  Verilog Pre-Processor
-Fri Jun 05 23:56:27 2026
+Mon Jun 08 17:23:44 2026
 
 Flattening file 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\cy_sync_v1_0\cy_sync_v1_0.v'
 Flattening file 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\warp\lib\common\cypress.v'
@@ -71,6 +71,8 @@ Flattening file 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\ps
 Flattening file 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\warp\lib\common\cypress.v'
 Flattening file 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\cy_analog_virtualmux_v1_0\cy_analog_virtualmux_v1_0.v'
 Flattening file 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\cy_vref_v1_70\cy_vref_v1_70.v'
+Flattening file 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyComponentLibrary\CyComponentLibrary.cylib\AMux_v1_80\AMux_v1_80.v'
+Flattening file 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\warp\lib\common\cypress.v'
 Flattening file 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\or_v1_0\or_v1_0.v'
 
 vpp:  No errors.
@@ -111,7 +113,7 @@ Options  :    -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE -ya -.fftprj=C:\Github\Tesi
 ======================================================================
 
 tovif V6.3 IR 41:  High-level synthesis
-Fri Jun 05 23:56:27 2026
+Mon Jun 08 17:23:44 2026
 
 Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\warp\lib\common\std.vhd'.
 Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\warp\lib\common\cypress.vhd'.
@@ -135,6 +137,7 @@ Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\conte
 Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyComponentLibrary\CyComponentLibrary.cylib\B_UART_v2_50\B_UART_v2_50.v'.
 Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\cy_analog_virtualmux_v1_0\cy_analog_virtualmux_v1_0.v'.
 Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\cy_vref_v1_70\cy_vref_v1_70.v'.
+Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyComponentLibrary\CyComponentLibrary.cylib\AMux_v1_80\AMux_v1_80.v'.
 Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\or_v1_0\or_v1_0.v'.
 Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\warp\lib\common\stdlogic\cy_psoc3pkg.vif'.
 Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\warp\lib\common\stdlogic\cy_psoc3.vif'.
@@ -151,7 +154,7 @@ Options  :    -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE -ya -.fftprj=C:\Github\Tesi
 ======================================================================
 
 topld V6.3 IR 41:  Synthesis and optimization
-Fri Jun 05 23:56:28 2026
+Mon Jun 08 17:23:44 2026
 
 Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\warp\lib\common\std.vhd'.
 Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\warp\lib\common\cypress.vhd'.
@@ -175,6 +178,7 @@ Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\conte
 Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyComponentLibrary\CyComponentLibrary.cylib\B_UART_v2_50\B_UART_v2_50.v'.
 Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\cy_analog_virtualmux_v1_0\cy_analog_virtualmux_v1_0.v'.
 Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\cy_vref_v1_70\cy_vref_v1_70.v'.
+Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyComponentLibrary\CyComponentLibrary.cylib\AMux_v1_80\AMux_v1_80.v'.
 Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\or_v1_0\or_v1_0.v'.
 Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\warp\lib\common\stdlogic\cy_psoc3pkg.vif'.
 Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\warp\lib\common\stdlogic\cy_psoc3.vif'.
@@ -275,42 +279,27 @@ Aliasing \UART:BUART:sRX:MODULE_4:g2:a0:newb_2\ to tmpOE__Tx_1_net_0
 Aliasing \UART:BUART:sRX:MODULE_4:g2:a0:newb_1\ to tmpOE__Tx_1_net_0
 Aliasing \UART:BUART:sRX:MODULE_4:g2:a0:newb_0\ to zero
 Aliasing \UART:BUART:sRX:MODULE_5:g1:a0:gx:u0:aeqb_0\ to tmpOE__Tx_1_net_0
-Aliasing \PGAgain:Net_37\ to zero
-Aliasing \PGAgain:Net_40\ to zero
-Aliasing \PGAgain:Net_38\ to zero
-Aliasing \PGAgain:Net_39\ to zero
-Aliasing \PGAvdac:Net_37\ to zero
-Aliasing \PGAvdac:Net_40\ to zero
-Aliasing \PGAvdac:Net_38\ to zero
-Aliasing \PGAvdac:Net_39\ to zero
+Aliasing tmpOE__LPp_net_0 to tmpOE__Tx_1_net_0
 Aliasing tmpOE__LPo_net_0 to tmpOE__Tx_1_net_0
 Aliasing tmpOE__LPm_net_0 to tmpOE__Tx_1_net_0
-Aliasing tmpOE__LPp_net_0 to tmpOE__Tx_1_net_0
-Aliasing tmpOE__ADDERm_net_0 to tmpOE__Tx_1_net_0
-Aliasing tmpOE__REF_net_0 to tmpOE__Tx_1_net_0
-Aliasing tmpOE__VDACo_net_0 to tmpOE__Tx_1_net_0
+Aliasing \ADC:Net_482\ to zero
+Aliasing \ADC:tmpOE__Bypass_P03_net_0\ to tmpOE__Tx_1_net_0
+Aliasing \ADC:Net_252\ to zero
+Aliasing \ADC:soc\ to tmpOE__Tx_1_net_0
+Aliasing \PGA_ref:Net_37\ to zero
+Aliasing \PGA_ref:Net_40\ to zero
+Aliasing \PGA_ref:Net_38\ to zero
+Aliasing \PGA_ref:Net_39\ to zero
+Aliasing tmpOE__PGAo_net_0 to tmpOE__Tx_1_net_0
+Aliasing tmpOE__Vref_net_0 to tmpOE__Tx_1_net_0
+Aliasing \PGA:Net_37\ to zero
+Aliasing \PGA:Net_40\ to zero
+Aliasing \PGA:Net_38\ to zero
+Aliasing \PGA:Net_39\ to zero
 Aliasing \VDAC:Net_83\ to zero
 Aliasing \VDAC:Net_81\ to zero
 Aliasing \VDAC:Net_82\ to zero
-Aliasing tmpOE__ADDERp_net_0 to tmpOE__Tx_1_net_0
-Aliasing tmpOE__BPp_net_0 to tmpOE__Tx_1_net_0
-Aliasing tmpOE__BPm_net_0 to tmpOE__Tx_1_net_0
-Aliasing tmpOE__ADDERo_net_0 to tmpOE__Tx_1_net_0
-Aliasing tmpOE__BPo_net_0 to tmpOE__Tx_1_net_0
-Aliasing tmpOE__SEo_net_0 to tmpOE__Tx_1_net_0
-Aliasing \ADC:Net_482\ to zero
-Aliasing \ADC:Net_252\ to zero
-Aliasing \ADC:soc\ to tmpOE__Tx_1_net_0
-Aliasing tmpOE__INn_net_0 to tmpOE__Tx_1_net_0
-Aliasing tmpOE__INp_net_0 to tmpOE__Tx_1_net_0
-Aliasing \PGAn:Net_37\ to zero
-Aliasing \PGAn:Net_40\ to zero
-Aliasing \PGAn:Net_38\ to zero
-Aliasing \PGAn:Net_39\ to zero
-Aliasing \PGAp:Net_37\ to zero
-Aliasing \PGAp:Net_40\ to zero
-Aliasing \PGAp:Net_38\ to zero
-Aliasing \PGAp:Net_39\ to zero
+Aliasing tmpOE__PGAin_net_0 to tmpOE__Tx_1_net_0
 Aliasing \Timer:TimerUDB:capture_last\\D\ to zero
 Aliasing \Timer:TimerUDB:capture_out_reg_i\\D\ to \Timer:TimerUDB:capt_fifo_load_int\
 Aliasing \UART:BUART:reset_reg\\D\ to zero
@@ -434,56 +423,41 @@ Removing Lhs of wire \UART:BUART:sRX:MODULE_5:g1:a0:gx:u0:b_0\[528] = \UART:BUAR
 Removing Lhs of wire \UART:BUART:sRX:MODULE_5:g1:a0:gx:u0:aeqb_0\[530] = tmpOE__Tx_1_net_0[1]
 Removing Lhs of wire \UART:BUART:sRX:MODULE_5:g1:a0:gx:u0:eq_0\[531] = \UART:BUART:sRX:MODULE_5:g1:a0:gx:u0:xnor_array_0\[529]
 Removing Lhs of wire \UART:BUART:sRX:MODULE_5:g1:a0:gx:u0:eqi_0\[532] = \UART:BUART:sRX:MODULE_5:g1:a0:gx:u0:xnor_array_0\[529]
-Removing Lhs of wire \PGAgain:Net_37\[564] = zero[7]
-Removing Lhs of wire \PGAgain:Net_40\[565] = zero[7]
-Removing Lhs of wire \PGAgain:Net_38\[566] = zero[7]
-Removing Lhs of wire \PGAgain:Net_39\[567] = zero[7]
-Removing Lhs of wire \PGAvdac:Net_37\[584] = zero[7]
-Removing Lhs of wire \PGAvdac:Net_40\[585] = zero[7]
-Removing Lhs of wire \PGAvdac:Net_38\[586] = zero[7]
-Removing Lhs of wire \PGAvdac:Net_39\[587] = zero[7]
-Removing Lhs of wire tmpOE__LPo_net_0[618] = tmpOE__Tx_1_net_0[1]
-Removing Lhs of wire tmpOE__LPm_net_0[627] = tmpOE__Tx_1_net_0[1]
-Removing Lhs of wire tmpOE__LPp_net_0[634] = tmpOE__Tx_1_net_0[1]
-Removing Lhs of wire tmpOE__ADDERm_net_0[644] = tmpOE__Tx_1_net_0[1]
-Removing Lhs of wire tmpOE__REF_net_0[650] = tmpOE__Tx_1_net_0[1]
-Removing Lhs of wire tmpOE__VDACo_net_0[658] = tmpOE__Tx_1_net_0[1]
-Removing Lhs of wire \VDAC:Net_83\[664] = zero[7]
-Removing Lhs of wire \VDAC:Net_81\[665] = zero[7]
-Removing Lhs of wire \VDAC:Net_82\[666] = zero[7]
-Removing Lhs of wire tmpOE__ADDERp_net_0[670] = tmpOE__Tx_1_net_0[1]
-Removing Lhs of wire tmpOE__BPp_net_0[679] = tmpOE__Tx_1_net_0[1]
-Removing Lhs of wire tmpOE__BPm_net_0[690] = tmpOE__Tx_1_net_0[1]
-Removing Lhs of wire tmpOE__ADDERo_net_0[700] = tmpOE__Tx_1_net_0[1]
-Removing Lhs of wire tmpOE__BPo_net_0[706] = tmpOE__Tx_1_net_0[1]
-Removing Lhs of wire tmpOE__SEo_net_0[716] = tmpOE__Tx_1_net_0[1]
-Removing Rhs of wire \ADC:Net_488\[743] = \ADC:Net_250\[777]
-Removing Lhs of wire \ADC:Net_481\[745] = zero[7]
-Removing Lhs of wire \ADC:Net_482\[746] = zero[7]
-Removing Lhs of wire \ADC:Net_252\[779] = zero[7]
-Removing Lhs of wire \ADC:soc\[781] = tmpOE__Tx_1_net_0[1]
-Removing Lhs of wire tmpOE__INn_net_0[785] = tmpOE__Tx_1_net_0[1]
-Removing Lhs of wire tmpOE__INp_net_0[792] = tmpOE__Tx_1_net_0[1]
-Removing Lhs of wire \PGAn:Net_37\[802] = zero[7]
-Removing Lhs of wire \PGAn:Net_40\[803] = zero[7]
-Removing Lhs of wire \PGAn:Net_38\[804] = zero[7]
-Removing Lhs of wire \PGAn:Net_39\[805] = zero[7]
-Removing Lhs of wire \PGAp:Net_37\[813] = zero[7]
-Removing Lhs of wire \PGAp:Net_40\[814] = zero[7]
-Removing Lhs of wire \PGAp:Net_38\[815] = zero[7]
-Removing Lhs of wire \PGAp:Net_39\[816] = zero[7]
-Removing Lhs of wire \EdgeDetect:last\\D\[823] = Net_2338[18]
-Removing Lhs of wire \Timer:TimerUDB:capture_last\\D\[824] = zero[7]
-Removing Lhs of wire \Timer:TimerUDB:hwEnable_reg\\D\[825] = \Timer:TimerUDB:control_7\[35]
-Removing Lhs of wire \Timer:TimerUDB:tc_reg_i\\D\[826] = \Timer:TimerUDB:status_tc\[57]
-Removing Lhs of wire \Timer:TimerUDB:capture_out_reg_i\\D\[827] = \Timer:TimerUDB:capt_fifo_load\[53]
-Removing Lhs of wire \UART:BUART:reset_reg\\D\[830] = zero[7]
-Removing Lhs of wire \UART:BUART:rx_bitclk\\D\[845] = \UART:BUART:rx_bitclk_pre\[394]
-Removing Lhs of wire \UART:BUART:rx_parity_error_pre\\D\[854] = \UART:BUART:rx_parity_error_pre\[470]
-Removing Lhs of wire \UART:BUART:rx_break_status\\D\[855] = zero[7]
+Removing Lhs of wire tmpOE__LPp_net_0[560] = tmpOE__Tx_1_net_0[1]
+Removing Lhs of wire tmpOE__LPo_net_0[580] = tmpOE__Tx_1_net_0[1]
+Removing Lhs of wire tmpOE__LPm_net_0[587] = tmpOE__Tx_1_net_0[1]
+Removing Rhs of wire \ADC:Net_488\[617] = \ADC:Net_250\[659]
+Removing Lhs of wire \ADC:Net_481\[619] = zero[7]
+Removing Lhs of wire \ADC:Net_482\[620] = zero[7]
+Removing Lhs of wire \ADC:tmpOE__Bypass_P03_net_0\[644] = tmpOE__Tx_1_net_0[1]
+Removing Lhs of wire \ADC:Net_252\[661] = zero[7]
+Removing Lhs of wire \ADC:soc\[663] = tmpOE__Tx_1_net_0[1]
+Removing Lhs of wire \PGA_ref:Net_37\[675] = zero[7]
+Removing Lhs of wire \PGA_ref:Net_40\[676] = zero[7]
+Removing Lhs of wire \PGA_ref:Net_38\[677] = zero[7]
+Removing Lhs of wire \PGA_ref:Net_39\[678] = zero[7]
+Removing Lhs of wire tmpOE__PGAo_net_0[685] = tmpOE__Tx_1_net_0[1]
+Removing Lhs of wire tmpOE__Vref_net_0[692] = tmpOE__Tx_1_net_0[1]
+Removing Lhs of wire \PGA:Net_37\[712] = zero[7]
+Removing Lhs of wire \PGA:Net_40\[713] = zero[7]
+Removing Lhs of wire \PGA:Net_38\[714] = zero[7]
+Removing Lhs of wire \PGA:Net_39\[715] = zero[7]
+Removing Lhs of wire \VDAC:Net_83\[721] = zero[7]
+Removing Lhs of wire \VDAC:Net_81\[722] = zero[7]
+Removing Lhs of wire \VDAC:Net_82\[723] = zero[7]
+Removing Lhs of wire tmpOE__PGAin_net_0[727] = tmpOE__Tx_1_net_0[1]
+Removing Lhs of wire \EdgeDetect:last\\D\[733] = Net_2338[18]
+Removing Lhs of wire \Timer:TimerUDB:capture_last\\D\[734] = zero[7]
+Removing Lhs of wire \Timer:TimerUDB:hwEnable_reg\\D\[735] = \Timer:TimerUDB:control_7\[35]
+Removing Lhs of wire \Timer:TimerUDB:tc_reg_i\\D\[736] = \Timer:TimerUDB:status_tc\[57]
+Removing Lhs of wire \Timer:TimerUDB:capture_out_reg_i\\D\[737] = \Timer:TimerUDB:capt_fifo_load\[53]
+Removing Lhs of wire \UART:BUART:reset_reg\\D\[740] = zero[7]
+Removing Lhs of wire \UART:BUART:rx_bitclk\\D\[755] = \UART:BUART:rx_bitclk_pre\[394]
+Removing Lhs of wire \UART:BUART:rx_parity_error_pre\\D\[764] = \UART:BUART:rx_parity_error_pre\[470]
+Removing Lhs of wire \UART:BUART:rx_break_status\\D\[765] = zero[7]
 
 ------------------------------------------------------
-Aliased 0 equations, 166 wires.
+Aliased 0 equations, 151 wires.
 ------------------------------------------------------
 
 ----------------------------------------------------------
@@ -640,12 +614,12 @@ Removing Lhs of wire \Timer:TimerUDB:trig_reg\[68] = \Timer:TimerUDB:timer_enabl
 Removing Rhs of wire \UART:BUART:rx_bitclk_enable\[358] = \UART:BUART:rx_bitclk\[406]
 Removing Lhs of wire \UART:BUART:rx_status_0\[456] = zero[7]
 Removing Lhs of wire \UART:BUART:rx_status_6\[465] = zero[7]
-Removing Lhs of wire \UART:BUART:tx_ctrl_mark_last\\D\[837] = \UART:BUART:tx_ctrl_mark_last\[349]
-Removing Lhs of wire \UART:BUART:rx_markspace_status\\D\[849] = zero[7]
-Removing Lhs of wire \UART:BUART:rx_parity_error_status\\D\[850] = zero[7]
-Removing Lhs of wire \UART:BUART:rx_addr_match_status\\D\[852] = zero[7]
-Removing Lhs of wire \UART:BUART:rx_markspace_pre\\D\[853] = \UART:BUART:rx_markspace_pre\[469]
-Removing Lhs of wire \UART:BUART:rx_parity_bit\\D\[858] = \UART:BUART:rx_parity_bit\[475]
+Removing Lhs of wire \UART:BUART:tx_ctrl_mark_last\\D\[747] = \UART:BUART:tx_ctrl_mark_last\[349]
+Removing Lhs of wire \UART:BUART:rx_markspace_status\\D\[759] = zero[7]
+Removing Lhs of wire \UART:BUART:rx_parity_error_status\\D\[760] = zero[7]
+Removing Lhs of wire \UART:BUART:rx_addr_match_status\\D\[762] = zero[7]
+Removing Lhs of wire \UART:BUART:rx_markspace_pre\\D\[763] = \UART:BUART:rx_markspace_pre\[469]
+Removing Lhs of wire \UART:BUART:rx_parity_bit\\D\[768] = \UART:BUART:rx_parity_bit\[475]
 
 ------------------------------------------------------
 Aliased 0 equations, 11 wires.
@@ -684,14 +658,14 @@ CYPRESS_DIR    : C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\wa
 Warp Program   : C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\warp\bin\warp.exe
 Warp Arguments : -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE -ya -.fftprj=C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\AcondicionamientoAnalogico.cyprj -dcpsoc3 AcondicionamientoAnalogico.v -verilog
 </CYPRESSTAG>
-Warp synthesis phase: Elapsed time ==> 0s.989ms
+Warp synthesis phase: Elapsed time ==> 0s.985ms
 <CYPRESSTAG name="Fitter results...">
 <CYPRESSTAG name="Fitter startup details...">
-cyp3fit: V4.4.0.80, Family: PSoC3, Started at: Friday, 05 June 2026 23:56:28
+cyp3fit: V4.4.0.80, Family: PSoC3, Started at: Monday, 08 June 2026 17:23:45
 Options: -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE -ya -.fftprj=C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\AcondicionamientoAnalogico.cyprj -d CY8C5888LTI-LP097 AcondicionamientoAnalogico.v -verilog
 </CYPRESSTAG>
 <CYPRESSTAG name="Design parsing">
-Design parsing phase: Elapsed time ==> 0s.017ms
+Design parsing phase: Elapsed time ==> 0s.018ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Tech Mapping">
 <CYPRESSTAG name="Initial Mapping" icon="FILE_RPT_TECHM">
@@ -960,6 +934,47 @@ Design Equations
         {
         }
 
+    Pin : Name = LPp(0)
+        Attributes:
+            In Group/Port: True
+            In Sync Option: AUTO
+            Out Sync Option: AUTO
+            Interrupt generated: False
+            Interrupt mode: NONE
+            Drive mode: HI_Z_ANALOG
+            VTrip: EITHER
+            Slew: FAST
+            Input Sync needed: False
+            Output Sync needed: False
+            SC shield enabled: False
+            POR State: ANY
+            LCD Mode: COMMON
+            Register Mode: RegComb
+            CaSense Mode: NEITHER
+            Treat as pin: True
+            Is OE Registered: False
+            Uses Analog: True
+            Can contain Digital: False
+            Is SIO: False
+            SIO Output Buf: NONREGULATED
+            SIO Input Buf: SINGLE_ENDED
+            SIO HiFreq: LOW
+            SIO Hyst: DISABLED
+            SIO Vtrip: MULTIPLIER_0_5
+            SIO Multiplier Index: 0
+            SIO RefSel: VCC_IO
+            Required Capabilities: ANALOG
+            Initial Value: 0
+            IO Voltage: 0
+        PORT MAP (
+            pa_out => LPp(0)__PA ,
+            analog_term => Net_2721 ,
+            annotation => Net_2781 ,
+            pad => LPp(0)_PAD );
+        Properties:
+        {
+        }
+
     Pin : Name = LPo(0)
         Attributes:
             In Group/Port: True
@@ -994,8 +1009,8 @@ Design Equations
             IO Voltage: 0
         PORT MAP (
             pa_out => LPo(0)__PA ,
-            analog_term => Net_2197 ,
-            annotation => Net_2018 ,
+            analog_term => Net_2720 ,
+            annotation => Net_2724 ,
             pad => LPo(0)_PAD );
         Properties:
         {
@@ -1035,14 +1050,14 @@ Design Equations
             IO Voltage: 0
         PORT MAP (
             pa_out => LPm(0)__PA ,
-            analog_term => Net_2694 ,
-            annotation => Net_2005 ,
+            analog_term => Net_2719 ,
+            annotation => Net_2738 ,
             pad => LPm(0)_PAD );
         Properties:
         {
         }
 
-    Pin : Name = LPp(0)
+    Pin : Name = \ADC:Bypass_P03(0)\
         Attributes:
             In Group/Port: True
             In Sync Option: AUTO
@@ -1075,15 +1090,14 @@ Design Equations
             Initial Value: 0
             IO Voltage: 0
         PORT MAP (
-            pa_out => LPp(0)__PA ,
-            analog_term => Net_2002 ,
-            annotation => Net_2003 ,
-            pad => LPp(0)_PAD );
+            pa_out => \ADC:Bypass_P03(0)\__PA ,
+            analog_term => \ADC:Net_248\ ,
+            pad => \ADC:Bypass_P03(0)_PAD\ );
         Properties:
         {
         }
 
-    Pin : Name = ADDERm(0)
+    Pin : Name = PGAo(0)
         Attributes:
             In Group/Port: True
             In Sync Option: AUTO
@@ -1116,15 +1130,15 @@ Design Equations
             Initial Value: 0
             IO Voltage: 0
         PORT MAP (
-            pa_out => ADDERm(0)__PA ,
-            analog_term => Net_2693 ,
-            annotation => Net_1935 ,
-            pad => ADDERm(0)_PAD );
+            pa_out => PGAo(0)__PA ,
+            analog_term => Net_2601 ,
+            annotation => Net_2777 ,
+            pad => PGAo(0)_PAD );
         Properties:
         {
         }
 
-    Pin : Name = REF(0)
+    Pin : Name = Vref(0)
         Attributes:
             In Group/Port: True
             In Sync Option: AUTO
@@ -1157,15 +1171,15 @@ Design Equations
             Initial Value: 0
             IO Voltage: 0
         PORT MAP (
-            pa_out => REF(0)__PA ,
-            analog_term => Net_2269 ,
-            annotation => Net_1937 ,
-            pad => REF(0)_PAD );
+            pa_out => Vref(0)__PA ,
+            analog_term => Net_2776 ,
+            annotation => Net_2770 ,
+            pad => Vref(0)_PAD );
         Properties:
         {
         }
 
-    Pin : Name = VDACo(0)
+    Pin : Name = PGAin(0)
         Attributes:
             In Group/Port: True
             In Sync Option: AUTO
@@ -1198,338 +1212,10 @@ Design Equations
             Initial Value: 0
             IO Voltage: 0
         PORT MAP (
-            pa_out => VDACo(0)__PA ,
-            analog_term => Net_1972 ,
-            annotation => Net_1948 ,
-            pad => VDACo(0)_PAD );
-        Properties:
-        {
-        }
-
-    Pin : Name = ADDERp(0)
-        Attributes:
-            In Group/Port: True
-            In Sync Option: AUTO
-            Out Sync Option: AUTO
-            Interrupt generated: False
-            Interrupt mode: NONE
-            Drive mode: HI_Z_ANALOG
-            VTrip: EITHER
-            Slew: FAST
-            Input Sync needed: False
-            Output Sync needed: False
-            SC shield enabled: False
-            POR State: ANY
-            LCD Mode: COMMON
-            Register Mode: RegComb
-            CaSense Mode: NEITHER
-            Treat as pin: True
-            Is OE Registered: False
-            Uses Analog: True
-            Can contain Digital: False
-            Is SIO: False
-            SIO Output Buf: NONREGULATED
-            SIO Input Buf: SINGLE_ENDED
-            SIO HiFreq: LOW
-            SIO Hyst: DISABLED
-            SIO Vtrip: MULTIPLIER_0_5
-            SIO Multiplier Index: 0
-            SIO RefSel: VCC_IO
-            Required Capabilities: ANALOG
-            Initial Value: 0
-            IO Voltage: 0
-        PORT MAP (
-            pa_out => ADDERp(0)__PA ,
-            analog_term => Net_2690 ,
-            annotation => Net_1942 ,
-            pad => ADDERp(0)_PAD );
-        Properties:
-        {
-        }
-
-    Pin : Name = BPp(0)
-        Attributes:
-            In Group/Port: True
-            In Sync Option: AUTO
-            Out Sync Option: AUTO
-            Interrupt generated: False
-            Interrupt mode: NONE
-            Drive mode: HI_Z_ANALOG
-            VTrip: EITHER
-            Slew: FAST
-            Input Sync needed: False
-            Output Sync needed: False
-            SC shield enabled: False
-            POR State: ANY
-            LCD Mode: COMMON
-            Register Mode: RegComb
-            CaSense Mode: NEITHER
-            Treat as pin: True
-            Is OE Registered: False
-            Uses Analog: True
-            Can contain Digital: False
-            Is SIO: False
-            SIO Output Buf: NONREGULATED
-            SIO Input Buf: SINGLE_ENDED
-            SIO HiFreq: LOW
-            SIO Hyst: DISABLED
-            SIO Vtrip: MULTIPLIER_0_5
-            SIO Multiplier Index: 0
-            SIO RefSel: VCC_IO
-            Required Capabilities: ANALOG
-            Initial Value: 0
-            IO Voltage: 0
-        PORT MAP (
-            pa_out => BPp(0)__PA ,
-            analog_term => Net_1930 ,
-            annotation => Net_1940 ,
-            pad => BPp(0)_PAD );
-        Properties:
-        {
-        }
-
-    Pin : Name = BPm(0)
-        Attributes:
-            In Group/Port: True
-            In Sync Option: AUTO
-            Out Sync Option: AUTO
-            Interrupt generated: False
-            Interrupt mode: NONE
-            Drive mode: HI_Z_ANALOG
-            VTrip: EITHER
-            Slew: FAST
-            Input Sync needed: False
-            Output Sync needed: False
-            SC shield enabled: False
-            POR State: ANY
-            LCD Mode: COMMON
-            Register Mode: RegComb
-            CaSense Mode: NEITHER
-            Treat as pin: True
-            Is OE Registered: False
-            Uses Analog: True
-            Can contain Digital: False
-            Is SIO: False
-            SIO Output Buf: NONREGULATED
-            SIO Input Buf: SINGLE_ENDED
-            SIO HiFreq: LOW
-            SIO Hyst: DISABLED
-            SIO Vtrip: MULTIPLIER_0_5
-            SIO Multiplier Index: 0
-            SIO RefSel: VCC_IO
-            Required Capabilities: ANALOG
-            Initial Value: 0
-            IO Voltage: 0
-        PORT MAP (
-            pa_out => BPm(0)__PA ,
-            analog_term => Net_2688 ,
-            annotation => Net_1938 ,
-            pad => BPm(0)_PAD );
-        Properties:
-        {
-        }
-
-    Pin : Name = ADDERo(0)
-        Attributes:
-            In Group/Port: True
-            In Sync Option: AUTO
-            Out Sync Option: AUTO
-            Interrupt generated: False
-            Interrupt mode: NONE
-            Drive mode: HI_Z_ANALOG
-            VTrip: EITHER
-            Slew: FAST
-            Input Sync needed: False
-            Output Sync needed: False
-            SC shield enabled: False
-            POR State: ANY
-            LCD Mode: COMMON
-            Register Mode: RegComb
-            CaSense Mode: NEITHER
-            Treat as pin: True
-            Is OE Registered: False
-            Uses Analog: True
-            Can contain Digital: False
-            Is SIO: False
-            SIO Output Buf: NONREGULATED
-            SIO Input Buf: SINGLE_ENDED
-            SIO HiFreq: LOW
-            SIO Hyst: DISABLED
-            SIO Vtrip: MULTIPLIER_0_5
-            SIO Multiplier Index: 0
-            SIO RefSel: VCC_IO
-            Required Capabilities: ANALOG
-            Initial Value: 0
-            IO Voltage: 0
-        PORT MAP (
-            pa_out => ADDERo(0)__PA ,
-            analog_term => Net_1932 ,
-            annotation => Net_1933 ,
-            pad => ADDERo(0)_PAD );
-        Properties:
-        {
-        }
-
-    Pin : Name = BPo(0)
-        Attributes:
-            In Group/Port: True
-            In Sync Option: AUTO
-            Out Sync Option: AUTO
-            Interrupt generated: False
-            Interrupt mode: NONE
-            Drive mode: HI_Z_ANALOG
-            VTrip: EITHER
-            Slew: FAST
-            Input Sync needed: False
-            Output Sync needed: False
-            SC shield enabled: False
-            POR State: ANY
-            LCD Mode: COMMON
-            Register Mode: RegComb
-            CaSense Mode: NEITHER
-            Treat as pin: True
-            Is OE Registered: False
-            Uses Analog: True
-            Can contain Digital: False
-            Is SIO: False
-            SIO Output Buf: NONREGULATED
-            SIO Input Buf: SINGLE_ENDED
-            SIO HiFreq: LOW
-            SIO Hyst: DISABLED
-            SIO Vtrip: MULTIPLIER_0_5
-            SIO Multiplier Index: 0
-            SIO RefSel: VCC_IO
-            Required Capabilities: ANALOG
-            Initial Value: 0
-            IO Voltage: 0
-        PORT MAP (
-            pa_out => BPo(0)__PA ,
-            analog_term => Net_2689 ,
-            annotation => Net_2040 ,
-            pad => BPo(0)_PAD );
-        Properties:
-        {
-        }
-
-    Pin : Name = SEo(0)
-        Attributes:
-            In Group/Port: True
-            In Sync Option: AUTO
-            Out Sync Option: AUTO
-            Interrupt generated: False
-            Interrupt mode: NONE
-            Drive mode: HI_Z_ANALOG
-            VTrip: EITHER
-            Slew: FAST
-            Input Sync needed: False
-            Output Sync needed: False
-            SC shield enabled: False
-            POR State: ANY
-            LCD Mode: COMMON
-            Register Mode: RegComb
-            CaSense Mode: NEITHER
-            Treat as pin: True
-            Is OE Registered: False
-            Uses Analog: True
-            Can contain Digital: False
-            Is SIO: False
-            SIO Output Buf: NONREGULATED
-            SIO Input Buf: SINGLE_ENDED
-            SIO HiFreq: LOW
-            SIO Hyst: DISABLED
-            SIO Vtrip: MULTIPLIER_0_5
-            SIO Multiplier Index: 0
-            SIO RefSel: VCC_IO
-            Required Capabilities: ANALOG
-            Initial Value: 0
-            IO Voltage: 0
-        PORT MAP (
-            pa_out => SEo(0)__PA ,
-            analog_term => Net_2147 ,
-            annotation => Net_1927 ,
-            pad => SEo(0)_PAD );
-        Properties:
-        {
-        }
-
-    Pin : Name = INn(0)
-        Attributes:
-            In Group/Port: True
-            In Sync Option: AUTO
-            Out Sync Option: AUTO
-            Interrupt generated: False
-            Interrupt mode: NONE
-            Drive mode: HI_Z_ANALOG
-            VTrip: EITHER
-            Slew: FAST
-            Input Sync needed: False
-            Output Sync needed: False
-            SC shield enabled: False
-            POR State: ANY
-            LCD Mode: COMMON
-            Register Mode: RegComb
-            CaSense Mode: NEITHER
-            Treat as pin: True
-            Is OE Registered: False
-            Uses Analog: True
-            Can contain Digital: False
-            Is SIO: False
-            SIO Output Buf: NONREGULATED
-            SIO Input Buf: SINGLE_ENDED
-            SIO HiFreq: LOW
-            SIO Hyst: DISABLED
-            SIO Vtrip: MULTIPLIER_0_5
-            SIO Multiplier Index: 0
-            SIO RefSel: VCC_IO
-            Required Capabilities: ANALOG
-            Initial Value: 0
-            IO Voltage: 0
-        PORT MAP (
-            pa_out => INn(0)__PA ,
-            analog_term => Net_1176 ,
-            annotation => Net_2061 ,
-            pad => INn(0)_PAD );
-        Properties:
-        {
-        }
-
-    Pin : Name = INp(0)
-        Attributes:
-            In Group/Port: True
-            In Sync Option: AUTO
-            Out Sync Option: AUTO
-            Interrupt generated: False
-            Interrupt mode: NONE
-            Drive mode: HI_Z_ANALOG
-            VTrip: EITHER
-            Slew: FAST
-            Input Sync needed: False
-            Output Sync needed: False
-            SC shield enabled: False
-            POR State: ANY
-            LCD Mode: COMMON
-            Register Mode: RegComb
-            CaSense Mode: NEITHER
-            Treat as pin: True
-            Is OE Registered: False
-            Uses Analog: True
-            Can contain Digital: False
-            Is SIO: False
-            SIO Output Buf: NONREGULATED
-            SIO Input Buf: SINGLE_ENDED
-            SIO HiFreq: LOW
-            SIO Hyst: DISABLED
-            SIO Vtrip: MULTIPLIER_0_5
-            SIO Multiplier Index: 0
-            SIO RefSel: VCC_IO
-            Required Capabilities: ANALOG
-            Initial Value: 0
-            IO Voltage: 0
-        PORT MAP (
-            pa_out => INp(0)__PA ,
-            analog_term => Net_769 ,
-            annotation => Net_1190 ,
-            pad => INp(0)_PAD );
+            pa_out => PGAin(0)__PA ,
+            analog_term => Net_2633 ,
+            annotation => Net_170 ,
+            pad => PGAin(0)_PAD );
         Properties:
         {
         }
@@ -2453,18 +2139,18 @@ Design Equations
             is_nmi = 0
         }
 
-    interrupt: Name =isr_DelSig
+    interrupt: Name =\ADC:IRQ\
         PORT MAP (
-            interrupt => Net_1211 );
+            interrupt => Net_2704 );
         Properties:
         {
             int_type = "10"
             is_nmi = 0
         }
 
-    interrupt: Name =\ADC:IRQ\
+    interrupt: Name =isr_DelSig
         PORT MAP (
-            interrupt => Net_1211 );
+            interrupt => Net_2704 );
         Properties:
         {
             int_type = "10"
@@ -2485,7 +2171,7 @@ Analog Clocks                 :    1 :    3 :    4 : 25.00 %
 CapSense Buffers              :    0 :    2 :    2 :  0.00 %
 Digital Filter Block          :    0 :    1 :    1 :  0.00 %
 Interrupts                    :    6 :   26 :   32 : 18.75 %
-IO                            :   20 :   28 :   48 : 41.67 %
+IO                            :   13 :   35 :   48 : 27.08 %
 Segment LCD                   :    0 :    1 :    1 :  0.00 %
 CAN 2.0b                      :    0 :    1 :    1 :  0.00 %
 I2C                           :    0 :    1 :    1 :  0.00 %
@@ -2504,229 +2190,146 @@ UDB                           :      :      :      :
   Control Cells               :    2 :   22 :   24 :  8.33 %
     Control Registers         :    1 :      :      :        
     Count7 Cells              :    1 :      :      :        
-Opamp                         :    4 :    0 :    4 : 100.00 %
-Comparator                    :    0 :    4 :    4 :  0.00 %
+Opamp                         :    2 :    2 :    4 : 50.00 %
+Comparator                    :    1 :    3 :    4 : 25.00 %
 Delta-Sigma ADC               :    1 :    0 :    1 : 100.00 %
 LPF                           :    2 :    0 :    2 : 100.00 %
 SAR ADC                       :    0 :    2 :    2 :  0.00 %
-Analog (SC/CT) Blocks         :    4 :    0 :    4 : 100.00 %
+Analog (SC/CT) Blocks         :    2 :    2 :    4 : 50.00 %
 DAC                           :      :      :      :        
   VIDAC                       :    1 :    3 :    4 : 25.00 %
 </CYPRESSTAG>
-Technology Mapping: Elapsed time ==> 0s.136ms
-Tech Mapping phase: Elapsed time ==> 0s.189ms
+Technology Mapping: Elapsed time ==> 1s.027ms
+Tech Mapping phase: Elapsed time ==> 1s.081ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Analog Placement">
+Info: apr.M0002: Analog signal "\ADC:Net_35\" is connected to one terminal only. (App=cydsfit)
 Initial Analog Placement Results:
-IO_4@[IOP=(3)][IoId=(4)] : ADDERm(0) (fixed)
-IO_6@[IOP=(3)][IoId=(6)] : ADDERo(0) (fixed)
-IO_5@[IOP=(3)][IoId=(5)] : ADDERp(0) (fixed)
-IO_3@[IOP=(0)][IoId=(3)] : BPm(0) (fixed)
-IO_1@[IOP=(0)][IoId=(1)] : BPo(0) (fixed)
-IO_2@[IOP=(0)][IoId=(2)] : BPp(0) (fixed)
-IO_5@[IOP=(0)][IoId=(5)] : INn(0) (fixed)
-IO_4@[IOP=(0)][IoId=(4)] : INp(0) (fixed)
-IO_2@[IOP=(3)][IoId=(2)] : LPm(0) (fixed)
-IO_7@[IOP=(3)][IoId=(7)] : LPo(0) (fixed)
-IO_3@[IOP=(3)][IoId=(3)] : LPp(0) (fixed)
-IO_0@[IOP=(0)][IoId=(0)] : REF(0) (fixed)
+IO_5@[IOP=(0)][IoId=(5)] : LPm(0) (fixed)
+IO_0@[IOP=(0)][IoId=(0)] : LPo(0) (fixed)
+IO_4@[IOP=(0)][IoId=(4)] : LPp(0) (fixed)
+IO_4@[IOP=(3)][IoId=(4)] : PGAin(0) (fixed)
+IO_5@[IOP=(3)][IoId=(5)] : PGAo(0) (fixed)
 IO_2@[IOP=(1)][IoId=(2)] : Rx_1(0) (fixed)
-IO_7@[IOP=(0)][IoId=(7)] : SEo(0) (fixed)
 IO_6@[IOP=(12)][IoId=(6)] : SYNC_IN(0) (fixed)
 IO_5@[IOP=(1)][IoId=(5)] : Tx_1(0) (fixed)
-IO_6@[IOP=(0)][IoId=(6)] : VDACo(0) (fixed)
-OpAmp[2]@[FFB(OpAmp,2)] : \OPAref:ABuf\ (fixed)
-OpAmp[3]@[FFB(OpAmp,3)] : \OPAlp:ABuf\ (fixed)
-OpAmp[0]@[FFB(OpAmp,0)] : \OPAbp:ABuf\ (fixed)
-OpAmp[1]@[FFB(OpAmp,1)] : \OPAadder:ABuf\ (fixed)
-DSM[0]@[FFB(DSM,0)] : \ADC:DSM\
-LPF[1]@[FFB(LPF,1)] : \LPF_1:cy_psoc3_lpf_1\
-LPF[0]@[FFB(LPF,0)] : \LPF_2:cy_psoc3_lpf_1\
-SC[2]@[FFB(SC,2)] : \PGAgain:SC\
-SC[0]@[FFB(SC,0)] : \PGAn:SC\
-SC[3]@[FFB(SC,3)] : \PGAp:SC\
-SC[1]@[FFB(SC,1)] : \PGAvdac:SC\
+IO_6@[IOP=(3)][IoId=(6)] : Vref(0) (fixed)
+IO_3@[IOP=(0)][IoId=(3)] : \ADC:Bypass_P03(0)\ (fixed, DSM-ExtVrefL)
+OpAmp[1]@[FFB(OpAmp,1)] : \Opa_ref:ABuf\ (fixed)
+OpAmp[2]@[FFB(OpAmp,2)] : \Opa_LP:ABuf\ (fixed)
+DSM[0]@[FFB(DSM,0)] : \ADC:DSM\ (fixed, DSM-ExtVrefL)
+Vref[6]@[FFB(Vref,6)] : \ADC:vRef_2\
+LPF[1]@[FFB(LPF,1)] : \LPF_ADC:cy_psoc3_lpf_1\
+LPF[0]@[FFB(LPF,0)] : \LPF_ref:cy_psoc3_lpf_1\
+SC[3]@[FFB(SC,3)] : \PGA:SC\
+SC[2]@[FFB(SC,2)] : \PGA_ref:SC\
 VIDAC[3]@[FFB(VIDAC,3)] : \VDAC:viDAC8\
-Vref[1]@[FFB(Vref,1)] : vRef_1
-Log: apr.M0058: The analog placement iterative improvement is 31% done. (App=cydsfit)
-Log: apr.M0058: The analog placement iterative improvement is 61% done. (App=cydsfit)
+Comparator[0]@[FFB(Comparator,0)] : autoVrefComparator_0
+Vref[10]@[FFB(Vref,10)] : vRef_1
+Log: apr.M0058: The analog placement iterative improvement is 33% done. (App=cydsfit)
+Log: apr.M0058: The analog placement iterative improvement is 56% done. (App=cydsfit)
 Analog Placement Results:
-IO_4@[IOP=(3)][IoId=(4)] : ADDERm(0) (fixed)
-IO_6@[IOP=(3)][IoId=(6)] : ADDERo(0) (fixed)
-IO_5@[IOP=(3)][IoId=(5)] : ADDERp(0) (fixed)
-IO_3@[IOP=(0)][IoId=(3)] : BPm(0) (fixed)
-IO_1@[IOP=(0)][IoId=(1)] : BPo(0) (fixed)
-IO_2@[IOP=(0)][IoId=(2)] : BPp(0) (fixed)
-IO_5@[IOP=(0)][IoId=(5)] : INn(0) (fixed)
-IO_4@[IOP=(0)][IoId=(4)] : INp(0) (fixed)
-IO_2@[IOP=(3)][IoId=(2)] : LPm(0) (fixed)
-IO_7@[IOP=(3)][IoId=(7)] : LPo(0) (fixed)
-IO_3@[IOP=(3)][IoId=(3)] : LPp(0) (fixed)
-IO_0@[IOP=(0)][IoId=(0)] : REF(0) (fixed)
+IO_5@[IOP=(0)][IoId=(5)] : LPm(0) (fixed)
+IO_0@[IOP=(0)][IoId=(0)] : LPo(0) (fixed)
+IO_4@[IOP=(0)][IoId=(4)] : LPp(0) (fixed)
+IO_4@[IOP=(3)][IoId=(4)] : PGAin(0) (fixed)
+IO_5@[IOP=(3)][IoId=(5)] : PGAo(0) (fixed)
 IO_2@[IOP=(1)][IoId=(2)] : Rx_1(0) (fixed)
-IO_7@[IOP=(0)][IoId=(7)] : SEo(0) (fixed)
 IO_6@[IOP=(12)][IoId=(6)] : SYNC_IN(0) (fixed)
 IO_5@[IOP=(1)][IoId=(5)] : Tx_1(0) (fixed)
-IO_6@[IOP=(0)][IoId=(6)] : VDACo(0) (fixed)
-OpAmp[2]@[FFB(OpAmp,2)] : \OPAref:ABuf\ (fixed)
-OpAmp[3]@[FFB(OpAmp,3)] : \OPAlp:ABuf\ (fixed)
-OpAmp[0]@[FFB(OpAmp,0)] : \OPAbp:ABuf\ (fixed)
-OpAmp[1]@[FFB(OpAmp,1)] : \OPAadder:ABuf\ (fixed)
-DSM[0]@[FFB(DSM,0)] : \ADC:DSM\
-LPF[1]@[FFB(LPF,1)] : \LPF_1:cy_psoc3_lpf_1\
-LPF[0]@[FFB(LPF,0)] : \LPF_2:cy_psoc3_lpf_1\
-SC[1]@[FFB(SC,1)] : \PGAgain:SC\
-SC[0]@[FFB(SC,0)] : \PGAn:SC\
-SC[3]@[FFB(SC,3)] : \PGAp:SC\
-SC[2]@[FFB(SC,2)] : \PGAvdac:SC\
-VIDAC[2]@[FFB(VIDAC,2)] : \VDAC:viDAC8\
-Vref[1]@[FFB(Vref,1)] : vRef_1
+IO_6@[IOP=(3)][IoId=(6)] : Vref(0) (fixed)
+IO_3@[IOP=(0)][IoId=(3)] : \ADC:Bypass_P03(0)\ (fixed, DSM-ExtVrefL)
+OpAmp[1]@[FFB(OpAmp,1)] : \Opa_ref:ABuf\ (fixed)
+OpAmp[2]@[FFB(OpAmp,2)] : \Opa_LP:ABuf\ (fixed)
+DSM[0]@[FFB(DSM,0)] : \ADC:DSM\ (fixed, DSM-ExtVrefL)
+Vref[6]@[FFB(Vref,6)] : \ADC:vRef_2\
+LPF[1]@[FFB(LPF,1)] : \LPF_ADC:cy_psoc3_lpf_1\
+LPF[0]@[FFB(LPF,0)] : \LPF_ref:cy_psoc3_lpf_1\
+SC[1]@[FFB(SC,1)] : \PGA:SC\
+SC[3]@[FFB(SC,3)] : \PGA_ref:SC\
+VIDAC[1]@[FFB(VIDAC,1)] : \VDAC:viDAC8\
+Comparator[2]@[FFB(Comparator,2)] : autoVrefComparator_0
+Vref[10]@[FFB(Vref,10)] : vRef_1
 
-Analog Placement phase: Elapsed time ==> 2s.492ms
+Analog Placement phase: Elapsed time ==> 1s.874ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Analog Routing">
-Net "Net_1176" overuses wire "AGL[5]"
-Net "Net_769" overuses wire "sc2 out Wire"
-Net "Net_769" overuses wire "AGL[4]"
-Net "Net_2197" overuses wire "AGR[7]"
-Net "Net_2197" overuses wire "AGL2AGR[7] Sw__0b"
-Net "Net_2197" overuses wire "AGL[7]"
-Net "Net_2197" overuses wire "dsm0+ Wire"
-Net "Net_2269" overuses wire "AGL[4]"
-Net "Net_2269" overuses wire "dsm0+ Wire"
-Net "Net_2269" overuses wire "AGL[4]"
-Net "Net_2269" overuses wire "AGL[4]"
-Net "Net_2147" overuses wire "AGR[7]"
-Net "Net_2147" overuses wire "AGL2AGR[7] Sw__0b"
-Net "Net_2147" overuses wire "AGL[7]"
-Net "Net_1972" overuses wire "sc2 out Wire"
-Net "Net_2158" overuses wire "AGL[5]"
-Net "Net_1998" overuses wire "AGL[4]"
-Net "Net_769" overuses wire "sc2 out Wire"
-Net "Net_769" overuses wire "AGL[4]"
-Net "Net_2197" overuses wire "AGL[6]"
-Net "Net_2269" overuses wire "AGL[4]"
-Net "Net_1972" overuses wire "sc2 out Wire"
-Net "Net_1972" overuses wire "AGL[6]"
-Net "Net_2197" overuses wire "AGR[7]"
-Net "Net_2197" overuses wire "AGL2AGR[7] Sw__0b"
-Net "Net_2197" overuses wire "AGL[7]"
-Net "Net_2197" overuses wire "dsm0+ Wire"
-Net "Net_2269" overuses wire "dsm0+ Wire"
-Net "Net_2147" overuses wire "AGR[7]"
-Net "Net_2147" overuses wire "AGL2AGR[7] Sw__0b"
-Net "Net_2147" overuses wire "AGL[7]"
-Net "Net_1176" overuses wire "sc0 Vin Wire"
-Net "Net_769" overuses wire "AGL[4]"
-Net "Net_2269" overuses wire "AGL[4]"
-Net "Net_2147" overuses wire "sc0 Vin Wire"
-Analog Routing phase: Elapsed time ==> 0s.066ms
+Net "Net_2633" overuses wire "AGR[4]"
+Net "Net_2601" overuses wire "AGR[5]"
+Net "Net_2628" overuses wire "AGR[4]"
+Net "Net_2775" overuses wire "1.024v_vref Wire"
+Net "Net_2775" overuses wire "1.024v_vref Wire"
+Net "Net_2780" overuses wire "AGR[5]"
+Net "Net_2681" overuses wire "1.024v_vref Wire"
+Net "Net_2628" overuses wire "abusR0"
+Net "Net_2780" overuses wire "abusR0"
+Net "Net_2720" overuses wire "dsm0+ Wire"
+Net "Net_2780" overuses wire "dsm0+ Wire"
+Net "Net_2775" overuses wire "1.024v_vref Wire"
+Net "Net_2775" overuses wire "1.024v_vref Wire"
+Net "Net_2780" overuses wire "1.024v_vref Wire"
+Net "Net_2601" overuses wire "AGR[5]"
+Net "Net_2780" overuses wire "AGR[5]"
+Net "Net_2601" overuses wire "sc1 out Wire"
+Net "Net_2780" overuses wire "sc1 out Wire"
+Net "Net_2720" overuses wire "dsm0+ Wire"
+Net "Net_2780" overuses wire "dsm0+ Wire"
+Net "Net_2628" overuses wire "abusR0"
+Net "Net_2780" overuses wire "abusR0"
+Analog Routing phase: Elapsed time ==> 0s.043ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Analog Code Generation">
+Info: apr.M0060: Comparator 'Comparator[2]@[FFB(Comparator,2)]' is powered up by analog subsystem to support an auto-enabled vref. (App=cydsfit)
 ============ Analog Final Answer Routes ============
 Dump of CyAnalogRoutingResultsDB
 Map of net to items {
-  Net: Net_2693 {
-    opamp_1_vminus
-    opamp_1_vminus_x_p3_4
-    p3_4
-  }
-  Net: Net_1932 {
-    p3_6
-  }
-  Net: Net_2690 {
-    opamp_1_vplus
-    opamp_1_vplus_x_p3_5
-    p3_5
-  }
-  Net: Net_2688 {
-    opamp_0_vminus
-    opamp_0_vminus_x_p0_3
-    p0_3
-  }
-  Net: Net_2689 {
-    p0_1
-  }
-  Net: Net_1930 {
-    opamp_0_vplus
-    opamp_0_vplus_x_p0_2
-    p0_2
-  }
-  Net: Net_1176 {
-    sc_0_vin
-    amuxbusl_x_sc_0_vin
-    amuxbusl
-    amuxbusl_x_p0_5
-    p0_5
-  }
-  Net: Net_769 {
-    sc_3_vin
-    agr4_x_sc_3_vin
-    agr4
-    agl4_x_agr4
-    agl4
-    agl4_x_p0_4
-    p0_4
-  }
-  Net: Net_2694 {
-    opamp_3_vminus
-    opamp_3_vminus_x_p3_2
-    p3_2
-  }
-  Net: Net_2197 {
-    p3_7
-    amuxbusr_x_p3_7
-    amuxbusr
-    amuxbusr_x_p5_5
-    p5_5
-    agr1_x_p5_5
-    agr1
-    agl1_x_agr1
-    agl1
-    agl1_x_dsm_0_vplus
-    dsm_0_vplus
-  }
-  Net: Net_2002 {
-    opamp_3_vplus
-    opamp_3_vplus_x_p3_3
-    p3_3
-  }
-  Net: Net_2269 {
-    sc_0_vref
-    agl2_x_sc_0_vref
-    agl2
-    agl2_x_comp_2_vplus
-    comp_2_vplus
-    agl5_x_comp_2_vplus
-    agl5
-    agl5_x_opamp_2_vminus
-    opamp_2_vminus
-    agl2_x_agr2
-    agr2
-    agr2_x_sc_1_vref
-    sc_1_vref
-    opamp_2_vminus_x_p0_0
-    p0_0
-    agl5_x_dsm_0_vminus
+  Net: \ADC:Net_20\ {
     dsm_0_vminus
   }
-  Net: Net_2147 {
+  Net: \ADC:Net_244\ {
+    common_vssa
+  }
+  Net: \ADC:Net_35\ {
+  }
+  Net: Net_2719 {
+    opamp_2_vminus
+    opamp_2_vminus_x_p0_5
+    p0_5
+  }
+  Net: Net_2720 {
+    p0_0
+    agl4_x_p0_0
+    agl4
+    agl4_x_dsm_0_vplus
+    dsm_0_vplus
+  }
+  Net: Net_2721 {
+    opamp_2_vplus
+    opamp_2_vplus_x_p0_4
+    p0_4
+  }
+  Net: Net_2633 {
+    sc_1_vin
+    amuxbusr_x_sc_1_vin
+    amuxbusr
+    amuxbusr_x_p3_4
+    p3_4
+  }
+  Net: Net_2601 {
     sc_1_vout
-    agr7_x_sc_1_vout
-    agr7
-    agl7_x_agr7
-    agl7
-    agl7_x_p0_7
-    p0_7
+    agr5_x_sc_1_vout
+    agr5
+    agr5_x_p3_5
+    p3_5
   }
-  Net: Net_1972 {
-    sc_2_vout
-    agl6_x_sc_2_vout
-    agl6
-    agl6_x_p0_6
-    p0_6
+  Net: Net_2776 {
+    p3_6
+    opamp_1_vminus_x_p3_6
+    opamp_1_vminus
   }
-  Net: \ADC:Net_249\ {
+  Net: \ADC:Net_248\ {
+    p0_3_exvref
+    p0_3
   }
   Net: \ADC:Net_257\ {
   }
@@ -2734,180 +2337,175 @@ Map of net to items {
   }
   Net: \ADC:Net_34\ {
   }
-  Net: Net_2195 {
-    sc_3_vout
-    agr0_x_sc_3_vout
+  Net: Net_2774 {
+    vidac_1_vout
+    agr0_x_vidac_1_vout
     agr0
     agr0_x_lpf_1_vin
     lpf_1_vin
   }
-  Net: Net_2192 {
-    sc_1_vin
-    abusr0_x_sc_1_vin
+  Net: Net_2628 {
+    sc_3_vin
+    agr4_x_sc_3_vin
+    agr4
+    agr4_x_vidac_3_vout
+    vidac_3_vout
+    abusr0_x_vidac_3_vout
     abusr0
     abusr0_x_lpf_1_vout
     lpf_1_vout
   }
-  Net: Net_2687 {
-    common_Vdda/2
-    common_Vdda/2_x_comp_vref_vdda
-    comp_vref_vdda
-    comp_vref_vdda_x_comp_vref_vdda_0256
-    comp_vref_vdda_0256
-    comp_0_vminus_x_comp_vref_vdda_0256
+  Net: Net_2775 {
+    common_vref_1024
+    comp_02_vref_1024
+    comp_0_vminus_x_comp_02_vref_1024
     comp_0_vminus
     agl0_x_comp_0_vminus
     agl0
     agl0_x_lpf_0_vin
     lpf_0_vin
+    comp_0_vminus_x_comp_vref_vdda_0256
+    comp_vref_vdda_0256
+    comp_2_vminus_x_comp_vref_vdda_0256
+    comp_2_vminus
   }
-  Net: Net_2699 {
-    opamp_2_vplus
-    abusl0_x_opamp_2_vplus
+  Net: Net_2780 {
+    opamp_1_vplus
+    agr7_x_opamp_1_vplus
+    agr7
+    agl7_x_agr7
+    agl7
+    agl7_x_comp_0_vplus
+    comp_0_vplus
+    abusl0_x_comp_0_vplus
     abusl0
     abusl0_x_lpf_0_vout
     lpf_0_vout
   }
-  Net: Net_2158 {
-    sc_3_vref
-    agr3_x_sc_3_vref
-    agr3
-    agl3_x_agr3
-    agl3
-    agl3_x_sc_0_vout
-    sc_0_vout
+  Net: Net_2681 {
+    sc_3_vout
+    agr6_x_sc_3_vout
+    agr6
+    agr6_x_sc_1_vref
+    sc_1_vref
   }
-  Net: \PGAvdac:Net_17\ {
-  }
-  Net: Net_1998 {
-    vidac_2_vout
-    abusl2_x_vidac_2_vout
-    abusl2
-    abusl2_x_sc_2_vin
-    sc_2_vin
+  Net: \PGA_ref:Net_17\ {
   }
   Net: \VDAC:Net_77\ {
   }
+  Net: AmuxNet::\ADC:AMux\ {
+    dsm_0_vminus
+    dsm_0_vminus_x_dsm_0_vminus_vssa
+    dsm_0_vminus_vssa
+    common_vssa
+  }
 }
 Map of item to net {
-  opamp_1_vminus                                   -> Net_2693
-  opamp_1_vminus_x_p3_4                            -> Net_2693
-  p3_4                                             -> Net_2693
-  p3_6                                             -> Net_1932
-  opamp_1_vplus                                    -> Net_2690
-  opamp_1_vplus_x_p3_5                             -> Net_2690
-  p3_5                                             -> Net_2690
-  opamp_0_vminus                                   -> Net_2688
-  opamp_0_vminus_x_p0_3                            -> Net_2688
-  p0_3                                             -> Net_2688
-  p0_1                                             -> Net_2689
-  opamp_0_vplus                                    -> Net_1930
-  opamp_0_vplus_x_p0_2                             -> Net_1930
-  p0_2                                             -> Net_1930
-  sc_0_vin                                         -> Net_1176
-  amuxbusl_x_sc_0_vin                              -> Net_1176
-  amuxbusl                                         -> Net_1176
-  amuxbusl_x_p0_5                                  -> Net_1176
-  p0_5                                             -> Net_1176
-  sc_3_vin                                         -> Net_769
-  agr4_x_sc_3_vin                                  -> Net_769
-  agr4                                             -> Net_769
-  agl4_x_agr4                                      -> Net_769
-  agl4                                             -> Net_769
-  agl4_x_p0_4                                      -> Net_769
-  p0_4                                             -> Net_769
-  opamp_3_vminus                                   -> Net_2694
-  opamp_3_vminus_x_p3_2                            -> Net_2694
-  p3_2                                             -> Net_2694
-  p3_7                                             -> Net_2197
-  amuxbusr_x_p3_7                                  -> Net_2197
-  amuxbusr                                         -> Net_2197
-  amuxbusr_x_p5_5                                  -> Net_2197
-  p5_5                                             -> Net_2197
-  agr1_x_p5_5                                      -> Net_2197
-  agr1                                             -> Net_2197
-  agl1_x_agr1                                      -> Net_2197
-  agl1                                             -> Net_2197
-  agl1_x_dsm_0_vplus                               -> Net_2197
-  dsm_0_vplus                                      -> Net_2197
-  opamp_3_vplus                                    -> Net_2002
-  opamp_3_vplus_x_p3_3                             -> Net_2002
-  p3_3                                             -> Net_2002
-  sc_0_vref                                        -> Net_2269
-  agl2_x_sc_0_vref                                 -> Net_2269
-  agl2                                             -> Net_2269
-  agl2_x_comp_2_vplus                              -> Net_2269
-  comp_2_vplus                                     -> Net_2269
-  agl5_x_comp_2_vplus                              -> Net_2269
-  agl5                                             -> Net_2269
-  agl5_x_opamp_2_vminus                            -> Net_2269
-  opamp_2_vminus                                   -> Net_2269
-  agl2_x_agr2                                      -> Net_2269
-  agr2                                             -> Net_2269
-  agr2_x_sc_1_vref                                 -> Net_2269
-  sc_1_vref                                        -> Net_2269
-  opamp_2_vminus_x_p0_0                            -> Net_2269
-  p0_0                                             -> Net_2269
-  agl5_x_dsm_0_vminus                              -> Net_2269
-  dsm_0_vminus                                     -> Net_2269
-  sc_1_vout                                        -> Net_2147
-  agr7_x_sc_1_vout                                 -> Net_2147
-  agr7                                             -> Net_2147
-  agl7_x_agr7                                      -> Net_2147
-  agl7                                             -> Net_2147
-  agl7_x_p0_7                                      -> Net_2147
-  p0_7                                             -> Net_2147
-  sc_2_vout                                        -> Net_1972
-  agl6_x_sc_2_vout                                 -> Net_1972
-  agl6                                             -> Net_1972
-  agl6_x_p0_6                                      -> Net_1972
-  p0_6                                             -> Net_1972
-  sc_3_vout                                        -> Net_2195
-  agr0_x_sc_3_vout                                 -> Net_2195
-  agr0                                             -> Net_2195
-  agr0_x_lpf_1_vin                                 -> Net_2195
-  lpf_1_vin                                        -> Net_2195
-  sc_1_vin                                         -> Net_2192
-  abusr0_x_sc_1_vin                                -> Net_2192
-  abusr0                                           -> Net_2192
-  abusr0_x_lpf_1_vout                              -> Net_2192
-  lpf_1_vout                                       -> Net_2192
-  common_Vdda/2                                    -> Net_2687
-  common_Vdda/2_x_comp_vref_vdda                   -> Net_2687
-  comp_vref_vdda                                   -> Net_2687
-  comp_vref_vdda_x_comp_vref_vdda_0256             -> Net_2687
-  comp_vref_vdda_0256                              -> Net_2687
-  comp_0_vminus_x_comp_vref_vdda_0256              -> Net_2687
-  comp_0_vminus                                    -> Net_2687
-  agl0_x_comp_0_vminus                             -> Net_2687
-  agl0                                             -> Net_2687
-  agl0_x_lpf_0_vin                                 -> Net_2687
-  lpf_0_vin                                        -> Net_2687
-  opamp_2_vplus                                    -> Net_2699
-  abusl0_x_opamp_2_vplus                           -> Net_2699
-  abusl0                                           -> Net_2699
-  abusl0_x_lpf_0_vout                              -> Net_2699
-  lpf_0_vout                                       -> Net_2699
-  sc_3_vref                                        -> Net_2158
-  agr3_x_sc_3_vref                                 -> Net_2158
-  agr3                                             -> Net_2158
-  agl3_x_agr3                                      -> Net_2158
-  agl3                                             -> Net_2158
-  agl3_x_sc_0_vout                                 -> Net_2158
-  sc_0_vout                                        -> Net_2158
-  vidac_2_vout                                     -> Net_1998
-  abusl2_x_vidac_2_vout                            -> Net_1998
-  abusl2                                           -> Net_1998
-  abusl2_x_sc_2_vin                                -> Net_1998
-  sc_2_vin                                         -> Net_1998
+  opamp_2_vminus                                   -> Net_2719
+  opamp_2_vminus_x_p0_5                            -> Net_2719
+  p0_5                                             -> Net_2719
+  p0_0                                             -> Net_2720
+  agl4_x_p0_0                                      -> Net_2720
+  agl4                                             -> Net_2720
+  agl4_x_dsm_0_vplus                               -> Net_2720
+  dsm_0_vplus                                      -> Net_2720
+  opamp_2_vplus                                    -> Net_2721
+  opamp_2_vplus_x_p0_4                             -> Net_2721
+  p0_4                                             -> Net_2721
+  sc_1_vin                                         -> Net_2633
+  amuxbusr_x_sc_1_vin                              -> Net_2633
+  amuxbusr                                         -> Net_2633
+  amuxbusr_x_p3_4                                  -> Net_2633
+  p3_4                                             -> Net_2633
+  sc_1_vout                                        -> Net_2601
+  agr5_x_sc_1_vout                                 -> Net_2601
+  agr5                                             -> Net_2601
+  agr5_x_p3_5                                      -> Net_2601
+  p3_5                                             -> Net_2601
+  p3_6                                             -> Net_2776
+  opamp_1_vminus_x_p3_6                            -> Net_2776
+  opamp_1_vminus                                   -> Net_2776
+  p0_3_exvref                                      -> \ADC:Net_248\
+  p0_3                                             -> \ADC:Net_248\
+  vidac_1_vout                                     -> Net_2774
+  agr0_x_vidac_1_vout                              -> Net_2774
+  agr0                                             -> Net_2774
+  agr0_x_lpf_1_vin                                 -> Net_2774
+  lpf_1_vin                                        -> Net_2774
+  sc_3_vin                                         -> Net_2628
+  agr4_x_sc_3_vin                                  -> Net_2628
+  agr4                                             -> Net_2628
+  agr4_x_vidac_3_vout                              -> Net_2628
+  vidac_3_vout                                     -> Net_2628
+  abusr0_x_vidac_3_vout                            -> Net_2628
+  abusr0                                           -> Net_2628
+  abusr0_x_lpf_1_vout                              -> Net_2628
+  lpf_1_vout                                       -> Net_2628
+  common_vref_1024                                 -> Net_2775
+  comp_02_vref_1024                                -> Net_2775
+  comp_0_vminus_x_comp_02_vref_1024                -> Net_2775
+  comp_0_vminus                                    -> Net_2775
+  agl0_x_comp_0_vminus                             -> Net_2775
+  agl0                                             -> Net_2775
+  agl0_x_lpf_0_vin                                 -> Net_2775
+  lpf_0_vin                                        -> Net_2775
+  comp_0_vminus_x_comp_vref_vdda_0256              -> Net_2775
+  comp_vref_vdda_0256                              -> Net_2775
+  comp_2_vminus_x_comp_vref_vdda_0256              -> Net_2775
+  comp_2_vminus                                    -> Net_2775
+  opamp_1_vplus                                    -> Net_2780
+  agr7_x_opamp_1_vplus                             -> Net_2780
+  agr7                                             -> Net_2780
+  agl7_x_agr7                                      -> Net_2780
+  agl7                                             -> Net_2780
+  agl7_x_comp_0_vplus                              -> Net_2780
+  comp_0_vplus                                     -> Net_2780
+  abusl0_x_comp_0_vplus                            -> Net_2780
+  abusl0                                           -> Net_2780
+  abusl0_x_lpf_0_vout                              -> Net_2780
+  lpf_0_vout                                       -> Net_2780
+  sc_3_vout                                        -> Net_2681
+  agr6_x_sc_3_vout                                 -> Net_2681
+  agr6                                             -> Net_2681
+  agr6_x_sc_1_vref                                 -> Net_2681
+  sc_1_vref                                        -> Net_2681
+  dsm_0_vminus                                     -> \ADC:Net_20\
+  common_vssa                                      -> \ADC:Net_244\
+  dsm_0_vminus_x_dsm_0_vminus_vssa                 -> AmuxNet::\ADC:AMux\
+  dsm_0_vminus_vssa                                -> AmuxNet::\ADC:AMux\
 }
 Mux Info {
+  Mux: \ADC:AMux\ {
+     Mouth: \ADC:Net_20\
+     Guts:  AmuxNet::\ADC:AMux\
+     IsSingleSwitching: False
+     IsStaticSwitching: True
+     IsAtMostOneSwitch: False
+    Arm: 0 {
+      Net:   \ADC:Net_244\
+      Outer: dsm_0_vminus_x_dsm_0_vminus_vssa
+      Inner: __open__
+      Path {
+        common_vssa
+        dsm_0_vminus_vssa
+        dsm_0_vminus_x_dsm_0_vminus_vssa
+        dsm_0_vminus
+      }
+    }
+    Arm: 1 {
+      Net:   \ADC:Net_35\
+      Outer: __open__
+      Inner: __open__
+      Path {
+      }
+    }
+  }
 }
 Dump of CyP35AnalogRoutingResultsDB
-IsVddaHalfUsedForComp = True
+IsVddaHalfUsedForComp = False
 IsVddaHalfUsedForSar0 = False
 IsVddaHalfUsedForSar1 = False
-Analog Code Generation phase: Elapsed time ==> 0s.213ms
+Analog Code Generation phase: Elapsed time ==> 0s.234ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Digital Placement">
 <CYPRESSTAG name="Detailed placement messages">
@@ -2942,7 +2540,7 @@ PLD Packing: Elapsed time ==> 0s.000ms
 Initial Partitioning Summary not displayed at this verbose level.</CYPRESSTAG>
 <CYPRESSTAG name="Final Partitioning Summary">
 Final Partitioning Summary not displayed at this verbose level.</CYPRESSTAG>
-Partitioning: Elapsed time ==> 0s.072ms
+Partitioning: Elapsed time ==> 0s.065ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Final Placement Summary">
 
@@ -4045,7 +3643,7 @@ Intr container @ [IntrContainer=(0)]:
   Intr@ [IntrContainer=(0)][IntrId=(2)] 
     interrupt: Name =isr_DelSig
         PORT MAP (
-            interrupt => Net_1211 );
+            interrupt => Net_2704 );
         Properties:
         {
             int_type = "10"
@@ -4072,7 +3670,7 @@ Intr container @ [IntrContainer=(0)]:
   Intr@ [IntrContainer=(0)][IntrId=(29)] 
     interrupt: Name =\ADC:IRQ\
         PORT MAP (
-            interrupt => Net_1211 );
+            interrupt => Net_2704 );
         Properties:
         {
             int_type = "10"
@@ -4081,7 +3679,7 @@ Intr container @ [IntrContainer=(0)]:
 Drq container @ [DrqContainer=(0)]: empty
 Port 0 contains the following IO cells:
 [IoId=0]: 
-Pin : Name = REF(0)
+Pin : Name = LPo(0)
     Attributes:
         In Group/Port: True
         In Sync Option: AUTO
@@ -4114,100 +3712,16 @@ Pin : Name = REF(0)
         Initial Value: 0
         IO Voltage: 0
     PORT MAP (
-        pa_out => REF(0)__PA ,
-        analog_term => Net_2269 ,
-        annotation => Net_1937 ,
-        pad => REF(0)_PAD );
-    Properties:
-    {
-    }
-
-[IoId=1]: 
-Pin : Name = BPo(0)
-    Attributes:
-        In Group/Port: True
-        In Sync Option: AUTO
-        Out Sync Option: AUTO
-        Interrupt generated: False
-        Interrupt mode: NONE
-        Drive mode: HI_Z_ANALOG
-        VTrip: EITHER
-        Slew: FAST
-        Input Sync needed: False
-        Output Sync needed: False
-        SC shield enabled: False
-        POR State: ANY
-        LCD Mode: COMMON
-        Register Mode: RegComb
-        CaSense Mode: NEITHER
-        Treat as pin: True
-        Is OE Registered: False
-        Uses Analog: True
-        Can contain Digital: False
-        Is SIO: False
-        SIO Output Buf: NONREGULATED
-        SIO Input Buf: SINGLE_ENDED
-        SIO HiFreq: LOW
-        SIO Hyst: DISABLED
-        SIO Vtrip: MULTIPLIER_0_5
-        SIO Multiplier Index: 0
-        SIO RefSel: VCC_IO
-        Required Capabilities: ANALOG
-        Initial Value: 0
-        IO Voltage: 0
-    PORT MAP (
-        pa_out => BPo(0)__PA ,
-        analog_term => Net_2689 ,
-        annotation => Net_2040 ,
-        pad => BPo(0)_PAD );
-    Properties:
-    {
-    }
-
-[IoId=2]: 
-Pin : Name = BPp(0)
-    Attributes:
-        In Group/Port: True
-        In Sync Option: AUTO
-        Out Sync Option: AUTO
-        Interrupt generated: False
-        Interrupt mode: NONE
-        Drive mode: HI_Z_ANALOG
-        VTrip: EITHER
-        Slew: FAST
-        Input Sync needed: False
-        Output Sync needed: False
-        SC shield enabled: False
-        POR State: ANY
-        LCD Mode: COMMON
-        Register Mode: RegComb
-        CaSense Mode: NEITHER
-        Treat as pin: True
-        Is OE Registered: False
-        Uses Analog: True
-        Can contain Digital: False
-        Is SIO: False
-        SIO Output Buf: NONREGULATED
-        SIO Input Buf: SINGLE_ENDED
-        SIO HiFreq: LOW
-        SIO Hyst: DISABLED
-        SIO Vtrip: MULTIPLIER_0_5
-        SIO Multiplier Index: 0
-        SIO RefSel: VCC_IO
-        Required Capabilities: ANALOG
-        Initial Value: 0
-        IO Voltage: 0
-    PORT MAP (
-        pa_out => BPp(0)__PA ,
-        analog_term => Net_1930 ,
-        annotation => Net_1940 ,
-        pad => BPp(0)_PAD );
+        pa_out => LPo(0)__PA ,
+        analog_term => Net_2720 ,
+        annotation => Net_2724 ,
+        pad => LPo(0)_PAD );
     Properties:
     {
     }
 
 [IoId=3]: 
-Pin : Name = BPm(0)
+Pin : Name = \ADC:Bypass_P03(0)\
     Attributes:
         In Group/Port: True
         In Sync Option: AUTO
@@ -4240,16 +3754,15 @@ Pin : Name = BPm(0)
         Initial Value: 0
         IO Voltage: 0
     PORT MAP (
-        pa_out => BPm(0)__PA ,
-        analog_term => Net_2688 ,
-        annotation => Net_1938 ,
-        pad => BPm(0)_PAD );
+        pa_out => \ADC:Bypass_P03(0)\__PA ,
+        analog_term => \ADC:Net_248\ ,
+        pad => \ADC:Bypass_P03(0)_PAD\ );
     Properties:
     {
     }
 
 [IoId=4]: 
-Pin : Name = INp(0)
+Pin : Name = LPp(0)
     Attributes:
         In Group/Port: True
         In Sync Option: AUTO
@@ -4282,16 +3795,16 @@ Pin : Name = INp(0)
         Initial Value: 0
         IO Voltage: 0
     PORT MAP (
-        pa_out => INp(0)__PA ,
-        analog_term => Net_769 ,
-        annotation => Net_1190 ,
-        pad => INp(0)_PAD );
+        pa_out => LPp(0)__PA ,
+        analog_term => Net_2721 ,
+        annotation => Net_2781 ,
+        pad => LPp(0)_PAD );
     Properties:
     {
     }
 
 [IoId=5]: 
-Pin : Name = INn(0)
+Pin : Name = LPm(0)
     Attributes:
         In Group/Port: True
         In Sync Option: AUTO
@@ -4324,94 +3837,10 @@ Pin : Name = INn(0)
         Initial Value: 0
         IO Voltage: 0
     PORT MAP (
-        pa_out => INn(0)__PA ,
-        analog_term => Net_1176 ,
-        annotation => Net_2061 ,
-        pad => INn(0)_PAD );
-    Properties:
-    {
-    }
-
-[IoId=6]: 
-Pin : Name = VDACo(0)
-    Attributes:
-        In Group/Port: True
-        In Sync Option: AUTO
-        Out Sync Option: AUTO
-        Interrupt generated: False
-        Interrupt mode: NONE
-        Drive mode: HI_Z_ANALOG
-        VTrip: EITHER
-        Slew: FAST
-        Input Sync needed: False
-        Output Sync needed: False
-        SC shield enabled: False
-        POR State: ANY
-        LCD Mode: COMMON
-        Register Mode: RegComb
-        CaSense Mode: NEITHER
-        Treat as pin: True
-        Is OE Registered: False
-        Uses Analog: True
-        Can contain Digital: False
-        Is SIO: False
-        SIO Output Buf: NONREGULATED
-        SIO Input Buf: SINGLE_ENDED
-        SIO HiFreq: LOW
-        SIO Hyst: DISABLED
-        SIO Vtrip: MULTIPLIER_0_5
-        SIO Multiplier Index: 0
-        SIO RefSel: VCC_IO
-        Required Capabilities: ANALOG
-        Initial Value: 0
-        IO Voltage: 0
-    PORT MAP (
-        pa_out => VDACo(0)__PA ,
-        analog_term => Net_1972 ,
-        annotation => Net_1948 ,
-        pad => VDACo(0)_PAD );
-    Properties:
-    {
-    }
-
-[IoId=7]: 
-Pin : Name = SEo(0)
-    Attributes:
-        In Group/Port: True
-        In Sync Option: AUTO
-        Out Sync Option: AUTO
-        Interrupt generated: False
-        Interrupt mode: NONE
-        Drive mode: HI_Z_ANALOG
-        VTrip: EITHER
-        Slew: FAST
-        Input Sync needed: False
-        Output Sync needed: False
-        SC shield enabled: False
-        POR State: ANY
-        LCD Mode: COMMON
-        Register Mode: RegComb
-        CaSense Mode: NEITHER
-        Treat as pin: True
-        Is OE Registered: False
-        Uses Analog: True
-        Can contain Digital: False
-        Is SIO: False
-        SIO Output Buf: NONREGULATED
-        SIO Input Buf: SINGLE_ENDED
-        SIO HiFreq: LOW
-        SIO Hyst: DISABLED
-        SIO Vtrip: MULTIPLIER_0_5
-        SIO Multiplier Index: 0
-        SIO RefSel: VCC_IO
-        Required Capabilities: ANALOG
-        Initial Value: 0
-        IO Voltage: 0
-    PORT MAP (
-        pa_out => SEo(0)__PA ,
-        analog_term => Net_2147 ,
-        annotation => Net_1927 ,
-        pad => SEo(0)_PAD );
+        pa_out => LPm(0)__PA ,
+        analog_term => Net_2719 ,
+        annotation => Net_2738 ,
+        pad => LPm(0)_PAD );
     Properties:
     {
     }
@@ -4502,92 +3931,8 @@ Pin : Name = Tx_1(0)
 
 Port 2 contains the following IO cells:
 Port 3 contains the following IO cells:
-[IoId=2]: 
-Pin : Name = LPm(0)
-    Attributes:
-        In Group/Port: True
-        In Sync Option: AUTO
-        Out Sync Option: AUTO
-        Interrupt generated: False
-        Interrupt mode: NONE
-        Drive mode: HI_Z_ANALOG
-        VTrip: EITHER
-        Slew: FAST
-        Input Sync needed: False
-        Output Sync needed: False
-        SC shield enabled: False
-        POR State: ANY
-        LCD Mode: COMMON
-        Register Mode: RegComb
-        CaSense Mode: NEITHER
-        Treat as pin: True
-        Is OE Registered: False
-        Uses Analog: True
-        Can contain Digital: False
-        Is SIO: False
-        SIO Output Buf: NONREGULATED
-        SIO Input Buf: SINGLE_ENDED
-        SIO HiFreq: LOW
-        SIO Hyst: DISABLED
-        SIO Vtrip: MULTIPLIER_0_5
-        SIO Multiplier Index: 0
-        SIO RefSel: VCC_IO
-        Required Capabilities: ANALOG
-        Initial Value: 0
-        IO Voltage: 0
-    PORT MAP (
-        pa_out => LPm(0)__PA ,
-        analog_term => Net_2694 ,
-        annotation => Net_2005 ,
-        pad => LPm(0)_PAD );
-    Properties:
-    {
-    }
-
-[IoId=3]: 
-Pin : Name = LPp(0)
-    Attributes:
-        In Group/Port: True
-        In Sync Option: AUTO
-        Out Sync Option: AUTO
-        Interrupt generated: False
-        Interrupt mode: NONE
-        Drive mode: HI_Z_ANALOG
-        VTrip: EITHER
-        Slew: FAST
-        Input Sync needed: False
-        Output Sync needed: False
-        SC shield enabled: False
-        POR State: ANY
-        LCD Mode: COMMON
-        Register Mode: RegComb
-        CaSense Mode: NEITHER
-        Treat as pin: True
-        Is OE Registered: False
-        Uses Analog: True
-        Can contain Digital: False
-        Is SIO: False
-        SIO Output Buf: NONREGULATED
-        SIO Input Buf: SINGLE_ENDED
-        SIO HiFreq: LOW
-        SIO Hyst: DISABLED
-        SIO Vtrip: MULTIPLIER_0_5
-        SIO Multiplier Index: 0
-        SIO RefSel: VCC_IO
-        Required Capabilities: ANALOG
-        Initial Value: 0
-        IO Voltage: 0
-    PORT MAP (
-        pa_out => LPp(0)__PA ,
-        analog_term => Net_2002 ,
-        annotation => Net_2003 ,
-        pad => LPp(0)_PAD );
-    Properties:
-    {
-    }
-
 [IoId=4]: 
-Pin : Name = ADDERm(0)
+Pin : Name = PGAin(0)
     Attributes:
         In Group/Port: True
         In Sync Option: AUTO
@@ -4620,16 +3965,16 @@ Pin : Name = ADDERm(0)
         Initial Value: 0
         IO Voltage: 0
     PORT MAP (
-        pa_out => ADDERm(0)__PA ,
-        analog_term => Net_2693 ,
-        annotation => Net_1935 ,
-        pad => ADDERm(0)_PAD );
+        pa_out => PGAin(0)__PA ,
+        analog_term => Net_2633 ,
+        annotation => Net_170 ,
+        pad => PGAin(0)_PAD );
     Properties:
     {
     }
 
 [IoId=5]: 
-Pin : Name = ADDERp(0)
+Pin : Name = PGAo(0)
     Attributes:
         In Group/Port: True
         In Sync Option: AUTO
@@ -4662,16 +4007,16 @@ Pin : Name = ADDERp(0)
         Initial Value: 0
         IO Voltage: 0
     PORT MAP (
-        pa_out => ADDERp(0)__PA ,
-        analog_term => Net_2690 ,
-        annotation => Net_1942 ,
-        pad => ADDERp(0)_PAD );
+        pa_out => PGAo(0)__PA ,
+        analog_term => Net_2601 ,
+        annotation => Net_2777 ,
+        pad => PGAo(0)_PAD );
     Properties:
     {
     }
 
 [IoId=6]: 
-Pin : Name = ADDERo(0)
+Pin : Name = Vref(0)
     Attributes:
         In Group/Port: True
         In Sync Option: AUTO
@@ -4704,52 +4049,10 @@ Pin : Name = ADDERo(0)
         Initial Value: 0
         IO Voltage: 0
     PORT MAP (
-        pa_out => ADDERo(0)__PA ,
-        analog_term => Net_1932 ,
-        annotation => Net_1933 ,
-        pad => ADDERo(0)_PAD );
-    Properties:
-    {
-    }
-
-[IoId=7]: 
-Pin : Name = LPo(0)
-    Attributes:
-        In Group/Port: True
-        In Sync Option: AUTO
-        Out Sync Option: AUTO
-        Interrupt generated: False
-        Interrupt mode: NONE
-        Drive mode: HI_Z_ANALOG
-        VTrip: EITHER
-        Slew: FAST
-        Input Sync needed: False
-        Output Sync needed: False
-        SC shield enabled: False
-        POR State: ANY
-        LCD Mode: COMMON
-        Register Mode: RegComb
-        CaSense Mode: NEITHER
-        Treat as pin: True
-        Is OE Registered: False
-        Uses Analog: True
-        Can contain Digital: False
-        Is SIO: False
-        SIO Output Buf: NONREGULATED
-        SIO Input Buf: SINGLE_ENDED
-        SIO HiFreq: LOW
-        SIO Hyst: DISABLED
-        SIO Vtrip: MULTIPLIER_0_5
-        SIO Multiplier Index: 0
-        SIO RefSel: VCC_IO
-        Required Capabilities: ANALOG
-        Initial Value: 0
-        IO Voltage: 0
-    PORT MAP (
-        pa_out => LPo(0)__PA ,
-        analog_term => Net_2197 ,
-        annotation => Net_2018 ,
-        pad => LPo(0)_PAD );
+        pa_out => Vref(0)__PA ,
+        analog_term => Net_2776 ,
+        annotation => Net_2770 ,
+        pad => Vref(0)_PAD );
     Properties:
     {
     }
@@ -4827,18 +4130,25 @@ Clock group 0:
         Properties:
         {
         }
-Comparator group 0: empty
+Comparator group 0: 
+    Comparator Block @ F(Comparator,2): 
+    comparatorcell: Name =autoVrefComparator_0
+        PORT MAP (
+            vminus => Net_2775 );
+        Properties:
+        {
+        }
 DFB group 0: empty
 DSM group 0: 
     DS Modulator @ F(DSM,0): 
     dsmodcell: Name =\ADC:DSM\
         PORT MAP (
             aclock => \ADC:Net_488\ ,
-            vplus => Net_2197 ,
-            vminus => Net_2269 ,
+            vplus => Net_2720 ,
+            vminus => \ADC:Net_20\ ,
             reset_dec => \ADC:mod_reset\ ,
             extclk_cp_udb => \ADC:Net_93_local\ ,
-            ext_pin_1 => \ADC:Net_249\ ,
+            ext_pin_1 => \ADC:Net_248\ ,
             ext_pin_2 => \ADC:Net_257\ ,
             ext_vssa => \ADC:Net_109\ ,
             qtz_ref => \ADC:Net_34\ ,
@@ -4871,7 +4181,7 @@ Decimator group 0:
             mod_dat_0 => \ADC:mod_dat_0\ ,
             ext_start => __ONE__ ,
             modrst => \ADC:mod_reset\ ,
-            interrupt => Net_1211 );
+            interrupt => Net_2704 );
         Properties:
         {
             cy_registers = ""
@@ -4883,46 +4193,24 @@ LVD group 0: empty
 PICU group 0: empty
 PM group 0: empty
 SC group 0: 
-    SC Block @ F(SC,0): 
-    sccell: Name =\PGAn:SC\
-        PORT MAP (
-            vref => Net_2269 ,
-            vin => Net_1176 ,
-            modout => \PGAn:Net_41\ ,
-            vout => Net_2158 );
-        Properties:
-        {
-            cy_registers = ""
-        }
     SC Block @ F(SC,1): 
-    sccell: Name =\PGAgain:SC\
+    sccell: Name =\PGA:SC\
         PORT MAP (
-            vref => Net_2269 ,
-            vin => Net_2192 ,
-            modout => \PGAgain:Net_41\ ,
-            vout => Net_2147 );
-        Properties:
-        {
-            cy_registers = ""
-        }
-    SC Block @ F(SC,2): 
-    sccell: Name =\PGAvdac:SC\
-        PORT MAP (
-            vref => \PGAvdac:Net_17\ ,
-            vin => Net_1998 ,
-            modout => \PGAvdac:Net_41\ ,
-            vout => Net_1972 );
+            vref => Net_2681 ,
+            vin => Net_2633 ,
+            modout => \PGA:Net_41\ ,
+            vout => Net_2601 );
         Properties:
         {
             cy_registers = ""
         }
     SC Block @ F(SC,3): 
-    sccell: Name =\PGAp:SC\
+    sccell: Name =\PGA_ref:SC\
         PORT MAP (
-            vref => Net_2158 ,
-            vin => Net_769 ,
-            modout => \PGAp:Net_41\ ,
-            vout => Net_2195 );
+            vref => \PGA_ref:Net_17\ ,
+            vin => Net_2628 ,
+            modout => \PGA_ref:Net_41\ ,
+            vout => Net_2681 );
         Properties:
         {
             cy_registers = ""
@@ -4931,10 +4219,10 @@ SPC group 0: empty
 Timer group 0: empty
 USB group 0: empty
 VIDAC group 0: 
-    VIDAC Block @ F(VIDAC,2): 
+    VIDAC Block @ F(VIDAC,1): 
     vidaccell: Name =\VDAC:viDAC8\
         PORT MAP (
-            vout => Net_1998 ,
+            vout => Net_2774 ,
             iout => \VDAC:Net_77\ );
         Properties:
         {
@@ -4943,74 +4231,65 @@ VIDAC group 0:
             reg_data = 0
         }
 OpAmp group 0: 
-    Opamp Block @ F(OpAmp,0): 
-    abufcell: Name =\OPAbp:ABuf\
-        PORT MAP (
-            vplus => Net_1930 ,
-            vminus => Net_2688 ,
-            vout => Net_2689 );
-        Properties:
-        {
-            cy_registers = ""
-        }
     Opamp Block @ F(OpAmp,1): 
-    abufcell: Name =\OPAadder:ABuf\
+    abufcell: Name =\Opa_ref:ABuf\
         PORT MAP (
-            vplus => Net_2690 ,
-            vminus => Net_2693 ,
-            vout => Net_1932 );
+            vplus => Net_2780 ,
+            vminus => Net_2776 ,
+            vout => Net_2776 );
         Properties:
         {
             cy_registers = ""
         }
     Opamp Block @ F(OpAmp,2): 
-    abufcell: Name =\OPAref:ABuf\
+    abufcell: Name =\Opa_LP:ABuf\
         PORT MAP (
-            vplus => Net_2699 ,
-            vminus => Net_2269 ,
-            vout => Net_2269 );
-        Properties:
-        {
-            cy_registers = ""
-        }
-    Opamp Block @ F(OpAmp,3): 
-    abufcell: Name =\OPAlp:ABuf\
-        PORT MAP (
-            vplus => Net_2002 ,
-            vminus => Net_2694 ,
-            vout => Net_2197 );
+            vplus => Net_2721 ,
+            vminus => Net_2719 ,
+            vout => Net_2720 );
         Properties:
         {
             cy_registers = ""
         }
 CsAbuf group 0: empty
 Vref group 0: 
-    Vref Block @ F(Vref,1): 
-    vrefcell: Name =vRef_1
+    Vref Block @ F(Vref,6): 
+    vrefcell: Name =\ADC:vRef_2\
         PORT MAP (
-            vout => Net_2687 );
+            vout => \ADC:Net_244\ );
         Properties:
         {
             autoenable = 1
-            guid = "4720866E-BC14-478d-B8A0-3E44F38CADAC"
+            guid = "15B3DB15-B7B3-4d62-A2DF-25EA392A7161"
             ignoresleep = 0
-            name = "Vdda/2"
+            name = "Vssa (GND)"
+        }
+    Vref Block @ F(Vref,10): 
+    vrefcell: Name =vRef_1
+        PORT MAP (
+            vout => Net_2775 );
+        Properties:
+        {
+            autoenable = 1
+            guid = "89B398AD-36A8-4627-9212-707F2986319E"
+            ignoresleep = 0
+            name = "1.024V"
         }
 LPF group 0: 
     LPF Block @ F(LPF,0): 
-    lpfcell: Name =\LPF_2:cy_psoc3_lpf_1\
+    lpfcell: Name =\LPF_ref:cy_psoc3_lpf_1\
         PORT MAP (
-            vin => Net_2687 ,
-            vout => Net_2699 );
+            vin => Net_2775 ,
+            vout => Net_2780 );
         Properties:
         {
             cy_registers = ""
         }
     LPF Block @ F(LPF,1): 
-    lpfcell: Name =\LPF_1:cy_psoc3_lpf_1\
+    lpfcell: Name =\LPF_ADC:cy_psoc3_lpf_1\
         PORT MAP (
-            vin => Net_2195 ,
-            vout => Net_2192 );
+            vin => Net_2774 ,
+            vout => Net_2628 );
         Properties:
         {
             cy_registers = ""
@@ -5018,66 +4297,77 @@ LPF group 0:
 SAR group 0: empty
 ANAIF group 0: empty
 PHUB group 0: empty
+
+Blocks not positioned by the digital component placer:
+    Amux Block @ <No Location>: 
+    amuxcell: Name =\ADC:AMux\
+        PORT MAP (
+            muxin_1 => \ADC:Net_35\ ,
+            muxin_0 => \ADC:Net_244\ ,
+            vout => \ADC:Net_20\ );
+        Properties:
+        {
+            api_type = 0
+            connect_mode = 1
+            cy_registers = ""
+            hw_control = 0
+            init_mux_sel = "00"
+            muxin_width = 2
+            one_active = 0
+        }
 </CYPRESSTAG>
 <CYPRESSTAG name="Port Configuration Details">
 
 ------------------------------------------------------------
 Port Configuration report
 ------------------------------------------------------------
-     |     |       | Interrupt |                  |            | 
-Port | Pin | Fixed |      Type |       Drive Mode |       Name | Connections
------+-----+-------+-----------+------------------+------------+-----------------
-   0 |   0 |     * |      NONE |      HI_Z_ANALOG |     REF(0) | Analog(Net_2269)
-     |   1 |     * |      NONE |      HI_Z_ANALOG |     BPo(0) | Analog(Net_2689)
-     |   2 |     * |      NONE |      HI_Z_ANALOG |     BPp(0) | Analog(Net_1930)
-     |   3 |     * |      NONE |      HI_Z_ANALOG |     BPm(0) | Analog(Net_2688)
-     |   4 |     * |      NONE |      HI_Z_ANALOG |     INp(0) | Analog(Net_769)
-     |   5 |     * |      NONE |      HI_Z_ANALOG |     INn(0) | Analog(Net_1176)
-     |   6 |     * |      NONE |      HI_Z_ANALOG |   VDACo(0) | Analog(Net_1972)
-     |   7 |     * |      NONE |      HI_Z_ANALOG |     SEo(0) | Analog(Net_2147)
------+-----+-------+-----------+------------------+------------+-----------------
-   1 |   2 |     * |      NONE |     HI_Z_DIGITAL |    Rx_1(0) | FB(Net_2326)
-     |   5 |     * |      NONE |    OPEN_DRAIN_LO |    Tx_1(0) | In(Net_2330)
------+-----+-------+-----------+------------------+------------+-----------------
-   3 |   2 |     * |      NONE |      HI_Z_ANALOG |     LPm(0) | Analog(Net_2694)
-     |   3 |     * |      NONE |      HI_Z_ANALOG |     LPp(0) | Analog(Net_2002)
-     |   4 |     * |      NONE |      HI_Z_ANALOG |  ADDERm(0) | Analog(Net_2693)
-     |   5 |     * |      NONE |      HI_Z_ANALOG |  ADDERp(0) | Analog(Net_2690)
-     |   6 |     * |      NONE |      HI_Z_ANALOG |  ADDERo(0) | Analog(Net_1932)
-     |   7 |     * |      NONE |      HI_Z_ANALOG |     LPo(0) | Analog(Net_2197)
------+-----+-------+-----------+------------------+------------+-----------------
-  12 |   6 |     * |      NONE |     HI_Z_DIGITAL | SYNC_IN(0) | FB(Net_2336)
----------------------------------------------------------------------------------
+     |     |       | Interrupt |                  |                     | 
+Port | Pin | Fixed |      Type |       Drive Mode |                Name | Connections
+-----+-----+-------+-----------+------------------+---------------------+----------------------
+   0 |   0 |     * |      NONE |      HI_Z_ANALOG |              LPo(0) | Analog(Net_2720)
+     |   3 |     * |      NONE |      HI_Z_ANALOG | \ADC:Bypass_P03(0)\ | Analog(\ADC:Net_248\)
+     |   4 |     * |      NONE |      HI_Z_ANALOG |              LPp(0) | Analog(Net_2721)
+     |   5 |     * |      NONE |      HI_Z_ANALOG |              LPm(0) | Analog(Net_2719)
+-----+-----+-------+-----------+------------------+---------------------+----------------------
+   1 |   2 |     * |      NONE |     HI_Z_DIGITAL |             Rx_1(0) | FB(Net_2326)
+     |   5 |     * |      NONE |    OPEN_DRAIN_LO |             Tx_1(0) | In(Net_2330)
+-----+-----+-------+-----------+------------------+---------------------+----------------------
+   3 |   4 |     * |      NONE |      HI_Z_ANALOG |            PGAin(0) | Analog(Net_2633)
+     |   5 |     * |      NONE |      HI_Z_ANALOG |             PGAo(0) | Analog(Net_2601)
+     |   6 |     * |      NONE |      HI_Z_ANALOG |             Vref(0) | Analog(Net_2776)
+-----+-----+-------+-----------+------------------+---------------------+----------------------
+  12 |   6 |     * |      NONE |     HI_Z_DIGITAL |          SYNC_IN(0) | FB(Net_2336)
+-----------------------------------------------------------------------------------------------
 </CYPRESSTAG>
 </CYPRESSTAG>
 </CYPRESSTAG>
-Digital component placer commit/Report: Elapsed time ==> 0s.055ms
-Digital Placement phase: Elapsed time ==> 1s.181ms
+Digital component placer commit/Report: Elapsed time ==> 0s.042ms
+Digital Placement phase: Elapsed time ==> 1s.219ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Digital Routing">
 "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\bin/sjrouter.exe" --xml-path "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\dev\psoc5/psoc5lp/route_arch-rrg.cydata" --vh2-path "AcondicionamientoAnalogico_r.vh2" --pcf-path "AcondicionamientoAnalogico.pco" --des-name "AcondicionamientoAnalogico" --dsf-path "AcondicionamientoAnalogico.dsf" --sdc-path "AcondicionamientoAnalogico.sdc" --lib-path "AcondicionamientoAnalogico_r.lib"
 Routing successful.
-Digital Routing phase: Elapsed time ==> 1s.332ms
+Digital Routing phase: Elapsed time ==> 1s.534ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Bitstream Generation">
-Bitstream Generation phase: Elapsed time ==> 0s.139ms
+Bitstream Generation phase: Elapsed time ==> 0s.215ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Bitstream Verification">
-Bitstream Verification phase: Elapsed time ==> 0s.035ms
+Bitstream Verification phase: Elapsed time ==> 0s.063ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Static timing analysis">
 Timing report is in AcondicionamientoAnalogico_timing.html.
-Static timing analysis phase: Elapsed time ==> 0s.332ms
+Static timing analysis phase: Elapsed time ==> 0s.361ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Data reporting">
 Data reporting phase: Elapsed time ==> 0s.000ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Database update...">
-Design database save phase: Elapsed time ==> 0s.183ms
+Design database save phase: Elapsed time ==> 0s.213ms
 </CYPRESSTAG>
-cydsfit: Elapsed time ==> 6s.195ms
+cydsfit: Elapsed time ==> 6s.889ms
 </CYPRESSTAG>
-Fitter phase: Elapsed time ==> 6s.195ms
-API generation phase: Elapsed time ==> 1s.644ms
-Dependency generation phase: Elapsed time ==> 0s.005ms
+Fitter phase: Elapsed time ==> 6s.889ms
+API generation phase: Elapsed time ==> 1s.489ms
+Dependency generation phase: Elapsed time ==> 0s.010ms
 Cleanup phase: Elapsed time ==> 0s.000ms

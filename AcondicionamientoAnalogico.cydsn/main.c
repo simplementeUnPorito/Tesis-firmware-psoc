@@ -627,6 +627,7 @@ int main(void)
     PGA_ref_SetGain(g_pgavdac_code);
     PGA_Start();
     PGA_SetGain(g_pga_code);
+    Opa_LP_Start();
 #endif
 
     VDAC_Start();

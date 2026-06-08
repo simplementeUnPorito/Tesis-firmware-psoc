@@ -1116,10 +1116,10 @@ net ClockBlock_BUS_CLK
 	term   ":udb@[UDB=(0,2)]:dp_wrapper:datapath.busclk"
 	switch ":clockblockcell.clk_bus_glb==>:udb@[UDB=(1,1)]:dp_wrapper:datapath.busclk"
 	term   ":udb@[UDB=(1,1)]:dp_wrapper:datapath.busclk"
-	switch ":clockblockcell.clk_bus_glb==>:interrupt_2.clock"
-	term   ":interrupt_2.clock"
 	switch ":clockblockcell.clk_bus_glb==>:interrupt_29.clock"
 	term   ":interrupt_29.clock"
+	switch ":clockblockcell.clk_bus_glb==>:interrupt_2.clock"
+	term   ":interrupt_2.clock"
 	switch ":clockblockcell.clk_bus_glb==>:udb@[UDB=(1,1)]:clockreset:clk_pld1_mux.in_9"
 	switch ":udb@[UDB=(1,1)]:clockreset:clk_pld1_mux.pld1_clk==>:udb@[UDB=(1,1)]:pld1:mc0.clock_0"
 	term   ":udb@[UDB=(1,1)]:pld1:mc0.clock_0"
@@ -1224,9 +1224,12 @@ net ClockBlock_100k
 	switch "Stub-:udbswitch@[UDB=(2,0)][side=top]:v91==>:udb@[UDB=(3,0)]:sync_wrapper:sync1.in"
 	term   ":udb@[UDB=(3,0)]:sync_wrapper:sync1.in"
 end ClockBlock_100k
-net Net_1211
+net Net_2704
 	term   ":decimatorcell.interrupt"
 	switch ":decimatorcell.interrupt==>Stub-:dsiswitch_bottom@[DSI=(1,2)][side=bottom]:dsihc_bottom:v20+:dsiswitch_bottom@[DSI=(1,2)][side=bottom]:dsihc_bottom:v22"
+	switch "Stub-:dsiswitch_bottom@[DSI=(1,2)][side=bottom]:dsihc_bottom:v20+:dsiswitch_bottom@[DSI=(1,2)][side=bottom]:dsihc_bottom:v22==>:interrupt_idmux_29.in_0"
+	switch ":interrupt_idmux_29.interrupt_idmux_29__out==>:interrupt_29.interrupt"
+	term   ":interrupt_29.interrupt"
 	switch "OStub-:dsiswitch_bottom@[DSI=(1,2)][side=bottom]:dsihc_bottom:v20+:dsiswitch_bottom@[DSI=(1,2)][side=bottom]:dsihc_bottom:v22"
 	switch ":dsiswitch_bottom@[DSI=(1,2)][side=bottom]:dsihc_bottom:20,59"
 	switch ":hvswitch@[UDB=(3,2)][side=left]:hseg_59_f"
@@ -1237,10 +1240,7 @@ net Net_1211
 	switch "Stub-:dsiswitch_bottom@[DSI=(1,5)][side=bottom]:dsihc_bottom:v52+:dsiswitch_bottom@[DSI=(1,5)][side=bottom]:dsihc_bottom:v54==>:interrupt_idmux_2.in_2"
 	switch ":interrupt_idmux_2.interrupt_idmux_2__out==>:interrupt_2.interrupt"
 	term   ":interrupt_2.interrupt"
-	switch "Stub-:dsiswitch_bottom@[DSI=(1,2)][side=bottom]:dsihc_bottom:v20+:dsiswitch_bottom@[DSI=(1,2)][side=bottom]:dsihc_bottom:v22==>:interrupt_idmux_29.in_0"
-	switch ":interrupt_idmux_29.interrupt_idmux_29__out==>:interrupt_29.interrupt"
-	term   ":interrupt_29.interrupt"
-end Net_1211
+end Net_2704
 net \UART:BUART:tx_fifo_notfull\
 	term   ":udb@[UDB=(1,2)]:dp_wrapper:datapath.f0_bus_stat_comb"
 	switch ":udb@[UDB=(1,2)]:dp_wrapper:datapath.f0_bus_stat_comb==>:udb@[UDB=(1,2)]:dp_wrapper:output_permute.f0_bus_stat_comb"
