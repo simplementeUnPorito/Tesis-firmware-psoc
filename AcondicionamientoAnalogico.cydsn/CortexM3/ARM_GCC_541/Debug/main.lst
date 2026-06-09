@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 1
 
 
    1              		.syntax unified
@@ -58,7 +58,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
   29:main.c        **** *       0xA5 status/probe   0xA6 set PGAgain (0-8)   0xA9 set PGAvdac (0-8)
   30:main.c        **** *       0xAA set VDAC       0xB1 arm (espera SYNC)   0xB3 debug rampa (0/1)
   31:main.c        **** *       0xB4 start-now      0xC1 pong
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 2
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 2
 
 
   32:main.c        **** *   2 param : [0xAB][0xA3][n_lo][n_hi][0xA3^n_lo^n_hi]   (set N lotes)
@@ -118,7 +118,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
   86:main.c        **** #define COMM_WINDOW_TICKS     MS_TO_TICKS(COMM_WINDOW_MS)
   87:main.c        **** #define COMM_BLINK_TICKS      MS_TO_TICKS(COMM_BLINK_MS)
   88:main.c        **** #define CONNECT_BLINK_TICKS   MS_TO_TICKS(80u)
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 3
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 3
 
 
   89:main.c        **** 
@@ -178,7 +178,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  143:main.c        **** 
  144:main.c        **** static void uart_send_cfg_ack(uint8 cmd, uint8 val)
  145:main.c        **** {
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 4
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 4
 
 
  146:main.c        ****     uint8 frame[5u];
@@ -238,7 +238,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  179:main.c        ****     #if((ADC_CFG4_DEC_DIV != 0) && (ADC_DEFAULT_NUM_CONFIGS > 3))
  180:main.c        ****         if (ADC_Config == ADC_CFG4) { adcCounts /= ADC_CFG4_DEC_DIV; }
  181:main.c        ****     #endif
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 5
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 5
 
 
  182:main.c        ****     return adcCounts;
@@ -298,7 +298,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
   91              		.section	.text.capture_dump_pending,"ax",%progbits
   92              		.align	2
   93              		.thumb
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 6
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 6
 
 
   94              		.thumb_func
@@ -358,7 +358,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  210:main.c        ****     isr_Timer_ClearPending();
  211:main.c        **** }
  212:main.c        **** 
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 7
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 7
 
 
  213:main.c        **** static void capture_reset_locked(void)
@@ -418,7 +418,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  231:main.c        ****     capture_reset_locked();
  232:main.c        ****     g_state = PSOC_SAMPLING;
  233:main.c        ****     CyExitCriticalSection(saved);
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 8
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 8
 
 
  234:main.c        ****     ADC_StartConvert();
@@ -478,7 +478,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  288:main.c        ****         }
  289:main.c        ****     }
  290:main.c        ****     else
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 9
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 9
 
 
  291:main.c        ****     {
@@ -538,7 +538,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  203              	.L24:
  204 000a 00BF     		.align	2
  205              	.L23:
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 10
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 10
 
 
  206 000c 00000000 		.word	.LANCHOR0
@@ -598,7 +598,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  229              	.LVL6:
  230 0008 7047     		bx	lr
  231              	.LVL7:
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 11
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 11
 
 
  232              	.L27:
@@ -658,7 +658,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  379:main.c        **** }
  380:main.c        **** 
  381:main.c        **** static void uart_send_capture_batch(uint16 batchIndex)
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 12
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 12
 
 
  382:main.c        **** {
@@ -718,7 +718,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  436:main.c        **** 
  437:main.c        ****             case 2u:
  438:main.c        ****                 rx_p1 = rx; rx_p2 = 0u; rx_state = 3u; rx_watchdog_start();
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 13
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 13
 
 
  439:main.c        ****                 break;
@@ -778,7 +778,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  493:main.c        ****                         break;
  494:main.c        ****                     default: break;
  495:main.c        ****                 }
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 14
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 14
 
 
  496:main.c        ****                 break;
@@ -838,7 +838,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  535:main.c        ****         return;
  262              		.loc 1 535 0
  263 000e 7047     		bx	lr
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 15
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 15
 
 
  264              	.L29:
@@ -898,7 +898,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  302 003e 0649     		ldr	r1, .L35
  303 0040 0A6A     		ldr	r2, [r1, #32]
  304 0042 1344     		add	r3, r3, r2
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 16
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 16
 
 
  305              	.LVL12:
@@ -958,7 +958,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  350              	.LVL15:
  351 0006 FFF7FEFF 		bl	adc_counts_right_aligned
  352              	.LVL16:
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 17
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 17
 
 
  353 000a 314B     		ldr	r3, .L42
@@ -1018,7 +1018,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  398 0056 20F07F40 		bic	r0, r0, #-16777216
  399 005a 01E0     		b	.L40
  400              	.L39:
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 18
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 18
 
 
  246:main.c        ****         g_capture_raw[g_batches_captured][pos]      = (uint8)( val        & 0xFFu);
@@ -1078,7 +1078,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  448 00b2 CB80     		strh	r3, [r1, #6]	@ movhi
  254:main.c        ****             if (g_batches_captured >= capture_target_batches()) {
  449              		.loc 1 254 0
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 19
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 19
 
 
  450 00b4 8B88     		ldrh	r3, [r1, #4]
@@ -1138,7 +1138,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  266:main.c        ****         g_rx_watch_ticks++;
  499              		.loc 1 266 0
  500 0012 93F8803A 		ldrb	r3, [r3, #2688]	@ zero_extendqisi2
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 20
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 20
 
 
  501 0016 13F0FF0F 		tst	r3, #255
@@ -1198,7 +1198,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  547              		.section	.text.timer_start_runtime,"ax",%progbits
  548              		.align	2
  549              		.thumb
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 21
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 21
 
 
  550              		.thumb_func
@@ -1258,7 +1258,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  370:main.c        ****     capture_reset_locked();
  598              		.loc 1 370 0
  599 0006 FFF7FEFF 		bl	CyEnterCriticalSection
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 22
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 22
 
 
  600              	.LVL32:
@@ -1318,7 +1318,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  647              	.LVL39:
  335:main.c        **** 
  648              		.loc 1 335 0
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 23
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 23
 
 
  649 0010 2046     		mov	r0, r4
@@ -1378,7 +1378,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  698              	.LVL44:
  699 0000 38B5     		push	{r3, r4, r5, lr}
  700              		.cfi_def_cfa_offset 16
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 24
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 24
 
 
  701              		.cfi_offset 3, -16
@@ -1438,7 +1438,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  746              		.cfi_endproc
  747              	.LFE72:
  748              		.size	psoc_enter_sampling, .-psoc_enter_sampling
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 25
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 25
 
 
  749              		.section	.text.isr_SyncIn,"ax",%progbits
@@ -1498,7 +1498,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  296:main.c        ****         g_batches_sent     = 0u;
  795              		.loc 1 296 0
  796 0030 1A72     		strb	r2, [r3, #8]
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 26
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 26
 
 
  297:main.c        ****         g_batches_captured = 0u;
@@ -1558,7 +1558,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  844              		.type	PGAvdac_Set, %function
  845              	PGAvdac_Set:
  846              	.LFB83:
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 27
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 27
 
 
  355:main.c        ****     if (code <= 8u) {
@@ -1618,7 +1618,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  894 0002 05D8     		bhi	.L87
  343:main.c        ****     if (code <= 8u) {
  895              		.loc 1 343 0
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 28
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 28
 
 
  896 0004 08B5     		push	{r3, lr}
@@ -1678,7 +1678,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  945 000a 1E23     		movs	r3, #30
  946 000c 8DF80130 		strb	r3, [sp, #1]
  391:main.c        ****     frame[3] = (uint8)((g_seq >> 8u) & 0xFFu);
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 29
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 29
 
 
  947              		.loc 1 391 0
@@ -1738,7 +1738,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  992 0052 0336     		adds	r6, r6, #3
  993              	.LVL76:
  994              	.L91:
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 30
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 30
 
 
  395:main.c        ****     {
@@ -1798,7 +1798,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  1041              	.L96:
  1042 008c 00000000 		.word	.LANCHOR0
  1043              		.cfi_endproc
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 31
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 31
 
 
  1044              	.LFE86:
@@ -1858,7 +1858,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  1090              		.size	uart_send_fs_report, .-uart_send_fs_report
  1091              		.section	.text.uart_send_cfg_ack,"ax",%progbits
  1092              		.align	2
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 32
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 32
 
 
  1093              		.thumb
@@ -1918,7 +1918,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  1139              		.thumb
  1140              		.thumb_func
  1141              		.type	uart_send_ping, %function
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 33
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 33
 
 
  1142              	uart_send_ping:
@@ -1978,7 +1978,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  1190 000c 93F8803A 		ldrb	r3, [r3, #2688]	@ zero_extendqisi2
  1191 0010 DBB2     		uxtb	r3, r3
  1192 0012 052B     		cmp	r3, #5
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 34
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 34
 
 
  1193 0014 00F2D680 		bhi	.L108
@@ -2038,7 +2038,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  1243 0058 1E       		.byte	(.L117-.L119)/2
  1244 0059 1E       		.byte	(.L117-.L119)/2
  1245 005a 1E       		.byte	(.L117-.L119)/2
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 35
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 35
 
 
  1246 005b 1E       		.byte	(.L117-.L119)/2
@@ -2098,7 +2098,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  1294              		.loc 1 442 0
  1295 00a8 4B4B     		ldr	r3, .L133
  1296 00aa 83F8830A 		strb	r0, [r3, #2691]
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 36
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 36
 
 
  1297 00ae 0522     		movs	r2, #5
@@ -2158,7 +2158,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  1343 0104 DFE803F0 		tbb	[pc, r3]
  1344              	.L122:
  1345 0108 2F       		.byte	(.L121-.L122)/2
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 37
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 37
 
 
  1346 0109 62       		.byte	(.L107-.L122)/2
@@ -2218,7 +2218,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  469:main.c        ****                         led_toggle(); break;
  1393              		.loc 1 469 0
  1394 0144 94F8811A 		ldrb	r1, [r4, #2689]	@ zero_extendqisi2
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 38
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 38
 
 
  1395 0148 A920     		movs	r0, #169
@@ -2278,7 +2278,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  1441 0198 83F82820 		strb	r2, [r3, #40]
  483:main.c        ****                             psoc_enter_sampling(1u);
  1442              		.loc 1 483 0
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 39
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 39
 
 
  1443 019c 93F82830 		ldrb	r3, [r3, #40]	@ zero_extendqisi2
@@ -2338,7 +2338,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  1487 01d8 B0A90000 		.word	.LANCHOR1
  1488 01dc 00000000 		.word	.LANCHOR0
  1489 01e0 00000000 		.word	.LANCHOR2
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 40
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 40
 
 
  1490              		.cfi_endproc
@@ -2398,7 +2398,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  517:main.c        ****         g_batches_sent++;
  1536              		.loc 1 517 0
  1537 002c 0C4C     		ldr	r4, .L141
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 41
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 41
 
 
  1538 002e 6088     		ldrh	r0, [r4, #2]
@@ -2458,7 +2458,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  563:main.c        **** {
  564:main.c        ****     uint32 due = timer_now_ticks() + ticks;
  565:main.c        ****     while (!ticks_due(timer_now_ticks(), due)) {
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 42
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 42
 
 
  566:main.c        ****         service_runtime();
@@ -2518,7 +2518,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  584:main.c        ****             pingStart = now;
  585:main.c        ****             nextPing  = now + PING_PERIOD_TICKS;
  1619              		.loc 1 585 0
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 43
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 43
 
 
  1620 0020 05F14604 		add	r4, r5, #70
@@ -2578,7 +2578,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  565:main.c        ****         service_runtime();
  1661              		.loc 1 565 0
  1662 000a 01E0     		b	.L151
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 44
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 44
 
 
  1663              	.L152:
@@ -2638,7 +2638,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  1704              		.syntax unified
  1705 0004 FFF7FEFF 		bl	UART_Start
  1706              	.LVL143:
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 45
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 45
 
 
  606:main.c        **** 
@@ -2698,7 +2698,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  632:main.c        **** 
  633:main.c        ****     VDAC_Start();
  1735              		.loc 1 633 0
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 46
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 46
 
 
  1736 0032 FFF7FEFF 		bl	VDAC_Start
@@ -2758,7 +2758,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  651:main.c        ****     for (i = 0u; i < 5u; i++)
  1773              		.loc 1 651 0
  1774 0068 0024     		movs	r4, #0
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 47
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 47
 
 
  1775 006a 07E0     		b	.L155
@@ -2818,7 +2818,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  667:main.c        ****         now = timer_now_ticks();
  1812              		.loc 1 667 0 is_stmt 1
  1813 0096 FFF7FEFF 		bl	timer_now_ticks
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 48
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 48
 
 
  1814              	.LVL171:
@@ -2878,7 +2878,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  1853 00de 034B     		ldr	r3, .L165
  1854 00e0 C3F8882A 		str	r2, [r3, #2696]
  1855              	.L163:
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 49
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 49
 
 
  683:main.c        ****         }
@@ -2938,7 +2938,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  1907              		.type	g_batch_fill, %object
  1908              		.size	g_batch_fill, 2
  1909              	g_batch_fill:
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 50
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 50
 
 
  1910 0006 0000     		.space	2
@@ -2972,17 +2972,17 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  1938              	g_state:
  1939 0014 00       		.space	1
  1940 0015 000000   		.space	3
- 1941              		.type	lastTick.6306, %object
- 1942              		.size	lastTick.6306, 4
- 1943              	lastTick.6306:
+ 1941              		.type	lastTick.6293, %object
+ 1942              		.size	lastTick.6293, 4
+ 1943              	lastTick.6293:
  1944 0018 00000000 		.space	4
  1945              		.type	g_comm_countdown, %object
  1946              		.size	g_comm_countdown, 4
  1947              	g_comm_countdown:
  1948 001c 00000000 		.space	4
- 1949              		.type	blinkTicks.6307, %object
- 1950              		.size	blinkTicks.6307, 4
- 1951              	blinkTicks.6307:
+ 1949              		.type	blinkTicks.6294, %object
+ 1950              		.size	blinkTicks.6294, 4
+ 1951              	blinkTicks.6294:
  1952 0020 00000000 		.space	4
  1953              		.type	g_adc_raw, %object
  1954              		.size	g_adc_raw, 4
@@ -2998,7 +2998,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  1964              	g_capture_raw:
  1965 002c 00000000 		.space	46080
  1965      00000000 
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 51
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 51
 
 
  1965      00000000 
@@ -3033,9 +3033,9 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  1992              	g_esp_connected:
  1993 b435 00       		.space	1
  1994 b436 0000     		.space	2
- 1995              		.type	idlePingDue.6332, %object
- 1996              		.size	idlePingDue.6332, 4
- 1997              	idlePingDue.6332:
+ 1995              		.type	idlePingDue.6319, %object
+ 1996              		.size	idlePingDue.6319, 4
+ 1997              	idlePingDue.6319:
  1998 b438 00000000 		.space	4
  1999              		.text
  2000              	.Letext0:
@@ -3058,7 +3058,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  2017              		.file 18 "Generated_Source\\PSoC5/Opa_LP.h"
  2018              		.file 19 "Generated_Source\\PSoC5/isr_DelSig.h"
  2019              		.file 20 "Generated_Source\\PSoC5/isr_SyncIn.h"
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 52
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 52
 
 
  2020              		.section	.debug_info,"",%progbits
@@ -3118,7 +3118,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  2074 006b 696E7400 		.ascii	"int\000"
  2075 006f 02       		.uleb128 0x2
  2076 0070 04       		.byte	0x4
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 53
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 53
 
 
  2077 0071 07       		.byte	0x7
@@ -3178,7 +3178,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  2131 00e4 88000000 		.4byte	.LASF20
  2132 00e8 01       		.byte	0x1
  2133 00e9 A8       		.byte	0xa8
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 54
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 54
 
 
  2134 00ea A5000000 		.4byte	0xa5
@@ -3238,7 +3238,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  2188 0167 01       		.uleb128 0x1
  2189 0168 9C       		.byte	0x9c
  2190 0169 0C       		.uleb128 0xc
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 55
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 55
 
 
  2191 016a E9040000 		.4byte	.LASF24
@@ -3294,18 +3294,18 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  2241 01e2 99000000 		.4byte	0x99
  2242 01e6 05       		.uleb128 0x5
  2243 01e7 03       		.byte	0x3
- 2244 01e8 18000000 		.4byte	lastTick.6306
+ 2244 01e8 18000000 		.4byte	lastTick.6293
  2245 01ec 11       		.uleb128 0x11
  2246 01ed D9020000 		.4byte	.LASF28
  2247 01f1 01       		.byte	0x1
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 56
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 56
 
 
  2248 01f2 1202     		.2byte	0x212
  2249 01f4 99000000 		.4byte	0x99
  2250 01f8 05       		.uleb128 0x5
  2251 01f9 03       		.byte	0x3
- 2252 01fa 20000000 		.4byte	blinkTicks.6307
+ 2252 01fa 20000000 		.4byte	blinkTicks.6294
  2253 01fe 12       		.uleb128 0x12
  2254 01ff 7A020000 		.4byte	.LASF29
  2255 0203 01       		.byte	0x1
@@ -3358,7 +3358,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  2302 027b 0601     		.2byte	0x106
  2303 027d 00000000 		.4byte	.LFB74
  2304 0281 5C000000 		.4byte	.LFE74-.LFB74
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 57
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 57
 
 
  2305 0285 01       		.uleb128 0x1
@@ -3418,7 +3418,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  2359 0303 6E01     		.2byte	0x16e
  2360 0305 00000000 		.4byte	.LFB84
  2361 0309 24000000 		.4byte	.LFE84-.LFB84
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 58
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 58
 
 
  2362 030d 01       		.uleb128 0x1
@@ -3478,7 +3478,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  2416 0392 16       		.uleb128 0x16
  2417 0393 10000000 		.4byte	.LVL39
  2418 0397 030D0000 		.4byte	0xd03
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 59
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 59
 
 
  2419 039b 00       		.byte	0
@@ -3538,7 +3538,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  2473 0425 2E000000 		.4byte	.LVL50
  2474 0429 030D0000 		.4byte	0xd03
  2475 042d 38040000 		.4byte	0x438
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 60
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 60
 
 
  2476 0431 19       		.uleb128 0x19
@@ -3598,7 +3598,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  2530 04b5 1B       		.uleb128 0x1b
  2531 04b6 08000000 		.4byte	.LVL59
  2532 04ba CD030000 		.4byte	0x3cd
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 61
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 61
 
 
  2533 04be 19       		.uleb128 0x19
@@ -3658,7 +3658,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  2587 053b 1D       		.uleb128 0x1d
  2588 053c 64000000 		.4byte	.LASF47
  2589 0540 01       		.byte	0x1
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 62
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 62
 
 
  2590 0541 7D01     		.2byte	0x17d
@@ -3718,7 +3718,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  2644 05b3 BE050000 		.4byte	0x5be
  2645 05b7 20       		.uleb128 0x20
  2646 05b8 DC000000 		.4byte	0xdc
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 63
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 63
 
 
  2647 05bc 5E       		.byte	0x5e
@@ -3778,7 +3778,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  2701 0620 DC000000 		.4byte	0xdc
  2702 0624 04       		.byte	0x4
  2703 0625 00       		.byte	0
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 64
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 64
 
 
  2704 0626 1A       		.uleb128 0x1a
@@ -3838,7 +3838,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  2758 0692 1B       		.uleb128 0x1b
  2759 0693 0A000000 		.4byte	.LVL91
  2760 0697 450D0000 		.4byte	0xd45
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 65
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 65
 
 
  2761 069b 19       		.uleb128 0x19
@@ -3898,7 +3898,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  2815 071d 7D060000 		.4byte	0x67d
  2816 0721 16       		.uleb128 0x16
  2817 0722 22010000 		.4byte	.LVL107
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 66
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 66
 
 
  2818 0726 C4050000 		.4byte	0x5c4
@@ -3958,7 +3958,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  2872 07a1 01       		.uleb128 0x1
  2873 07a2 50       		.byte	0x50
  2874 07a3 01       		.uleb128 0x1
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 67
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 67
 
 
  2875 07a4 31       		.byte	0x31
@@ -4018,7 +4018,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  2929 0831 01       		.byte	0x1
  2930 0832 3D02     		.2byte	0x23d
  2931 0834 99000000 		.4byte	0x99
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 68
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 68
 
 
  2932 0838 94030000 		.4byte	.LLST23
@@ -4078,7 +4078,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  2986 08b5 3202     		.2byte	0x232
  2987 08b7 99000000 		.4byte	0x99
  2988 08bb D0030000 		.4byte	.LLST25
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 69
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 69
 
 
  2989 08bf 26       		.uleb128 0x26
@@ -4135,10 +4135,10 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  3040 0936 99000000 		.4byte	0x99
  3041 093a 05       		.uleb128 0x5
  3042 093b 03       		.byte	0x3
- 3043 093c 38B40000 		.4byte	idlePingDue.6332
+ 3043 093c 38B40000 		.4byte	idlePingDue.6319
  3044 0940 1E       		.uleb128 0x1e
  3045 0941 6E6F7700 		.ascii	"now\000"
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 70
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 70
 
 
  3046 0945 01       		.byte	0x1
@@ -4198,7 +4198,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  3100 09c7 18000000 		.4byte	.LVL147
  3101 09cb 9D0D0000 		.4byte	0xd9d
  3102 09cf 16       		.uleb128 0x16
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 71
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 71
 
 
  3103 09d0 22000000 		.4byte	.LVL148
@@ -4258,7 +4258,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  3157 0a51 56000000 		.4byte	.LVL158
  3158 0a55 EA0D0000 		.4byte	0xdea
  3159 0a59 670A0000 		.4byte	0xa67
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 72
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 72
 
 
  3160 0a5d 19       		.uleb128 0x19
@@ -4318,7 +4318,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  3214 0ac9 24000000 		.4byte	g_adc_raw
  3215 0acd 06       		.uleb128 0x6
  3216 0ace A5000000 		.4byte	0xa5
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 73
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 73
 
 
  3217 0ad2 1F       		.uleb128 0x1f
@@ -4378,7 +4378,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  3271 0b48 01       		.byte	0x1
  3272 0b49 66       		.byte	0x66
  3273 0b4a C6000000 		.4byte	0xc6
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 74
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 74
 
 
  3274 0b4e 05       		.uleb128 0x5
@@ -4438,7 +4438,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  3328 0bc0 03       		.byte	0x3
  3329 0bc1 28000000 		.4byte	g_debug_psoc
  3330 0bc5 24       		.uleb128 0x24
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 75
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 75
 
 
  3331 0bc6 39040000 		.4byte	.LASF74
@@ -4498,7 +4498,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  3385 0c38 2CB40000 		.4byte	g_timer_ticks
  3386 0c3c 24       		.uleb128 0x24
  3387 0c3d 0B060000 		.4byte	.LASF81
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 76
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 76
 
 
  3388 0c41 01       		.byte	0x1
@@ -4558,7 +4558,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  3442 0cb7 9F060000 		.4byte	.LASF87
  3443 0cbb 9F060000 		.4byte	.LASF87
  3444 0cbf 05       		.byte	0x5
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 77
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 77
 
 
  3445 0cc0 42       		.byte	0x42
@@ -4618,7 +4618,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  3499 0d38 0B       		.byte	0xb
  3500 0d39 41       		.byte	0x41
  3501 0d3a 2D       		.uleb128 0x2d
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 78
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 78
 
 
  3502 0d3b 2E030000 		.4byte	.LASF99
@@ -4678,7 +4678,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  3556 0db3 2D       		.uleb128 0x2d
  3557 0db4 CE030000 		.4byte	.LASF110
  3558 0db8 CE030000 		.4byte	.LASF110
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 79
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 79
 
 
  3559 0dbc 12       		.byte	0x12
@@ -4738,7 +4738,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  3613 0018 3E       		.uleb128 0x3e
  3614 0019 0B       		.uleb128 0xb
  3615 001a 03       		.uleb128 0x3
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 80
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 80
 
 
  3616 001b 0E       		.uleb128 0xe
@@ -4798,7 +4798,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  3670 0051 3B       		.uleb128 0x3b
  3671 0052 0B       		.uleb128 0xb
  3672 0053 27       		.uleb128 0x27
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 81
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 81
 
 
  3673 0054 19       		.uleb128 0x19
@@ -4858,7 +4858,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  3727 008b 27       		.uleb128 0x27
  3728 008c 19       		.uleb128 0x19
  3729 008d 49       		.uleb128 0x49
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 82
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 82
 
 
  3730 008e 13       		.uleb128 0x13
@@ -4918,7 +4918,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  3784 00c7 2E       		.uleb128 0x2e
  3785 00c8 01       		.byte	0x1
  3786 00c9 03       		.uleb128 0x3
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 83
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 83
 
 
  3787 00ca 0E       		.uleb128 0xe
@@ -4978,7 +4978,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  3841 0102 19       		.uleb128 0x19
  3842 0103 01       		.uleb128 0x1
  3843 0104 13       		.uleb128 0x13
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 84
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 84
 
 
  3844 0105 00       		.byte	0
@@ -5038,7 +5038,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  3898 013b 3A       		.uleb128 0x3a
  3899 013c 0B       		.uleb128 0xb
  3900 013d 3B       		.uleb128 0x3b
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 85
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 85
 
 
  3901 013e 0B       		.uleb128 0xb
@@ -5098,7 +5098,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  3955 0177 19       		.uleb128 0x19
  3956 0178 03       		.uleb128 0x3
  3957 0179 0E       		.uleb128 0xe
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 86
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 86
 
 
  3958 017a 3A       		.uleb128 0x3a
@@ -5158,7 +5158,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  4012 01b6 18       		.uleb128 0x18
  4013 01b7 9742     		.uleb128 0x2117
  4014 01b9 19       		.uleb128 0x19
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 87
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 87
 
 
  4015 01ba 01       		.uleb128 0x1
@@ -5218,7 +5218,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  4069 01f2 02       		.uleb128 0x2
  4070 01f3 17       		.uleb128 0x17
  4071 01f4 00       		.byte	0
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 88
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 88
 
 
  4072 01f5 00       		.byte	0
@@ -5278,7 +5278,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  4126 022b 1C       		.uleb128 0x1c
  4127 022c 0B       		.uleb128 0xb
  4128 022d 00       		.byte	0
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 89
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 89
 
 
  4129 022e 00       		.byte	0
@@ -5338,7 +5338,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  4183 0264 0B       		.uleb128 0xb
  4184 0265 3B       		.uleb128 0x3b
  4185 0266 05       		.uleb128 0x5
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 90
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 90
 
 
  4186 0267 27       		.uleb128 0x27
@@ -5398,7 +5398,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  4240 029f 3B       		.uleb128 0x3b
  4241 02a0 0B       		.uleb128 0xb
  4242 02a1 49       		.uleb128 0x49
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 91
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 91
 
 
  4243 02a2 13       		.uleb128 0x13
@@ -5458,7 +5458,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  4297 001a 00000000 		.4byte	0
  4298              	.LLST1:
  4299 001e 00000000 		.4byte	.LVL4
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 92
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 92
 
 
  4300 0022 08000000 		.4byte	.LVL6
@@ -5518,10 +5518,10 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  4354 009e 70       		.byte	0x70
  4355 009f 00       		.sleb128 0
  4356 00a0 03       		.byte	0x3
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 93
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 93
 
 
- 4357 00a1 18000000 		.4byte	lastTick.6306
+ 4357 00a1 18000000 		.4byte	lastTick.6293
  4358 00a5 06       		.byte	0x6
  4359 00a6 1C       		.byte	0x1c
  4360 00a7 9F       		.byte	0x9f
@@ -5535,7 +5535,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  4368 00bd 70       		.byte	0x70
  4369 00be 00       		.sleb128 0
  4370 00bf 03       		.byte	0x3
- 4371 00c0 18000000 		.4byte	lastTick.6306
+ 4371 00c0 18000000 		.4byte	lastTick.6293
  4372 00c4 06       		.byte	0x6
  4373 00c5 1C       		.byte	0x1c
  4374 00c6 9F       		.byte	0x9f
@@ -5578,7 +5578,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  4411 0128 0100     		.2byte	0x1
  4412 012a 50       		.byte	0x50
  4413 012b 00000000 		.4byte	0
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 94
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 94
 
 
  4414 012f 00000000 		.4byte	0
@@ -5638,7 +5638,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  4468              	.LLST13:
  4469 01b9 00000000 		.4byte	.LVL63
  4470 01bd 0D000000 		.4byte	.LVL64-1
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 95
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 95
 
 
  4471 01c1 0100     		.2byte	0x1
@@ -5698,7 +5698,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  4525 0246 0100     		.2byte	0x1
  4526 0248 52       		.byte	0x52
  4527 0249 5E000000 		.4byte	.LVL78
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 96
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 96
 
 
  4528 024d 6A000000 		.4byte	.LVL80
@@ -5758,7 +5758,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  4582 02c7 00000000 		.4byte	.LVL87
  4583 02cb 24000000 		.4byte	.LVL89
  4584 02cf 0100     		.2byte	0x1
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 97
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 97
 
 
  4585 02d1 50       		.byte	0x50
@@ -5818,7 +5818,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  4639 0357 50       		.byte	0x50
  4640 0358 CC000000 		.4byte	.LVL104
  4641 035c CF000000 		.4byte	.LVL105-1
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 98
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 98
 
 
  4642 0360 0100     		.2byte	0x1
@@ -5878,7 +5878,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  4696 03f1 01       		.uleb128 0x1
  4697 03f2 50       		.byte	0x50
  4698 03f3 9F       		.byte	0x9f
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 99
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 99
 
 
  4699 03f4 00000000 		.4byte	0
@@ -5938,7 +5938,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  4753 0054 D4000000 		.4byte	.LFE73-.LFB73
  4754 0058 00000000 		.4byte	.LFB74
  4755 005c 5C000000 		.4byte	.LFE74-.LFB74
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 100
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 100
 
 
  4756 0060 00000000 		.4byte	.LFB69
@@ -5998,7 +5998,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  4810 0038 00000000 		.4byte	.LFB89
  4811 003c 5C000000 		.4byte	.LFE89
  4812 0040 00000000 		.4byte	.LFB73
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 101
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 101
 
 
  4813 0044 D4000000 		.4byte	.LFE73
@@ -6058,7 +6058,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  4859              	.LASF57:
  4860 0017 6E657874 		.ascii	"nextPing\000"
  4860      50696E67 
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 102
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 102
 
 
  4860      00
@@ -6118,7 +6118,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  4886 00b6 675F7278 		.ascii	"g_rx_watch_ticks\000"
  4886      5F776174 
  4886      63685F74 
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 103
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 103
 
 
  4886      69636B73 
@@ -6178,7 +6178,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  4911              	.LASF73:
  4912 015a 675F6465 		.ascii	"g_debug_psoc\000"
  4912      6275675F 
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 104
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 104
 
 
  4912      70736F63 
@@ -6238,7 +6238,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  4932              	.LASF29:
  4933 027a 656C6170 		.ascii	"elapsed\000"
  4933      73656400 
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 105
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 105
 
 
  4934              	.LASF67:
@@ -6298,7 +6298,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  4959      6374696F 
  4960              	.LASF84:
  4961 0315 675F7069 		.ascii	"g_ping_frame\000"
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 106
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 106
 
 
  4961      6E675F66 
@@ -6358,7 +6358,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  4985      6500
  4986              	.LASF13:
  4987 03bc 75696E74 		.ascii	"uint32\000"
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 107
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 107
 
 
  4987      333200
@@ -6418,7 +6418,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  5010              	.LASF2:
  5011 045c 73686F72 		.ascii	"short int\000"
  5011      7420696E 
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 108
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 108
 
 
  5011      7400
@@ -6478,7 +6478,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  5033      7700
  5034              	.LASF53:
  5035 0504 75617274 		.ascii	"uart_send_ping\000"
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 109
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 109
 
 
  5035      5F73656E 
@@ -6538,7 +6538,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  5057      7400
  5058              	.LASF1:
  5059 05a5 756E7369 		.ascii	"unsigned char\000"
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 110
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 110
 
 
  5059      676E6564 
@@ -6598,7 +6598,7 @@ ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 1
  5081 064c 73686F72 		.ascii	"short unsigned int\000"
  5081      7420756E 
  5081      7369676E 
-ARM GAS  C:\Users\elias\AppData\Local\Temp\ccSfVU6q.s 			page 111
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccZAAHov.s 			page 111
 
 
  5081      65642069 

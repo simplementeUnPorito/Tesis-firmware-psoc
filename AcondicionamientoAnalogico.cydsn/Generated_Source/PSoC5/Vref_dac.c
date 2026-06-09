@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: LPp.c  
+* File Name: Vref_dac.c  
 * Version 2.20
 *
 * Description:
@@ -15,15 +15,15 @@
 *******************************************************************************/
 
 #include "cytypes.h"
-#include "LPp.h"
+#include "Vref_dac.h"
 
 /* APIs are not generated for P15[7:6] on PSoC 5 */
 #if !(CY_PSOC5A &&\
-	 LPp__PORT == 15 && ((LPp__MASK & 0xC0) != 0))
+	 Vref_dac__PORT == 15 && ((Vref_dac__MASK & 0xC0) != 0))
 
 
 /*******************************************************************************
-* Function Name: LPp_Write
+* Function Name: Vref_dac_Write
 ****************************************************************************//**
 *
 * \brief Writes the value to the physical port (data output register), masking
@@ -52,17 +52,17 @@
 *  this function.
 *
 * \funcusage
-*  \snippet LPp_SUT.c usage_LPp_Write
+*  \snippet Vref_dac_SUT.c usage_Vref_dac_Write
 *******************************************************************************/
-void LPp_Write(uint8 value)
+void Vref_dac_Write(uint8 value)
 {
-    uint8 staticBits = (LPp_DR & (uint8)(~LPp_MASK));
-    LPp_DR = staticBits | ((uint8)(value << LPp_SHIFT) & LPp_MASK);
+    uint8 staticBits = (Vref_dac_DR & (uint8)(~Vref_dac_MASK));
+    Vref_dac_DR = staticBits | ((uint8)(value << Vref_dac_SHIFT) & Vref_dac_MASK);
 }
 
 
 /*******************************************************************************
-* Function Name: LPp_SetDriveMode
+* Function Name: Vref_dac_SetDriveMode
 ****************************************************************************//**
 *
 * \brief Sets the drive mode for each of the Pins component's pins.
@@ -85,16 +85,16 @@ void LPp_Write(uint8 value)
 *  APIs (primary method) or disable interrupts around this function.
 *
 * \funcusage
-*  \snippet LPp_SUT.c usage_LPp_SetDriveMode
+*  \snippet Vref_dac_SUT.c usage_Vref_dac_SetDriveMode
 *******************************************************************************/
-void LPp_SetDriveMode(uint8 mode)
+void Vref_dac_SetDriveMode(uint8 mode)
 {
-	CyPins_SetPinDriveMode(LPp_0, mode);
+	CyPins_SetPinDriveMode(Vref_dac_0, mode);
 }
 
 
 /*******************************************************************************
-* Function Name: LPp_Read
+* Function Name: Vref_dac_Read
 ****************************************************************************//**
 *
 * \brief Reads the associated physical port (pin status register) and masks 
@@ -108,16 +108,16 @@ void LPp_SetDriveMode(uint8 mode)
 *  The current value for the pins in the component as a right justified number.
 *
 * \funcusage
-*  \snippet LPp_SUT.c usage_LPp_Read  
+*  \snippet Vref_dac_SUT.c usage_Vref_dac_Read  
 *******************************************************************************/
-uint8 LPp_Read(void)
+uint8 Vref_dac_Read(void)
 {
-    return (LPp_PS & LPp_MASK) >> LPp_SHIFT;
+    return (Vref_dac_PS & Vref_dac_MASK) >> Vref_dac_SHIFT;
 }
 
 
 /*******************************************************************************
-* Function Name: LPp_ReadDataReg
+* Function Name: Vref_dac_ReadDataReg
 ****************************************************************************//**
 *
 * \brief Reads the associated physical port's data output register and masks 
@@ -126,8 +126,8 @@ uint8 LPp_Read(void)
 *
 * The data output register controls the signal applied to the physical pin in 
 * conjunction with the drive mode parameter. This is not the same as the 
-* preferred LPp_Read() API because the 
-* LPp_ReadDataReg() reads the data register instead of the status 
+* preferred Vref_dac_Read() API because the 
+* Vref_dac_ReadDataReg() reads the data register instead of the status 
 * register. For output pins this is a useful function to determine the value 
 * just written to the pin.
 *
@@ -136,19 +136,19 @@ uint8 LPp_Read(void)
 *  justified number for the component instance.
 *
 * \funcusage
-*  \snippet LPp_SUT.c usage_LPp_ReadDataReg 
+*  \snippet Vref_dac_SUT.c usage_Vref_dac_ReadDataReg 
 *******************************************************************************/
-uint8 LPp_ReadDataReg(void)
+uint8 Vref_dac_ReadDataReg(void)
 {
-    return (LPp_DR & LPp_MASK) >> LPp_SHIFT;
+    return (Vref_dac_DR & Vref_dac_MASK) >> Vref_dac_SHIFT;
 }
 
 
 /* If interrupt is connected for this Pins component */ 
-#if defined(LPp_INTSTAT) 
+#if defined(Vref_dac_INTSTAT) 
 
     /*******************************************************************************
-    * Function Name: LPp_SetInterruptMode
+    * Function Name: Vref_dac_SetInterruptMode
     ****************************************************************************//**
     *
     * \brief Configures the interrupt mode for each of the Pins component's
@@ -161,12 +161,12 @@ uint8 LPp_ReadDataReg(void)
     * \param position
     *  The pin position as listed in the Pins component. You may OR these to be 
     *  able to configure the interrupt mode of multiple pins within a Pins 
-    *  component. Or you may use LPp_INTR_ALL to configure the
+    *  component. Or you may use Vref_dac_INTR_ALL to configure the
     *  interrupt mode of all the pins in the Pins component.       
-    *  - LPp_0_INTR       (First pin in the list)
-    *  - LPp_1_INTR       (Second pin in the list)
+    *  - Vref_dac_0_INTR       (First pin in the list)
+    *  - Vref_dac_1_INTR       (Second pin in the list)
     *  - ...
-    *  - LPp_INTR_ALL     (All pins in Pins component)
+    *  - Vref_dac_INTR_ALL     (All pins in Pins component)
     *
     * \param mode
     *  Interrupt mode for the selected pins. Valid options are documented in
@@ -182,19 +182,19 @@ uint8 LPp_ReadDataReg(void)
     *  port.
     *
     * \funcusage
-    *  \snippet LPp_SUT.c usage_LPp_SetInterruptMode
+    *  \snippet Vref_dac_SUT.c usage_Vref_dac_SetInterruptMode
     *******************************************************************************/
-    void LPp_SetInterruptMode(uint16 position, uint16 mode)
+    void Vref_dac_SetInterruptMode(uint16 position, uint16 mode)
     {
-		if((position & LPp_0_INTR) != 0u) 
+		if((position & Vref_dac_0_INTR) != 0u) 
 		{ 
-			 LPp_0_INTTYPE_REG = (uint8)mode; 
+			 Vref_dac_0_INTTYPE_REG = (uint8)mode; 
 		}
     }
     
     
     /*******************************************************************************
-    * Function Name: LPp_ClearInterrupt
+    * Function Name: Vref_dac_ClearInterrupt
     ****************************************************************************//**
     *
     * \brief Clears any active interrupts attached with the component and returns 
@@ -211,11 +211,11 @@ uint8 LPp_ReadDataReg(void)
     *  those associated with the Pins component.
     *
     * \funcusage
-    *  \snippet LPp_SUT.c usage_LPp_ClearInterrupt
+    *  \snippet Vref_dac_SUT.c usage_Vref_dac_ClearInterrupt
     *******************************************************************************/
-    uint8 LPp_ClearInterrupt(void)
+    uint8 Vref_dac_ClearInterrupt(void)
     {
-        return (LPp_INTSTAT & LPp_MASK) >> LPp_SHIFT;
+        return (Vref_dac_INTSTAT & Vref_dac_MASK) >> Vref_dac_SHIFT;
     }
 
 #endif /* If Interrupts Are Enabled for this Pins component */ 

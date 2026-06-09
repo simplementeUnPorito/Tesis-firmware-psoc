@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: LPp.h  
+* File Name: Vref_dac.h  
 * Version 2.20
 *
 * Description:
@@ -15,8 +15,8 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#if !defined(CY_PINS_LPp_ALIASES_H) /* Pins LPp_ALIASES_H */
-#define CY_PINS_LPp_ALIASES_H
+#if !defined(CY_PINS_Vref_dac_ALIASES_H) /* Pins Vref_dac_ALIASES_H */
+#define CY_PINS_Vref_dac_ALIASES_H
 
 #include "cytypes.h"
 #include "cyfitter.h"
@@ -25,12 +25,12 @@
 /***************************************
 *              Constants        
 ***************************************/
-#define LPp_0			(LPp__0__PC)
-#define LPp_0_INTR	((uint16)((uint16)0x0001u << LPp__0__SHIFT))
+#define Vref_dac_0			(Vref_dac__0__PC)
+#define Vref_dac_0_INTR	((uint16)((uint16)0x0001u << Vref_dac__0__SHIFT))
 
-#define LPp_INTR_ALL	 ((uint16)(LPp_0_INTR))
+#define Vref_dac_INTR_ALL	 ((uint16)(Vref_dac_0_INTR))
 
-#endif /* End Pins LPp_ALIASES_H */
+#endif /* End Pins Vref_dac_ALIASES_H */
 
 
 /* [] END OF FILE */

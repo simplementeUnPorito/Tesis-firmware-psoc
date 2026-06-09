@@ -1,5 +1,5 @@
 -- Project:   AcondicionamientoAnalogico
--- Generated: 06/08/2026 21:01:54
+-- Generated: 06/09/2026 18:09:30
 -- PSoC Creator  4.4
 
 ENTITY AcondicionamientoAnalogico IS
@@ -35,7 +35,6 @@ ARCHITECTURE __DEFAULT__ OF AcondicionamientoAnalogico IS
     SIGNAL ClockBlock_XTAL_32KHZ : bit;
     SIGNAL LPm(0)__PA : bit;
     SIGNAL LPo(0)__PA : bit;
-    SIGNAL LPp(0)__PA : bit;
     SIGNAL Net_2277 : bit;
     SIGNAL Net_2326 : bit;
     SIGNAL Net_2329 : bit;
@@ -188,19 +187,17 @@ ARCHITECTURE __DEFAULT__ OF AcondicionamientoAnalogico IS
     ATTRIBUTE Location OF SYNC_IN(0) : LABEL IS "P12[6]";
     ATTRIBUTE lib_model OF Rx_1(0) : LABEL IS "iocell3";
     ATTRIBUTE Location OF Rx_1(0) : LABEL IS "P1[2]";
-    ATTRIBUTE lib_model OF LPp(0) : LABEL IS "iocell4";
-    ATTRIBUTE Location OF LPp(0) : LABEL IS "P0[4]";
-    ATTRIBUTE lib_model OF LPo(0) : LABEL IS "iocell5";
+    ATTRIBUTE lib_model OF LPo(0) : LABEL IS "iocell4";
     ATTRIBUTE Location OF LPo(0) : LABEL IS "P0[0]";
-    ATTRIBUTE lib_model OF LPm(0) : LABEL IS "iocell6";
+    ATTRIBUTE lib_model OF LPm(0) : LABEL IS "iocell5";
     ATTRIBUTE Location OF LPm(0) : LABEL IS "P0[5]";
-    ATTRIBUTE lib_model OF \ADC:Bypass_P03(0)\ : LABEL IS "iocell7";
+    ATTRIBUTE lib_model OF \ADC:Bypass_P03(0)\ : LABEL IS "iocell6";
     ATTRIBUTE Location OF \ADC:Bypass_P03(0)\ : LABEL IS "P0[3]";
-    ATTRIBUTE lib_model OF PGAo(0) : LABEL IS "iocell8";
+    ATTRIBUTE lib_model OF PGAo(0) : LABEL IS "iocell7";
     ATTRIBUTE Location OF PGAo(0) : LABEL IS "P3[5]";
-    ATTRIBUTE lib_model OF Vref(0) : LABEL IS "iocell9";
+    ATTRIBUTE lib_model OF Vref(0) : LABEL IS "iocell8";
     ATTRIBUTE Location OF Vref(0) : LABEL IS "P3[6]";
-    ATTRIBUTE lib_model OF PGAin(0) : LABEL IS "iocell10";
+    ATTRIBUTE lib_model OF PGAin(0) : LABEL IS "iocell9";
     ATTRIBUTE Location OF PGAin(0) : LABEL IS "P3[4]";
     ATTRIBUTE lib_model OF Net_2348 : LABEL IS "macrocell1";
     ATTRIBUTE lib_model OF \Timer:TimerUDB:status_tc\ : LABEL IS "macrocell2";
@@ -225,14 +222,14 @@ ARCHITECTURE __DEFAULT__ OF AcondicionamientoAnalogico IS
     ATTRIBUTE lib_model OF \UART:BUART:sRX:RxShifter:u0\ : LABEL IS "datapathcell7";
     ATTRIBUTE lib_model OF \UART:BUART:sRX:RxSts\ : LABEL IS "statusicell3";
     ATTRIBUTE Location OF \Opa_LP:ABuf\ : LABEL IS "F(OpAmp,2)";
-    ATTRIBUTE Location OF autoVrefComparator_0 : LABEL IS "F(Comparator,2)";
-    ATTRIBUTE Location OF \LPF_ADC:cy_psoc3_lpf_1\ : LABEL IS "F(LPF,1)";
+    ATTRIBUTE Location OF autoVrefComparator_0 : LABEL IS "F(Comparator,1)";
+    ATTRIBUTE Location OF \LPF_ADC:cy_psoc3_lpf_1\ : LABEL IS "F(LPF,0)";
     ATTRIBUTE Location OF \ADC:DSM\ : LABEL IS "F(DSM,0)";
-    ATTRIBUTE Location OF \LPF_ref:cy_psoc3_lpf_1\ : LABEL IS "F(LPF,0)";
+    ATTRIBUTE Location OF \LPF_ref:cy_psoc3_lpf_1\ : LABEL IS "F(LPF,1)";
     ATTRIBUTE Location OF \Opa_ref:ABuf\ : LABEL IS "F(OpAmp,1)";
     ATTRIBUTE Location OF \PGA_ref:SC\ : LABEL IS "F(SC,3)";
     ATTRIBUTE Location OF \PGA:SC\ : LABEL IS "F(SC,1)";
-    ATTRIBUTE Location OF \VDAC:viDAC8\ : LABEL IS "F(VIDAC,1)";
+    ATTRIBUTE Location OF \VDAC:viDAC8\ : LABEL IS "F(VIDAC,0)";
     ATTRIBUTE lib_model OF \EdgeDetect:last\ : LABEL IS "macrocell12";
     ATTRIBUTE lib_model OF \Timer:TimerUDB:run_mode\ : LABEL IS "macrocell13";
     ATTRIBUTE lib_model OF Net_2277 : LABEL IS "macrocell14";
@@ -953,95 +950,6 @@ BEGIN
             fb => Net_2326,
             pad_in => Rx_1(0)_PAD,
             in_clock => ClockBlock_BUS_CLK,
-            in_clock_en => '1',
-            in_reset => '0',
-            out_clock => open,
-            out_clock_en => '1',
-            out_reset => '0');
-
-    LPp:logicalport
-        GENERIC MAP(
-            drive_mode => "000",
-            ibuf_enabled => "0",
-            id => "af13f7b3-2849-44fb-82ab-68da6b7b241b",
-            init_dr_st => "0",
-            input_buffer_sel => "00",
-            input_clk_en => 0,
-            input_sync => "1",
-            input_sync_mode => "0",
-            intr_mode => "00",
-            invert_in_clock => 0,
-            invert_in_clock_en => 0,
-            invert_in_reset => 0,
-            invert_out_clock => 0,
-            invert_out_clock_en => 0,
-            invert_out_reset => 0,
-            io_voltage => "",
-            layout_mode => "CONTIGUOUS",
-            oe_conn => "0",
-            oe_reset => 0,
-            oe_sync => "0",
-            output_clk_en => 0,
-            output_clock_mode => "0",
-            output_conn => "0",
-            output_mode => "0",
-            output_reset => 0,
-            output_sync => "0",
-            ovt_hyst_trim => "0",
-            ovt_needed => "0",
-            ovt_slew_control => "00",
-            pa_in_clock => -1,
-            pa_in_clock_en => -1,
-            pa_in_reset => -1,
-            pa_out_clock => -1,
-            pa_out_clock_en => -1,
-            pa_out_reset => -1,
-            pin_aliases => "",
-            pin_mode => "A",
-            por_state => 4,
-            port_alias_group => "",
-            port_alias_required => 0,
-            sio_group_cnt => 0,
-            sio_hifreq => "00000000",
-            sio_hyst => "1",
-            sio_ibuf => "00000000",
-            sio_info => "00",
-            sio_obuf => "00000000",
-            sio_refsel => "00000000",
-            sio_vohsel => "00000000",
-            sio_vtrip => "00000000",
-            slew_rate => "0",
-            spanning => 0,
-            sw_only => 0,
-            use_annotation => "1",
-            vtrip => "10",
-            width => 1,
-            in_clk_inv => 0,
-            in_clken_inv => 0,
-            in_clken_mode => 1,
-            in_rst_inv => 0,
-            out_clk_inv => 0,
-            out_clken_inv => 0,
-            out_clken_mode => 1,
-            out_rst_inv => 0)
-        PORT MAP(
-            in_clock_en => open,
-            in_reset => open,
-            out_clock_en => open,
-            out_reset => open);
-
-    LPp(0):iocell
-        GENERIC MAP(
-            in_sync_mode => 0,
-            out_sync_mode => 0,
-            oe_sync_mode => 0,
-            logicalport => "LPp",
-            logicalport_pin_id => 0,
-            io_capabilities => "0000000000000000000000000000000000000000000000000000000000000010")
-        PORT MAP(
-            pa_out => LPp(0)__PA,
-            oe => open,
-            in_clock => open,
             in_clock_en => '1',
             in_reset => '0',
             out_clock => open,

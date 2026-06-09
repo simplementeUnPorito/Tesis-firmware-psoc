@@ -25,8 +25,6 @@
 #include "isr_Timer.h"
 #include "isr_SyncIn.h"
 #include "UART.h"
-#include "LPp_aliases.h"
-#include "LPp.h"
 #include "LPo_aliases.h"
 #include "LPo.h"
 #include "LPm_aliases.h"
