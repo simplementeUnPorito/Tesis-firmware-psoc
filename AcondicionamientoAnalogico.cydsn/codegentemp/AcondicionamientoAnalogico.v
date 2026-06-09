@@ -1,6 +1,6 @@
 // ======================================================================
 // AcondicionamientoAnalogico.v generated from TopDesign.cysch
-// 06/08/2026 at 17:23
+// 06/08/2026 at 21:01
 // This file is auto generated. ANY EDITS YOU MAKE MAY BE LOST WHEN THIS FILE IS REGENERATED!!!
 // ======================================================================
 
@@ -998,20 +998,20 @@ endmodule
 // top
 module top ;
 
-          wire  Net_2773;
-          wire [7:0] Net_2772;
-    electrical  Net_2778;
-    electrical  Net_2776;
-    electrical  Net_2779;
-    electrical  Net_2780;
-    electrical  Net_2775;
+          wire  Net_2785;
+          wire [7:0] Net_2784;
+    electrical  Net_2789;
+    electrical  Net_2788;
+    electrical  Net_2790;
+    electrical  Net_2791;
+    electrical  Net_2787;
     electrical  Net_2735;
           wire  Net_2734;
     electrical  Net_2733;
           wire  Net_2732;
           wire  Net_2704;
           wire  Net_2731;
-    electrical  Net_2774;
+    electrical  Net_2786;
     electrical  Net_2719;
     electrical  Net_2777;
     electrical  Net_2384;
@@ -1758,7 +1758,7 @@ module top ;
     defparam D_2.width = 2;
 
     Analog_LPF_v1_0_3 LPF_ADC (
-        .Vin(Net_2774),
+        .Vin(Net_2786),
         .Vout(Net_2628));
 
     ADC_DelSig_v3_30_4 ADC (
@@ -1771,19 +1771,19 @@ module top ;
         .vplus(Net_2720));
 
     Analog_LPF_v1_0_5 LPF_ref (
-        .Vin(Net_2775),
-        .Vout(Net_2780));
+        .Vin(Net_2787),
+        .Vout(Net_2791));
 
     OpAmp_v1_90_6 Opa_ref (
-        .Vminus(Net_2779),
-        .Vout(Net_2776),
-        .Vplus(Net_2780));
+        .Vminus(Net_2790),
+        .Vout(Net_2788),
+        .Vplus(Net_2791));
     defparam Opa_ref.Mode = 1;
 
     PGA_v2_0_7 PGA_ref (
         .Vin(Net_2628),
         .Vout(Net_2681),
-        .Vref(Net_2778));
+        .Vref(Net_2789));
 
 	wire [0:0] tmpOE__PGAo_net;
 	wire [0:0] tmpFB_0__PGAo_net;
@@ -1925,7 +1925,7 @@ module top ;
 		 (.oe(tmpOE__Vref_net),
 		  .y({1'b0}),
 		  .fb({tmpFB_0__Vref_net[0:0]}),
-		  .analog({Net_2776}),
+		  .analog({Net_2788}),
 		  .io({tmpIO_0__Vref_net[0:0]}),
 		  .siovref(tmpSIOVREF__Vref_net),
 		  .interrupt({tmpINTERRUPT_0__Vref_net[0:0]}),
@@ -1945,7 +1945,7 @@ module top ;
 		  .name("1.024V"),
 		  .autoenable(1))
 		vRef_1
-		 (.vout(Net_2775));
+		 (.vout(Net_2787));
 
 
     cy_annotation_universal_v1_0 R_4 (
@@ -2027,7 +2027,7 @@ module top ;
     VDAC8_v1_90_9 VDAC (
         .data(8'b00000000),
         .strobe(1'b0),
-        .vOut(Net_2774));
+        .vOut(Net_2786));
     defparam VDAC.Data_Source = 0;
     defparam VDAC.Initial_Value = 255;
     defparam VDAC.Strobe_Mode = 0;

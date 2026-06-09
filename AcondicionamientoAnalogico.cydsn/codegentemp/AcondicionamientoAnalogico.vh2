@@ -2,7 +2,7 @@
 --	Conversion of AcondicionamientoAnalogico.v to vh2:
 --
 --	Cypress Semiconductor - WARP Version 6.3 IR 41
---	Mon Jun 08 17:23:45 2026
+--	Mon Jun 08 21:01:51 2026
 --
 
 USE cypress.cypress.all;
@@ -744,7 +744,7 @@ SIGNAL tmpINTERRUPT_0__LPm_net_0 : bit;
 TERMINAL \Opa_LP:Net_29\ : bit;
 TERMINAL Net_2665 : bit;
 TERMINAL Net_2771 : bit;
-TERMINAL Net_2774 : bit;
+TERMINAL Net_2786 : bit;
 TERMINAL Net_2628 : bit;
 TERMINAL \ADC:Net_244\ : bit;
 TERMINAL \ADC:Net_690\ : bit;
@@ -789,10 +789,10 @@ SIGNAL \ADC:Net_252\ : bit;
 SIGNAL \ADC:soc\ : bit;
 SIGNAL \ADC:Net_268\ : bit;
 SIGNAL \ADC:Net_270\ : bit;
-TERMINAL Net_2775 : bit;
-TERMINAL Net_2780 : bit;
+TERMINAL Net_2787 : bit;
+TERMINAL Net_2791 : bit;
 TERMINAL \Opa_ref:Net_29\ : bit;
-TERMINAL Net_2776 : bit;
+TERMINAL Net_2788 : bit;
 TERMINAL \PGA_ref:Net_17\ : bit;
 SIGNAL \PGA_ref:Net_37\ : bit;
 SIGNAL \PGA_ref:Net_40\ : bit;
@@ -2215,7 +2215,7 @@ D_2:cy_annotation_universal_v1_0
 	PORT MAP(connect=>(Net_170, Net_2665));
 \LPF_ADC:cy_psoc3_lpf_1\:cy_psoc3_lpf_v1_0
 	GENERIC MAP(cy_registers=>"")
-	PORT MAP(vin=>Net_2774,
+	PORT MAP(vin=>Net_2786,
 		vout=>Net_2628);
 \ADC:vRef_2\:cy_vref_v1_0
 	GENERIC MAP(guid=>"15B3DB15-B7B3-4d62-A2DF-25EA392A7161",
@@ -2394,18 +2394,18 @@ D_2:cy_annotation_universal_v1_0
 		interrupt=>Net_2704);
 \LPF_ref:cy_psoc3_lpf_1\:cy_psoc3_lpf_v1_0
 	GENERIC MAP(cy_registers=>"")
-	PORT MAP(vin=>Net_2775,
-		vout=>Net_2780);
+	PORT MAP(vin=>Net_2787,
+		vout=>Net_2791);
 \Opa_ref:ABuf\:cy_psoc3_abuf_v1_0
 	GENERIC MAP(cy_registers=>"")
-	PORT MAP(vplus=>Net_2780,
+	PORT MAP(vplus=>Net_2791,
 		vminus=>\Opa_ref:Net_29\,
-		vout=>Net_2776);
+		vout=>Net_2788);
 \Opa_ref:abuf_negInput_mux_connect\:cy_connect_v1_0
 	GENERIC MAP(sig_width=>1,
 		is_net_join=>'0')
 	PORT MAP(signal1=>\Opa_ref:Net_29\,
-		signal2=>Net_2776);
+		signal2=>Net_2788);
 \PGA_ref:SC\:cy_psoc3_scblock_v1_0
 	GENERIC MAP(cy_registers=>"")
 	PORT MAP(vref=>\PGA_ref:Net_17\,
@@ -2552,7 +2552,7 @@ Vref:cy_psoc3_pins_v1_10
 	PORT MAP(oe=>(tmpOE__Tx_1_net_0),
 		y=>(zero),
 		fb=>(tmpFB_0__Vref_net_0),
-		analog=>Net_2776,
+		analog=>Net_2788,
 		io=>(tmpIO_0__Vref_net_0),
 		siovref=>(tmpSIOVREF__Vref_net_0),
 		annotation=>Net_2770,
@@ -2568,7 +2568,7 @@ vRef_1:cy_vref_v1_0
 		name=>"1.024V",
 		autoenable=>'1',
 		ignoresleep=>'0')
-	PORT MAP(vout=>Net_2775);
+	PORT MAP(vout=>Net_2787);
 R_4:cy_annotation_universal_v1_0
 	GENERIC MAP(comp_name=>"Resistor_v1_0",
 		port_names=>"T1, T2",
@@ -2632,7 +2632,7 @@ C_1:cy_annotation_universal_v1_0
 			zero, zero, zero, zero),
 		strobe=>zero,
 		strobe_udb=>zero,
-		vout=>Net_2774,
+		vout=>Net_2786,
 		iout=>\VDAC:Net_77\);
 \VDAC:cy_analog_noconnect_1\:cy_analog_noconnect_v1_0
 	PORT MAP(noconnect=>\VDAC:Net_77\);
