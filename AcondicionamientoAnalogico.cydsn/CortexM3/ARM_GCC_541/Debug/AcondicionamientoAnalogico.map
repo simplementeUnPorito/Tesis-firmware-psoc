@@ -20,8 +20,6 @@ Archive member included to satisfy reference by file (symbol)
                               .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART.o) (UART_IntClock_Start)
 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
                               .\CortexM3\ARM_GCC_541\Debug\main.o (PGA_ref_SetGain)
-.\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(VDAC.o)
-                              .\CortexM3\ARM_GCC_541\Debug\main.o (VDAC_SetValue)
 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
                               .\CortexM3\ARM_GCC_541\Debug\main.o (ADC_Start)
 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_INT.o)
@@ -421,10 +419,6 @@ Discarded input sections
  .data          0x00000000        0x0 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
  .text.PGA_ref_Stop
                 0x00000000       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
- .text          0x00000000        0x0 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(VDAC.o)
- .data          0x00000000        0x0 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(VDAC.o)
- .text.VDAC_Stop
-                0x00000000       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(VDAC.o)
  .text          0x00000000        0x0 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
  .text.ADC_Stop
                 0x00000000       0xe4 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
@@ -723,7 +717,7 @@ END GROUP
                 0x00000800                ee_size = (CY_APPL_LOADABLE && ! (CY_EE_IN_BTLDR))?(CY_EE_SIZE / CY_APPL_MAX):CY_EE_SIZE
                 [!provide]                PROVIDE (CY_ECC_OFFSET, ecc_offset)
 
-.text           0x00000000     0x1d2e
+.text           0x00000000     0x1c46
  CREATE_OBJECT_SYMBOLS
                 0x00000000                PROVIDE (__cy_interrupt_vector, RomVectors)
  *(.romvectors)
@@ -804,401 +798,381 @@ END GROUP
  .text.cfg_write_bytes32
                 0x00000870       0x34 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
  .text.AnalogSetDefault
-                0x000008a4       0xb8 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
+                0x000008a4       0xa0 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
  .text.CYMEMZERO
-                0x0000095c        0xc .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
+                0x00000944        0xc .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
  .text.CYCONFIGCPY
-                0x00000968        0x8 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
+                0x00000950        0x8 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
  .text.ClockSetup
-                0x00000970       0xe8 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
+                0x00000958       0xe8 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
  .text.ADC_AMux_Set
-                0x00000a58       0x1c .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
-                0x00000a58                ADC_AMux_Set
+                0x00000a40       0x1c .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
+                0x00000a40                ADC_AMux_Set
  .text.ADC_AMux_Unset
-                0x00000a74       0x1c .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
-                0x00000a74                ADC_AMux_Unset
+                0x00000a5c       0x1c .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
+                0x00000a5c                ADC_AMux_Unset
  .text.cyfitter_cfg
-                0x00000a90      0x110 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
-                0x00000a90                cyfitter_cfg
+                0x00000a78      0x108 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
+                0x00000a78                cyfitter_cfg
  .text.IntDefaultHandler
-                0x00000ba0       0x10 .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
-                0x00000ba0                IntDefaultHandler
- .text.Start_c  0x00000bb0       0x4c .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
-                0x00000bb0                Start_c
+                0x00000b80       0x10 .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
+                0x00000b80                IntDefaultHandler
+ .text.Start_c  0x00000b90       0x4c .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
+                0x00000b90                Start_c
  .text.initialize_psoc
-                0x00000bfc       0x68 .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
-                0x00000bfc                initialize_psoc
- .text.CyHalt   0x00000c64        0x4 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyLib.o)
-                0x00000c64                CyHalt
+                0x00000bdc       0x68 .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
+                0x00000bdc                initialize_psoc
+ .text.CyHalt   0x00000c44        0x4 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyLib.o)
+                0x00000c44                CyHalt
  .text.CyDelayUs
-                0x00000c68       0x14 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyLib.o)
-                0x00000c68                CyDelayUs
+                0x00000c48       0x14 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyLib.o)
+                0x00000c48                CyDelayUs
  .text.CyIntSetVector
-                0x00000c7c       0x28 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyLib.o)
-                0x00000c7c                CyIntSetVector
+                0x00000c5c       0x28 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyLib.o)
+                0x00000c5c                CyIntSetVector
  .text.CyIntSetPriority
-                0x00000ca4       0x30 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyLib.o)
-                0x00000ca4                CyIntSetPriority
+                0x00000c84       0x30 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyLib.o)
+                0x00000c84                CyIntSetPriority
  .text.isr_DelSig_SetVector
-                0x00000cd4        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_DelSig.o)
-                0x00000cd4                isr_DelSig_SetVector
+                0x00000cb4        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_DelSig.o)
+                0x00000cb4                isr_DelSig_SetVector
  .text.isr_DelSig_SetPriority
-                0x00000ce0       0x10 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_DelSig.o)
-                0x00000ce0                isr_DelSig_SetPriority
+                0x00000cc0       0x10 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_DelSig.o)
+                0x00000cc0                isr_DelSig_SetPriority
  .text.isr_DelSig_Enable
-                0x00000cf0        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_DelSig.o)
-                0x00000cf0                isr_DelSig_Enable
+                0x00000cd0        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_DelSig.o)
+                0x00000cd0                isr_DelSig_Enable
  .text.isr_DelSig_Disable
-                0x00000cfc        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_DelSig.o)
-                0x00000cfc                isr_DelSig_Disable
+                0x00000cdc        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_DelSig.o)
+                0x00000cdc                isr_DelSig_Disable
  .text.isr_DelSig_StartEx
-                0x00000d08       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_DelSig.o)
-                0x00000d08                isr_DelSig_StartEx
+                0x00000ce8       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_DelSig.o)
+                0x00000ce8                isr_DelSig_StartEx
  .text.isr_Timer_SetVector
-                0x00000d24        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_Timer.o)
-                0x00000d24                isr_Timer_SetVector
+                0x00000d04        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_Timer.o)
+                0x00000d04                isr_Timer_SetVector
  .text.isr_Timer_SetPriority
-                0x00000d30       0x10 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_Timer.o)
-                0x00000d30                isr_Timer_SetPriority
+                0x00000d10       0x10 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_Timer.o)
+                0x00000d10                isr_Timer_SetPriority
  .text.isr_Timer_Enable
-                0x00000d40        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_Timer.o)
-                0x00000d40                isr_Timer_Enable
+                0x00000d20        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_Timer.o)
+                0x00000d20                isr_Timer_Enable
  .text.isr_Timer_Disable
-                0x00000d4c        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_Timer.o)
-                0x00000d4c                isr_Timer_Disable
+                0x00000d2c        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_Timer.o)
+                0x00000d2c                isr_Timer_Disable
  .text.isr_Timer_StartEx
-                0x00000d58       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_Timer.o)
-                0x00000d58                isr_Timer_StartEx
+                0x00000d38       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_Timer.o)
+                0x00000d38                isr_Timer_StartEx
  .text.isr_Timer_ClearPending
-                0x00000d74        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_Timer.o)
-                0x00000d74                isr_Timer_ClearPending
+                0x00000d54        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_Timer.o)
+                0x00000d54                isr_Timer_ClearPending
  .text.Timer_Enable
-                0x00000d80       0x10 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
-                0x00000d80                Timer_Enable
+                0x00000d60       0x10 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
+                0x00000d60                Timer_Enable
  .text.Timer_Stop
-                0x00000d90       0x10 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
-                0x00000d90                Timer_Stop
+                0x00000d70       0x10 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
+                0x00000d70                Timer_Stop
  .text.Timer_SetInterruptMode
-                0x00000da0        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
-                0x00000da0                Timer_SetInterruptMode
+                0x00000d80        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
+                0x00000d80                Timer_SetInterruptMode
  .text.Timer_ReadStatusRegister
-                0x00000dac        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
-                0x00000dac                Timer_ReadStatusRegister
+                0x00000d8c        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
+                0x00000d8c                Timer_ReadStatusRegister
  .text.Timer_WritePeriod
-                0x00000db8        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
-                0x00000db8                Timer_WritePeriod
+                0x00000d98        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
+                0x00000d98                Timer_WritePeriod
  .text.Timer_ReadCapture
-                0x00000dc4        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
-                0x00000dc4                Timer_ReadCapture
+                0x00000da4        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
+                0x00000da4                Timer_ReadCapture
  .text.Timer_WriteCounter
-                0x00000dd0        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
-                0x00000dd0                Timer_WriteCounter
+                0x00000db0        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
+                0x00000db0                Timer_WriteCounter
  .text.Timer_ClearFIFO
-                0x00000ddc       0x14 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
-                0x00000ddc                Timer_ClearFIFO
+                0x00000dbc       0x14 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
+                0x00000dbc                Timer_ClearFIFO
  .text.Timer_Init
-                0x00000df0       0x30 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
-                0x00000df0                Timer_Init
+                0x00000dd0       0x30 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
+                0x00000dd0                Timer_Init
  .text.Timer_Start
-                0x00000e20       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
-                0x00000e20                Timer_Start
+                0x00000e00       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
+                0x00000e00                Timer_Start
  .text.Opa_ref_Enable
-                0x00000e3c       0x28 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_ref.o)
-                0x00000e3c                Opa_ref_Enable
+                0x00000e1c       0x28 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_ref.o)
+                0x00000e1c                Opa_ref_Enable
  .text.Opa_ref_SetPower
-                0x00000e64       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_ref.o)
-                0x00000e64                Opa_ref_SetPower
+                0x00000e44       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_ref.o)
+                0x00000e44                Opa_ref_SetPower
  .text.Opa_ref_Init
-                0x00000e80        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_ref.o)
-                0x00000e80                Opa_ref_Init
+                0x00000e60        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_ref.o)
+                0x00000e60                Opa_ref_Init
  .text.Opa_ref_Start
-                0x00000e8c       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_ref.o)
-                0x00000e8c                Opa_ref_Start
+                0x00000e6c       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_ref.o)
+                0x00000e6c                Opa_ref_Start
  .text.UART_Init
-                0x00000ea8       0x5c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART.o)
-                0x00000ea8                UART_Init
+                0x00000e88       0x5c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART.o)
+                0x00000e88                UART_Init
  .text.UART_Enable
-                0x00000f04       0x50 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART.o)
-                0x00000f04                UART_Enable
+                0x00000ee4       0x50 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART.o)
+                0x00000ee4                UART_Enable
  .text.UART_Start
-                0x00000f54       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART.o)
-                0x00000f54                UART_Start
+                0x00000f34       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART.o)
+                0x00000f34                UART_Start
  .text.UART_ReadRxData
-                0x00000f70       0x64 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART.o)
-                0x00000f70                UART_ReadRxData
+                0x00000f50       0x64 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART.o)
+                0x00000f50                UART_ReadRxData
  .text.UART_GetRxBufferSize
-                0x00000fd4       0x60 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART.o)
-                0x00000fd4                UART_GetRxBufferSize
+                0x00000fb4       0x60 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART.o)
+                0x00000fb4                UART_GetRxBufferSize
  .text.UART_PutChar
-                0x00001034       0x74 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART.o)
-                0x00001034                UART_PutChar
+                0x00001014       0x74 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART.o)
+                0x00001014                UART_PutChar
  .text.UART_PutArray
-                0x000010a8       0x28 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART.o)
-                0x000010a8                UART_PutArray
+                0x00001088       0x28 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART.o)
+                0x00001088                UART_PutArray
  .text.UART_RXISR
-                0x000010d0       0x98 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_INT.o)
-                0x000010d0                UART_RXISR
+                0x000010b0       0x98 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_INT.o)
+                0x000010b0                UART_RXISR
  .text.UART_TXISR
-                0x00001168       0x58 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_INT.o)
-                0x00001168                UART_TXISR
+                0x00001148       0x58 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_INT.o)
+                0x00001148                UART_TXISR
  .text.UART_IntClock_Start
-                0x000011c0       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_IntClock.o)
-                0x000011c0                UART_IntClock_Start
+                0x000011a0       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_IntClock.o)
+                0x000011a0                UART_IntClock_Start
  .text.PGA_ref_Enable
-                0x000011dc       0x28 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
-                0x000011dc                PGA_ref_Enable
+                0x000011bc       0x28 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
+                0x000011bc                PGA_ref_Enable
  .text.PGA_ref_SetPower
-                0x00001204       0x18 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
-                0x00001204                PGA_ref_SetPower
+                0x000011e4       0x18 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
+                0x000011e4                PGA_ref_SetPower
  .text.PGA_ref_SetGain
-                0x0000121c       0x78 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
-                0x0000121c                PGA_ref_SetGain
+                0x000011fc       0x78 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
+                0x000011fc                PGA_ref_SetGain
  .text.PGA_ref_Init
-                0x00001294       0x34 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
-                0x00001294                PGA_ref_Init
+                0x00001274       0x34 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
+                0x00001274                PGA_ref_Init
  .text.PGA_ref_Start
-                0x000012c8       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
-                0x000012c8                PGA_ref_Start
- .text.VDAC_Enable
-                0x000012e4       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(VDAC.o)
-                0x000012e4                VDAC_Enable
- .text.VDAC_SetSpeed
-                0x00001300       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(VDAC.o)
-                0x00001300                VDAC_SetSpeed
- .text.VDAC_SetValue
-                0x0000131c        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(VDAC.o)
-                0x0000131c                VDAC_SetValue
- .text.VDAC_DacTrim
-                0x00001328       0x24 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(VDAC.o)
-                0x00001328                VDAC_DacTrim
- .text.VDAC_SetRange
-                0x0000134c       0x20 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(VDAC.o)
-                0x0000134c                VDAC_SetRange
- .text.VDAC_Init
-                0x0000136c       0x20 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(VDAC.o)
-                0x0000136c                VDAC_Init
- .text.VDAC_Start
-                0x0000138c       0x24 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(VDAC.o)
-                0x0000138c                VDAC_Start
+                0x000012a8       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
+                0x000012a8                PGA_ref_Start
  .text.ADC_GainCompensation
-                0x000013b0       0xdc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
+                0x000012c4       0xdc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
  .text.ADC_SetDSMRef0Reg
-                0x0000148c       0x4c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
+                0x000013a0       0x4c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
  .text.ADC_InitConfig
-                0x000014d8       0xe0 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
+                0x000013ec       0xe0 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
  .text.ADC_Init
-                0x000015b8       0xc4 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
-                0x000015b8                ADC_Init
+                0x000014cc       0xc4 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
+                0x000014cc                ADC_Init
  .text.ADC_Enable
-                0x0000167c       0xd8 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
-                0x0000167c                ADC_Enable
+                0x00001590       0xd8 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
+                0x00001590                ADC_Enable
  .text.ADC_Start
-                0x00001754       0x28 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
-                0x00001754                ADC_Start
+                0x00001668       0x28 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
+                0x00001668                ADC_Start
  .text.ADC_StartConvert
-                0x0000177c       0x10 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
-                0x0000177c                ADC_StartConvert
+                0x00001690       0x10 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
+                0x00001690                ADC_StartConvert
  .text.ADC_StopConvert
-                0x0000178c       0x10 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
-                0x0000178c                ADC_StopConvert
+                0x000016a0       0x10 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
+                0x000016a0                ADC_StopConvert
  .text.ADC_GetResult32
-                0x0000179c       0x6c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
-                0x0000179c                ADC_GetResult32
+                0x000016b0       0x6c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
+                0x000016b0                ADC_GetResult32
  .text.ADC_ISR1
-                0x00001808        0x4 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_INT.o)
-                0x00001808                ADC_ISR1
+                0x0000171c        0x4 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_INT.o)
+                0x0000171c                ADC_ISR1
  .text.ADC_Ext_CP_Clk_GetDividerRegister
-                0x0000180c        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
-                0x0000180c                ADC_Ext_CP_Clk_GetDividerRegister
+                0x00001720        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
+                0x00001720                ADC_Ext_CP_Clk_GetDividerRegister
  .text.ADC_Ext_CP_Clk_SetModeRegister
-                0x00001818       0x14 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
-                0x00001818                ADC_Ext_CP_Clk_SetModeRegister
+                0x0000172c       0x14 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
+                0x0000172c                ADC_Ext_CP_Clk_SetModeRegister
  .text.ADC_Ext_CP_Clk_GetSourceRegister
-                0x0000182c       0x10 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
-                0x0000182c                ADC_Ext_CP_Clk_GetSourceRegister
+                0x00001740       0x10 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
+                0x00001740                ADC_Ext_CP_Clk_GetSourceRegister
  .text.ADC_Ext_CP_Clk_SetDividerRegister
-                0x0000183c       0xd8 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
-                0x0000183c                ADC_Ext_CP_Clk_SetDividerRegister
+                0x00001750       0xd8 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
+                0x00001750                ADC_Ext_CP_Clk_SetDividerRegister
  .text.ADC_theACLK_GetDividerRegister
-                0x00001914        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_theACLK.o)
-                0x00001914                ADC_theACLK_GetDividerRegister
+                0x00001828        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_theACLK.o)
+                0x00001828                ADC_theACLK_GetDividerRegister
  .text.ADC_theACLK_SetModeRegister
-                0x00001920       0x14 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_theACLK.o)
-                0x00001920                ADC_theACLK_SetModeRegister
+                0x00001834       0x14 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_theACLK.o)
+                0x00001834                ADC_theACLK_SetModeRegister
  .text.ADC_theACLK_GetSourceRegister
-                0x00001934       0x10 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_theACLK.o)
-                0x00001934                ADC_theACLK_GetSourceRegister
+                0x00001848       0x10 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_theACLK.o)
+                0x00001848                ADC_theACLK_GetSourceRegister
  .text.ADC_theACLK_SetDividerRegister
-                0x00001944       0xd8 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_theACLK.o)
-                0x00001944                ADC_theACLK_SetDividerRegister
+                0x00001858       0xd8 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_theACLK.o)
+                0x00001858                ADC_theACLK_SetDividerRegister
  .text.SYNC_IN_Read
-                0x00001a1c       0x10 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(SYNC_IN.o)
-                0x00001a1c                SYNC_IN_Read
+                0x00001930       0x10 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(SYNC_IN.o)
+                0x00001930                SYNC_IN_Read
  .text.isr_SyncIn_SetVector
-                0x00001a2c        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
-                0x00001a2c                isr_SyncIn_SetVector
+                0x00001940        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
+                0x00001940                isr_SyncIn_SetVector
  .text.isr_SyncIn_SetPriority
-                0x00001a38       0x10 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
-                0x00001a38                isr_SyncIn_SetPriority
+                0x0000194c       0x10 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
+                0x0000194c                isr_SyncIn_SetPriority
  .text.isr_SyncIn_Enable
-                0x00001a48        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
-                0x00001a48                isr_SyncIn_Enable
+                0x0000195c        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
+                0x0000195c                isr_SyncIn_Enable
  .text.isr_SyncIn_Disable
-                0x00001a54        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
-                0x00001a54                isr_SyncIn_Disable
+                0x00001968        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
+                0x00001968                isr_SyncIn_Disable
  .text.isr_SyncIn_StartEx
-                0x00001a60       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
-                0x00001a60                isr_SyncIn_StartEx
+                0x00001974       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
+                0x00001974                isr_SyncIn_StartEx
  .text.LPF_ADC_SetCutoffFreq
-                0x00001a7c       0x18 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ADC.o)
-                0x00001a7c                LPF_ADC_SetCutoffFreq
+                0x00001990       0x18 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ADC.o)
+                0x00001990                LPF_ADC_SetCutoffFreq
  .text.LPF_ADC_Start
-                0x00001a94       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ADC.o)
-                0x00001a94                LPF_ADC_Start
+                0x000019a8       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ADC.o)
+                0x000019a8                LPF_ADC_Start
  .text.PGA_Enable
-                0x00001ab0       0x28 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
-                0x00001ab0                PGA_Enable
+                0x000019c4       0x28 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
+                0x000019c4                PGA_Enable
  .text.PGA_SetPower
-                0x00001ad8       0x18 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
-                0x00001ad8                PGA_SetPower
+                0x000019ec       0x18 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
+                0x000019ec                PGA_SetPower
  .text.PGA_SetGain
-                0x00001af0       0x78 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
-                0x00001af0                PGA_SetGain
+                0x00001a04       0x78 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
+                0x00001a04                PGA_SetGain
  .text.PGA_Init
-                0x00001b68       0x34 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
-                0x00001b68                PGA_Init
+                0x00001a7c       0x34 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
+                0x00001a7c                PGA_Init
  .text.PGA_Start
-                0x00001b9c       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
-                0x00001b9c                PGA_Start
+                0x00001ab0       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
+                0x00001ab0                PGA_Start
  .text.LPF_ref_SetCutoffFreq
-                0x00001bb8       0x18 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ref.o)
-                0x00001bb8                LPF_ref_SetCutoffFreq
+                0x00001acc       0x18 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ref.o)
+                0x00001acc                LPF_ref_SetCutoffFreq
  .text.LPF_ref_Start
-                0x00001bd0       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ref.o)
-                0x00001bd0                LPF_ref_Start
+                0x00001ae4       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ref.o)
+                0x00001ae4                LPF_ref_Start
  .text.ADC_AMux_Start
-                0x00001bec       0x20 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_AMux.o)
-                0x00001bec                ADC_AMux_Start
+                0x00001b00       0x20 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_AMux.o)
+                0x00001b00                ADC_AMux_Start
  .text.ADC_AMux_Select
-                0x00001c0c       0x18 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_AMux.o)
-                0x00001c0c                ADC_AMux_Select
+                0x00001b20       0x18 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_AMux.o)
+                0x00001b20                ADC_AMux_Select
  .text.Opa_LP_Enable
-                0x00001c24       0x28 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
-                0x00001c24                Opa_LP_Enable
+                0x00001b38       0x28 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
+                0x00001b38                Opa_LP_Enable
  .text.Opa_LP_SetPower
-                0x00001c4c       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
-                0x00001c4c                Opa_LP_SetPower
+                0x00001b60       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
+                0x00001b60                Opa_LP_SetPower
  .text.Opa_LP_Init
-                0x00001c68        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
-                0x00001c68                Opa_LP_Init
+                0x00001b7c        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
+                0x00001b7c                Opa_LP_Init
  .text.Opa_LP_Start
-                0x00001c74       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
-                0x00001c74                Opa_LP_Start
- .text          0x00001c90       0x20 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyBootAsmGnu.o)
-                0x00001c90                CyDelayCycles
-                0x00001ca0                CyEnterCriticalSection
-                0x00001ca8                CyExitCriticalSection
- .text.__errno  0x00001cb0        0xc c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-errno.o)
-                0x00001cb0                __errno
+                0x00001b88       0x1c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
+                0x00001b88                Opa_LP_Start
+ *fill*         0x00001ba4        0x4 
+ .text          0x00001ba8       0x20 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyBootAsmGnu.o)
+                0x00001ba8                CyDelayCycles
+                0x00001bb8                CyEnterCriticalSection
+                0x00001bc0                CyExitCriticalSection
+ .text.__errno  0x00001bc8        0xc c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-errno.o)
+                0x00001bc8                __errno
  .text.__libc_init_array
-                0x00001cbc       0x4c c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-init.o)
-                0x00001cbc                __libc_init_array
- .text.memcpy   0x00001d08       0x16 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-memcpy-stub.o)
-                0x00001d08                memcpy
- .text.memset   0x00001d1e       0x10 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-memset.o)
-                0x00001d1e                memset
+                0x00001bd4       0x4c c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-init.o)
+                0x00001bd4                __libc_init_array
+ .text.memcpy   0x00001c20       0x16 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-memcpy-stub.o)
+                0x00001c20                memcpy
+ .text.memset   0x00001c36       0x10 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-memset.o)
+                0x00001c36                memset
  *(.plt)
  *(.gnu.warning)
  *(.glue_7t)
- .glue_7t       0x00001d2e        0x0 linker stubs
+ .glue_7t       0x00001c46        0x0 linker stubs
  *(.glue_7)
- .glue_7        0x00001d2e        0x0 linker stubs
+ .glue_7        0x00001c46        0x0 linker stubs
  *(.vfp11_veneer)
- .vfp11_veneer  0x00001d2e        0x0 linker stubs
+ .vfp11_veneer  0x00001c46        0x0 linker stubs
  *(.bootloader)
  *(.ARM.extab* .gnu.linkonce.armextab.*)
  *(.gcc_except_table)
 
-.v4_bx          0x00001d30        0x0
- .v4_bx         0x00001d30        0x0 linker stubs
+.v4_bx          0x00001c48        0x0
+ .v4_bx         0x00001c48        0x0 linker stubs
 
-.iplt           0x00001d30        0x0
- .iplt          0x00001d30        0x0 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtbegin.o
+.iplt           0x00001c48        0x0
+ .iplt          0x00001c48        0x0 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtbegin.o
 
 .eh_frame_hdr
  *(.eh_frame_hdr)
 
-.eh_frame       0x00001d30        0x4
+.eh_frame       0x00001c48        0x4
  *(.eh_frame)
- .eh_frame      0x00001d30        0x0 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtbegin.o
- .eh_frame      0x00001d30        0x4 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtend.o
+ .eh_frame      0x00001c48        0x0 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtbegin.o
+ .eh_frame      0x00001c48        0x4 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtend.o
                 [!provide]                PROVIDE (__exidx_start, .)
 
 .ARM.exidx
  *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-                0x00001d34                __exidx_end = .
+                0x00001c4c                __exidx_end = .
 
-.rodata         0x00001d34       0xa4
+.rodata         0x00001c4c       0xa4
  *(.rodata .rodata.* .gnu.linkonce.r.*)
- .rodata        0x00001d34        0x4 .\CortexM3\ARM_GCC_541\Debug\main.o
- .rodata        0x00001d38       0x3c .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
-                0x00001d38                ADC_AMux__addrTable
-                0x00001d40                ADC_AMux__maskTable
- .rodata        0x00001d74       0x15 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
- *fill*         0x00001d89        0x3 
- .rodata        0x00001d8c       0x15 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
+ .rodata        0x00001c4c        0x4 .\CortexM3\ARM_GCC_541\Debug\main.o
+ .rodata        0x00001c50       0x3c .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
+                0x00001c50                ADC_AMux__addrTable
+                0x00001c58                ADC_AMux__maskTable
+ .rodata        0x00001c8c       0x15 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
+ *fill*         0x00001ca1        0x3 
+ .rodata        0x00001ca4       0x15 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
  .rodata.str1.1
-                0x00001da1        0x2 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-impure.o)
-                0x00001da4                . = ALIGN (0x4)
- *fill*         0x00001da3        0x1 
+                0x00001cb9        0x2 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-impure.o)
+                0x00001cbc                . = ALIGN (0x4)
+ *fill*         0x00001cbb        0x1 
  *(.init)
- .init          0x00001da4        0x4 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crti.o
-                0x00001da4                _init
- .init          0x00001da8        0x8 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtn.o
-                0x00001db0                . = ALIGN (0x4)
-                0x00001db0                __preinit_array_start = .
+ .init          0x00001cbc        0x4 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crti.o
+                0x00001cbc                _init
+ .init          0x00001cc0        0x8 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtn.o
+                0x00001cc8                . = ALIGN (0x4)
+                0x00001cc8                __preinit_array_start = .
  *(.preinit_array)
-                0x00001db0                __preinit_array_end = .
-                0x00001db0                . = ALIGN (0x4)
-                0x00001db0                __init_array_start = .
+                0x00001cc8                __preinit_array_end = .
+                0x00001cc8                . = ALIGN (0x4)
+                0x00001cc8                __init_array_start = .
  *(SORT(.init_array.*))
  *(.init_array)
- .init_array    0x00001db0        0x4 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtbegin.o
- .init_array    0x00001db4        0x4 .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
-                0x00001db8                __init_array_end = .
-                0x00001db8                . = ALIGN (0x4)
+ .init_array    0x00001cc8        0x4 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtbegin.o
+ .init_array    0x00001ccc        0x4 .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
+                0x00001cd0                __init_array_end = .
+                0x00001cd0                . = ALIGN (0x4)
  *(.fini)
- .fini          0x00001db8        0x4 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crti.o
-                0x00001db8                _fini
- .fini          0x00001dbc        0x8 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtn.o
-                0x00001dc4                . = ALIGN (0x4)
-                0x00001dc4                __fini_array_start = .
+ .fini          0x00001cd0        0x4 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crti.o
+                0x00001cd0                _fini
+ .fini          0x00001cd4        0x8 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtn.o
+                0x00001cdc                . = ALIGN (0x4)
+                0x00001cdc                __fini_array_start = .
  *(.fini_array)
- .fini_array    0x00001dc4        0x4 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtbegin.o
+ .fini_array    0x00001cdc        0x4 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtbegin.o
  *(SORT(.fini_array.*))
-                0x00001dc8                __fini_array_end = .
-                0x00001dc8                . = ALIGN (0x4)
+                0x00001ce0                __fini_array_end = .
+                0x00001ce0                . = ALIGN (0x4)
  *crtbegin.o(.ctors)
  *(EXCLUDE_FILE(*crtend.o) .ctors)
  *(SORT(.ctors.*))
  *crtend.o(.ctors)
-                0x00001dc8                . = ALIGN (0x4)
+                0x00001ce0                . = ALIGN (0x4)
  *crtbegin.o(.dtors)
  *(EXCLUDE_FILE(*crtend.o) .dtors)
  *(SORT(.dtors.*))
  *crtend.o(.dtors)
-                0x00001dc8                . = ALIGN (0x4)
-                0x00001dc8                __cy_regions = .
-                0x00001dc8        0x4 LONG 0x1dd8 __cy_region_init_ram
-                0x00001dcc        0x4 LONG 0x1fff80c8 __cy_region_start_data
-                0x00001dd0        0x4 LONG 0x80 __cy_region_init_size_ram
-                0x00001dd4        0x4 LONG 0xb520 __cy_region_zero_size_ram
-                0x00001dd8                __cy_regions_end = .
-                0x00001dd8                . = ALIGN (0x8)
-                0x00001dd8                _etext = .
+                0x00001ce0                . = ALIGN (0x4)
+                0x00001ce0                __cy_regions = .
+                0x00001ce0        0x4 LONG 0x1cf0 __cy_region_init_ram
+                0x00001ce4        0x4 LONG 0x1fff80c8 __cy_region_start_data
+                0x00001ce8        0x4 LONG 0x80 __cy_region_init_size_ram
+                0x00001cec        0x4 LONG 0xb518 __cy_region_zero_size_ram
+                0x00001cf0                __cy_regions_end = .
+                0x00001cf0                . = ALIGN (0x8)
+                0x00001cf0                _etext = .
 
 .cy_checksum_exclude
-                0x00001dd8        0x0
+                0x00001cf0        0x0
  *(.cy_checksum_exclude)
 
 .ramvectors     0x1fff8000       0xc0
@@ -1212,7 +1186,7 @@ END GROUP
  .noinit        0x1fff80c0        0x1 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyLib.o)
                 0x1fff80c0                CyResetStatus
 
-.data           0x1fff80c8       0x80 load address 0x00001dd8
+.data           0x1fff80c8       0x80 load address 0x00001cf0
                 0x1fff80c8                __cy_region_start_data = .
  *(.jcr)
  .jcr           0x1fff80c8        0x0 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtbegin.o
@@ -1241,10 +1215,10 @@ END GROUP
  *(.ram)
                 0x1fff8148                _edata = .
 
-.igot.plt       0x1fff8148        0x0 load address 0x00001e58
+.igot.plt       0x1fff8148        0x0 load address 0x00001d70
  .igot.plt      0x1fff8148        0x0 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtbegin.o
 
-.bss            0x1fff8148     0xb520 load address 0x00001e58
+.bss            0x1fff8148     0xb518 load address 0x00001d70
                 0x1fff8148                PROVIDE (__bss_start__, .)
  *(.shbss)
  *(.bss .bss.* .gnu.linkonce.b.*)
@@ -1265,45 +1239,41 @@ END GROUP
                 0x200035a9                UART_txBufferWrite
  .bss           0x200035ab        0x1 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
                 0x200035ab                PGA_ref_initVar
- .bss           0x200035ac        0x1 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(VDAC.o)
-                0x200035ac                VDAC_initVar
- *fill*         0x200035ad        0x3 
- .bss           0x200035b0        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
-                0x200035b4                ADC_stopConversion
-                0x200035b5                ADC_convDone
-                0x200035b6                ADC_initVar
-                0x200035b7                ADC_started
-                0x200035b8                ADC_Offset
- .bss           0x200035bc        0x1 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ADC.o)
-                0x200035bc                LPF_ADC_initVar
- .bss           0x200035bd        0x1 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
-                0x200035bd                PGA_initVar
- .bss           0x200035be        0x1 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ref.o)
-                0x200035be                LPF_ref_initVar
- .bss           0x200035bf        0x1 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
-                0x200035bf                Opa_LP_initVar
+ .bss           0x200035ac        0xc .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
+                0x200035b0                ADC_stopConversion
+                0x200035b1                ADC_convDone
+                0x200035b2                ADC_initVar
+                0x200035b3                ADC_started
+                0x200035b4                ADC_Offset
+ .bss           0x200035b8        0x1 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ADC.o)
+                0x200035b8                LPF_ADC_initVar
+ .bss           0x200035b9        0x1 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
+                0x200035b9                PGA_initVar
+ .bss           0x200035ba        0x1 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ref.o)
+                0x200035ba                LPF_ref_initVar
+ .bss           0x200035bb        0x1 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
+                0x200035bb                Opa_LP_initVar
  *(COMMON)
- COMMON         0x200035c0       0xa0 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART.o)
-                0x200035c0                UART_rxBuffer
-                0x200035e0                UART_txBuffer
- COMMON         0x20003660        0x4 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
-                0x20003660                ADC_CountsPerVolt
-                0x20003668                . = ALIGN (0x8)
- *fill*         0x20003664        0x4 
+ COMMON         0x200035bc       0xa0 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART.o)
+                0x200035bc                UART_rxBuffer
+                0x200035dc                UART_txBuffer
+ COMMON         0x2000365c        0x4 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
+                0x2000365c                ADC_CountsPerVolt
+                0x20003660                . = ALIGN (0x8)
  *(.ram.b)
-                0x20003668                _end = .
-                0x20003668                __end = .
-                0x20003668                PROVIDE (end, .)
-                0x20003668                PROVIDE (__bss_end__, .)
-                0x00001dd8                __cy_region_init_ram = LOADADDR (.data)
+                0x20003660                _end = .
+                0x20003660                __end = .
+                0x20003660                PROVIDE (end, .)
+                0x20003660                PROVIDE (__bss_end__, .)
+                0x00001cf0                __cy_region_init_ram = LOADADDR (.data)
                 0x00000080                __cy_region_init_size_ram = (_edata - ADDR (.data))
-                0x0000b520                __cy_region_zero_size_ram = (_end - _edata)
+                0x0000b518                __cy_region_zero_size_ram = (_end - _edata)
 
-.heap           0x20003668       0x80 load address 0x00001e58
-                0x20003668                . = _end
-                0x200036e8                . = (. + 0x80)
- *fill*         0x20003668       0x80 
-                0x200036e8                __cy_heap_limit = .
+.heap           0x20003660       0x80 load address 0x00001d70
+                0x20003660                . = _end
+                0x200036e0                . = (. + 0x80)
+ *fill*         0x20003660       0x80 
+                0x200036e0                __cy_heap_limit = .
 
 .stack          0x20007800      0x800
                 0x20007800                __cy_stack_limit = .
@@ -1350,8 +1320,8 @@ END GROUP
  .cymeta        0x90500000        0xc .\CortexM3\ARM_GCC_541\Debug\cymetadata.o
                 0x90500000                cy_metadata
 
-.rel.dyn        0x00001e58        0x0 load address 0x9050000c
- .rel.iplt      0x00001e58        0x0 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtbegin.o
+.rel.dyn        0x00001d70        0x0 load address 0x9050000c
+ .rel.iplt      0x00001d70        0x0 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtbegin.o
 
 .stab
  *(.stab)
@@ -1371,7 +1341,7 @@ END GROUP
 .debug_sfnames
  *(.debug_sfnames)
 
-.debug_aranges  0x00000000      0xdf8
+.debug_aranges  0x00000000      0xda0
  *(.debug_aranges)
  .debug_aranges
                 0x00000000       0xf8 .\CortexM3\ARM_GCC_541\Debug\main.o
@@ -1402,171 +1372,165 @@ END GROUP
  .debug_aranges
                 0x00000850       0x48 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
  .debug_aranges
-                0x00000898       0x58 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(VDAC.o)
+                0x00000898       0xe8 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
  .debug_aranges
-                0x000008f0       0xe8 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
+                0x00000980       0x38 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_INT.o)
  .debug_aranges
-                0x000009d8       0x38 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_INT.o)
+                0x000009b8       0x70 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
  .debug_aranges
-                0x00000a10       0x70 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
+                0x00000a28       0x80 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_theACLK.o)
  .debug_aranges
-                0x00000a80       0x80 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_theACLK.o)
+                0x00000aa8       0x38 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(SYNC_IN.o)
  .debug_aranges
-                0x00000b00       0x38 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(SYNC_IN.o)
+                0x00000ae0       0x80 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
  .debug_aranges
-                0x00000b38       0x80 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
+                0x00000b60       0x30 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ADC.o)
  .debug_aranges
-                0x00000bb8       0x30 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ADC.o)
+                0x00000b90       0x48 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
  .debug_aranges
-                0x00000be8       0x48 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
+                0x00000bd8       0x30 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ref.o)
  .debug_aranges
-                0x00000c30       0x30 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ref.o)
+                0x00000c08       0x30 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_AMux.o)
  .debug_aranges
-                0x00000c60       0x30 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_AMux.o)
+                0x00000c38       0x40 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
  .debug_aranges
-                0x00000c90       0x40 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
+                0x00000c78       0x20 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyBootAsmGnu.o)
  .debug_aranges
-                0x00000cd0       0x20 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyBootAsmGnu.o)
+                0x00000c98       0x88 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyFlash.o)
  .debug_aranges
-                0x00000cf0       0x88 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyFlash.o)
- .debug_aranges
-                0x00000d78       0x80 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CySpc.o)
+                0x00000d20       0x80 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CySpc.o)
 
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x00000000     0x76ba
+.debug_info     0x00000000     0x7520
  *(.debug_info .gnu.linkonce.wi.*)
- .debug_info    0x00000000      0xdf6 .\CortexM3\ARM_GCC_541\Debug\main.o
- .debug_info    0x00000df6      0x5c1 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
- .debug_info    0x000013b7      0x137 .\CortexM3\ARM_GCC_541\Debug\cymetadata.o
- .debug_info    0x000014ee      0x3bb .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
- .debug_info    0x000018a9     0x1374 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyLib.o)
- .debug_info    0x00002c1d      0xa2a .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(cyPm.o)
- .debug_info    0x00003647      0x2d2 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_DelSig.o)
- .debug_info    0x00003919      0x2d2 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_Timer.o)
- .debug_info    0x00003beb      0x2ee .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
- .debug_info    0x00003ed9      0x151 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_ref.o)
- .debug_info    0x0000402a      0x7be .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART.o)
- .debug_info    0x000047e8      0x196 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_INT.o)
- .debug_info    0x0000497e      0x283 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_IntClock.o)
- .debug_info    0x00004c01      0x1d3 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
- .debug_info    0x00004dd4      0x1e0 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(VDAC.o)
- .debug_info    0x00004fb4      0xa1d .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
- .debug_info    0x000059d1       0xd3 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_INT.o)
- .debug_info    0x00005aa4      0x283 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
- .debug_info    0x00005d27      0x2c4 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_theACLK.o)
- .debug_info    0x00005feb      0x11f .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(SYNC_IN.o)
- .debug_info    0x0000610a      0x2d2 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
- .debug_info    0x000063dc      0x118 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ADC.o)
- .debug_info    0x000064f4      0x1d3 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
- .debug_info    0x000066c7      0x118 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ref.o)
- .debug_info    0x000067df      0x165 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_AMux.o)
- .debug_info    0x00006944      0x151 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
- .debug_info    0x00006a95       0x88 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyBootAsmGnu.o)
- .debug_info    0x00006b1d      0x64d .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyFlash.o)
- .debug_info    0x0000716a      0x550 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CySpc.o)
+ .debug_info    0x00000000      0xe3c .\CortexM3\ARM_GCC_541\Debug\main.o
+ .debug_info    0x00000e3c      0x5c1 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
+ .debug_info    0x000013fd      0x137 .\CortexM3\ARM_GCC_541\Debug\cymetadata.o
+ .debug_info    0x00001534      0x3bb .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
+ .debug_info    0x000018ef     0x1374 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyLib.o)
+ .debug_info    0x00002c63      0xa2a .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(cyPm.o)
+ .debug_info    0x0000368d      0x2d2 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_DelSig.o)
+ .debug_info    0x0000395f      0x2d2 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_Timer.o)
+ .debug_info    0x00003c31      0x2ee .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
+ .debug_info    0x00003f1f      0x151 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_ref.o)
+ .debug_info    0x00004070      0x7be .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART.o)
+ .debug_info    0x0000482e      0x196 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_INT.o)
+ .debug_info    0x000049c4      0x283 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_IntClock.o)
+ .debug_info    0x00004c47      0x1d3 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
+ .debug_info    0x00004e1a      0xa1d .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
+ .debug_info    0x00005837       0xd3 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_INT.o)
+ .debug_info    0x0000590a      0x283 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
+ .debug_info    0x00005b8d      0x2c4 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_theACLK.o)
+ .debug_info    0x00005e51      0x11f .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(SYNC_IN.o)
+ .debug_info    0x00005f70      0x2d2 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
+ .debug_info    0x00006242      0x118 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ADC.o)
+ .debug_info    0x0000635a      0x1d3 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
+ .debug_info    0x0000652d      0x118 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ref.o)
+ .debug_info    0x00006645      0x165 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_AMux.o)
+ .debug_info    0x000067aa      0x151 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
+ .debug_info    0x000068fb       0x88 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyBootAsmGnu.o)
+ .debug_info    0x00006983      0x64d .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyFlash.o)
+ .debug_info    0x00006fd0      0x550 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CySpc.o)
 
-.debug_abbrev   0x00000000     0x22c2
+.debug_abbrev   0x00000000     0x21f4
  *(.debug_abbrev)
- .debug_abbrev  0x00000000      0x2cc .\CortexM3\ARM_GCC_541\Debug\main.o
- .debug_abbrev  0x000002cc      0x21e .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
- .debug_abbrev  0x000004ea       0x77 .\CortexM3\ARM_GCC_541\Debug\cymetadata.o
- .debug_abbrev  0x00000561      0x1e8 .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
- .debug_abbrev  0x00000749      0x254 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyLib.o)
- .debug_abbrev  0x0000099d      0x1ab .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(cyPm.o)
- .debug_abbrev  0x00000b48      0x173 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_DelSig.o)
- .debug_abbrev  0x00000cbb      0x173 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_Timer.o)
- .debug_abbrev  0x00000e2e      0x12b .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
- .debug_abbrev  0x00000f59       0xb2 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_ref.o)
- .debug_abbrev  0x0000100b      0x16f .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART.o)
- .debug_abbrev  0x0000117a       0xa2 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_INT.o)
- .debug_abbrev  0x0000121c      0x139 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_IntClock.o)
- .debug_abbrev  0x00001355       0xf6 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
- .debug_abbrev  0x0000144b       0xf7 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(VDAC.o)
- .debug_abbrev  0x00001542      0x1cd .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
- .debug_abbrev  0x0000170f       0x42 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_INT.o)
- .debug_abbrev  0x00001751      0x139 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
- .debug_abbrev  0x0000188a      0x121 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_theACLK.o)
- .debug_abbrev  0x000019ab       0x90 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(SYNC_IN.o)
- .debug_abbrev  0x00001a3b      0x173 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
- .debug_abbrev  0x00001bae       0xb6 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ADC.o)
- .debug_abbrev  0x00001c64       0xf6 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
- .debug_abbrev  0x00001d5a       0xb6 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ref.o)
- .debug_abbrev  0x00001e10       0xb1 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_AMux.o)
- .debug_abbrev  0x00001ec1       0xb2 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
- .debug_abbrev  0x00001f73       0x14 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyBootAsmGnu.o)
- .debug_abbrev  0x00001f87      0x1a7 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyFlash.o)
- .debug_abbrev  0x0000212e      0x194 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CySpc.o)
+ .debug_abbrev  0x00000000      0x2f5 .\CortexM3\ARM_GCC_541\Debug\main.o
+ .debug_abbrev  0x000002f5      0x21e .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
+ .debug_abbrev  0x00000513       0x77 .\CortexM3\ARM_GCC_541\Debug\cymetadata.o
+ .debug_abbrev  0x0000058a      0x1e8 .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
+ .debug_abbrev  0x00000772      0x254 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyLib.o)
+ .debug_abbrev  0x000009c6      0x1ab .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(cyPm.o)
+ .debug_abbrev  0x00000b71      0x173 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_DelSig.o)
+ .debug_abbrev  0x00000ce4      0x173 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_Timer.o)
+ .debug_abbrev  0x00000e57      0x12b .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
+ .debug_abbrev  0x00000f82       0xb2 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_ref.o)
+ .debug_abbrev  0x00001034      0x16f .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART.o)
+ .debug_abbrev  0x000011a3       0xa2 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_INT.o)
+ .debug_abbrev  0x00001245      0x139 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_IntClock.o)
+ .debug_abbrev  0x0000137e       0xf6 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
+ .debug_abbrev  0x00001474      0x1cd .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
+ .debug_abbrev  0x00001641       0x42 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_INT.o)
+ .debug_abbrev  0x00001683      0x139 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
+ .debug_abbrev  0x000017bc      0x121 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_theACLK.o)
+ .debug_abbrev  0x000018dd       0x90 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(SYNC_IN.o)
+ .debug_abbrev  0x0000196d      0x173 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
+ .debug_abbrev  0x00001ae0       0xb6 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ADC.o)
+ .debug_abbrev  0x00001b96       0xf6 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
+ .debug_abbrev  0x00001c8c       0xb6 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ref.o)
+ .debug_abbrev  0x00001d42       0xb1 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_AMux.o)
+ .debug_abbrev  0x00001df3       0xb2 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
+ .debug_abbrev  0x00001ea5       0x14 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyBootAsmGnu.o)
+ .debug_abbrev  0x00001eb9      0x1a7 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyFlash.o)
+ .debug_abbrev  0x00002060      0x194 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CySpc.o)
 
-.debug_line     0x00000000     0x32ef
+.debug_line     0x00000000     0x31ff
  *(.debug_line)
- .debug_line    0x00000000      0x580 .\CortexM3\ARM_GCC_541\Debug\main.o
- .debug_line    0x00000580      0x218 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
- .debug_line    0x00000798      0x141 .\CortexM3\ARM_GCC_541\Debug\cymetadata.o
- .debug_line    0x000008d9      0x234 .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
- .debug_line    0x00000b0d      0x816 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyLib.o)
- .debug_line    0x00001323      0x367 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(cyPm.o)
- .debug_line    0x0000168a      0x137 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_DelSig.o)
- .debug_line    0x000017c1      0x136 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_Timer.o)
- .debug_line    0x000018f7      0x170 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
- .debug_line    0x00001a67       0xaa .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_ref.o)
- .debug_line    0x00001b11      0x33c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART.o)
- .debug_line    0x00001e4d       0xa5 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_INT.o)
- .debug_line    0x00001ef2      0x17c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_IntClock.o)
- .debug_line    0x0000206e       0xce .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
- .debug_line    0x0000213c       0xe1 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(VDAC.o)
- .debug_line    0x0000221d      0x368 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
- .debug_line    0x00002585       0x80 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_INT.o)
- .debug_line    0x00002605      0x17d .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
- .debug_line    0x00002782      0x19d .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_theACLK.o)
- .debug_line    0x0000291f       0x94 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(SYNC_IN.o)
- .debug_line    0x000029b3      0x137 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
- .debug_line    0x00002aea       0x83 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ADC.o)
- .debug_line    0x00002b6d       0xca .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
- .debug_line    0x00002c37       0x83 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ref.o)
- .debug_line    0x00002cba       0xac .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_AMux.o)
- .debug_line    0x00002d66       0xa9 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
- .debug_line    0x00002e0f       0x66 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyBootAsmGnu.o)
- .debug_line    0x00002e75      0x21a .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyFlash.o)
- .debug_line    0x0000308f      0x260 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CySpc.o)
+ .debug_line    0x00000000      0x576 .\CortexM3\ARM_GCC_541\Debug\main.o
+ .debug_line    0x00000576      0x213 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
+ .debug_line    0x00000789      0x141 .\CortexM3\ARM_GCC_541\Debug\cymetadata.o
+ .debug_line    0x000008ca      0x234 .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
+ .debug_line    0x00000afe      0x816 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyLib.o)
+ .debug_line    0x00001314      0x367 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(cyPm.o)
+ .debug_line    0x0000167b      0x137 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_DelSig.o)
+ .debug_line    0x000017b2      0x136 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_Timer.o)
+ .debug_line    0x000018e8      0x170 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
+ .debug_line    0x00001a58       0xaa .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_ref.o)
+ .debug_line    0x00001b02      0x33c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART.o)
+ .debug_line    0x00001e3e       0xa5 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_INT.o)
+ .debug_line    0x00001ee3      0x17c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_IntClock.o)
+ .debug_line    0x0000205f       0xce .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
+ .debug_line    0x0000212d      0x368 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
+ .debug_line    0x00002495       0x80 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_INT.o)
+ .debug_line    0x00002515      0x17d .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
+ .debug_line    0x00002692      0x19d .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_theACLK.o)
+ .debug_line    0x0000282f       0x94 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(SYNC_IN.o)
+ .debug_line    0x000028c3      0x137 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
+ .debug_line    0x000029fa       0x83 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ADC.o)
+ .debug_line    0x00002a7d       0xca .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
+ .debug_line    0x00002b47       0x83 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ref.o)
+ .debug_line    0x00002bca       0xac .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_AMux.o)
+ .debug_line    0x00002c76       0xa9 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
+ .debug_line    0x00002d1f       0x66 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyBootAsmGnu.o)
+ .debug_line    0x00002d85      0x21a .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyFlash.o)
+ .debug_line    0x00002f9f      0x260 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CySpc.o)
 
-.debug_frame    0x00000000     0x2230
+.debug_frame    0x00000000     0x2168
  *(.debug_frame)
  .debug_frame   0x00000000      0x2e0 .\CortexM3\ARM_GCC_541\Debug\main.o
- .debug_frame   0x000002e0      0x118 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
- .debug_frame   0x000003f8       0xb8 .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
- .debug_frame   0x000004b0      0x738 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyLib.o)
- .debug_frame   0x00000be8      0x1f8 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(cyPm.o)
- .debug_frame   0x00000de0      0x104 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_DelSig.o)
- .debug_frame   0x00000ee4      0x104 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_Timer.o)
- .debug_frame   0x00000fe8      0x124 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
- .debug_frame   0x0000110c       0x78 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_ref.o)
- .debug_frame   0x00001184      0x25c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART.o)
- .debug_frame   0x000013e0       0x30 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_INT.o)
- .debug_frame   0x00001410       0xe0 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_IntClock.o)
- .debug_frame   0x000014f0       0x9c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
- .debug_frame   0x0000158c       0xb4 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(VDAC.o)
- .debug_frame   0x00001640      0x28c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
- .debug_frame   0x000018cc       0x50 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_INT.o)
- .debug_frame   0x0000191c       0xe0 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
- .debug_frame   0x000019fc      0x100 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_theACLK.o)
- .debug_frame   0x00001afc       0x50 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(SYNC_IN.o)
- .debug_frame   0x00001b4c      0x104 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
- .debug_frame   0x00001c50       0x4c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ADC.o)
- .debug_frame   0x00001c9c       0x9c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
- .debug_frame   0x00001d38       0x4c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ref.o)
- .debug_frame   0x00001d84       0x64 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_AMux.o)
- .debug_frame   0x00001de8       0x78 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
- .debug_frame   0x00001e60      0x194 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyFlash.o)
- .debug_frame   0x00001ff4      0x180 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CySpc.o)
- .debug_frame   0x00002174       0x20 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-errno.o)
- .debug_frame   0x00002194       0x28 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-exit.o)
- .debug_frame   0x000021bc       0x2c c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-init.o)
- .debug_frame   0x000021e8       0x28 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-memcpy-stub.o)
- .debug_frame   0x00002210       0x20 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-memset.o)
+ .debug_frame   0x000002e0      0x104 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
+ .debug_frame   0x000003e4       0xb8 .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
+ .debug_frame   0x0000049c      0x738 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyLib.o)
+ .debug_frame   0x00000bd4      0x1f8 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(cyPm.o)
+ .debug_frame   0x00000dcc      0x104 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_DelSig.o)
+ .debug_frame   0x00000ed0      0x104 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_Timer.o)
+ .debug_frame   0x00000fd4      0x124 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Timer.o)
+ .debug_frame   0x000010f8       0x78 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_ref.o)
+ .debug_frame   0x00001170      0x25c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART.o)
+ .debug_frame   0x000013cc       0x30 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_INT.o)
+ .debug_frame   0x000013fc       0xe0 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_IntClock.o)
+ .debug_frame   0x000014dc       0x9c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
+ .debug_frame   0x00001578      0x28c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
+ .debug_frame   0x00001804       0x50 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_INT.o)
+ .debug_frame   0x00001854       0xe0 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
+ .debug_frame   0x00001934      0x100 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_theACLK.o)
+ .debug_frame   0x00001a34       0x50 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(SYNC_IN.o)
+ .debug_frame   0x00001a84      0x104 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
+ .debug_frame   0x00001b88       0x4c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ADC.o)
+ .debug_frame   0x00001bd4       0x9c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
+ .debug_frame   0x00001c70       0x4c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ref.o)
+ .debug_frame   0x00001cbc       0x64 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_AMux.o)
+ .debug_frame   0x00001d20       0x78 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
+ .debug_frame   0x00001d98      0x194 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyFlash.o)
+ .debug_frame   0x00001f2c      0x180 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CySpc.o)
+ .debug_frame   0x000020ac       0x20 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-errno.o)
+ .debug_frame   0x000020cc       0x28 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-exit.o)
+ .debug_frame   0x000020f4       0x2c c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-init.o)
+ .debug_frame   0x00002120       0x28 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-memcpy-stub.o)
+ .debug_frame   0x00002148       0x20 c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-memset.o)
 
-.debug_str      0x00000000     0x2adb
+.debug_str      0x00000000     0x2a5b
  *(.debug_str)
  .debug_str     0x00000000      0x66f .\CortexM3\ARM_GCC_541\Debug\main.o
                                 0x6ef (size before relaxing)
@@ -1596,36 +1560,34 @@ END GROUP
                                 0x32e (size before relaxing)
  .debug_str     0x00001e45       0x99 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
                                 0x23b (size before relaxing)
- .debug_str     0x00001ede       0x80 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(VDAC.o)
-                                0x20d (size before relaxing)
- .debug_str     0x00001f5e      0x2fb .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
+ .debug_str     0x00001ede      0x2fb .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
                                 0x5c1 (size before relaxing)
- .debug_str     0x00002259       0x45 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_INT.o)
+ .debug_str     0x000021d9       0x45 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_INT.o)
                                 0x1b8 (size before relaxing)
- .debug_str     0x0000229e      0x12a .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
+ .debug_str     0x0000221e      0x12a .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
                                 0x33a (size before relaxing)
- .debug_str     0x000023c8      0x14f .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_theACLK.o)
+ .debug_str     0x00002348      0x14f .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_theACLK.o)
                                 0x359 (size before relaxing)
- .debug_str     0x00002517       0x63 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(SYNC_IN.o)
+ .debug_str     0x00002497       0x63 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(SYNC_IN.o)
                                 0x1e4 (size before relaxing)
- .debug_str     0x0000257a      0x119 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
+ .debug_str     0x000024fa      0x119 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
                                 0x2e4 (size before relaxing)
- .debug_str     0x00002693       0x5b .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ADC.o)
+ .debug_str     0x00002613       0x5b .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ADC.o)
                                 0x1d8 (size before relaxing)
- .debug_str     0x000026ee       0x6e .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
+ .debug_str     0x0000266e       0x6e .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
                                 0x213 (size before relaxing)
- .debug_str     0x0000275c       0x54 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ref.o)
+ .debug_str     0x000026dc       0x54 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ref.o)
                                 0x1d8 (size before relaxing)
- .debug_str     0x000027b0       0x5f .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_AMux.o)
+ .debug_str     0x00002730       0x5f .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_AMux.o)
                                 0x1f7 (size before relaxing)
- .debug_str     0x0000280f       0x65 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
+ .debug_str     0x0000278f       0x65 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
                                 0x1f6 (size before relaxing)
- .debug_str     0x00002874      0x1bb .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyFlash.o)
+ .debug_str     0x000027f4      0x1bb .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyFlash.o)
                                 0x3b8 (size before relaxing)
- .debug_str     0x00002a2f       0xac .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CySpc.o)
+ .debug_str     0x000029af       0xac .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CySpc.o)
                                 0x330 (size before relaxing)
 
-.debug_loc      0x00000000     0x2fe9
+.debug_loc      0x00000000     0x2f70
  *(.debug_loc)
  .debug_loc     0x00000000      0x444 .\CortexM3\ARM_GCC_541\Debug\main.o
  .debug_loc     0x00000444      0x219 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
@@ -1640,24 +1602,23 @@ END GROUP
  .debug_loc     0x000017e2       0x45 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_INT.o)
  .debug_loc     0x00001827      0x128 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_IntClock.o)
  .debug_loc     0x0000194f       0x60 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
- .debug_loc     0x000019af       0x79 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(VDAC.o)
- .debug_loc     0x00001a28      0x6ca .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
- .debug_loc     0x000020f2      0x12c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
- .debug_loc     0x0000221e      0x14d .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_theACLK.o)
- .debug_loc     0x0000236b       0x42 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(SYNC_IN.o)
- .debug_loc     0x000023ad       0x56 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
- .debug_loc     0x00002403       0x21 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ADC.o)
- .debug_loc     0x00002424       0x60 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
- .debug_loc     0x00002484       0x21 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ref.o)
- .debug_loc     0x000024a5       0x6c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_AMux.o)
- .debug_loc     0x00002511       0x21 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
- .debug_loc     0x00002532      0x3b2 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyFlash.o)
- .debug_loc     0x000028e4      0x705 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CySpc.o)
+ .debug_loc     0x000019af      0x6ca .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
+ .debug_loc     0x00002079      0x12c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
+ .debug_loc     0x000021a5      0x14d .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_theACLK.o)
+ .debug_loc     0x000022f2       0x42 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(SYNC_IN.o)
+ .debug_loc     0x00002334       0x56 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
+ .debug_loc     0x0000238a       0x21 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ADC.o)
+ .debug_loc     0x000023ab       0x60 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
+ .debug_loc     0x0000240b       0x21 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ref.o)
+ .debug_loc     0x0000242c       0x6c .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_AMux.o)
+ .debug_loc     0x00002498       0x21 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
+ .debug_loc     0x000024b9      0x3b2 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyFlash.o)
+ .debug_loc     0x0000286b      0x705 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CySpc.o)
 
 .debug_macinfo
  *(.debug_macinfo)
 
-.debug_ranges   0x00000000      0xc10
+.debug_ranges   0x00000000      0xbc8
  *(.debug_ranges)
  .debug_ranges  0x00000000       0xe8 .\CortexM3\ARM_GCC_541\Debug\main.o
  .debug_ranges  0x000000e8       0x58 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
@@ -1672,20 +1633,19 @@ END GROUP
  .debug_ranges  0x00000700       0x18 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_INT.o)
  .debug_ranges  0x00000718       0x60 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_IntClock.o)
  .debug_ranges  0x00000778       0x38 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
- .debug_ranges  0x000007b0       0x48 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(VDAC.o)
- .debug_ranges  0x000007f8       0xd8 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
- .debug_ranges  0x000008d0       0x28 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_INT.o)
- .debug_ranges  0x000008f8       0x60 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
- .debug_ranges  0x00000958       0x70 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_theACLK.o)
- .debug_ranges  0x000009c8       0x28 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(SYNC_IN.o)
- .debug_ranges  0x000009f0       0x70 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
- .debug_ranges  0x00000a60       0x20 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ADC.o)
- .debug_ranges  0x00000a80       0x38 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
- .debug_ranges  0x00000ab8       0x20 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ref.o)
- .debug_ranges  0x00000ad8       0x20 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_AMux.o)
- .debug_ranges  0x00000af8       0x30 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
- .debug_ranges  0x00000b28       0x78 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyFlash.o)
- .debug_ranges  0x00000ba0       0x70 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CySpc.o)
+ .debug_ranges  0x000007b0       0xd8 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
+ .debug_ranges  0x00000888       0x28 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_INT.o)
+ .debug_ranges  0x000008b0       0x60 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
+ .debug_ranges  0x00000910       0x70 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_theACLK.o)
+ .debug_ranges  0x00000980       0x28 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(SYNC_IN.o)
+ .debug_ranges  0x000009a8       0x70 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
+ .debug_ranges  0x00000a18       0x20 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ADC.o)
+ .debug_ranges  0x00000a38       0x38 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
+ .debug_ranges  0x00000a70       0x20 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ref.o)
+ .debug_ranges  0x00000a90       0x20 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_AMux.o)
+ .debug_ranges  0x00000ab0       0x30 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
+ .debug_ranges  0x00000ae0       0x78 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyFlash.o)
+ .debug_ranges  0x00000b58       0x70 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CySpc.o)
 
 .comment        0x00000000       0x6e
  .comment       0x00000000       0x6e .\CortexM3\ARM_GCC_541\Debug\main.o
@@ -1703,7 +1663,6 @@ END GROUP
  .comment       0x0000006e       0x6f .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_INT.o)
  .comment       0x0000006e       0x6f .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(UART_IntClock.o)
  .comment       0x0000006e       0x6f .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
- .comment       0x0000006e       0x6f .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(VDAC.o)
  .comment       0x0000006e       0x6f .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
  .comment       0x0000006e       0x6f .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_INT.o)
  .comment       0x0000006e       0x6f .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
@@ -1771,61 +1730,59 @@ END GROUP
  .ARM.attributes
                 0x000002fc       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA_ref.o)
  .ARM.attributes
-                0x0000032f       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(VDAC.o)
+                0x0000032f       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
  .ARM.attributes
-                0x00000362       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC.o)
+                0x00000362       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_INT.o)
  .ARM.attributes
-                0x00000395       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_INT.o)
+                0x00000395       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
  .ARM.attributes
-                0x000003c8       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_Ext_CP_Clk.o)
+                0x000003c8       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_theACLK.o)
  .ARM.attributes
-                0x000003fb       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_theACLK.o)
+                0x000003fb       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(SYNC_IN.o)
  .ARM.attributes
-                0x0000042e       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(SYNC_IN.o)
+                0x0000042e       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
  .ARM.attributes
-                0x00000461       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(isr_SyncIn.o)
+                0x00000461       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ADC.o)
  .ARM.attributes
-                0x00000494       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ADC.o)
+                0x00000494       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
  .ARM.attributes
-                0x000004c7       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(PGA.o)
+                0x000004c7       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ref.o)
  .ARM.attributes
-                0x000004fa       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(LPF_ref.o)
+                0x000004fa       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_AMux.o)
  .ARM.attributes
-                0x0000052d       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(ADC_AMux.o)
+                0x0000052d       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
  .ARM.attributes
-                0x00000560       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(Opa_LP.o)
+                0x00000560       0x21 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyBootAsmGnu.o)
  .ARM.attributes
-                0x00000593       0x21 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyBootAsmGnu.o)
+                0x00000581       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyFlash.o)
  .ARM.attributes
-                0x000005b4       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CyFlash.o)
+                0x000005b4       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CySpc.o)
  .ARM.attributes
-                0x000005e7       0x33 .\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.a(CySpc.o)
+                0x000005e7       0x1d c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m\libgcc.a(_arm_addsubdf3.o)
  .ARM.attributes
-                0x0000061a       0x1d c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m\libgcc.a(_arm_addsubdf3.o)
+                0x00000604       0x1d c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m\libgcc.a(_arm_cmpdf2.o)
  .ARM.attributes
-                0x00000637       0x1d c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m\libgcc.a(_arm_cmpdf2.o)
+                0x00000621       0x1d c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m\libgcc.a(_arm_addsubsf3.o)
  .ARM.attributes
-                0x00000654       0x1d c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m\libgcc.a(_arm_addsubsf3.o)
+                0x0000063e       0x1d c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m\libgcc.a(_arm_muldivsf3.o)
  .ARM.attributes
-                0x00000671       0x1d c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m\libgcc.a(_arm_muldivsf3.o)
+                0x0000065b       0x1d c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m\libgcc.a(_arm_fixunssfsi.o)
  .ARM.attributes
-                0x0000068e       0x1d c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m\libgcc.a(_arm_fixunssfsi.o)
+                0x00000678       0x2d c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-errno.o)
  .ARM.attributes
-                0x000006ab       0x2d c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-errno.o)
+                0x000006a5       0x2d c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-exit.o)
  .ARM.attributes
-                0x000006d8       0x2d c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-exit.o)
+                0x000006d2       0x2d c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-impure.o)
  .ARM.attributes
-                0x00000705       0x2d c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-impure.o)
+                0x000006ff       0x2d c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-init.o)
  .ARM.attributes
-                0x00000732       0x2d c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-init.o)
+                0x0000072c       0x2d c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-memcpy-stub.o)
  .ARM.attributes
-                0x0000075f       0x2d c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-memcpy-stub.o)
+                0x00000759       0x2d c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-memset.o)
  .ARM.attributes
-                0x0000078c       0x2d c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7-m\libg_nano.a(lib_a-memset.o)
+                0x00000786       0x2d c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtend.o
  .ARM.attributes
-                0x000007b9       0x2d c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtend.o
- .ARM.attributes
-                0x000007e6       0x1d c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtn.o
+                0x000007b3       0x1d c:/program files (x86)/cypress/psoc creator/4.4/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7-m/crtn.o
 
 /DISCARD/
  *(.note.GNU-stack)

@@ -1,5 +1,5 @@
 -- Project:   C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\AcondicionamientoAnalogico.cyprj
--- Generated: 06/09/2026 18:09:33
+-- Generated: 06/10/2026 15:43:02
 -- PSoC Creator  4.4
 
 ENTITY AcondicionamientoAnalogico IS
@@ -283,17 +283,18 @@ ARCHITECTURE __DEFAULT__ OF AcondicionamientoAnalogico IS
     ATTRIBUTE Location OF \UART:BUART:sRX:RxBitCounter\ : LABEL IS "U(0,1)";
     ATTRIBUTE lib_model OF \UART:BUART:sRX:RxSts\ : LABEL IS "statusicell3";
     ATTRIBUTE Location OF \UART:BUART:sRX:RxSts\ : LABEL IS "U(1,1)";
+    ATTRIBUTE Location OF \VDAC_refIn:viDAC8\ : LABEL IS "F(VIDAC,3)";
     ATTRIBUTE Location OF \Opa_LP:ABuf\ : LABEL IS "F(OpAmp,2)";
-    ATTRIBUTE Location OF autoVrefComparator_0 : LABEL IS "F(Comparator,1)";
     ATTRIBUTE Location OF \LPF_ADC:cy_psoc3_lpf_1\ : LABEL IS "F(LPF,0)";
     ATTRIBUTE Location OF \ADC:DSM\ : LABEL IS "F(DSM,0)";
     ATTRIBUTE Location OF \ADC:IRQ\ : LABEL IS "[IntrContainer=(0)][IntrId=(29)]";
     ATTRIBUTE Location OF \ADC:DEC\ : LABEL IS "F(Decimator,0)";
     ATTRIBUTE Location OF \LPF_ref:cy_psoc3_lpf_1\ : LABEL IS "F(LPF,1)";
     ATTRIBUTE Location OF \Opa_ref:ABuf\ : LABEL IS "F(OpAmp,1)";
-    ATTRIBUTE Location OF \PGA_ref:SC\ : LABEL IS "F(SC,3)";
-    ATTRIBUTE Location OF \PGA:SC\ : LABEL IS "F(SC,1)";
-    ATTRIBUTE Location OF \VDAC:viDAC8\ : LABEL IS "F(VIDAC,0)";
+    ATTRIBUTE Location OF \PGA_ref:SC\ : LABEL IS "F(SC,0)";
+    ATTRIBUTE Location OF \VDAC_LP:viDAC8\ : LABEL IS "F(VIDAC,1)";
+    ATTRIBUTE Location OF \PGA:SC\ : LABEL IS "F(SC,3)";
+    ATTRIBUTE Location OF \VDAC_PGA:viDAC8\ : LABEL IS "F(VIDAC,0)";
     ATTRIBUTE Location OF isr_DelSig : LABEL IS "[IntrContainer=(0)][IntrId=(2)]";
     ATTRIBUTE lib_model OF \EdgeDetect:last\ : LABEL IS "macrocell12";
     ATTRIBUTE Location OF \EdgeDetect:last\ : LABEL IS "U(1,1)";
@@ -419,12 +420,6 @@ ARCHITECTURE __DEFAULT__ OF AcondicionamientoAnalogico IS
             dclk_glb_ff_5 : OUT std_ulogic;
             dclk_glb_ff_6 : OUT std_ulogic;
             dclk_glb_ff_7 : OUT std_ulogic);
-    END COMPONENT;
-    COMPONENT comparatorcell
-        PORT (
-            out : OUT std_ulogic;
-            clk_udb : IN std_ulogic;
-            clock : IN std_ulogic);
     END COMPONENT;
     COMPONENT controlcell
         PORT (
@@ -2154,13 +2149,19 @@ BEGIN
             status_0 => open,
             interrupt => Net_2329);
 
+    \VDAC_refIn:viDAC8\:vidaccell
+        GENERIC MAP(
+            cy_registers => "",
+            is_all_if_any => 0,
+            reg_data => 0)
+        PORT MAP(
+            reset => open,
+            idir => open,
+            ioff => open);
+
     \Opa_LP:ABuf\:abufcell
         GENERIC MAP(
             cy_registers => "");
-
-    autoVrefComparator_0:comparatorcell
-        PORT MAP(
-            clock => open);
 
     \LPF_ADC:cy_psoc3_lpf_1\:lpfcell
         GENERIC MAP(
@@ -2226,6 +2227,16 @@ BEGIN
             dyn_cntl_udb => open,
             modout => \PGA_ref:Net_41\);
 
+    \VDAC_LP:viDAC8\:vidaccell
+        GENERIC MAP(
+            cy_registers => "",
+            is_all_if_any => 0,
+            reg_data => 0)
+        PORT MAP(
+            reset => open,
+            idir => open,
+            ioff => open);
+
     \PGA:SC\:sccell
         GENERIC MAP(
             cy_registers => "")
@@ -2233,7 +2244,7 @@ BEGIN
             dyn_cntl_udb => open,
             modout => \PGA:Net_41\);
 
-    \VDAC:viDAC8\:vidaccell
+    \VDAC_PGA:viDAC8\:vidaccell
         GENERIC MAP(
             cy_registers => "",
             is_all_if_any => 0,

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: VDAC_pga.c  
+* File Name: VDAC_PGA.c  
 * Version 1.90
 *
 * Description:
@@ -18,25 +18,25 @@
 *******************************************************************************/
 
 #include "cytypes.h"
-#include "VDAC_pga.h"
+#include "VDAC_PGA.h"
 
 #if (CY_PSOC5A)
 #include <CyLib.h>
 #endif /* CY_PSOC5A */
 
-uint8 VDAC_pga_initVar = 0u;
+uint8 VDAC_PGA_initVar = 0u;
 
 #if (CY_PSOC5A)
-    static uint8 VDAC_pga_restoreVal = 0u;
+    static uint8 VDAC_PGA_restoreVal = 0u;
 #endif /* CY_PSOC5A */
 
 #if (CY_PSOC5A)
-    static VDAC_pga_backupStruct VDAC_pga_backup;
+    static VDAC_PGA_backupStruct VDAC_PGA_backup;
 #endif /* CY_PSOC5A */
 
 
 /*******************************************************************************
-* Function Name: VDAC_pga_Init
+* Function Name: VDAC_PGA_Init
 ********************************************************************************
 * Summary:
 *  Initialize to the schematic state.
@@ -52,32 +52,32 @@ uint8 VDAC_pga_initVar = 0u;
 * Side Effects:
 *
 *******************************************************************************/
-void VDAC_pga_Init(void) 
+void VDAC_PGA_Init(void) 
 {
-    VDAC_pga_CR0 = (VDAC_pga_MODE_V );
+    VDAC_PGA_CR0 = (VDAC_PGA_MODE_V );
 
     /* Set default data source */
-    #if(VDAC_pga_DEFAULT_DATA_SRC != 0 )
-        VDAC_pga_CR1 = (VDAC_pga_DEFAULT_CNTL | VDAC_pga_DACBUS_ENABLE) ;
+    #if(VDAC_PGA_DEFAULT_DATA_SRC != 0 )
+        VDAC_PGA_CR1 = (VDAC_PGA_DEFAULT_CNTL | VDAC_PGA_DACBUS_ENABLE) ;
     #else
-        VDAC_pga_CR1 = (VDAC_pga_DEFAULT_CNTL | VDAC_pga_DACBUS_DISABLE) ;
-    #endif /* (VDAC_pga_DEFAULT_DATA_SRC != 0 ) */
+        VDAC_PGA_CR1 = (VDAC_PGA_DEFAULT_CNTL | VDAC_PGA_DACBUS_DISABLE) ;
+    #endif /* (VDAC_PGA_DEFAULT_DATA_SRC != 0 ) */
 
     /* Set default strobe mode */
-    #if(VDAC_pga_DEFAULT_STRB != 0)
-        VDAC_pga_Strobe |= VDAC_pga_STRB_EN ;
-    #endif/* (VDAC_pga_DEFAULT_STRB != 0) */
+    #if(VDAC_PGA_DEFAULT_STRB != 0)
+        VDAC_PGA_Strobe |= VDAC_PGA_STRB_EN ;
+    #endif/* (VDAC_PGA_DEFAULT_STRB != 0) */
 
     /* Set default range */
-    VDAC_pga_SetRange(VDAC_pga_DEFAULT_RANGE); 
+    VDAC_PGA_SetRange(VDAC_PGA_DEFAULT_RANGE); 
 
     /* Set default speed */
-    VDAC_pga_SetSpeed(VDAC_pga_DEFAULT_SPEED);
+    VDAC_PGA_SetSpeed(VDAC_PGA_DEFAULT_SPEED);
 }
 
 
 /*******************************************************************************
-* Function Name: VDAC_pga_Enable
+* Function Name: VDAC_PGA_Enable
 ********************************************************************************
 * Summary:
 *  Enable the VDAC8
@@ -93,25 +93,25 @@ void VDAC_pga_Init(void)
 * Side Effects:
 *
 *******************************************************************************/
-void VDAC_pga_Enable(void) 
+void VDAC_PGA_Enable(void) 
 {
-    VDAC_pga_PWRMGR |= VDAC_pga_ACT_PWR_EN;
-    VDAC_pga_STBY_PWRMGR |= VDAC_pga_STBY_PWR_EN;
+    VDAC_PGA_PWRMGR |= VDAC_PGA_ACT_PWR_EN;
+    VDAC_PGA_STBY_PWRMGR |= VDAC_PGA_STBY_PWR_EN;
 
     /*This is to restore the value of register CR0 ,
     which is modified  in Stop API , this prevents misbehaviour of VDAC */
     #if (CY_PSOC5A)
-        if(VDAC_pga_restoreVal == 1u) 
+        if(VDAC_PGA_restoreVal == 1u) 
         {
-             VDAC_pga_CR0 = VDAC_pga_backup.data_value;
-             VDAC_pga_restoreVal = 0u;
+             VDAC_PGA_CR0 = VDAC_PGA_backup.data_value;
+             VDAC_PGA_restoreVal = 0u;
         }
     #endif /* CY_PSOC5A */
 }
 
 
 /*******************************************************************************
-* Function Name: VDAC_pga_Start
+* Function Name: VDAC_PGA_Start
 ********************************************************************************
 *
 * Summary:
@@ -126,29 +126,29 @@ void VDAC_pga_Enable(void)
 *  void 
 *
 * Global variables:
-*  VDAC_pga_initVar: Is modified when this function is called for the 
+*  VDAC_PGA_initVar: Is modified when this function is called for the 
 *  first time. Is used to ensure that initialization happens only once.
 *
 *******************************************************************************/
-void VDAC_pga_Start(void)  
+void VDAC_PGA_Start(void)  
 {
     /* Hardware initiazation only needs to occure the first time */
-    if(VDAC_pga_initVar == 0u)
+    if(VDAC_PGA_initVar == 0u)
     { 
-        VDAC_pga_Init();
-        VDAC_pga_initVar = 1u;
+        VDAC_PGA_Init();
+        VDAC_PGA_initVar = 1u;
     }
 
     /* Enable power to DAC */
-    VDAC_pga_Enable();
+    VDAC_PGA_Enable();
 
     /* Set default value */
-    VDAC_pga_SetValue(VDAC_pga_DEFAULT_DATA); 
+    VDAC_PGA_SetValue(VDAC_PGA_DEFAULT_DATA); 
 }
 
 
 /*******************************************************************************
-* Function Name: VDAC_pga_Stop
+* Function Name: VDAC_PGA_Stop
 ********************************************************************************
 *
 * Summary:
@@ -165,24 +165,24 @@ void VDAC_pga_Start(void)
 * Side Effects:
 *
 *******************************************************************************/
-void VDAC_pga_Stop(void) 
+void VDAC_PGA_Stop(void) 
 {
     /* Disble power to DAC */
-    VDAC_pga_PWRMGR &= (uint8)(~VDAC_pga_ACT_PWR_EN);
-    VDAC_pga_STBY_PWRMGR &= (uint8)(~VDAC_pga_STBY_PWR_EN);
+    VDAC_PGA_PWRMGR &= (uint8)(~VDAC_PGA_ACT_PWR_EN);
+    VDAC_PGA_STBY_PWRMGR &= (uint8)(~VDAC_PGA_STBY_PWR_EN);
 
     /* This is a work around for PSoC5A  ,
     this sets VDAC to current mode with output off */
     #if (CY_PSOC5A)
-        VDAC_pga_backup.data_value = VDAC_pga_CR0;
-        VDAC_pga_CR0 = VDAC_pga_CUR_MODE_OUT_OFF;
-        VDAC_pga_restoreVal = 1u;
+        VDAC_PGA_backup.data_value = VDAC_PGA_CR0;
+        VDAC_PGA_CR0 = VDAC_PGA_CUR_MODE_OUT_OFF;
+        VDAC_PGA_restoreVal = 1u;
     #endif /* CY_PSOC5A */
 }
 
 
 /*******************************************************************************
-* Function Name: VDAC_pga_SetSpeed
+* Function Name: VDAC_PGA_SetSpeed
 ********************************************************************************
 *
 * Summary:
@@ -199,16 +199,16 @@ void VDAC_pga_Stop(void)
 * Side Effects:
 *
 *******************************************************************************/
-void VDAC_pga_SetSpeed(uint8 speed) 
+void VDAC_PGA_SetSpeed(uint8 speed) 
 {
     /* Clear power mask then write in new value */
-    VDAC_pga_CR0 &= (uint8)(~VDAC_pga_HS_MASK);
-    VDAC_pga_CR0 |=  (speed & VDAC_pga_HS_MASK);
+    VDAC_PGA_CR0 &= (uint8)(~VDAC_PGA_HS_MASK);
+    VDAC_PGA_CR0 |=  (speed & VDAC_PGA_HS_MASK);
 }
 
 
 /*******************************************************************************
-* Function Name: VDAC_pga_SetRange
+* Function Name: VDAC_PGA_SetRange
 ********************************************************************************
 *
 * Summary:
@@ -225,16 +225,16 @@ void VDAC_pga_SetSpeed(uint8 speed)
 * Side Effects:
 *
 *******************************************************************************/
-void VDAC_pga_SetRange(uint8 range) 
+void VDAC_PGA_SetRange(uint8 range) 
 {
-    VDAC_pga_CR0 &= (uint8)(~VDAC_pga_RANGE_MASK);      /* Clear existing mode */
-    VDAC_pga_CR0 |= (range & VDAC_pga_RANGE_MASK);      /*  Set Range  */
-    VDAC_pga_DacTrim();
+    VDAC_PGA_CR0 &= (uint8)(~VDAC_PGA_RANGE_MASK);      /* Clear existing mode */
+    VDAC_PGA_CR0 |= (range & VDAC_PGA_RANGE_MASK);      /*  Set Range  */
+    VDAC_PGA_DacTrim();
 }
 
 
 /*******************************************************************************
-* Function Name: VDAC_pga_SetValue
+* Function Name: VDAC_PGA_SetValue
 ********************************************************************************
 *
 * Summary:
@@ -251,25 +251,25 @@ void VDAC_pga_SetRange(uint8 range)
 * Side Effects:
 *
 *******************************************************************************/
-void VDAC_pga_SetValue(uint8 value) 
+void VDAC_PGA_SetValue(uint8 value) 
 {
     #if (CY_PSOC5A)
-        uint8 VDAC_pga_intrStatus = CyEnterCriticalSection();
+        uint8 VDAC_PGA_intrStatus = CyEnterCriticalSection();
     #endif /* CY_PSOC5A */
 
-    VDAC_pga_Data = value;                /*  Set Value  */
+    VDAC_PGA_Data = value;                /*  Set Value  */
 
     /* PSOC5A requires a double write */
     /* Exit Critical Section */
     #if (CY_PSOC5A)
-        VDAC_pga_Data = value;
-        CyExitCriticalSection(VDAC_pga_intrStatus);
+        VDAC_PGA_Data = value;
+        CyExitCriticalSection(VDAC_PGA_intrStatus);
     #endif /* CY_PSOC5A */
 }
 
 
 /*******************************************************************************
-* Function Name: VDAC_pga_DacTrim
+* Function Name: VDAC_PGA_DacTrim
 ********************************************************************************
 *
 * Summary:
@@ -286,12 +286,12 @@ void VDAC_pga_SetValue(uint8 value)
 * Side Effects:
 *
 *******************************************************************************/
-void VDAC_pga_DacTrim(void) 
+void VDAC_PGA_DacTrim(void) 
 {
     uint8 mode;
 
-    mode = (uint8)((VDAC_pga_CR0 & VDAC_pga_RANGE_MASK) >> 2) + VDAC_pga_TRIM_M7_1V_RNG_OFFSET;
-    VDAC_pga_TR = CY_GET_XTND_REG8((uint8 *)(VDAC_pga_DAC_TRIM_BASE + mode));
+    mode = (uint8)((VDAC_PGA_CR0 & VDAC_PGA_RANGE_MASK) >> 2) + VDAC_PGA_TRIM_M7_1V_RNG_OFFSET;
+    VDAC_PGA_TR = CY_GET_XTND_REG8((uint8 *)(VDAC_PGA_DAC_TRIM_BASE + mode));
 }
 
 

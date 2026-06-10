@@ -1,6 +1,6 @@
 // ======================================================================
 // AcondicionamientoAnalogico.v generated from TopDesign.cysch
-// 06/09/2026 at 18:09
+// 06/10/2026 at 15:42
 // This file is auto generated. ANY EDITS YOU MAKE MAY BE LOST WHEN THIS FILE IS REGENERATED!!!
 // ======================================================================
 
@@ -422,6 +422,53 @@ module UART_v2_50_1 (
 
 endmodule
 
+// VDAC8_v1_90(Data_Source=0, Initial_Value=255, Strobe_Mode=0, VDAC_Range=0, VDAC_Speed=0, Voltage=1020, CY_API_CALLBACK_HEADER_INCLUDE=#include "cyapicallbacks.h", CY_COMMENT=, CY_COMPONENT_NAME=VDAC8_v1_90, CY_CONFIG_TITLE=VDAC_refIn, CY_CONST_CONFIG=true, CY_CONTROL_FILE=<:default:>, CY_DATASHEET_FILE=<:default:>, CY_FITTER_NAME=VDAC_refIn, CY_INSTANCE_SHORT_NAME=VDAC_refIn, CY_MAJOR_VERSION=1, CY_MINOR_VERSION=90, CY_PDL_DRIVER_NAME=, CY_PDL_DRIVER_REQ_VERSION=, CY_PDL_DRIVER_SUBGROUP=, CY_PDL_DRIVER_VARIANT=, CY_REMOVE=false, CY_SUPPRESS_API_GEN=false, CY_VERSION=PSoC Creator  4.4, INSTANCE_NAME=VDAC_refIn, )
+module VDAC8_v1_90_2 (
+    data,
+    strobe,
+    vOut);
+    input      [7:0] data;
+    input       strobe;
+    inout       vOut;
+    electrical  vOut;
+
+    parameter Data_Source = 0;
+    parameter Initial_Value = 255;
+    parameter Strobe_Mode = 0;
+
+    electrical  Net_77;
+          wire  Net_83;
+          wire  Net_82;
+          wire  Net_81;
+
+    cy_psoc3_vidac8_v1_0 viDAC8 (
+        .data(data[7:0]),
+        .idir(Net_81),
+        .ioff(Net_82),
+        .iout(Net_77),
+        .reset(Net_83),
+        .strobe(strobe),
+        .strobe_udb(strobe),
+        .vout(vOut));
+    defparam viDAC8.is_all_if_any = 0;
+    defparam viDAC8.reg_data = 0;
+
+    ZeroTerminal ZeroTerminal_1 (
+        .z(Net_81));
+
+    ZeroTerminal ZeroTerminal_2 (
+        .z(Net_82));
+
+    ZeroTerminal ZeroTerminal_3 (
+        .z(Net_83));
+
+    cy_analog_noconnect_v1_0 cy_analog_noconnect_1 (
+        .noconnect(Net_77));
+
+
+
+endmodule
+
 // Component: cy_analog_virtualmux_v1_0
 `ifdef CY_BLK_DIR
 `undef CY_BLK_DIR
@@ -436,7 +483,7 @@ endmodule
 `endif
 
 // OpAmp_v1_90(Mode=0, Power=3, CY_API_CALLBACK_HEADER_INCLUDE=#include "cyapicallbacks.h", CY_COMMENT=, CY_COMPONENT_NAME=OpAmp_v1_90, CY_CONFIG_TITLE=Opa_LP, CY_CONST_CONFIG=true, CY_CONTROL_FILE=<:default:>, CY_DATASHEET_FILE=<:default:>, CY_FITTER_NAME=Opa_LP, CY_INSTANCE_SHORT_NAME=Opa_LP, CY_MAJOR_VERSION=1, CY_MINOR_VERSION=90, CY_PDL_DRIVER_NAME=, CY_PDL_DRIVER_REQ_VERSION=, CY_PDL_DRIVER_SUBGROUP=, CY_PDL_DRIVER_VARIANT=, CY_REMOVE=false, CY_SUPPRESS_API_GEN=false, CY_VERSION=PSoC Creator  4.4, INSTANCE_NAME=Opa_LP, )
-module OpAmp_v1_90_2 (
+module OpAmp_v1_90_3 (
     Vminus,
     Vout,
     Vplus);
@@ -465,7 +512,7 @@ module OpAmp_v1_90_2 (
 endmodule
 
 // Analog_LPF_v1_0(Cutoff_Frequency=3, CY_API_CALLBACK_HEADER_INCLUDE=#include "cyapicallbacks.h", CY_COMMENT=, CY_COMPONENT_NAME=Analog_LPF_v1_0, CY_CONFIG_TITLE=LPF_ADC, CY_CONST_CONFIG=true, CY_CONTROL_FILE=<:default:>, CY_DATASHEET_FILE=<:default:>, CY_FITTER_NAME=LPF_ADC, CY_INSTANCE_SHORT_NAME=LPF_ADC, CY_MAJOR_VERSION=1, CY_MINOR_VERSION=0, CY_PDL_DRIVER_NAME=, CY_PDL_DRIVER_REQ_VERSION=, CY_PDL_DRIVER_SUBGROUP=, CY_PDL_DRIVER_VARIANT=, CY_REMOVE=false, CY_SUPPRESS_API_GEN=false, CY_VERSION=PSoC Creator  4.4, INSTANCE_NAME=LPF_ADC, )
-module Analog_LPF_v1_0_3 (
+module Analog_LPF_v1_0_4 (
     Vin,
     Vout);
     inout       Vin;
@@ -523,7 +570,7 @@ endmodule
 `endif
 
 // ADC_DelSig_v3_30(ADC_Alignment=1, ADC_Alignment_Config2=0, ADC_Alignment_Config3=0, ADC_Alignment_Config4=0, ADC_Charge_Pump_Clock=true, ADC_Clock=1, ADC_CLOCK_FREQUENCY=3072000, ADC_Input_Mode=1, ADC_Input_Range=2, ADC_Input_Range_Config2=0, ADC_Input_Range_Config3=0, ADC_Input_Range_Config4=0, ADC_Power=1, ADC_Reference=6, ADC_Reference_Config2=0, ADC_Reference_Config3=0, ADC_Reference_Config4=0, ADC_Resolution=18, ADC_Resolution_Config2=16, ADC_Resolution_Config3=16, ADC_Resolution_Config4=16, Clock_Frequency=64000, Comment_Config1=Default Config, Comment_Config2=Second Config, Comment_Config3=Third Config, Comment_Config4=Fourth Config, Config1_Name=CFG1, Config2_Name=CFG2, Config3_Name=CFG3, Config4_Name=CFG4, Configs=1, Conversion_Mode=2, Conversion_Mode_Config2=2, Conversion_Mode_Config3=2, Conversion_Mode_Config4=2, Enable_Vref_Vss=false, EnableModulatorInput=false, Input_Buffer_Gain=1, Input_Buffer_Gain_Config2=1, Input_Buffer_Gain_Config3=1, Input_Buffer_Gain_Config4=1, Input_Buffer_Mode=0, Input_Buffer_Mode_Config2=1, Input_Buffer_Mode_Config3=1, Input_Buffer_Mode_Config4=1, Ref_Voltage=1.25, Ref_Voltage_Config2=1.024, Ref_Voltage_Config3=1.024, Ref_Voltage_Config4=1.024, rm_int=false, Sample_Rate=3000, Sample_Rate_Config2=10000, Sample_Rate_Config3=10000, Sample_Rate_Config4=10000, Start_of_Conversion=0, Vdda_Value=5, CY_API_CALLBACK_HEADER_INCLUDE=#include "cyapicallbacks.h", CY_COMMENT=, CY_COMPONENT_NAME=ADC_DelSig_v3_30, CY_CONFIG_TITLE=ADC, CY_CONST_CONFIG=true, CY_CONTROL_FILE=<:default:>, CY_DATASHEET_FILE=<:default:>, CY_FITTER_NAME=ADC, CY_INSTANCE_SHORT_NAME=ADC, CY_MAJOR_VERSION=3, CY_MINOR_VERSION=30, CY_PDL_DRIVER_NAME=, CY_PDL_DRIVER_REQ_VERSION=, CY_PDL_DRIVER_SUBGROUP=, CY_PDL_DRIVER_VARIANT=, CY_REMOVE=false, CY_SUPPRESS_API_GEN=false, CY_VERSION=PSoC Creator  4.4, INSTANCE_NAME=ADC, )
-module ADC_DelSig_v3_30_4 (
+module ADC_DelSig_v3_30_5 (
     aclk,
     eoc,
     mi,
@@ -793,7 +840,7 @@ module ADC_DelSig_v3_30_4 (
 endmodule
 
 // Analog_LPF_v1_0(Cutoff_Frequency=3, CY_API_CALLBACK_HEADER_INCLUDE=#include "cyapicallbacks.h", CY_COMMENT=, CY_COMPONENT_NAME=Analog_LPF_v1_0, CY_CONFIG_TITLE=LPF_ref, CY_CONST_CONFIG=true, CY_CONTROL_FILE=<:default:>, CY_DATASHEET_FILE=<:default:>, CY_FITTER_NAME=LPF_ref, CY_INSTANCE_SHORT_NAME=LPF_ref, CY_MAJOR_VERSION=1, CY_MINOR_VERSION=0, CY_PDL_DRIVER_NAME=, CY_PDL_DRIVER_REQ_VERSION=, CY_PDL_DRIVER_SUBGROUP=, CY_PDL_DRIVER_VARIANT=, CY_REMOVE=false, CY_SUPPRESS_API_GEN=false, CY_VERSION=PSoC Creator  4.4, INSTANCE_NAME=LPF_ref, )
-module Analog_LPF_v1_0_5 (
+module Analog_LPF_v1_0_6 (
     Vin,
     Vout);
     inout       Vin;
@@ -812,7 +859,7 @@ module Analog_LPF_v1_0_5 (
 endmodule
 
 // OpAmp_v1_90(Mode=1, Power=3, CY_API_CALLBACK_HEADER_INCLUDE=#include "cyapicallbacks.h", CY_COMMENT=, CY_COMPONENT_NAME=OpAmp_v1_90, CY_CONFIG_TITLE=Opa_ref, CY_CONST_CONFIG=true, CY_CONTROL_FILE=<:default:>, CY_DATASHEET_FILE=<:default:>, CY_FITTER_NAME=Opa_ref, CY_INSTANCE_SHORT_NAME=Opa_ref, CY_MAJOR_VERSION=1, CY_MINOR_VERSION=90, CY_PDL_DRIVER_NAME=, CY_PDL_DRIVER_REQ_VERSION=, CY_PDL_DRIVER_SUBGROUP=, CY_PDL_DRIVER_VARIANT=, CY_REMOVE=false, CY_SUPPRESS_API_GEN=false, CY_VERSION=PSoC Creator  4.4, INSTANCE_NAME=Opa_ref, )
-module OpAmp_v1_90_6 (
+module OpAmp_v1_90_7 (
     Vminus,
     Vout,
     Vplus);
@@ -841,7 +888,7 @@ module OpAmp_v1_90_6 (
 endmodule
 
 // PGA_v2_0(Gain=0, Power=3, VddaValue=5, Vref_Input=0, CY_API_CALLBACK_HEADER_INCLUDE=#include "cyapicallbacks.h", CY_COMMENT=, CY_COMPONENT_NAME=PGA_v2_0, CY_CONFIG_TITLE=PGA_ref, CY_CONST_CONFIG=true, CY_CONTROL_FILE=<:default:>, CY_DATASHEET_FILE=<:default:>, CY_FITTER_NAME=PGA_ref, CY_INSTANCE_SHORT_NAME=PGA_ref, CY_MAJOR_VERSION=2, CY_MINOR_VERSION=0, CY_PDL_DRIVER_NAME=, CY_PDL_DRIVER_REQ_VERSION=, CY_PDL_DRIVER_SUBGROUP=, CY_PDL_DRIVER_VARIANT=, CY_REMOVE=false, CY_SUPPRESS_API_GEN=false, CY_VERSION=PSoC Creator  4.4, INSTANCE_NAME=PGA_ref, )
-module PGA_v2_0_7 (
+module PGA_v2_0_8 (
     Vin,
     Vout,
     Vref);
@@ -894,8 +941,55 @@ module PGA_v2_0_7 (
 
 endmodule
 
+// VDAC8_v1_90(Data_Source=0, Initial_Value=255, Strobe_Mode=0, VDAC_Range=0, VDAC_Speed=0, Voltage=1020, CY_API_CALLBACK_HEADER_INCLUDE=#include "cyapicallbacks.h", CY_COMMENT=, CY_COMPONENT_NAME=VDAC8_v1_90, CY_CONFIG_TITLE=VDAC_LP, CY_CONST_CONFIG=true, CY_CONTROL_FILE=<:default:>, CY_DATASHEET_FILE=<:default:>, CY_FITTER_NAME=VDAC_LP, CY_INSTANCE_SHORT_NAME=VDAC_LP, CY_MAJOR_VERSION=1, CY_MINOR_VERSION=90, CY_PDL_DRIVER_NAME=, CY_PDL_DRIVER_REQ_VERSION=, CY_PDL_DRIVER_SUBGROUP=, CY_PDL_DRIVER_VARIANT=, CY_REMOVE=false, CY_SUPPRESS_API_GEN=false, CY_VERSION=PSoC Creator  4.4, INSTANCE_NAME=VDAC_LP, )
+module VDAC8_v1_90_9 (
+    data,
+    strobe,
+    vOut);
+    input      [7:0] data;
+    input       strobe;
+    inout       vOut;
+    electrical  vOut;
+
+    parameter Data_Source = 0;
+    parameter Initial_Value = 255;
+    parameter Strobe_Mode = 0;
+
+    electrical  Net_77;
+          wire  Net_83;
+          wire  Net_82;
+          wire  Net_81;
+
+    cy_psoc3_vidac8_v1_0 viDAC8 (
+        .data(data[7:0]),
+        .idir(Net_81),
+        .ioff(Net_82),
+        .iout(Net_77),
+        .reset(Net_83),
+        .strobe(strobe),
+        .strobe_udb(strobe),
+        .vout(vOut));
+    defparam viDAC8.is_all_if_any = 0;
+    defparam viDAC8.reg_data = 0;
+
+    ZeroTerminal ZeroTerminal_1 (
+        .z(Net_81));
+
+    ZeroTerminal ZeroTerminal_2 (
+        .z(Net_82));
+
+    ZeroTerminal ZeroTerminal_3 (
+        .z(Net_83));
+
+    cy_analog_noconnect_v1_0 cy_analog_noconnect_1 (
+        .noconnect(Net_77));
+
+
+
+endmodule
+
 // PGA_v2_0(Gain=3, Power=3, VddaValue=5, Vref_Input=1, CY_API_CALLBACK_HEADER_INCLUDE=#include "cyapicallbacks.h", CY_COMMENT=, CY_COMPONENT_NAME=PGA_v2_0, CY_CONFIG_TITLE=PGA, CY_CONST_CONFIG=true, CY_CONTROL_FILE=<:default:>, CY_DATASHEET_FILE=<:default:>, CY_FITTER_NAME=PGA, CY_INSTANCE_SHORT_NAME=PGA, CY_MAJOR_VERSION=2, CY_MINOR_VERSION=0, CY_PDL_DRIVER_NAME=, CY_PDL_DRIVER_REQ_VERSION=, CY_PDL_DRIVER_SUBGROUP=, CY_PDL_DRIVER_VARIANT=, CY_REMOVE=false, CY_SUPPRESS_API_GEN=false, CY_VERSION=PSoC Creator  4.4, INSTANCE_NAME=PGA, )
-module PGA_v2_0_8 (
+module PGA_v2_0_10 (
     Vin,
     Vout,
     Vref);
@@ -948,8 +1042,8 @@ module PGA_v2_0_8 (
 
 endmodule
 
-// VDAC8_v1_90(Data_Source=0, Initial_Value=255, Strobe_Mode=0, VDAC_Range=0, VDAC_Speed=0, Voltage=1020, CY_API_CALLBACK_HEADER_INCLUDE=#include "cyapicallbacks.h", CY_COMMENT=, CY_COMPONENT_NAME=VDAC8_v1_90, CY_CONFIG_TITLE=VDAC, CY_CONST_CONFIG=true, CY_CONTROL_FILE=<:default:>, CY_DATASHEET_FILE=<:default:>, CY_FITTER_NAME=VDAC, CY_INSTANCE_SHORT_NAME=VDAC, CY_MAJOR_VERSION=1, CY_MINOR_VERSION=90, CY_PDL_DRIVER_NAME=, CY_PDL_DRIVER_REQ_VERSION=, CY_PDL_DRIVER_SUBGROUP=, CY_PDL_DRIVER_VARIANT=, CY_REMOVE=false, CY_SUPPRESS_API_GEN=false, CY_VERSION=PSoC Creator  4.4, INSTANCE_NAME=VDAC, )
-module VDAC8_v1_90_9 (
+// VDAC8_v1_90(Data_Source=0, Initial_Value=255, Strobe_Mode=0, VDAC_Range=0, VDAC_Speed=0, Voltage=1020, CY_API_CALLBACK_HEADER_INCLUDE=#include "cyapicallbacks.h", CY_COMMENT=, CY_COMPONENT_NAME=VDAC8_v1_90, CY_CONFIG_TITLE=VDAC_PGA, CY_CONST_CONFIG=true, CY_CONTROL_FILE=<:default:>, CY_DATASHEET_FILE=<:default:>, CY_FITTER_NAME=VDAC_PGA, CY_INSTANCE_SHORT_NAME=VDAC_PGA, CY_MAJOR_VERSION=1, CY_MINOR_VERSION=90, CY_PDL_DRIVER_NAME=, CY_PDL_DRIVER_REQ_VERSION=, CY_PDL_DRIVER_SUBGROUP=, CY_PDL_DRIVER_VARIANT=, CY_REMOVE=false, CY_SUPPRESS_API_GEN=false, CY_VERSION=PSoC Creator  4.4, INSTANCE_NAME=VDAC_PGA, )
+module VDAC8_v1_90_11 (
     data,
     strobe,
     vOut);
@@ -1000,11 +1094,12 @@ module top ;
 
           wire  Net_2785;
           wire [7:0] Net_2784;
+          wire  Net_4144;
+          wire [7:0] Net_4143;
     electrical  Net_2789;
     electrical  Net_2788;
     electrical  Net_2790;
     electrical  Net_2791;
-    electrical  Net_2787;
     electrical  Net_2735;
           wire  Net_2734;
     electrical  Net_2733;
@@ -1014,6 +1109,8 @@ module top ;
     electrical  Net_2786;
     electrical  Net_2719;
     electrical  Net_2777;
+          wire  Net_4140;
+          wire [7:0] Net_4139;
     electrical  Net_2384;
           wire  Net_2334;
           wire  Net_2333;
@@ -1038,9 +1135,11 @@ module top ;
           wire  Net_2338;
           wire  Net_2336;
           wire  Net_2330;
+    electrical  Net_2787;
     electrical  Net_2681;
     electrical  Net_2781;
     electrical  Net_2792;
+    electrical  Net_4138;
     electrical  Net_2720;
     electrical  Net_2724;
     electrical  Net_2763;
@@ -1403,6 +1502,14 @@ module top ;
     defparam ESP_Vdd.port_names = "T1";
     defparam ESP_Vdd.width = 1;
 
+    VDAC8_v1_90_2 VDAC_refIn (
+        .data(8'b00000000),
+        .strobe(1'b0),
+        .vOut(Net_2787));
+    defparam VDAC_refIn.Data_Source = 0;
+    defparam VDAC_refIn.Initial_Value = 255;
+    defparam VDAC_refIn.Strobe_Mode = 0;
+
     cy_annotation_universal_v1_0 R_8 (
         .connect({
             Net_2781,
@@ -1636,10 +1743,10 @@ module top ;
 
 	assign tmpOE__LPm_net = (`CYDEV_CHIP_MEMBER_USED == `CYDEV_CHIP_MEMBER_3A && `CYDEV_CHIP_REVISION_USED < `CYDEV_CHIP_REVISION_3A_ES3) ? ~{1'b1} : {1'b1};
 
-    OpAmp_v1_90_2 Opa_LP (
+    OpAmp_v1_90_3 Opa_LP (
         .Vminus(Net_2719),
         .Vout(Net_2720),
-        .Vplus(Net_2681));
+        .Vplus(Net_4138));
     defparam Opa_LP.Mode = 0;
 
     cy_annotation_universal_v1_0 GND_2 (
@@ -1680,11 +1787,11 @@ module top ;
     defparam D_2.port_names = "A, K";
     defparam D_2.width = 2;
 
-    Analog_LPF_v1_0_3 LPF_ADC (
+    Analog_LPF_v1_0_4 LPF_ADC (
         .Vin(Net_2786),
         .Vout(Net_2628));
 
-    ADC_DelSig_v3_30_4 ADC (
+    ADC_DelSig_v3_30_5 ADC (
         .aclk(1'b0),
         .eoc(Net_2704),
         .mi(1'b0),
@@ -1693,17 +1800,17 @@ module top ;
         .vminus(Net_2735),
         .vplus(Net_2720));
 
-    Analog_LPF_v1_0_5 LPF_ref (
+    Analog_LPF_v1_0_6 LPF_ref (
         .Vin(Net_2787),
         .Vout(Net_2791));
 
-    OpAmp_v1_90_6 Opa_ref (
+    OpAmp_v1_90_7 Opa_ref (
         .Vminus(Net_2790),
         .Vout(Net_2788),
         .Vplus(Net_2791));
     defparam Opa_ref.Mode = 1;
 
-    PGA_v2_0_7 PGA_ref (
+    PGA_v2_0_8 PGA_ref (
         .Vin(Net_2628),
         .Vout(Net_2681),
         .Vref(Net_2789));
@@ -1862,14 +1969,13 @@ module top ;
 
 	assign tmpOE__Vref_net = (`CYDEV_CHIP_MEMBER_USED == `CYDEV_CHIP_MEMBER_3A && `CYDEV_CHIP_REVISION_USED < `CYDEV_CHIP_REVISION_3A_ES3) ? ~{1'b1} : {1'b1};
 
-
-	cy_vref_v1_0
-		#(.guid("89B398AD-36A8-4627-9212-707F2986319E"),
-		  .name("1.024V"),
-		  .autoenable(1))
-		vRef_1
-		 (.vout(Net_2787));
-
+    VDAC8_v1_90_9 VDAC_LP (
+        .data(8'b00000000),
+        .strobe(1'b0),
+        .vOut(Net_4138));
+    defparam VDAC_LP.Data_Source = 0;
+    defparam VDAC_LP.Initial_Value = 255;
+    defparam VDAC_LP.Strobe_Mode = 0;
 
     cy_annotation_universal_v1_0 R_4 (
         .connect({
@@ -1942,18 +2048,18 @@ module top ;
     defparam C_1.port_names = "T1, T2";
     defparam C_1.width = 2;
 
-    PGA_v2_0_8 PGA (
+    PGA_v2_0_10 PGA (
         .Vin(Net_2633),
         .Vout(Net_2601),
         .Vref(Net_2681));
 
-    VDAC8_v1_90_9 VDAC (
+    VDAC8_v1_90_11 VDAC_PGA (
         .data(8'b00000000),
         .strobe(1'b0),
         .vOut(Net_2786));
-    defparam VDAC.Data_Source = 0;
-    defparam VDAC.Initial_Value = 255;
-    defparam VDAC.Strobe_Mode = 0;
+    defparam VDAC_PGA.Data_Source = 0;
+    defparam VDAC_PGA.Initial_Value = 255;
+    defparam VDAC_PGA.Strobe_Mode = 0;
 
 	wire [0:0] tmpOE__PGAin_net;
 	wire [0:0] tmpFB_0__PGAin_net;

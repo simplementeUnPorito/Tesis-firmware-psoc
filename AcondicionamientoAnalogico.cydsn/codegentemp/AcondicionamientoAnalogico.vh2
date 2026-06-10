@@ -2,7 +2,7 @@
 --	Conversion of AcondicionamientoAnalogico.v to vh2:
 --
 --	Cypress Semiconductor - WARP Version 6.3 IR 41
---	Tue Jun 09 18:09:28 2026
+--	Wed Jun 10 15:42:57 2026
 --
 
 USE cypress.cypress.all;
@@ -715,6 +715,11 @@ ATTRIBUTE port_state_att of \UART:BUART:sRX:MODULE_5:gte\:SIGNAL IS 2;
 SIGNAL \UART:BUART:sRX:MODULE_5:lte\ : bit;
 ATTRIBUTE port_state_att of \UART:BUART:sRX:MODULE_5:lte\:SIGNAL IS 2;
 TERMINAL Net_2384 : bit;
+SIGNAL \VDAC_refIn:Net_83\ : bit;
+SIGNAL \VDAC_refIn:Net_81\ : bit;
+SIGNAL \VDAC_refIn:Net_82\ : bit;
+TERMINAL Net_2787 : bit;
+TERMINAL \VDAC_refIn:Net_77\ : bit;
 TERMINAL Net_2781 : bit;
 TERMINAL Net_2792 : bit;
 TERMINAL Net_2666 : bit;
@@ -736,7 +741,7 @@ TERMINAL Net_2719 : bit;
 SIGNAL tmpIO_0__LPm_net_0 : bit;
 TERMINAL tmpSIOVREF__LPm_net_0 : bit;
 SIGNAL tmpINTERRUPT_0__LPm_net_0 : bit;
-TERMINAL Net_2681 : bit;
+TERMINAL Net_4138 : bit;
 TERMINAL \Opa_LP:Net_29\ : bit;
 TERMINAL Net_2665 : bit;
 TERMINAL Net_2771 : bit;
@@ -785,7 +790,6 @@ SIGNAL \ADC:Net_252\ : bit;
 SIGNAL \ADC:soc\ : bit;
 SIGNAL \ADC:Net_268\ : bit;
 SIGNAL \ADC:Net_270\ : bit;
-TERMINAL Net_2787 : bit;
 TERMINAL Net_2791 : bit;
 TERMINAL \Opa_ref:Net_29\ : bit;
 TERMINAL Net_2788 : bit;
@@ -795,6 +799,7 @@ SIGNAL \PGA_ref:Net_40\ : bit;
 SIGNAL \PGA_ref:Net_38\ : bit;
 SIGNAL \PGA_ref:Net_39\ : bit;
 SIGNAL \PGA_ref:Net_41\ : bit;
+TERMINAL Net_2681 : bit;
 TERMINAL \PGA_ref:Net_75\ : bit;
 SIGNAL tmpOE__PGAo_net_0 : bit;
 SIGNAL tmpFB_0__PGAo_net_0 : bit;
@@ -807,6 +812,10 @@ SIGNAL tmpFB_0__Vref_net_0 : bit;
 SIGNAL tmpIO_0__Vref_net_0 : bit;
 TERMINAL tmpSIOVREF__Vref_net_0 : bit;
 SIGNAL tmpINTERRUPT_0__Vref_net_0 : bit;
+SIGNAL \VDAC_LP:Net_83\ : bit;
+SIGNAL \VDAC_LP:Net_81\ : bit;
+SIGNAL \VDAC_LP:Net_82\ : bit;
+TERMINAL \VDAC_LP:Net_77\ : bit;
 TERMINAL Net_204 : bit;
 TERMINAL Net_193 : bit;
 TERMINAL Net_2661 : bit;
@@ -819,10 +828,10 @@ SIGNAL \PGA:Net_38\ : bit;
 SIGNAL \PGA:Net_39\ : bit;
 SIGNAL \PGA:Net_41\ : bit;
 TERMINAL \PGA:Net_75\ : bit;
-SIGNAL \VDAC:Net_83\ : bit;
-SIGNAL \VDAC:Net_81\ : bit;
-SIGNAL \VDAC:Net_82\ : bit;
-TERMINAL \VDAC:Net_77\ : bit;
+SIGNAL \VDAC_PGA:Net_83\ : bit;
+SIGNAL \VDAC_PGA:Net_81\ : bit;
+SIGNAL \VDAC_PGA:Net_82\ : bit;
+TERMINAL \VDAC_PGA:Net_77\ : bit;
 SIGNAL tmpOE__PGAin_net_0 : bit;
 SIGNAL tmpFB_0__PGAin_net_0 : bit;
 SIGNAL tmpIO_0__PGAin_net_0 : bit;
@@ -1928,6 +1937,21 @@ ESP_Vdd:cy_annotation_universal_v1_0
 		port_names=>"T1",
 		width=>1)
 	PORT MAP(connect=>Net_2384);
+\VDAC_refIn:viDAC8\:cy_psoc3_vidac8_v1_0
+	GENERIC MAP(cy_registers=>"",
+		reg_data=>'0',
+		is_all_if_any=>'0')
+	PORT MAP(reset=>zero,
+		idir=>zero,
+		ioff=>zero,
+		data=>(zero, zero, zero, zero,
+			zero, zero, zero, zero),
+		strobe=>zero,
+		strobe_udb=>zero,
+		vout=>Net_2787,
+		iout=>\VDAC_refIn:Net_77\);
+\VDAC_refIn:cy_analog_noconnect_1\:cy_analog_noconnect_v1_0
+	PORT MAP(noconnect=>\VDAC_refIn:Net_77\);
 R_8:cy_annotation_universal_v1_0
 	GENERIC MAP(comp_name=>"Resistor_v1_0",
 		port_names=>"T1, T2",
@@ -2110,7 +2134,7 @@ LPm:cy_psoc3_pins_v1_10
 		interrupt=>tmpINTERRUPT_0__LPm_net_0);
 \Opa_LP:ABuf\:cy_psoc3_abuf_v1_0
 	GENERIC MAP(cy_registers=>"")
-	PORT MAP(vplus=>Net_2681,
+	PORT MAP(vplus=>Net_4138,
 		vminus=>\Opa_LP:Net_29\,
 		vout=>Net_2720);
 \Opa_LP:abuf_negInput_mux_connect\:cy_connect_v1_0
@@ -2488,12 +2512,21 @@ Vref:cy_psoc3_pins_v1_10
 		out_clock_en=>tmpOE__Tx_1_net_0,
 		out_reset=>zero,
 		interrupt=>tmpINTERRUPT_0__Vref_net_0);
-vRef_1:cy_vref_v1_0
-	GENERIC MAP(guid=>"89B398AD-36A8-4627-9212-707F2986319E",
-		name=>"1.024V",
-		autoenable=>'1',
-		ignoresleep=>'0')
-	PORT MAP(vout=>Net_2787);
+\VDAC_LP:viDAC8\:cy_psoc3_vidac8_v1_0
+	GENERIC MAP(cy_registers=>"",
+		reg_data=>'0',
+		is_all_if_any=>'0')
+	PORT MAP(reset=>zero,
+		idir=>zero,
+		ioff=>zero,
+		data=>(zero, zero, zero, zero,
+			zero, zero, zero, zero),
+		strobe=>zero,
+		strobe_udb=>zero,
+		vout=>Net_4138,
+		iout=>\VDAC_LP:Net_77\);
+\VDAC_LP:cy_analog_noconnect_1\:cy_analog_noconnect_v1_0
+	PORT MAP(noconnect=>\VDAC_LP:Net_77\);
 R_4:cy_annotation_universal_v1_0
 	GENERIC MAP(comp_name=>"Resistor_v1_0",
 		port_names=>"T1, T2",
@@ -2546,7 +2579,7 @@ C_1:cy_annotation_universal_v1_0
 		signal2=>Net_2681);
 \PGA:cy_analog_noconnect_2\:cy_analog_noconnect_v1_0
 	PORT MAP(noconnect=>\PGA:Net_75\);
-\VDAC:viDAC8\:cy_psoc3_vidac8_v1_0
+\VDAC_PGA:viDAC8\:cy_psoc3_vidac8_v1_0
 	GENERIC MAP(cy_registers=>"",
 		reg_data=>'0',
 		is_all_if_any=>'0')
@@ -2558,9 +2591,9 @@ C_1:cy_annotation_universal_v1_0
 		strobe=>zero,
 		strobe_udb=>zero,
 		vout=>Net_2786,
-		iout=>\VDAC:Net_77\);
-\VDAC:cy_analog_noconnect_1\:cy_analog_noconnect_v1_0
-	PORT MAP(noconnect=>\VDAC:Net_77\);
+		iout=>\VDAC_PGA:Net_77\);
+\VDAC_PGA:cy_analog_noconnect_1\:cy_analog_noconnect_v1_0
+	PORT MAP(noconnect=>\VDAC_PGA:Net_77\);
 PGAin:cy_psoc3_pins_v1_10
 	GENERIC MAP(id=>"73dd02f4-0e06-46c2-a41d-979aeec9d969",
 		drive_mode=>"000",
