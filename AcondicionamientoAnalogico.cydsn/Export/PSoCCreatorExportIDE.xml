@@ -27,7 +27,7 @@
   </Toolchains>
   <Project Name="AcondicionamientoAnalogico" Path="C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn" Version="6.10" Type="Normal">
     <CMSIS_SVD_File>AcondicionamientoAnalogico.svd</CMSIS_SVD_File>
-    <Datasheet />
+    <Datasheet>AcondicionamientoAnalogico_datasheet.pdf</Datasheet>
     <LinkerFiles>
       <LinkerFile Toolchain="ARM GCC Generic">.\Generated_Source\PSoC5\cm3gcc.ld</LinkerFile>
       <LinkerFile Toolchain="ARM MDK Generic">.\Generated_Source\PSoC5\Cm3RealView.scat</LinkerFile>
@@ -37,7 +37,14 @@
       <Folder BuildType="STRICT" Path="C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn">
         <Files Root="C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn">
           <File BuildType="BUILD" Toolchain="">main.c</File>
+          <File BuildType="BUILD" Toolchain="">calibration.c</File>
+          <File BuildType="BUILD" Toolchain="">psoc_adc.c</File>
+          <File BuildType="BUILD" Toolchain="">psoc_hw.c</File>
           <File BuildType="BUILD" Toolchain="">cyapicallbacks.h</File>
+          <File BuildType="BUILD" Toolchain="">calibration.h</File>
+          <File BuildType="BUILD" Toolchain="">calibration_tables.h</File>
+          <File BuildType="BUILD" Toolchain="">psoc_adc.h</File>
+          <File BuildType="BUILD" Toolchain="">psoc_hw.h</File>
         </Files>
       </Folder>
       <Folder BuildType="STRICT" Path="C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\Generated_Source\PSoC5">
@@ -98,12 +105,12 @@
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Timer.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Timer.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Timer_PM.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\LED_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\LED.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\LED.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Vref_aliases.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Vref.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Vref.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Opa_ref.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Opa_ref.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Opa_ref_PM.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\UART.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\UART.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\UART_PM.c</File>
@@ -111,16 +118,49 @@
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\UART_BOOT.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\UART_IntClock.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\UART_IntClock.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGA_ref.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGA_ref.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGA_ref_PM.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\VDAC.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\VDAC.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\VDAC_PM.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\OPAbp.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\OPAbp.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\OPAbp_PM.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\OPAlp.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\OPAlp.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\OPAlp_PM.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\OPAadder.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\OPAadder.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\OPAadder_PM.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SEo_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SEo.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SEo.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC_PM.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC_INT.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGAgain.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGAgain.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGAgain_PM.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\BPm_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\BPm.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\BPm.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\INn_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\INn.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\INn.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\INp_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\INp.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\INp.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGAn.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGAn.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGAn_PM.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGAp.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGAp.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGAp_PM.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\BPo_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\BPo.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\BPo.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADDERm_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADDERm.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADDERm.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADDERo_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADDERo.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADDERo.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\LPm_aliases.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\LPm.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\LPm.h</File>
@@ -133,32 +173,40 @@
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC_IRQ.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC_theACLK.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC_theACLK.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\OPAref.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\OPAref.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\OPAref_PM.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\LPF_1.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\LPF_1.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\LPF_2.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\LPF_2.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SYNC_IN_aliases.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SYNC_IN.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\SYNC_IN.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\isr_SyncIn.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\isr_SyncIn.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\LPF_ADC.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\LPF_ADC.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGA.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGA.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGA_PM.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\LPF_ref.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\LPF_ref.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC_AMux.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC_AMux.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Opa_LP.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Opa_LP.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Opa_LP_PM.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGAo_aliases.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGAo.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGAo.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC_Bypass_P03_aliases.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC_Bypass_P03.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\ADC_Bypass_P03.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGAin_aliases.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGAin.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGAin.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\AMux_1.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\AMux_1.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\AMux_1_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\VDAC_ref_LP.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\VDAC_ref_LP.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\VDAC_ref_LP_PM.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\VDAC_ref_BP.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\VDAC_ref_BP.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\VDAC_ref_BP_PM.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\VDAC_ref_PGA.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\VDAC_ref_PGA.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\VDAC_ref_PGA_PM.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\VDAC_Ref_Adder.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\VDAC_Ref_Adder.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\VDAC_Ref_Adder_PM.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\AMux_0_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\AMux_0.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\AMux_0.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\AMux_IN.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\AMux_IN.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\AMux_ADC.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\AMux_ADC.h</File>
         </Files>
       </Folder>
       <Folder BuildType="STRICT" Path="C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\Export\ARM_GCC_Generic">

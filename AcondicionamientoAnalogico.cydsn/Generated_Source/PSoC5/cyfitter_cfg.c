@@ -167,11 +167,14 @@ CYPACKED typedef struct
 /* IOPINS0_1 Address: CYREG_PRT1_DR Size (bytes): 10 */
 #define BS_IOPINS0_1_VAL ((const uint8 CYFAR *)0x480005FCu)
 
+/* IOPINS0_2 Address: CYREG_PRT2_DM0 Size (bytes): 8 */
+#define BS_IOPINS0_2_VAL ((const uint8 CYFAR *)0x48000608u)
+
 /* IOPINS0_3 Address: CYREG_PRT3_DM0 Size (bytes): 8 */
-#define BS_IOPINS0_3_VAL ((const uint8 CYFAR *)0x48000608u)
+#define BS_IOPINS0_3_VAL ((const uint8 CYFAR *)0x48000610u)
 
 /* CYDEV_CLKDIST_ACFG0_CFG0 Address: CYREG_CLKDIST_ACFG0_CFG0 Size (bytes): 4 */
-#define BS_CYDEV_CLKDIST_ACFG0_CFG0_VAL ((const uint8 CYFAR *)0x48000610u)
+#define BS_CYDEV_CLKDIST_ACFG0_CFG0_VAL ((const uint8 CYFAR *)0x48000618u)
 
 
 /*******************************************************************************
@@ -301,24 +304,33 @@ static void AnalogSetDefault(void)
 	uint8 bg_xover_inl_trim = CY_GET_XTND_REG8((void CYFAR *)(CYREG_FLSHID_MFG_CFG_BG_XOVER_INL_TRIM + 1u));
 	CY_SET_XTND_REG8((void CYFAR *)(CYREG_BG_DFT0), (bg_xover_inl_trim & 0x07u));
 	CY_SET_XTND_REG8((void CYFAR *)(CYREG_BG_DFT1), ((bg_xover_inl_trim >> 4) & 0x0Fu));
-	CY_SET_XTND_REG8((void CYFAR *)CYREG_PRT0_AG, 0x01u);
-	CY_SET_XTND_REG8((void CYFAR *)CYREG_PRT3_AG, 0x30u);
+	CY_SET_XTND_REG16((void CYFAR *)CYREG_PRT0_AMUX, 0x8001u);
+	CY_SET_XTND_REG16((void CYFAR *)CYREG_PRT5_AMUX, 0x4040u);
+	CY_SET_XTND_REG16((void CYFAR *)CYREG_PRT15_AMUX, 0x2020u);
+	CY_SET_XTND_REG8((void CYFAR *)CYREG_BG_CR0, 0x09u);
 	CY_SET_XTND_REG8((void CYFAR *)CYREG_LPF0_CR0, 0x05u);
-	CY_SET_XTND_REG8((void CYFAR *)CYREG_LPF1_CR0, 0x06u);
-	CY_SET_XTND_REG8((void CYFAR *)CYREG_SC0_SW2, 0x01u);
-	CY_SET_XTND_REG8((void CYFAR *)CYREG_SC0_SW8, 0x80u);
-	CY_SET_XTND_REG8((void CYFAR *)CYREG_SC2_SW0, 0x20u);
-	CY_SET_XTND_REG8((void CYFAR *)CYREG_SC2_SW7, 0x04u);
-	CY_SET_XTND_REG8((void CYFAR *)CYREG_SC3_SW0, 0x10u);
-	CY_SET_XTND_REG8((void CYFAR *)CYREG_SC3_SW4, 0x80u);
-	CY_SET_XTND_REG8((void CYFAR *)CYREG_DAC0_SW0, 0x01u);
+	CY_SET_XTND_REG8((void CYFAR *)CYREG_LPF1_CR0, 0x05u);
+	CY_SET_XTND_REG8((void CYFAR *)CYREG_SC0_SW4, 0x40u);
+	CY_SET_XTND_REG8((void CYFAR *)CYREG_SC0_SW8, 0x08u);
+	CY_SET_XTND_REG8((void CYFAR *)CYREG_SC1_SW2, 0x01u);
+	CY_SET_XTND_REG8((void CYFAR *)CYREG_SC1_SW4, 0x50u);
+	CY_SET_XTND_REG8((void CYFAR *)CYREG_SC1_SW8, 0x80u);
+	CY_SET_XTND_REG8((void CYFAR *)CYREG_SC2_SW4, 0x08u);
+	CY_SET_XTND_REG8((void CYFAR *)CYREG_SC3_SW0, 0x01u);
+	CY_SET_XTND_REG8((void CYFAR *)CYREG_SC3_SW7, 0x04u);
+	CY_SET_XTND_REG8((void CYFAR *)CYREG_DAC0_SW2, 0x08u);
 	CY_SET_XTND_REG8((void CYFAR *)CYREG_DAC1_SW2, 0x08u);
-	CY_SET_XTND_REG8((void CYFAR *)CYREG_DAC3_SW3, 0x01u);
-	CY_SET_XTND_REG8((void CYFAR *)CYREG_DSM0_SW0, 0x10u);
-	CY_SET_XTND_REG16((void CYFAR *)CYREG_OPAMP1_MX, 0x0105u);
-	CY_SET_XTND_REG16((void CYFAR *)CYREG_OPAMP2_MX, 0x0208u);
-	CY_SET_XTND_REG8((void CYFAR *)CYREG_BUS_SW0, 0xA0u);
-	CY_SET_XTND_REG8((void CYFAR *)CYREG_BUS_SW2, 0x08u);
+	CY_SET_XTND_REG8((void CYFAR *)CYREG_DAC2_SW2, 0x04u);
+	CY_SET_XTND_REG8((void CYFAR *)CYREG_DAC3_SW0, 0x20u);
+	CY_SET_XTND_REG8((void CYFAR *)CYREG_CMP0_SW3, 0x40u);
+	CY_SET_XTND_REG8((void CYFAR *)CYREG_CMP0_SW4, 0x01u);
+	CY_SET_XTND_REG8((void CYFAR *)CYREG_CMP1_SW4, 0x10u);
+	CY_SET_XTND_REG8((void CYFAR *)CYREG_CMP1_SW6, 0x04u);
+	CY_SET_XTND_REG8((void CYFAR *)CYREG_DSM0_SW4, 0x02u);
+	CY_SET_XTND_REG32((void CYFAR *)CYREG_OPAMP0_MX, 0x02020208u);
+	CY_SET_XTND_REG32((void CYFAR *)CYREG_OPAMP2_MX, 0x02080105u);
+	CY_SET_XTND_REG8((void CYFAR *)CYREG_BUS_SW0, 0xC4u);
+	CY_SET_XTND_REG8((void CYFAR *)CYREG_BUS_SW2, 0x04u);
 	CY_SET_XTND_REG8((void CYFAR *)CYREG_PUMP_CR0, 0x44u);
 }
 
@@ -356,22 +368,40 @@ void SetAnalogRoutingPumps(uint8 enabled)
 
 
 #define CY_AMUX_UNUSED CYREG_BOOST_SR
-/* This is an implementation detail of the AMux. Code that depends on it may be
-   incompatible with other versions of PSoC Creator. */
-uint8 CYXDATA * const CYCODE ADC_AMux__addrTable[2] = {
-	(uint8 CYXDATA *)CYREG_DSM0_SW3, 
-	(uint8 CYXDATA *)CY_AMUX_UNUSED, 
+static uint8 CYXDATA * const CYCODE AMux_ADC__outerAddr[4] = {
+	(uint8 CYXDATA *)CYREG_PRT2_AG, 
+	(uint8 CYXDATA *)CYREG_PRT1_AG, 
+	(uint8 CYXDATA *)CYREG_PRT3_AMUX, 
+	(uint8 CYXDATA *)CYREG_PRT3_AMUX, 
 };
 
-/* This is an implementation detail of the AMux. Code that depends on it may be
-   incompatible with other versions of PSoC Creator. */
-const uint8 CYCODE ADC_AMux__maskTable[2] = {
+static const uint8 CYCODE AMux_ADC__outerMask[4] = {
 	0x40u, 
-	0x00u, 
+	0x40u, 
+	0x40u, 
+	0x80u, 
 };
+
+static uint8 CYXDATA * const CYCODE AMux_ADC__innerAddr[1] = {
+	(uint8 CYXDATA *)CYREG_DSM0_SW0, 
+};
+
+static const uint8 CYCODE AMux_ADC__innerMask[1] = {
+	0x04u, 
+};
+
+static const uint8 CYCODE AMux_ADC__innerMap[4] = {
+	0u, 
+	0u, 
+	0u, 
+	0u, 
+};
+
+static uint8 AMux_ADC__armsEnabled = 0u;
+static uint8 AMux_ADC__refCnt[] = {0u};
 
 /*******************************************************************************
-* Function Name: ADC_AMux_Set
+* Function Name: AMux_ADC_Set
 ********************************************************************************
 * Summary:
 *  This function is used to set a particular channel as active on the AMux.
@@ -383,16 +413,25 @@ const uint8 CYCODE ADC_AMux__maskTable[2] = {
 *   void
 *
 *******************************************************************************/
-void ADC_AMux_Set(uint8 channel)
+void AMux_ADC_Set(uint8 channel)
 {
-	if (channel < 2)
+	uint8 i;
+	uint8 channelMask = (1UL << channel);
+	if ((channel < 4u) && ((AMux_ADC__armsEnabled & channelMask) == ((uint32)0u)))
 	{
-		*ADC_AMux__addrTable[channel] |= ADC_AMux__maskTable[channel];
+		AMux_ADC__armsEnabled |= channelMask;
+		*AMux_ADC__outerAddr[channel] |= AMux_ADC__outerMask[channel];
+		i = AMux_ADC__innerMap[channel];
+		if (AMux_ADC__refCnt[i] == 0u)
+		{
+			*AMux_ADC__innerAddr[i] |= AMux_ADC__innerMask[i];
+		}
+		AMux_ADC__refCnt[i]++;
 	}
 }
 
 /*******************************************************************************
-* Function Name: ADC_AMux_Unset
+* Function Name: AMux_ADC_Unset
 ********************************************************************************
 * Summary:
 *  This function is used to clear a particular channel from being active on the
@@ -405,11 +444,146 @@ void ADC_AMux_Set(uint8 channel)
 *   void
 *
 *******************************************************************************/
-void ADC_AMux_Unset(uint8 channel)
+void AMux_ADC_Unset(uint8 channel)
+{
+	uint8 i;
+	uint8 channelMask = (1UL << channel);
+	if ((channel < 4u) && ((AMux_ADC__armsEnabled & channelMask) != ((uint32)0u)))
+	{
+		AMux_ADC__armsEnabled &= (uint8)~channelMask;
+		*AMux_ADC__outerAddr[channel] &= (uint8)~AMux_ADC__outerMask[channel];
+		i = AMux_ADC__innerMap[channel];
+		AMux_ADC__refCnt[i]--;
+		if (AMux_ADC__refCnt[i] == 0)
+		{
+			*AMux_ADC__innerAddr[i] &= (uint8)~AMux_ADC__innerMask[i];
+		}
+	}
+}
+
+/* This is an implementation detail of the AMux. Code that depends on it may be
+   incompatible with other versions of PSoC Creator. */
+uint8 CYXDATA * const CYCODE AMux_IN_CYAMUXSIDE_A__addrTable[4] = {
+	(uint8 CYXDATA *)CYREG_PRT0_AG, (uint8 CYXDATA *)CYREG_SC2_SW0, 
+	(uint8 CYXDATA *)CYREG_SC2_SW3, (uint8 CYXDATA *)CY_AMUX_UNUSED, 
+};
+
+/* This is an implementation detail of the AMux. Code that depends on it may be
+   incompatible with other versions of PSoC Creator. */
+const uint8 CYCODE AMux_IN_CYAMUXSIDE_A__maskTable[4] = {
+	0x10u, 0x10u, 
+	0x01u, 0x00u, 
+};
+
+/*******************************************************************************
+* Function Name: AMux_IN_CYAMUXSIDE_A_Set
+********************************************************************************
+* Summary:
+*  This function is used to set a particular channel as active on the AMux.
+*
+* Parameters:  
+*   channel - The mux channel input to set as active
+*
+* Return:
+*   void
+*
+*******************************************************************************/
+void AMux_IN_CYAMUXSIDE_A_Set(uint8 channel)
 {
 	if (channel < 2)
 	{
-		*ADC_AMux__addrTable[channel] &= (uint8)~ADC_AMux__maskTable[channel];
+		channel += channel;
+		*AMux_IN_CYAMUXSIDE_A__addrTable[channel] |= AMux_IN_CYAMUXSIDE_A__maskTable[channel];
+		channel++;
+		*AMux_IN_CYAMUXSIDE_A__addrTable[channel] |= AMux_IN_CYAMUXSIDE_A__maskTable[channel];
+	}
+}
+
+/*******************************************************************************
+* Function Name: AMux_IN_CYAMUXSIDE_A_Unset
+********************************************************************************
+* Summary:
+*  This function is used to clear a particular channel from being active on the
+*  AMux.
+*
+* Parameters:  
+*   channel - The mux channel input to mark inactive
+*
+* Return:
+*   void
+*
+*******************************************************************************/
+void AMux_IN_CYAMUXSIDE_A_Unset(uint8 channel)
+{
+	if (channel < 2)
+	{
+		channel += channel;
+		*AMux_IN_CYAMUXSIDE_A__addrTable[channel] &= (uint8)~AMux_IN_CYAMUXSIDE_A__maskTable[channel];
+		channel++;
+		*AMux_IN_CYAMUXSIDE_A__addrTable[channel] &= (uint8)~AMux_IN_CYAMUXSIDE_A__maskTable[channel];
+	}
+}
+
+/* This is an implementation detail of the AMux. Code that depends on it may be
+   incompatible with other versions of PSoC Creator. */
+uint8 CYXDATA * const CYCODE AMux_IN_CYAMUXSIDE_B__addrTable[4] = {
+	(uint8 CYXDATA *)CYREG_PRT0_AG, (uint8 CYXDATA *)CYREG_SC0_SW0, 
+	(uint8 CYXDATA *)CYREG_SC0_SW3, (uint8 CYXDATA *)CY_AMUX_UNUSED, 
+};
+
+/* This is an implementation detail of the AMux. Code that depends on it may be
+   incompatible with other versions of PSoC Creator. */
+const uint8 CYCODE AMux_IN_CYAMUXSIDE_B__maskTable[4] = {
+	0x20u, 0x20u, 
+	0x01u, 0x00u, 
+};
+
+/*******************************************************************************
+* Function Name: AMux_IN_CYAMUXSIDE_B_Set
+********************************************************************************
+* Summary:
+*  This function is used to set a particular channel as active on the AMux.
+*
+* Parameters:  
+*   channel - The mux channel input to set as active
+*
+* Return:
+*   void
+*
+*******************************************************************************/
+void AMux_IN_CYAMUXSIDE_B_Set(uint8 channel)
+{
+	if (channel < 2)
+	{
+		channel += channel;
+		*AMux_IN_CYAMUXSIDE_B__addrTable[channel] |= AMux_IN_CYAMUXSIDE_B__maskTable[channel];
+		channel++;
+		*AMux_IN_CYAMUXSIDE_B__addrTable[channel] |= AMux_IN_CYAMUXSIDE_B__maskTable[channel];
+	}
+}
+
+/*******************************************************************************
+* Function Name: AMux_IN_CYAMUXSIDE_B_Unset
+********************************************************************************
+* Summary:
+*  This function is used to clear a particular channel from being active on the
+*  AMux.
+*
+* Parameters:  
+*   channel - The mux channel input to mark inactive
+*
+* Return:
+*   void
+*
+*******************************************************************************/
+void AMux_IN_CYAMUXSIDE_B_Unset(uint8 channel)
+{
+	if (channel < 2)
+	{
+		channel += channel;
+		*AMux_IN_CYAMUXSIDE_B__addrTable[channel] &= (uint8)~AMux_IN_CYAMUXSIDE_B__maskTable[channel];
+		channel++;
+		*AMux_IN_CYAMUXSIDE_B__addrTable[channel] &= (uint8)~AMux_IN_CYAMUXSIDE_B__maskTable[channel];
 	}
 }
 
@@ -451,7 +625,6 @@ void cyfitter_cfg(void)
 
 		static const cfg_memset_t CYCODE cfg_memset_list[] = {
 			/* address, size */
-			{(void CYFAR *)(CYREG_PRT2_DR), 16u},
 			{(void CYFAR *)(CYREG_PRT4_DR), 48u},
 			{(void CYFAR *)(CYREG_PRT15_DR), 16u},
 			{(void CYFAR *)(CYDEV_UCFG_B0_P0_U0_BASE), 4096u},
@@ -489,6 +662,7 @@ void cyfitter_cfg(void)
 	CYCONFIGCPY((void CYFAR *)(CYREG_PRT0_DM0), (const void CYFAR *)(BS_IOPINS0_0_VAL), 8u);
 	CYCONFIGCPY((void CYFAR *)(CYREG_PRT12_DM0), (const void CYFAR *)(BS_IOPINS0_7_VAL), 8u);
 	CYCONFIGCPY((void CYFAR *)(CYREG_PRT1_DR), (const void CYFAR *)(BS_IOPINS0_1_VAL), 10u);
+	CYCONFIGCPY((void CYFAR *)(CYREG_PRT2_DM0), (const void CYFAR *)(BS_IOPINS0_2_VAL), 8u);
 	CYCONFIGCPY((void CYFAR *)(CYREG_PRT3_DM0), (const void CYFAR *)(BS_IOPINS0_3_VAL), 8u);
 	/* Switch Boost to the precision bandgap reference from its internal reference */
 	CY_SET_REG8((void CYXDATA *)CYREG_BOOST_CR2, (CY_GET_REG8((void CYXDATA *)CYREG_BOOST_CR2) | 0x08u));

@@ -1,250 +1,165 @@
 /*******************************************************************************
 * File Name: PGA_ref.h  
-* Version 2.0
+* Version 2.20
 *
 * Description:
-*  This file contains the function prototypes and constants used in
-*  the PGA User Module.
+*  This file contains Pin function prototypes and register defines
 *
 * Note:
 *
 ********************************************************************************
-* Copyright 2008-2012, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions, 
 * disclaimers, and limitations in the end user license agreement accompanying 
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#if !defined(CY_PGA_PGA_ref_H) 
-#define CY_PGA_PGA_ref_H 
+#if !defined(CY_PINS_PGA_ref_H) /* Pins PGA_ref_H */
+#define CY_PINS_PGA_ref_H
 
 #include "cytypes.h"
 #include "cyfitter.h"
-#include "CyLib.h"
+#include "cypins.h"
+#include "PGA_ref_aliases.h"
 
-/* Check to see if required defines such as CY_PSOC5LP are available */
-/* They are defined starting with cy_boot v3.0 */
-#if !defined (CY_PSOC5LP)
-    #error Component PGA_v2_0 requires cy_boot v3.0 or later
-#endif /* (CY_ PSOC5LP) */
-
-
-#if(!CY_PSOC5A)
-    #if(CYDEV_VARIABLE_VDDA == 1)
-        #if (!defined(CY_LIB_SC_BST_CLK_EN))
-            #error Component PGA_v2_0 requires cy_boot v3.30 or later
-        #endif /* (!defined(CY_LIB_SC_BST_CLK_EN)) */
-    #endif /* CYDEV_VARIABLE_VDDA == 1 */
-#endif /* (!CY_PSOC5A) */
-
-/***************************************
-*   Data Struct Definition
-***************************************/
-
-/* Low power Mode API Support */
-typedef struct
-{
-    uint8   enableState;
-    uint8   scCR1Reg;
-    uint8   scCR2Reg;
-    uint8   scCR3Reg;
-}   PGA_ref_BACKUP_STRUCT;
-
-
-/* variable describes init state of the component */
-extern uint8 PGA_ref_initVar;
+/* APIs are not generated for P15[7:6] */
+#if !(CY_PSOC5A &&\
+	 PGA_ref__PORT == 15 && ((PGA_ref__MASK & 0xC0) != 0))
 
 
 /***************************************
-*        Function Prototypes 
-***************************************/
+*        Function Prototypes             
+***************************************/    
 
-void PGA_ref_Start(void)                 ; 
-void PGA_ref_Stop(void)                  ; 
-void PGA_ref_SetPower(uint8 power)       ;
-void PGA_ref_SetGain(uint8 gain)         ;
-void PGA_ref_Sleep(void)                 ; 
-void PGA_ref_Wakeup(void)                ;
-void PGA_ref_SaveConfig(void)            ; 
-void PGA_ref_RestoreConfig(void)         ;
-void PGA_ref_Init(void)                  ;
-void PGA_ref_Enable(void)                ;
+/**
+* \addtogroup group_general
+* @{
+*/
+void    PGA_ref_Write(uint8 value);
+void    PGA_ref_SetDriveMode(uint8 mode);
+uint8   PGA_ref_ReadDataReg(void);
+uint8   PGA_ref_Read(void);
+void    PGA_ref_SetInterruptMode(uint16 position, uint16 mode);
+uint8   PGA_ref_ClearInterrupt(void);
+/** @} general */
+
+/***************************************
+*           API Constants        
+***************************************/
+/**
+* \addtogroup group_constants
+* @{
+*/
+    /** \addtogroup driveMode Drive mode constants
+     * \brief Constants to be passed as "mode" parameter in the PGA_ref_SetDriveMode() function.
+     *  @{
+     */
+        #define PGA_ref_DM_ALG_HIZ         PIN_DM_ALG_HIZ
+        #define PGA_ref_DM_DIG_HIZ         PIN_DM_DIG_HIZ
+        #define PGA_ref_DM_RES_UP          PIN_DM_RES_UP
+        #define PGA_ref_DM_RES_DWN         PIN_DM_RES_DWN
+        #define PGA_ref_DM_OD_LO           PIN_DM_OD_LO
+        #define PGA_ref_DM_OD_HI           PIN_DM_OD_HI
+        #define PGA_ref_DM_STRONG          PIN_DM_STRONG
+        #define PGA_ref_DM_RES_UPDWN       PIN_DM_RES_UPDWN
+    /** @} driveMode */
+/** @} group_constants */
+    
+/* Digital Port Constants */
+#define PGA_ref_MASK               PGA_ref__MASK
+#define PGA_ref_SHIFT              PGA_ref__SHIFT
+#define PGA_ref_WIDTH              1u
+
+/* Interrupt constants */
+#if defined(PGA_ref__INTSTAT)
+/**
+* \addtogroup group_constants
+* @{
+*/
+    /** \addtogroup intrMode Interrupt constants
+     * \brief Constants to be passed as "mode" parameter in PGA_ref_SetInterruptMode() function.
+     *  @{
+     */
+        #define PGA_ref_INTR_NONE      (uint16)(0x0000u)
+        #define PGA_ref_INTR_RISING    (uint16)(0x0001u)
+        #define PGA_ref_INTR_FALLING   (uint16)(0x0002u)
+        #define PGA_ref_INTR_BOTH      (uint16)(0x0003u) 
+    /** @} intrMode */
+/** @} group_constants */
+
+    #define PGA_ref_INTR_MASK      (0x01u) 
+#endif /* (PGA_ref__INTSTAT) */
 
 
 /***************************************
-*            API Constants
+*             Registers        
 ***************************************/
 
-/* Power constants for SetPower function */
-#define PGA_ref_MINPOWER                 (0x00u)
-#define PGA_ref_LOWPOWER                 (0x01u)
-#define PGA_ref_MEDPOWER                 (0x02u)
-#define PGA_ref_HIGHPOWER                (0x03u)
+/* Main Port Registers */
+/* Pin State */
+#define PGA_ref_PS                     (* (reg8 *) PGA_ref__PS)
+/* Data Register */
+#define PGA_ref_DR                     (* (reg8 *) PGA_ref__DR)
+/* Port Number */
+#define PGA_ref_PRT_NUM                (* (reg8 *) PGA_ref__PRT) 
+/* Connect to Analog Globals */                                                  
+#define PGA_ref_AG                     (* (reg8 *) PGA_ref__AG)                       
+/* Analog MUX bux enable */
+#define PGA_ref_AMUX                   (* (reg8 *) PGA_ref__AMUX) 
+/* Bidirectional Enable */                                                        
+#define PGA_ref_BIE                    (* (reg8 *) PGA_ref__BIE)
+/* Bit-mask for Aliased Register Access */
+#define PGA_ref_BIT_MASK               (* (reg8 *) PGA_ref__BIT_MASK)
+/* Bypass Enable */
+#define PGA_ref_BYP                    (* (reg8 *) PGA_ref__BYP)
+/* Port wide control signals */                                                   
+#define PGA_ref_CTL                    (* (reg8 *) PGA_ref__CTL)
+/* Drive Modes */
+#define PGA_ref_DM0                    (* (reg8 *) PGA_ref__DM0) 
+#define PGA_ref_DM1                    (* (reg8 *) PGA_ref__DM1)
+#define PGA_ref_DM2                    (* (reg8 *) PGA_ref__DM2) 
+/* Input Buffer Disable Override */
+#define PGA_ref_INP_DIS                (* (reg8 *) PGA_ref__INP_DIS)
+/* LCD Common or Segment Drive */
+#define PGA_ref_LCD_COM_SEG            (* (reg8 *) PGA_ref__LCD_COM_SEG)
+/* Enable Segment LCD */
+#define PGA_ref_LCD_EN                 (* (reg8 *) PGA_ref__LCD_EN)
+/* Slew Rate Control */
+#define PGA_ref_SLW                    (* (reg8 *) PGA_ref__SLW)
 
-/* Constants for SetGain function */
-#define PGA_ref_GAIN_01                  (0x00u)
-#define PGA_ref_GAIN_02                  (0x01u)
-#define PGA_ref_GAIN_04                  (0x02u)
-#define PGA_ref_GAIN_08                  (0x03u)
-#define PGA_ref_GAIN_16                  (0x04u)
-#define PGA_ref_GAIN_24                  (0x05u)
-#define PGA_ref_GAIN_32                  (0x06u)
-#define PGA_ref_GAIN_48                  (0x07u)
-#define PGA_ref_GAIN_50                  (0x08u)
-#define PGA_ref_GAIN_MAX                 (0x08u)
+/* DSI Port Registers */
+/* Global DSI Select Register */
+#define PGA_ref_PRTDSI__CAPS_SEL       (* (reg8 *) PGA_ref__PRTDSI__CAPS_SEL) 
+/* Double Sync Enable */
+#define PGA_ref_PRTDSI__DBL_SYNC_IN    (* (reg8 *) PGA_ref__PRTDSI__DBL_SYNC_IN) 
+/* Output Enable Select Drive Strength */
+#define PGA_ref_PRTDSI__OE_SEL0        (* (reg8 *) PGA_ref__PRTDSI__OE_SEL0) 
+#define PGA_ref_PRTDSI__OE_SEL1        (* (reg8 *) PGA_ref__PRTDSI__OE_SEL1) 
+/* Port Pin Output Select Registers */
+#define PGA_ref_PRTDSI__OUT_SEL0       (* (reg8 *) PGA_ref__PRTDSI__OUT_SEL0) 
+#define PGA_ref_PRTDSI__OUT_SEL1       (* (reg8 *) PGA_ref__PRTDSI__OUT_SEL1) 
+/* Sync Output Enable Registers */
+#define PGA_ref_PRTDSI__SYNC_OUT       (* (reg8 *) PGA_ref__PRTDSI__SYNC_OUT) 
 
+/* SIO registers */
+#if defined(PGA_ref__SIO_CFG)
+    #define PGA_ref_SIO_HYST_EN        (* (reg8 *) PGA_ref__SIO_HYST_EN)
+    #define PGA_ref_SIO_REG_HIFREQ     (* (reg8 *) PGA_ref__SIO_REG_HIFREQ)
+    #define PGA_ref_SIO_CFG            (* (reg8 *) PGA_ref__SIO_CFG)
+    #define PGA_ref_SIO_DIFF           (* (reg8 *) PGA_ref__SIO_DIFF)
+#endif /* (PGA_ref__SIO_CFG) */
 
-/***************************************
-*       Initialization Values
-***************************************/
+/* Interrupt Registers */
+#if defined(PGA_ref__INTSTAT)
+    #define PGA_ref_INTSTAT            (* (reg8 *) PGA_ref__INTSTAT)
+    #define PGA_ref_SNAP               (* (reg8 *) PGA_ref__SNAP)
+    
+	#define PGA_ref_0_INTTYPE_REG 		(* (reg8 *) PGA_ref__0__INTTYPE)
+#endif /* (PGA_ref__INTSTAT) */
 
-#define PGA_ref_DEFAULT_GAIN             (0u)
-#define PGA_ref_VREF_MODE                ((0u != 0x00u) ? (0x00u) : PGA_ref_GNDVREF_E)
-#define PGA_ref_DEFAULT_POWER            (3u)
+#endif /* CY_PSOC5A... */
 
-
-/***************************************
-*              Registers
-***************************************/
-
-#define PGA_ref_CR0_REG                  (* (reg8 *) PGA_ref_SC__CR0 )
-#define PGA_ref_CR0_PTR                  (  (reg8 *) PGA_ref_SC__CR0 )
-#define PGA_ref_CR1_REG                  (* (reg8 *) PGA_ref_SC__CR1 )
-#define PGA_ref_CR1_PTR                  (  (reg8 *) PGA_ref_SC__CR1 )
-#define PGA_ref_CR2_REG                  (* (reg8 *) PGA_ref_SC__CR2 )
-#define PGA_ref_CR2_PTR                  (  (reg8 *) PGA_ref_SC__CR2 )
-  /* Power manager */
-#define PGA_ref_PM_ACT_CFG_REG           (* (reg8 *) PGA_ref_SC__PM_ACT_CFG )
-#define PGA_ref_PM_ACT_CFG_PTR           (  (reg8 *) PGA_ref_SC__PM_ACT_CFG )  
-#define PGA_ref_PM_STBY_CFG_REG          (* (reg8 *) PGA_ref_SC__PM_STBY_CFG )
-  /* Power manager */
-#define PGA_ref_PM_STBY_CFG_PTR          (  (reg8 *) PGA_ref_SC__PM_STBY_CFG )  
-#define PGA_ref_BSTCLK_REG               (* (reg8 *) PGA_ref_SC__BST )
-#define PGA_ref_BSTCLK_PTR               (  (reg8 *) PGA_ref_SC__BST )
-/* Pump clock selectin register */
-#define PGA_ref_PUMP_CR1_REG             (* (reg8 *) CYDEV_ANAIF_CFG_PUMP_CR1)
-#define PGA_ref_PUMP_CR1_PTR             (  (reg8 *) CYDEV_ANAIF_CFG_PUMP_CR1)
-
-/* Pump Register for SC block */
-#define PGA_ref_SC_MISC_REG              (* (reg8 *) CYDEV_ANAIF_RT_SC_MISC)
-#define PGA_ref_SC_MISC_PTR              (  (reg8 *) CYDEV_ANAIF_RT_SC_MISC)
-
-/* PM_ACT_CFG (Active Power Mode CFG Register)mask */ 
-#define PGA_ref_ACT_PWR_EN               PGA_ref_SC__PM_ACT_MSK 
-
-/* PM_STBY_CFG (Alternate Active Power Mode CFG Register)mask */ 
-#define PGA_ref_STBY_PWR_EN              PGA_ref_SC__PM_STBY_MSK 
-
-
-/***************************************
-*            Register Constants
-***************************************/
-
-/* SC_MISC constants */
-#define PGA_ref_PUMP_FORCE               (0x20u)
-#define PGA_ref_PUMP_AUTO                (0x10u)
-#define PGA_ref_DIFF_PGA_1_3             (0x02u)
-#define PGA_ref_DIFF_PGA_0_2             (0x01u)
-
-/* ANIF.PUMP.CR1 Constants */
-#define PGA_ref_PUMP_CR1_SC_CLKSEL       (0x80u)
-
-/* CR0 SC/CT Control Register 0 definitions */
-#define PGA_ref_MODE_PGA                 (0x0Cu)
-
-/* CR1 SC/CT Control Register 1 definitions */
-
-/* Bit Field  SC_COMP_ENUM */
-#define PGA_ref_COMP_MASK                (0x0Cu)
-#define PGA_ref_COMP_3P0PF               (0x00u)
-#define PGA_ref_COMP_3P6PF               (0x04u)
-#define PGA_ref_COMP_4P35PF              (0x08u)
-#define PGA_ref_COMP_5P1PF               (0x0Cu)
-
-/* Bit Field  SC_DIV2_ENUM */
-#define PGA_ref_DIV2_MASK                (0x10u)
-#define PGA_ref_DIV2_DISABLE             (0x00u)
-#define PGA_ref_DIV2_ENABLE              (0x10u)
-
-/* Bit Field  SC_DRIVE_ENUM */
-#define PGA_ref_DRIVE_MASK               (0x03u)
-#define PGA_ref_DRIVE_280UA              (0x00u)
-#define PGA_ref_DRIVE_420UA              (0x01u)
-#define PGA_ref_DRIVE_530UA              (0x02u)
-#define PGA_ref_DRIVE_650UA              (0x03u)
-
-/* Bit Field  SC_PGA_MODE_ENUM */
-#define PGA_ref_PGA_MODE_MASK            (0x20u)
-#define PGA_ref_PGA_INV                  (0x00u)
-#define PGA_ref_PGA_NINV                 (0x20u)
-
-/* CR2 SC/CT Control Register 2 definitions */
-
-/* Bit Field  SC_BIAS_CONTROL_ENUM */
-#define PGA_ref_BIAS_MASK                (0x01u)
-#define PGA_ref_BIAS_NORMAL              (0x00u)
-#define PGA_ref_BIAS_LOW                 (0x01u)
-
-/* Bit Field  SC_PGA_GNDVREF_ENUM  */
-#define PGA_ref_GNDVREF_MASK             (0x80u)
-#define PGA_ref_GNDVREF_DI               (0x00u)
-#define PGA_ref_GNDVREF_E                (0x80u)
-
-/* Bit Field  SC_R20_40B_ENUM */
-#define PGA_ref_R20_40B_MASK             (0x02u)
-#define PGA_ref_R20_40B_40K              (0x00u)
-#define PGA_ref_R20_40B_20K              (0x02u)
-
-/* Bit Field  SC_REDC_ENUM */
-#define PGA_ref_REDC_MASK                (0x0Cu)
-#define PGA_ref_REDC_00                  (0x00u)
-#define PGA_ref_REDC_01                  (0x04u)
-#define PGA_ref_REDC_10                  (0x08u)
-#define PGA_ref_REDC_11                  (0x0Cu)
-
-/* Bit Field  SC_RVAL_ENUM */
-#define PGA_ref_RVAL_MASK                (0x70u)
-#define PGA_ref_RVAL_0K                  (0x00u)
-#define PGA_ref_RVAL_40K                 (0x10u)
-#define PGA_ref_RVAL_120K                (0x20u)
-#define PGA_ref_RVAL_280K                (0x30u)
-#define PGA_ref_RVAL_600K                (0x40u)
-#define PGA_ref_RVAL_460K                (0x60u)
-#define PGA_ref_RVAL_620K                (0x50u)
-#define PGA_ref_RVAL_470K                (0x60u)
-#define PGA_ref_RVAL_490K                (0x70u)
-
-/* Bit Field  PGA_GAIN_ENUM */
-#define PGA_ref_PGA_GAIN_MASK            (0x72u)
-#define PGA_ref_PGA_GAIN_01              (0x00u)
-#define PGA_ref_PGA_GAIN_02              (0x10u)
-#define PGA_ref_PGA_GAIN_04              (0x20u)
-#define PGA_ref_PGA_GAIN_08              (0x30u)
-#define PGA_ref_PGA_GAIN_16              (0x40u)
-#define PGA_ref_PGA_GAIN_24              (0x50u)
-#define PGA_ref_PGA_GAIN_25              (0x70u)
-#define PGA_ref_PGA_GAIN_32              (0x52u)
-#define PGA_ref_PGA_GAIN_48              (0x62u)
-#define PGA_ref_PGA_GAIN_50              (0x72u)
-
-#define PGA_ref_BST_CLK_EN               (0x08u)
-#define PGA_ref_BST_CLK_INDEX_MASK       (0x07u)
-#define PGA_ref_PM_ACT_CFG_MASK          (0x0Fu)
-
-/* Constant for VDDA Threshold */
-#define PGA_ref_CYDEV_VDDA_MV       (CYDEV_VDDA_MV)
-#define PGA_ref_MINIMUM_VDDA_THRESHOLD_MV   (2700u)
-
-/*******************************************************************************
-* Following code are OBSOLETE and must not be used starting from PGA 2.0
-*******************************************************************************/
-#define PGA_ref_BST_REG            (PGA_ref_BSTCLK_REG)
-#define PGA_ref_BST_PTR            (PGA_ref_BSTCLK_PTR)
-#define PGA_ref_SC_REG_CLR         (0x00u)
-#define PGA_ref_BST_REG_EN         (0x08u)
-
-
-#endif /* CY_PGA_PGA_ref_H */
+#endif /*  CY_PINS_PGA_ref_H */
 
 
 /* [] END OF FILE */

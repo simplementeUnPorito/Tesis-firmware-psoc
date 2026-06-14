@@ -1,282 +1,226 @@
 /*******************************************************************************
 * File Name: PGA_ref.c  
-* Version 2.0
+* Version 2.20
 *
 * Description:
-*  This file provides the source code to the API for the PGA 
-*  User Module.
+*  This file contains API to enable firmware control of a Pins component.
 *
 * Note:
 *
 ********************************************************************************
-* Copyright 2008-2012, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions, 
 * disclaimers, and limitations in the end user license agreement accompanying 
 * the software package with which this file was provided.
 *******************************************************************************/
 
+#include "cytypes.h"
 #include "PGA_ref.h"
 
-#if (!CY_PSOC5A)
-    #if (CYDEV_VARIABLE_VDDA == 1u)
-        #include "CyScBoostClk.h"
-    #endif /* (CYDEV_VARIABLE_VDDA == 1u) */
-#endif /* (!CY_PSOC5A) */
-
-#if (CY_PSOC5A)
-    static PGA_ref_BACKUP_STRUCT  PGA_ref_P5backup;
-#endif /* (CY_ PSOC5A) */
-
-uint8 PGA_ref_initVar = 0u;
+/* APIs are not generated for P15[7:6] on PSoC 5 */
+#if !(CY_PSOC5A &&\
+	 PGA_ref__PORT == 15 && ((PGA_ref__MASK & 0xC0) != 0))
 
 
-/*******************************************************************************   
-* Function Name: PGA_ref_Init
-********************************************************************************
+/*******************************************************************************
+* Function Name: PGA_ref_Write
+****************************************************************************//**
 *
-* Summary:
-*  Initialize component's parameters to the parameters set by user in the 
-*  customizer of the component placed onto schematic. Usually called in 
-*  PGA_ref_Start().
+* \brief Writes the value to the physical port (data output register), masking
+*  and shifting the bits appropriately. 
 *
-* Parameters:
-*  void
+* The data output register controls the signal applied to the physical pin in 
+* conjunction with the drive mode parameter. This function avoids changing 
+* other bits in the port by using the appropriate method (read-modify-write or
+* bit banding).
 *
-* Return:
-*  void
+* <b>Note</b> This function should not be used on a hardware digital output pin 
+* as it is driven by the hardware signal attached to it.
 *
+* \param value
+*  Value to write to the component instance.
+*
+* \return 
+*  None 
+*
+* \sideeffect
+*  If you use read-modify-write operations that are not atomic; the Interrupt 
+*  Service Routines (ISR) can cause corruption of this function. An ISR that 
+*  interrupts this function and performs writes to the Pins component data 
+*  register can cause corrupted port data. To avoid this issue, you should 
+*  either use the Per-Pin APIs (primary method) or disable interrupts around 
+*  this function.
+*
+* \funcusage
+*  \snippet PGA_ref_SUT.c usage_PGA_ref_Write
 *******************************************************************************/
-void PGA_ref_Init(void) 
+void PGA_ref_Write(uint8 value)
 {
-    /* Set PGA mode */
-    PGA_ref_CR0_REG = PGA_ref_MODE_PGA;      
-    /* Set non-inverting PGA mode and reference mode */
-    PGA_ref_CR1_REG |= PGA_ref_PGA_NINV;  
-    /* Set default gain and ref mode */
-    PGA_ref_CR2_REG = PGA_ref_VREF_MODE;
-    /* Set gain and compensation */
-    PGA_ref_SetGain(PGA_ref_DEFAULT_GAIN);
-    /* Set power */
-    PGA_ref_SetPower(PGA_ref_DEFAULT_POWER);
-}
-
-
-/*******************************************************************************   
-* Function Name: PGA_ref_Enable
-********************************************************************************
-*
-* Summary:
-*  Enables the PGA block operation.
-*
-* Parameters:
-*  void
-*
-* Return:
-*  void
-*
-*******************************************************************************/
-void PGA_ref_Enable(void) 
-{
-    /* This is to restore the value of register CR1 and CR2 which is saved 
-      in prior to the modifications in stop() API */
-    #if (CY_PSOC5A)
-        if(PGA_ref_P5backup.enableState == 1u)
-        {
-            PGA_ref_CR1_REG = PGA_ref_P5backup.scCR1Reg;
-            PGA_ref_CR2_REG = PGA_ref_P5backup.scCR2Reg;
-            PGA_ref_P5backup.enableState = 0u;
-        }
-    #endif /* CY_PSOC5A */   
-
-    /* Enable power to the Amp in Active mode*/
-    PGA_ref_PM_ACT_CFG_REG |= PGA_ref_ACT_PWR_EN;
-
-    /* Enable power to the Amp in Alternative Active mode*/
-    PGA_ref_PM_STBY_CFG_REG |= PGA_ref_STBY_PWR_EN;
-    
-    PGA_ref_PUMP_CR1_REG |= PGA_ref_PUMP_CR1_SC_CLKSEL;
-    
-    #if (!CY_PSOC5A)
-        #if (CYDEV_VARIABLE_VDDA == 1u)
-            if(CyScPumpEnabled == 1u)
-            {
-                PGA_ref_BSTCLK_REG &= (uint8)(~PGA_ref_BST_CLK_INDEX_MASK);
-                PGA_ref_BSTCLK_REG |= PGA_ref_BST_CLK_EN | CyScBoostClk__INDEX;
-                PGA_ref_SC_MISC_REG |= PGA_ref_PUMP_FORCE;
-                CyScBoostClk_Start();
-            }
-            else
-            {
-                PGA_ref_BSTCLK_REG &= (uint8)(~PGA_ref_BST_CLK_EN);
-                PGA_ref_SC_MISC_REG &= (uint8)(~PGA_ref_PUMP_FORCE);
-            }
-        #endif /* (CYDEV_VARIABLE_VDDA == 1u) */
-    #endif /* (!CY_PSOC5A) */
+    uint8 staticBits = (PGA_ref_DR & (uint8)(~PGA_ref_MASK));
+    PGA_ref_DR = staticBits | ((uint8)(value << PGA_ref_SHIFT) & PGA_ref_MASK);
 }
 
 
 /*******************************************************************************
-* Function Name: PGA_ref_Start
-********************************************************************************
+* Function Name: PGA_ref_SetDriveMode
+****************************************************************************//**
 *
-* Summary:
-*  The start function initializes the PGA with the default values and sets
-*  the power to the given level. A power level of 0, is same as executing
-*  the stop function.
+* \brief Sets the drive mode for each of the Pins component's pins.
+* 
+* <b>Note</b> This affects all pins in the Pins component instance. Use the
+* Per-Pin APIs if you wish to control individual pin's drive modes.
 *
-* Parameters:
-*  void
+* \param mode
+*  Mode for the selected signals. Valid options are documented in 
+*  \ref driveMode.
 *
-* Return:
-*  void
+* \return
+*  None
 *
+* \sideeffect
+*  If you use read-modify-write operations that are not atomic, the ISR can
+*  cause corruption of this function. An ISR that interrupts this function 
+*  and performs writes to the Pins component Drive Mode registers can cause 
+*  corrupted port data. To avoid this issue, you should either use the Per-Pin
+*  APIs (primary method) or disable interrupts around this function.
+*
+* \funcusage
+*  \snippet PGA_ref_SUT.c usage_PGA_ref_SetDriveMode
 *******************************************************************************/
-void PGA_ref_Start(void) 
+void PGA_ref_SetDriveMode(uint8 mode)
 {
+	CyPins_SetPinDriveMode(PGA_ref_0, mode);
+}
 
-    /* This is to restore the value of register CR1 and CR2 which is saved 
-      in prior to the modification in stop() API */
 
-    if(PGA_ref_initVar == 0u)
+/*******************************************************************************
+* Function Name: PGA_ref_Read
+****************************************************************************//**
+*
+* \brief Reads the associated physical port (pin status register) and masks 
+*  the required bits according to the width and bit position of the component
+*  instance. 
+*
+* The pin's status register returns the current logic level present on the 
+* physical pin.
+*
+* \return 
+*  The current value for the pins in the component as a right justified number.
+*
+* \funcusage
+*  \snippet PGA_ref_SUT.c usage_PGA_ref_Read  
+*******************************************************************************/
+uint8 PGA_ref_Read(void)
+{
+    return (PGA_ref_PS & PGA_ref_MASK) >> PGA_ref_SHIFT;
+}
+
+
+/*******************************************************************************
+* Function Name: PGA_ref_ReadDataReg
+****************************************************************************//**
+*
+* \brief Reads the associated physical port's data output register and masks 
+*  the correct bits according to the width and bit position of the component 
+*  instance. 
+*
+* The data output register controls the signal applied to the physical pin in 
+* conjunction with the drive mode parameter. This is not the same as the 
+* preferred PGA_ref_Read() API because the 
+* PGA_ref_ReadDataReg() reads the data register instead of the status 
+* register. For output pins this is a useful function to determine the value 
+* just written to the pin.
+*
+* \return 
+*  The current value of the data register masked and shifted into a right 
+*  justified number for the component instance.
+*
+* \funcusage
+*  \snippet PGA_ref_SUT.c usage_PGA_ref_ReadDataReg 
+*******************************************************************************/
+uint8 PGA_ref_ReadDataReg(void)
+{
+    return (PGA_ref_DR & PGA_ref_MASK) >> PGA_ref_SHIFT;
+}
+
+
+/* If interrupt is connected for this Pins component */ 
+#if defined(PGA_ref_INTSTAT) 
+
+    /*******************************************************************************
+    * Function Name: PGA_ref_SetInterruptMode
+    ****************************************************************************//**
+    *
+    * \brief Configures the interrupt mode for each of the Pins component's
+    *  pins. Alternatively you may set the interrupt mode for all the pins
+    *  specified in the Pins component.
+    *
+    *  <b>Note</b> The interrupt is port-wide and therefore any enabled pin
+    *  interrupt may trigger it.
+    *
+    * \param position
+    *  The pin position as listed in the Pins component. You may OR these to be 
+    *  able to configure the interrupt mode of multiple pins within a Pins 
+    *  component. Or you may use PGA_ref_INTR_ALL to configure the
+    *  interrupt mode of all the pins in the Pins component.       
+    *  - PGA_ref_0_INTR       (First pin in the list)
+    *  - PGA_ref_1_INTR       (Second pin in the list)
+    *  - ...
+    *  - PGA_ref_INTR_ALL     (All pins in Pins component)
+    *
+    * \param mode
+    *  Interrupt mode for the selected pins. Valid options are documented in
+    *  \ref intrMode.
+    *
+    * \return 
+    *  None
+    *  
+    * \sideeffect
+    *  It is recommended that the interrupt be disabled before calling this 
+    *  function to avoid unintended interrupt requests. Note that the interrupt
+    *  type is port wide, and therefore will trigger for any enabled pin on the 
+    *  port.
+    *
+    * \funcusage
+    *  \snippet PGA_ref_SUT.c usage_PGA_ref_SetInterruptMode
+    *******************************************************************************/
+    void PGA_ref_SetInterruptMode(uint16 position, uint16 mode)
     {
-        PGA_ref_Init();
-        PGA_ref_initVar = 1u;
+		if((position & PGA_ref_0_INTR) != 0u) 
+		{ 
+			 PGA_ref_0_INTTYPE_REG = (uint8)mode; 
+		}
+    }
+    
+    
+    /*******************************************************************************
+    * Function Name: PGA_ref_ClearInterrupt
+    ****************************************************************************//**
+    *
+    * \brief Clears any active interrupts attached with the component and returns 
+    *  the value of the interrupt status register allowing determination of which
+    *  pins generated an interrupt event.
+    *
+    * \return 
+    *  The right-shifted current value of the interrupt status register. Each pin 
+    *  has one bit set if it generated an interrupt event. For example, bit 0 is 
+    *  for pin 0 and bit 1 is for pin 1 of the Pins component.
+    *  
+    * \sideeffect
+    *  Clears all bits of the physical port's interrupt status register, not just
+    *  those associated with the Pins component.
+    *
+    * \funcusage
+    *  \snippet PGA_ref_SUT.c usage_PGA_ref_ClearInterrupt
+    *******************************************************************************/
+    uint8 PGA_ref_ClearInterrupt(void)
+    {
+        return (PGA_ref_INTSTAT & PGA_ref_MASK) >> PGA_ref_SHIFT;
     }
 
-    PGA_ref_Enable();
-}
+#endif /* If Interrupts Are Enabled for this Pins component */ 
 
+#endif /* CY_PSOC5A... */
 
-/*******************************************************************************
-* Function Name: PGA_ref_Stop
-********************************************************************************
-*
-* Summary:
-*  Powers down amplifier to lowest power state.
-*
-* Parameters:
-*  void
-*
-* Return:
-*  void
-*
-*******************************************************************************/
-void PGA_ref_Stop(void) 
-{ 
-    /* Disble power to the Amp in Active mode template */
-    PGA_ref_PM_ACT_CFG_REG &= (uint8)(~PGA_ref_ACT_PWR_EN);
-
-    /* Disble power to the Amp in Alternative Active mode template */
-    PGA_ref_PM_STBY_CFG_REG &= (uint8)(~PGA_ref_STBY_PWR_EN);
-
-    #if (!CY_PSOC5A)
-        #if (CYDEV_VARIABLE_VDDA == 1u)
-            PGA_ref_BSTCLK_REG &= (uint8)(~PGA_ref_BST_CLK_EN);
-            /* Disable pumps only if there aren't any SC block in use */
-            if ((PGA_ref_PM_ACT_CFG_REG & PGA_ref_PM_ACT_CFG_MASK) == 0u)
-            {
-                PGA_ref_SC_MISC_REG &= (uint8)(~PGA_ref_PUMP_FORCE);
-                PGA_ref_PUMP_CR1_REG &= (uint8)(~PGA_ref_PUMP_CR1_SC_CLKSEL);
-                CyScBoostClk_Stop();
-            }
-        #endif /* CYDEV_VARIABLE_VDDA == 1u */
-    #endif /* (CY_PSOC3 || CY_PSOC5LP) */
-
-    /* This sets PGA in zero current mode and output routes are valid */
-    #if (CY_PSOC5A)
-        PGA_ref_P5backup.scCR1Reg = PGA_ref_CR1_REG;
-        PGA_ref_P5backup.scCR2Reg = PGA_ref_CR2_REG;
-        PGA_ref_CR1_REG = 0x00u;
-        PGA_ref_CR2_REG = 0x00u;
-        PGA_ref_P5backup.enableState = 1u;
-    #endif /* CY_PSOC5A */
-}
-
-
-/*******************************************************************************
-* Function Name: PGA_ref_SetPower
-********************************************************************************
-*
-* Summary:
-*  Set the power of the PGA.
-*
-* Parameters:
-*  power: Sets power level between (0) and (3) high power
-*
-* Return:
-*  void
-*
-*******************************************************************************/
-void PGA_ref_SetPower(uint8 power) 
-{
-    uint8 tmpCR;
-
-    tmpCR = PGA_ref_CR1_REG & (uint8)(~PGA_ref_DRIVE_MASK);
-    tmpCR |= (power & PGA_ref_DRIVE_MASK);
-    PGA_ref_CR1_REG = tmpCR;  
-}
-
-
-/*******************************************************************************
-* Function Name: PGA_ref_SetGain
-********************************************************************************
-*
-* Summary:
-*  This function sets values of the input and feedback resistors to set a 
-*  specific gain of the amplifier.
-*
-* Parameters:
-*  gain: Gain value of PGA (See header file for gain values.)
-*
-* Return:
-*  void 
-*
-*******************************************************************************/
-void PGA_ref_SetGain(uint8 gain) 
-{
-    /* Constant array for gain settings */
-    const uint8 PGA_ref_GainArray[9] = { 
-        (PGA_ref_RVAL_0K   | PGA_ref_R20_40B_40K | PGA_ref_BIAS_LOW), /* G=1  */
-        (PGA_ref_RVAL_40K  | PGA_ref_R20_40B_40K | PGA_ref_BIAS_LOW), /* G=2  */
-        (PGA_ref_RVAL_120K | PGA_ref_R20_40B_40K | PGA_ref_BIAS_LOW), /* G=4  */
-        (PGA_ref_RVAL_280K | PGA_ref_R20_40B_40K | PGA_ref_BIAS_LOW), /* G=8  */
-        (PGA_ref_RVAL_600K | PGA_ref_R20_40B_40K | PGA_ref_BIAS_LOW), /* G=16 */
-        (PGA_ref_RVAL_460K | PGA_ref_R20_40B_40K | PGA_ref_BIAS_LOW), /* G=24, Sets Rin as 20k */
-        (PGA_ref_RVAL_620K | PGA_ref_R20_40B_20K | PGA_ref_BIAS_LOW), /* G=32 */
-        (PGA_ref_RVAL_470K | PGA_ref_R20_40B_20K | PGA_ref_BIAS_LOW), /* G=48, Sets Rin as 10k */
-        (PGA_ref_RVAL_490K | PGA_ref_R20_40B_20K | PGA_ref_BIAS_LOW)  /* G=50, Sets Rin as 10k */
-    };
     
-    /* Constant array for gain compenstion settings */
-    const uint8 PGA_ref_GainComp[9] = { 
-        ( PGA_ref_COMP_4P35PF  | (uint8)( PGA_ref_REDC_00 >> 2 )), /* G=1  */
-        ( PGA_ref_COMP_4P35PF  | (uint8)( PGA_ref_REDC_01 >> 2 )), /* G=2  */
-        ( PGA_ref_COMP_3P0PF   | (uint8)( PGA_ref_REDC_01 >> 2 )), /* G=4  */
-        ( PGA_ref_COMP_3P0PF   | (uint8)( PGA_ref_REDC_01 >> 2 )), /* G=8  */
-        ( PGA_ref_COMP_3P6PF   | (uint8)( PGA_ref_REDC_01 >> 2 )), /* G=16 */
-        ( PGA_ref_COMP_3P6PF   | (uint8)( PGA_ref_REDC_11 >> 2 )), /* G=24 */
-        ( PGA_ref_COMP_3P6PF   | (uint8)( PGA_ref_REDC_11 >> 2 )), /* G=32 */
-        ( PGA_ref_COMP_3P6PF   | (uint8)( PGA_ref_REDC_00 >> 2 )), /* G=48 */
-        ( PGA_ref_COMP_3P6PF   | (uint8)( PGA_ref_REDC_00 >> 2 ))  /* G=50 */
-    };
-    
-    /* Only set new gain if it is a valid gain */
-    if( gain <= PGA_ref_GAIN_MAX)
-    {
-        /* Clear resistors, redc, and bias */
-        PGA_ref_CR2_REG &= (uint8)(~(PGA_ref_RVAL_MASK | PGA_ref_R20_40B_MASK | 
-                                PGA_ref_REDC_MASK | PGA_ref_BIAS_MASK ));
-
-        /* Set gain value resistors, redc comp, and bias */
-        PGA_ref_CR2_REG |= (PGA_ref_GainArray[gain] |
-                                ((uint8)(PGA_ref_GainComp[gain] << 2 ) & PGA_ref_REDC_MASK));
-
-        /* Clear sc_comp  */
-        PGA_ref_CR1_REG &= (uint8)(~PGA_ref_COMP_MASK);
-        /* Set sc_comp  */
-        PGA_ref_CR1_REG |= ( PGA_ref_GainComp[gain] | PGA_ref_COMP_MASK );
-    }
-}
-
-
 /* [] END OF FILE */

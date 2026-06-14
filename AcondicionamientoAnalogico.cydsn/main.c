@@ -2,18 +2,18 @@
 * main.c — Firmware PSoC unificado para geófono (GEO) y martillo (HAMMER).
 *
 * El hardware del TopDesign determina automáticamente el modo de compilación:
-*   Si el proyecto tiene PGAgain  → CLASS = GEO    (geófono diferencial)
-*   Si el proyecto tiene PGA      → CLASS = HAMMER  (martillo piezoeléctrico)
+*   Si el proyecto tiene PGAgain  → PSOC_HW_CLASS = GEO
+*   Si el proyecto tiene PGA      → PSOC_HW_CLASS = HAMMER
 * No hay que cambiar nada en este archivo al cambiar de proyecto.
 *
 * ─────────────────────────────────────────────────────────────────────────────
 *  GEO — componentes TopDesign:
-*    UART, ADC, VDAC, PGAgain, PGAvdac, OPAref, PGAp, PGAn, LPF_1, LPF_2,
-*    OPAbp, OPAadder, OPAlp, Timer, LED, isr_DelSig, isr_Timer, isr_SyncIn.
+*    UART, ADC, AMux_IN, AMux_ADC, VDAC_ref_*, PGAgain, OPAref, PGAp,
+*    PGAn, LPF_1, LPF_2, OPAbp, OPAadder, OPAlp, Timer, LED, isr_*.
 *
 *  HAMMER — componentes TopDesign:
-*    UART, ADC, VDAC, PGA, PGA_ref, Opa_ref, LPF_ADC, LPF_ref,
-*    Timer, LED, isr_DelSig, isr_Timer, isr_SyncIn.
+*    UART, ADC, AMux_IN, AMux_ADC, VDAC_ref_IN, VDAC_PGA, VDAC_LP,
+*    PGA, Opa_ref_IN, Opa_ref_PGA, Opa_LP, LPF_ADC, LPF_ref, Timer, LED.
 * ─────────────────────────────────────────────────────────────────────────────
 *
 * Cadena: MATLAB → maestro → esclavo (ESP-NOW) → PSoC (UART).
@@ -26,9 +26,9 @@
 *
 * RX UART — comandos con checksum XOR:
 *   1 param : [0xAB][cmd][param][cmd^param]
-*       0xA5 status/probe   0xA6 set PGAgain (0-8)   0xA9 set PGAvdac (0-8)
-*       0xAA set VDAC       0xB1 arm (espera SYNC)   0xB3 debug rampa (0/1)
-*       0xB4 start-now      0xC1 pong
+*       0xA5 status/probe   0xA6 set PGA (0-8)       0xA9 legacy ACK
+*       0xAA legacy ACK     0xB1 arm (espera SYNC)   0xB3 debug rampa (0/1)
+*       0xB4 start-now      0xB5 calibrar refs       0xC1 pong
 *   2 param : [0xAB][0xA3][n_lo][n_hi][0xA3^n_lo^n_hi]   (set N lotes)
 *
 * Detección PSoC ↔ ESP:
@@ -38,21 +38,12 @@
 *******************************************************************************/
 
 #include "project.h"
-
-/* ── Auto-detección de hardware por los componentes del TopDesign ────────── */
-#define GEO    0
-#define HAMMER 1
-
-#if defined(PGAgain_DEFAULT_GAIN)
-  #define CLASS GEO
-#elif defined(PGA_DEFAULT_GAIN)
-  #define CLASS HAMMER
-#else
-  #error "Hardware no reconocido: el TopDesign debe tener PGAgain (GEO) o PGA (HAMMER)."
-#endif
-
+#include "psoc_hw.h"
+#include "psoc_adc.h"
+#include "calibration.h"
+#include "LED.h"
 /* -------------------------------------------------------------------------- */
-#define VDAC_INIT_VALUE    0x94u
+#define LEGACY_VDAC_SHADOW_INIT 0x9Cu
 #define TIMER_TICK_MS      10u
 #define TIMEOUT_COUNTS     240000u    /* 10 ms @ 24 MHz — tick de sistema */
 
@@ -64,14 +55,6 @@
 #ifndef PSOC_CAPTURE_MAX_BATCHES
 #define PSOC_CAPTURE_MAX_BATCHES 512u
 #endif
-
-#define PSOC_IDLE          0u
-#define PSOC_ARMED         1u
-#define PSOC_SAMPLING      2u
-
-#define PSOC_CMD_PING      0xC0u
-#define PSOC_CMD_PONG      0xC1u
-#define PSOC_CMD_CFG_ACK   0xC2u
 
 #define PING_PERIOD_MS     700u
 #define PING_OFF_MS        100u
@@ -101,15 +84,10 @@ static          uint16 g_seq              = 0u;
 static volatile uint16 g_batches_captured = 0u;
 static volatile uint8  g_capture_done     = 0u;
 
-#if CLASS == GEO
-static uint8  g_pga_code     = PGAgain_DEFAULT_GAIN;
-static uint8  g_pgavdac_code = PGAvdac_DEFAULT_GAIN;
-#else  /* HAMMER */
-static uint8  g_pga_code     = PGA_DEFAULT_GAIN;
-static uint8  g_pgavdac_code = PGA_ref_DEFAULT_GAIN;
-#endif
+static uint8  g_pga_code     = PSOC_PGA_DEFAULT_CODE;
+static uint8  g_pgavdac_code = PSOC_PGAVDAC_DEFAULT_CODE;
 
-static uint8  g_vdac_val     = VDAC_INIT_VALUE;
+static uint8  g_vdac_val     = LEGACY_VDAC_SHADOW_INIT;
 
 static volatile uint8  g_state        = PSOC_IDLE;
 static          uint16 g_n_batches    = 0u;
@@ -158,28 +136,43 @@ static void uart_send_fs_report(void)
     uint8 fs_hi = (uint8)(((uint16)ADC_DEFAULT_SRATE >> 8u) & 0xFFu);
     uint8 frame[5u];
     frame[0] = 0xABu;
-    frame[1] = 0xC3u;
+    frame[1] = PSOC_CMD_FS_REPORT;
     frame[2] = fs_lo;
     frame[3] = fs_hi;
-    frame[4] = (uint8)(0xC3u ^ fs_lo ^ fs_hi);
+    frame[4] = (uint8)(PSOC_CMD_FS_REPORT ^ fs_lo ^ fs_hi);
     UART_PutArray(frame, (uint8)sizeof(frame));
 }
 
-static int32 adc_counts_right_aligned(int32 adcCounts)
+static void uart_send_diag(uint8 event, uint8 value)
 {
-    #if(ADC_CFG1_DEC_DIV != 0)
-        if (ADC_Config == ADC_CFG1) { adcCounts /= ADC_CFG1_DEC_DIV; }
-    #endif
-    #if((ADC_CFG2_DEC_DIV != 0) && (ADC_DEFAULT_NUM_CONFIGS > 1))
-        if (ADC_Config == ADC_CFG2) { adcCounts /= ADC_CFG2_DEC_DIV; }
-    #endif
-    #if((ADC_CFG3_DEC_DIV != 0) && (ADC_DEFAULT_NUM_CONFIGS > 2))
-        if (ADC_Config == ADC_CFG3) { adcCounts /= ADC_CFG3_DEC_DIV; }
-    #endif
-    #if((ADC_CFG4_DEC_DIV != 0) && (ADC_DEFAULT_NUM_CONFIGS > 3))
-        if (ADC_Config == ADC_CFG4) { adcCounts /= ADC_CFG4_DEC_DIV; }
-    #endif
-    return adcCounts;
+    uint8 state = g_state;
+    uint8 frame[6u];
+    frame[0] = 0xABu;
+    frame[1] = PSOC_CMD_DIAG_EVT;
+    frame[2] = event;
+    frame[3] = value;
+    frame[4] = state;
+    frame[5] = (uint8)(PSOC_CMD_DIAG_EVT ^ event ^ value ^ state);
+    UART_PutArray(frame, (uint8)sizeof(frame));
+}
+
+static uint8 diag_u16_sat(uint16 value)
+{
+    return (value > 255u) ? 255u : (uint8)value;
+}
+
+/* Telemetria de calibracion: envia el valor medido (counts, signo incluido)
+ * de la etapa como dos eventos PSOC_EVT_CAL_STAGE_MEAS (HI luego LO de un
+ * int16 saturado). target_counts=0 => este valor es directamente el error;
+ * ~0 confirma offset corregido, ~+-32767 indica saturacion/formato. */
+static void uart_send_cal_stage_meas(int32 value)
+{
+    uint16 u;
+    if (value > 32767L) { value = 32767L; }
+    if (value < -32768L) { value = -32768L; }
+    u = (uint16)(int16)value;
+    uart_send_diag(PSOC_EVT_CAL_STAGE_MEAS, (uint8)(u >> 8));
+    uart_send_diag(PSOC_EVT_CAL_STAGE_MEAS, (uint8)(u & 0xFFu));
 }
 
 static uint16 capture_target_batches(void)
@@ -194,6 +187,13 @@ static uint16 capture_target_batches(void)
 static uint8 capture_dump_pending(void)
 {
     return (g_batches_sent < g_batches_captured) ? 1u : 0u;
+}
+
+static void psoc_prepare_capture_path(void)
+{
+    ADC_StopConvert();
+    psoc_adc_select_capture_config();
+    psoc_calibration_restore_capture_path();
 }
 
 static void timer_start_runtime(void)
@@ -224,6 +224,7 @@ static void capture_reset_locked(void)
 static void psoc_enter_sampling(uint8 debugMode)
 {
     uint8 saved;
+    uint16 target = capture_target_batches();
     ADC_StopConvert();
     timer_stop_quiet();
     saved = CyEnterCriticalSection();
@@ -231,12 +232,14 @@ static void psoc_enter_sampling(uint8 debugMode)
     capture_reset_locked();
     g_state = PSOC_SAMPLING;
     CyExitCriticalSection(saved);
+    uart_send_diag(PSOC_EVT_SAMPLING_START, diag_u16_sat(target));
     ADC_StartConvert();
 }
 
 CY_ISR(isr_DelSigReady)
 {
-    g_adc_raw = adc_counts_right_aligned(ADC_GetResult32());
+    g_adc_raw = psoc_adc_counts_right_aligned(ADC_GetResult32());
+    psoc_adc_note_isr_sample(g_adc_raw);
 
     if (g_state == PSOC_SAMPLING && g_capture_done == 0u &&
         g_batches_captured < capture_target_batches() &&
@@ -280,8 +283,12 @@ CY_ISR(isr_Timer)
 CY_ISR(isr_SyncIn)
 {
     uint8 saved;
+#if defined(SYNC_IN_INTSTAT)
+    (void)SYNC_IN_ClearInterrupt();
+#endif
     if (SYNC_IN_Read())
     {
+        uart_send_diag(PSOC_EVT_SYNC_RISE, g_state);
         if (g_state == PSOC_ARMED)
         {
             psoc_enter_sampling(g_debug_psoc);
@@ -289,6 +296,7 @@ CY_ISR(isr_SyncIn)
     }
     else
     {
+        uart_send_diag(PSOC_EVT_SYNC_FALL, g_state);
         ADC_StopConvert();
         timer_start_runtime();
         saved = CyEnterCriticalSection();
@@ -309,7 +317,7 @@ static void rx_watchdog_stop(void)  { g_rx_watch_ticks = 0u; watchdog_rx = 0u; }
 
 static void led_write(uint8 value)
 {
-#if defined(LED_Write)
+#ifdef CY_PINS_LED_H
     LED_Write(value);
 #else
     (void)value;
@@ -318,7 +326,7 @@ static void led_write(uint8 value)
 
 static void led_toggle(void)
 {
-#if defined(LED_Write) && defined(LED_Read)
+#ifdef CY_PINS_LED_H
     if (g_state != PSOC_SAMPLING) {
         LED_Write(LED_Read() ^ 0x01u);
     }
@@ -343,11 +351,7 @@ static void PGAgain_Set(uint8 code)
 {
     if (code <= 8u) {
         g_pga_code = code;
-#if CLASS == GEO
-        PGAgain_SetGain(code);
-#else  /* HAMMER */
-        PGA_SetGain(code);
-#endif
+        psoc_hw_set_pga(code);
     }
 }
 
@@ -355,27 +359,44 @@ static void PGAvdac_Set(uint8 code)
 {
     if (code <= 8u) {
         g_pgavdac_code = code;
-#if CLASS == GEO
-        PGAvdac_SetGain(code);
-#else  /* HAMMER */
-        PGA_ref_SetGain(code);
-#endif
+        psoc_hw_set_pgavdac(code);
     }
 }
 
 static void psoc_arm(void)
 {
     uint8 saved;
-    ADC_StopConvert();
+    psoc_prepare_capture_path();
     saved = CyEnterCriticalSection();
     capture_reset_locked();
     g_state = PSOC_ARMED;
     CyExitCriticalSection(saved);
+    uart_send_diag(PSOC_EVT_ARMED, diag_u16_sat(g_n_batches));
 }
 
 static void psoc_start_now(void)
 {
+    psoc_prepare_capture_path();
     psoc_enter_sampling(0u);
+}
+
+static uint8 psoc_run_calibration_if_idle(void)
+{
+    uint8 ok;
+    uint8 i;
+    if (g_state != PSOC_IDLE) {
+        uart_send_diag(PSOC_EVT_CAL_BUSY, g_state);
+        return 0u;
+    }
+    uart_send_diag(PSOC_EVT_CAL_START, 0u);
+    psoc_calibration_reset_references();
+    ok = 1u;
+    for (i = 0u; i < g_psoc_cal_result_count; i++) {
+        uart_send_diag(PSOC_EVT_CAL_STAGE_DAC, g_psoc_cal_results[i].final_dac);
+        uart_send_cal_stage_meas(g_psoc_cal_results[i].final_measured);
+    }
+    uart_send_diag(PSOC_EVT_CAL_DONE, ok);
+    return ok;
 }
 
 static void uart_send_capture_batch(uint16 batchIndex)
@@ -425,7 +446,8 @@ static void uart_service(void)
                 switch (rx)
                 {
                     case 0xA5u: case 0xA6u: case 0xA9u: case 0xAAu:
-                    case 0xB1u: case 0xB3u: case 0xB4u: case PSOC_CMD_PONG:
+                    case 0xB1u: case 0xB3u: case 0xB4u: case PSOC_CMD_CALIBRATE:
+                    case PSOC_CMD_PONG:
                         rx_cmd = rx; rx_state = 2u; break;
                     case 0xA3u:
                         rx_cmd = rx; rx_state = 4u; break;
@@ -450,13 +472,20 @@ static void uart_service(void)
                 rx_watchdog_stop(); rx_state = 0u;
                 if (rx != (uint8)(rx_cmd ^ rx_p1 ^ rx_p2)) { break; }
 
-                g_esp_connected  = 1u;
+                if (!g_esp_connected) {
+                    g_esp_connected = 1u;
+                    uart_send_diag(PSOC_EVT_ESP_SEEN, rx_cmd);
+                }
+                if (rx_cmd != PSOC_CMD_PONG) {
+                    uart_send_diag(PSOC_EVT_RX_CMD, rx_cmd);
+                }
                 g_comm_countdown = COMM_WINDOW_TICKS;
 
                 switch (rx_cmd)
                 {
                     case PSOC_CMD_PONG: break;
                     case 0xA5u:
+                        uart_send_diag(PSOC_EVT_STATUS_REQ, 0u);
                         uart_send_ping();
                         uart_send_fs_report();
                         break;
@@ -469,27 +498,44 @@ static void uart_service(void)
                         uart_send_cfg_ack(0xA9u, g_pgavdac_code);
                         led_toggle(); break;
                     case 0xAAu:
-                        VDAC_SetValue(rx_p1); g_vdac_val = rx_p1;
+                        /* Legacy command: hardware now uses the four VDAC_ref_* refs. */
+                        g_vdac_val = rx_p1;
                         uart_send_cfg_ack(0xAAu, g_vdac_val);
                         led_toggle(); break;
                     case 0xA3u:
-                        g_n_batches = (uint16)rx_p1 | ((uint16)rx_p2 << 8u); break;
+                        g_n_batches = (uint16)rx_p1 | ((uint16)rx_p2 << 8u);
+                        uart_send_diag(PSOC_EVT_SETN, diag_u16_sat(g_n_batches));
+                        break;
                     case 0xB1u:
-                        psoc_arm(); led_toggle(); break;
+                        psoc_arm();
+                        uart_send_cfg_ack(0xB1u, g_state);
+                        led_toggle();
+                        break;
                     case 0xB4u:
-                        psoc_start_now(); led_toggle(); break;
+                        uart_send_diag(PSOC_EVT_START_NOW, 0u);
+                        uart_send_cfg_ack(0xB4u, 1u);
+                        psoc_start_now();
+                        led_toggle();
+                        break;
                     case 0xB3u:
                         g_debug_psoc = (rx_p1 == 0u) ? 0u : 1u;
+                        uart_send_diag(PSOC_EVT_DEBUG_MODE, g_debug_psoc);
                         if (g_debug_psoc) {
+                            psoc_prepare_capture_path();
                             psoc_enter_sampling(1u);
                         } else {
                             ADC_StopConvert();
+                            psoc_prepare_capture_path();
                             timer_start_runtime();
                             g_batch_fill   = 0u;
                             g_batch_ready  = 0u;
                             g_capture_done = 0u;
                             g_state        = PSOC_IDLE;
                         }
+                        break;
+                    case PSOC_CMD_CALIBRATE:
+                        uart_send_cfg_ack(PSOC_CMD_CALIBRATE, psoc_run_calibration_if_idle());
+                        led_toggle();
                         break;
                     default: break;
                 }
@@ -509,13 +555,20 @@ static void service_runtime(void)
         }
         ADC_StopConvert();
         timer_start_runtime();
+        uart_send_diag(PSOC_EVT_CAPTURE_DONE, diag_u16_sat(g_batches_captured));
         g_capture_done = 0u;
         g_state = PSOC_IDLE;
     }
 
     if (capture_dump_pending()) {
+        if (g_batches_sent == 0u) {
+            uart_send_diag(PSOC_EVT_DUMP_START, diag_u16_sat(g_batches_captured));
+        }
         uart_send_capture_batch(g_batches_sent);
         g_batches_sent++;
+        if (!capture_dump_pending()) {
+            uart_send_diag(PSOC_EVT_DUMP_DONE, diag_u16_sat(g_batches_sent));
+        }
         return;
     }
 
@@ -573,6 +626,7 @@ static void wait_for_esp(void)
     uint32 pingStart = nextPing;
 
     led_write(1u);
+    uart_send_diag(PSOC_EVT_WAIT_ESP, 0u);
     while (!g_esp_connected)
     {
         uint32 now;
@@ -603,38 +657,12 @@ int main(void)
     CyGlobalIntEnable;
 
     UART_Start();
+    uart_send_diag(PSOC_EVT_BOOT, PSOC_HW_CLASS);
 
-#if CLASS == GEO
-    /* ── Cadena analógica del geófono diferencial ── */
-    OPAref_Start();
-    PGAp_Start();  PGAn_Start();
-    PGAp_SetGain(PGAp_GAIN_02);
-    PGAn_SetGain(PGAp_GAIN_02);
-    LPF_1_Start(); LPF_2_Start();
-    PGAgain_Start();
-    PGAgain_SetGain(g_pga_code);
-    OPAbp_Start();
-    OPAadder_Start();
-    PGAvdac_Start();
-    PGAvdac_SetGain(g_pgavdac_code);
-    OPAlp_Start();
-#else  /* HAMMER */
-    /* ── Cadena analógica del martillo piezoeléctrico ── */
-    LPF_ref_Start();
-    LPF_ADC_Start();
-    Opa_ref_Start();
-    PGA_ref_Start();
-    PGA_ref_SetGain(g_pgavdac_code);
-    PGA_Start();
-    PGA_SetGain(g_pga_code);
-    Opa_LP_Start();
-#endif
-
-    VDAC_Start();
-    VDAC_SetValue(VDAC_INIT_VALUE);
-
-    ADC_Start();
-    ADC_StopConvert();
+    psoc_hw_start_analog(g_pga_code, g_pgavdac_code);
+    psoc_calibration_start_references();
+    psoc_prepare_capture_path();
+    uart_send_diag(PSOC_EVT_ANALOG_READY, 0u);
 
     isr_DelSig_StartEx(isr_DelSigReady);
     isr_Timer_StartEx(isr_Timer);
@@ -646,6 +674,10 @@ int main(void)
 
     /* ── Loop de arranque: busca el ESP sin bloquear UART/ADC ───────────── */
     wait_for_esp();
+
+    /* Autocalibra cuando el ESP ya recibe UART, manteniendo el arranque viejo. */
+    CyDelay(PSOC_STARTUP_CAL_DELAY_MS);
+    (void)psoc_run_calibration_if_idle();
 
     /* ── 5 parpadeos rápidos al conectar ─────────────────────────────────── */
     for (i = 0u; i < 5u; i++)

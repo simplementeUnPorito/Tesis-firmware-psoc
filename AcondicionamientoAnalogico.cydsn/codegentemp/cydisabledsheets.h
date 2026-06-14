@@ -1,6 +1,6 @@
 #ifndef INCLUDED_CYDISABLEDSHEETS_H
 #define INCLUDED_CYDISABLEDSHEETS_H
 
-#define AnalogGeo__DISABLED 1u /* AnalogGeo */
+#define AnalogHammer__DISABLED 1u /* AnalogHammer */
 
 #endif /* INCLUDED_CYDISABLEDSHEETS_H */

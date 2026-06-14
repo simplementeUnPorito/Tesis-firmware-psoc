@@ -1,0 +1,4613 @@
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"calibration.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.abs_counts,"ax",%progbits
+  20              		.align	2
+  21              		.thumb
+  22              		.thumb_func
+  23              		.type	abs_counts, %function
+  24              	abs_counts:
+  25              	.LFB67:
+  26              		.file 1 "calibration.c"
+   1:calibration.c **** #include "calibration.h"
+   2:calibration.c **** #include "calibration_tables.h"
+   3:calibration.c **** #include "psoc_adc.h"
+   4:calibration.c **** 
+   5:calibration.c **** #ifndef CAL_AMUX_ADC_START
+   6:calibration.c **** #define CAL_AMUX_ADC_START() AMux_ADC_Start()
+   7:calibration.c **** #endif
+   8:calibration.c **** 
+   9:calibration.c **** #ifndef CAL_AMUX_ADC_SELECT
+  10:calibration.c **** #define CAL_AMUX_ADC_SELECT(channel) AMux_ADC_Select(channel)
+  11:calibration.c **** #endif
+  12:calibration.c **** 
+  13:calibration.c **** #ifndef CAL_AMUX_IN_START
+  14:calibration.c **** #define CAL_AMUX_IN_START() AMux_IN_Start()
+  15:calibration.c **** #endif
+  16:calibration.c **** 
+  17:calibration.c **** #ifndef CAL_AMUX_IN_SELECT
+  18:calibration.c **** #define CAL_AMUX_IN_SELECT(channel) AMux_IN_Select(channel)
+  19:calibration.c **** #endif
+  20:calibration.c **** 
+  21:calibration.c **** static int32 abs_counts(int32 value)
+  22:calibration.c **** {
+  27              		.loc 1 22 0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 0
+  30              		@ frame_needed = 0, uses_anonymous_args = 0
+  31              		@ link register save eliminated.
+  32              	.LVL0:
+  23:calibration.c ****     return (value < 0) ? -value : value;
+  24:calibration.c **** }
+  33              		.loc 1 24 0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 2
+
+
+  34 0000 0028     		cmp	r0, #0
+  35 0002 B8BF     		it	lt
+  36 0004 4042     		rsblt	r0, r0, #0
+  37              	.LVL1:
+  38 0006 7047     		bx	lr
+  39              		.cfi_endproc
+  40              	.LFE67:
+  41              		.size	abs_counts, .-abs_counts
+  42              		.section	.text.cal_vdac_geo_lp,"ax",%progbits
+  43              		.align	2
+  44              		.thumb
+  45              		.thumb_func
+  46              		.type	cal_vdac_geo_lp, %function
+  47              	cal_vdac_geo_lp:
+  48              	.LFB66:
+  49              		.file 2 "calibration_tables.h"
+   1:calibration_tables.h **** #ifndef CALIBRATION_TABLES_H
+   2:calibration_tables.h **** #define CALIBRATION_TABLES_H
+   3:calibration_tables.h **** 
+   4:calibration_tables.h **** #include "calibration.h"
+   5:calibration_tables.h **** 
+   6:calibration_tables.h **** #ifndef CAL_INPUT_NORMAL_CHANNEL
+   7:calibration_tables.h **** #define CAL_INPUT_NORMAL_CHANNEL 0u
+   8:calibration_tables.h **** #endif
+   9:calibration_tables.h **** 
+  10:calibration_tables.h **** /* AMux_IN canal 1 = referencia/tierra virtual de 2.5 V. Durante calibracion
+  11:calibration_tables.h ****  * la entrada se fuerza ahi para que cada etapa quede centrada tambien en 2.5 V. */
+  12:calibration_tables.h **** #ifndef CAL_INPUT_REF_CHANNEL
+  13:calibration_tables.h **** #define CAL_INPUT_REF_CHANNEL 1u
+  14:calibration_tables.h **** #endif
+  15:calibration_tables.h **** 
+  16:calibration_tables.h **** #ifndef CAL_INPUT_GROUND_CHANNEL
+  17:calibration_tables.h **** #define CAL_INPUT_GROUND_CHANNEL CAL_INPUT_REF_CHANNEL
+  18:calibration_tables.h **** #endif
+  19:calibration_tables.h **** 
+  20:calibration_tables.h **** #ifndef CAL_AMUX_SETTLE_MS
+  21:calibration_tables.h **** #define CAL_AMUX_SETTLE_MS 5u
+  22:calibration_tables.h **** #endif
+  23:calibration_tables.h **** 
+  24:calibration_tables.h **** #ifndef CAL_DAC_SETTLE_MS
+  25:calibration_tables.h **** #define CAL_DAC_SETTLE_MS 5u
+  26:calibration_tables.h **** #endif
+  27:calibration_tables.h **** 
+  28:calibration_tables.h **** #ifndef CAL_TARGET_1V_COUNTS
+  29:calibration_tables.h **** #define CAL_TARGET_1V_COUNTS 52429L
+  30:calibration_tables.h **** #endif
+  31:calibration_tables.h **** 
+  32:calibration_tables.h **** #ifndef CAL_TARGET_1V5_COUNTS
+  33:calibration_tables.h **** #define CAL_TARGET_1V5_COUNTS 78644L
+  34:calibration_tables.h **** #endif
+  35:calibration_tables.h **** 
+  36:calibration_tables.h **** #ifndef CAL_TARGET_HAMMER_IN_COUNTS
+  37:calibration_tables.h **** #define CAL_TARGET_HAMMER_IN_COUNTS CAL_TARGET_1V_COUNTS
+  38:calibration_tables.h **** #endif
+  39:calibration_tables.h **** 
+  40:calibration_tables.h **** #ifndef CAL_TARGET_HAMMER_PGA_COUNTS
+  41:calibration_tables.h **** #define CAL_TARGET_HAMMER_PGA_COUNTS CAL_TARGET_1V5_COUNTS
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 3
+
+
+  42:calibration_tables.h **** #endif
+  43:calibration_tables.h **** 
+  44:calibration_tables.h **** #ifndef CAL_TARGET_HAMMER_LP_COUNTS
+  45:calibration_tables.h **** #define CAL_TARGET_HAMMER_LP_COUNTS CAL_TARGET_1V5_COUNTS
+  46:calibration_tables.h **** #endif
+  47:calibration_tables.h **** 
+  48:calibration_tables.h **** /* ADC_CFG1 es diferencial signed de 18 bits (0 = 0V diferencial). En modo
+  49:calibration_tables.h ****  * GEO cada etapa debe quedar con su salida DC igualada a AMux_IN=1
+  50:calibration_tables.h ****  * (referencia/tierra virtual de 2.5 V), es decir lectura diferencial = 0 counts. */
+  51:calibration_tables.h **** #ifndef CAL_TARGET_GEO_PGA_COUNTS
+  52:calibration_tables.h **** #define CAL_TARGET_GEO_PGA_COUNTS 0L
+  53:calibration_tables.h **** #endif
+  54:calibration_tables.h **** 
+  55:calibration_tables.h **** #ifndef CAL_TARGET_GEO_BP_COUNTS
+  56:calibration_tables.h **** #define CAL_TARGET_GEO_BP_COUNTS 0L
+  57:calibration_tables.h **** #endif
+  58:calibration_tables.h **** 
+  59:calibration_tables.h **** #ifndef CAL_TARGET_GEO_ADDER_COUNTS
+  60:calibration_tables.h **** #define CAL_TARGET_GEO_ADDER_COUNTS 0L
+  61:calibration_tables.h **** #endif
+  62:calibration_tables.h **** 
+  63:calibration_tables.h **** #ifndef CAL_TARGET_GEO_LP_COUNTS
+  64:calibration_tables.h **** #define CAL_TARGET_GEO_LP_COUNTS 0L
+  65:calibration_tables.h **** #endif
+  66:calibration_tables.h **** 
+  67:calibration_tables.h **** #define CAL_AVG_N      32u
+  68:calibration_tables.h **** #define CAL_MAX_ITER   12u
+  69:calibration_tables.h **** #define CAL_TOL_COUNTS 250L
+  70:calibration_tables.h **** 
+  71:calibration_tables.h **** /* Punto de partida obligatorio de la busqueda binaria: 0x9C = 156 ->
+  72:calibration_tables.h ****  * 156 * 16mV (VDAC8 1x) = 2.496V =~ 2.5V (centro de rango / "tierra
+  73:calibration_tables.h ****  * virtual" del front-end analogico). */
+  74:calibration_tables.h **** #define CAL_DAC_INIT   0x9Cu
+  75:calibration_tables.h **** 
+  76:calibration_tables.h **** /* Primer paso (antes de la busqueda binaria) para detectar empiricamente si
+  77:calibration_tables.h ****  * la medida crece o decrece con el codigo DAC. */
+  78:calibration_tables.h **** #define CAL_PROBE_STEP 32u
+  79:calibration_tables.h **** 
+  80:calibration_tables.h **** /* "Estabilizacion": stable_avg() repite avg_counts() hasta que dos ventanas
+  81:calibration_tables.h ****  * consecutivas difieran <= CAL_SETTLE_TOL_COUNTS (ruido de cuantizacion),
+  82:calibration_tables.h ****  * o hasta CAL_SETTLE_MAX_WINDOWS intentos (usa la ultima ventana). */
+  83:calibration_tables.h **** #define CAL_SETTLE_MAX_WINDOWS 10u
+  84:calibration_tables.h **** #define CAL_SETTLE_TOL_COUNTS  100L
+  85:calibration_tables.h **** 
+  86:calibration_tables.h **** #if PSOC_HW_CLASS == PSOC_HW_GEO
+  87:calibration_tables.h **** 
+  88:calibration_tables.h **** #ifndef CAL_ADC_CAPTURE_CHANNEL
+  89:calibration_tables.h **** #define CAL_ADC_CAPTURE_CHANNEL 3u
+  90:calibration_tables.h **** #endif
+  91:calibration_tables.h **** 
+  92:calibration_tables.h **** #if !defined(VDAC_ref_PGA_DEFAULT_DATA)
+  93:calibration_tables.h ****     #error "AnalogGeo requiere el componente VDAC_ref_PGA."
+  94:calibration_tables.h **** #endif
+  95:calibration_tables.h **** #if !defined(VDAC_ref_BP_DEFAULT_DATA)
+  96:calibration_tables.h ****     #error "AnalogGeo requiere el componente VDAC_ref_BP."
+  97:calibration_tables.h **** #endif
+  98:calibration_tables.h **** #if !defined(VDAC_Ref_Adder_DEFAULT_DATA)
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 4
+
+
+  99:calibration_tables.h ****     #error "AnalogGeo requiere el componente VDAC_Ref_Adder."
+ 100:calibration_tables.h **** #endif
+ 101:calibration_tables.h **** #if !defined(VDAC_ref_LP_DEFAULT_DATA)
+ 102:calibration_tables.h ****     #error "AnalogGeo requiere el componente VDAC_ref_LP."
+ 103:calibration_tables.h **** #endif
+ 104:calibration_tables.h **** 
+ 105:calibration_tables.h **** static void cal_vdac_geo_pga(uint8 value)   { VDAC_ref_PGA_SetValue(value); }
+ 106:calibration_tables.h **** static void cal_vdac_geo_bp(uint8 value)    { VDAC_ref_BP_SetValue(value); }
+ 107:calibration_tables.h **** static void cal_vdac_geo_adder(uint8 value) { VDAC_Ref_Adder_SetValue(value); }
+ 108:calibration_tables.h **** static void cal_vdac_geo_lp(uint8 value)    { VDAC_ref_LP_SetValue(value); }
+  50              		.loc 2 108 0
+  51              		.cfi_startproc
+  52              		@ args = 0, pretend = 0, frame = 0
+  53              		@ frame_needed = 0, uses_anonymous_args = 0
+  54              	.LVL2:
+  55 0000 08B5     		push	{r3, lr}
+  56              		.cfi_def_cfa_offset 8
+  57              		.cfi_offset 3, -8
+  58              		.cfi_offset 14, -4
+  59              		.loc 2 108 0
+  60 0002 FFF7FEFF 		bl	VDAC_ref_LP_SetValue
+  61              	.LVL3:
+  62 0006 08BD     		pop	{r3, pc}
+  63              		.cfi_endproc
+  64              	.LFE66:
+  65              		.size	cal_vdac_geo_lp, .-cal_vdac_geo_lp
+  66              		.section	.text.cal_vdac_geo_adder,"ax",%progbits
+  67              		.align	2
+  68              		.thumb
+  69              		.thumb_func
+  70              		.type	cal_vdac_geo_adder, %function
+  71              	cal_vdac_geo_adder:
+  72              	.LFB65:
+ 107:calibration_tables.h **** static void cal_vdac_geo_lp(uint8 value)    { VDAC_ref_LP_SetValue(value); }
+  73              		.loc 2 107 0
+  74              		.cfi_startproc
+  75              		@ args = 0, pretend = 0, frame = 0
+  76              		@ frame_needed = 0, uses_anonymous_args = 0
+  77              	.LVL4:
+  78 0000 08B5     		push	{r3, lr}
+  79              		.cfi_def_cfa_offset 8
+  80              		.cfi_offset 3, -8
+  81              		.cfi_offset 14, -4
+ 107:calibration_tables.h **** static void cal_vdac_geo_lp(uint8 value)    { VDAC_ref_LP_SetValue(value); }
+  82              		.loc 2 107 0
+  83 0002 FFF7FEFF 		bl	VDAC_Ref_Adder_SetValue
+  84              	.LVL5:
+  85 0006 08BD     		pop	{r3, pc}
+  86              		.cfi_endproc
+  87              	.LFE65:
+  88              		.size	cal_vdac_geo_adder, .-cal_vdac_geo_adder
+  89              		.section	.text.cal_vdac_geo_bp,"ax",%progbits
+  90              		.align	2
+  91              		.thumb
+  92              		.thumb_func
+  93              		.type	cal_vdac_geo_bp, %function
+  94              	cal_vdac_geo_bp:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 5
+
+
+  95              	.LFB64:
+ 106:calibration_tables.h **** static void cal_vdac_geo_adder(uint8 value) { VDAC_Ref_Adder_SetValue(value); }
+  96              		.loc 2 106 0
+  97              		.cfi_startproc
+  98              		@ args = 0, pretend = 0, frame = 0
+  99              		@ frame_needed = 0, uses_anonymous_args = 0
+ 100              	.LVL6:
+ 101 0000 08B5     		push	{r3, lr}
+ 102              		.cfi_def_cfa_offset 8
+ 103              		.cfi_offset 3, -8
+ 104              		.cfi_offset 14, -4
+ 106:calibration_tables.h **** static void cal_vdac_geo_adder(uint8 value) { VDAC_Ref_Adder_SetValue(value); }
+ 105              		.loc 2 106 0
+ 106 0002 FFF7FEFF 		bl	VDAC_ref_BP_SetValue
+ 107              	.LVL7:
+ 108 0006 08BD     		pop	{r3, pc}
+ 109              		.cfi_endproc
+ 110              	.LFE64:
+ 111              		.size	cal_vdac_geo_bp, .-cal_vdac_geo_bp
+ 112              		.section	.text.cal_vdac_geo_pga,"ax",%progbits
+ 113              		.align	2
+ 114              		.thumb
+ 115              		.thumb_func
+ 116              		.type	cal_vdac_geo_pga, %function
+ 117              	cal_vdac_geo_pga:
+ 118              	.LFB63:
+ 105:calibration_tables.h **** static void cal_vdac_geo_bp(uint8 value)    { VDAC_ref_BP_SetValue(value); }
+ 119              		.loc 2 105 0
+ 120              		.cfi_startproc
+ 121              		@ args = 0, pretend = 0, frame = 0
+ 122              		@ frame_needed = 0, uses_anonymous_args = 0
+ 123              	.LVL8:
+ 124 0000 08B5     		push	{r3, lr}
+ 125              		.cfi_def_cfa_offset 8
+ 126              		.cfi_offset 3, -8
+ 127              		.cfi_offset 14, -4
+ 105:calibration_tables.h **** static void cal_vdac_geo_bp(uint8 value)    { VDAC_ref_BP_SetValue(value); }
+ 128              		.loc 2 105 0
+ 129 0002 FFF7FEFF 		bl	VDAC_ref_PGA_SetValue
+ 130              	.LVL9:
+ 131 0006 08BD     		pop	{r3, pc}
+ 132              		.cfi_endproc
+ 133              	.LFE63:
+ 134              		.size	cal_vdac_geo_pga, .-cal_vdac_geo_pga
+ 135              		.section	.text.avg_counts,"ax",%progbits
+ 136              		.align	2
+ 137              		.thumb
+ 138              		.thumb_func
+ 139              		.type	avg_counts, %function
+ 140              	avg_counts:
+ 141              	.LFB68:
+  25:calibration.c **** 
+  26:calibration.c **** static uint8 avg_counts(uint8 n, int32 *avg_out)
+  27:calibration.c **** {
+ 142              		.loc 1 27 0
+ 143              		.cfi_startproc
+ 144              		@ args = 0, pretend = 0, frame = 8
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 6
+
+
+ 145              		@ frame_needed = 0, uses_anonymous_args = 0
+ 146              	.LVL10:
+  28:calibration.c ****     uint8 i;
+  29:calibration.c ****     int32 acc = 0;
+  30:calibration.c ****     int32 sample;
+  31:calibration.c ****     if (avg_out == (int32 *)0) { return 0u; }
+ 147              		.loc 1 31 0
+ 148 0000 D1B1     		cbz	r1, .L15
+  27:calibration.c ****     uint8 i;
+ 149              		.loc 1 27 0
+ 150 0002 F0B5     		push	{r4, r5, r6, r7, lr}
+ 151              		.cfi_def_cfa_offset 20
+ 152              		.cfi_offset 4, -20
+ 153              		.cfi_offset 5, -16
+ 154              		.cfi_offset 6, -12
+ 155              		.cfi_offset 7, -8
+ 156              		.cfi_offset 14, -4
+ 157 0004 83B0     		sub	sp, sp, #12
+ 158              		.cfi_def_cfa_offset 32
+ 159 0006 0646     		mov	r6, r0
+ 160 0008 0F46     		mov	r7, r1
+  32:calibration.c ****     if (n == 0u) { n = 1u; }
+ 161              		.loc 1 32 0
+ 162 000a 00B9     		cbnz	r0, .L12
+ 163 000c 0126     		movs	r6, #1
+ 164              	.L12:
+ 165              	.LVL11:
+  29:calibration.c ****     int32 sample;
+ 166              		.loc 1 29 0
+ 167 000e 0025     		movs	r5, #0
+  33:calibration.c ****     for (i = 0u; i < n; i++) {
+ 168              		.loc 1 33 0
+ 169 0010 2C46     		mov	r4, r5
+ 170 0012 0AE0     		b	.L13
+ 171              	.LVL12:
+ 172              	.L14:
+  34:calibration.c ****         if (!psoc_adc_wait_fresh_sample(&sample, CAL_ADC_READ_TIMEOUT_US)) {
+ 173              		.loc 1 34 0
+ 174 0014 44F62061 		movw	r1, #20000
+ 175 0018 01A8     		add	r0, sp, #4
+ 176 001a FFF7FEFF 		bl	psoc_adc_wait_fresh_sample
+ 177              	.LVL13:
+ 178 001e 0346     		mov	r3, r0
+ 179 0020 68B1     		cbz	r0, .L11
+  35:calibration.c ****             return 0u;
+  36:calibration.c ****         }
+  37:calibration.c ****         acc += sample;
+ 180              		.loc 1 37 0 discriminator 2
+ 181 0022 019B     		ldr	r3, [sp, #4]
+ 182 0024 1D44     		add	r5, r5, r3
+ 183              	.LVL14:
+  33:calibration.c ****         if (!psoc_adc_wait_fresh_sample(&sample, CAL_ADC_READ_TIMEOUT_US)) {
+ 184              		.loc 1 33 0 discriminator 2
+ 185 0026 0134     		adds	r4, r4, #1
+ 186              	.LVL15:
+ 187 0028 E4B2     		uxtb	r4, r4
+ 188              	.LVL16:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 7
+
+
+ 189              	.L13:
+  33:calibration.c ****         if (!psoc_adc_wait_fresh_sample(&sample, CAL_ADC_READ_TIMEOUT_US)) {
+ 190              		.loc 1 33 0 is_stmt 0 discriminator 1
+ 191 002a A642     		cmp	r6, r4
+ 192 002c F2D8     		bhi	.L14
+  38:calibration.c ****     }
+  39:calibration.c ****     *avg_out = acc / (int32)n;
+ 193              		.loc 1 39 0 is_stmt 1
+ 194 002e 95FBF6F5 		sdiv	r5, r5, r6
+ 195              	.LVL17:
+ 196 0032 3D60     		str	r5, [r7]
+  40:calibration.c ****     return 1u;
+ 197              		.loc 1 40 0
+ 198 0034 0123     		movs	r3, #1
+ 199 0036 02E0     		b	.L11
+ 200              	.LVL18:
+ 201              	.L15:
+ 202              		.cfi_def_cfa_offset 0
+ 203              		.cfi_restore 4
+ 204              		.cfi_restore 5
+ 205              		.cfi_restore 6
+ 206              		.cfi_restore 7
+ 207              		.cfi_restore 14
+  31:calibration.c ****     if (n == 0u) { n = 1u; }
+ 208              		.loc 1 31 0
+ 209 0038 0023     		movs	r3, #0
+  41:calibration.c **** }
+ 210              		.loc 1 41 0
+ 211 003a 1846     		mov	r0, r3
+ 212              	.LVL19:
+ 213 003c 7047     		bx	lr
+ 214              	.LVL20:
+ 215              	.L11:
+ 216              		.cfi_def_cfa_offset 32
+ 217              		.cfi_offset 4, -20
+ 218              		.cfi_offset 5, -16
+ 219              		.cfi_offset 6, -12
+ 220              		.cfi_offset 7, -8
+ 221              		.cfi_offset 14, -4
+ 222 003e 1846     		mov	r0, r3
+ 223 0040 03B0     		add	sp, sp, #12
+ 224              		.cfi_def_cfa_offset 20
+ 225              		@ sp needed
+ 226 0042 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 227              		.cfi_endproc
+ 228              	.LFE68:
+ 229              		.size	avg_counts, .-avg_counts
+ 230              		.section	.text.stable_avg,"ax",%progbits
+ 231              		.align	2
+ 232              		.thumb
+ 233              		.thumb_func
+ 234              		.type	stable_avg, %function
+ 235              	stable_avg:
+ 236              	.LFB69:
+  42:calibration.c **** 
+  43:calibration.c **** /* Repite avg_counts() hasta que dos ventanas consecutivas difieran <=
+  44:calibration.c ****  * CAL_SETTLE_TOL_COUNTS (solo queda ruido de cuantizacion), o hasta
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 8
+
+
+  45:calibration.c ****  * CAL_SETTLE_MAX_WINDOWS intentos (se usa la ultima ventana medida). */
+  46:calibration.c **** static uint8 stable_avg(uint8 n, int32 *avg_out)
+  47:calibration.c **** {
+ 237              		.loc 1 47 0
+ 238              		.cfi_startproc
+ 239              		@ args = 0, pretend = 0, frame = 8
+ 240              		@ frame_needed = 0, uses_anonymous_args = 0
+ 241              	.LVL21:
+ 242 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+ 243              		.cfi_def_cfa_offset 20
+ 244              		.cfi_offset 4, -20
+ 245              		.cfi_offset 5, -16
+ 246              		.cfi_offset 6, -12
+ 247              		.cfi_offset 7, -8
+ 248              		.cfi_offset 14, -4
+ 249 0002 83B0     		sub	sp, sp, #12
+ 250              		.cfi_def_cfa_offset 32
+ 251 0004 0646     		mov	r6, r0
+ 252 0006 0F46     		mov	r7, r1
+  48:calibration.c ****     int32 prev_avg;
+  49:calibration.c ****     int32 cur_avg;
+  50:calibration.c ****     uint8 settle_iter;
+  51:calibration.c **** 
+  52:calibration.c ****     if (!avg_counts(n, &prev_avg)) { return 0u; }
+ 253              		.loc 1 52 0
+ 254 0008 01A9     		add	r1, sp, #4
+ 255              	.LVL22:
+ 256 000a FFF7FEFF 		bl	avg_counts
+ 257              	.LVL23:
+ 258 000e 0346     		mov	r3, r0
+ 259 0010 C0B1     		cbz	r0, .L20
+  53:calibration.c ****     cur_avg = prev_avg;
+ 260              		.loc 1 53 0
+ 261 0012 019B     		ldr	r3, [sp, #4]
+ 262 0014 0093     		str	r3, [sp]
+ 263              	.LVL24:
+  54:calibration.c ****     for (settle_iter = 0u; settle_iter < CAL_SETTLE_MAX_WINDOWS; settle_iter++) {
+ 264              		.loc 1 54 0
+ 265 0016 0024     		movs	r4, #0
+ 266 0018 0FE0     		b	.L21
+ 267              	.LVL25:
+ 268              	.L23:
+  55:calibration.c ****         if (!avg_counts(n, &cur_avg)) { return 0u; }
+ 269              		.loc 1 55 0
+ 270 001a 6946     		mov	r1, sp
+ 271 001c 3046     		mov	r0, r6
+ 272 001e FFF7FEFF 		bl	avg_counts
+ 273              	.LVL26:
+ 274 0022 0346     		mov	r3, r0
+ 275 0024 70B1     		cbz	r0, .L20
+  56:calibration.c ****         if (abs_counts(cur_avg - prev_avg) <= CAL_SETTLE_TOL_COUNTS) {
+ 276              		.loc 1 56 0
+ 277 0026 009D     		ldr	r5, [sp]
+ 278 0028 0198     		ldr	r0, [sp, #4]
+ 279 002a 281A     		subs	r0, r5, r0
+ 280 002c FFF7FEFF 		bl	abs_counts
+ 281              	.LVL27:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 9
+
+
+ 282 0030 6428     		cmp	r0, #100
+ 283 0032 04DD     		ble	.L22
+  57:calibration.c ****             break;
+  58:calibration.c ****         }
+  59:calibration.c ****         prev_avg = cur_avg;
+ 284              		.loc 1 59 0 discriminator 2
+ 285 0034 0195     		str	r5, [sp, #4]
+  54:calibration.c ****         if (!avg_counts(n, &cur_avg)) { return 0u; }
+ 286              		.loc 1 54 0 discriminator 2
+ 287 0036 0134     		adds	r4, r4, #1
+ 288              	.LVL28:
+ 289 0038 E4B2     		uxtb	r4, r4
+ 290              	.LVL29:
+ 291              	.L21:
+  54:calibration.c ****         if (!avg_counts(n, &cur_avg)) { return 0u; }
+ 292              		.loc 1 54 0 is_stmt 0 discriminator 1
+ 293 003a 092C     		cmp	r4, #9
+ 294 003c EDD9     		bls	.L23
+ 295              	.L22:
+  60:calibration.c ****     }
+  61:calibration.c ****     *avg_out = cur_avg;
+ 296              		.loc 1 61 0 is_stmt 1
+ 297 003e 009B     		ldr	r3, [sp]
+ 298 0040 3B60     		str	r3, [r7]
+  62:calibration.c ****     return 1u;
+ 299              		.loc 1 62 0
+ 300 0042 0123     		movs	r3, #1
+ 301              	.LVL30:
+ 302              	.L20:
+  63:calibration.c **** }
+ 303              		.loc 1 63 0
+ 304 0044 1846     		mov	r0, r3
+ 305 0046 03B0     		add	sp, sp, #12
+ 306              		.cfi_def_cfa_offset 20
+ 307              		@ sp needed
+ 308 0048 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 309              		.cfi_endproc
+ 310              	.LFE69:
+ 311              		.size	stable_avg, .-stable_avg
+ 312 004a 00BF     		.section	.text.calibrate_stage,"ax",%progbits
+ 313              		.align	2
+ 314              		.thumb
+ 315              		.thumb_func
+ 316              		.type	calibrate_stage, %function
+ 317              	calibrate_stage:
+ 318              	.LFB70:
+  64:calibration.c **** 
+  65:calibration.c **** /* Busqueda binaria sobre el codigo DAC [0,255]:
+  66:calibration.c ****  *  1) Arranca siempre en CAL_DAC_INIT (2.5V).
+  67:calibration.c ****  *  2) Da un primer paso de CAL_PROBE_STEP en la direccion sugerida por
+  68:calibration.c ****  *     stage->direction y, comparando ambas medidas, determina
+  69:calibration.c ****  *     empiricamente si la lectura crece o decrece con el codigo DAC.
+  70:calibration.c ****  *  3) Con esa pendiente, bisecta [0,255] hasta caer dentro de
+  71:calibration.c ****  *     stage->tolerance_counts o agotar stage->max_iter.
+  72:calibration.c ****  * Cada medida usa stable_avg(): espera a que el escalon anterior se asiente
+  73:calibration.c ****  * (ruido de cuantizacion constante) antes de promediar. */
+  74:calibration.c **** static uint8 calibrate_stage(const PsocCalStage *stage, PsocCalResult *result)
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 10
+
+
+  75:calibration.c **** {
+ 319              		.loc 1 75 0
+ 320              		.cfi_startproc
+ 321              		@ args = 0, pretend = 0, frame = 24
+ 322              		@ frame_needed = 0, uses_anonymous_args = 0
+ 323              	.LVL31:
+ 324 0000 2DE9F04F 		push	{r4, r5, r6, r7, r8, r9, r10, fp, lr}
+ 325              		.cfi_def_cfa_offset 36
+ 326              		.cfi_offset 4, -36
+ 327              		.cfi_offset 5, -32
+ 328              		.cfi_offset 6, -28
+ 329              		.cfi_offset 7, -24
+ 330              		.cfi_offset 8, -20
+ 331              		.cfi_offset 9, -16
+ 332              		.cfi_offset 10, -12
+ 333              		.cfi_offset 11, -8
+ 334              		.cfi_offset 14, -4
+ 335 0004 87B0     		sub	sp, sp, #28
+ 336              		.cfi_def_cfa_offset 64
+ 337 0006 0446     		mov	r4, r0
+ 338 0008 8A46     		mov	r10, r1
+  76:calibration.c ****     uint8  dac;
+  77:calibration.c ****     uint8  lo;
+  78:calibration.c ****     uint8  hi;
+  79:calibration.c ****     int32  measured;
+  80:calibration.c ****     int32  abs_error;
+  81:calibration.c ****     uint8  increasing;
+  82:calibration.c ****     uint16 iter;
+  83:calibration.c ****     uint8  best_dac;
+  84:calibration.c ****     int32  best_measured;
+  85:calibration.c ****     int32  best_abs_error;
+  86:calibration.c **** 
+  87:calibration.c ****     ADC_Stop();
+ 339              		.loc 1 87 0
+ 340 000a FFF7FEFF 		bl	ADC_Stop
+ 341              	.LVL32:
+  88:calibration.c ****     CAL_AMUX_ADC_SELECT(stage->adc_channel);
+ 342              		.loc 1 88 0
+ 343 000e 2079     		ldrb	r0, [r4, #4]	@ zero_extendqisi2
+ 344 0010 FFF7FEFF 		bl	AMux_ADC_FastSelect
+ 345              	.LVL33:
+  89:calibration.c ****     CyDelay(CAL_AMUX_SETTLE_MS);
+ 346              		.loc 1 89 0
+ 347 0014 0520     		movs	r0, #5
+ 348 0016 FFF7FEFF 		bl	CyDelay
+ 349              	.LVL34:
+  90:calibration.c ****     ADC_Start();
+ 350              		.loc 1 90 0
+ 351 001a FFF7FEFF 		bl	ADC_Start
+ 352              	.LVL35:
+  91:calibration.c ****     psoc_adc_clear_isr_sample();
+ 353              		.loc 1 91 0
+ 354 001e FFF7FEFF 		bl	psoc_adc_clear_isr_sample
+ 355              	.LVL36:
+  92:calibration.c ****     isr_DelSig_ClearPending();
+ 356              		.loc 1 92 0
+ 357 0022 FFF7FEFF 		bl	isr_DelSig_ClearPending
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 11
+
+
+ 358              	.LVL37:
+  93:calibration.c ****     ADC_StartConvert();
+ 359              		.loc 1 93 0
+ 360 0026 FFF7FEFF 		bl	ADC_StartConvert
+ 361              	.LVL38:
+  94:calibration.c **** 
+  95:calibration.c ****     dac = CAL_DAC_INIT;
+  96:calibration.c ****     stage->write(dac);
+ 362              		.loc 1 96 0
+ 363 002a A369     		ldr	r3, [r4, #24]
+ 364 002c 9C20     		movs	r0, #156
+ 365 002e 9847     		blx	r3
+ 366              	.LVL39:
+  97:calibration.c ****     CyDelay(CAL_DAC_SETTLE_MS);
+ 367              		.loc 1 97 0
+ 368 0030 0520     		movs	r0, #5
+ 369 0032 FFF7FEFF 		bl	CyDelay
+ 370              	.LVL40:
+  98:calibration.c ****     if (!stable_avg(stage->avg_n, &measured)) {
+ 371              		.loc 1 98 0
+ 372 0036 05A9     		add	r1, sp, #20
+ 373 0038 207B     		ldrb	r0, [r4, #12]	@ zero_extendqisi2
+ 374 003a FFF7FEFF 		bl	stable_avg
+ 375              	.LVL41:
+ 376 003e 0090     		str	r0, [sp]
+ 377 0040 50B9     		cbnz	r0, .L26
+  99:calibration.c ****         /* 0x7FFF (saturado) en vez de 0: si el ADC no entrega muestras
+ 100:calibration.c ****          * (p.ej. CFG1 no quedo en modo Continuous), la telemetria no debe
+ 101:calibration.c ****          * parecer "0V perfecto" en esta etapa. */
+ 102:calibration.c ****         result->final_dac = dac;
+ 378              		.loc 1 102 0
+ 379 0042 9C23     		movs	r3, #156
+ 380 0044 8AF80030 		strb	r3, [r10]
+ 103:calibration.c ****         result->final_measured = 0x7FFFL;
+ 381              		.loc 1 103 0
+ 382 0048 47F6FF73 		movw	r3, #32767
+ 383 004c CAF80430 		str	r3, [r10, #4]
+ 104:calibration.c ****         result->ok = 0u;
+ 384              		.loc 1 104 0
+ 385 0050 0023     		movs	r3, #0
+ 386 0052 8AF80830 		strb	r3, [r10, #8]
+ 105:calibration.c ****         return 0u;
+ 387              		.loc 1 105 0
+ 388 0056 E5E0     		b	.L27
+ 389              	.L26:
+ 390              	.LVL42:
+ 106:calibration.c ****     }
+ 107:calibration.c **** 
+ 108:calibration.c ****     best_dac = dac;
+ 109:calibration.c ****     best_measured = measured;
+ 391              		.loc 1 109 0
+ 392 0058 059B     		ldr	r3, [sp, #20]
+ 393 005a 0193     		str	r3, [sp, #4]
+ 394              	.LVL43:
+ 110:calibration.c ****     best_abs_error = abs_counts(stage->target_counts - measured);
+ 395              		.loc 1 110 0
+ 396 005c A068     		ldr	r0, [r4, #8]
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 12
+
+
+ 397 005e C01A     		subs	r0, r0, r3
+ 398 0060 FFF7FEFF 		bl	abs_counts
+ 399              	.LVL44:
+ 400 0064 8346     		mov	fp, r0
+ 401              	.LVL45:
+ 111:calibration.c **** 
+ 112:calibration.c ****     if (best_abs_error <= stage->tolerance_counts) {
+ 402              		.loc 1 112 0
+ 403 0066 2369     		ldr	r3, [r4, #16]
+ 404 0068 9842     		cmp	r0, r3
+ 405 006a 0ADC     		bgt	.L28
+ 113:calibration.c ****         result->final_dac = dac;
+ 406              		.loc 1 113 0
+ 407 006c 9C23     		movs	r3, #156
+ 408 006e 8AF80030 		strb	r3, [r10]
+ 114:calibration.c ****         result->final_measured = measured;
+ 409              		.loc 1 114 0
+ 410 0072 059B     		ldr	r3, [sp, #20]
+ 411 0074 CAF80430 		str	r3, [r10, #4]
+ 115:calibration.c ****         result->ok = 1u;
+ 412              		.loc 1 115 0
+ 413 0078 0123     		movs	r3, #1
+ 414 007a 8AF80830 		strb	r3, [r10, #8]
+ 116:calibration.c ****         return 1u;
+ 415              		.loc 1 116 0
+ 416 007e 0093     		str	r3, [sp]
+ 417 0080 D0E0     		b	.L27
+ 418              	.L28:
+ 419              	.LBB2:
+ 117:calibration.c ****     }
+ 118:calibration.c **** 
+ 119:calibration.c ****     /* Primer paso: nudge en la direccion sugerida por la tabla (con guarda
+ 120:calibration.c ****      * de borde [0,255]) para medir la pendiente real. */
+ 121:calibration.c ****     {
+ 122:calibration.c ****         uint8 probe_dac;
+ 123:calibration.c ****         int32 probe_measured;
+ 124:calibration.c **** 
+ 125:calibration.c ****         if (stage->direction >= 0) {
+ 420              		.loc 1 125 0
+ 421 0082 94F91430 		ldrsb	r3, [r4, #20]
+ 422 0086 002B     		cmp	r3, #0
+ 423 0088 01DB     		blt	.L46
+ 126:calibration.c ****             probe_dac = ((uint16)dac + CAL_PROBE_STEP > 255u)
+ 424              		.loc 1 126 0
+ 425 008a BC27     		movs	r7, #188
+ 426 008c 00E0     		b	.L29
+ 427              	.L46:
+ 127:calibration.c ****                 ? (uint8)(dac - CAL_PROBE_STEP)
+ 128:calibration.c ****                 : (uint8)(dac + CAL_PROBE_STEP);
+ 129:calibration.c ****         } else {
+ 130:calibration.c ****             probe_dac = ((int16)dac - (int16)CAL_PROBE_STEP < 0)
+ 428              		.loc 1 130 0
+ 429 008e 7C27     		movs	r7, #124
+ 430              	.L29:
+ 431              	.LVL46:
+ 131:calibration.c ****                 ? (uint8)(dac + CAL_PROBE_STEP)
+ 132:calibration.c ****                 : (uint8)(dac - CAL_PROBE_STEP);
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 13
+
+
+ 133:calibration.c ****         }
+ 134:calibration.c **** 
+ 135:calibration.c ****         stage->write(probe_dac);
+ 432              		.loc 1 135 0
+ 433 0090 A369     		ldr	r3, [r4, #24]
+ 434 0092 3846     		mov	r0, r7
+ 435              	.LVL47:
+ 436 0094 9847     		blx	r3
+ 437              	.LVL48:
+ 136:calibration.c ****         CyDelay(CAL_DAC_SETTLE_MS);
+ 438              		.loc 1 136 0
+ 439 0096 0520     		movs	r0, #5
+ 440 0098 FFF7FEFF 		bl	CyDelay
+ 441              	.LVL49:
+ 137:calibration.c ****         if (!stable_avg(stage->avg_n, &probe_measured)) {
+ 442              		.loc 1 137 0
+ 443 009c 04A9     		add	r1, sp, #16
+ 444 009e 207B     		ldrb	r0, [r4, #12]	@ zero_extendqisi2
+ 445 00a0 FFF7FEFF 		bl	stable_avg
+ 446              	.LVL50:
+ 447 00a4 0090     		str	r0, [sp]
+ 448 00a6 78B9     		cbnz	r0, .L30
+ 138:calibration.c ****             stage->write(best_dac);
+ 449              		.loc 1 138 0
+ 450 00a8 A369     		ldr	r3, [r4, #24]
+ 451 00aa 9C20     		movs	r0, #156
+ 452 00ac 9847     		blx	r3
+ 453              	.LVL51:
+ 139:calibration.c ****             CyDelay(CAL_DAC_SETTLE_MS);
+ 454              		.loc 1 139 0
+ 455 00ae 0520     		movs	r0, #5
+ 456 00b0 FFF7FEFF 		bl	CyDelay
+ 457              	.LVL52:
+ 140:calibration.c ****             result->final_dac = best_dac;
+ 458              		.loc 1 140 0
+ 459 00b4 9C23     		movs	r3, #156
+ 460 00b6 8AF80030 		strb	r3, [r10]
+ 141:calibration.c ****             result->final_measured = best_measured;
+ 461              		.loc 1 141 0
+ 462 00ba 019B     		ldr	r3, [sp, #4]
+ 463 00bc CAF80430 		str	r3, [r10, #4]
+ 142:calibration.c ****             result->ok = 0u;
+ 464              		.loc 1 142 0
+ 465 00c0 0023     		movs	r3, #0
+ 466 00c2 8AF80830 		strb	r3, [r10, #8]
+ 143:calibration.c ****             return 0u;
+ 467              		.loc 1 143 0
+ 468 00c6 ADE0     		b	.L27
+ 469              	.L30:
+ 144:calibration.c ****         }
+ 145:calibration.c **** 
+ 146:calibration.c ****         abs_error = abs_counts(stage->target_counts - probe_measured);
+ 470              		.loc 1 146 0
+ 471 00c8 A068     		ldr	r0, [r4, #8]
+ 472 00ca 049D     		ldr	r5, [sp, #16]
+ 473 00cc 401B     		subs	r0, r0, r5
+ 474 00ce FFF7FEFF 		bl	abs_counts
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 14
+
+
+ 475              	.LVL53:
+ 147:calibration.c ****         if (abs_error < best_abs_error) {
+ 476              		.loc 1 147 0
+ 477 00d2 8345     		cmp	fp, r0
+ 478 00d4 02DC     		bgt	.L47
+ 479              	.LBE2:
+ 108:calibration.c ****     best_measured = measured;
+ 480              		.loc 1 108 0
+ 481 00d6 9C23     		movs	r3, #156
+ 482 00d8 0393     		str	r3, [sp, #12]
+ 483 00da 02E0     		b	.L32
+ 484              	.L47:
+ 485              	.LBB3:
+ 148:calibration.c ****             best_abs_error = abs_error;
+ 486              		.loc 1 148 0
+ 487 00dc 8346     		mov	fp, r0
+ 488              	.LVL54:
+ 149:calibration.c ****             best_dac = probe_dac;
+ 150:calibration.c ****             best_measured = probe_measured;
+ 489              		.loc 1 150 0
+ 490 00de 0195     		str	r5, [sp, #4]
+ 491              	.LVL55:
+ 149:calibration.c ****             best_dac = probe_dac;
+ 492              		.loc 1 149 0
+ 493 00e0 0397     		str	r7, [sp, #12]
+ 494              	.L32:
+ 495              	.LVL56:
+ 151:calibration.c ****         }
+ 152:calibration.c ****         if (abs_error <= stage->tolerance_counts) {
+ 496              		.loc 1 152 0
+ 497 00e2 2369     		ldr	r3, [r4, #16]
+ 498 00e4 9842     		cmp	r0, r3
+ 499 00e6 09DC     		bgt	.L33
+ 153:calibration.c ****             result->final_dac = probe_dac;
+ 500              		.loc 1 153 0
+ 501 00e8 8AF80070 		strb	r7, [r10]
+ 154:calibration.c ****             result->final_measured = probe_measured;
+ 502              		.loc 1 154 0
+ 503 00ec 049B     		ldr	r3, [sp, #16]
+ 504 00ee CAF80430 		str	r3, [r10, #4]
+ 155:calibration.c ****             result->ok = 1u;
+ 505              		.loc 1 155 0
+ 506 00f2 0123     		movs	r3, #1
+ 507 00f4 8AF80830 		strb	r3, [r10, #8]
+ 156:calibration.c ****             return 1u;
+ 508              		.loc 1 156 0
+ 509 00f8 0093     		str	r3, [sp]
+ 510 00fa 93E0     		b	.L27
+ 511              	.L33:
+ 157:calibration.c ****         }
+ 158:calibration.c **** 
+ 159:calibration.c ****         if (probe_measured == measured) {
+ 512              		.loc 1 159 0
+ 513 00fc 059B     		ldr	r3, [sp, #20]
+ 514 00fe 9D42     		cmp	r5, r3
+ 515 0100 06D1     		bne	.L34
+ 160:calibration.c ****             increasing = (stage->direction >= 0) ? 1u : 0u;
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 15
+
+
+ 516              		.loc 1 160 0
+ 517 0102 94F91430 		ldrsb	r3, [r4, #20]
+ 518 0106 002B     		cmp	r3, #0
+ 519 0108 0FDB     		blt	.L48
+ 520 010a 0123     		movs	r3, #1
+ 521 010c 0293     		str	r3, [sp, #8]
+ 522 010e 11E0     		b	.L35
+ 523              	.L34:
+ 161:calibration.c ****         } else {
+ 162:calibration.c ****             increasing = ((probe_measured > measured) == (probe_dac > dac)) ? 1u : 0u;
+ 524              		.loc 1 162 0
+ 525 0110 9D42     		cmp	r5, r3
+ 526 0112 CCBF     		ite	gt
+ 527 0114 0023     		movgt	r3, #0
+ 528 0116 0123     		movle	r3, #1
+ 529 0118 9C2F     		cmp	r7, #156
+ 530 011a 94BF     		ite	ls
+ 531 011c 0022     		movls	r2, #0
+ 532 011e 0122     		movhi	r2, #1
+ 533 0120 9342     		cmp	r3, r2
+ 534 0122 05D0     		beq	.L49
+ 535 0124 0123     		movs	r3, #1
+ 536 0126 0293     		str	r3, [sp, #8]
+ 537 0128 04E0     		b	.L35
+ 538              	.L48:
+ 160:calibration.c ****             increasing = (stage->direction >= 0) ? 1u : 0u;
+ 539              		.loc 1 160 0
+ 540 012a 0023     		movs	r3, #0
+ 541 012c 0293     		str	r3, [sp, #8]
+ 542 012e 01E0     		b	.L35
+ 543              	.L49:
+ 544              		.loc 1 162 0
+ 545 0130 0023     		movs	r3, #0
+ 546 0132 0293     		str	r3, [sp, #8]
+ 547              	.L35:
+ 548              	.LVL57:
+ 163:calibration.c ****         }
+ 164:calibration.c **** 
+ 165:calibration.c ****         dac = probe_dac;
+ 166:calibration.c ****         measured = probe_measured;
+ 549              		.loc 1 166 0
+ 550 0134 0595     		str	r5, [sp, #20]
+ 551              	.LVL58:
+ 552              	.LBE3:
+ 167:calibration.c ****     }
+ 168:calibration.c **** 
+ 169:calibration.c ****     /* Busqueda binaria sobre [0,255] usando la pendiente empirica. */
+ 170:calibration.c ****     lo = 0u;
+ 171:calibration.c ****     hi = 255u;
+ 172:calibration.c **** 
+ 173:calibration.c ****     for (iter = 0u; iter < stage->max_iter; iter++) {
+ 553              		.loc 1 173 0
+ 554 0136 0026     		movs	r6, #0
+ 171:calibration.c **** 
+ 555              		.loc 1 171 0
+ 556 0138 4FF0FF09 		mov	r9, #255
+ 170:calibration.c ****     hi = 255u;
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 16
+
+
+ 557              		.loc 1 170 0
+ 558 013c B046     		mov	r8, r6
+ 559              		.loc 1 173 0
+ 560 013e 5EE0     		b	.L36
+ 561              	.LVL59:
+ 562              	.L45:
+ 563              	.LBB4:
+ 174:calibration.c ****         uint8 go_up = increasing
+ 564              		.loc 1 174 0
+ 565 0140 029B     		ldr	r3, [sp, #8]
+ 566 0142 2BB1     		cbz	r3, .L37
+ 175:calibration.c ****             ? ((measured < stage->target_counts) ? 1u : 0u)
+ 567              		.loc 1 175 0 discriminator 1
+ 568 0144 A268     		ldr	r2, [r4, #8]
+ 569 0146 059B     		ldr	r3, [sp, #20]
+ 174:calibration.c ****         uint8 go_up = increasing
+ 570              		.loc 1 174 0 discriminator 1
+ 571 0148 9A42     		cmp	r2, r3
+ 572 014a 07DD     		ble	.L50
+ 174:calibration.c ****         uint8 go_up = increasing
+ 573              		.loc 1 174 0 is_stmt 0
+ 574 014c 0123     		movs	r3, #1
+ 575 014e 08E0     		b	.L38
+ 576              	.L37:
+ 176:calibration.c ****             : ((measured > stage->target_counts) ? 1u : 0u);
+ 577              		.loc 1 176 0 is_stmt 1 discriminator 2
+ 578 0150 A268     		ldr	r2, [r4, #8]
+ 579 0152 059B     		ldr	r3, [sp, #20]
+ 174:calibration.c ****         uint8 go_up = increasing
+ 580              		.loc 1 174 0 discriminator 2
+ 581 0154 9A42     		cmp	r2, r3
+ 582 0156 03DA     		bge	.L51
+ 174:calibration.c ****         uint8 go_up = increasing
+ 583              		.loc 1 174 0 is_stmt 0
+ 584 0158 0123     		movs	r3, #1
+ 585 015a 02E0     		b	.L38
+ 586              	.L50:
+ 587 015c 0023     		movs	r3, #0
+ 588 015e 00E0     		b	.L38
+ 589              	.L51:
+ 590 0160 0023     		movs	r3, #0
+ 591              	.L38:
+ 592              	.LVL60:
+ 177:calibration.c ****         uint8 next_dac;
+ 178:calibration.c **** 
+ 179:calibration.c ****         if (go_up) {
+ 593              		.loc 1 179 0 is_stmt 1 discriminator 12
+ 594 0162 33B1     		cbz	r3, .L39
+ 180:calibration.c ****             if (dac == 255u) { break; }
+ 595              		.loc 1 180 0
+ 596 0164 FF2F     		cmp	r7, #255
+ 597 0166 4DD0     		beq	.L40
+ 181:calibration.c ****             lo = (uint8)(dac + 1u);
+ 598              		.loc 1 181 0
+ 599 0168 07F10108 		add	r8, r7, #1
+ 600              	.LVL61:
+ 601 016c 5FFA88F8 		uxtb	r8, r8
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 17
+
+
+ 602              	.LVL62:
+ 603 0170 05E0     		b	.L41
+ 604              	.L39:
+ 182:calibration.c ****         } else {
+ 183:calibration.c ****             if (dac == 0u) { break; }
+ 605              		.loc 1 183 0
+ 606 0172 002F     		cmp	r7, #0
+ 607 0174 46D0     		beq	.L40
+ 184:calibration.c ****             hi = (uint8)(dac - 1u);
+ 608              		.loc 1 184 0
+ 609 0176 07F1FF39 		add	r9, r7, #-1
+ 610              	.LVL63:
+ 611 017a 5FFA89F9 		uxtb	r9, r9
+ 612              	.LVL64:
+ 613              	.L41:
+ 185:calibration.c ****         }
+ 186:calibration.c ****         if (lo > hi) { break; }
+ 614              		.loc 1 186 0
+ 615 017e C845     		cmp	r8, r9
+ 616 0180 40D8     		bhi	.L40
+ 187:calibration.c **** 
+ 188:calibration.c ****         next_dac = (uint8)(lo + ((hi - lo) / 2u));
+ 617              		.loc 1 188 0
+ 618 0182 C8EB0905 		rsb	r5, r8, r9
+ 619 0186 C5F34705 		ubfx	r5, r5, #1, #8
+ 620 018a 4544     		add	r5, r5, r8
+ 621 018c EDB2     		uxtb	r5, r5
+ 622              	.LVL65:
+ 189:calibration.c ****         if (next_dac == dac) { break; }
+ 623              		.loc 1 189 0
+ 624 018e AF42     		cmp	r7, r5
+ 625 0190 38D0     		beq	.L40
+ 626              	.LVL66:
+ 190:calibration.c ****         dac = next_dac;
+ 191:calibration.c **** 
+ 192:calibration.c ****         stage->write(dac);
+ 627              		.loc 1 192 0
+ 628 0192 A369     		ldr	r3, [r4, #24]
+ 629              	.LVL67:
+ 630 0194 2846     		mov	r0, r5
+ 631              	.LVL68:
+ 632 0196 9847     		blx	r3
+ 633              	.LVL69:
+ 193:calibration.c ****         CyDelay(CAL_DAC_SETTLE_MS);
+ 634              		.loc 1 193 0
+ 635 0198 0520     		movs	r0, #5
+ 636 019a FFF7FEFF 		bl	CyDelay
+ 637              	.LVL70:
+ 194:calibration.c ****         if (!stable_avg(stage->avg_n, &measured)) {
+ 638              		.loc 1 194 0
+ 639 019e 05A9     		add	r1, sp, #20
+ 640 01a0 207B     		ldrb	r0, [r4, #12]	@ zero_extendqisi2
+ 641 01a2 FFF7FEFF 		bl	stable_avg
+ 642              	.LVL71:
+ 643 01a6 0090     		str	r0, [sp]
+ 644 01a8 78B9     		cbnz	r0, .L42
+ 195:calibration.c ****             stage->write(best_dac);
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 18
+
+
+ 645              		.loc 1 195 0
+ 646 01aa A369     		ldr	r3, [r4, #24]
+ 647 01ac 039C     		ldr	r4, [sp, #12]
+ 648              	.LVL72:
+ 649 01ae 2046     		mov	r0, r4
+ 650 01b0 9847     		blx	r3
+ 651              	.LVL73:
+ 196:calibration.c ****             CyDelay(CAL_DAC_SETTLE_MS);
+ 652              		.loc 1 196 0
+ 653 01b2 0520     		movs	r0, #5
+ 654 01b4 FFF7FEFF 		bl	CyDelay
+ 655              	.LVL74:
+ 197:calibration.c ****             result->final_dac = best_dac;
+ 656              		.loc 1 197 0
+ 657 01b8 8AF80040 		strb	r4, [r10]
+ 198:calibration.c ****             result->final_measured = best_measured;
+ 658              		.loc 1 198 0
+ 659 01bc 019B     		ldr	r3, [sp, #4]
+ 660 01be CAF80430 		str	r3, [r10, #4]
+ 199:calibration.c ****             result->ok = 0u;
+ 661              		.loc 1 199 0
+ 662 01c2 0023     		movs	r3, #0
+ 663 01c4 8AF80830 		strb	r3, [r10, #8]
+ 200:calibration.c ****             return 0u;
+ 664              		.loc 1 200 0
+ 665 01c8 2CE0     		b	.L27
+ 666              	.LVL75:
+ 667              	.L42:
+ 201:calibration.c ****         }
+ 202:calibration.c **** 
+ 203:calibration.c ****         abs_error = abs_counts(stage->target_counts - measured);
+ 668              		.loc 1 203 0
+ 669 01ca A068     		ldr	r0, [r4, #8]
+ 670 01cc 059F     		ldr	r7, [sp, #20]
+ 671 01ce C01B     		subs	r0, r0, r7
+ 672 01d0 FFF7FEFF 		bl	abs_counts
+ 673              	.LVL76:
+ 204:calibration.c ****         if (abs_error < best_abs_error) {
+ 674              		.loc 1 204 0
+ 675 01d4 8345     		cmp	fp, r0
+ 676 01d6 02DD     		ble	.L43
+ 205:calibration.c ****             best_abs_error = abs_error;
+ 677              		.loc 1 205 0
+ 678 01d8 8346     		mov	fp, r0
+ 679              	.LVL77:
+ 206:calibration.c ****             best_dac = dac;
+ 207:calibration.c ****             best_measured = measured;
+ 680              		.loc 1 207 0
+ 681 01da 0197     		str	r7, [sp, #4]
+ 682              	.LVL78:
+ 206:calibration.c ****             best_dac = dac;
+ 683              		.loc 1 206 0
+ 684 01dc 0395     		str	r5, [sp, #12]
+ 685              	.LVL79:
+ 686              	.L43:
+ 208:calibration.c ****         }
+ 209:calibration.c ****         if (abs_error <= stage->tolerance_counts) {
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 19
+
+
+ 687              		.loc 1 209 0
+ 688 01de 2369     		ldr	r3, [r4, #16]
+ 689 01e0 9842     		cmp	r0, r3
+ 690 01e2 09DC     		bgt	.L44
+ 210:calibration.c ****             result->final_dac = dac;
+ 691              		.loc 1 210 0
+ 692 01e4 8AF80050 		strb	r5, [r10]
+ 211:calibration.c ****             result->final_measured = measured;
+ 693              		.loc 1 211 0
+ 694 01e8 059B     		ldr	r3, [sp, #20]
+ 695 01ea CAF80430 		str	r3, [r10, #4]
+ 212:calibration.c ****             result->ok = 1u;
+ 696              		.loc 1 212 0
+ 697 01ee 0123     		movs	r3, #1
+ 698 01f0 8AF80830 		strb	r3, [r10, #8]
+ 213:calibration.c ****             return 1u;
+ 699              		.loc 1 213 0
+ 700 01f4 0093     		str	r3, [sp]
+ 701 01f6 15E0     		b	.L27
+ 702              	.L44:
+ 703              	.LBE4:
+ 173:calibration.c ****         uint8 go_up = increasing
+ 704              		.loc 1 173 0 discriminator 2
+ 705 01f8 0136     		adds	r6, r6, #1
+ 706              	.LVL80:
+ 707 01fa B6B2     		uxth	r6, r6
+ 708              	.LVL81:
+ 709              	.LBB5:
+ 190:calibration.c **** 
+ 710              		.loc 1 190 0 discriminator 2
+ 711 01fc 2F46     		mov	r7, r5
+ 712              	.LVL82:
+ 713              	.L36:
+ 714              	.LBE5:
+ 173:calibration.c ****         uint8 go_up = increasing
+ 715              		.loc 1 173 0 discriminator 1
+ 716 01fe E389     		ldrh	r3, [r4, #14]
+ 717 0200 9E42     		cmp	r6, r3
+ 718 0202 9DD3     		bcc	.L45
+ 719              	.L40:
+ 214:calibration.c ****         }
+ 215:calibration.c ****     }
+ 216:calibration.c **** 
+ 217:calibration.c ****     stage->write(best_dac);
+ 720              		.loc 1 217 0
+ 721 0204 A369     		ldr	r3, [r4, #24]
+ 722 0206 039C     		ldr	r4, [sp, #12]
+ 723              	.LVL83:
+ 724 0208 2046     		mov	r0, r4
+ 725              	.LVL84:
+ 726 020a 9847     		blx	r3
+ 727              	.LVL85:
+ 218:calibration.c ****     CyDelay(CAL_DAC_SETTLE_MS);
+ 728              		.loc 1 218 0
+ 729 020c 0520     		movs	r0, #5
+ 730 020e FFF7FEFF 		bl	CyDelay
+ 731              	.LVL86:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 20
+
+
+ 219:calibration.c ****     result->final_dac = best_dac;
+ 732              		.loc 1 219 0
+ 733 0212 8AF80040 		strb	r4, [r10]
+ 220:calibration.c ****     result->final_measured = best_measured;
+ 734              		.loc 1 220 0
+ 735 0216 019B     		ldr	r3, [sp, #4]
+ 736 0218 CAF80430 		str	r3, [r10, #4]
+ 221:calibration.c ****     result->ok = 0u;
+ 737              		.loc 1 221 0
+ 738 021c 0023     		movs	r3, #0
+ 739 021e 8AF80830 		strb	r3, [r10, #8]
+ 222:calibration.c ****     return 0u;
+ 740              		.loc 1 222 0
+ 741 0222 0093     		str	r3, [sp]
+ 742              	.LVL87:
+ 743              	.L27:
+ 223:calibration.c **** }
+ 744              		.loc 1 223 0
+ 745 0224 0098     		ldr	r0, [sp]
+ 746 0226 07B0     		add	sp, sp, #28
+ 747              		.cfi_def_cfa_offset 36
+ 748              		@ sp needed
+ 749 0228 BDE8F08F 		pop	{r4, r5, r6, r7, r8, r9, r10, fp, pc}
+ 750              		.cfi_endproc
+ 751              	.LFE70:
+ 752              		.size	calibrate_stage, .-calibrate_stage
+ 753              		.section	.text.psoc_calibration_start_references,"ax",%progbits
+ 754              		.align	2
+ 755              		.global	psoc_calibration_start_references
+ 756              		.thumb
+ 757              		.thumb_func
+ 758              		.type	psoc_calibration_start_references, %function
+ 759              	psoc_calibration_start_references:
+ 760              	.LFB71:
+ 224:calibration.c **** 
+ 225:calibration.c **** PsocCalResult g_psoc_cal_results[PSOC_CAL_MAX_STAGES];
+ 226:calibration.c **** uint8 g_psoc_cal_result_count = 0u;
+ 227:calibration.c **** 
+ 228:calibration.c **** void psoc_calibration_start_references(void)
+ 229:calibration.c **** {
+ 761              		.loc 1 229 0
+ 762              		.cfi_startproc
+ 763              		@ args = 0, pretend = 0, frame = 0
+ 764              		@ frame_needed = 0, uses_anonymous_args = 0
+ 765 0000 10B5     		push	{r4, lr}
+ 766              		.cfi_def_cfa_offset 8
+ 767              		.cfi_offset 4, -8
+ 768              		.cfi_offset 14, -4
+ 230:calibration.c ****     uint8 i;
+ 231:calibration.c **** 
+ 232:calibration.c ****     CAL_AMUX_ADC_START();
+ 769              		.loc 1 232 0
+ 770 0002 FFF7FEFF 		bl	AMux_ADC_Start
+ 771              	.LVL88:
+ 233:calibration.c ****     CAL_AMUX_IN_START();
+ 772              		.loc 1 233 0
+ 773 0006 FFF7FEFF 		bl	AMux_IN_Start
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 21
+
+
+ 774              	.LVL89:
+ 234:calibration.c ****     ADC_Stop();
+ 775              		.loc 1 234 0
+ 776 000a FFF7FEFF 		bl	ADC_Stop
+ 777              	.LVL90:
+ 235:calibration.c ****     CAL_AMUX_IN_SELECT(CAL_INPUT_NORMAL_CHANNEL);
+ 778              		.loc 1 235 0
+ 779 000e 0020     		movs	r0, #0
+ 780 0010 FFF7FEFF 		bl	AMux_IN_FastSelect
+ 781              	.LVL91:
+ 236:calibration.c ****     CAL_AMUX_ADC_SELECT(CAL_ADC_CAPTURE_CHANNEL);
+ 782              		.loc 1 236 0
+ 783 0014 0320     		movs	r0, #3
+ 784 0016 FFF7FEFF 		bl	AMux_ADC_FastSelect
+ 785              	.LVL92:
+ 237:calibration.c ****     CyDelay(CAL_AMUX_SETTLE_MS);
+ 786              		.loc 1 237 0
+ 787 001a 0520     		movs	r0, #5
+ 788 001c FFF7FEFF 		bl	CyDelay
+ 789              	.LVL93:
+ 238:calibration.c ****     ADC_Start();
+ 790              		.loc 1 238 0
+ 791 0020 FFF7FEFF 		bl	ADC_Start
+ 792              	.LVL94:
+ 239:calibration.c ****     ADC_StopConvert();
+ 793              		.loc 1 239 0
+ 794 0024 FFF7FEFF 		bl	ADC_StopConvert
+ 795              	.LVL95:
+ 240:calibration.c **** 
+ 241:calibration.c **** #if PSOC_HW_CLASS == PSOC_HW_GEO
+ 242:calibration.c ****     VDAC_ref_PGA_Start();
+ 796              		.loc 1 242 0
+ 797 0028 FFF7FEFF 		bl	VDAC_ref_PGA_Start
+ 798              	.LVL96:
+ 243:calibration.c ****     VDAC_ref_BP_Start();
+ 799              		.loc 1 243 0
+ 800 002c FFF7FEFF 		bl	VDAC_ref_BP_Start
+ 801              	.LVL97:
+ 244:calibration.c ****     VDAC_Ref_Adder_Start();
+ 802              		.loc 1 244 0
+ 803 0030 FFF7FEFF 		bl	VDAC_Ref_Adder_Start
+ 804              	.LVL98:
+ 245:calibration.c ****     VDAC_ref_LP_Start();
+ 805              		.loc 1 245 0
+ 806 0034 FFF7FEFF 		bl	VDAC_ref_LP_Start
+ 807              	.LVL99:
+ 246:calibration.c **** #else
+ 247:calibration.c ****     HAMMER_VDAC_IN_START();
+ 248:calibration.c ****     VDAC_PGA_Start();
+ 249:calibration.c ****     VDAC_LP_Start();
+ 250:calibration.c **** #endif
+ 251:calibration.c **** 
+ 252:calibration.c ****     for (i = 0u; i < PSOC_CAL_STAGE_COUNT; i++) {
+ 808              		.loc 1 252 0
+ 809 0038 0024     		movs	r4, #0
+ 810 003a 09E0     		b	.L55
+ 811              	.LVL100:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 22
+
+
+ 812              	.L56:
+ 253:calibration.c ****         g_psoc_cal_stages[i].write(CAL_DAC_INIT);
+ 813              		.loc 1 253 0 discriminator 3
+ 814 003c C4EBC402 		rsb	r2, r4, r4, lsl #3
+ 815 0040 9300     		lsls	r3, r2, #2
+ 816 0042 054A     		ldr	r2, .L58
+ 817 0044 1344     		add	r3, r3, r2
+ 818 0046 9B69     		ldr	r3, [r3, #24]
+ 819 0048 9C20     		movs	r0, #156
+ 820 004a 9847     		blx	r3
+ 821              	.LVL101:
+ 252:calibration.c ****         g_psoc_cal_stages[i].write(CAL_DAC_INIT);
+ 822              		.loc 1 252 0 discriminator 3
+ 823 004c 0134     		adds	r4, r4, #1
+ 824              	.LVL102:
+ 825 004e E4B2     		uxtb	r4, r4
+ 826              	.LVL103:
+ 827              	.L55:
+ 252:calibration.c ****         g_psoc_cal_stages[i].write(CAL_DAC_INIT);
+ 828              		.loc 1 252 0 is_stmt 0 discriminator 1
+ 829 0050 032C     		cmp	r4, #3
+ 830 0052 F3D9     		bls	.L56
+ 254:calibration.c ****     }
+ 255:calibration.c **** }
+ 831              		.loc 1 255 0 is_stmt 1
+ 832 0054 10BD     		pop	{r4, pc}
+ 833              	.LVL104:
+ 834              	.L59:
+ 835 0056 00BF     		.align	2
+ 836              	.L58:
+ 837 0058 00000000 		.word	.LANCHOR0
+ 838              		.cfi_endproc
+ 839              	.LFE71:
+ 840              		.size	psoc_calibration_start_references, .-psoc_calibration_start_references
+ 841              		.section	.text.psoc_calibration_restore_capture_path,"ax",%progbits
+ 842              		.align	2
+ 843              		.global	psoc_calibration_restore_capture_path
+ 844              		.thumb
+ 845              		.thumb_func
+ 846              		.type	psoc_calibration_restore_capture_path, %function
+ 847              	psoc_calibration_restore_capture_path:
+ 848              	.LFB72:
+ 256:calibration.c **** 
+ 257:calibration.c **** void psoc_calibration_restore_capture_path(void)
+ 258:calibration.c **** {
+ 849              		.loc 1 258 0
+ 850              		.cfi_startproc
+ 851              		@ args = 0, pretend = 0, frame = 0
+ 852              		@ frame_needed = 0, uses_anonymous_args = 0
+ 853 0000 08B5     		push	{r3, lr}
+ 854              		.cfi_def_cfa_offset 8
+ 855              		.cfi_offset 3, -8
+ 856              		.cfi_offset 14, -4
+ 259:calibration.c ****     ADC_Stop();
+ 857              		.loc 1 259 0
+ 858 0002 FFF7FEFF 		bl	ADC_Stop
+ 859              	.LVL105:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 23
+
+
+ 260:calibration.c ****     CAL_AMUX_IN_SELECT(CAL_INPUT_NORMAL_CHANNEL);
+ 860              		.loc 1 260 0
+ 861 0006 0020     		movs	r0, #0
+ 862 0008 FFF7FEFF 		bl	AMux_IN_FastSelect
+ 863              	.LVL106:
+ 261:calibration.c ****     CAL_AMUX_ADC_SELECT(CAL_ADC_CAPTURE_CHANNEL);
+ 864              		.loc 1 261 0
+ 865 000c 0320     		movs	r0, #3
+ 866 000e FFF7FEFF 		bl	AMux_ADC_FastSelect
+ 867              	.LVL107:
+ 262:calibration.c ****     CyDelay(CAL_AMUX_SETTLE_MS);
+ 868              		.loc 1 262 0
+ 869 0012 0520     		movs	r0, #5
+ 870 0014 FFF7FEFF 		bl	CyDelay
+ 871              	.LVL108:
+ 263:calibration.c ****     ADC_Start();
+ 872              		.loc 1 263 0
+ 873 0018 FFF7FEFF 		bl	ADC_Start
+ 874              	.LVL109:
+ 264:calibration.c ****     ADC_StopConvert();
+ 875              		.loc 1 264 0
+ 876 001c FFF7FEFF 		bl	ADC_StopConvert
+ 877              	.LVL110:
+ 878 0020 08BD     		pop	{r3, pc}
+ 879              		.cfi_endproc
+ 880              	.LFE72:
+ 881              		.size	psoc_calibration_restore_capture_path, .-psoc_calibration_restore_capture_path
+ 882 0022 00BF     		.section	.text.psoc_calibration_reset_references,"ax",%progbits
+ 883              		.align	2
+ 884              		.global	psoc_calibration_reset_references
+ 885              		.thumb
+ 886              		.thumb_func
+ 887              		.type	psoc_calibration_reset_references, %function
+ 888              	psoc_calibration_reset_references:
+ 889              	.LFB73:
+ 265:calibration.c **** }
+ 266:calibration.c **** 
+ 267:calibration.c **** void psoc_calibration_reset_references(void)
+ 268:calibration.c **** {
+ 890              		.loc 1 268 0
+ 891              		.cfi_startproc
+ 892              		@ args = 0, pretend = 0, frame = 0
+ 893              		@ frame_needed = 0, uses_anonymous_args = 0
+ 894 0000 38B5     		push	{r3, r4, r5, lr}
+ 895              		.cfi_def_cfa_offset 16
+ 896              		.cfi_offset 3, -16
+ 897              		.cfi_offset 4, -12
+ 898              		.cfi_offset 5, -8
+ 899              		.cfi_offset 14, -4
+ 269:calibration.c ****     uint8 i;
+ 270:calibration.c **** 
+ 271:calibration.c ****     ADC_Stop();
+ 900              		.loc 1 271 0
+ 901 0002 FFF7FEFF 		bl	ADC_Stop
+ 902              	.LVL111:
+ 272:calibration.c ****     CAL_AMUX_IN_SELECT(CAL_INPUT_REF_CHANNEL);
+ 903              		.loc 1 272 0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 24
+
+
+ 904 0006 0120     		movs	r0, #1
+ 905 0008 FFF7FEFF 		bl	AMux_IN_FastSelect
+ 906              	.LVL112:
+ 273:calibration.c ****     CyDelay(CAL_AMUX_SETTLE_MS);
+ 907              		.loc 1 273 0
+ 908 000c 0520     		movs	r0, #5
+ 909 000e FFF7FEFF 		bl	CyDelay
+ 910              	.LVL113:
+ 274:calibration.c ****     for (i = 0u; i < PSOC_CAL_STAGE_COUNT; i++) {
+ 911              		.loc 1 274 0
+ 912 0012 0024     		movs	r4, #0
+ 913 0014 14E0     		b	.L63
+ 914              	.LVL114:
+ 915              	.L64:
+ 275:calibration.c ****         g_psoc_cal_stages[i].write(CAL_DAC_INIT);
+ 916              		.loc 1 275 0 discriminator 3
+ 917 0016 C4EBC402 		rsb	r2, r4, r4, lsl #3
+ 918 001a 9300     		lsls	r3, r2, #2
+ 919 001c 0C4A     		ldr	r2, .L66
+ 920 001e 1344     		add	r3, r3, r2
+ 921 0020 9B69     		ldr	r3, [r3, #24]
+ 922 0022 9C20     		movs	r0, #156
+ 923 0024 9847     		blx	r3
+ 924              	.LVL115:
+ 276:calibration.c ****         g_psoc_cal_results[i].final_dac = CAL_DAC_INIT;
+ 925              		.loc 1 276 0 discriminator 3
+ 926 0026 0B49     		ldr	r1, .L66+4
+ 927 0028 6300     		lsls	r3, r4, #1
+ 928 002a 1819     		adds	r0, r3, r4
+ 929 002c 8200     		lsls	r2, r0, #2
+ 930 002e 8818     		adds	r0, r1, r2
+ 931 0030 9C25     		movs	r5, #156
+ 932 0032 8D54     		strb	r5, [r1, r2]
+ 277:calibration.c ****         g_psoc_cal_results[i].final_measured = 0L;
+ 933              		.loc 1 277 0 discriminator 3
+ 934 0034 0022     		movs	r2, #0
+ 935 0036 4260     		str	r2, [r0, #4]
+ 278:calibration.c ****         g_psoc_cal_results[i].ok = 1u;
+ 936              		.loc 1 278 0 discriminator 3
+ 937 0038 0123     		movs	r3, #1
+ 938 003a 0372     		strb	r3, [r0, #8]
+ 274:calibration.c ****         g_psoc_cal_stages[i].write(CAL_DAC_INIT);
+ 939              		.loc 1 274 0 discriminator 3
+ 940 003c 1C44     		add	r4, r4, r3
+ 941              	.LVL116:
+ 942 003e E4B2     		uxtb	r4, r4
+ 943              	.LVL117:
+ 944              	.L63:
+ 274:calibration.c ****         g_psoc_cal_stages[i].write(CAL_DAC_INIT);
+ 945              		.loc 1 274 0 is_stmt 0 discriminator 1
+ 946 0040 032C     		cmp	r4, #3
+ 947 0042 E8D9     		bls	.L64
+ 279:calibration.c ****     }
+ 280:calibration.c ****     g_psoc_cal_result_count = PSOC_CAL_STAGE_COUNT;
+ 948              		.loc 1 280 0 is_stmt 1
+ 949 0044 0422     		movs	r2, #4
+ 950 0046 044B     		ldr	r3, .L66+8
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 25
+
+
+ 951 0048 1A70     		strb	r2, [r3]
+ 281:calibration.c ****     psoc_calibration_restore_capture_path();
+ 952              		.loc 1 281 0
+ 953 004a FFF7FEFF 		bl	psoc_calibration_restore_capture_path
+ 954              	.LVL118:
+ 955 004e 38BD     		pop	{r3, r4, r5, pc}
+ 956              	.LVL119:
+ 957              	.L67:
+ 958              		.align	2
+ 959              	.L66:
+ 960 0050 00000000 		.word	.LANCHOR0
+ 961 0054 00000000 		.word	g_psoc_cal_results
+ 962 0058 00000000 		.word	.LANCHOR1
+ 963              		.cfi_endproc
+ 964              	.LFE73:
+ 965              		.size	psoc_calibration_reset_references, .-psoc_calibration_reset_references
+ 966              		.section	.text.psoc_calibration_run_blocking,"ax",%progbits
+ 967              		.align	2
+ 968              		.global	psoc_calibration_run_blocking
+ 969              		.thumb
+ 970              		.thumb_func
+ 971              		.type	psoc_calibration_run_blocking, %function
+ 972              	psoc_calibration_run_blocking:
+ 973              	.LFB74:
+ 282:calibration.c **** }
+ 283:calibration.c **** 
+ 284:calibration.c **** uint8 psoc_calibration_run_blocking(void)
+ 285:calibration.c **** {
+ 974              		.loc 1 285 0
+ 975              		.cfi_startproc
+ 976              		@ args = 0, pretend = 0, frame = 0
+ 977              		@ frame_needed = 0, uses_anonymous_args = 0
+ 978 0000 38B5     		push	{r3, r4, r5, lr}
+ 979              		.cfi_def_cfa_offset 16
+ 980              		.cfi_offset 3, -16
+ 981              		.cfi_offset 4, -12
+ 982              		.cfi_offset 5, -8
+ 983              		.cfi_offset 14, -4
+ 984              	.LVL120:
+ 286:calibration.c ****     uint8 i;
+ 287:calibration.c ****     uint8 ok = 1u;
+ 288:calibration.c **** 
+ 289:calibration.c ****     /* AMux_IN=1 es la referencia/tierra virtual de 2.5 V. Se calibra cada
+ 290:calibration.c ****      * etapa para que su salida mida 2.5 V contra esa misma referencia. */
+ 291:calibration.c ****     isr_SyncIn_Disable();
+ 985              		.loc 1 291 0
+ 986 0002 FFF7FEFF 		bl	isr_SyncIn_Disable
+ 987              	.LVL121:
+ 292:calibration.c ****     ADC_Stop();
+ 988              		.loc 1 292 0
+ 989 0006 FFF7FEFF 		bl	ADC_Stop
+ 990              	.LVL122:
+ 293:calibration.c ****     psoc_adc_select_calibration_config();
+ 991              		.loc 1 293 0
+ 992 000a FFF7FEFF 		bl	psoc_adc_select_calibration_config
+ 993              	.LVL123:
+ 294:calibration.c **** 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 26
+
+
+ 295:calibration.c ****     ADC_Stop();
+ 994              		.loc 1 295 0
+ 995 000e FFF7FEFF 		bl	ADC_Stop
+ 996              	.LVL124:
+ 296:calibration.c ****     CAL_AMUX_IN_SELECT(CAL_INPUT_REF_CHANNEL);
+ 997              		.loc 1 296 0
+ 998 0012 0120     		movs	r0, #1
+ 999 0014 FFF7FEFF 		bl	AMux_IN_FastSelect
+ 1000              	.LVL125:
+ 297:calibration.c ****     CyDelay(CAL_AMUX_SETTLE_MS);
+ 1001              		.loc 1 297 0
+ 1002 0018 0520     		movs	r0, #5
+ 1003 001a FFF7FEFF 		bl	CyDelay
+ 1004              	.LVL126:
+ 298:calibration.c **** 
+ 299:calibration.c ****     g_psoc_cal_result_count = PSOC_CAL_STAGE_COUNT;
+ 1005              		.loc 1 299 0
+ 1006 001e 0422     		movs	r2, #4
+ 1007 0020 104B     		ldr	r3, .L74
+ 1008 0022 1A70     		strb	r2, [r3]
+ 1009              	.LVL127:
+ 287:calibration.c **** 
+ 1010              		.loc 1 287 0
+ 1011 0024 0125     		movs	r5, #1
+ 300:calibration.c ****     for (i = 0u; i < PSOC_CAL_STAGE_COUNT; i++) {
+ 1012              		.loc 1 300 0
+ 1013 0026 0024     		movs	r4, #0
+ 1014 0028 0FE0     		b	.L69
+ 1015              	.LVL128:
+ 1016              	.L71:
+ 301:calibration.c ****         if (!calibrate_stage(&g_psoc_cal_stages[i], &g_psoc_cal_results[i])) {
+ 1017              		.loc 1 301 0
+ 1018 002a 04EB4403 		add	r3, r4, r4, lsl #1
+ 1019 002e 9A00     		lsls	r2, r3, #2
+ 1020 0030 C4EBC401 		rsb	r1, r4, r4, lsl #3
+ 1021 0034 8B00     		lsls	r3, r1, #2
+ 1022 0036 0C49     		ldr	r1, .L74+4
+ 1023 0038 1144     		add	r1, r1, r2
+ 1024 003a 0C48     		ldr	r0, .L74+8
+ 1025 003c 1844     		add	r0, r0, r3
+ 1026 003e FFF7FEFF 		bl	calibrate_stage
+ 1027              	.LVL129:
+ 1028 0042 00B9     		cbnz	r0, .L70
+ 302:calibration.c ****             ok = 0u;
+ 1029              		.loc 1 302 0
+ 1030 0044 0025     		movs	r5, #0
+ 1031              	.LVL130:
+ 1032              	.L70:
+ 300:calibration.c ****     for (i = 0u; i < PSOC_CAL_STAGE_COUNT; i++) {
+ 1033              		.loc 1 300 0 discriminator 2
+ 1034 0046 0134     		adds	r4, r4, #1
+ 1035              	.LVL131:
+ 1036 0048 E4B2     		uxtb	r4, r4
+ 1037              	.LVL132:
+ 1038              	.L69:
+ 300:calibration.c ****     for (i = 0u; i < PSOC_CAL_STAGE_COUNT; i++) {
+ 1039              		.loc 1 300 0 is_stmt 0 discriminator 1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 27
+
+
+ 1040 004a 032C     		cmp	r4, #3
+ 1041 004c EDD9     		bls	.L71
+ 303:calibration.c ****         }
+ 304:calibration.c ****     }
+ 305:calibration.c **** 
+ 306:calibration.c ****     ADC_Stop();
+ 1042              		.loc 1 306 0 is_stmt 1
+ 1043 004e FFF7FEFF 		bl	ADC_Stop
+ 1044              	.LVL133:
+ 307:calibration.c ****     psoc_calibration_restore_capture_path();
+ 1045              		.loc 1 307 0
+ 1046 0052 FFF7FEFF 		bl	psoc_calibration_restore_capture_path
+ 1047              	.LVL134:
+ 308:calibration.c **** #if defined(SYNC_IN_INTSTAT)
+ 309:calibration.c ****     (void)SYNC_IN_ClearInterrupt();
+ 310:calibration.c **** #endif
+ 311:calibration.c ****     isr_SyncIn_ClearPending();
+ 1048              		.loc 1 311 0
+ 1049 0056 FFF7FEFF 		bl	isr_SyncIn_ClearPending
+ 1050              	.LVL135:
+ 312:calibration.c ****     isr_SyncIn_Enable();
+ 1051              		.loc 1 312 0
+ 1052 005a FFF7FEFF 		bl	isr_SyncIn_Enable
+ 1053              	.LVL136:
+ 313:calibration.c **** 
+ 314:calibration.c ****     return ok;
+ 315:calibration.c **** }
+ 1054              		.loc 1 315 0
+ 1055 005e 2846     		mov	r0, r5
+ 1056 0060 38BD     		pop	{r3, r4, r5, pc}
+ 1057              	.LVL137:
+ 1058              	.L75:
+ 1059 0062 00BF     		.align	2
+ 1060              	.L74:
+ 1061 0064 00000000 		.word	.LANCHOR1
+ 1062 0068 00000000 		.word	g_psoc_cal_results
+ 1063 006c 00000000 		.word	.LANCHOR0
+ 1064              		.cfi_endproc
+ 1065              	.LFE74:
+ 1066              		.size	psoc_calibration_run_blocking, .-psoc_calibration_run_blocking
+ 1067              		.global	g_psoc_cal_result_count
+ 1068              		.comm	g_psoc_cal_results,48,4
+ 1069              		.section	.rodata
+ 1070              		.align	2
+ 1071              		.set	.LANCHOR0,. + 0
+ 1072              		.type	g_psoc_cal_stages, %object
+ 1073              		.size	g_psoc_cal_stages, 112
+ 1074              	g_psoc_cal_stages:
+ 1075 0000 00000000 		.word	.LC0
+ 1076 0004 00       		.byte	0
+ 1077 0005 000000   		.space	3
+ 1078 0008 00000000 		.word	0
+ 1079 000c 20       		.byte	32
+ 1080 000d 00       		.space	1
+ 1081 000e 0C00     		.short	12
+ 1082 0010 FA000000 		.word	250
+ 1083 0014 01       		.byte	1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 28
+
+
+ 1084 0015 000000   		.space	3
+ 1085 0018 00000000 		.word	cal_vdac_geo_pga
+ 1086 001c 08000000 		.word	.LC1
+ 1087 0020 01       		.byte	1
+ 1088 0021 000000   		.space	3
+ 1089 0024 00000000 		.word	0
+ 1090 0028 20       		.byte	32
+ 1091 0029 00       		.space	1
+ 1092 002a 0C00     		.short	12
+ 1093 002c FA000000 		.word	250
+ 1094 0030 01       		.byte	1
+ 1095 0031 000000   		.space	3
+ 1096 0034 00000000 		.word	cal_vdac_geo_bp
+ 1097 0038 10000000 		.word	.LC2
+ 1098 003c 02       		.byte	2
+ 1099 003d 000000   		.space	3
+ 1100 0040 00000000 		.word	0
+ 1101 0044 20       		.byte	32
+ 1102 0045 00       		.space	1
+ 1103 0046 0C00     		.short	12
+ 1104 0048 FA000000 		.word	250
+ 1105 004c 01       		.byte	1
+ 1106 004d 000000   		.space	3
+ 1107 0050 00000000 		.word	cal_vdac_geo_adder
+ 1108 0054 1C000000 		.word	.LC3
+ 1109 0058 03       		.byte	3
+ 1110 0059 000000   		.space	3
+ 1111 005c 00000000 		.word	0
+ 1112 0060 20       		.byte	32
+ 1113 0061 00       		.space	1
+ 1114 0062 0C00     		.short	12
+ 1115 0064 FA000000 		.word	250
+ 1116 0068 01       		.byte	1
+ 1117 0069 000000   		.space	3
+ 1118 006c 00000000 		.word	cal_vdac_geo_lp
+ 1119              		.section	.rodata.str1.4,"aMS",%progbits,1
+ 1120              		.align	2
+ 1121              	.LC0:
+ 1122 0000 47454F5F 		.ascii	"GEO_PGA\000"
+ 1122      50474100 
+ 1123              	.LC1:
+ 1124 0008 47454F5F 		.ascii	"GEO_BP\000"
+ 1124      425000
+ 1125 000f 00       		.space	1
+ 1126              	.LC2:
+ 1127 0010 47454F5F 		.ascii	"GEO_ADDER\000"
+ 1127      41444445 
+ 1127      5200
+ 1128 001a 0000     		.space	2
+ 1129              	.LC3:
+ 1130 001c 47454F5F 		.ascii	"GEO_LP\000"
+ 1130      4C5000
+ 1131              		.bss
+ 1132              		.set	.LANCHOR1,. + 0
+ 1133              		.type	g_psoc_cal_result_count, %object
+ 1134              		.size	g_psoc_cal_result_count, 1
+ 1135              	g_psoc_cal_result_count:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 29
+
+
+ 1136 0000 00       		.space	1
+ 1137              		.text
+ 1138              	.Letext0:
+ 1139              		.file 3 "c:\\program files (x86)\\cypress\\psoc creator\\4.4\\psoc creator\\import\\gnu\\arm\\5.4.
+ 1140              		.file 4 "c:\\program files (x86)\\cypress\\psoc creator\\4.4\\psoc creator\\import\\gnu\\arm\\5.4.
+ 1141              		.file 5 "Generated_Source\\PSoC5/cytypes.h"
+ 1142              		.file 6 "calibration.h"
+ 1143              		.file 7 "Generated_Source\\PSoC5/core_cm3.h"
+ 1144              		.file 8 "Generated_Source\\PSoC5/VDAC_ref_LP.h"
+ 1145              		.file 9 "Generated_Source\\PSoC5/VDAC_Ref_Adder.h"
+ 1146              		.file 10 "Generated_Source\\PSoC5/VDAC_ref_BP.h"
+ 1147              		.file 11 "Generated_Source\\PSoC5/VDAC_ref_PGA.h"
+ 1148              		.file 12 "psoc_adc.h"
+ 1149              		.file 13 "Generated_Source\\PSoC5/CyLib.h"
+ 1150              		.file 14 "Generated_Source\\PSoC5/ADC.h"
+ 1151              		.file 15 "Generated_Source\\PSoC5/AMux_ADC.h"
+ 1152              		.file 16 "Generated_Source\\PSoC5/isr_DelSig.h"
+ 1153              		.file 17 "Generated_Source\\PSoC5/AMux_IN.h"
+ 1154              		.file 18 "Generated_Source\\PSoC5/isr_SyncIn.h"
+ 1155              		.section	.debug_info,"",%progbits
+ 1156              	.Ldebug_info0:
+ 1157 0000 420A0000 		.4byte	0xa42
+ 1158 0004 0400     		.2byte	0x4
+ 1159 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 1160 000a 04       		.byte	0x4
+ 1161 000b 01       		.uleb128 0x1
+ 1162 000c F4040000 		.4byte	.LASF92
+ 1163 0010 0C       		.byte	0xc
+ 1164 0011 9D000000 		.4byte	.LASF93
+ 1165 0015 D3050000 		.4byte	.LASF94
+ 1166 0019 30000000 		.4byte	.Ldebug_ranges0+0x30
+ 1167 001d 00000000 		.4byte	0
+ 1168 0021 00000000 		.4byte	.Ldebug_line0
+ 1169 0025 02       		.uleb128 0x2
+ 1170 0026 01       		.byte	0x1
+ 1171 0027 06       		.byte	0x6
+ 1172 0028 70040000 		.4byte	.LASF0
+ 1173 002c 02       		.uleb128 0x2
+ 1174 002d 01       		.byte	0x1
+ 1175 002e 08       		.byte	0x8
+ 1176 002f 50020000 		.4byte	.LASF1
+ 1177 0033 02       		.uleb128 0x2
+ 1178 0034 02       		.byte	0x2
+ 1179 0035 05       		.byte	0x5
+ 1180 0036 4A000000 		.4byte	.LASF2
+ 1181 003a 02       		.uleb128 0x2
+ 1182 003b 02       		.byte	0x2
+ 1183 003c 07       		.byte	0x7
+ 1184 003d 5C030000 		.4byte	.LASF3
+ 1185 0041 03       		.uleb128 0x3
+ 1186 0042 57040000 		.4byte	.LASF9
+ 1187 0046 03       		.byte	0x3
+ 1188 0047 3F       		.byte	0x3f
+ 1189 0048 4C000000 		.4byte	0x4c
+ 1190 004c 02       		.uleb128 0x2
+ 1191 004d 04       		.byte	0x4
+ 1192 004e 05       		.byte	0x5
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 30
+
+
+ 1193 004f 9F010000 		.4byte	.LASF4
+ 1194 0053 02       		.uleb128 0x2
+ 1195 0054 04       		.byte	0x4
+ 1196 0055 07       		.byte	0x7
+ 1197 0056 D0020000 		.4byte	.LASF5
+ 1198 005a 02       		.uleb128 0x2
+ 1199 005b 08       		.byte	0x8
+ 1200 005c 05       		.byte	0x5
+ 1201 005d 52010000 		.4byte	.LASF6
+ 1202 0061 02       		.uleb128 0x2
+ 1203 0062 08       		.byte	0x8
+ 1204 0063 07       		.byte	0x7
+ 1205 0064 7F020000 		.4byte	.LASF7
+ 1206 0068 04       		.uleb128 0x4
+ 1207 0069 04       		.byte	0x4
+ 1208 006a 05       		.byte	0x5
+ 1209 006b 696E7400 		.ascii	"int\000"
+ 1210 006f 02       		.uleb128 0x2
+ 1211 0070 04       		.byte	0x4
+ 1212 0071 07       		.byte	0x7
+ 1213 0072 AF020000 		.4byte	.LASF8
+ 1214 0076 03       		.uleb128 0x3
+ 1215 0077 54030000 		.4byte	.LASF10
+ 1216 007b 04       		.byte	0x4
+ 1217 007c 2C       		.byte	0x2c
+ 1218 007d 41000000 		.4byte	0x41
+ 1219 0081 05       		.uleb128 0x5
+ 1220 0082 E6000000 		.4byte	.LASF11
+ 1221 0086 05       		.byte	0x5
+ 1222 0087 E901     		.2byte	0x1e9
+ 1223 0089 2C000000 		.4byte	0x2c
+ 1224 008d 05       		.uleb128 0x5
+ 1225 008e D9000000 		.4byte	.LASF12
+ 1226 0092 05       		.byte	0x5
+ 1227 0093 EA01     		.2byte	0x1ea
+ 1228 0095 3A000000 		.4byte	0x3a
+ 1229 0099 05       		.uleb128 0x5
+ 1230 009a 6C010000 		.4byte	.LASF13
+ 1231 009e 05       		.byte	0x5
+ 1232 009f EC01     		.2byte	0x1ec
+ 1233 00a1 25000000 		.4byte	0x25
+ 1234 00a5 05       		.uleb128 0x5
+ 1235 00a6 E0000000 		.4byte	.LASF14
+ 1236 00aa 05       		.byte	0x5
+ 1237 00ab ED01     		.2byte	0x1ed
+ 1238 00ad 33000000 		.4byte	0x33
+ 1239 00b1 05       		.uleb128 0x5
+ 1240 00b2 0E040000 		.4byte	.LASF15
+ 1241 00b6 05       		.byte	0x5
+ 1242 00b7 EE01     		.2byte	0x1ee
+ 1243 00b9 4C000000 		.4byte	0x4c
+ 1244 00bd 02       		.uleb128 0x2
+ 1245 00be 04       		.byte	0x4
+ 1246 00bf 04       		.byte	0x4
+ 1247 00c0 07000000 		.4byte	.LASF16
+ 1248 00c4 02       		.uleb128 0x2
+ 1249 00c5 08       		.byte	0x8
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 31
+
+
+ 1250 00c6 04       		.byte	0x4
+ 1251 00c7 14040000 		.4byte	.LASF17
+ 1252 00cb 02       		.uleb128 0x2
+ 1253 00cc 01       		.byte	0x1
+ 1254 00cd 08       		.byte	0x8
+ 1255 00ce 4F030000 		.4byte	.LASF18
+ 1256 00d2 02       		.uleb128 0x2
+ 1257 00d3 08       		.byte	0x8
+ 1258 00d4 04       		.byte	0x4
+ 1259 00d5 32020000 		.4byte	.LASF19
+ 1260 00d9 02       		.uleb128 0x2
+ 1261 00da 04       		.byte	0x4
+ 1262 00db 07       		.byte	0x7
+ 1263 00dc 54000000 		.4byte	.LASF20
+ 1264 00e0 06       		.uleb128 0x6
+ 1265 00e1 04       		.byte	0x4
+ 1266 00e2 E6000000 		.4byte	0xe6
+ 1267 00e6 07       		.uleb128 0x7
+ 1268 00e7 CB000000 		.4byte	0xcb
+ 1269 00eb 03       		.uleb128 0x3
+ 1270 00ec A8010000 		.4byte	.LASF21
+ 1271 00f0 06       		.byte	0x6
+ 1272 00f1 11       		.byte	0x11
+ 1273 00f2 F6000000 		.4byte	0xf6
+ 1274 00f6 06       		.uleb128 0x6
+ 1275 00f7 04       		.byte	0x4
+ 1276 00f8 FC000000 		.4byte	0xfc
+ 1277 00fc 08       		.uleb128 0x8
+ 1278 00fd 07010000 		.4byte	0x107
+ 1279 0101 09       		.uleb128 0x9
+ 1280 0102 81000000 		.4byte	0x81
+ 1281 0106 00       		.byte	0
+ 1282 0107 0A       		.uleb128 0xa
+ 1283 0108 1C       		.byte	0x1c
+ 1284 0109 06       		.byte	0x6
+ 1285 010a 13       		.byte	0x13
+ 1286 010b 70010000 		.4byte	0x170
+ 1287 010f 0B       		.uleb128 0xb
+ 1288 0110 24020000 		.4byte	.LASF22
+ 1289 0114 06       		.byte	0x6
+ 1290 0115 14       		.byte	0x14
+ 1291 0116 E0000000 		.4byte	0xe0
+ 1292 011a 00       		.byte	0
+ 1293 011b 0B       		.uleb128 0xb
+ 1294 011c 60010000 		.4byte	.LASF23
+ 1295 0120 06       		.byte	0x6
+ 1296 0121 15       		.byte	0x15
+ 1297 0122 81000000 		.4byte	0x81
+ 1298 0126 04       		.byte	0x4
+ 1299 0127 0B       		.uleb128 0xb
+ 1300 0128 C2020000 		.4byte	.LASF24
+ 1301 012c 06       		.byte	0x6
+ 1302 012d 16       		.byte	0x16
+ 1303 012e B1000000 		.4byte	0xb1
+ 1304 0132 08       		.byte	0x8
+ 1305 0133 0B       		.uleb128 0xb
+ 1306 0134 5E020000 		.4byte	.LASF25
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 32
+
+
+ 1307 0138 06       		.byte	0x6
+ 1308 0139 17       		.byte	0x17
+ 1309 013a 81000000 		.4byte	0x81
+ 1310 013e 0C       		.byte	0xc
+ 1311 013f 0B       		.uleb128 0xb
+ 1312 0140 29020000 		.4byte	.LASF26
+ 1313 0144 06       		.byte	0x6
+ 1314 0145 18       		.byte	0x18
+ 1315 0146 8D000000 		.4byte	0x8d
+ 1316 014a 0E       		.byte	0xe
+ 1317 014b 0B       		.uleb128 0xb
+ 1318 014c 7C040000 		.4byte	.LASF27
+ 1319 0150 06       		.byte	0x6
+ 1320 0151 19       		.byte	0x19
+ 1321 0152 B1000000 		.4byte	0xb1
+ 1322 0156 10       		.byte	0x10
+ 1323 0157 0B       		.uleb128 0xb
+ 1324 0158 7B000000 		.4byte	.LASF28
+ 1325 015c 06       		.byte	0x6
+ 1326 015d 1A       		.byte	0x1a
+ 1327 015e 99000000 		.4byte	0x99
+ 1328 0162 14       		.byte	0x14
+ 1329 0163 0B       		.uleb128 0xb
+ 1330 0164 0D000000 		.4byte	.LASF29
+ 1331 0168 06       		.byte	0x6
+ 1332 0169 1B       		.byte	0x1b
+ 1333 016a EB000000 		.4byte	0xeb
+ 1334 016e 18       		.byte	0x18
+ 1335 016f 00       		.byte	0
+ 1336 0170 03       		.uleb128 0x3
+ 1337 0171 23010000 		.4byte	.LASF30
+ 1338 0175 06       		.byte	0x6
+ 1339 0176 1C       		.byte	0x1c
+ 1340 0177 07010000 		.4byte	0x107
+ 1341 017b 0A       		.uleb128 0xa
+ 1342 017c 0C       		.byte	0xc
+ 1343 017d 06       		.byte	0x6
+ 1344 017e 20       		.byte	0x20
+ 1345 017f A7010000 		.4byte	0x1a7
+ 1346 0183 0B       		.uleb128 0xb
+ 1347 0184 FD020000 		.4byte	.LASF31
+ 1348 0188 06       		.byte	0x6
+ 1349 0189 21       		.byte	0x21
+ 1350 018a 81000000 		.4byte	0x81
+ 1351 018e 00       		.byte	0
+ 1352 018f 0B       		.uleb128 0xb
+ 1353 0190 71010000 		.4byte	.LASF32
+ 1354 0194 06       		.byte	0x6
+ 1355 0195 22       		.byte	0x22
+ 1356 0196 B1000000 		.4byte	0xb1
+ 1357 019a 04       		.byte	0x4
+ 1358 019b 0C       		.uleb128 0xc
+ 1359 019c 6F6B00   		.ascii	"ok\000"
+ 1360 019f 06       		.byte	0x6
+ 1361 01a0 23       		.byte	0x23
+ 1362 01a1 81000000 		.4byte	0x81
+ 1363 01a5 08       		.byte	0x8
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 33
+
+
+ 1364 01a6 00       		.byte	0
+ 1365 01a7 03       		.uleb128 0x3
+ 1366 01a8 CB000000 		.4byte	.LASF33
+ 1367 01ac 06       		.byte	0x6
+ 1368 01ad 24       		.byte	0x24
+ 1369 01ae 7B010000 		.4byte	0x17b
+ 1370 01b2 0D       		.uleb128 0xd
+ 1371 01b3 A4020000 		.4byte	.LASF39
+ 1372 01b7 01       		.byte	0x1
+ 1373 01b8 15       		.byte	0x15
+ 1374 01b9 B1000000 		.4byte	0xb1
+ 1375 01bd 00000000 		.4byte	.LFB67
+ 1376 01c1 08000000 		.4byte	.LFE67-.LFB67
+ 1377 01c5 01       		.uleb128 0x1
+ 1378 01c6 9C       		.byte	0x9c
+ 1379 01c7 DB010000 		.4byte	0x1db
+ 1380 01cb 0E       		.uleb128 0xe
+ 1381 01cc AB000000 		.4byte	.LASF34
+ 1382 01d0 01       		.byte	0x1
+ 1383 01d1 15       		.byte	0x15
+ 1384 01d2 B1000000 		.4byte	0xb1
+ 1385 01d6 00000000 		.4byte	.LLST0
+ 1386 01da 00       		.byte	0
+ 1387 01db 0F       		.uleb128 0xf
+ 1388 01dc 13000000 		.4byte	.LASF35
+ 1389 01e0 02       		.byte	0x2
+ 1390 01e1 6C       		.byte	0x6c
+ 1391 01e2 00000000 		.4byte	.LFB66
+ 1392 01e6 08000000 		.4byte	.LFE66-.LFB66
+ 1393 01ea 01       		.uleb128 0x1
+ 1394 01eb 9C       		.byte	0x9c
+ 1395 01ec 09020000 		.4byte	0x209
+ 1396 01f0 0E       		.uleb128 0xe
+ 1397 01f1 AB000000 		.4byte	.LASF34
+ 1398 01f5 02       		.byte	0x2
+ 1399 01f6 6C       		.byte	0x6c
+ 1400 01f7 81000000 		.4byte	0x81
+ 1401 01fb 21000000 		.4byte	.LLST1
+ 1402 01ff 10       		.uleb128 0x10
+ 1403 0200 06000000 		.4byte	.LVL3
+ 1404 0204 3D090000 		.4byte	0x93d
+ 1405 0208 00       		.byte	0
+ 1406 0209 0F       		.uleb128 0xf
+ 1407 020a 7F030000 		.4byte	.LASF36
+ 1408 020e 02       		.byte	0x2
+ 1409 020f 6B       		.byte	0x6b
+ 1410 0210 00000000 		.4byte	.LFB65
+ 1411 0214 08000000 		.4byte	.LFE65-.LFB65
+ 1412 0218 01       		.uleb128 0x1
+ 1413 0219 9C       		.byte	0x9c
+ 1414 021a 37020000 		.4byte	0x237
+ 1415 021e 0E       		.uleb128 0xe
+ 1416 021f AB000000 		.4byte	.LASF34
+ 1417 0223 02       		.byte	0x2
+ 1418 0224 6B       		.byte	0x6b
+ 1419 0225 81000000 		.4byte	0x81
+ 1420 0229 42000000 		.4byte	.LLST2
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 34
+
+
+ 1421 022d 10       		.uleb128 0x10
+ 1422 022e 06000000 		.4byte	.LVL5
+ 1423 0232 48090000 		.4byte	0x948
+ 1424 0236 00       		.byte	0
+ 1425 0237 0F       		.uleb128 0xf
+ 1426 0238 B9010000 		.4byte	.LASF37
+ 1427 023c 02       		.byte	0x2
+ 1428 023d 6A       		.byte	0x6a
+ 1429 023e 00000000 		.4byte	.LFB64
+ 1430 0242 08000000 		.4byte	.LFE64-.LFB64
+ 1431 0246 01       		.uleb128 0x1
+ 1432 0247 9C       		.byte	0x9c
+ 1433 0248 65020000 		.4byte	0x265
+ 1434 024c 0E       		.uleb128 0xe
+ 1435 024d AB000000 		.4byte	.LASF34
+ 1436 0251 02       		.byte	0x2
+ 1437 0252 6A       		.byte	0x6a
+ 1438 0253 81000000 		.4byte	0x81
+ 1439 0257 63000000 		.4byte	.LLST3
+ 1440 025b 10       		.uleb128 0x10
+ 1441 025c 06000000 		.4byte	.LVL7
+ 1442 0260 53090000 		.4byte	0x953
+ 1443 0264 00       		.byte	0
+ 1444 0265 0F       		.uleb128 0xf
+ 1445 0266 46040000 		.4byte	.LASF38
+ 1446 026a 02       		.byte	0x2
+ 1447 026b 69       		.byte	0x69
+ 1448 026c 00000000 		.4byte	.LFB63
+ 1449 0270 08000000 		.4byte	.LFE63-.LFB63
+ 1450 0274 01       		.uleb128 0x1
+ 1451 0275 9C       		.byte	0x9c
+ 1452 0276 93020000 		.4byte	0x293
+ 1453 027a 0E       		.uleb128 0xe
+ 1454 027b AB000000 		.4byte	.LASF34
+ 1455 027f 02       		.byte	0x2
+ 1456 0280 69       		.byte	0x69
+ 1457 0281 81000000 		.4byte	0x81
+ 1458 0285 84000000 		.4byte	.LLST4
+ 1459 0289 10       		.uleb128 0x10
+ 1460 028a 06000000 		.4byte	.LVL9
+ 1461 028e 5E090000 		.4byte	0x95e
+ 1462 0292 00       		.byte	0
+ 1463 0293 0D       		.uleb128 0xd
+ 1464 0294 5D000000 		.4byte	.LASF40
+ 1465 0298 01       		.byte	0x1
+ 1466 0299 1A       		.byte	0x1a
+ 1467 029a 81000000 		.4byte	0x81
+ 1468 029e 00000000 		.4byte	.LFB68
+ 1469 02a2 44000000 		.4byte	.LFE68-.LFB68
+ 1470 02a6 01       		.uleb128 0x1
+ 1471 02a7 9C       		.byte	0x9c
+ 1472 02a8 0A030000 		.4byte	0x30a
+ 1473 02ac 11       		.uleb128 0x11
+ 1474 02ad 6E00     		.ascii	"n\000"
+ 1475 02af 01       		.byte	0x1
+ 1476 02b0 1A       		.byte	0x1a
+ 1477 02b1 81000000 		.4byte	0x81
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 35
+
+
+ 1478 02b5 A5000000 		.4byte	.LLST5
+ 1479 02b9 0E       		.uleb128 0xe
+ 1480 02ba D9040000 		.4byte	.LASF41
+ 1481 02be 01       		.byte	0x1
+ 1482 02bf 1A       		.byte	0x1a
+ 1483 02c0 0A030000 		.4byte	0x30a
+ 1484 02c4 E7000000 		.4byte	.LLST6
+ 1485 02c8 12       		.uleb128 0x12
+ 1486 02c9 6900     		.ascii	"i\000"
+ 1487 02cb 01       		.byte	0x1
+ 1488 02cc 1C       		.byte	0x1c
+ 1489 02cd 81000000 		.4byte	0x81
+ 1490 02d1 1B010000 		.4byte	.LLST7
+ 1491 02d5 12       		.uleb128 0x12
+ 1492 02d6 61636300 		.ascii	"acc\000"
+ 1493 02da 01       		.byte	0x1
+ 1494 02db 1D       		.byte	0x1d
+ 1495 02dc B1000000 		.4byte	0xb1
+ 1496 02e0 50010000 		.4byte	.LLST8
+ 1497 02e4 13       		.uleb128 0x13
+ 1498 02e5 3A000000 		.4byte	.LASF42
+ 1499 02e9 01       		.byte	0x1
+ 1500 02ea 1E       		.byte	0x1e
+ 1501 02eb B1000000 		.4byte	0xb1
+ 1502 02ef 02       		.uleb128 0x2
+ 1503 02f0 91       		.byte	0x91
+ 1504 02f1 64       		.sleb128 -28
+ 1505 02f2 14       		.uleb128 0x14
+ 1506 02f3 1E000000 		.4byte	.LVL13
+ 1507 02f7 69090000 		.4byte	0x969
+ 1508 02fb 15       		.uleb128 0x15
+ 1509 02fc 01       		.uleb128 0x1
+ 1510 02fd 50       		.byte	0x50
+ 1511 02fe 02       		.uleb128 0x2
+ 1512 02ff 91       		.byte	0x91
+ 1513 0300 64       		.sleb128 -28
+ 1514 0301 15       		.uleb128 0x15
+ 1515 0302 01       		.uleb128 0x1
+ 1516 0303 51       		.byte	0x51
+ 1517 0304 03       		.uleb128 0x3
+ 1518 0305 0A       		.byte	0xa
+ 1519 0306 204E     		.2byte	0x4e20
+ 1520 0308 00       		.byte	0
+ 1521 0309 00       		.byte	0
+ 1522 030a 06       		.uleb128 0x6
+ 1523 030b 04       		.byte	0x4
+ 1524 030c B1000000 		.4byte	0xb1
+ 1525 0310 0D       		.uleb128 0xd
+ 1526 0311 E2020000 		.4byte	.LASF43
+ 1527 0315 01       		.byte	0x1
+ 1528 0316 2E       		.byte	0x2e
+ 1529 0317 81000000 		.4byte	0x81
+ 1530 031b 00000000 		.4byte	.LFB69
+ 1531 031f 4A000000 		.4byte	.LFE69-.LFB69
+ 1532 0323 01       		.uleb128 0x1
+ 1533 0324 9C       		.byte	0x9c
+ 1534 0325 AE030000 		.4byte	0x3ae
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 36
+
+
+ 1535 0329 11       		.uleb128 0x11
+ 1536 032a 6E00     		.ascii	"n\000"
+ 1537 032c 01       		.byte	0x1
+ 1538 032d 2E       		.byte	0x2e
+ 1539 032e 81000000 		.4byte	0x81
+ 1540 0332 7B010000 		.4byte	.LLST9
+ 1541 0336 0E       		.uleb128 0xe
+ 1542 0337 D9040000 		.4byte	.LASF41
+ 1543 033b 01       		.byte	0x1
+ 1544 033c 2E       		.byte	0x2e
+ 1545 033d 0A030000 		.4byte	0x30a
+ 1546 0341 9C010000 		.4byte	.LLST10
+ 1547 0345 13       		.uleb128 0x13
+ 1548 0346 31000000 		.4byte	.LASF44
+ 1549 034a 01       		.byte	0x1
+ 1550 034b 30       		.byte	0x30
+ 1551 034c B1000000 		.4byte	0xb1
+ 1552 0350 02       		.uleb128 0x2
+ 1553 0351 91       		.byte	0x91
+ 1554 0352 64       		.sleb128 -28
+ 1555 0353 13       		.uleb128 0x13
+ 1556 0354 0A010000 		.4byte	.LASF45
+ 1557 0358 01       		.byte	0x1
+ 1558 0359 31       		.byte	0x31
+ 1559 035a B1000000 		.4byte	0xb1
+ 1560 035e 02       		.uleb128 0x2
+ 1561 035f 91       		.byte	0x91
+ 1562 0360 60       		.sleb128 -32
+ 1563 0361 16       		.uleb128 0x16
+ 1564 0362 1B040000 		.4byte	.LASF46
+ 1565 0366 01       		.byte	0x1
+ 1566 0367 32       		.byte	0x32
+ 1567 0368 81000000 		.4byte	0x81
+ 1568 036c BA010000 		.4byte	.LLST11
+ 1569 0370 17       		.uleb128 0x17
+ 1570 0371 0E000000 		.4byte	.LVL23
+ 1571 0375 93020000 		.4byte	0x293
+ 1572 0379 8A030000 		.4byte	0x38a
+ 1573 037d 15       		.uleb128 0x15
+ 1574 037e 01       		.uleb128 0x1
+ 1575 037f 50       		.byte	0x50
+ 1576 0380 02       		.uleb128 0x2
+ 1577 0381 76       		.byte	0x76
+ 1578 0382 00       		.sleb128 0
+ 1579 0383 15       		.uleb128 0x15
+ 1580 0384 01       		.uleb128 0x1
+ 1581 0385 51       		.byte	0x51
+ 1582 0386 02       		.uleb128 0x2
+ 1583 0387 91       		.byte	0x91
+ 1584 0388 64       		.sleb128 -28
+ 1585 0389 00       		.byte	0
+ 1586 038a 17       		.uleb128 0x17
+ 1587 038b 22000000 		.4byte	.LVL26
+ 1588 038f 93020000 		.4byte	0x293
+ 1589 0393 A4030000 		.4byte	0x3a4
+ 1590 0397 15       		.uleb128 0x15
+ 1591 0398 01       		.uleb128 0x1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 37
+
+
+ 1592 0399 50       		.byte	0x50
+ 1593 039a 02       		.uleb128 0x2
+ 1594 039b 76       		.byte	0x76
+ 1595 039c 00       		.sleb128 0
+ 1596 039d 15       		.uleb128 0x15
+ 1597 039e 01       		.uleb128 0x1
+ 1598 039f 51       		.byte	0x51
+ 1599 03a0 02       		.uleb128 0x2
+ 1600 03a1 7D       		.byte	0x7d
+ 1601 03a2 00       		.sleb128 0
+ 1602 03a3 00       		.byte	0
+ 1603 03a4 10       		.uleb128 0x10
+ 1604 03a5 30000000 		.4byte	.LVL27
+ 1605 03a9 B2010000 		.4byte	0x1b2
+ 1606 03ad 00       		.byte	0
+ 1607 03ae 0D       		.uleb128 0xd
+ 1608 03af 6F030000 		.4byte	.LASF47
+ 1609 03b3 01       		.byte	0x1
+ 1610 03b4 4A       		.byte	0x4a
+ 1611 03b5 81000000 		.4byte	0x81
+ 1612 03b9 00000000 		.4byte	.LFB70
+ 1613 03bd 2C020000 		.4byte	.LFE70-.LFB70
+ 1614 03c1 01       		.uleb128 0x1
+ 1615 03c2 9C       		.byte	0x9c
+ 1616 03c3 36060000 		.4byte	0x636
+ 1617 03c7 0E       		.uleb128 0xe
+ 1618 03c8 1C030000 		.4byte	.LASF48
+ 1619 03cc 01       		.byte	0x1
+ 1620 03cd 4A       		.byte	0x4a
+ 1621 03ce 36060000 		.4byte	0x636
+ 1622 03d2 E4010000 		.4byte	.LLST12
+ 1623 03d6 0E       		.uleb128 0xe
+ 1624 03d7 00000000 		.4byte	.LASF49
+ 1625 03db 01       		.byte	0x1
+ 1626 03dc 4A       		.byte	0x4a
+ 1627 03dd 41060000 		.4byte	0x641
+ 1628 03e1 29020000 		.4byte	.LLST13
+ 1629 03e5 12       		.uleb128 0x12
+ 1630 03e6 64616300 		.ascii	"dac\000"
+ 1631 03ea 01       		.byte	0x1
+ 1632 03eb 4C       		.byte	0x4c
+ 1633 03ec 81000000 		.4byte	0x81
+ 1634 03f0 47020000 		.4byte	.LLST14
+ 1635 03f4 12       		.uleb128 0x12
+ 1636 03f5 6C6F00   		.ascii	"lo\000"
+ 1637 03f8 01       		.byte	0x1
+ 1638 03f9 4D       		.byte	0x4d
+ 1639 03fa 81000000 		.4byte	0x81
+ 1640 03fe 7D020000 		.4byte	.LLST15
+ 1641 0402 12       		.uleb128 0x12
+ 1642 0403 686900   		.ascii	"hi\000"
+ 1643 0406 01       		.byte	0x1
+ 1644 0407 4E       		.byte	0x4e
+ 1645 0408 81000000 		.4byte	0x81
+ 1646 040c A7020000 		.4byte	.LLST16
+ 1647 0410 13       		.uleb128 0x13
+ 1648 0411 41000000 		.4byte	.LASF50
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 38
+
+
+ 1649 0415 01       		.byte	0x1
+ 1650 0416 4F       		.byte	0x4f
+ 1651 0417 B1000000 		.4byte	0xb1
+ 1652 041b 02       		.uleb128 0x2
+ 1653 041c 91       		.byte	0x91
+ 1654 041d 54       		.sleb128 -44
+ 1655 041e 16       		.uleb128 0x16
+ 1656 041f A4040000 		.4byte	.LASF51
+ 1657 0423 01       		.byte	0x1
+ 1658 0424 50       		.byte	0x50
+ 1659 0425 B1000000 		.4byte	0xb1
+ 1660 0429 D2020000 		.4byte	.LLST17
+ 1661 042d 16       		.uleb128 0x16
+ 1662 042e C9010000 		.4byte	.LASF52
+ 1663 0432 01       		.byte	0x1
+ 1664 0433 51       		.byte	0x51
+ 1665 0434 81000000 		.4byte	0x81
+ 1666 0438 F0020000 		.4byte	.LLST18
+ 1667 043c 16       		.uleb128 0x16
+ 1668 043d 9F040000 		.4byte	.LASF53
+ 1669 0441 01       		.byte	0x1
+ 1670 0442 52       		.byte	0x52
+ 1671 0443 8D000000 		.4byte	0x8d
+ 1672 0447 04030000 		.4byte	.LLST19
+ 1673 044b 16       		.uleb128 0x16
+ 1674 044c AE040000 		.4byte	.LASF54
+ 1675 0450 01       		.byte	0x1
+ 1676 0451 53       		.byte	0x53
+ 1677 0452 81000000 		.4byte	0x81
+ 1678 0456 2E030000 		.4byte	.LLST20
+ 1679 045a 16       		.uleb128 0x16
+ 1680 045b 23000000 		.4byte	.LASF55
+ 1681 045f 01       		.byte	0x1
+ 1682 0460 54       		.byte	0x54
+ 1683 0461 B1000000 		.4byte	0xb1
+ 1684 0465 4F030000 		.4byte	.LLST21
+ 1685 0469 16       		.uleb128 0x16
+ 1686 046a CA040000 		.4byte	.LASF56
+ 1687 046e 01       		.byte	0x1
+ 1688 046f 55       		.byte	0x55
+ 1689 0470 B1000000 		.4byte	0xb1
+ 1690 0474 86030000 		.4byte	.LLST22
+ 1691 0478 18       		.uleb128 0x18
+ 1692 0479 00000000 		.4byte	.Ldebug_ranges0+0
+ 1693 047d 02050000 		.4byte	0x502
+ 1694 0481 16       		.uleb128 0x16
+ 1695 0482 45030000 		.4byte	.LASF57
+ 1696 0486 01       		.byte	0x1
+ 1697 0487 7A       		.byte	0x7a
+ 1698 0488 81000000 		.4byte	0x81
+ 1699 048c BA030000 		.4byte	.LLST23
+ 1700 0490 13       		.uleb128 0x13
+ 1701 0491 E6010000 		.4byte	.LASF58
+ 1702 0495 01       		.byte	0x1
+ 1703 0496 7B       		.byte	0x7b
+ 1704 0497 B1000000 		.4byte	0xb1
+ 1705 049b 02       		.uleb128 0x2
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 39
+
+
+ 1706 049c 91       		.byte	0x91
+ 1707 049d 50       		.sleb128 -48
+ 1708 049e 19       		.uleb128 0x19
+ 1709 049f 96000000 		.4byte	.LVL48
+ 1710 04a3 AE040000 		.4byte	0x4ae
+ 1711 04a7 15       		.uleb128 0x15
+ 1712 04a8 01       		.uleb128 0x1
+ 1713 04a9 50       		.byte	0x50
+ 1714 04aa 02       		.uleb128 0x2
+ 1715 04ab 77       		.byte	0x77
+ 1716 04ac 00       		.sleb128 0
+ 1717 04ad 00       		.byte	0
+ 1718 04ae 17       		.uleb128 0x17
+ 1719 04af 9C000000 		.4byte	.LVL49
+ 1720 04b3 74090000 		.4byte	0x974
+ 1721 04b7 C1040000 		.4byte	0x4c1
+ 1722 04bb 15       		.uleb128 0x15
+ 1723 04bc 01       		.uleb128 0x1
+ 1724 04bd 50       		.byte	0x50
+ 1725 04be 01       		.uleb128 0x1
+ 1726 04bf 35       		.byte	0x35
+ 1727 04c0 00       		.byte	0
+ 1728 04c1 17       		.uleb128 0x17
+ 1729 04c2 A4000000 		.4byte	.LVL50
+ 1730 04c6 10030000 		.4byte	0x310
+ 1731 04ca D5040000 		.4byte	0x4d5
+ 1732 04ce 15       		.uleb128 0x15
+ 1733 04cf 01       		.uleb128 0x1
+ 1734 04d0 51       		.byte	0x51
+ 1735 04d1 02       		.uleb128 0x2
+ 1736 04d2 91       		.byte	0x91
+ 1737 04d3 50       		.sleb128 -48
+ 1738 04d4 00       		.byte	0
+ 1739 04d5 19       		.uleb128 0x19
+ 1740 04d6 AE000000 		.4byte	.LVL51
+ 1741 04da E5040000 		.4byte	0x4e5
+ 1742 04de 15       		.uleb128 0x15
+ 1743 04df 01       		.uleb128 0x1
+ 1744 04e0 50       		.byte	0x50
+ 1745 04e1 02       		.uleb128 0x2
+ 1746 04e2 09       		.byte	0x9
+ 1747 04e3 9C       		.byte	0x9c
+ 1748 04e4 00       		.byte	0
+ 1749 04e5 17       		.uleb128 0x17
+ 1750 04e6 B4000000 		.4byte	.LVL52
+ 1751 04ea 74090000 		.4byte	0x974
+ 1752 04ee F8040000 		.4byte	0x4f8
+ 1753 04f2 15       		.uleb128 0x15
+ 1754 04f3 01       		.uleb128 0x1
+ 1755 04f4 50       		.byte	0x50
+ 1756 04f5 01       		.uleb128 0x1
+ 1757 04f6 35       		.byte	0x35
+ 1758 04f7 00       		.byte	0
+ 1759 04f8 10       		.uleb128 0x10
+ 1760 04f9 D2000000 		.4byte	.LVL53
+ 1761 04fd B2010000 		.4byte	0x1b2
+ 1762 0501 00       		.byte	0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 40
+
+
+ 1763 0502 18       		.uleb128 0x18
+ 1764 0503 18000000 		.4byte	.Ldebug_ranges0+0x18
+ 1765 0507 8D050000 		.4byte	0x58d
+ 1766 050b 16       		.uleb128 0x16
+ 1767 050c BC020000 		.4byte	.LASF59
+ 1768 0510 01       		.byte	0x1
+ 1769 0511 AE       		.byte	0xae
+ 1770 0512 81000000 		.4byte	0x81
+ 1771 0516 CD030000 		.4byte	.LLST24
+ 1772 051a 16       		.uleb128 0x16
+ 1773 051b A2050000 		.4byte	.LASF60
+ 1774 051f 01       		.byte	0x1
+ 1775 0520 B1       		.byte	0xb1
+ 1776 0521 81000000 		.4byte	0x81
+ 1777 0525 E0030000 		.4byte	.LLST25
+ 1778 0529 19       		.uleb128 0x19
+ 1779 052a 98010000 		.4byte	.LVL69
+ 1780 052e 39050000 		.4byte	0x539
+ 1781 0532 15       		.uleb128 0x15
+ 1782 0533 01       		.uleb128 0x1
+ 1783 0534 50       		.byte	0x50
+ 1784 0535 02       		.uleb128 0x2
+ 1785 0536 75       		.byte	0x75
+ 1786 0537 00       		.sleb128 0
+ 1787 0538 00       		.byte	0
+ 1788 0539 17       		.uleb128 0x17
+ 1789 053a 9E010000 		.4byte	.LVL70
+ 1790 053e 74090000 		.4byte	0x974
+ 1791 0542 4C050000 		.4byte	0x54c
+ 1792 0546 15       		.uleb128 0x15
+ 1793 0547 01       		.uleb128 0x1
+ 1794 0548 50       		.byte	0x50
+ 1795 0549 01       		.uleb128 0x1
+ 1796 054a 35       		.byte	0x35
+ 1797 054b 00       		.byte	0
+ 1798 054c 17       		.uleb128 0x17
+ 1799 054d A6010000 		.4byte	.LVL71
+ 1800 0551 10030000 		.4byte	0x310
+ 1801 0555 60050000 		.4byte	0x560
+ 1802 0559 15       		.uleb128 0x15
+ 1803 055a 01       		.uleb128 0x1
+ 1804 055b 51       		.byte	0x51
+ 1805 055c 02       		.uleb128 0x2
+ 1806 055d 91       		.byte	0x91
+ 1807 055e 54       		.sleb128 -44
+ 1808 055f 00       		.byte	0
+ 1809 0560 19       		.uleb128 0x19
+ 1810 0561 B2010000 		.4byte	.LVL73
+ 1811 0565 70050000 		.4byte	0x570
+ 1812 0569 15       		.uleb128 0x15
+ 1813 056a 01       		.uleb128 0x1
+ 1814 056b 50       		.byte	0x50
+ 1815 056c 02       		.uleb128 0x2
+ 1816 056d 74       		.byte	0x74
+ 1817 056e 00       		.sleb128 0
+ 1818 056f 00       		.byte	0
+ 1819 0570 17       		.uleb128 0x17
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 41
+
+
+ 1820 0571 B8010000 		.4byte	.LVL74
+ 1821 0575 74090000 		.4byte	0x974
+ 1822 0579 83050000 		.4byte	0x583
+ 1823 057d 15       		.uleb128 0x15
+ 1824 057e 01       		.uleb128 0x1
+ 1825 057f 50       		.byte	0x50
+ 1826 0580 01       		.uleb128 0x1
+ 1827 0581 35       		.byte	0x35
+ 1828 0582 00       		.byte	0
+ 1829 0583 10       		.uleb128 0x10
+ 1830 0584 D4010000 		.4byte	.LVL76
+ 1831 0588 B2010000 		.4byte	0x1b2
+ 1832 058c 00       		.byte	0
+ 1833 058d 10       		.uleb128 0x10
+ 1834 058e 0E000000 		.4byte	.LVL32
+ 1835 0592 7F090000 		.4byte	0x97f
+ 1836 0596 10       		.uleb128 0x10
+ 1837 0597 14000000 		.4byte	.LVL33
+ 1838 059b 8A090000 		.4byte	0x98a
+ 1839 059f 17       		.uleb128 0x17
+ 1840 05a0 1A000000 		.4byte	.LVL34
+ 1841 05a4 74090000 		.4byte	0x974
+ 1842 05a8 B2050000 		.4byte	0x5b2
+ 1843 05ac 15       		.uleb128 0x15
+ 1844 05ad 01       		.uleb128 0x1
+ 1845 05ae 50       		.byte	0x50
+ 1846 05af 01       		.uleb128 0x1
+ 1847 05b0 35       		.byte	0x35
+ 1848 05b1 00       		.byte	0
+ 1849 05b2 10       		.uleb128 0x10
+ 1850 05b3 1E000000 		.4byte	.LVL35
+ 1851 05b7 95090000 		.4byte	0x995
+ 1852 05bb 10       		.uleb128 0x10
+ 1853 05bc 22000000 		.4byte	.LVL36
+ 1854 05c0 A0090000 		.4byte	0x9a0
+ 1855 05c4 10       		.uleb128 0x10
+ 1856 05c5 26000000 		.4byte	.LVL37
+ 1857 05c9 AB090000 		.4byte	0x9ab
+ 1858 05cd 10       		.uleb128 0x10
+ 1859 05ce 2A000000 		.4byte	.LVL38
+ 1860 05d2 B6090000 		.4byte	0x9b6
+ 1861 05d6 19       		.uleb128 0x19
+ 1862 05d7 30000000 		.4byte	.LVL39
+ 1863 05db E6050000 		.4byte	0x5e6
+ 1864 05df 15       		.uleb128 0x15
+ 1865 05e0 01       		.uleb128 0x1
+ 1866 05e1 50       		.byte	0x50
+ 1867 05e2 02       		.uleb128 0x2
+ 1868 05e3 09       		.byte	0x9
+ 1869 05e4 9C       		.byte	0x9c
+ 1870 05e5 00       		.byte	0
+ 1871 05e6 17       		.uleb128 0x17
+ 1872 05e7 36000000 		.4byte	.LVL40
+ 1873 05eb 74090000 		.4byte	0x974
+ 1874 05ef F9050000 		.4byte	0x5f9
+ 1875 05f3 15       		.uleb128 0x15
+ 1876 05f4 01       		.uleb128 0x1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 42
+
+
+ 1877 05f5 50       		.byte	0x50
+ 1878 05f6 01       		.uleb128 0x1
+ 1879 05f7 35       		.byte	0x35
+ 1880 05f8 00       		.byte	0
+ 1881 05f9 17       		.uleb128 0x17
+ 1882 05fa 3E000000 		.4byte	.LVL41
+ 1883 05fe 10030000 		.4byte	0x310
+ 1884 0602 0D060000 		.4byte	0x60d
+ 1885 0606 15       		.uleb128 0x15
+ 1886 0607 01       		.uleb128 0x1
+ 1887 0608 51       		.byte	0x51
+ 1888 0609 02       		.uleb128 0x2
+ 1889 060a 91       		.byte	0x91
+ 1890 060b 54       		.sleb128 -44
+ 1891 060c 00       		.byte	0
+ 1892 060d 10       		.uleb128 0x10
+ 1893 060e 64000000 		.4byte	.LVL44
+ 1894 0612 B2010000 		.4byte	0x1b2
+ 1895 0616 19       		.uleb128 0x19
+ 1896 0617 0C020000 		.4byte	.LVL85
+ 1897 061b 26060000 		.4byte	0x626
+ 1898 061f 15       		.uleb128 0x15
+ 1899 0620 01       		.uleb128 0x1
+ 1900 0621 50       		.byte	0x50
+ 1901 0622 02       		.uleb128 0x2
+ 1902 0623 74       		.byte	0x74
+ 1903 0624 00       		.sleb128 0
+ 1904 0625 00       		.byte	0
+ 1905 0626 14       		.uleb128 0x14
+ 1906 0627 12020000 		.4byte	.LVL86
+ 1907 062b 74090000 		.4byte	0x974
+ 1908 062f 15       		.uleb128 0x15
+ 1909 0630 01       		.uleb128 0x1
+ 1910 0631 50       		.byte	0x50
+ 1911 0632 01       		.uleb128 0x1
+ 1912 0633 35       		.byte	0x35
+ 1913 0634 00       		.byte	0
+ 1914 0635 00       		.byte	0
+ 1915 0636 06       		.uleb128 0x6
+ 1916 0637 04       		.byte	0x4
+ 1917 0638 3C060000 		.4byte	0x63c
+ 1918 063c 07       		.uleb128 0x7
+ 1919 063d 70010000 		.4byte	0x170
+ 1920 0641 06       		.uleb128 0x6
+ 1921 0642 04       		.byte	0x4
+ 1922 0643 A7010000 		.4byte	0x1a7
+ 1923 0647 1A       		.uleb128 0x1a
+ 1924 0648 C2030000 		.4byte	.LASF61
+ 1925 064c 01       		.byte	0x1
+ 1926 064d E4       		.byte	0xe4
+ 1927 064e 00000000 		.4byte	.LFB71
+ 1928 0652 5C000000 		.4byte	.LFE71-.LFB71
+ 1929 0656 01       		.uleb128 0x1
+ 1930 0657 9C       		.byte	0x9c
+ 1931 0658 11070000 		.4byte	0x711
+ 1932 065c 12       		.uleb128 0x12
+ 1933 065d 6900     		.ascii	"i\000"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 43
+
+
+ 1934 065f 01       		.byte	0x1
+ 1935 0660 E6       		.byte	0xe6
+ 1936 0661 81000000 		.4byte	0x81
+ 1937 0665 F3030000 		.4byte	.LLST26
+ 1938 0669 10       		.uleb128 0x10
+ 1939 066a 06000000 		.4byte	.LVL88
+ 1940 066e C1090000 		.4byte	0x9c1
+ 1941 0672 10       		.uleb128 0x10
+ 1942 0673 0A000000 		.4byte	.LVL89
+ 1943 0677 CC090000 		.4byte	0x9cc
+ 1944 067b 10       		.uleb128 0x10
+ 1945 067c 0E000000 		.4byte	.LVL90
+ 1946 0680 7F090000 		.4byte	0x97f
+ 1947 0684 17       		.uleb128 0x17
+ 1948 0685 14000000 		.4byte	.LVL91
+ 1949 0689 D7090000 		.4byte	0x9d7
+ 1950 068d 97060000 		.4byte	0x697
+ 1951 0691 15       		.uleb128 0x15
+ 1952 0692 01       		.uleb128 0x1
+ 1953 0693 50       		.byte	0x50
+ 1954 0694 01       		.uleb128 0x1
+ 1955 0695 30       		.byte	0x30
+ 1956 0696 00       		.byte	0
+ 1957 0697 17       		.uleb128 0x17
+ 1958 0698 1A000000 		.4byte	.LVL92
+ 1959 069c 8A090000 		.4byte	0x98a
+ 1960 06a0 AA060000 		.4byte	0x6aa
+ 1961 06a4 15       		.uleb128 0x15
+ 1962 06a5 01       		.uleb128 0x1
+ 1963 06a6 50       		.byte	0x50
+ 1964 06a7 01       		.uleb128 0x1
+ 1965 06a8 33       		.byte	0x33
+ 1966 06a9 00       		.byte	0
+ 1967 06aa 17       		.uleb128 0x17
+ 1968 06ab 20000000 		.4byte	.LVL93
+ 1969 06af 74090000 		.4byte	0x974
+ 1970 06b3 BD060000 		.4byte	0x6bd
+ 1971 06b7 15       		.uleb128 0x15
+ 1972 06b8 01       		.uleb128 0x1
+ 1973 06b9 50       		.byte	0x50
+ 1974 06ba 01       		.uleb128 0x1
+ 1975 06bb 35       		.byte	0x35
+ 1976 06bc 00       		.byte	0
+ 1977 06bd 10       		.uleb128 0x10
+ 1978 06be 24000000 		.4byte	.LVL94
+ 1979 06c2 95090000 		.4byte	0x995
+ 1980 06c6 10       		.uleb128 0x10
+ 1981 06c7 28000000 		.4byte	.LVL95
+ 1982 06cb E2090000 		.4byte	0x9e2
+ 1983 06cf 10       		.uleb128 0x10
+ 1984 06d0 2C000000 		.4byte	.LVL96
+ 1985 06d4 ED090000 		.4byte	0x9ed
+ 1986 06d8 10       		.uleb128 0x10
+ 1987 06d9 30000000 		.4byte	.LVL97
+ 1988 06dd F8090000 		.4byte	0x9f8
+ 1989 06e1 10       		.uleb128 0x10
+ 1990 06e2 34000000 		.4byte	.LVL98
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 44
+
+
+ 1991 06e6 030A0000 		.4byte	0xa03
+ 1992 06ea 10       		.uleb128 0x10
+ 1993 06eb 38000000 		.4byte	.LVL99
+ 1994 06ef 0E0A0000 		.4byte	0xa0e
+ 1995 06f3 1B       		.uleb128 0x1b
+ 1996 06f4 4C000000 		.4byte	.LVL101
+ 1997 06f8 10       		.uleb128 0x10
+ 1998 06f9 74       		.byte	0x74
+ 1999 06fa 00       		.sleb128 0
+ 2000 06fb 33       		.byte	0x33
+ 2001 06fc 24       		.byte	0x24
+ 2002 06fd 74       		.byte	0x74
+ 2003 06fe 00       		.sleb128 0
+ 2004 06ff 1C       		.byte	0x1c
+ 2005 0700 32       		.byte	0x32
+ 2006 0701 24       		.byte	0x24
+ 2007 0702 03       		.byte	0x3
+ 2008 0703 18000000 		.4byte	.LANCHOR0+24
+ 2009 0707 22       		.byte	0x22
+ 2010 0708 06       		.byte	0x6
+ 2011 0709 15       		.uleb128 0x15
+ 2012 070a 01       		.uleb128 0x1
+ 2013 070b 50       		.byte	0x50
+ 2014 070c 02       		.uleb128 0x2
+ 2015 070d 09       		.byte	0x9
+ 2016 070e 9C       		.byte	0x9c
+ 2017 070f 00       		.byte	0
+ 2018 0710 00       		.byte	0
+ 2019 0711 1C       		.uleb128 0x1c
+ 2020 0712 FE010000 		.4byte	.LASF62
+ 2021 0716 01       		.byte	0x1
+ 2022 0717 0101     		.2byte	0x101
+ 2023 0719 00000000 		.4byte	.LFB72
+ 2024 071d 22000000 		.4byte	.LFE72-.LFB72
+ 2025 0721 01       		.uleb128 0x1
+ 2026 0722 9C       		.byte	0x9c
+ 2027 0723 7C070000 		.4byte	0x77c
+ 2028 0727 10       		.uleb128 0x10
+ 2029 0728 06000000 		.4byte	.LVL105
+ 2030 072c 7F090000 		.4byte	0x97f
+ 2031 0730 17       		.uleb128 0x17
+ 2032 0731 0C000000 		.4byte	.LVL106
+ 2033 0735 D7090000 		.4byte	0x9d7
+ 2034 0739 43070000 		.4byte	0x743
+ 2035 073d 15       		.uleb128 0x15
+ 2036 073e 01       		.uleb128 0x1
+ 2037 073f 50       		.byte	0x50
+ 2038 0740 01       		.uleb128 0x1
+ 2039 0741 30       		.byte	0x30
+ 2040 0742 00       		.byte	0
+ 2041 0743 17       		.uleb128 0x17
+ 2042 0744 12000000 		.4byte	.LVL107
+ 2043 0748 8A090000 		.4byte	0x98a
+ 2044 074c 56070000 		.4byte	0x756
+ 2045 0750 15       		.uleb128 0x15
+ 2046 0751 01       		.uleb128 0x1
+ 2047 0752 50       		.byte	0x50
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 45
+
+
+ 2048 0753 01       		.uleb128 0x1
+ 2049 0754 33       		.byte	0x33
+ 2050 0755 00       		.byte	0
+ 2051 0756 17       		.uleb128 0x17
+ 2052 0757 18000000 		.4byte	.LVL108
+ 2053 075b 74090000 		.4byte	0x974
+ 2054 075f 69070000 		.4byte	0x769
+ 2055 0763 15       		.uleb128 0x15
+ 2056 0764 01       		.uleb128 0x1
+ 2057 0765 50       		.byte	0x50
+ 2058 0766 01       		.uleb128 0x1
+ 2059 0767 35       		.byte	0x35
+ 2060 0768 00       		.byte	0
+ 2061 0769 10       		.uleb128 0x10
+ 2062 076a 1C000000 		.4byte	.LVL109
+ 2063 076e 95090000 		.4byte	0x995
+ 2064 0772 10       		.uleb128 0x10
+ 2065 0773 20000000 		.4byte	.LVL110
+ 2066 0777 E2090000 		.4byte	0x9e2
+ 2067 077b 00       		.byte	0
+ 2068 077c 1C       		.uleb128 0x1c
+ 2069 077d 30010000 		.4byte	.LASF63
+ 2070 0781 01       		.byte	0x1
+ 2071 0782 0B01     		.2byte	0x10b
+ 2072 0784 00000000 		.4byte	.LFB73
+ 2073 0788 5C000000 		.4byte	.LFE73-.LFB73
+ 2074 078c 01       		.uleb128 0x1
+ 2075 078d 9C       		.byte	0x9c
+ 2076 078e FA070000 		.4byte	0x7fa
+ 2077 0792 1D       		.uleb128 0x1d
+ 2078 0793 6900     		.ascii	"i\000"
+ 2079 0795 01       		.byte	0x1
+ 2080 0796 0D01     		.2byte	0x10d
+ 2081 0798 81000000 		.4byte	0x81
+ 2082 079c 1D040000 		.4byte	.LLST27
+ 2083 07a0 10       		.uleb128 0x10
+ 2084 07a1 06000000 		.4byte	.LVL111
+ 2085 07a5 7F090000 		.4byte	0x97f
+ 2086 07a9 17       		.uleb128 0x17
+ 2087 07aa 0C000000 		.4byte	.LVL112
+ 2088 07ae D7090000 		.4byte	0x9d7
+ 2089 07b2 BC070000 		.4byte	0x7bc
+ 2090 07b6 15       		.uleb128 0x15
+ 2091 07b7 01       		.uleb128 0x1
+ 2092 07b8 50       		.byte	0x50
+ 2093 07b9 01       		.uleb128 0x1
+ 2094 07ba 31       		.byte	0x31
+ 2095 07bb 00       		.byte	0
+ 2096 07bc 17       		.uleb128 0x17
+ 2097 07bd 12000000 		.4byte	.LVL113
+ 2098 07c1 74090000 		.4byte	0x974
+ 2099 07c5 CF070000 		.4byte	0x7cf
+ 2100 07c9 15       		.uleb128 0x15
+ 2101 07ca 01       		.uleb128 0x1
+ 2102 07cb 50       		.byte	0x50
+ 2103 07cc 01       		.uleb128 0x1
+ 2104 07cd 35       		.byte	0x35
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 46
+
+
+ 2105 07ce 00       		.byte	0
+ 2106 07cf 1E       		.uleb128 0x1e
+ 2107 07d0 26000000 		.4byte	.LVL115
+ 2108 07d4 10       		.uleb128 0x10
+ 2109 07d5 74       		.byte	0x74
+ 2110 07d6 00       		.sleb128 0
+ 2111 07d7 33       		.byte	0x33
+ 2112 07d8 24       		.byte	0x24
+ 2113 07d9 74       		.byte	0x74
+ 2114 07da 00       		.sleb128 0
+ 2115 07db 1C       		.byte	0x1c
+ 2116 07dc 32       		.byte	0x32
+ 2117 07dd 24       		.byte	0x24
+ 2118 07de 03       		.byte	0x3
+ 2119 07df 18000000 		.4byte	.LANCHOR0+24
+ 2120 07e3 22       		.byte	0x22
+ 2121 07e4 06       		.byte	0x6
+ 2122 07e5 F0070000 		.4byte	0x7f0
+ 2123 07e9 15       		.uleb128 0x15
+ 2124 07ea 01       		.uleb128 0x1
+ 2125 07eb 50       		.byte	0x50
+ 2126 07ec 02       		.uleb128 0x2
+ 2127 07ed 09       		.byte	0x9
+ 2128 07ee 9C       		.byte	0x9c
+ 2129 07ef 00       		.byte	0
+ 2130 07f0 10       		.uleb128 0x10
+ 2131 07f1 4E000000 		.4byte	.LVL118
+ 2132 07f5 11070000 		.4byte	0x711
+ 2133 07f9 00       		.byte	0
+ 2134 07fa 1F       		.uleb128 0x1f
+ 2135 07fb EC000000 		.4byte	.LASF95
+ 2136 07ff 01       		.byte	0x1
+ 2137 0800 1C01     		.2byte	0x11c
+ 2138 0802 81000000 		.4byte	0x81
+ 2139 0806 00000000 		.4byte	.LFB74
+ 2140 080a 70000000 		.4byte	.LFE74-.LFB74
+ 2141 080e 01       		.uleb128 0x1
+ 2142 080f 9C       		.byte	0x9c
+ 2143 0810 D4080000 		.4byte	0x8d4
+ 2144 0814 1D       		.uleb128 0x1d
+ 2145 0815 6900     		.ascii	"i\000"
+ 2146 0817 01       		.byte	0x1
+ 2147 0818 1E01     		.2byte	0x11e
+ 2148 081a 81000000 		.4byte	0x81
+ 2149 081e 47040000 		.4byte	.LLST28
+ 2150 0822 1D       		.uleb128 0x1d
+ 2151 0823 6F6B00   		.ascii	"ok\000"
+ 2152 0826 01       		.byte	0x1
+ 2153 0827 1F01     		.2byte	0x11f
+ 2154 0829 81000000 		.4byte	0x81
+ 2155 082d 71040000 		.4byte	.LLST29
+ 2156 0831 10       		.uleb128 0x10
+ 2157 0832 06000000 		.4byte	.LVL121
+ 2158 0836 190A0000 		.4byte	0xa19
+ 2159 083a 10       		.uleb128 0x10
+ 2160 083b 0A000000 		.4byte	.LVL122
+ 2161 083f 7F090000 		.4byte	0x97f
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 47
+
+
+ 2162 0843 10       		.uleb128 0x10
+ 2163 0844 0E000000 		.4byte	.LVL123
+ 2164 0848 240A0000 		.4byte	0xa24
+ 2165 084c 10       		.uleb128 0x10
+ 2166 084d 12000000 		.4byte	.LVL124
+ 2167 0851 7F090000 		.4byte	0x97f
+ 2168 0855 17       		.uleb128 0x17
+ 2169 0856 18000000 		.4byte	.LVL125
+ 2170 085a D7090000 		.4byte	0x9d7
+ 2171 085e 68080000 		.4byte	0x868
+ 2172 0862 15       		.uleb128 0x15
+ 2173 0863 01       		.uleb128 0x1
+ 2174 0864 50       		.byte	0x50
+ 2175 0865 01       		.uleb128 0x1
+ 2176 0866 31       		.byte	0x31
+ 2177 0867 00       		.byte	0
+ 2178 0868 17       		.uleb128 0x17
+ 2179 0869 1E000000 		.4byte	.LVL126
+ 2180 086d 74090000 		.4byte	0x974
+ 2181 0871 7B080000 		.4byte	0x87b
+ 2182 0875 15       		.uleb128 0x15
+ 2183 0876 01       		.uleb128 0x1
+ 2184 0877 50       		.byte	0x50
+ 2185 0878 01       		.uleb128 0x1
+ 2186 0879 35       		.byte	0x35
+ 2187 087a 00       		.byte	0
+ 2188 087b 17       		.uleb128 0x17
+ 2189 087c 42000000 		.4byte	.LVL129
+ 2190 0880 AE030000 		.4byte	0x3ae
+ 2191 0884 AF080000 		.4byte	0x8af
+ 2192 0888 15       		.uleb128 0x15
+ 2193 0889 01       		.uleb128 0x1
+ 2194 088a 50       		.byte	0x50
+ 2195 088b 0F       		.uleb128 0xf
+ 2196 088c 74       		.byte	0x74
+ 2197 088d 00       		.sleb128 0
+ 2198 088e 33       		.byte	0x33
+ 2199 088f 24       		.byte	0x24
+ 2200 0890 74       		.byte	0x74
+ 2201 0891 00       		.sleb128 0
+ 2202 0892 1C       		.byte	0x1c
+ 2203 0893 32       		.byte	0x32
+ 2204 0894 24       		.byte	0x24
+ 2205 0895 03       		.byte	0x3
+ 2206 0896 00000000 		.4byte	.LANCHOR0
+ 2207 089a 22       		.byte	0x22
+ 2208 089b 15       		.uleb128 0x15
+ 2209 089c 01       		.uleb128 0x1
+ 2210 089d 51       		.byte	0x51
+ 2211 089e 0F       		.uleb128 0xf
+ 2212 089f 74       		.byte	0x74
+ 2213 08a0 00       		.sleb128 0
+ 2214 08a1 31       		.byte	0x31
+ 2215 08a2 24       		.byte	0x24
+ 2216 08a3 74       		.byte	0x74
+ 2217 08a4 00       		.sleb128 0
+ 2218 08a5 22       		.byte	0x22
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 48
+
+
+ 2219 08a6 32       		.byte	0x32
+ 2220 08a7 24       		.byte	0x24
+ 2221 08a8 03       		.byte	0x3
+ 2222 08a9 00000000 		.4byte	g_psoc_cal_results
+ 2223 08ad 22       		.byte	0x22
+ 2224 08ae 00       		.byte	0
+ 2225 08af 10       		.uleb128 0x10
+ 2226 08b0 52000000 		.4byte	.LVL133
+ 2227 08b4 7F090000 		.4byte	0x97f
+ 2228 08b8 10       		.uleb128 0x10
+ 2229 08b9 56000000 		.4byte	.LVL134
+ 2230 08bd 11070000 		.4byte	0x711
+ 2231 08c1 10       		.uleb128 0x10
+ 2232 08c2 5A000000 		.4byte	.LVL135
+ 2233 08c6 2F0A0000 		.4byte	0xa2f
+ 2234 08ca 10       		.uleb128 0x10
+ 2235 08cb 5E000000 		.4byte	.LVL136
+ 2236 08cf 3A0A0000 		.4byte	0xa3a
+ 2237 08d3 00       		.byte	0
+ 2238 08d4 20       		.uleb128 0x20
+ 2239 08d5 3C060000 		.4byte	0x63c
+ 2240 08d9 E4080000 		.4byte	0x8e4
+ 2241 08dd 21       		.uleb128 0x21
+ 2242 08de D9000000 		.4byte	0xd9
+ 2243 08e2 03       		.byte	0x3
+ 2244 08e3 00       		.byte	0
+ 2245 08e4 13       		.uleb128 0x13
+ 2246 08e5 34040000 		.4byte	.LASF64
+ 2247 08e9 02       		.byte	0x2
+ 2248 08ea 6E       		.byte	0x6e
+ 2249 08eb F5080000 		.4byte	0x8f5
+ 2250 08ef 05       		.uleb128 0x5
+ 2251 08f0 03       		.byte	0x3
+ 2252 08f1 00000000 		.4byte	g_psoc_cal_stages
+ 2253 08f5 07       		.uleb128 0x7
+ 2254 08f6 D4080000 		.4byte	0x8d4
+ 2255 08fa 22       		.uleb128 0x22
+ 2256 08fb 27040000 		.4byte	.LASF65
+ 2257 08ff 07       		.byte	0x7
+ 2258 0900 1207     		.2byte	0x712
+ 2259 0902 06090000 		.4byte	0x906
+ 2260 0906 23       		.uleb128 0x23
+ 2261 0907 76000000 		.4byte	0x76
+ 2262 090b 20       		.uleb128 0x20
+ 2263 090c A7010000 		.4byte	0x1a7
+ 2264 0910 1B090000 		.4byte	0x91b
+ 2265 0914 21       		.uleb128 0x21
+ 2266 0915 D9000000 		.4byte	0xd9
+ 2267 0919 03       		.byte	0x3
+ 2268 091a 00       		.byte	0
+ 2269 091b 24       		.uleb128 0x24
+ 2270 091c B7040000 		.4byte	.LASF66
+ 2271 0920 01       		.byte	0x1
+ 2272 0921 E1       		.byte	0xe1
+ 2273 0922 0B090000 		.4byte	0x90b
+ 2274 0926 05       		.uleb128 0x5
+ 2275 0927 03       		.byte	0x3
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 49
+
+
+ 2276 0928 00000000 		.4byte	g_psoc_cal_results
+ 2277 092c 24       		.uleb128 0x24
+ 2278 092d 85000000 		.4byte	.LASF67
+ 2279 0931 01       		.byte	0x1
+ 2280 0932 E2       		.byte	0xe2
+ 2281 0933 81000000 		.4byte	0x81
+ 2282 0937 05       		.uleb128 0x5
+ 2283 0938 03       		.byte	0x3
+ 2284 0939 00000000 		.4byte	g_psoc_cal_result_count
+ 2285 093d 25       		.uleb128 0x25
+ 2286 093e 07030000 		.4byte	.LASF68
+ 2287 0942 07030000 		.4byte	.LASF68
+ 2288 0946 08       		.byte	0x8
+ 2289 0947 37       		.byte	0x37
+ 2290 0948 25       		.uleb128 0x25
+ 2291 0949 8A050000 		.4byte	.LASF69
+ 2292 094d 8A050000 		.4byte	.LASF69
+ 2293 0951 09       		.byte	0x9
+ 2294 0952 37       		.byte	0x37
+ 2295 0953 25       		.uleb128 0x25
+ 2296 0954 80010000 		.4byte	.LASF70
+ 2297 0958 80010000 		.4byte	.LASF70
+ 2298 095c 0A       		.byte	0xa
+ 2299 095d 37       		.byte	0x37
+ 2300 095e 25       		.uleb128 0x25
+ 2301 095f F8030000 		.4byte	.LASF71
+ 2302 0963 F8030000 		.4byte	.LASF71
+ 2303 0967 0B       		.byte	0xb
+ 2304 0968 37       		.byte	0x37
+ 2305 0969 25       		.uleb128 0x25
+ 2306 096a 64020000 		.4byte	.LASF72
+ 2307 096e 64020000 		.4byte	.LASF72
+ 2308 0972 0C       		.byte	0xc
+ 2309 0973 0C       		.byte	0xc
+ 2310 0974 25       		.uleb128 0x25
+ 2311 0975 82050000 		.4byte	.LASF73
+ 2312 0979 82050000 		.4byte	.LASF73
+ 2313 097d 0D       		.byte	0xd
+ 2314 097e 76       		.byte	0x76
+ 2315 097f 25       		.uleb128 0x25
+ 2316 0980 F5010000 		.4byte	.LASF74
+ 2317 0984 F5010000 		.4byte	.LASF74
+ 2318 0988 0E       		.byte	0xe
+ 2319 0989 3B       		.byte	0x3b
+ 2320 098a 25       		.uleb128 0x25
+ 2321 098b E4030000 		.4byte	.LASF75
+ 2322 098f E4030000 		.4byte	.LASF75
+ 2323 0993 0F       		.byte	0xf
+ 2324 0994 27       		.byte	0x27
+ 2325 0995 25       		.uleb128 0x25
+ 2326 0996 95010000 		.4byte	.LASF76
+ 2327 099a 95010000 		.4byte	.LASF76
+ 2328 099e 0E       		.byte	0xe
+ 2329 099f 3A       		.byte	0x3a
+ 2330 09a0 25       		.uleb128 0x25
+ 2331 09a1 B1000000 		.4byte	.LASF77
+ 2332 09a5 B1000000 		.4byte	.LASF77
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 50
+
+
+ 2333 09a9 0C       		.byte	0xc
+ 2334 09aa 09       		.byte	0x9
+ 2335 09ab 25       		.uleb128 0x25
+ 2336 09ac 92030000 		.4byte	.LASF78
+ 2337 09b0 92030000 		.4byte	.LASF78
+ 2338 09b4 10       		.byte	0x10
+ 2339 09b5 28       		.byte	0x28
+ 2340 09b6 25       		.uleb128 0x25
+ 2341 09b7 12010000 		.4byte	.LASF79
+ 2342 09bb 12010000 		.4byte	.LASF79
+ 2343 09bf 0E       		.byte	0xe
+ 2344 09c0 3D       		.byte	0x3d
+ 2345 09c1 25       		.uleb128 0x25
+ 2346 09c2 61040000 		.4byte	.LASF80
+ 2347 09c6 61040000 		.4byte	.LASF80
+ 2348 09ca 0F       		.byte	0xf
+ 2349 09cb 25       		.byte	0x25
+ 2350 09cc 25       		.uleb128 0x25
+ 2351 09cd 96020000 		.4byte	.LASF81
+ 2352 09d1 96020000 		.4byte	.LASF81
+ 2353 09d5 11       		.byte	0x11
+ 2354 09d6 25       		.byte	0x25
+ 2355 09d7 25       		.uleb128 0x25
+ 2356 09d8 68000000 		.4byte	.LASF82
+ 2357 09dc 68000000 		.4byte	.LASF82
+ 2358 09e0 11       		.byte	0x11
+ 2359 09e1 27       		.byte	0x27
+ 2360 09e2 25       		.uleb128 0x25
+ 2361 09e3 ED020000 		.4byte	.LASF83
+ 2362 09e7 ED020000 		.4byte	.LASF83
+ 2363 09eb 0E       		.byte	0xe
+ 2364 09ec 3E       		.byte	0x3e
+ 2365 09ed 25       		.uleb128 0x25
+ 2366 09ee AB050000 		.4byte	.LASF84
+ 2367 09f2 AB050000 		.4byte	.LASF84
+ 2368 09f6 0B       		.byte	0xb
+ 2369 09f7 33       		.byte	0x33
+ 2370 09f8 25       		.uleb128 0x25
+ 2371 09f9 3E020000 		.4byte	.LASF85
+ 2372 09fd 3E020000 		.4byte	.LASF85
+ 2373 0a01 0A       		.byte	0xa
+ 2374 0a02 33       		.byte	0x33
+ 2375 0a03 25       		.uleb128 0x25
+ 2376 0a04 BE050000 		.4byte	.LASF86
+ 2377 0a08 BE050000 		.4byte	.LASF86
+ 2378 0a0c 09       		.byte	0x9
+ 2379 0a0d 33       		.byte	0x33
+ 2380 0a0e 25       		.uleb128 0x25
+ 2381 0a0f D4010000 		.4byte	.LASF87
+ 2382 0a13 D4010000 		.4byte	.LASF87
+ 2383 0a17 08       		.byte	0x8
+ 2384 0a18 33       		.byte	0x33
+ 2385 0a19 25       		.uleb128 0x25
+ 2386 0a1a E1040000 		.4byte	.LASF88
+ 2387 0a1e E1040000 		.4byte	.LASF88
+ 2388 0a22 12       		.byte	0x12
+ 2389 0a23 25       		.byte	0x25
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 51
+
+
+ 2390 0a24 25       		.uleb128 0x25
+ 2391 0a25 22030000 		.4byte	.LASF89
+ 2392 0a29 22030000 		.4byte	.LASF89
+ 2393 0a2d 0C       		.byte	0xc
+ 2394 0a2e 08       		.byte	0x8
+ 2395 0a2f 25       		.uleb128 0x25
+ 2396 0a30 AA030000 		.4byte	.LASF90
+ 2397 0a34 AA030000 		.4byte	.LASF90
+ 2398 0a38 12       		.byte	0x12
+ 2399 0a39 28       		.byte	0x28
+ 2400 0a3a 25       		.uleb128 0x25
+ 2401 0a3b 8D040000 		.4byte	.LASF91
+ 2402 0a3f 8D040000 		.4byte	.LASF91
+ 2403 0a43 12       		.byte	0x12
+ 2404 0a44 23       		.byte	0x23
+ 2405 0a45 00       		.byte	0
+ 2406              		.section	.debug_abbrev,"",%progbits
+ 2407              	.Ldebug_abbrev0:
+ 2408 0000 01       		.uleb128 0x1
+ 2409 0001 11       		.uleb128 0x11
+ 2410 0002 01       		.byte	0x1
+ 2411 0003 25       		.uleb128 0x25
+ 2412 0004 0E       		.uleb128 0xe
+ 2413 0005 13       		.uleb128 0x13
+ 2414 0006 0B       		.uleb128 0xb
+ 2415 0007 03       		.uleb128 0x3
+ 2416 0008 0E       		.uleb128 0xe
+ 2417 0009 1B       		.uleb128 0x1b
+ 2418 000a 0E       		.uleb128 0xe
+ 2419 000b 55       		.uleb128 0x55
+ 2420 000c 17       		.uleb128 0x17
+ 2421 000d 11       		.uleb128 0x11
+ 2422 000e 01       		.uleb128 0x1
+ 2423 000f 10       		.uleb128 0x10
+ 2424 0010 17       		.uleb128 0x17
+ 2425 0011 00       		.byte	0
+ 2426 0012 00       		.byte	0
+ 2427 0013 02       		.uleb128 0x2
+ 2428 0014 24       		.uleb128 0x24
+ 2429 0015 00       		.byte	0
+ 2430 0016 0B       		.uleb128 0xb
+ 2431 0017 0B       		.uleb128 0xb
+ 2432 0018 3E       		.uleb128 0x3e
+ 2433 0019 0B       		.uleb128 0xb
+ 2434 001a 03       		.uleb128 0x3
+ 2435 001b 0E       		.uleb128 0xe
+ 2436 001c 00       		.byte	0
+ 2437 001d 00       		.byte	0
+ 2438 001e 03       		.uleb128 0x3
+ 2439 001f 16       		.uleb128 0x16
+ 2440 0020 00       		.byte	0
+ 2441 0021 03       		.uleb128 0x3
+ 2442 0022 0E       		.uleb128 0xe
+ 2443 0023 3A       		.uleb128 0x3a
+ 2444 0024 0B       		.uleb128 0xb
+ 2445 0025 3B       		.uleb128 0x3b
+ 2446 0026 0B       		.uleb128 0xb
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 52
+
+
+ 2447 0027 49       		.uleb128 0x49
+ 2448 0028 13       		.uleb128 0x13
+ 2449 0029 00       		.byte	0
+ 2450 002a 00       		.byte	0
+ 2451 002b 04       		.uleb128 0x4
+ 2452 002c 24       		.uleb128 0x24
+ 2453 002d 00       		.byte	0
+ 2454 002e 0B       		.uleb128 0xb
+ 2455 002f 0B       		.uleb128 0xb
+ 2456 0030 3E       		.uleb128 0x3e
+ 2457 0031 0B       		.uleb128 0xb
+ 2458 0032 03       		.uleb128 0x3
+ 2459 0033 08       		.uleb128 0x8
+ 2460 0034 00       		.byte	0
+ 2461 0035 00       		.byte	0
+ 2462 0036 05       		.uleb128 0x5
+ 2463 0037 16       		.uleb128 0x16
+ 2464 0038 00       		.byte	0
+ 2465 0039 03       		.uleb128 0x3
+ 2466 003a 0E       		.uleb128 0xe
+ 2467 003b 3A       		.uleb128 0x3a
+ 2468 003c 0B       		.uleb128 0xb
+ 2469 003d 3B       		.uleb128 0x3b
+ 2470 003e 05       		.uleb128 0x5
+ 2471 003f 49       		.uleb128 0x49
+ 2472 0040 13       		.uleb128 0x13
+ 2473 0041 00       		.byte	0
+ 2474 0042 00       		.byte	0
+ 2475 0043 06       		.uleb128 0x6
+ 2476 0044 0F       		.uleb128 0xf
+ 2477 0045 00       		.byte	0
+ 2478 0046 0B       		.uleb128 0xb
+ 2479 0047 0B       		.uleb128 0xb
+ 2480 0048 49       		.uleb128 0x49
+ 2481 0049 13       		.uleb128 0x13
+ 2482 004a 00       		.byte	0
+ 2483 004b 00       		.byte	0
+ 2484 004c 07       		.uleb128 0x7
+ 2485 004d 26       		.uleb128 0x26
+ 2486 004e 00       		.byte	0
+ 2487 004f 49       		.uleb128 0x49
+ 2488 0050 13       		.uleb128 0x13
+ 2489 0051 00       		.byte	0
+ 2490 0052 00       		.byte	0
+ 2491 0053 08       		.uleb128 0x8
+ 2492 0054 15       		.uleb128 0x15
+ 2493 0055 01       		.byte	0x1
+ 2494 0056 27       		.uleb128 0x27
+ 2495 0057 19       		.uleb128 0x19
+ 2496 0058 01       		.uleb128 0x1
+ 2497 0059 13       		.uleb128 0x13
+ 2498 005a 00       		.byte	0
+ 2499 005b 00       		.byte	0
+ 2500 005c 09       		.uleb128 0x9
+ 2501 005d 05       		.uleb128 0x5
+ 2502 005e 00       		.byte	0
+ 2503 005f 49       		.uleb128 0x49
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 53
+
+
+ 2504 0060 13       		.uleb128 0x13
+ 2505 0061 00       		.byte	0
+ 2506 0062 00       		.byte	0
+ 2507 0063 0A       		.uleb128 0xa
+ 2508 0064 13       		.uleb128 0x13
+ 2509 0065 01       		.byte	0x1
+ 2510 0066 0B       		.uleb128 0xb
+ 2511 0067 0B       		.uleb128 0xb
+ 2512 0068 3A       		.uleb128 0x3a
+ 2513 0069 0B       		.uleb128 0xb
+ 2514 006a 3B       		.uleb128 0x3b
+ 2515 006b 0B       		.uleb128 0xb
+ 2516 006c 01       		.uleb128 0x1
+ 2517 006d 13       		.uleb128 0x13
+ 2518 006e 00       		.byte	0
+ 2519 006f 00       		.byte	0
+ 2520 0070 0B       		.uleb128 0xb
+ 2521 0071 0D       		.uleb128 0xd
+ 2522 0072 00       		.byte	0
+ 2523 0073 03       		.uleb128 0x3
+ 2524 0074 0E       		.uleb128 0xe
+ 2525 0075 3A       		.uleb128 0x3a
+ 2526 0076 0B       		.uleb128 0xb
+ 2527 0077 3B       		.uleb128 0x3b
+ 2528 0078 0B       		.uleb128 0xb
+ 2529 0079 49       		.uleb128 0x49
+ 2530 007a 13       		.uleb128 0x13
+ 2531 007b 38       		.uleb128 0x38
+ 2532 007c 0B       		.uleb128 0xb
+ 2533 007d 00       		.byte	0
+ 2534 007e 00       		.byte	0
+ 2535 007f 0C       		.uleb128 0xc
+ 2536 0080 0D       		.uleb128 0xd
+ 2537 0081 00       		.byte	0
+ 2538 0082 03       		.uleb128 0x3
+ 2539 0083 08       		.uleb128 0x8
+ 2540 0084 3A       		.uleb128 0x3a
+ 2541 0085 0B       		.uleb128 0xb
+ 2542 0086 3B       		.uleb128 0x3b
+ 2543 0087 0B       		.uleb128 0xb
+ 2544 0088 49       		.uleb128 0x49
+ 2545 0089 13       		.uleb128 0x13
+ 2546 008a 38       		.uleb128 0x38
+ 2547 008b 0B       		.uleb128 0xb
+ 2548 008c 00       		.byte	0
+ 2549 008d 00       		.byte	0
+ 2550 008e 0D       		.uleb128 0xd
+ 2551 008f 2E       		.uleb128 0x2e
+ 2552 0090 01       		.byte	0x1
+ 2553 0091 03       		.uleb128 0x3
+ 2554 0092 0E       		.uleb128 0xe
+ 2555 0093 3A       		.uleb128 0x3a
+ 2556 0094 0B       		.uleb128 0xb
+ 2557 0095 3B       		.uleb128 0x3b
+ 2558 0096 0B       		.uleb128 0xb
+ 2559 0097 27       		.uleb128 0x27
+ 2560 0098 19       		.uleb128 0x19
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 54
+
+
+ 2561 0099 49       		.uleb128 0x49
+ 2562 009a 13       		.uleb128 0x13
+ 2563 009b 11       		.uleb128 0x11
+ 2564 009c 01       		.uleb128 0x1
+ 2565 009d 12       		.uleb128 0x12
+ 2566 009e 06       		.uleb128 0x6
+ 2567 009f 40       		.uleb128 0x40
+ 2568 00a0 18       		.uleb128 0x18
+ 2569 00a1 9742     		.uleb128 0x2117
+ 2570 00a3 19       		.uleb128 0x19
+ 2571 00a4 01       		.uleb128 0x1
+ 2572 00a5 13       		.uleb128 0x13
+ 2573 00a6 00       		.byte	0
+ 2574 00a7 00       		.byte	0
+ 2575 00a8 0E       		.uleb128 0xe
+ 2576 00a9 05       		.uleb128 0x5
+ 2577 00aa 00       		.byte	0
+ 2578 00ab 03       		.uleb128 0x3
+ 2579 00ac 0E       		.uleb128 0xe
+ 2580 00ad 3A       		.uleb128 0x3a
+ 2581 00ae 0B       		.uleb128 0xb
+ 2582 00af 3B       		.uleb128 0x3b
+ 2583 00b0 0B       		.uleb128 0xb
+ 2584 00b1 49       		.uleb128 0x49
+ 2585 00b2 13       		.uleb128 0x13
+ 2586 00b3 02       		.uleb128 0x2
+ 2587 00b4 17       		.uleb128 0x17
+ 2588 00b5 00       		.byte	0
+ 2589 00b6 00       		.byte	0
+ 2590 00b7 0F       		.uleb128 0xf
+ 2591 00b8 2E       		.uleb128 0x2e
+ 2592 00b9 01       		.byte	0x1
+ 2593 00ba 03       		.uleb128 0x3
+ 2594 00bb 0E       		.uleb128 0xe
+ 2595 00bc 3A       		.uleb128 0x3a
+ 2596 00bd 0B       		.uleb128 0xb
+ 2597 00be 3B       		.uleb128 0x3b
+ 2598 00bf 0B       		.uleb128 0xb
+ 2599 00c0 27       		.uleb128 0x27
+ 2600 00c1 19       		.uleb128 0x19
+ 2601 00c2 11       		.uleb128 0x11
+ 2602 00c3 01       		.uleb128 0x1
+ 2603 00c4 12       		.uleb128 0x12
+ 2604 00c5 06       		.uleb128 0x6
+ 2605 00c6 40       		.uleb128 0x40
+ 2606 00c7 18       		.uleb128 0x18
+ 2607 00c8 9742     		.uleb128 0x2117
+ 2608 00ca 19       		.uleb128 0x19
+ 2609 00cb 01       		.uleb128 0x1
+ 2610 00cc 13       		.uleb128 0x13
+ 2611 00cd 00       		.byte	0
+ 2612 00ce 00       		.byte	0
+ 2613 00cf 10       		.uleb128 0x10
+ 2614 00d0 898201   		.uleb128 0x4109
+ 2615 00d3 00       		.byte	0
+ 2616 00d4 11       		.uleb128 0x11
+ 2617 00d5 01       		.uleb128 0x1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 55
+
+
+ 2618 00d6 31       		.uleb128 0x31
+ 2619 00d7 13       		.uleb128 0x13
+ 2620 00d8 00       		.byte	0
+ 2621 00d9 00       		.byte	0
+ 2622 00da 11       		.uleb128 0x11
+ 2623 00db 05       		.uleb128 0x5
+ 2624 00dc 00       		.byte	0
+ 2625 00dd 03       		.uleb128 0x3
+ 2626 00de 08       		.uleb128 0x8
+ 2627 00df 3A       		.uleb128 0x3a
+ 2628 00e0 0B       		.uleb128 0xb
+ 2629 00e1 3B       		.uleb128 0x3b
+ 2630 00e2 0B       		.uleb128 0xb
+ 2631 00e3 49       		.uleb128 0x49
+ 2632 00e4 13       		.uleb128 0x13
+ 2633 00e5 02       		.uleb128 0x2
+ 2634 00e6 17       		.uleb128 0x17
+ 2635 00e7 00       		.byte	0
+ 2636 00e8 00       		.byte	0
+ 2637 00e9 12       		.uleb128 0x12
+ 2638 00ea 34       		.uleb128 0x34
+ 2639 00eb 00       		.byte	0
+ 2640 00ec 03       		.uleb128 0x3
+ 2641 00ed 08       		.uleb128 0x8
+ 2642 00ee 3A       		.uleb128 0x3a
+ 2643 00ef 0B       		.uleb128 0xb
+ 2644 00f0 3B       		.uleb128 0x3b
+ 2645 00f1 0B       		.uleb128 0xb
+ 2646 00f2 49       		.uleb128 0x49
+ 2647 00f3 13       		.uleb128 0x13
+ 2648 00f4 02       		.uleb128 0x2
+ 2649 00f5 17       		.uleb128 0x17
+ 2650 00f6 00       		.byte	0
+ 2651 00f7 00       		.byte	0
+ 2652 00f8 13       		.uleb128 0x13
+ 2653 00f9 34       		.uleb128 0x34
+ 2654 00fa 00       		.byte	0
+ 2655 00fb 03       		.uleb128 0x3
+ 2656 00fc 0E       		.uleb128 0xe
+ 2657 00fd 3A       		.uleb128 0x3a
+ 2658 00fe 0B       		.uleb128 0xb
+ 2659 00ff 3B       		.uleb128 0x3b
+ 2660 0100 0B       		.uleb128 0xb
+ 2661 0101 49       		.uleb128 0x49
+ 2662 0102 13       		.uleb128 0x13
+ 2663 0103 02       		.uleb128 0x2
+ 2664 0104 18       		.uleb128 0x18
+ 2665 0105 00       		.byte	0
+ 2666 0106 00       		.byte	0
+ 2667 0107 14       		.uleb128 0x14
+ 2668 0108 898201   		.uleb128 0x4109
+ 2669 010b 01       		.byte	0x1
+ 2670 010c 11       		.uleb128 0x11
+ 2671 010d 01       		.uleb128 0x1
+ 2672 010e 31       		.uleb128 0x31
+ 2673 010f 13       		.uleb128 0x13
+ 2674 0110 00       		.byte	0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 56
+
+
+ 2675 0111 00       		.byte	0
+ 2676 0112 15       		.uleb128 0x15
+ 2677 0113 8A8201   		.uleb128 0x410a
+ 2678 0116 00       		.byte	0
+ 2679 0117 02       		.uleb128 0x2
+ 2680 0118 18       		.uleb128 0x18
+ 2681 0119 9142     		.uleb128 0x2111
+ 2682 011b 18       		.uleb128 0x18
+ 2683 011c 00       		.byte	0
+ 2684 011d 00       		.byte	0
+ 2685 011e 16       		.uleb128 0x16
+ 2686 011f 34       		.uleb128 0x34
+ 2687 0120 00       		.byte	0
+ 2688 0121 03       		.uleb128 0x3
+ 2689 0122 0E       		.uleb128 0xe
+ 2690 0123 3A       		.uleb128 0x3a
+ 2691 0124 0B       		.uleb128 0xb
+ 2692 0125 3B       		.uleb128 0x3b
+ 2693 0126 0B       		.uleb128 0xb
+ 2694 0127 49       		.uleb128 0x49
+ 2695 0128 13       		.uleb128 0x13
+ 2696 0129 02       		.uleb128 0x2
+ 2697 012a 17       		.uleb128 0x17
+ 2698 012b 00       		.byte	0
+ 2699 012c 00       		.byte	0
+ 2700 012d 17       		.uleb128 0x17
+ 2701 012e 898201   		.uleb128 0x4109
+ 2702 0131 01       		.byte	0x1
+ 2703 0132 11       		.uleb128 0x11
+ 2704 0133 01       		.uleb128 0x1
+ 2705 0134 31       		.uleb128 0x31
+ 2706 0135 13       		.uleb128 0x13
+ 2707 0136 01       		.uleb128 0x1
+ 2708 0137 13       		.uleb128 0x13
+ 2709 0138 00       		.byte	0
+ 2710 0139 00       		.byte	0
+ 2711 013a 18       		.uleb128 0x18
+ 2712 013b 0B       		.uleb128 0xb
+ 2713 013c 01       		.byte	0x1
+ 2714 013d 55       		.uleb128 0x55
+ 2715 013e 17       		.uleb128 0x17
+ 2716 013f 01       		.uleb128 0x1
+ 2717 0140 13       		.uleb128 0x13
+ 2718 0141 00       		.byte	0
+ 2719 0142 00       		.byte	0
+ 2720 0143 19       		.uleb128 0x19
+ 2721 0144 898201   		.uleb128 0x4109
+ 2722 0147 01       		.byte	0x1
+ 2723 0148 11       		.uleb128 0x11
+ 2724 0149 01       		.uleb128 0x1
+ 2725 014a 01       		.uleb128 0x1
+ 2726 014b 13       		.uleb128 0x13
+ 2727 014c 00       		.byte	0
+ 2728 014d 00       		.byte	0
+ 2729 014e 1A       		.uleb128 0x1a
+ 2730 014f 2E       		.uleb128 0x2e
+ 2731 0150 01       		.byte	0x1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 57
+
+
+ 2732 0151 3F       		.uleb128 0x3f
+ 2733 0152 19       		.uleb128 0x19
+ 2734 0153 03       		.uleb128 0x3
+ 2735 0154 0E       		.uleb128 0xe
+ 2736 0155 3A       		.uleb128 0x3a
+ 2737 0156 0B       		.uleb128 0xb
+ 2738 0157 3B       		.uleb128 0x3b
+ 2739 0158 0B       		.uleb128 0xb
+ 2740 0159 27       		.uleb128 0x27
+ 2741 015a 19       		.uleb128 0x19
+ 2742 015b 11       		.uleb128 0x11
+ 2743 015c 01       		.uleb128 0x1
+ 2744 015d 12       		.uleb128 0x12
+ 2745 015e 06       		.uleb128 0x6
+ 2746 015f 40       		.uleb128 0x40
+ 2747 0160 18       		.uleb128 0x18
+ 2748 0161 9742     		.uleb128 0x2117
+ 2749 0163 19       		.uleb128 0x19
+ 2750 0164 01       		.uleb128 0x1
+ 2751 0165 13       		.uleb128 0x13
+ 2752 0166 00       		.byte	0
+ 2753 0167 00       		.byte	0
+ 2754 0168 1B       		.uleb128 0x1b
+ 2755 0169 898201   		.uleb128 0x4109
+ 2756 016c 01       		.byte	0x1
+ 2757 016d 11       		.uleb128 0x11
+ 2758 016e 01       		.uleb128 0x1
+ 2759 016f 9342     		.uleb128 0x2113
+ 2760 0171 18       		.uleb128 0x18
+ 2761 0172 00       		.byte	0
+ 2762 0173 00       		.byte	0
+ 2763 0174 1C       		.uleb128 0x1c
+ 2764 0175 2E       		.uleb128 0x2e
+ 2765 0176 01       		.byte	0x1
+ 2766 0177 3F       		.uleb128 0x3f
+ 2767 0178 19       		.uleb128 0x19
+ 2768 0179 03       		.uleb128 0x3
+ 2769 017a 0E       		.uleb128 0xe
+ 2770 017b 3A       		.uleb128 0x3a
+ 2771 017c 0B       		.uleb128 0xb
+ 2772 017d 3B       		.uleb128 0x3b
+ 2773 017e 05       		.uleb128 0x5
+ 2774 017f 27       		.uleb128 0x27
+ 2775 0180 19       		.uleb128 0x19
+ 2776 0181 11       		.uleb128 0x11
+ 2777 0182 01       		.uleb128 0x1
+ 2778 0183 12       		.uleb128 0x12
+ 2779 0184 06       		.uleb128 0x6
+ 2780 0185 40       		.uleb128 0x40
+ 2781 0186 18       		.uleb128 0x18
+ 2782 0187 9742     		.uleb128 0x2117
+ 2783 0189 19       		.uleb128 0x19
+ 2784 018a 01       		.uleb128 0x1
+ 2785 018b 13       		.uleb128 0x13
+ 2786 018c 00       		.byte	0
+ 2787 018d 00       		.byte	0
+ 2788 018e 1D       		.uleb128 0x1d
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 58
+
+
+ 2789 018f 34       		.uleb128 0x34
+ 2790 0190 00       		.byte	0
+ 2791 0191 03       		.uleb128 0x3
+ 2792 0192 08       		.uleb128 0x8
+ 2793 0193 3A       		.uleb128 0x3a
+ 2794 0194 0B       		.uleb128 0xb
+ 2795 0195 3B       		.uleb128 0x3b
+ 2796 0196 05       		.uleb128 0x5
+ 2797 0197 49       		.uleb128 0x49
+ 2798 0198 13       		.uleb128 0x13
+ 2799 0199 02       		.uleb128 0x2
+ 2800 019a 17       		.uleb128 0x17
+ 2801 019b 00       		.byte	0
+ 2802 019c 00       		.byte	0
+ 2803 019d 1E       		.uleb128 0x1e
+ 2804 019e 898201   		.uleb128 0x4109
+ 2805 01a1 01       		.byte	0x1
+ 2806 01a2 11       		.uleb128 0x11
+ 2807 01a3 01       		.uleb128 0x1
+ 2808 01a4 9342     		.uleb128 0x2113
+ 2809 01a6 18       		.uleb128 0x18
+ 2810 01a7 01       		.uleb128 0x1
+ 2811 01a8 13       		.uleb128 0x13
+ 2812 01a9 00       		.byte	0
+ 2813 01aa 00       		.byte	0
+ 2814 01ab 1F       		.uleb128 0x1f
+ 2815 01ac 2E       		.uleb128 0x2e
+ 2816 01ad 01       		.byte	0x1
+ 2817 01ae 3F       		.uleb128 0x3f
+ 2818 01af 19       		.uleb128 0x19
+ 2819 01b0 03       		.uleb128 0x3
+ 2820 01b1 0E       		.uleb128 0xe
+ 2821 01b2 3A       		.uleb128 0x3a
+ 2822 01b3 0B       		.uleb128 0xb
+ 2823 01b4 3B       		.uleb128 0x3b
+ 2824 01b5 05       		.uleb128 0x5
+ 2825 01b6 27       		.uleb128 0x27
+ 2826 01b7 19       		.uleb128 0x19
+ 2827 01b8 49       		.uleb128 0x49
+ 2828 01b9 13       		.uleb128 0x13
+ 2829 01ba 11       		.uleb128 0x11
+ 2830 01bb 01       		.uleb128 0x1
+ 2831 01bc 12       		.uleb128 0x12
+ 2832 01bd 06       		.uleb128 0x6
+ 2833 01be 40       		.uleb128 0x40
+ 2834 01bf 18       		.uleb128 0x18
+ 2835 01c0 9742     		.uleb128 0x2117
+ 2836 01c2 19       		.uleb128 0x19
+ 2837 01c3 01       		.uleb128 0x1
+ 2838 01c4 13       		.uleb128 0x13
+ 2839 01c5 00       		.byte	0
+ 2840 01c6 00       		.byte	0
+ 2841 01c7 20       		.uleb128 0x20
+ 2842 01c8 01       		.uleb128 0x1
+ 2843 01c9 01       		.byte	0x1
+ 2844 01ca 49       		.uleb128 0x49
+ 2845 01cb 13       		.uleb128 0x13
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 59
+
+
+ 2846 01cc 01       		.uleb128 0x1
+ 2847 01cd 13       		.uleb128 0x13
+ 2848 01ce 00       		.byte	0
+ 2849 01cf 00       		.byte	0
+ 2850 01d0 21       		.uleb128 0x21
+ 2851 01d1 21       		.uleb128 0x21
+ 2852 01d2 00       		.byte	0
+ 2853 01d3 49       		.uleb128 0x49
+ 2854 01d4 13       		.uleb128 0x13
+ 2855 01d5 2F       		.uleb128 0x2f
+ 2856 01d6 0B       		.uleb128 0xb
+ 2857 01d7 00       		.byte	0
+ 2858 01d8 00       		.byte	0
+ 2859 01d9 22       		.uleb128 0x22
+ 2860 01da 34       		.uleb128 0x34
+ 2861 01db 00       		.byte	0
+ 2862 01dc 03       		.uleb128 0x3
+ 2863 01dd 0E       		.uleb128 0xe
+ 2864 01de 3A       		.uleb128 0x3a
+ 2865 01df 0B       		.uleb128 0xb
+ 2866 01e0 3B       		.uleb128 0x3b
+ 2867 01e1 05       		.uleb128 0x5
+ 2868 01e2 49       		.uleb128 0x49
+ 2869 01e3 13       		.uleb128 0x13
+ 2870 01e4 3F       		.uleb128 0x3f
+ 2871 01e5 19       		.uleb128 0x19
+ 2872 01e6 3C       		.uleb128 0x3c
+ 2873 01e7 19       		.uleb128 0x19
+ 2874 01e8 00       		.byte	0
+ 2875 01e9 00       		.byte	0
+ 2876 01ea 23       		.uleb128 0x23
+ 2877 01eb 35       		.uleb128 0x35
+ 2878 01ec 00       		.byte	0
+ 2879 01ed 49       		.uleb128 0x49
+ 2880 01ee 13       		.uleb128 0x13
+ 2881 01ef 00       		.byte	0
+ 2882 01f0 00       		.byte	0
+ 2883 01f1 24       		.uleb128 0x24
+ 2884 01f2 34       		.uleb128 0x34
+ 2885 01f3 00       		.byte	0
+ 2886 01f4 03       		.uleb128 0x3
+ 2887 01f5 0E       		.uleb128 0xe
+ 2888 01f6 3A       		.uleb128 0x3a
+ 2889 01f7 0B       		.uleb128 0xb
+ 2890 01f8 3B       		.uleb128 0x3b
+ 2891 01f9 0B       		.uleb128 0xb
+ 2892 01fa 49       		.uleb128 0x49
+ 2893 01fb 13       		.uleb128 0x13
+ 2894 01fc 3F       		.uleb128 0x3f
+ 2895 01fd 19       		.uleb128 0x19
+ 2896 01fe 02       		.uleb128 0x2
+ 2897 01ff 18       		.uleb128 0x18
+ 2898 0200 00       		.byte	0
+ 2899 0201 00       		.byte	0
+ 2900 0202 25       		.uleb128 0x25
+ 2901 0203 2E       		.uleb128 0x2e
+ 2902 0204 00       		.byte	0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 60
+
+
+ 2903 0205 3F       		.uleb128 0x3f
+ 2904 0206 19       		.uleb128 0x19
+ 2905 0207 3C       		.uleb128 0x3c
+ 2906 0208 19       		.uleb128 0x19
+ 2907 0209 6E       		.uleb128 0x6e
+ 2908 020a 0E       		.uleb128 0xe
+ 2909 020b 03       		.uleb128 0x3
+ 2910 020c 0E       		.uleb128 0xe
+ 2911 020d 3A       		.uleb128 0x3a
+ 2912 020e 0B       		.uleb128 0xb
+ 2913 020f 3B       		.uleb128 0x3b
+ 2914 0210 0B       		.uleb128 0xb
+ 2915 0211 00       		.byte	0
+ 2916 0212 00       		.byte	0
+ 2917 0213 00       		.byte	0
+ 2918              		.section	.debug_loc,"",%progbits
+ 2919              	.Ldebug_loc0:
+ 2920              	.LLST0:
+ 2921 0000 00000000 		.4byte	.LVL0
+ 2922 0004 06000000 		.4byte	.LVL1
+ 2923 0008 0100     		.2byte	0x1
+ 2924 000a 50       		.byte	0x50
+ 2925 000b 06000000 		.4byte	.LVL1
+ 2926 000f 08000000 		.4byte	.LFE67
+ 2927 0013 0400     		.2byte	0x4
+ 2928 0015 F3       		.byte	0xf3
+ 2929 0016 01       		.uleb128 0x1
+ 2930 0017 50       		.byte	0x50
+ 2931 0018 9F       		.byte	0x9f
+ 2932 0019 00000000 		.4byte	0
+ 2933 001d 00000000 		.4byte	0
+ 2934              	.LLST1:
+ 2935 0021 00000000 		.4byte	.LVL2
+ 2936 0025 05000000 		.4byte	.LVL3-1
+ 2937 0029 0100     		.2byte	0x1
+ 2938 002b 50       		.byte	0x50
+ 2939 002c 05000000 		.4byte	.LVL3-1
+ 2940 0030 08000000 		.4byte	.LFE66
+ 2941 0034 0400     		.2byte	0x4
+ 2942 0036 F3       		.byte	0xf3
+ 2943 0037 01       		.uleb128 0x1
+ 2944 0038 50       		.byte	0x50
+ 2945 0039 9F       		.byte	0x9f
+ 2946 003a 00000000 		.4byte	0
+ 2947 003e 00000000 		.4byte	0
+ 2948              	.LLST2:
+ 2949 0042 00000000 		.4byte	.LVL4
+ 2950 0046 05000000 		.4byte	.LVL5-1
+ 2951 004a 0100     		.2byte	0x1
+ 2952 004c 50       		.byte	0x50
+ 2953 004d 05000000 		.4byte	.LVL5-1
+ 2954 0051 08000000 		.4byte	.LFE65
+ 2955 0055 0400     		.2byte	0x4
+ 2956 0057 F3       		.byte	0xf3
+ 2957 0058 01       		.uleb128 0x1
+ 2958 0059 50       		.byte	0x50
+ 2959 005a 9F       		.byte	0x9f
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 61
+
+
+ 2960 005b 00000000 		.4byte	0
+ 2961 005f 00000000 		.4byte	0
+ 2962              	.LLST3:
+ 2963 0063 00000000 		.4byte	.LVL6
+ 2964 0067 05000000 		.4byte	.LVL7-1
+ 2965 006b 0100     		.2byte	0x1
+ 2966 006d 50       		.byte	0x50
+ 2967 006e 05000000 		.4byte	.LVL7-1
+ 2968 0072 08000000 		.4byte	.LFE64
+ 2969 0076 0400     		.2byte	0x4
+ 2970 0078 F3       		.byte	0xf3
+ 2971 0079 01       		.uleb128 0x1
+ 2972 007a 50       		.byte	0x50
+ 2973 007b 9F       		.byte	0x9f
+ 2974 007c 00000000 		.4byte	0
+ 2975 0080 00000000 		.4byte	0
+ 2976              	.LLST4:
+ 2977 0084 00000000 		.4byte	.LVL8
+ 2978 0088 05000000 		.4byte	.LVL9-1
+ 2979 008c 0100     		.2byte	0x1
+ 2980 008e 50       		.byte	0x50
+ 2981 008f 05000000 		.4byte	.LVL9-1
+ 2982 0093 08000000 		.4byte	.LFE63
+ 2983 0097 0400     		.2byte	0x4
+ 2984 0099 F3       		.byte	0xf3
+ 2985 009a 01       		.uleb128 0x1
+ 2986 009b 50       		.byte	0x50
+ 2987 009c 9F       		.byte	0x9f
+ 2988 009d 00000000 		.4byte	0
+ 2989 00a1 00000000 		.4byte	0
+ 2990              	.LLST5:
+ 2991 00a5 00000000 		.4byte	.LVL10
+ 2992 00a9 0E000000 		.4byte	.LVL11
+ 2993 00ad 0100     		.2byte	0x1
+ 2994 00af 50       		.byte	0x50
+ 2995 00b0 0E000000 		.4byte	.LVL11
+ 2996 00b4 38000000 		.4byte	.LVL18
+ 2997 00b8 0100     		.2byte	0x1
+ 2998 00ba 56       		.byte	0x56
+ 2999 00bb 38000000 		.4byte	.LVL18
+ 3000 00bf 3C000000 		.4byte	.LVL19
+ 3001 00c3 0100     		.2byte	0x1
+ 3002 00c5 50       		.byte	0x50
+ 3003 00c6 3C000000 		.4byte	.LVL19
+ 3004 00ca 3E000000 		.4byte	.LVL20
+ 3005 00ce 0400     		.2byte	0x4
+ 3006 00d0 F3       		.byte	0xf3
+ 3007 00d1 01       		.uleb128 0x1
+ 3008 00d2 50       		.byte	0x50
+ 3009 00d3 9F       		.byte	0x9f
+ 3010 00d4 3E000000 		.4byte	.LVL20
+ 3011 00d8 44000000 		.4byte	.LFE68
+ 3012 00dc 0100     		.2byte	0x1
+ 3013 00de 56       		.byte	0x56
+ 3014 00df 00000000 		.4byte	0
+ 3015 00e3 00000000 		.4byte	0
+ 3016              	.LLST6:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 62
+
+
+ 3017 00e7 00000000 		.4byte	.LVL10
+ 3018 00eb 14000000 		.4byte	.LVL12
+ 3019 00ef 0100     		.2byte	0x1
+ 3020 00f1 51       		.byte	0x51
+ 3021 00f2 14000000 		.4byte	.LVL12
+ 3022 00f6 38000000 		.4byte	.LVL18
+ 3023 00fa 0100     		.2byte	0x1
+ 3024 00fc 57       		.byte	0x57
+ 3025 00fd 38000000 		.4byte	.LVL18
+ 3026 0101 3E000000 		.4byte	.LVL20
+ 3027 0105 0100     		.2byte	0x1
+ 3028 0107 51       		.byte	0x51
+ 3029 0108 3E000000 		.4byte	.LVL20
+ 3030 010c 44000000 		.4byte	.LFE68
+ 3031 0110 0100     		.2byte	0x1
+ 3032 0112 57       		.byte	0x57
+ 3033 0113 00000000 		.4byte	0
+ 3034 0117 00000000 		.4byte	0
+ 3035              	.LLST7:
+ 3036 011b 0E000000 		.4byte	.LVL11
+ 3037 011f 14000000 		.4byte	.LVL12
+ 3038 0123 0200     		.2byte	0x2
+ 3039 0125 30       		.byte	0x30
+ 3040 0126 9F       		.byte	0x9f
+ 3041 0127 14000000 		.4byte	.LVL12
+ 3042 012b 28000000 		.4byte	.LVL15
+ 3043 012f 0100     		.2byte	0x1
+ 3044 0131 54       		.byte	0x54
+ 3045 0132 2A000000 		.4byte	.LVL16
+ 3046 0136 38000000 		.4byte	.LVL18
+ 3047 013a 0100     		.2byte	0x1
+ 3048 013c 54       		.byte	0x54
+ 3049 013d 3E000000 		.4byte	.LVL20
+ 3050 0141 44000000 		.4byte	.LFE68
+ 3051 0145 0100     		.2byte	0x1
+ 3052 0147 54       		.byte	0x54
+ 3053 0148 00000000 		.4byte	0
+ 3054 014c 00000000 		.4byte	0
+ 3055              	.LLST8:
+ 3056 0150 00000000 		.4byte	.LVL10
+ 3057 0154 14000000 		.4byte	.LVL12
+ 3058 0158 0200     		.2byte	0x2
+ 3059 015a 30       		.byte	0x30
+ 3060 015b 9F       		.byte	0x9f
+ 3061 015c 14000000 		.4byte	.LVL12
+ 3062 0160 32000000 		.4byte	.LVL17
+ 3063 0164 0100     		.2byte	0x1
+ 3064 0166 55       		.byte	0x55
+ 3065 0167 38000000 		.4byte	.LVL18
+ 3066 016b 3E000000 		.4byte	.LVL20
+ 3067 016f 0200     		.2byte	0x2
+ 3068 0171 30       		.byte	0x30
+ 3069 0172 9F       		.byte	0x9f
+ 3070 0173 00000000 		.4byte	0
+ 3071 0177 00000000 		.4byte	0
+ 3072              	.LLST9:
+ 3073 017b 00000000 		.4byte	.LVL21
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 63
+
+
+ 3074 017f 0D000000 		.4byte	.LVL23-1
+ 3075 0183 0100     		.2byte	0x1
+ 3076 0185 50       		.byte	0x50
+ 3077 0186 0D000000 		.4byte	.LVL23-1
+ 3078 018a 4A000000 		.4byte	.LFE69
+ 3079 018e 0400     		.2byte	0x4
+ 3080 0190 F3       		.byte	0xf3
+ 3081 0191 01       		.uleb128 0x1
+ 3082 0192 50       		.byte	0x50
+ 3083 0193 9F       		.byte	0x9f
+ 3084 0194 00000000 		.4byte	0
+ 3085 0198 00000000 		.4byte	0
+ 3086              	.LLST10:
+ 3087 019c 00000000 		.4byte	.LVL21
+ 3088 01a0 0A000000 		.4byte	.LVL22
+ 3089 01a4 0100     		.2byte	0x1
+ 3090 01a6 51       		.byte	0x51
+ 3091 01a7 0A000000 		.4byte	.LVL22
+ 3092 01ab 4A000000 		.4byte	.LFE69
+ 3093 01af 0100     		.2byte	0x1
+ 3094 01b1 57       		.byte	0x57
+ 3095 01b2 00000000 		.4byte	0
+ 3096 01b6 00000000 		.4byte	0
+ 3097              	.LLST11:
+ 3098 01ba 16000000 		.4byte	.LVL24
+ 3099 01be 1A000000 		.4byte	.LVL25
+ 3100 01c2 0200     		.2byte	0x2
+ 3101 01c4 30       		.byte	0x30
+ 3102 01c5 9F       		.byte	0x9f
+ 3103 01c6 1A000000 		.4byte	.LVL25
+ 3104 01ca 38000000 		.4byte	.LVL28
+ 3105 01ce 0100     		.2byte	0x1
+ 3106 01d0 54       		.byte	0x54
+ 3107 01d1 3A000000 		.4byte	.LVL29
+ 3108 01d5 44000000 		.4byte	.LVL30
+ 3109 01d9 0100     		.2byte	0x1
+ 3110 01db 54       		.byte	0x54
+ 3111 01dc 00000000 		.4byte	0
+ 3112 01e0 00000000 		.4byte	0
+ 3113              	.LLST12:
+ 3114 01e4 00000000 		.4byte	.LVL31
+ 3115 01e8 0D000000 		.4byte	.LVL32-1
+ 3116 01ec 0100     		.2byte	0x1
+ 3117 01ee 50       		.byte	0x50
+ 3118 01ef 0D000000 		.4byte	.LVL32-1
+ 3119 01f3 AE010000 		.4byte	.LVL72
+ 3120 01f7 0100     		.2byte	0x1
+ 3121 01f9 54       		.byte	0x54
+ 3122 01fa AE010000 		.4byte	.LVL72
+ 3123 01fe CA010000 		.4byte	.LVL75
+ 3124 0202 0400     		.2byte	0x4
+ 3125 0204 F3       		.byte	0xf3
+ 3126 0205 01       		.uleb128 0x1
+ 3127 0206 50       		.byte	0x50
+ 3128 0207 9F       		.byte	0x9f
+ 3129 0208 CA010000 		.4byte	.LVL75
+ 3130 020c 08020000 		.4byte	.LVL83
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 64
+
+
+ 3131 0210 0100     		.2byte	0x1
+ 3132 0212 54       		.byte	0x54
+ 3133 0213 08020000 		.4byte	.LVL83
+ 3134 0217 2C020000 		.4byte	.LFE70
+ 3135 021b 0400     		.2byte	0x4
+ 3136 021d F3       		.byte	0xf3
+ 3137 021e 01       		.uleb128 0x1
+ 3138 021f 50       		.byte	0x50
+ 3139 0220 9F       		.byte	0x9f
+ 3140 0221 00000000 		.4byte	0
+ 3141 0225 00000000 		.4byte	0
+ 3142              	.LLST13:
+ 3143 0229 00000000 		.4byte	.LVL31
+ 3144 022d 0D000000 		.4byte	.LVL32-1
+ 3145 0231 0100     		.2byte	0x1
+ 3146 0233 51       		.byte	0x51
+ 3147 0234 0D000000 		.4byte	.LVL32-1
+ 3148 0238 2C020000 		.4byte	.LFE70
+ 3149 023c 0100     		.2byte	0x1
+ 3150 023e 5A       		.byte	0x5a
+ 3151 023f 00000000 		.4byte	0
+ 3152 0243 00000000 		.4byte	0
+ 3153              	.LLST14:
+ 3154 0247 2A000000 		.4byte	.LVL38
+ 3155 024b 34010000 		.4byte	.LVL57
+ 3156 024f 0300     		.2byte	0x3
+ 3157 0251 09       		.byte	0x9
+ 3158 0252 9C       		.byte	0x9c
+ 3159 0253 9F       		.byte	0x9f
+ 3160 0254 34010000 		.4byte	.LVL57
+ 3161 0258 92010000 		.4byte	.LVL66
+ 3162 025c 0100     		.2byte	0x1
+ 3163 025e 57       		.byte	0x57
+ 3164 025f 92010000 		.4byte	.LVL66
+ 3165 0263 FE010000 		.4byte	.LVL82
+ 3166 0267 0100     		.2byte	0x1
+ 3167 0269 55       		.byte	0x55
+ 3168 026a FE010000 		.4byte	.LVL82
+ 3169 026e 24020000 		.4byte	.LVL87
+ 3170 0272 0100     		.2byte	0x1
+ 3171 0274 57       		.byte	0x57
+ 3172 0275 00000000 		.4byte	0
+ 3173 0279 00000000 		.4byte	0
+ 3174              	.LLST15:
+ 3175 027d 36010000 		.4byte	.LVL58
+ 3176 0281 40010000 		.4byte	.LVL59
+ 3177 0285 0200     		.2byte	0x2
+ 3178 0287 30       		.byte	0x30
+ 3179 0288 9F       		.byte	0x9f
+ 3180 0289 40010000 		.4byte	.LVL59
+ 3181 028d 6C010000 		.4byte	.LVL61
+ 3182 0291 0100     		.2byte	0x1
+ 3183 0293 58       		.byte	0x58
+ 3184 0294 70010000 		.4byte	.LVL62
+ 3185 0298 24020000 		.4byte	.LVL87
+ 3186 029c 0100     		.2byte	0x1
+ 3187 029e 58       		.byte	0x58
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 65
+
+
+ 3188 029f 00000000 		.4byte	0
+ 3189 02a3 00000000 		.4byte	0
+ 3190              	.LLST16:
+ 3191 02a7 36010000 		.4byte	.LVL58
+ 3192 02ab 40010000 		.4byte	.LVL59
+ 3193 02af 0300     		.2byte	0x3
+ 3194 02b1 09       		.byte	0x9
+ 3195 02b2 FF       		.byte	0xff
+ 3196 02b3 9F       		.byte	0x9f
+ 3197 02b4 40010000 		.4byte	.LVL59
+ 3198 02b8 7A010000 		.4byte	.LVL63
+ 3199 02bc 0100     		.2byte	0x1
+ 3200 02be 59       		.byte	0x59
+ 3201 02bf 7E010000 		.4byte	.LVL64
+ 3202 02c3 24020000 		.4byte	.LVL87
+ 3203 02c7 0100     		.2byte	0x1
+ 3204 02c9 59       		.byte	0x59
+ 3205 02ca 00000000 		.4byte	0
+ 3206 02ce 00000000 		.4byte	0
+ 3207              	.LLST17:
+ 3208 02d2 D2000000 		.4byte	.LVL53
+ 3209 02d6 96010000 		.4byte	.LVL68
+ 3210 02da 0100     		.2byte	0x1
+ 3211 02dc 50       		.byte	0x50
+ 3212 02dd D4010000 		.4byte	.LVL76
+ 3213 02e1 0A020000 		.4byte	.LVL84
+ 3214 02e5 0100     		.2byte	0x1
+ 3215 02e7 50       		.byte	0x50
+ 3216 02e8 00000000 		.4byte	0
+ 3217 02ec 00000000 		.4byte	0
+ 3218              	.LLST18:
+ 3219 02f0 34010000 		.4byte	.LVL57
+ 3220 02f4 24020000 		.4byte	.LVL87
+ 3221 02f8 0200     		.2byte	0x2
+ 3222 02fa 91       		.byte	0x91
+ 3223 02fb 48       		.sleb128 -56
+ 3224 02fc 00000000 		.4byte	0
+ 3225 0300 00000000 		.4byte	0
+ 3226              	.LLST19:
+ 3227 0304 36010000 		.4byte	.LVL58
+ 3228 0308 40010000 		.4byte	.LVL59
+ 3229 030c 0200     		.2byte	0x2
+ 3230 030e 30       		.byte	0x30
+ 3231 030f 9F       		.byte	0x9f
+ 3232 0310 40010000 		.4byte	.LVL59
+ 3233 0314 FA010000 		.4byte	.LVL80
+ 3234 0318 0100     		.2byte	0x1
+ 3235 031a 56       		.byte	0x56
+ 3236 031b FC010000 		.4byte	.LVL81
+ 3237 031f 24020000 		.4byte	.LVL87
+ 3238 0323 0100     		.2byte	0x1
+ 3239 0325 56       		.byte	0x56
+ 3240 0326 00000000 		.4byte	0
+ 3241 032a 00000000 		.4byte	0
+ 3242              	.LLST20:
+ 3243 032e 58000000 		.4byte	.LVL42
+ 3244 0332 E2000000 		.4byte	.LVL56
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 66
+
+
+ 3245 0336 0300     		.2byte	0x3
+ 3246 0338 09       		.byte	0x9
+ 3247 0339 9C       		.byte	0x9c
+ 3248 033a 9F       		.byte	0x9f
+ 3249 033b E2000000 		.4byte	.LVL56
+ 3250 033f 24020000 		.4byte	.LVL87
+ 3251 0343 0200     		.2byte	0x2
+ 3252 0345 91       		.byte	0x91
+ 3253 0346 4C       		.sleb128 -52
+ 3254 0347 00000000 		.4byte	0
+ 3255 034b 00000000 		.4byte	0
+ 3256              	.LLST21:
+ 3257 034f 5C000000 		.4byte	.LVL43
+ 3258 0353 63000000 		.4byte	.LVL44-1
+ 3259 0357 0100     		.2byte	0x1
+ 3260 0359 53       		.byte	0x53
+ 3261 035a 63000000 		.4byte	.LVL44-1
+ 3262 035e E0000000 		.4byte	.LVL55
+ 3263 0362 0200     		.2byte	0x2
+ 3264 0364 91       		.byte	0x91
+ 3265 0365 44       		.sleb128 -60
+ 3266 0366 E2000000 		.4byte	.LVL56
+ 3267 036a DC010000 		.4byte	.LVL78
+ 3268 036e 0200     		.2byte	0x2
+ 3269 0370 91       		.byte	0x91
+ 3270 0371 44       		.sleb128 -60
+ 3271 0372 DE010000 		.4byte	.LVL79
+ 3272 0376 24020000 		.4byte	.LVL87
+ 3273 037a 0200     		.2byte	0x2
+ 3274 037c 91       		.byte	0x91
+ 3275 037d 44       		.sleb128 -60
+ 3276 037e 00000000 		.4byte	0
+ 3277 0382 00000000 		.4byte	0
+ 3278              	.LLST22:
+ 3279 0386 66000000 		.4byte	.LVL45
+ 3280 038a 94000000 		.4byte	.LVL47
+ 3281 038e 0100     		.2byte	0x1
+ 3282 0390 50       		.byte	0x50
+ 3283 0391 94000000 		.4byte	.LVL47
+ 3284 0395 DE000000 		.4byte	.LVL54
+ 3285 0399 0100     		.2byte	0x1
+ 3286 039b 5B       		.byte	0x5b
+ 3287 039c E2000000 		.4byte	.LVL56
+ 3288 03a0 DA010000 		.4byte	.LVL77
+ 3289 03a4 0100     		.2byte	0x1
+ 3290 03a6 5B       		.byte	0x5b
+ 3291 03a7 DE010000 		.4byte	.LVL79
+ 3292 03ab 24020000 		.4byte	.LVL87
+ 3293 03af 0100     		.2byte	0x1
+ 3294 03b1 5B       		.byte	0x5b
+ 3295 03b2 00000000 		.4byte	0
+ 3296 03b6 00000000 		.4byte	0
+ 3297              	.LLST23:
+ 3298 03ba 90000000 		.4byte	.LVL46
+ 3299 03be 40010000 		.4byte	.LVL59
+ 3300 03c2 0100     		.2byte	0x1
+ 3301 03c4 57       		.byte	0x57
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 67
+
+
+ 3302 03c5 00000000 		.4byte	0
+ 3303 03c9 00000000 		.4byte	0
+ 3304              	.LLST24:
+ 3305 03cd 62010000 		.4byte	.LVL60
+ 3306 03d1 94010000 		.4byte	.LVL67
+ 3307 03d5 0100     		.2byte	0x1
+ 3308 03d7 53       		.byte	0x53
+ 3309 03d8 00000000 		.4byte	0
+ 3310 03dc 00000000 		.4byte	0
+ 3311              	.LLST25:
+ 3312 03e0 8E010000 		.4byte	.LVL65
+ 3313 03e4 FE010000 		.4byte	.LVL82
+ 3314 03e8 0100     		.2byte	0x1
+ 3315 03ea 55       		.byte	0x55
+ 3316 03eb 00000000 		.4byte	0
+ 3317 03ef 00000000 		.4byte	0
+ 3318              	.LLST26:
+ 3319 03f3 38000000 		.4byte	.LVL99
+ 3320 03f7 3C000000 		.4byte	.LVL100
+ 3321 03fb 0200     		.2byte	0x2
+ 3322 03fd 30       		.byte	0x30
+ 3323 03fe 9F       		.byte	0x9f
+ 3324 03ff 3C000000 		.4byte	.LVL100
+ 3325 0403 4E000000 		.4byte	.LVL102
+ 3326 0407 0100     		.2byte	0x1
+ 3327 0409 54       		.byte	0x54
+ 3328 040a 50000000 		.4byte	.LVL103
+ 3329 040e 56000000 		.4byte	.LVL104
+ 3330 0412 0100     		.2byte	0x1
+ 3331 0414 54       		.byte	0x54
+ 3332 0415 00000000 		.4byte	0
+ 3333 0419 00000000 		.4byte	0
+ 3334              	.LLST27:
+ 3335 041d 12000000 		.4byte	.LVL113
+ 3336 0421 16000000 		.4byte	.LVL114
+ 3337 0425 0200     		.2byte	0x2
+ 3338 0427 30       		.byte	0x30
+ 3339 0428 9F       		.byte	0x9f
+ 3340 0429 16000000 		.4byte	.LVL114
+ 3341 042d 3E000000 		.4byte	.LVL116
+ 3342 0431 0100     		.2byte	0x1
+ 3343 0433 54       		.byte	0x54
+ 3344 0434 40000000 		.4byte	.LVL117
+ 3345 0438 50000000 		.4byte	.LVL119
+ 3346 043c 0100     		.2byte	0x1
+ 3347 043e 54       		.byte	0x54
+ 3348 043f 00000000 		.4byte	0
+ 3349 0443 00000000 		.4byte	0
+ 3350              	.LLST28:
+ 3351 0447 24000000 		.4byte	.LVL127
+ 3352 044b 2A000000 		.4byte	.LVL128
+ 3353 044f 0200     		.2byte	0x2
+ 3354 0451 30       		.byte	0x30
+ 3355 0452 9F       		.byte	0x9f
+ 3356 0453 2A000000 		.4byte	.LVL128
+ 3357 0457 48000000 		.4byte	.LVL131
+ 3358 045b 0100     		.2byte	0x1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 68
+
+
+ 3359 045d 54       		.byte	0x54
+ 3360 045e 4A000000 		.4byte	.LVL132
+ 3361 0462 62000000 		.4byte	.LVL137
+ 3362 0466 0100     		.2byte	0x1
+ 3363 0468 54       		.byte	0x54
+ 3364 0469 00000000 		.4byte	0
+ 3365 046d 00000000 		.4byte	0
+ 3366              	.LLST29:
+ 3367 0471 02000000 		.4byte	.LVL120
+ 3368 0475 2A000000 		.4byte	.LVL128
+ 3369 0479 0200     		.2byte	0x2
+ 3370 047b 31       		.byte	0x31
+ 3371 047c 9F       		.byte	0x9f
+ 3372 047d 2A000000 		.4byte	.LVL128
+ 3373 0481 62000000 		.4byte	.LVL137
+ 3374 0485 0100     		.2byte	0x1
+ 3375 0487 55       		.byte	0x55
+ 3376 0488 00000000 		.4byte	0
+ 3377 048c 00000000 		.4byte	0
+ 3378              		.section	.debug_aranges,"",%progbits
+ 3379 0000 74000000 		.4byte	0x74
+ 3380 0004 0200     		.2byte	0x2
+ 3381 0006 00000000 		.4byte	.Ldebug_info0
+ 3382 000a 04       		.byte	0x4
+ 3383 000b 00       		.byte	0
+ 3384 000c 0000     		.2byte	0
+ 3385 000e 0000     		.2byte	0
+ 3386 0010 00000000 		.4byte	.LFB67
+ 3387 0014 08000000 		.4byte	.LFE67-.LFB67
+ 3388 0018 00000000 		.4byte	.LFB66
+ 3389 001c 08000000 		.4byte	.LFE66-.LFB66
+ 3390 0020 00000000 		.4byte	.LFB65
+ 3391 0024 08000000 		.4byte	.LFE65-.LFB65
+ 3392 0028 00000000 		.4byte	.LFB64
+ 3393 002c 08000000 		.4byte	.LFE64-.LFB64
+ 3394 0030 00000000 		.4byte	.LFB63
+ 3395 0034 08000000 		.4byte	.LFE63-.LFB63
+ 3396 0038 00000000 		.4byte	.LFB68
+ 3397 003c 44000000 		.4byte	.LFE68-.LFB68
+ 3398 0040 00000000 		.4byte	.LFB69
+ 3399 0044 4A000000 		.4byte	.LFE69-.LFB69
+ 3400 0048 00000000 		.4byte	.LFB70
+ 3401 004c 2C020000 		.4byte	.LFE70-.LFB70
+ 3402 0050 00000000 		.4byte	.LFB71
+ 3403 0054 5C000000 		.4byte	.LFE71-.LFB71
+ 3404 0058 00000000 		.4byte	.LFB72
+ 3405 005c 22000000 		.4byte	.LFE72-.LFB72
+ 3406 0060 00000000 		.4byte	.LFB73
+ 3407 0064 5C000000 		.4byte	.LFE73-.LFB73
+ 3408 0068 00000000 		.4byte	.LFB74
+ 3409 006c 70000000 		.4byte	.LFE74-.LFB74
+ 3410 0070 00000000 		.4byte	0
+ 3411 0074 00000000 		.4byte	0
+ 3412              		.section	.debug_ranges,"",%progbits
+ 3413              	.Ldebug_ranges0:
+ 3414 0000 82000000 		.4byte	.LBB2
+ 3415 0004 D6000000 		.4byte	.LBE2
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 69
+
+
+ 3416 0008 DC000000 		.4byte	.LBB3
+ 3417 000c 36010000 		.4byte	.LBE3
+ 3418 0010 00000000 		.4byte	0
+ 3419 0014 00000000 		.4byte	0
+ 3420 0018 40010000 		.4byte	.LBB4
+ 3421 001c F8010000 		.4byte	.LBE4
+ 3422 0020 FC010000 		.4byte	.LBB5
+ 3423 0024 FE010000 		.4byte	.LBE5
+ 3424 0028 00000000 		.4byte	0
+ 3425 002c 00000000 		.4byte	0
+ 3426 0030 00000000 		.4byte	.LFB67
+ 3427 0034 08000000 		.4byte	.LFE67
+ 3428 0038 00000000 		.4byte	.LFB66
+ 3429 003c 08000000 		.4byte	.LFE66
+ 3430 0040 00000000 		.4byte	.LFB65
+ 3431 0044 08000000 		.4byte	.LFE65
+ 3432 0048 00000000 		.4byte	.LFB64
+ 3433 004c 08000000 		.4byte	.LFE64
+ 3434 0050 00000000 		.4byte	.LFB63
+ 3435 0054 08000000 		.4byte	.LFE63
+ 3436 0058 00000000 		.4byte	.LFB68
+ 3437 005c 44000000 		.4byte	.LFE68
+ 3438 0060 00000000 		.4byte	.LFB69
+ 3439 0064 4A000000 		.4byte	.LFE69
+ 3440 0068 00000000 		.4byte	.LFB70
+ 3441 006c 2C020000 		.4byte	.LFE70
+ 3442 0070 00000000 		.4byte	.LFB71
+ 3443 0074 5C000000 		.4byte	.LFE71
+ 3444 0078 00000000 		.4byte	.LFB72
+ 3445 007c 22000000 		.4byte	.LFE72
+ 3446 0080 00000000 		.4byte	.LFB73
+ 3447 0084 5C000000 		.4byte	.LFE73
+ 3448 0088 00000000 		.4byte	.LFB74
+ 3449 008c 70000000 		.4byte	.LFE74
+ 3450 0090 00000000 		.4byte	0
+ 3451 0094 00000000 		.4byte	0
+ 3452              		.section	.debug_line,"",%progbits
+ 3453              	.Ldebug_line0:
+ 3454 0000 2A040000 		.section	.debug_str,"MS",%progbits,1
+ 3454      02002102 
+ 3454      00000201 
+ 3454      FB0E0D00 
+ 3454      01010101 
+ 3455              	.LASF49:
+ 3456 0000 72657375 		.ascii	"result\000"
+ 3456      6C7400
+ 3457              	.LASF16:
+ 3458 0007 666C6F61 		.ascii	"float\000"
+ 3458      7400
+ 3459              	.LASF29:
+ 3460 000d 77726974 		.ascii	"write\000"
+ 3460      6500
+ 3461              	.LASF35:
+ 3462 0013 63616C5F 		.ascii	"cal_vdac_geo_lp\000"
+ 3462      76646163 
+ 3462      5F67656F 
+ 3462      5F6C7000 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 70
+
+
+ 3463              	.LASF55:
+ 3464 0023 62657374 		.ascii	"best_measured\000"
+ 3464      5F6D6561 
+ 3464      73757265 
+ 3464      6400
+ 3465              	.LASF44:
+ 3466 0031 70726576 		.ascii	"prev_avg\000"
+ 3466      5F617667 
+ 3466      00
+ 3467              	.LASF42:
+ 3468 003a 73616D70 		.ascii	"sample\000"
+ 3468      6C6500
+ 3469              	.LASF50:
+ 3470 0041 6D656173 		.ascii	"measured\000"
+ 3470      75726564 
+ 3470      00
+ 3471              	.LASF2:
+ 3472 004a 73686F72 		.ascii	"short int\000"
+ 3472      7420696E 
+ 3472      7400
+ 3473              	.LASF20:
+ 3474 0054 73697A65 		.ascii	"sizetype\000"
+ 3474      74797065 
+ 3474      00
+ 3475              	.LASF40:
+ 3476 005d 6176675F 		.ascii	"avg_counts\000"
+ 3476      636F756E 
+ 3476      747300
+ 3477              	.LASF82:
+ 3478 0068 414D7578 		.ascii	"AMux_IN_FastSelect\000"
+ 3478      5F494E5F 
+ 3478      46617374 
+ 3478      53656C65 
+ 3478      637400
+ 3479              	.LASF28:
+ 3480 007b 64697265 		.ascii	"direction\000"
+ 3480      6374696F 
+ 3480      6E00
+ 3481              	.LASF67:
+ 3482 0085 675F7073 		.ascii	"g_psoc_cal_result_count\000"
+ 3482      6F635F63 
+ 3482      616C5F72 
+ 3482      6573756C 
+ 3482      745F636F 
+ 3483              	.LASF93:
+ 3484 009d 63616C69 		.ascii	"calibration.c\000"
+ 3484      62726174 
+ 3484      696F6E2E 
+ 3484      6300
+ 3485              	.LASF34:
+ 3486 00ab 76616C75 		.ascii	"value\000"
+ 3486      6500
+ 3487              	.LASF77:
+ 3488 00b1 70736F63 		.ascii	"psoc_adc_clear_isr_sample\000"
+ 3488      5F616463 
+ 3488      5F636C65 
+ 3488      61725F69 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 71
+
+
+ 3488      73725F73 
+ 3489              	.LASF33:
+ 3490 00cb 50736F63 		.ascii	"PsocCalResult\000"
+ 3490      43616C52 
+ 3490      6573756C 
+ 3490      7400
+ 3491              	.LASF12:
+ 3492 00d9 75696E74 		.ascii	"uint16\000"
+ 3492      313600
+ 3493              	.LASF14:
+ 3494 00e0 696E7431 		.ascii	"int16\000"
+ 3494      3600
+ 3495              	.LASF11:
+ 3496 00e6 75696E74 		.ascii	"uint8\000"
+ 3496      3800
+ 3497              	.LASF95:
+ 3498 00ec 70736F63 		.ascii	"psoc_calibration_run_blocking\000"
+ 3498      5F63616C 
+ 3498      69627261 
+ 3498      74696F6E 
+ 3498      5F72756E 
+ 3499              	.LASF45:
+ 3500 010a 6375725F 		.ascii	"cur_avg\000"
+ 3500      61766700 
+ 3501              	.LASF79:
+ 3502 0112 4144435F 		.ascii	"ADC_StartConvert\000"
+ 3502      53746172 
+ 3502      74436F6E 
+ 3502      76657274 
+ 3502      00
+ 3503              	.LASF30:
+ 3504 0123 50736F63 		.ascii	"PsocCalStage\000"
+ 3504      43616C53 
+ 3504      74616765 
+ 3504      00
+ 3505              	.LASF63:
+ 3506 0130 70736F63 		.ascii	"psoc_calibration_reset_references\000"
+ 3506      5F63616C 
+ 3506      69627261 
+ 3506      74696F6E 
+ 3506      5F726573 
+ 3507              	.LASF6:
+ 3508 0152 6C6F6E67 		.ascii	"long long int\000"
+ 3508      206C6F6E 
+ 3508      6720696E 
+ 3508      7400
+ 3509              	.LASF23:
+ 3510 0160 6164635F 		.ascii	"adc_channel\000"
+ 3510      6368616E 
+ 3510      6E656C00 
+ 3511              	.LASF13:
+ 3512 016c 696E7438 		.ascii	"int8\000"
+ 3512      00
+ 3513              	.LASF32:
+ 3514 0171 66696E61 		.ascii	"final_measured\000"
+ 3514      6C5F6D65 
+ 3514      61737572 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 72
+
+
+ 3514      656400
+ 3515              	.LASF70:
+ 3516 0180 56444143 		.ascii	"VDAC_ref_BP_SetValue\000"
+ 3516      5F726566 
+ 3516      5F42505F 
+ 3516      53657456 
+ 3516      616C7565 
+ 3517              	.LASF76:
+ 3518 0195 4144435F 		.ascii	"ADC_Start\000"
+ 3518      53746172 
+ 3518      7400
+ 3519              	.LASF4:
+ 3520 019f 6C6F6E67 		.ascii	"long int\000"
+ 3520      20696E74 
+ 3520      00
+ 3521              	.LASF21:
+ 3522 01a8 50736F63 		.ascii	"PsocCalVdacWrite\000"
+ 3522      43616C56 
+ 3522      64616357 
+ 3522      72697465 
+ 3522      00
+ 3523              	.LASF37:
+ 3524 01b9 63616C5F 		.ascii	"cal_vdac_geo_bp\000"
+ 3524      76646163 
+ 3524      5F67656F 
+ 3524      5F627000 
+ 3525              	.LASF52:
+ 3526 01c9 696E6372 		.ascii	"increasing\000"
+ 3526      65617369 
+ 3526      6E6700
+ 3527              	.LASF87:
+ 3528 01d4 56444143 		.ascii	"VDAC_ref_LP_Start\000"
+ 3528      5F726566 
+ 3528      5F4C505F 
+ 3528      53746172 
+ 3528      7400
+ 3529              	.LASF58:
+ 3530 01e6 70726F62 		.ascii	"probe_measured\000"
+ 3530      655F6D65 
+ 3530      61737572 
+ 3530      656400
+ 3531              	.LASF74:
+ 3532 01f5 4144435F 		.ascii	"ADC_Stop\000"
+ 3532      53746F70 
+ 3532      00
+ 3533              	.LASF62:
+ 3534 01fe 70736F63 		.ascii	"psoc_calibration_restore_capture_path\000"
+ 3534      5F63616C 
+ 3534      69627261 
+ 3534      74696F6E 
+ 3534      5F726573 
+ 3535              	.LASF22:
+ 3536 0224 6E616D65 		.ascii	"name\000"
+ 3536      00
+ 3537              	.LASF26:
+ 3538 0229 6D61785F 		.ascii	"max_iter\000"
+ 3538      69746572 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 73
+
+
+ 3538      00
+ 3539              	.LASF19:
+ 3540 0232 6C6F6E67 		.ascii	"long double\000"
+ 3540      20646F75 
+ 3540      626C6500 
+ 3541              	.LASF85:
+ 3542 023e 56444143 		.ascii	"VDAC_ref_BP_Start\000"
+ 3542      5F726566 
+ 3542      5F42505F 
+ 3542      53746172 
+ 3542      7400
+ 3543              	.LASF1:
+ 3544 0250 756E7369 		.ascii	"unsigned char\000"
+ 3544      676E6564 
+ 3544      20636861 
+ 3544      7200
+ 3545              	.LASF25:
+ 3546 025e 6176675F 		.ascii	"avg_n\000"
+ 3546      6E00
+ 3547              	.LASF72:
+ 3548 0264 70736F63 		.ascii	"psoc_adc_wait_fresh_sample\000"
+ 3548      5F616463 
+ 3548      5F776169 
+ 3548      745F6672 
+ 3548      6573685F 
+ 3549              	.LASF7:
+ 3550 027f 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 3550      206C6F6E 
+ 3550      6720756E 
+ 3550      7369676E 
+ 3550      65642069 
+ 3551              	.LASF81:
+ 3552 0296 414D7578 		.ascii	"AMux_IN_Start\000"
+ 3552      5F494E5F 
+ 3552      53746172 
+ 3552      7400
+ 3553              	.LASF39:
+ 3554 02a4 6162735F 		.ascii	"abs_counts\000"
+ 3554      636F756E 
+ 3554      747300
+ 3555              	.LASF8:
+ 3556 02af 756E7369 		.ascii	"unsigned int\000"
+ 3556      676E6564 
+ 3556      20696E74 
+ 3556      00
+ 3557              	.LASF59:
+ 3558 02bc 676F5F75 		.ascii	"go_up\000"
+ 3558      7000
+ 3559              	.LASF24:
+ 3560 02c2 74617267 		.ascii	"target_counts\000"
+ 3560      65745F63 
+ 3560      6F756E74 
+ 3560      7300
+ 3561              	.LASF5:
+ 3562 02d0 6C6F6E67 		.ascii	"long unsigned int\000"
+ 3562      20756E73 
+ 3562      69676E65 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 74
+
+
+ 3562      6420696E 
+ 3562      7400
+ 3563              	.LASF43:
+ 3564 02e2 73746162 		.ascii	"stable_avg\000"
+ 3564      6C655F61 
+ 3564      766700
+ 3565              	.LASF83:
+ 3566 02ed 4144435F 		.ascii	"ADC_StopConvert\000"
+ 3566      53746F70 
+ 3566      436F6E76 
+ 3566      65727400 
+ 3567              	.LASF31:
+ 3568 02fd 66696E61 		.ascii	"final_dac\000"
+ 3568      6C5F6461 
+ 3568      6300
+ 3569              	.LASF68:
+ 3570 0307 56444143 		.ascii	"VDAC_ref_LP_SetValue\000"
+ 3570      5F726566 
+ 3570      5F4C505F 
+ 3570      53657456 
+ 3570      616C7565 
+ 3571              	.LASF48:
+ 3572 031c 73746167 		.ascii	"stage\000"
+ 3572      6500
+ 3573              	.LASF89:
+ 3574 0322 70736F63 		.ascii	"psoc_adc_select_calibration_config\000"
+ 3574      5F616463 
+ 3574      5F73656C 
+ 3574      6563745F 
+ 3574      63616C69 
+ 3575              	.LASF57:
+ 3576 0345 70726F62 		.ascii	"probe_dac\000"
+ 3576      655F6461 
+ 3576      6300
+ 3577              	.LASF18:
+ 3578 034f 63686172 		.ascii	"char\000"
+ 3578      00
+ 3579              	.LASF10:
+ 3580 0354 696E7433 		.ascii	"int32_t\000"
+ 3580      325F7400 
+ 3581              	.LASF3:
+ 3582 035c 73686F72 		.ascii	"short unsigned int\000"
+ 3582      7420756E 
+ 3582      7369676E 
+ 3582      65642069 
+ 3582      6E7400
+ 3583              	.LASF47:
+ 3584 036f 63616C69 		.ascii	"calibrate_stage\000"
+ 3584      62726174 
+ 3584      655F7374 
+ 3584      61676500 
+ 3585              	.LASF36:
+ 3586 037f 63616C5F 		.ascii	"cal_vdac_geo_adder\000"
+ 3586      76646163 
+ 3586      5F67656F 
+ 3586      5F616464 
+ 3586      657200
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 75
+
+
+ 3587              	.LASF78:
+ 3588 0392 6973725F 		.ascii	"isr_DelSig_ClearPending\000"
+ 3588      44656C53 
+ 3588      69675F43 
+ 3588      6C656172 
+ 3588      50656E64 
+ 3589              	.LASF90:
+ 3590 03aa 6973725F 		.ascii	"isr_SyncIn_ClearPending\000"
+ 3590      53796E63 
+ 3590      496E5F43 
+ 3590      6C656172 
+ 3590      50656E64 
+ 3591              	.LASF61:
+ 3592 03c2 70736F63 		.ascii	"psoc_calibration_start_references\000"
+ 3592      5F63616C 
+ 3592      69627261 
+ 3592      74696F6E 
+ 3592      5F737461 
+ 3593              	.LASF75:
+ 3594 03e4 414D7578 		.ascii	"AMux_ADC_FastSelect\000"
+ 3594      5F414443 
+ 3594      5F466173 
+ 3594      7453656C 
+ 3594      65637400 
+ 3595              	.LASF71:
+ 3596 03f8 56444143 		.ascii	"VDAC_ref_PGA_SetValue\000"
+ 3596      5F726566 
+ 3596      5F504741 
+ 3596      5F536574 
+ 3596      56616C75 
+ 3597              	.LASF15:
+ 3598 040e 696E7433 		.ascii	"int32\000"
+ 3598      3200
+ 3599              	.LASF17:
+ 3600 0414 646F7562 		.ascii	"double\000"
+ 3600      6C6500
+ 3601              	.LASF46:
+ 3602 041b 73657474 		.ascii	"settle_iter\000"
+ 3602      6C655F69 
+ 3602      74657200 
+ 3603              	.LASF65:
+ 3604 0427 49544D5F 		.ascii	"ITM_RxBuffer\000"
+ 3604      52784275 
+ 3604      66666572 
+ 3604      00
+ 3605              	.LASF64:
+ 3606 0434 675F7073 		.ascii	"g_psoc_cal_stages\000"
+ 3606      6F635F63 
+ 3606      616C5F73 
+ 3606      74616765 
+ 3606      7300
+ 3607              	.LASF38:
+ 3608 0446 63616C5F 		.ascii	"cal_vdac_geo_pga\000"
+ 3608      76646163 
+ 3608      5F67656F 
+ 3608      5F706761 
+ 3608      00
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 76
+
+
+ 3609              	.LASF9:
+ 3610 0457 5F5F696E 		.ascii	"__int32_t\000"
+ 3610      7433325F 
+ 3610      7400
+ 3611              	.LASF80:
+ 3612 0461 414D7578 		.ascii	"AMux_ADC_Start\000"
+ 3612      5F414443 
+ 3612      5F537461 
+ 3612      727400
+ 3613              	.LASF0:
+ 3614 0470 7369676E 		.ascii	"signed char\000"
+ 3614      65642063 
+ 3614      68617200 
+ 3615              	.LASF27:
+ 3616 047c 746F6C65 		.ascii	"tolerance_counts\000"
+ 3616      72616E63 
+ 3616      655F636F 
+ 3616      756E7473 
+ 3616      00
+ 3617              	.LASF91:
+ 3618 048d 6973725F 		.ascii	"isr_SyncIn_Enable\000"
+ 3618      53796E63 
+ 3618      496E5F45 
+ 3618      6E61626C 
+ 3618      6500
+ 3619              	.LASF53:
+ 3620 049f 69746572 		.ascii	"iter\000"
+ 3620      00
+ 3621              	.LASF51:
+ 3622 04a4 6162735F 		.ascii	"abs_error\000"
+ 3622      6572726F 
+ 3622      7200
+ 3623              	.LASF54:
+ 3624 04ae 62657374 		.ascii	"best_dac\000"
+ 3624      5F646163 
+ 3624      00
+ 3625              	.LASF66:
+ 3626 04b7 675F7073 		.ascii	"g_psoc_cal_results\000"
+ 3626      6F635F63 
+ 3626      616C5F72 
+ 3626      6573756C 
+ 3626      747300
+ 3627              	.LASF56:
+ 3628 04ca 62657374 		.ascii	"best_abs_error\000"
+ 3628      5F616273 
+ 3628      5F657272 
+ 3628      6F7200
+ 3629              	.LASF41:
+ 3630 04d9 6176675F 		.ascii	"avg_out\000"
+ 3630      6F757400 
+ 3631              	.LASF88:
+ 3632 04e1 6973725F 		.ascii	"isr_SyncIn_Disable\000"
+ 3632      53796E63 
+ 3632      496E5F44 
+ 3632      69736162 
+ 3632      6C6500
+ 3633              	.LASF92:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccd7lW9S.s 			page 77
+
+
+ 3634 04f4 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 3634      43313120 
+ 3634      352E342E 
+ 3634      31203230 
+ 3634      31363036 
+ 3635 0527 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"
+ 3635      20726576 
+ 3635      6973696F 
+ 3635      6E203233 
+ 3635      37373135 
+ 3636 055a 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 3636      66756E63 
+ 3636      74696F6E 
+ 3636      2D736563 
+ 3636      74696F6E 
+ 3637              	.LASF73:
+ 3638 0582 43794465 		.ascii	"CyDelay\000"
+ 3638      6C617900 
+ 3639              	.LASF69:
+ 3640 058a 56444143 		.ascii	"VDAC_Ref_Adder_SetValue\000"
+ 3640      5F526566 
+ 3640      5F416464 
+ 3640      65725F53 
+ 3640      65745661 
+ 3641              	.LASF60:
+ 3642 05a2 6E657874 		.ascii	"next_dac\000"
+ 3642      5F646163 
+ 3642      00
+ 3643              	.LASF84:
+ 3644 05ab 56444143 		.ascii	"VDAC_ref_PGA_Start\000"
+ 3644      5F726566 
+ 3644      5F504741 
+ 3644      5F537461 
+ 3644      727400
+ 3645              	.LASF86:
+ 3646 05be 56444143 		.ascii	"VDAC_Ref_Adder_Start\000"
+ 3646      5F526566 
+ 3646      5F416464 
+ 3646      65725F53 
+ 3646      74617274 
+ 3647              	.LASF94:
+ 3648 05d3 433A5C47 		.ascii	"C:\\Github\\Tesis\\src\\psoc\\AcondicionamientoAnal"
+ 3648      69746875 
+ 3648      625C5465 
+ 3648      7369735C 
+ 3648      7372635C 
+ 3649 0601 6F676963 		.ascii	"ogico.cydsn\000"
+ 3649      6F2E6379 
+ 3649      64736E00 
+ 3650              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran
