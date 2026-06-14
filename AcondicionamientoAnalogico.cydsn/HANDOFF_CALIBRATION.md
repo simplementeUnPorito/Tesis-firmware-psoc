@@ -1174,3 +1174,991 @@ el código que parcheaba — no se aplicó (ni hace falta) en esta arquitectura.
   `.lst`/`.o` de un build anterior (arquitectura PID vieja) en
   `CortexM3/ARM_GCC_541/Debug/` — quedarán desactualizados hasta el próximo build
   real.
+
+## 14. Primera corrida en hardware real (2026-06-14)
+
+### 14.0 Contexto
+
+§§13.4-13.5 fueron escritas describiendo un `psoc_calibration_run_blocking()`
+que en el momento de escribirlas todavía no existía en código — la
+implementación real (`calibration.c` actual) ya es la **máquina de estados
+asíncrona** (`psoc_calibration_start_async()` /
+`psoc_calibration_service_async()`, estados `CAL_ASYNC_IDLE` →
+`CAL_ASYNC_DONE`). Esta sección documenta la primera corrida real de esa
+máquina, capturada en COM12 el 2026-06-14 (mismo log que motivó la corrección
+en `BUILD_PROGRAM_PSOC.md`: la comunicación ESP↔PSoC funciona bien, el ciclo
+de captura de 100 batches completó OK, y luego se disparó `0xB5` —
+"Calibrar").
+
+**Corrección a §13.5**: la telemetría `CAL_STAGE_DAC`/`CAL_STAGE_MEAS` no se
+emite solo al final de cada etapa. `cal_diag_point()` (línea 45-49 de
+`calibration.c`) se llama desde `async_measure_service()` por **cada
+medición** que termina su settle/promediado (`EVAL_INIT`, `EVAL_PROBE`, cada
+`EVAL_ITER` de la bisección, y la pasada de `VERIFY`). Además,
+`async_finish_stage()` vuelve a emitir `CAL_STAGE_DAC`/`CAL_STAGE_MEAS` con
+`final_dac`/`final_measured`, seguido de `CAL_STAGE_OK` (0x16). Es decir, la
+secuencia real por etapa es:
+
+```
+CAL_STAGE_BEGIN(stage_index)
+  (DAC, MEAS_hi, MEAS_lo)        <- EVAL_INIT (dac=CAL_DAC_INIT=0x9C)
+  (DAC, MEAS_hi, MEAS_lo)        <- EVAL_PROBE (dac=INIT±CAL_PROBE_STEP)
+  (DAC, MEAS_hi, MEAS_lo) x N    <- EVAL_ITER, una por cada paso de bisección (hasta CAL_MAX_ITER)
+  (DAC, MEAS_hi, MEAS_lo)        <- final_dac/final_measured (async_finish_stage)
+  CAL_STAGE_OK(ok)
+```
+
+y al final, tras las 4 etapas, una pasada de verificación:
+
+```
+CAL_VERIFY_BEGIN(stage_index)
+  (DAC, MEAS_hi, MEAS_lo)        <- medición con final_dac y verify_settle_samples
+  CAL_VERIFY_OK(ok)
+```
+repetido para `stage_index=0..3`, y solo entonces `CAL_DONE(val)`
+(`val = g_cal_async.ok`, AND de los 4 `ok` de etapa y los 4 `verify_ok`).
+
+Esto es BUENA noticia: la telemetría es mucho más rica de lo que §13.5
+anticipaba — se puede reconstruir la trayectoria completa de la búsqueda
+binaria, no solo el punto final.
+
+### 14.1 GEO_PGA (stage 0): primera convergencia confirmada en hardware
+
+Decodificando la secuencia `(DAC, MEAS_hi<<8|MEAS_lo como int16)` para
+`stage_index=0` del log pegado por el usuario:
+
+| paso | dac | measured | abs_error vs target=0 |
+|---|---|---|---|
+| EVAL_INIT  | 156 (`0x9C`) | -15297 | 15297 |
+| EVAL_PROBE | 188 | -7375 | 7375 |
+| EVAL_ITER  | 222 | -1129 | 1129 |
+| EVAL_ITER  | 239 | 2595  | 2595 |
+| EVAL_ITER  | 230 | 352   | 352 |
+| EVAL_ITER  | 226 | -367  | 367 |
+| EVAL_ITER (final) | 228 | -85 | 85 |
+
+`CAL_STAGE_OK val=1` — **`final_dac=228`, `final_measured=-85`, dentro de
+`CAL_TOL_COUNTS_GEO_PGA=250`**. La bisección se comporta exactamente como se
+describe en §13.3 (probe hacia +32 desde 0x9C, dirección `increasing`
+detectada correctamente, y converge en 5 iteraciones, bien por debajo del
+tope `CAL_MAX_ITER=12`).
+
+**Esta es la primera prueba en hardware real de que el algoritmo de búsqueda
+binaria + `stable_avg()` + telemetría funciona end-to-end para al menos una
+etapa.**
+
+### 14.2 GEO_BP (stage 1): primer punto saturado, pero el log se corta ahí
+
+`CAL_STAGE_BEGIN(1)` aparece, y luego el primer `(DAC, MEAS)` —
+`EVAL_INIT`, `dac=156=CAL_DAC_INIT` — aparece **~5.0 s después**. Eso coincide
+exactamente con `CAL_SETTLE_SAMPLES_GEO_BP=15000` muestras a ~3 kSPS
+(15000/3000 = 5.0 s). Esto confirma que es una **medición real post-settle**,
+no el sentinel de timeout de `async_measure_service()` (que dispara tras
+`CAL_ASYNC_EMPTY_POLL_LIMIT=2,000,000` iteraciones de polling vacío — eso, si
+ocurriera, sería casi instantáneo en escala de ms, no ~5 s).
+
+El valor de `measured` en la telemetría es `32767` (`0x7FFF`).
+
+**Importante — esto NO implica necesariamente que el algoritmo se haya
+colgado ni que sea el sentinel de timeout de §13.5**: `cal_diag_i16()`
+(línea 35-42 de `calibration.c`) satura el promedio `int32` a rango `int16`
+**solo para el envío por UART**. El valor que usa el algoritmo internamente
+(`g_cal_async.measured`, comparado contra `target_counts=0` para
+`best_abs_error` y para decidir `increasing`) es el `int32` SIN saturar — y el
+ADC `CFG1` es diferencial de 18 bits (~±131071 counts), así que el valor real
+podría ser mucho mayor que 32767 en magnitud. En cualquier caso
+`abs_error >> tolerance_counts=250`, así que `EVAL_INIT` no converge en este
+punto y la máquina avanza normalmente: como `GEO_BP` tiene `direction=1`,
+`dac` pasa a `156+32=188` y arranca `EVAL_PROBE`. **El algoritmo sigue
+corriendo** — el `32767` es simplemente "la salida de esta etapa está MUY
+lejos de 0V diferencial en el punto de partida `0x9C`", lo cual es razonable
+si `GEO_BP` (filtro pasabanda) tiene mucha más ganancia/desbalance de DC que
+`GEO_PGA`.
+
+### 14.3 El log está truncado, no necesariamente colgado
+
+El log pegado por el usuario muestra líneas `[time][S1]...` y métricas
+`#M,time,S1,...` intercaladas/desordenadas (dos streams async renderizados
+fuera de orden en la terminal), y se corta a mitad de la etapa `GEO_BP`. **No
+tenemos**:
+- el resultado de la bisección completa de `GEO_BP` (`final_dac`,
+  `final_measured`, `CAL_STAGE_OK`),
+- los resultados de `GEO_ADDER` y `GEO_LP`,
+- la pasada de `VERIFY` (4x `CAL_VERIFY_BEGIN`/`CAL_VERIFY_OK`),
+- el `CAL_DONE val=?` final.
+
+Por lo tanto **no se puede concluir todavía** que la calibración completa
+falle ni que `GEO_BP` esté saturado de forma permanente — solo que su primer
+punto de muestreo (en `dac=0x9C`) está lejos de 0.
+
+### 14.4 Sobre "calibracion fallida" / "cfg busy sub=0xB5 pending=0xB5" en el log del master
+
+Dos causas posibles, distinguibles por el tiempo transcurrido entre
+"`S1 calibracion solicitada`" y la respuesta:
+
+1. **Rechazo inmediato por busy (UX, no bug de firmware)**: si el usuario
+   hace clic en "Calibrar" mientras una calibración anterior todavía está
+   corriendo (`g_state==PSOC_CALIBRATING` en el PSoC, o
+   `g_cfg_waiting==true` en el slave ESP — `handleSetConfig()`,
+   `slave/src/main.cpp`), el slave responde **inmediatamente**
+   `sendCfgAck(0xB5, 0)` con log `"cfg busy sub=0xB5 pending=0xB5"`, y el
+   master loguea `"S1 calibracion fallida"` (`app.js` línea ~791) en
+   **menos de 1 s** desde el clic. Dado que una corrida completa de las 4
+   etapas + verify puede tardar del orden de **1-3 minutos** (ver §14.5), es
+   muy probable que el patrón observado sea esto: el usuario reintentó
+   "Calibrar" mientras la corrida anterior seguía viva.
+2. **`CAL_DONE val=0` genuino**: si alguna etapa termina en
+   `async_finish_stage(0)` (bisección agota `CAL_MAX_ITER`, `dac` llega a un
+   riel 0/255, o `lo>hi`) o alguna pasada de `VERIFY` da `verify_ok=0`,
+   `g_cal_async.ok` queda en 0, `CAL_DONE val=0`, y el PSoC responde
+   `CFG_ACK(0xB5, 0)` → `"S1 calibracion fallida"`. Esto solo puede ocurrir
+   **al final** de la secuencia completa (1-3 minutos después del clic).
+
+Para distinguir ambos casos en la próxima prueba: medir el tiempo entre el
+clic y la línea `"calibracion ..."` en el log del master.
+
+### 14.5 Próximo paso de hardware recomendado
+
+1. Hacer clic en "Calibrar" **una sola vez** y NO reintentar aunque tarde —
+   estimar el peor caso: `GEO_PGA` (~16 s), `GEO_BP` (~80 s), `GEO_ADDER`
+   (~41 s), `GEO_LP` (~31 s) + verify de las 4 etapas ≈ **hasta ~3 minutos**
+   en el peor caso (si cada etapa necesita las `CAL_MAX_ITER=12`
+   iteraciones; en la práctica `GEO_PGA` convergió en 5, así que probablemente
+   sea más rápido).
+2. Capturar el log COM12 completo desde `CAL_START` hasta `CAL_DONE` sin
+   cortes.
+3. Reconstruir, por cada etapa 0-3: la trayectoria `(dac, measured)` completa
+   (como en la tabla de §14.1), `final_dac`/`final_measured`/`CAL_STAGE_OK`,
+   y luego los 4 `CAL_VERIFY_BEGIN`/`CAL_VERIFY_OK`.
+4. Si `CAL_DONE val=1`: éxito — repetir 1-2 veces más para chequear
+   repetibilidad de `final_dac` (criterio de §13.8 punto 5).
+5. Si `CAL_DONE val=0`: identificar CUÁL etapa/verify dio `ok=0` y con qué
+   `final_dac`/`final_measured` — eso indica si el problema es de rango de la
+   etapa (`dac` en riel 0/255), de tolerancia (`CAL_TOL_COUNTS`/`
+   CAL_SETTLE_TOL_COUNTS` muy estrictos para el ruido real), o de `VERIFY`
+   (la salida se mueve entre el fin de la bisección y la pasada de verify con
+   `verify_settle_samples` más largo).
+
+### 14.6 Confirmado: AMux_IN vuelve a 0 y los VDAC solo se tocan en boot/`0xB5` (osciloscopio + código)
+
+El usuario observó en el osciloscopio que las salidas VDAC se mueven una vez
+al arrancar y luego quedan fijas. Esto coincide con el código:
+
+- **AMux_IN**: `psoc_calibration_start_async()` (`calibration.c:257`) pone
+  `AMux_IN_Select(CAL_INPUT_REF_CHANNEL=1)` (tierra virtual) durante TODA la
+  calibración (4 etapas + verify). Solo cuando la máquina llega a
+  `CAL_ASYNC_VERIFY_BEGIN` con `stage_index >= PSOC_CAL_STAGE_COUNT`
+  (`calibration.c:413-424`, es decir: las 4 etapas Y las 4 pasadas de verify
+  ya terminaron) se llama `psoc_calibration_restore_capture_path()`
+  (`calibration.c:130-137`), que hace
+  `AMux_IN_Select(CAL_INPUT_NORMAL_CHANNEL=0)` +
+  `AMux_ADC_Select(CAL_ADC_CAPTURE_CHANNEL=3)`. No hay rama de aborto que se
+  salte este restore — incluso una etapa que no converge
+  (`async_finish_stage(0)`) sigue normalmente a la próxima etapa, así que el
+  restore siempre corre al llegar a `CAL_DONE`.
+- **VDACs**: solo se escriben en dos momentos:
+  1. Una vez al boot, sin condición, vía `psoc_calibration_start_references()`
+     (`main.c:814`) → escribe `CAL_DAC_INIT=0x9C` en los 4 VDAC.
+  2. Durante el autocal de arranque (`main.c:830-856`, disparado
+     `PSOC_STARTUP_CAL_DELAY_MS` después de detectar al ESP) y en cualquier
+     `0xB5`/`PSOC_CMD_CALIBRATE` posterior (`main.c:573-576`) — ambos pasan por
+     `psoc_start_calibration_if_idle()` → `psoc_calibration_start_async()`, la
+     misma máquina de búsqueda binaria que escribe cada VDAC repetidas veces
+     mientras converge y lo deja en `final_dac`.
+  - El comando legacy `0xAA` (`main.c:537-541`) solo actualiza la variable
+    sombra `g_vdac_val`, NUNCA llama `VDAC_ref_*_SetValue()`. No hay ningún
+    otro `stage->write()` en el firmware.
+
+Conclusión: el comportamiento visto en el osciloscopio es el esperado y
+coincide 1:1 con el diseño — VDAC fijos tras boot+autocal, AMux_IN/AMux_ADC
+garantizados de vuelta a modo captura normal al llegar `CAL_DONE`.
+
+### 14.7 Nueva telemetría `PSOC_EVT_CAL_AMUX_IN` (0x19) para verificar §14.6 por software
+
+El usuario pidió una forma de confirmar por telemetría (no solo por
+osciloscopio/lectura de código) que `AMux_IN` efectivamente vuelve a 0. Se
+agregó un evento de diagnóstico nuevo:
+
+- `psoc_hw.h` / `slave/src/psoc_uart.h`: `PSOC_EVT_CAL_AMUX_IN = 0x19`.
+- `calibration.c`: nuevo helper `cal_amux_in_select(channel)` que hace
+  `AMux_IN_Select(channel)` + `cal_diag(PSOC_EVT_CAL_AMUX_IN, channel)`.
+  Reemplaza los 4 usos directos de `CAL_AMUX_IN_SELECT(...)`:
+  - `psoc_calibration_start_references()` (boot, → `channel=0`)
+  - `psoc_calibration_restore_capture_path()` (fin de calibración / cualquier
+    `psoc_prepare_capture_path()`, → `channel=0`)
+  - `psoc_calibration_reset_references()` (no usada actualmente, → `channel=1`)
+  - `psoc_calibration_start_async()` (inicio de calibración, → `channel=1`)
+- `slave/src/main.cpp`: `psocDiagName()` agrega `"CAL_AMUX_IN"`, y `onPsocDiag()`
+  imprime una línea dedicada:
+  `[SLAVE] CAL AMux_IN -> %u (normal/captura | referencia/tierra virtual)`
+  además de la línea genérica `PSOC_EVT CAL_AMUX_IN event=0x19 val=%u ...`.
+
+**Qué esperar en el log COM12 de una corrida `0xB5` completa**: una línea
+`CAL_AMUX_IN -> 1 (referencia/tierra virtual)` justo después de `CAL_START`
+(emitida dentro de `psoc_calibration_start_async()`), y una línea
+`CAL_AMUX_IN -> 0 (normal/captura)` justo antes de `CAL_DONE` (emitida dentro
+de `psoc_calibration_restore_capture_path()` al llegar a
+`CAL_ASYNC_VERIFY_BEGIN` con las 4 etapas+verify completas). Si la segunda
+línea NO aparece, o aparece con `val=1`, eso indicaría que la máquina no llegó
+a `CAL_ASYNC_DONE` (se quedó colgada en alguna etapa) — sería la primera señal
+de un problema real, distinto de lo analizado en §14.2-14.3.
+
+**Pendiente**: compilar/programar este cambio y volver a correr "Calibrar" una
+vez completa (§14.5) para confirmar en hardware que ambas líneas aparecen como
+se espera.
+
+### 14.8 Reporte del usuario (2026-06-14): 2da calibración "se cuelga", riesgo de quedar saturado
+
+El usuario reportó, sin haber compilado/programado todavía los cambios de
+§14.7 (ese paso sigue pendiente):
+
+- La **primera** vez que aprieta "Calibrar" tras un reset del PSoC, calibra
+  bien (esto coincide con §14.1, GEO_PGA convergió en la primera corrida real).
+- Las veces **siguientes** parece quedarse en un "loop infinito": nunca
+  vuelve, o al menos no hay ninguna indicación de que haya terminado.
+- Le preocupa que el **estado final** de los operacionales pueda quedar
+  **saturado** (en un extremo del DAC) — esto es peor que quedar "no
+  calibrado", y pide que ante esa situación el firmware "vuelva atrás" a un
+  candidato no saturado, guardando los mejores candidatos en vez de tirar el
+  DAC a un extremo.
+- Pide telemetría "elemental" de estado durante la calibración para que el
+  ESP/maestro sepan que el PSoC sigue viva (no colgado).
+
+**Hipótesis de la causa del "loop infinito"** (sin confirmar en hardware
+todavía): `async_measure_service()` tiene un timeout por-medición de
+`CAL_ASYNC_EMPTY_POLL_LIMIT = 2,000,000` polls cuando `psoc_adc_take_isr_sample()`
+nunca devuelve una muestra fresca. Si en la 2da corrida la ISR del ADC
+(`isr_DelSigReady`) deja de disparar por algún motivo de configuración, **cada
+una de las ~60 mediciones** de la corrida (4 etapas × hasta 14 mediciones de
+búsqueda + 4 de verify) tardaría el timeout completo antes de devolver el
+sentinel `0x7FFF` — multiplicando un timeout de unos pocos segundos por 60 da
+un total de varios minutos, que para el usuario "parece infinito" (y puede
+superar incluso el `PSOC_CAL_ACK_TIMEOUT_MS=240000` del ESP, dejando
+`g_cal_async.busy=1` para siempre → 3ra corrida rechazada con `CAL_BUSY`).
+**No se modificó `async_measure_service`/ISR en esta sesión** — sería el
+próximo paso si el watchdog de abajo no resuelve el síntoma.
+
+**Cambios implementados en esta sesión (sin compilar/programar — pendiente
+igual que §14.7)**:
+
+1. **Watchdog global de calibración** (`calibration.c`):
+   - Nuevas constantes `CAL_WATCHDOG_TICKS = 20000` (200 s a 10 ms/tick, por
+     debajo del `PSOC_CAL_ACK_TIMEOUT_MS=240000` del ESP) y
+     `CAL_PROGRESS_PERIOD_TICKS = 50` (~500 ms).
+   - Nuevo getter `psoc_now_ticks()` (declarado en `psoc_hw.h`, implementado
+     en `main.c` como wrapper de `timer_now_ticks()`/`g_timer_ticks`,
+     10 ms/tick) para que `calibration.c` pueda medir tiempo real transcurrido.
+   - `psoc_calibration_start_async()` guarda `start_ticks`/`last_progress_ticks`.
+   - Al inicio de `psoc_calibration_service_async()`: si
+     `now - start_ticks >= CAL_WATCHDOG_TICKS`, se llama
+     `cal_async_abort_watchdog()` y se retorna `1u` (= "terminado", dispara
+     `CAL_DONE ok=0` en `main.c` igual que un final normal).
+   - `cal_async_abort_watchdog()`: si NO está en fase de verificación
+     (`CAL_ASYNC_VERIFY_BEGIN`/`CAL_ASYNC_EVAL_VERIFY`), fuerza
+     `CAL_DAC_INIT` (0x9C, punto medio, no saturado) en la etapa en curso y
+     en las que faltan (las ya terminadas conservan su `best_dac`); si SÍ
+     está en verificación, no toca ningún DAC (todas las etapas ya tienen su
+     `best_dac` escrito). En ambos casos: `ok=0`, restaura el camino de
+     captura (`psoc_calibration_restore_capture_path()` → `AMux_IN=0` +
+     canal ADC de captura), re-habilita `isr_SyncIn`, `busy=0`, `done=1`,
+     `state=CAL_ASYNC_DONE`, y emite el nuevo evento `PSOC_EVT_CAL_WATCHDOG`
+     (0x1B) con `value=stage_index` donde se colgó.
+   - **Garantiza** que toda corrida de calibración termina (`CAL_DONE`) en
+     ≤200 s, sin que ninguna etapa quede con un DAC fuera de control.
+
+2. **Nunca dejar un operacional fuera de rango operativo** (`calibration.c`,
+   `async_finish_stage()`) — **CORREGIDO en §14.9**, ver ahí el motivo:
+   - Nueva constante `CAL_OPERATING_RANGE_COUNTS = 26214` (`calibration_tables.h`,
+     ±0.5 V derivados de `ADC_CFG1_COUNTS_PER_VOLT = 52429`) y helper
+     `cal_measured_out_of_range(measured)` (`abs(measured) > 26214`).
+   - Si la **medición** (`best_measured`, en counts del ADC) del `best_dac`
+     encontrado por la búsqueda binaria queda fuera de ese rango, se descarta
+     (aunque `ok` hubiera sido 1) y se escribe `CAL_DAC_INIT` en su lugar, con
+     `final_measured = base_measured` (la medición tomada en `CAL_DAC_INIT` al
+     inicio de la etapa) y `ok=0`. Implementa el pedido del usuario: "más
+     conviene un sistema no calibrado perfectamente que uno que queda en
+     cualquier extremo".
+   - Caso especial **GEO_LP** (última etapa, `stage_index ==
+     PSOC_CAL_STAGE_COUNT-1`, la que alimenta `CAL_ADC_CAPTURE_CHANNEL`): si
+     incluso con `CAL_DAC_INIT` la medición sigue fuera de rango, se emite
+     `PSOC_EVT_CAL_LP_BAD` (0x1C) — ver §14.9.
+
+3. **Telemetría periódica de progreso** (`calibration.c` + `slave/src/main.cpp`):
+   - Nuevo evento `PSOC_EVT_CAL_PROGRESS` (0x1A), emitido cada
+     `CAL_PROGRESS_PERIOD_TICKS` (~500 ms) con `value = stage_index` actual
+     (0-3, ver `psocCalStageName`).
+   - En el slave, `onPsocDiag()` loguea cada `CAL_PROGRESS` (`[SLAVE] CAL
+     progress stage=N/NOMBRE`), y si hay un `CMD_CALIBRATE` pendiente
+     (`g_cfg_waiting && g_cfg_sub_cmd==PSOC_CMD_CALIBRATE`), reenvía al
+     maestro `sendCfgAck(PSOC_CMD_CALIBRATE, 2)` (throttle de 3 s,
+     `PSOC_CAL_PROGRESS_ACK_PERIOD_MS`). `ok=2` es un sentinel nuevo
+     ("sigue calibrando", distinto de 0=fallo/1=ok) — el master firmware NO
+     necesita cambios: `onCfgAck()` no tiene caso especial para
+     `sub_cmd=0xB5`, así que cae directo a `matlab.sendAck()` y llega a la
+     web como `PTYPE_ACK ackCmd=0xB5 ackVal=2`.
+   - `PSOC_EVT_CAL_WATCHDOG` (0x1B) también se loguea en el slave
+     (`[SLAVE] CAL WATCHDOG timeout en stage=N/NOMBRE -> abortado, valores
+     seguros restaurados`).
+
+4. **Indicador "calibrando..." en la web del maestro**:
+   - `slave_panel.js`: `setDot()`/`setCalibrationLock()` ahora soportan un
+     3er estado (`state=3`) → clase CSS `.dot.busy` (punto naranja
+     pulsante, `style.css`), tooltip "Calibrando... (puede tardar hasta
+     ~3 min)".
+   - `app.js`: `onCalibrateRequested()` pone el dot en `state=3` al pedir la
+     calibración. `handleAck()` intercepta `ackCmd===SUBCMD_CALIBRATE &&
+     ackVal===2` ANTES del borrado genérico de `nd.pending` (para no perder
+     el pending de la confirmación final), mantiene el dot en `state=3` y
+     loguea `"S{idx} calibrando..."` con throttle de 15 s
+     (`nd.calProgressLogMs`, nuevo campo en `data_store.js`) para no
+     inundar el log durante los ~3 min que puede durar.
+
+**Recordatorio (ya implementado, no es código nuevo)**: el "debounce" de
+transitorio que pedía el usuario ("muestreás y cuando deja de variar decís que
+ya pasó el transitorio") YA EXISTE — es `async_measure_service()` comparando
+ventanas de `CAL_AVG_N=32` muestras consecutivas contra
+`CAL_SETTLE_TOL_COUNTS=100` counts, hasta `CAL_SETTLE_MAX_WINDOWS=10` veces
+(`calibration_tables.h`). Si en hardware el transitorio real es más lento/
+ruidoso que eso, ajustar esas dos constantes (no hace falta rediseñar la
+lógica).
+
+### 14.9 Corrección del usuario (2026-06-14): el criterio es voltaje de salida, no código de DAC
+
+El punto 2 de §14.8 ("nunca dejar una etapa en un rail del DAC",
+`CAL_RAIL_MARGIN=4`/`cal_dac_is_rail(dac)`) fue **reemplazado** tras esta
+aclaración del usuario:
+
+> "No me refiero a que no podes dejar el VDAC en algún extremo, lo que digo es
+> que la prioridad máxima es que todos los operacionales estén en rango
+> operativo (máximo ±0.5 voltios fuera del 0, idealmente mucho menos) y lo más
+> importante el VDAC LP que es la etapa que va al ADC debe estar SIEMPRE bien
+> si no no vemos un carajo."
+
+Es decir: lo que importa no es si el *código* del DAC (0-255) queda cerca de
+0/255, sino si la **medición del ADC** (la salida real del op-amp de esa
+etapa) queda dentro del rango operativo (±0.5 V = ±26214 counts, ver
+`ADC_CFG1_COUNTS_PER_VOLT=52429` en §4/§13). Un `best_dac` cerca de un
+extremo del rango 0-255 puede perfectamente corresponder a una salida dentro
+de ±0.5 V (y viceversa), así que chequear el código del DAC no es lo correcto.
+
+**Cambios aplicados** (reemplazan el punto 2 de §14.8, sin tocar los puntos
+1/3/4):
+
+- `calibration_tables.h`: nueva constante `CAL_OPERATING_RANGE_COUNTS = 26214L`
+  (±0.5 V).
+- `calibration.c`: se eliminó `CAL_RAIL_MARGIN`/`cal_dac_is_rail(dac)`, se
+  agregó `cal_measured_out_of_range(measured)` (`abs_counts(measured) >
+  CAL_OPERATING_RANGE_COUNTS`).
+- `async_finish_stage()`: el chequeo ahora es sobre `final_measured`
+  (counts del ADC), no sobre `final_dac` (código 0-255). Igual que antes, si
+  está fuera de rango se vuelve a `CAL_DAC_INIT`/`base_measured`/`ok=0`.
+- **Nuevo, específico para GEO_LP** (última etapa, `stage_index ==
+  PSOC_CAL_STAGE_COUNT-1`, la que alimenta `CAL_ADC_CAPTURE_CHANNEL=3`): si
+  incluso en `CAL_DAC_INIT` (el fallback "seguro") la medición sigue fuera de
+  ±0.5 V, se emite el nuevo evento `PSOC_EVT_CAL_LP_BAD` (0x1C) — indica que la
+  captura de datos va a ser inútil ("no vemos un carajo") porque la última
+  etapa antes del ADC está fuera de rango incluso sin calibrar. No hay
+  fallback adicional posible en firmware para este caso (es un problema de
+  hardware/offset que excede lo que el VDAC de referencia puede compensar);
+  el evento es solo diagnóstico.
+- `psoc_hw.h` / `slave/src/psoc_uart.h`: `PSOC_EVT_CAL_LP_BAD = 0x1C`.
+- `slave/src/main.cpp`: `psocDiagName()` devuelve `"CAL_LP_BAD"`; `onPsocDiag()`
+  loguea como crítico: `[SLAVE] *** CAL CRITICO *** stage=N/GEO_LP (etapa de
+  captura) quedo fuera de rango incluso en CAL_DAC_INIT -> la captura va a ser
+  inutil` (vía `SLAVE_LOG_PRINTF` + `LOGM("CAL_LP_BAD", ...)`).
+- **No se agregó plumbing nuevo hacia la web del maestro** para
+  `CAL_LP_BAD` específicamente: si GEO_LP queda fuera de rango, `ok=0` ya
+  provoca que `CAL_DONE` llegue con `ok=0` y la web marque el dot en
+  `state=2` ("fallida"), que es la señal más importante. `CAL_LP_BAD` queda
+  como detalle de diagnóstico en el log serie del esclavo
+  (`DBG_STREAM`/`LOGM`, no llega a la web) — suficiente por ahora; si se
+  necesita visibilidad en la web habría que sumar un campo/evento nuevo al
+  protocolo ESP-NOW `MsgCfgAck`.
+
+**Pendiente**: compilar/programar TODO lo de §14.7 + §14.8 + §14.9 junto, y
+correr "Calibrar" 2-3 veces seguidas observando: (a) que cada corrida termine
+(`CAL_DONE`) en ≤200 s con indicación visible en la web (`state=3`
+"calibrando..."), (b) si aparece `CAL_WATCHDOG`, en qué `stage_index` queda,
+(c) que ninguna etapa quede con `abs(final_measured) > 26214` counts
+(±0.5 V) — revisar `CAL_STAGE_MEAS` de cada corrida, especialmente la última
+(GEO_LP), y (d) que no aparezca `CAL_LP_BAD`; si aparece, GEO_LP necesita
+revisión de hardware (offset fuera de lo que el VDAC de referencia puede
+compensar).
+
+### 14.10 Sesión 2026-06-14 (3ra parte): primer ensayo en hardware de §14.7/14.8/14.9, AMux_IN idle/activo, y promediado acumulativo contra overfitting
+
+Tras compilar/programar §14.7+14.8+14.9, el usuario reportó la primera
+corrida real:
+
+> "buildee todo pero no parece haber funcionado bien podes probar vos? el
+> psoc programé pero no parece autocalibrarse al arrancar igual esta medio mal
+> porque tarda mucho en estabilizarse deberias aplicar la misma logica cuando
+> ves que las señales estan calibradas ahi recien activas la rutina inicial de
+> autocalibración. De default podes dejar tambien la entrada en AMux_In 1 para
+> que siempre se verifique para autocalibrar si estamos idle pero igual la
+> autocalibración aun no funciona sigue siendo peor que el valor de arranque
+> inicial"
+
+Del log pegado: ~80 líneas `HELLO` repetidas y luego "S1 calibracion
+fallida" — **nunca apareció ninguna indicación "calibrando..."** (`state=3`)
+en el log, es decir el indicador de progreso de §14.8 punto 2 no se vio
+disparar (no se investigó la causa raíz en esta sesión: podría ser que la
+corrida nunca llegó a `psoc_calibration_start_async()`, o que terminó/abortó
+antes del primer `PSOC_EVT_CAL_PROGRESS`). Además reporta que el resultado de
+calibración es **peor** que el valor de arranque (`CAL_DAC_INIT`).
+
+#### a) AMux_IN: idle = referencia, activo = entrada real (implementado)
+
+El usuario afinó el pedido con un mensaje posterior, más específico que la
+sugerencia "AMux_IN=1 por default" de arriba:
+
+> "Deberias mantener en IDLE el AMux_in en 1 y cuando vamos a medir algo ahi
+> moves a 0 luego volves a 1, particularmente cuando llega el pre-start y
+> estas en hot-wait ahi moves el mux"
+
+Implementado en `calibration.c`/`calibration.h`/`main.c`:
+
+- `calibration.c`: nuevas funciones exportadas `psoc_calibration_amux_active()`
+  (AMux_IN → `CAL_INPUT_NORMAL_CHANNEL`=0, entrada real) y
+  `psoc_calibration_amux_idle()` (AMux_IN → `CAL_INPUT_REF_CHANNEL`=1,
+  referencia/tierra virtual), ambas wrappers de `cal_amux_in_select()` (que ya
+  emite `PSOC_EVT_CAL_AMUX_IN`).
+- `psoc_calibration_restore_capture_path()` (usada al terminar boot/captura/
+  calibración) ahora deja `AMux_IN=REF(1)` en vez de `NORMAL(0)` — éste es el
+  nuevo estado IDLE por defecto: `AMux_ADC` sigue mirando GEO_LP
+  (`CAL_ADC_CAPTURE_CHANNEL=3`) pero contra la referencia, permitiendo
+  monitorear en cualquier momento si el front-end sigue calibrado sin afectar
+  la entrada real.
+- `main.c`: nuevos helpers estáticos `psoc_set_amux_active()` /
+  `psoc_set_amux_idle()` (wrappers 1:1 de las funciones de arriba, evitan que
+  `main.c` necesite las macros `CAL_INPUT_*` de `calibration_tables.h`).
+  Cableado en todas las transiciones IDLE↔activo:
+  - `psoc_arm()` (PRESTART/`0xB1`, entra a "hot-wait" `PSOC_ARMED` esperando
+    SYNC): `psoc_set_amux_active()` justo después de
+    `psoc_prepare_capture_path()` — el mux se mueve a la entrada real ya
+    durante el hot-wait, como pidió el usuario.
+  - `psoc_start_now()` (`0xB4`): mismo cableado.
+  - Branch debug-on (`0xB3` con `g_debug_psoc`): mismo cableado entre
+    `psoc_prepare_capture_path()` y `psoc_enter_sampling(1u)`.
+  - Transición SAMPLING→IDLE en `service_runtime()`: `psoc_set_amux_idle()`
+    justo después de `g_state = PSOC_IDLE`.
+  - `isr_SyncIn` flanco de bajada en `PSOC_ARMED` (abort, SYNC nunca llegó):
+    `psoc_set_amux_idle()` tras volver a `PSOC_IDLE` en la sección crítica.
+  - Boot: como `psoc_calibration_restore_capture_path()` ya deja `AMux_IN=REF`,
+    el arranque normal termina en `AMux_IN=1` sin código adicional.
+
+Resultado esperado tras compilar/programar: en cualquier corrida (`0xB1`,
+`0xB4`, debug `0xB3`) debería verse `CAL_AMUX_IN -> 0` al entrar a hot-wait/
+sampling y `CAL_AMUX_IN -> 1` al volver a idle. **Pendiente verificar en
+hardware** junto con lo de §14.7.
+
+#### b) Promediado acumulativo contra "overfitting" al ruido (implementado)
+
+Pedido más importante de esta sesión, sobre por qué la calibración termina
+peor que `CAL_DAC_INIT`:
+
+> "Mi mayor problema es que siento que estas moviendo el DAC de más porque
+> tratas de fitear demasiado, lo ideal seria que si hay demasiado ruido de
+> medición sigas promediando, ejemplo en vez de promediar a lo loco un valor
+> fijo, capaz lo que podrias hacer es seguir promediando hasta que el valor
+> medido deje de variar una cierta resolución por ejemplo +-10 bits, ahi dejas
+> de promediar y usas ese valor como el real, tambien no tengas miedo de
+> volver a un valor anterior de la busqueda si daba un offset mejor porque en
+> el osciloscopio veo que llegas un valor quasi-perfecto pero ya que seguis
+> buscando como loco empezas a hacer un overfitting que se traduce como
+> saturación en LP solo porque no esta en 0 perfecto"
+
+Diagnóstico: la parte "no tengas miedo de volver a un valor anterior" ya
+estaba implementada estructuralmente — `async_finish_stage()` siempre escribe
+`best_dac`/`best_measured` (el mejor punto visto durante toda la búsqueda, no
+el último). El problema real era el ruido en `measured`: cada punto se medía
+con un solo promedio de `CAL_AVG_N=32` muestras, repetido hasta
+`CAL_SETTLE_MAX_WINDOWS=10` veces, comparando ventanas consecutivas con
+`CAL_SETTLE_TOL_COUNTS=100` — una ventana de 32 muestras ruidosa podía quedar
+"casualmente" dentro de la tolerancia y marcar un punto saturado como
+`best_measured` (mejor `abs_error` que el real) sin que la búsqueda lo supiera.
+
+**Cambio aplicado** (`calibration.c`, `async_measure_service()` +
+`PsocCalAsync`/`async_measure_begin()`):
+
+- Nuevos campos `cum_sum`/`cum_count` (int32) en `PsocCalAsync`, reseteados en
+  `async_measure_begin()`.
+- Cada ventana completa de `avg_n` muestras ya NO se compara aislada: se suma
+  a `cum_sum`/`cum_count` (promedio acumulado de TODAS las muestras tomadas
+  para ese punto desde el último `write(dac)`).
+- `g_cal_async.measured` pasa a ser siempre `cum_avg = cum_sum / cum_count` —
+  tanto si se llega por "asentó" como por "se acabaron las ventanas". Antes,
+  el camino de "se acabaron las ventanas" usaba la última ventana sola (la más
+  ruidosa posible).
+- La condición de asentado compara `cum_avg` consecutivo contra
+  `CAL_SETTLE_TOL_COUNTS` (antes comparaba ventanas aisladas). Como `cum_avg`
+  es un promedio creciente, cada ventana nueva lo mueve cada vez menos —
+  converge naturalmente incluso con una tolerancia mucho más chica.
+- `calibration_tables.h`: `CAL_SETTLE_TOL_COUNTS` 100 → **10** (±10 counts,
+  el valor que pidió el usuario) y `CAL_SETTLE_MAX_WINDOWS` 10 → **40** (limite
+  de seguridad si nunca asienta a ±10). Costo en el peor caso: 40×32=1280
+  muestras/punto (~426 ms a ~3 kSPS) vs 320 muestras (~107 ms) antes; con
+  ~60 puntos medidos en una corrida completa eso son ~19 s extra en el peor
+  caso, muy por debajo de `CAL_WATCHDOG_TICKS`=200 s.
+
+**Pendiente**: compilar/programar y repetir la calibración varias veces,
+comparando con el osciloscopio que GEO_LP ya no termine saturado y que el
+resultado sea igual o mejor que `CAL_DAC_INIT` (no peor). Si con
+`CAL_SETTLE_TOL_COUNTS=10` algún punto sigue sin asentar nunca (siempre usa
+las 40 ventanas), considerar relajar a ±20-30 antes de tocar `CAL_AVG_N`.
+
+#### c) Abierto / no implementado en esta sesión
+
+- **Disparo de auto-calibración al boot**: el trigger actual
+  (`startup_cal_pending`/`startup_cal_due`,
+  `PSOC_STARTUP_CAL_DELAY_MS=5000`, en `main.c`) es un *one-shot* a los 5 s de
+  conectar el ESP: si en ese instante `g_state != PSOC_IDLE` (p.ej. ya llegó
+  `0xB1`/`PSOC_ARMED`), `psoc_start_calibration_if_idle(0u)` no hace nada
+  (emite `PSOC_EVT_CAL_BUSY`) y `startup_cal_pending` se limpia igual — la
+  calibración de arranque nunca corre y no hay reintento. El usuario pidió
+  reemplazar el delay fijo por un disparo basado en estabilidad ("cuando ves
+  que las señales estan calibradas ahi recien activas la rutina inicial de
+  autocalibración") — **no diseñado ni implementado todavía**.
+- **"Invalid: fs must be positive"**: aparece en un panel
+  Test/Ver/Probe-latency de la UI del maestro (captura de pantalla adjunta por
+  el usuario); no se investigó alcance/causa en esta sesión.
+- **Indicador "calibrando..." nunca visto en el log**: no se confirmó si
+  `PSOC_EVT_CAL_PROGRESS`/`state=3` llegó a dispararse en la corrida reportada
+  — revisar junto con el punto de "auto-calibración al boot" de arriba.
+
+### 14.11 Sesión 2026-06-14 (4ta parte): "calibrando..." independizado del stream de diagnóstico + diagnóstico de fondo de "siempre termina en una esquina"
+
+El usuario activó `/advisor opus` y `/effort max`, y mandó (verbatim):
+
+> "Hace el update de master y slave vos porque cuando hago no aparecen los
+> updades en master como el ver el estado actual de la calibración no veo en
+> ningun lugar de la interfaz? porque mucha vueltas ya dimos algo esta mal en
+> como medis y decidis mover los VDACs porque al ver en el osciloscopio estas
+> moviendo bien las cosas pero no paras cunado debes parar y siempre concluis
+> que la mejor señal es en una de las esquinas claro porque si esta enla
+> esquina va a saturar y ahi para de tener ruido pero eso es estupido"
+
+Dos pedidos:
+
+- **(c1)** "Hacé el build vos" + por qué nunca se ve "calibrando..." en la interfaz.
+- **(c2) — el de fondo**: la búsqueda mueve los VDAC en la dirección correcta
+  (se ve en el osciloscopio) pero NUNCA PARA cuando debería, y siempre termina
+  en una esquina del rango DAC (0 o 255) — porque una esquina satura la etapa,
+  y "saturado" = "sin ruido", y el criterio de "convergió" (incluido el de
+  §14.10b) sólo mira "¿dejó de moverse / tiene poco ruido?", que en una
+  esquina saturada es SIEMPRE verdadero. No es un tema de afinar constantes:
+  el criterio está mal de raíz.
+
+#### a) c1 — Auditoría completa de la cadena "calibrando..." → web (sin bugs encontrados; se hizo más robusta de todos modos)
+
+Se repasó TODO el camino PSoC → ESP esclavo → ESP maestro → web de punta a
+punta, sin cortes:
+
+1. `platformio.ini` (slave): el diff pendiente renombra `-DDBG_ENABLE=1` →
+   `-DSLAVE_LOGS_ENABLE=1`, y `debug_log.h` lo reencadena a
+   `DBG_ENABLE=SLAVE_LOGS_ENABLE`. **Valor efectivo de `DBG_ENABLE`=1 antes Y
+   después** — rename cosmético, descartado como causa.
+2. `calibration.c::psoc_calibration_service_async()`: `cal_diag(PSOC_EVT_CAL_PROGRESS,
+   stage_index)` se emite cada `CAL_PROGRESS_PERIOD_TICKS=50` ticks (~500 ms)
+   mientras `g_cal_async.busy` — dispara repetidamente durante TODA la
+   calibración, no sólo al final.
+3. `psoc_calibration_start_async()`: `start_ticks`/`last_progress_ticks` se
+   inicializan con `psoc_now_ticks()` al arrancar — el watchdog
+   (`CAL_WATCHDOG_TICKS=20000`≈200 s) no puede disparar instantáneo por un bug
+   de init (descartado).
+4. `slave/main.cpp::loop()`: mientras `g_state != SAMPLING` (CALIBRATING
+   incluido) se llama `psoc.poll()` en cada iteración, que dispara
+   `onPsocDiag()` vía `_diagCb`.
+5. `onPsocDiag()`: el guard `if (g_state == SAMPLING && event.event !=
+   PSOC_EVT_DUMP_DONE) return;` no bloquea nada durante CALIBRATING (state=3
+   ≠ SAMPLING=2).
+6. Rama `PSOC_EVT_CAL_PROGRESS` (antes del cambio de esta sesión): chequeaba
+   `g_cfg_waiting && g_cfg_sub_cmd==PSOC_CMD_CALIBRATE` y mandaba
+   `sendCfgAck(PSOC_CMD_CALIBRATE, 2)` cada `PSOC_CAL_PROGRESS_ACK_PERIOD_MS=3000` ms.
+7. `g_cfg_waiting`: se pone `true` en `waitForPsocConfigAck()` al aceptar
+   `0xB5`, y sólo se limpia con el ack final (`ackCmd==g_cfg_sub_cmd`) o tras
+   `PSOC_CAL_ACK_TIMEOUT_MS=240000` ms — permanece `true` durante toda una
+   calibración normal (<200 s por el watchdog del PSoC).
+8. `master/data/js/app.js::handleAck()` línea 759: `if (ackCmd ===
+   cfg.SUBCMD_CALIBRATE && ackVal === 2 ...) { ...; return; }` — corta ANTES
+   de la rama "confirmada/fallida" (línea 803). Sin conflicto.
+9. `data_store.js::NodeData`: `this.calProgressLogMs = 0` — el primer log
+   "calibrando..." no se pierde por `NaN` (estaba bien inicializado).
+
+**Cada eslabón individual está correcto**; no se encontró ningún bug estático
+que explique "nunca apareció calibrando...". Podría ser un problema de
+timing/orden de llegada de paquetes que sólo se ve en vivo (p. ej. si el
+stream de diagnóstico y el ack final `0xC2` llegan "de a golpes" tras un
+bloqueo largo del lado PSoC, ambos podrían procesarse en la misma iteración de
+`loop()` del ESP y el dot pasaría de `busy`→`ok/bad` sin que el navegador
+llegue a pintar el estado intermedio).
+
+**Cambio aplicado** (`slave/src/main.cpp`, 3 ediciones; `calibration.c`/PSoC
+sin tocar): el ping "calibrando..." (`sendCfgAck(PSOC_CMD_CALIBRATE, 2)`) ya
+NO depende de que llegue `PSOC_EVT_CAL_PROGRESS` por el stream de diagnóstico
+del PSoC:
+
+- `waitForPsocConfigAck()`: si `sub_cmd==PSOC_CMD_CALIBRATE`, inicializa
+  `g_cal_progress_ack_ms = g_cfg_start_ms - PSOC_CAL_PROGRESS_ACK_PERIOD_MS` →
+  el primer ping sale en el `loop()` siguiente, sin esperar 3 s.
+- `servicePsocConfigAck()`: al final, si `g_cfg_waiting &&
+  g_cfg_sub_cmd==PSOC_CMD_CALIBRATE`, manda `sendCfgAck(PSOC_CMD_CALIBRATE,
+  2)` cada `PSOC_CAL_PROGRESS_ACK_PERIOD_MS` — corre en CADA `loop()` mientras
+  `g_state != SAMPLING`, usando sólo `millis()` y estado local del ESP (nada
+  de UART del PSoC).
+- `onPsocDiag()` rama `PSOC_EVT_CAL_PROGRESS`: se quitó el envío de ack
+  (queda sólo el log `CAL_PROGRESS` para diagnóstico).
+
+Resultado: el dot `.busy` ("Calibrando... (puede tardar hasta ~3 min)") y el
+log "S{idx} calibrando..." (cada 15 s, throttle del lado web) deberían
+aparecer dentro del primer segundo de aceptar `0xB5` y repetirse cada 3 s
+hasta el ack final — **independiente de cualquier problema en el link de
+diagnóstico PSoC→ESP**. Si en la próxima corrida TODAVÍA no aparece
+"calibrando...", el bug está en `sendCfgAck`/ESP-NOW/`onCfgAck`/
+`matlab.sendAck`/`protocol.js`/`app.js`/`slave_panel.js` — no en el lado
+PSoC, lo cual acota mucho la búsqueda.
+
+**Build verificado** (sólo compilación, sin flashear — eso queda para el
+usuario):
+- `pio run -e slave2` (GEOPHONE) → SUCCESS.
+- `pio run -e esp32dev` (maestro) → SUCCESS.
+- `pio run -e esp32dev -t buildfs` (imagen LittleFS con `slave_panel.js`, ya
+  tenía el `.busy`/`setCalibrationLock(3)` de §14.10) → SUCCESS.
+
+#### b) c2 — el problema de fondo: "converged" no distingue "centrado" de "saturado"
+
+Cita completa de la parte que importa:
+
+> "...algo esta mal en como medis y decidis mover los VDACs porque al ver en
+> el osciloscopio estas moviendo bien las cosas pero no paras cunado debes
+> parar y siempre concluis que la mejor señal es en una de las esquinas claro
+> porque si esta enla esquina va a saturar y ahi para de tener ruido pero eso
+> es estupido"
+
+**Evidencia ya disponible (de §14.10, sin nueva corrida) consistente con este
+diagnóstico**: el usuario reportó que, AÚN con el fallback de §14.9
+(`cal_measured_out_of_range()`: si `|best_measured| >
+CAL_OPERATING_RANGE_COUNTS=26214` ±0.5 V, se descarta `best_dac` y se vuelve a
+`CAL_DAC_INIT`/`base_measured`/`ok=0`), **el resultado sigue siendo peor que
+`CAL_DAC_INIT`**. Para que esto pase, `best_measured` tiene que estar PASANDO
+el chequeo de rango (`|best_measured| ≤ 26214`) — el ADC lee un valor
+"razonable" — mientras la etapa analógica está en un estado que el
+osciloscopio muestra saturado. Una salida saturada (pegada a un riel) es una
+señal DC constante: si esa constante cae cerca del "cero diferencial" que mide
+el ADC, `measured≈0` Y el ruido entre ventanas ≈0 simultáneamente —
+exactamente lo que el criterio de "convergió" (§14.10b y el anterior)
+interpreta como "perfecto, paramos acá".
+
+**El defecto de fondo** (enmarcado con el advisor, Opus 4.8): el criterio
+actual de convergencia usa SOLO `(measured, ruido)` en UN punto del DAC. Eso
+es estructuralmente incapaz de distinguir entre:
+
+- **Cruce por cero real**: la etapa tiene ganancia normal ahí, `measured≈target`
+  porque el VDAC de referencia está bien ajustado.
+- **Plateau de saturación**: la etapa tiene ganancia ≈0 ahí (la salida del
+  op-amp está pegada a un riel), y `measured≈target` es COINCIDENCIA (la
+  constante saturada cae cerca de 0 diferencial).
+
+Ambos casos se ven IDÉNTICOS para el criterio actual: "poco ruido, `abs_error`
+chico → converged". El discriminador que falta es la PENDIENTE/RESPUESTA de
+`measured` ante cambios de `dac`: en un cruce real, `measured` responde
+(pendiente ≠ 0); en un plateau saturado, `measured` no responde (pendiente ≈
+0) — la ganancia de esa etapa, en ese rango de DAC, es nula.
+
+**Por qué NO se tocó el algoritmo todavía**: hay al menos una hipótesis
+alternativa que explica el mismo síntoma — que la GANANCIA de la etapa sea tan
+ALTA que **1 LSB del VDAC de referencia (≈16 mV) ya mueva `measured` en mucho
+más que `CAL_TOL_COUNTS=250`**, en cuyo caso NINGÚN código 0-255 satisface la
+tolerancia, la búsqueda agota `CAL_MAX_ITER=12` iteraciones, y `best_dac` queda
+en el código más cercano al cruce real — que, si el offset de hardware es
+grande, podría estar genuinamente cerca de 0 o 255 (una "esquina" real, no una
+saturación). Esta hipótesis NO se arregla con un chequeo de
+pendiente/respuesta — se arregla con una tolerancia relativa a la pendiente
+local.
+
+Ambas hipótesis predicen "termina en una esquina", pero la corrección es
+distinta (chequeo de respuesta/pendiente vs. tolerancia relativa), y un fix
+elegido sin datos puede no aplicar al caso real o enmascarar el síntoma sin
+arreglarlo. **No se hizo ningún cambio al algoritmo de búsqueda/convergencia
+esta sesión** — queda bloqueado hasta tener la traza de la próxima corrida.
+
+#### c) Qué traer para destrabar (c2): una corrida completa, sin recortar
+
+El log `[SLAVE] CAL point stage=X/NOMBRE dac=D meas=M` (más `CAL_BEGIN`/
+`CAL_STAGE`/`CAL_VERIFY*`/`CAL_PROGRESS`/`CAL_AMUX_IN`/`CAL_WATCHDOG`) ya tiene
+todo lo necesario — es el mismo que armó las tablas de §14.1/§14.2. Lo que
+faltó en §14.2 fue que se cortó a la mitad de GEO_BP. Para la próxima corrida:
+
+1. Programar (`pio run -t upload` para `slave2`, y para el maestro +
+   `uploadfs`), presionar "Calibrar" y dejar el monitor serie del ESCLAVO
+   corriendo SIN CORTAR hasta ver `S{idx} calibracion confirmada` o `fallida`
+   en la web. Con el fix de (a), debería verse "Calibrando..." parpadeando en
+   el dot mientras tanto — confirma (c1) en la misma corrida.
+2. Pegar el log COMPLETO (todas las líneas `[SLAVE] CAL ...` de las 4 etapas +
+   verify), no sólo un fragmento.
+
+Con esa traza `(stage, dac, measured)` completa por etapa, esto se decide en
+minutos:
+
+- **Si `measured` se queda CONSTANTE (≈mismo valor, posiblemente cerca de 0)
+  para varios `dac` distintos cerca del final de una etapa** → plateau de
+  saturación confirmado → fix = chequeo de respuesta/pendiente antes de
+  aceptar `best_dac` (hipótesis A).
+- **Si `measured` SIGUE variando con `dac` (pendiente clara, sin aplanarse)
+  pero nunca entra en `±250` y la búsqueda gasta las 12 iteraciones** →
+  tolerancia demasiado chica para la ganancia real de esa etapa → fix =
+  tolerancia relativa a la pendiente local, o `CAL_TOL_COUNTS` por etapa más
+  realista (hipótesis B).
+- También mirar `final_dac` de cada etapa: si literalmente es `0` o `255` (no
+  sólo "cerca"), es más evidencia de plateau (las etapas suelen saturar ANTES
+  del extremo absoluto del código DAC, pero el extremo absoluto SIEMPRE está
+  saturado si el resto lo está).
+
+No se requiere ninguna otra acción del usuario sobre hardware aparte de
+programar y correr una calibración una vez.
+
+### 14.12 Sesión 2026-06-14 (5ta parte): la corrida de §14.11c llegó completa — blind spot del clamping de telemetría, GEO_LP cruza de riel a riel en 1 LSB, idea de PID/dithering (NO implementada), y fix de telemetría sin clamping
+
+#### a) La corrida completa pedida en §14.11c
+
+El usuario pegó el log completo, sin cortar, de las 4 etapas + verify. Cita:
+"Acá casi hizo lo que debia hacer, pero al final se volvio a ir al carajo,
+podes analizar el log para ver que paso?"
+
+Tabla `dac→meas` (el `meas` del log, que es `cal_diag_i16` — ver (b) sobre por
+qué este valor puede estar clampeado):
+
+| Etapa | Secuencia `dac→meas` (orden de la búsqueda) | Resultado |
+|---|---|---|
+| 0 GEO_PGA | 156→32767, 188→32767, 93→32767, 46→32767, 22→32767, 10→32767, 4→32767, 1→32767, 0→32767; [readback] 156→32767 | `ok=0 dac=156 meas=32767` |
+| 1 GEO_BP | 156→32767, 188→32767, 93→-32768, 140→-14297, 164→32767, 152→32767, 146→32767, 143→16147, 141→-9427, 142→-6658; [readback] 142→-6658 | `ok=0 dac=142 meas=-6658` |
+| 2 GEO_ADDER | 156→-21064, 188→14216, 93→-32768, 140→-32768, 164→-10352, 176→2256, 170→-4018, 173→-985, 174→1; [readback] 174→1 | `ok=1 dac=174 meas=1` |
+| 3 GEO_LP | 156→32767, 188→32767, 93→-32768, 140→-32768, 164→-32768, 176→32767, 170→32767, 167→32767, 165→32767; **CAL_LP_BAD**; [readback] 156→32767 | `ok=0 dac=156 meas=32767` |
+
+Esta secuencia se trazó punto por punto contra el algoritmo real
+(`EVAL_INIT`→`EVAL_PROBE`→`PLAN_ITER`/`EVAL_ITER`→`async_finish_stage`,
+`calibration.c` líneas ~399-560 y ~309-345) y **coincide exactamente** en las
+4 etapas — confirma que la máquina de bisección hace lo que el código dice que
+hace. En particular:
+
+- **GEO_ADDER (etapa 2) es un caso de éxito de manual**: `f(156)=-21064` y
+  `f(188)=+14216` (signos opuestos, ninguno saturado) → `increasing` se infiere
+  correctamente de los dos primeros puntos → bisección limpia hasta
+  `dac=174, meas=1, ok=1`. El algoritmo de bisección, cuando el primer par de
+  sondeos es informativo, converge perfecto.
+- **GEO_BP (etapa 1)** termina en `dac=142, meas=-6658` — fuera de
+  `CAL_TOL_COUNTS=250` (por ~26x) pero MUY adentro de
+  `CAL_OPERATING_RANGE_COUNTS=26214` (-6658 ≈ -0.13 V de offset). `ok=0` pero
+  el valor SE CONSERVA (no hay revert a `CAL_DAC_INIT`, `cal_measured_out_of_range(-6658)`
+  es falso). Caso "usable pero no ok" — ver (d).
+- **GEO_PGA (etapa 0)**: los 9 códigos sondeados (156,188,93,46,22,10,4,1,0)
+  leen TODOS `32767` (clampeado). `best` nunca mejora sobre el punto inicial
+  (todos empatan), la búsqueda llega a `dac=0` y termina; revert a
+  `CAL_DAC_INIT` (no-op, ya estaba ahí).
+- **GEO_LP (etapa 3)**: la bisección converge correctamente hacia el límite
+  `[164,165]` — `164→-32768` y `165`(visitado indirectamente vía 176→170→167→165)
+  `→+32767`. Cada lectura `+32767` en la zona `[165,176]` empata (no supera,
+  `<` estricto) el `best_abs_error=32767` del punto inicial `dac=156`. La
+  búsqueda termina con `lo>hi`, `best` sigue siendo el punto inicial
+  `(156,32767)`, `cal_measured_out_of_range(32767)`→true→revert a
+  `CAL_DAC_INIT` (no-op) + **`CAL_LP_BAD`** porque es la última etapa.
+
+#### b) Blind spot identificado por el advisor (Opus): `cal_diag_i16` CLAMPEA — los "32767"/"-32768" del log NO son necesariamente el riel físico
+
+Antes de escribir esto al HANDOFF, se armó una hipótesis de bug de software
+("Finding 1": el fallback `increasing=(direction>=0)` cuando
+`measured(188)==measured(156)` sólo explora la MITAD del rango DAC; "Finding
+2": `abs_error < best_abs_error` con `<` estricto nunca actualiza `best` ante
+un empate exacto). El advisor señaló el blind spot que invalida ambas como
+"demostradas con este log":
+
+```c
+static void cal_diag_i16(uint8 event, int32 value)
+{
+    uint16 u;
+    if (value > 32767L) { value = 32767L; }
+    if (value < -32768L) { value = -32768L; }
+    u = (uint16)(int16)value;
+    ...
+}
+```
+
+`measured` internamente es `cum_avg`, un `int32` completo (línea ~272). SÓLO
+la telemetría pasa por `cal_diag_i16`, que SATURA a ±32767 antes de mandar 2
+bytes. Es decir: **cualquier `|measured|>32767` se ve IDÉNTICO en el log**
+("siempre 32767" o "siempre -32768"), pero las comparaciones internas
+(`abs_error`, `measured==base_measured`, `cal_measured_out_of_range`) usan el
+valor `int32` REAL, no el clampeado.
+
+Consecuencia: los "empates en 32767" de GEO_PGA y de la zona `[165,176]` de
+GEO_LP **podrían no ser empates reales** — podrían ser, p. ej., 35000, 50000,
+100000 (todos se ven "32767" en el log) — y entonces `increasing` SÍ pudo
+inferirse del par real (no del fallback), y `best` SÍ pudo actualizarse vía
+`<` estricto. **Finding 1 y Finding 2 quedan SIN CONFIRMAR / posiblemente no
+aplicables** — no se descartan para siempre, pero no son la explicación
+establecida de este log. No vale la pena perseguirlas más sin datos sin
+clamp.
+
+**Lo que SÍ sobrevive intacto** (un cambio de signo no se invierte por
+clamping):
+
+- GEO_ADDER funciona perfecto (prueba que la bisección, cuando tiene
+  información, converge bien).
+- GEO_BP termina en un punto "usable pero no ok" CONSERVADO (-6658, dentro de
+  rango).
+- **GEO_LP cruza de `-32768` a `+32767` entre `dac=164` y `dac=165` — un
+  cambio de signo real entre dos códigos DAC ADYACENTES**. Esto sigue siendo
+  la pieza dura del problema: el cruce de "salida muy negativa" a "salida muy
+  positiva" para GEO_LP cae dentro de **1 LSB del VDAC de referencia (≈16
+  mV)**, visto con la telemetría clampeada. Lo que NO sabemos todavía es la
+  MAGNITUD real de `f(164)` y `f(165)` (¿-40000/+38000? ¿-27000/+27500?) — eso
+  decide si esto es "apenas fuera de rango" (arreglable) o "saturación dura"
+  (no arreglable por DAC).
+
+#### c) Observación del usuario: calibración manual a 16mV YA logró resultados usables
+
+Mensaje del usuario (verbatim), llegado durante la investigación de (a)/(b):
+
+> "Lo que pasa tambien es que hay veces que llega a ser usable y esta bien
+> pero seguis moviendo así que no te creo que no se pueda con una resolución
+> de 16mV que es lo que tenemos actualmente, pues yo calibraba a mano en zonas
+> usables esto y lograba deajar algo funcional, así que una cpu deberia
+> tambein [poder]"
+
+Esto es evidencia empírica directa (no se deriva del código): **el usuario ya
+encontró, a mano, códigos VDAC (16 mV/LSB, el mismo DAC que usa el firmware)
+que dejan el front-end en un estado funcional**. Esto:
+
+1. Refuerza la prioridad de (b): hay que ver los valores SIN CLAMP antes de
+   concluir "imposible con este DAC" para GEO_PGA/GEO_LP.
+2. Aporta una pista de comportamiento adicional — "a veces llega a ser usable
+   y esta bien pero seguís moviendo" — es decir, durante la búsqueda el
+   sistema PASA por puntos razonables (ej. GEO_BP en -6658, ~-0.13V, es
+   bastante "usable" en términos prácticos aunque `ok=0` por
+   `CAL_TOL_COUNTS=250`) pero el criterio de paro actual (`abs_error<=250`,
+   chequeo SOLO en el punto actual) no los reconoce como "suficientemente
+   buenos" — sigue iterando. El caso GEO_BP (-6658, conservado porque está en
+   rango) muestra que el VALOR final SÍ puede ser razonable aunque `ok=0`; el
+   caso GEO_PGA/GEO_LP (revert a `CAL_DAC_INIT`) es el que hay que mirar con
+   datos sin clamp para saber si está "apenas" o "muy" fuera de
+   `CAL_OPERATING_RANGE_COUNTS=26214`.
+
+#### d) Propuesta del usuario: PID/PI continuo por etapa — IDEA, NO IMPLEMENTADA
+
+Mensaje del usuario (verbatim):
+
+> "No crees que capaz sea más probable que converja si hacemos un PID para
+> cada operacional que sigue operando eternamente hasta que llegue la señal de
+> VER o START? capaz funciona mejor por la parte integral que se beneficia del
+> tiempo. Pregunto es para que mandes al advisor y pongas, literal podriamos
+> poner unos PID conservadores, probablemente PI nomás quita la D para no
+> amplificar el ruido, y poniendo esto bien conservador podemos capaz obtener
+> que se autocalibre mientras va iniciando. Igual deja como idea esto en el md
+> primero veamos que hacemos con busqueda binaria pero bueno capaz podes
+> mandarle a advisor para ver si es que vale la pena, porque hasta ahora no
+> logramos que funcione la puerqueza con la busqueda binaria no sé muy bien
+> que hacer más, no sé que más verificar"
+
+Se consultó al advisor (Opus 4.8) con esta propuesta + el análisis de
+(a)/(b). Resumen de su respuesta:
+
+- **PID es ortogonal al fallo real**: un PI corriendo sobre el MISMO DAC de
+  8 bits/16mV pega contra el MISMO piso de cuantización. Para un cruce
+  sub-LSB (GEO_LP entre 164 y 165), un lazo PI no converge — *limit-cycla*
+  entre los dos códigos adyacentes con el integrador "wind-up", lo cual es
+  PEOR que el "me rindo" limpio de la bisección, no mejor. El promediado que
+  el usuario espera de la parte integral YA lo hace
+  `async_measure_service` (promediado acumulativo, ver §14.10b).
+- **El núcleo salvable de la idea NO es "PID" sino "dithering"**: alternar
+  (PWM) entre dos códigos DAC adyacentes para conseguir una resolución de
+  referencia EFECTIVA sub-LSB. Esa es la ÚNICA técnica que podría calibrar
+  GEO_LP — y SÓLO SI la etapa tiene una pendiente finita (aunque empinada)
+  entre 164 y 165, no si está físicamente pegada a un riel en TODO el rango
+  alcanzable. Esto se decide con los datos sin clamp de (b)/(f).
+- Recomendación: **dejar la idea documentada (acá) como "dithering
+  PWM-entre-códigos-adyacentes, eventualmente impulsado por un integrador
+  PI conservador"**, pero NO implementarla todavía — primero conseguir UNA
+  corrida con telemetría sin clamp (f) y ver si GEO_PGA/GEO_LP tienen algún
+  código (o par de códigos adyacentes) con magnitud real cerca de
+  `CAL_OPERATING_RANGE_COUNTS`. Si sí → dithering tiene sentido. Si está
+  saturado en TODO el rango con magnitudes enormes → es un problema de
+  ganancia de hardware, ningún controlador (bisección, PID o dithering)
+  operando sobre este VDAC lo resuelve.
+
+**No se tocó el algoritmo de búsqueda/convergencia ni se implementó PID ni
+dithering esta sesión** — sólo se aplicó el fix de telemetría de (f), que es
+el prerequisito de datos que tanto el advisor como la observación (c) del
+usuario piden antes de elegir entre bisección-arreglada / dithering /
+rediseño de hardware.
+
+#### e) Fix aplicado esta sesión: telemetría SIN CLAMP — nuevo evento `PSOC_EVT_CAL_STAGE_MEAS32` (0x1D) / log `CAL_POINT32`
+
+Cambio mínimo y aditivo: además de la telemetría clampeada existente
+(`PSOC_EVT_CAL_STAGE_MEAS`, 2 bytes, ±32767), se manda AHORA TAMBIÉN el
+`int32 measured` COMPLETO (4 bytes MSB-first, sin clamping) bajo un evento
+nuevo. No se quitó ni modificó ningún evento existente — cero riesgo para
+parsers/JS actuales (verificado: `master/data/js/slave_panel.js` no
+referencia `LOGM`/`CAL_POINT` por nombre, así que una línea de log nueva no
+rompe nada).
+
+Archivos tocados:
+
+- `psoc_hw.h` (PSoC): `#define PSOC_EVT_CAL_STAGE_MEAS32 0x1Du` (después de
+  `PSOC_EVT_CAL_LP_BAD=0x1Cu`; `0x1D` estaba libre, el próximo usado era
+  `PSOC_EVT_WAIT_ESP=0x20u`).
+- `calibration.c`:
+  - nueva `cal_diag_i32(uint8 event, int32 value)` (después de
+    `cal_diag_i16`, ~línea 51) — manda los 4 bytes crudos de `value` (sin
+    saturar) con el mismo framing que `cal_diag_i16` (N llamadas a
+    `cal_diag` con el mismo `event`).
+  - `cal_diag_point()`: ahora también llama
+    `cal_diag_i32(PSOC_EVT_CAL_STAGE_MEAS32, measured)` — se emite por CADA
+    punto sondeado durante la búsqueda/verify (mismo call site que ya emitía
+    `CAL_STAGE_DAC` + `CAL_STAGE_MEAS`).
+  - `async_finish_stage()`: idem, después de
+    `cal_diag_i16(PSOC_EVT_CAL_STAGE_MEAS, result->final_measured)` — el
+    resultado FINAL de cada etapa también viaja sin clamp.
+- `slave/src/psoc_uart.h` (ESP): mismo `#define PSOC_EVT_CAL_STAGE_MEAS32
+  0x1D`.
+- `slave/src/main.cpp`:
+  - `psocDiagName()`: nuevo caso `"CAL_STAGE_MEAS32"`.
+  - nuevas estáticas `calMeasRaw` (`uint32_t`) / `calMeasRawByte` (`uint8_t`,
+    contador 0-3), reseteadas junto con `calMeasHigh` en
+    `CAL_STAGE_BEGIN`/`CAL_VERIFY_BEGIN` (mismo patrón que el ensamblado de 2
+    bytes ya existente para `calMeas`).
+  - nueva rama `else if (event.event == PSOC_EVT_CAL_STAGE_MEAS32)`: ensambla
+    4 bytes big-endian en `calMeasRaw`, y al completar imprime:
+    - `[SLAVE] CAL point32 stage=X/NOMBRE dac=D measRaw=<int32 real>`
+    - `LOGM("CAL_POINT32", "stage=X,name=...,dac=D,measRaw=<int32 real>")`
+
+**Build verificado**: `pio run -e slave2` → SUCCESS, mismo footprint
+(RAM 13.5% / Flash 56.3%). El lado PSoC (`calibration.c`/`psoc_hw.h`) NO se
+puede compilar desde CLI (requiere el fitter de PSoC Creator, ver §2) — los
+cambios son sintácticamente análogos a `cal_diag_i16`/`cal_diag_point` (mismos
+tipos `uint8`/`int32`/`uint32` ya usados en ese archivo), pero **falta
+compilar+programar en PSoC Creator** antes de la próxima corrida.
+
+#### f) Qué traer para la próxima corrida
+
+1. Abrir `AcondicionamientoAnalogico.cydsn` en PSoC Creator, compilar (genera
+   el fitter de nuevo, sin cambios de TopDesign) y programar.
+2. `pio run -t upload` para `slave2` (ya verificado que compila).
+3. Correr "Calibrar" y pegar el log COMPLETO sin cortar — ahora cada punto
+   tendrá DOS líneas:
+   ```
+   [SLAVE] CAL point stage=3/GEO_LP dac=164 meas=-32768
+   [SLAVE] CAL point32 stage=3/GEO_LP dac=164 measRaw=<valor real>
+   ```
+4. Con `measRaw` real para GEO_PGA (los 9 puntos, todos "32767" clampeado) y
+   GEO_LP (en particular `dac=164` y `dac=165`), responde:
+   - **¿Algún `measRaw` cae cerca de `±26214` (p. ej. entre ±26000 y
+     ±35000)?** → "apenas fuera de rango", posiblemente arreglable ajustando
+     `CAL_OPERATING_RANGE_COUNTS`/búsqueda, o con dithering entre los códigos
+     vecinos.
+   - **¿Todos los `measRaw` son enormes (decenas/cientos de miles) en TODO el
+     rango sondeado?** → saturación dura de hardware; ningún algoritmo sobre
+     este VDAC lo arregla — replantear ganancia de GEO_PGA/GEO_LP o el punto
+     de inyección de la referencia (pregunta de hardware, no de firmware).
+   - Para GEO_LP específicamente: ¿`measRaw(164)` y `measRaw(165)` son
+     "moderados" (cerca del rango operativo) o "extremos"? Esto decide si
+     dithering 164↔165 (idea de (d)) tiene sentido.

@@ -29,6 +29,7 @@
 #define PSOC_IDLE      0u
 #define PSOC_ARMED     1u
 #define PSOC_SAMPLING  2u
+#define PSOC_CALIBRATING 3u
 
 #define PSOC_CMD_PING      0xC0u
 #define PSOC_CMD_PONG      0xC1u
@@ -43,6 +44,15 @@
 #define PSOC_EVT_CAL_BUSY         0x12u
 #define PSOC_EVT_CAL_STAGE_DAC    0x13u
 #define PSOC_EVT_CAL_STAGE_MEAS   0x14u
+#define PSOC_EVT_CAL_STAGE_BEGIN  0x15u
+#define PSOC_EVT_CAL_STAGE_OK     0x16u
+#define PSOC_EVT_CAL_VERIFY_BEGIN 0x17u
+#define PSOC_EVT_CAL_VERIFY_OK    0x18u
+#define PSOC_EVT_CAL_AMUX_IN      0x19u
+#define PSOC_EVT_CAL_PROGRESS     0x1Au
+#define PSOC_EVT_CAL_WATCHDOG     0x1Bu
+#define PSOC_EVT_CAL_LP_BAD       0x1Cu
+#define PSOC_EVT_CAL_STAGE_MEAS32 0x1Du
 #define PSOC_EVT_WAIT_ESP         0x20u
 #define PSOC_EVT_ESP_SEEN         0x21u
 #define PSOC_EVT_RX_CMD           0x30u
@@ -71,5 +81,9 @@
 void psoc_hw_start_analog(uint8 pga_code, uint8 pgavdac_code);
 void psoc_hw_set_pga(uint8 code);
 void psoc_hw_set_pgavdac(uint8 code);
+
+/* Contador de ticks de 10 ms (g_timer_ticks de main.c), usado por
+ * calibration.c para el watchdog y la telemetria periodica de progreso. */
+uint32 psoc_now_ticks(void);
 
 #endif

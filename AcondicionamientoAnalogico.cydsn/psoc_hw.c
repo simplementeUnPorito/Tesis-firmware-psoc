@@ -30,6 +30,7 @@ void psoc_hw_start_analog(uint8 pga_code, uint8 pgavdac_code)
 {
 #if PSOC_HW_CLASS == PSOC_HW_GEO
     OPAref_Start();
+    PGAshield_Start();
     PGAp_Start();
     PGAn_Start();
     PGAp_SetGain(PGAp_GAIN_02);

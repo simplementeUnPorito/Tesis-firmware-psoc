@@ -68,6 +68,42 @@
 #define CAL_MAX_ITER   12u
 #define CAL_TOL_COUNTS 250L
 
+#define CAL_TOL_COUNTS_GEO_PGA   250L
+#define CAL_TOL_COUNTS_GEO_BP    250L
+#define CAL_TOL_COUNTS_GEO_ADDER 250L
+#define CAL_TOL_COUNTS_GEO_LP    250L
+
+/* Rango operativo absoluto: ADC_CFG1_COUNTS_PER_VOLT=52429 (ver HANDOFF
+ * §4/§13), entonces 0.5V =~ 26214 counts. Una etapa cuya mejor medicion
+ * (best_measured) quede mas lejos de 0 que esto NO se deja calibrada con ese
+ * DAC aunque "ok" hubiera sido 1: se prefiere volver a CAL_DAC_INIT
+ * (~2.5V, sin calibrar pero en rango) a dejar el operacional fuera de rango
+ * (riesgo de saturacion en cascada). Prioridad maxima: la ultima etapa
+ * (GEO_LP, la que alimenta al canal de captura del ADC) SIEMPRE debe quedar
+ * dentro de este rango, o la captura es inutil (ver PSOC_EVT_CAL_LP_BAD). */
+#define CAL_OPERATING_RANGE_COUNTS 26214L
+
+/* Espera en muestras ADC descartadas despues de tocar cada VDAC. CFG1 corre a
+ * ~3 kSPS, asi que 300 muestras son aproximadamente 100 ms. Los nodos mas
+ * abajo en la cascada esperan mas porque ven el asentamiento acumulado. */
+#define CAL_SETTLE_SAMPLES_GEO_PGA   3000u
+#define CAL_SETTLE_SAMPLES_GEO_BP   15000u
+#define CAL_SETTLE_SAMPLES_GEO_ADDER 8000u
+#define CAL_SETTLE_SAMPLES_GEO_LP    6000u
+
+#define CAL_VERIFY_SAMPLES_GEO_PGA    5000u
+#define CAL_VERIFY_SAMPLES_GEO_BP    24000u
+#define CAL_VERIFY_SAMPLES_GEO_ADDER 12000u
+#define CAL_VERIFY_SAMPLES_GEO_LP     9000u
+
+#define CAL_SETTLE_SAMPLES_HAMMER_IN   180u
+#define CAL_SETTLE_SAMPLES_HAMMER_PGA  600u
+#define CAL_SETTLE_SAMPLES_HAMMER_LP   900u
+
+#define CAL_VERIFY_SAMPLES_HAMMER_IN   300u
+#define CAL_VERIFY_SAMPLES_HAMMER_PGA  900u
+#define CAL_VERIFY_SAMPLES_HAMMER_LP  1200u
+
 /* Punto de partida obligatorio de la busqueda binaria: 0x9C = 156 ->
  * 156 * 16mV (VDAC8 1x) = 2.496V =~ 2.5V (centro de rango / "tierra
  * virtual" del front-end analogico). */
@@ -77,11 +113,19 @@
  * la medida crece o decrece con el codigo DAC. */
 #define CAL_PROBE_STEP 32u
 
-/* "Estabilizacion": stable_avg() repite avg_counts() hasta que dos ventanas
- * consecutivas difieran <= CAL_SETTLE_TOL_COUNTS (ruido de cuantizacion),
- * o hasta CAL_SETTLE_MAX_WINDOWS intentos (usa la ultima ventana). */
-#define CAL_SETTLE_MAX_WINDOWS 10u
-#define CAL_SETTLE_TOL_COUNTS  100L
+/* La maquina de estados no bloqueante descarta settle_samples y luego sigue
+ * promediando ACUMULATIVAMENTE (ver async_measure_service en calibration.c)
+ * hasta que el promedio acumulado deje de moverse mas de
+ * CAL_SETTLE_TOL_COUNTS de una ventana a la siguiente, o hasta
+ * CAL_SETTLE_MAX_WINDOWS como limite de seguridad. CAL_SETTLE_TOL_COUNTS=10
+ * (~+-10 counts, pedido del usuario 2026-06-14) es estricto porque se compara
+ * contra el promedio ACUMULADO (cada vez mas estable), no contra una ventana
+ * sola. CAL_SETTLE_MAX_WINDOWS=40 (vs 10 antes) => hasta 40*32=1280 muestras
+ * por punto (~426 ms a ~3 kSPS); con ~60 puntos medidos en una corrida
+ * completa eso agrega ~19 s en el peor caso, muy por debajo de
+ * CAL_WATCHDOG_TICKS=200 s. */
+#define CAL_SETTLE_MAX_WINDOWS 40u
+#define CAL_SETTLE_TOL_COUNTS  10L
 
 #if PSOC_HW_CLASS == PSOC_HW_GEO
 
@@ -108,10 +152,10 @@ static void cal_vdac_geo_adder(uint8 value) { VDAC_Ref_Adder_SetValue(value); }
 static void cal_vdac_geo_lp(uint8 value)    { VDAC_ref_LP_SetValue(value); }
 
 static const PsocCalStage g_psoc_cal_stages[] = {
-    { "GEO_PGA",   0u, CAL_TARGET_GEO_PGA_COUNTS,   CAL_AVG_N, CAL_MAX_ITER, CAL_TOL_COUNTS, 1, cal_vdac_geo_pga },
-    { "GEO_BP",    1u, CAL_TARGET_GEO_BP_COUNTS,    CAL_AVG_N, CAL_MAX_ITER, CAL_TOL_COUNTS, 1, cal_vdac_geo_bp },
-    { "GEO_ADDER", 2u, CAL_TARGET_GEO_ADDER_COUNTS, CAL_AVG_N, CAL_MAX_ITER, CAL_TOL_COUNTS, 1, cal_vdac_geo_adder },
-    { "GEO_LP",    3u, CAL_TARGET_GEO_LP_COUNTS,    CAL_AVG_N, CAL_MAX_ITER, CAL_TOL_COUNTS, 1, cal_vdac_geo_lp },
+    { "GEO_PGA",   0u, CAL_TARGET_GEO_PGA_COUNTS,   CAL_AVG_N, CAL_SETTLE_SAMPLES_GEO_PGA,   CAL_VERIFY_SAMPLES_GEO_PGA,   CAL_MAX_ITER, CAL_TOL_COUNTS_GEO_PGA,   1, cal_vdac_geo_pga },
+    { "GEO_BP",    1u, CAL_TARGET_GEO_BP_COUNTS,    CAL_AVG_N, CAL_SETTLE_SAMPLES_GEO_BP,    CAL_VERIFY_SAMPLES_GEO_BP,    CAL_MAX_ITER, CAL_TOL_COUNTS_GEO_BP,    1, cal_vdac_geo_bp },
+    { "GEO_ADDER", 2u, CAL_TARGET_GEO_ADDER_COUNTS, CAL_AVG_N, CAL_SETTLE_SAMPLES_GEO_ADDER, CAL_VERIFY_SAMPLES_GEO_ADDER, CAL_MAX_ITER, CAL_TOL_COUNTS_GEO_ADDER, 1, cal_vdac_geo_adder },
+    { "GEO_LP",    3u, CAL_TARGET_GEO_LP_COUNTS,    CAL_AVG_N, CAL_SETTLE_SAMPLES_GEO_LP,    CAL_VERIFY_SAMPLES_GEO_LP,    CAL_MAX_ITER, CAL_TOL_COUNTS_GEO_LP,    1, cal_vdac_geo_lp },
 };
 
 #define PSOC_CAL_STAGE_COUNT ((uint8)(sizeof(g_psoc_cal_stages) / sizeof(g_psoc_cal_stages[0])))
@@ -140,9 +184,9 @@ static void cal_vdac_hammer_pga(uint8 value) { VDAC_PGA_SetValue(value); }
 static void cal_vdac_hammer_lp(uint8 value)  { VDAC_LP_SetValue(value); }
 
 static const PsocCalStage g_psoc_cal_stages[] = {
-    { "HAMMER_IN",  0u, CAL_TARGET_HAMMER_IN_COUNTS,  CAL_AVG_N, CAL_MAX_ITER, CAL_TOL_COUNTS, 1, cal_vdac_hammer_in },
-    { "HAMMER_PGA", 1u, CAL_TARGET_HAMMER_PGA_COUNTS, CAL_AVG_N, CAL_MAX_ITER, CAL_TOL_COUNTS, 1, cal_vdac_hammer_pga },
-    { "HAMMER_LP",  2u, CAL_TARGET_HAMMER_LP_COUNTS,  CAL_AVG_N, CAL_MAX_ITER, CAL_TOL_COUNTS, 1, cal_vdac_hammer_lp },
+    { "HAMMER_IN",  0u, CAL_TARGET_HAMMER_IN_COUNTS,  CAL_AVG_N, CAL_SETTLE_SAMPLES_HAMMER_IN,  CAL_VERIFY_SAMPLES_HAMMER_IN,  CAL_MAX_ITER, CAL_TOL_COUNTS, 1, cal_vdac_hammer_in },
+    { "HAMMER_PGA", 1u, CAL_TARGET_HAMMER_PGA_COUNTS, CAL_AVG_N, CAL_SETTLE_SAMPLES_HAMMER_PGA, CAL_VERIFY_SAMPLES_HAMMER_PGA, CAL_MAX_ITER, CAL_TOL_COUNTS, 1, cal_vdac_hammer_pga },
+    { "HAMMER_LP",  2u, CAL_TARGET_HAMMER_LP_COUNTS,  CAL_AVG_N, CAL_SETTLE_SAMPLES_HAMMER_LP,  CAL_VERIFY_SAMPLES_HAMMER_LP,  CAL_MAX_ITER, CAL_TOL_COUNTS, 1, cal_vdac_hammer_lp },
 };
 
 #define PSOC_CAL_STAGE_COUNT ((uint8)(sizeof(g_psoc_cal_stages) / sizeof(g_psoc_cal_stages[0])))

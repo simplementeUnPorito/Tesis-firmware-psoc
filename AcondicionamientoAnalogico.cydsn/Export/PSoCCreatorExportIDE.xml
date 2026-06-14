@@ -6,8 +6,8 @@
     <Toolchain Name="ARM GCC Generic" Selected="True">
       <Tool Name="prebuild" Command="" Options="" />
       <Tool Name="assembler" Command="arm-none-eabi-as.exe" Options="-mcpu=cortex-m3 -mthumb -I..\shared -I. -IGenerated_Source\PSoC5 -alh=${OutputDir}/${CompileFile}.lst -g -W" />
-      <Tool Name="compiler" Command="arm-none-eabi-gcc.exe" Options="-mcpu=cortex-m3 -mthumb -I..\shared -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D DEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Og" />
-      <Tool Name="linker" Command="arm-none-eabi-gcc.exe" Options="-mcpu=cortex-m3 -mthumb -L Generated_Source\PSoC5 -Wl,-Map,${OutputDir}/${ProjectShortName}.map -T Generated_Source\PSoC5\cm3gcc.ld -specs=nano.specs -Wl,--gc-sections -g -ffunction-sections -Og -ffat-lto-objects" />
+      <Tool Name="compiler" Command="arm-none-eabi-gcc.exe" Options="-mcpu=cortex-m3 -mthumb -I..\shared -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D DEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -flto -O3" />
+      <Tool Name="linker" Command="arm-none-eabi-gcc.exe" Options="-mcpu=cortex-m3 -mthumb -L Generated_Source\PSoC5 -Wl,-Map,${OutputDir}/${ProjectShortName}.map -T Generated_Source\PSoC5\cm3gcc.ld -specs=nano.specs -Wl,--gc-sections -g -ffunction-sections -finline-functions -O3 -flto -ffat-lto-objects" />
       <Tool Name="postbuild" Command="" Options="" />
     </Toolchain>
     <Toolchain Name="ARM MDK Generic" Selected="False">
@@ -207,6 +207,12 @@
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\AMux_IN.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\AMux_ADC.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\AMux_ADC.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGAshield.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGAshield.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\PGAshield_PM.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Vshield_aliases.h</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Vshield.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC5\Vshield.h</File>
         </Files>
       </Folder>
       <Folder BuildType="STRICT" Path="C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\Export\ARM_GCC_Generic">
