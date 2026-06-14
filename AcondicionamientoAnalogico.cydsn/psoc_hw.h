@@ -53,8 +53,11 @@
 #define PSOC_EVT_CAL_WATCHDOG     0x1Bu
 #define PSOC_EVT_CAL_LP_BAD       0x1Cu
 #define PSOC_EVT_CAL_STAGE_MEAS32 0x1Du
+#define PSOC_EVT_SERVO_STAGE      0x1Eu
+#define PSOC_EVT_SERVO_STEP       0x1Fu
 #define PSOC_EVT_WAIT_ESP         0x20u
 #define PSOC_EVT_ESP_SEEN         0x21u
+#define PSOC_EVT_CAL_LOOP         0x22u
 #define PSOC_EVT_RX_CMD           0x30u
 #define PSOC_EVT_SETN             0x31u
 #define PSOC_EVT_ARMED            0x32u

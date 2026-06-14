@@ -23,6 +23,8 @@ typedef struct {
     uint16 max_iter;
     int32 tolerance_counts;
     int8 direction;
+    uint8 dac_center;
+    uint8 dac_max_change;
     PsocCalVdacWrite write;
 } PsocCalStage;
 
@@ -53,5 +55,9 @@ uint8 psoc_calibration_start_async(void);
 uint8 psoc_calibration_service_async(void);
 uint8 psoc_calibration_async_busy(void);
 uint8 psoc_calibration_async_result_ok(void);
+void psoc_calibration_servo_enable(uint8 enable);
+uint8 psoc_calibration_servo_enabled(void);
+void psoc_calibration_servo_abort(void);
+uint8 psoc_calibration_servo_service(void);
 
 #endif

@@ -68,20 +68,20 @@
 #define CAL_MAX_ITER   12u
 #define CAL_TOL_COUNTS 250L
 
-#define CAL_TOL_COUNTS_GEO_PGA   250L
-#define CAL_TOL_COUNTS_GEO_BP    250L
-#define CAL_TOL_COUNTS_GEO_ADDER 250L
-#define CAL_TOL_COUNTS_GEO_LP    250L
-
 /* Rango operativo absoluto: ADC_CFG1_COUNTS_PER_VOLT=52429 (ver HANDOFF
- * §4/§13), entonces 0.5V =~ 26214 counts. Una etapa cuya mejor medicion
- * (best_measured) quede mas lejos de 0 que esto NO se deja calibrada con ese
- * DAC aunque "ok" hubiera sido 1: se prefiere volver a CAL_DAC_INIT
- * (~2.5V, sin calibrar pero en rango) a dejar el operacional fuera de rango
- * (riesgo de saturacion en cascada). Prioridad maxima: la ultima etapa
- * (GEO_LP, la que alimenta al canal de captura del ADC) SIEMPRE debe quedar
- * dentro de este rango, o la captura es inutil (ver PSOC_EVT_CAL_LP_BAD). */
+ * §4/§13), entonces 0.5V =~ 26214 counts. En GEO lo usamos tambien como
+ * criterio de "suficientemente bueno": si cae dentro de este rango, se lockea
+ * la etapa y se pasa a la siguiente. Si no cae, igual se conserva el mejor
+ * candidato encontrado; no se vuelve al default. */
 #define CAL_OPERATING_RANGE_COUNTS 26214L
+
+/* GEO ahora acepta "funcional" como dentro del rango operativo. Si una etapa
+ * cae ahi se lockea y se pasa a la siguiente; no se sigue buscando perfeccion
+ * de pocos counts con un VDAC de 8 bits. */
+#define CAL_TOL_COUNTS_GEO_PGA   CAL_OPERATING_RANGE_COUNTS
+#define CAL_TOL_COUNTS_GEO_BP    CAL_OPERATING_RANGE_COUNTS
+#define CAL_TOL_COUNTS_GEO_ADDER CAL_OPERATING_RANGE_COUNTS
+#define CAL_TOL_COUNTS_GEO_LP    CAL_OPERATING_RANGE_COUNTS
 
 /* Espera en muestras ADC descartadas despues de tocar cada VDAC. CFG1 corre a
  * ~3 kSPS, asi que 300 muestras son aproximadamente 100 ms. Los nodos mas
@@ -109,6 +109,39 @@
  * virtual" del front-end analogico). */
 #define CAL_DAC_INIT   0x9Cu
 
+/* Cada etapa busca alrededor de su codigo VDAC esperado, no sobre todo el
+ * rango. Asi esto escala a otros front-ends: se ajusta CENTER/MAX_CHANGE por
+ * operacional y la maquina de estados calcula center +- max_change. */
+#define CAL_DAC_CENTER CAL_DAC_INIT
+#define CAL_DAC_MAX_CHANGE_GEO 64u
+#define CAL_DAC_MAX_CHANGE_HAMMER 255u
+
+/* Si una etapa no entra al rango operativo, no tiene sentido seguir con las
+ * posteriores porque el front-end es una cascada. Deja logueado el mejor punto
+ * de la etapa fallida y termina con CAL_DONE=0. */
+#define CAL_FAIL_FAST_ON_STAGE_FAIL 1u
+
+#define CAL_DAC_CENTER_GEO_PGA   CAL_DAC_CENTER
+#define CAL_DAC_CENTER_GEO_BP    CAL_DAC_CENTER
+#define CAL_DAC_CENTER_GEO_ADDER CAL_DAC_CENTER
+#define CAL_DAC_CENTER_GEO_LP    CAL_DAC_CENTER
+
+#define CAL_DAC_MAX_CHANGE_GEO_PGA   CAL_DAC_MAX_CHANGE_GEO
+#define CAL_DAC_MAX_CHANGE_GEO_BP    CAL_DAC_MAX_CHANGE_GEO
+#define CAL_DAC_MAX_CHANGE_GEO_ADDER CAL_DAC_MAX_CHANGE_GEO
+#define CAL_DAC_MAX_CHANGE_GEO_LP    CAL_DAC_MAX_CHANGE_GEO
+
+#define CAL_DAC_CENTER_HAMMER_IN  CAL_DAC_CENTER
+#define CAL_DAC_CENTER_HAMMER_PGA CAL_DAC_CENTER
+#define CAL_DAC_CENTER_HAMMER_LP  CAL_DAC_CENTER
+
+#define CAL_DAC_MAX_CHANGE_HAMMER_IN  CAL_DAC_MAX_CHANGE_HAMMER
+#define CAL_DAC_MAX_CHANGE_HAMMER_PGA CAL_DAC_MAX_CHANGE_HAMMER
+#define CAL_DAC_MAX_CHANGE_HAMMER_LP  CAL_DAC_MAX_CHANGE_HAMMER
+
+#define CAL_BEST_CANDIDATE_COUNT 4u
+#define CAL_VISIT_HISTORY_COUNT  8u
+
 /* Primer paso (antes de la busqueda binaria) para detectar empiricamente si
  * la medida crece o decrece con el codigo DAC. */
 #define CAL_PROBE_STEP 32u
@@ -126,6 +159,83 @@
  * CAL_WATCHDOG_TICKS=200 s. */
 #define CAL_SETTLE_MAX_WINDOWS 40u
 #define CAL_SETTLE_TOL_COUNTS  10L
+
+/* Servo lento de mantenimiento en IDLE. No reemplaza al comando manual de
+ * calibracion; corrige deriva de a poco, por turnos, con AMux_IN=referencia. */
+#ifndef CAL_SERVO_ENABLE_DEFAULT
+#define CAL_SERVO_ENABLE_DEFAULT 0u
+#endif
+
+#define CAL_SERVO_DEADBAND_COUNTS       5000L
+#define CAL_SERVO_WORSE_HYST_COUNTS      250L
+#define CAL_SERVO_INTEGRAL_LIMIT      419424L
+#define CAL_SERVO_FINE_STEP                1u
+#define CAL_SERVO_RECOVERY_STEP            1u
+#define CAL_SERVO_AVG_N                   32u
+#define CAL_SERVO_SETTLE_MAX_WINDOWS       8u
+#define CAL_SERVO_SETTLE_TOL_COUNTS       50L
+#define CAL_SERVO_PERIOD_TICKS            25u
+
+#define CAL_SERVO_SETTLE_SAMPLES_GEO_PGA    1200u
+#define CAL_SERVO_SETTLE_SAMPLES_GEO_BP     6000u
+#define CAL_SERVO_SETTLE_SAMPLES_GEO_ADDER  3000u
+#define CAL_SERVO_SETTLE_SAMPLES_GEO_LP     3000u
+
+#define CAL_SERVO_SETTLE_SAMPLES_HAMMER_IN   180u
+#define CAL_SERVO_SETTLE_SAMPLES_HAMMER_PGA  600u
+#define CAL_SERVO_SETTLE_SAMPLES_HAMMER_LP   900u
+
+/* PI tuneable por etapa. Estan iguales a proposito para arrancar; en banco se
+ * ajustan por separado sin tocar el codigo del servo. control =
+ * err*KP_NUM + integral*KI_NUM/KI_DIV, y el signo decide el siguiente LSB. */
+#define CAL_SERVO_KP_NUM_GEO_PGA       1L
+#define CAL_SERVO_KI_NUM_GEO_PGA       1L
+#define CAL_SERVO_KI_DIV_GEO_PGA       8L
+#define CAL_SERVO_DEADBAND_GEO_PGA     CAL_SERVO_DEADBAND_COUNTS
+#define CAL_SERVO_FINE_STEP_GEO_PGA    CAL_SERVO_FINE_STEP
+#define CAL_SERVO_RECOVERY_STEP_GEO_PGA CAL_SERVO_RECOVERY_STEP
+
+#define CAL_SERVO_KP_NUM_GEO_BP        1L
+#define CAL_SERVO_KI_NUM_GEO_BP        1L
+#define CAL_SERVO_KI_DIV_GEO_BP        8L
+#define CAL_SERVO_DEADBAND_GEO_BP      CAL_SERVO_DEADBAND_COUNTS
+#define CAL_SERVO_FINE_STEP_GEO_BP     CAL_SERVO_FINE_STEP
+#define CAL_SERVO_RECOVERY_STEP_GEO_BP CAL_SERVO_RECOVERY_STEP
+
+#define CAL_SERVO_KP_NUM_GEO_ADDER     1L
+#define CAL_SERVO_KI_NUM_GEO_ADDER     1L
+#define CAL_SERVO_KI_DIV_GEO_ADDER     8L
+#define CAL_SERVO_DEADBAND_GEO_ADDER   2000L
+#define CAL_SERVO_FINE_STEP_GEO_ADDER  CAL_SERVO_FINE_STEP
+#define CAL_SERVO_RECOVERY_STEP_GEO_ADDER CAL_SERVO_RECOVERY_STEP
+
+#define CAL_SERVO_KP_NUM_GEO_LP        1L
+#define CAL_SERVO_KI_NUM_GEO_LP        1L
+#define CAL_SERVO_KI_DIV_GEO_LP        8L
+#define CAL_SERVO_DEADBAND_GEO_LP      CAL_SERVO_DEADBAND_COUNTS
+#define CAL_SERVO_FINE_STEP_GEO_LP     CAL_SERVO_FINE_STEP
+#define CAL_SERVO_RECOVERY_STEP_GEO_LP CAL_SERVO_RECOVERY_STEP
+
+#define CAL_SERVO_KP_NUM_HAMMER_IN       1L
+#define CAL_SERVO_KI_NUM_HAMMER_IN       1L
+#define CAL_SERVO_KI_DIV_HAMMER_IN       8L
+#define CAL_SERVO_DEADBAND_HAMMER_IN     CAL_SERVO_DEADBAND_COUNTS
+#define CAL_SERVO_FINE_STEP_HAMMER_IN    CAL_SERVO_FINE_STEP
+#define CAL_SERVO_RECOVERY_STEP_HAMMER_IN CAL_SERVO_RECOVERY_STEP
+
+#define CAL_SERVO_KP_NUM_HAMMER_PGA       1L
+#define CAL_SERVO_KI_NUM_HAMMER_PGA       1L
+#define CAL_SERVO_KI_DIV_HAMMER_PGA       8L
+#define CAL_SERVO_DEADBAND_HAMMER_PGA     CAL_SERVO_DEADBAND_COUNTS
+#define CAL_SERVO_FINE_STEP_HAMMER_PGA    CAL_SERVO_FINE_STEP
+#define CAL_SERVO_RECOVERY_STEP_HAMMER_PGA CAL_SERVO_RECOVERY_STEP
+
+#define CAL_SERVO_KP_NUM_HAMMER_LP       1L
+#define CAL_SERVO_KI_NUM_HAMMER_LP       1L
+#define CAL_SERVO_KI_DIV_HAMMER_LP       8L
+#define CAL_SERVO_DEADBAND_HAMMER_LP     CAL_SERVO_DEADBAND_COUNTS
+#define CAL_SERVO_FINE_STEP_HAMMER_LP    CAL_SERVO_FINE_STEP
+#define CAL_SERVO_RECOVERY_STEP_HAMMER_LP CAL_SERVO_RECOVERY_STEP
 
 #if PSOC_HW_CLASS == PSOC_HW_GEO
 
@@ -152,10 +262,10 @@ static void cal_vdac_geo_adder(uint8 value) { VDAC_Ref_Adder_SetValue(value); }
 static void cal_vdac_geo_lp(uint8 value)    { VDAC_ref_LP_SetValue(value); }
 
 static const PsocCalStage g_psoc_cal_stages[] = {
-    { "GEO_PGA",   0u, CAL_TARGET_GEO_PGA_COUNTS,   CAL_AVG_N, CAL_SETTLE_SAMPLES_GEO_PGA,   CAL_VERIFY_SAMPLES_GEO_PGA,   CAL_MAX_ITER, CAL_TOL_COUNTS_GEO_PGA,   1, cal_vdac_geo_pga },
-    { "GEO_BP",    1u, CAL_TARGET_GEO_BP_COUNTS,    CAL_AVG_N, CAL_SETTLE_SAMPLES_GEO_BP,    CAL_VERIFY_SAMPLES_GEO_BP,    CAL_MAX_ITER, CAL_TOL_COUNTS_GEO_BP,    1, cal_vdac_geo_bp },
-    { "GEO_ADDER", 2u, CAL_TARGET_GEO_ADDER_COUNTS, CAL_AVG_N, CAL_SETTLE_SAMPLES_GEO_ADDER, CAL_VERIFY_SAMPLES_GEO_ADDER, CAL_MAX_ITER, CAL_TOL_COUNTS_GEO_ADDER, 1, cal_vdac_geo_adder },
-    { "GEO_LP",    3u, CAL_TARGET_GEO_LP_COUNTS,    CAL_AVG_N, CAL_SETTLE_SAMPLES_GEO_LP,    CAL_VERIFY_SAMPLES_GEO_LP,    CAL_MAX_ITER, CAL_TOL_COUNTS_GEO_LP,    1, cal_vdac_geo_lp },
+    { "GEO_PGA",   0u, CAL_TARGET_GEO_PGA_COUNTS,   CAL_AVG_N, CAL_SETTLE_SAMPLES_GEO_PGA,   CAL_VERIFY_SAMPLES_GEO_PGA,   CAL_MAX_ITER, CAL_TOL_COUNTS_GEO_PGA,   1, CAL_DAC_CENTER_GEO_PGA,   CAL_DAC_MAX_CHANGE_GEO_PGA,   cal_vdac_geo_pga },
+    { "GEO_BP",    1u, CAL_TARGET_GEO_BP_COUNTS,    CAL_AVG_N, CAL_SETTLE_SAMPLES_GEO_BP,    CAL_VERIFY_SAMPLES_GEO_BP,    CAL_MAX_ITER, CAL_TOL_COUNTS_GEO_BP,    1, CAL_DAC_CENTER_GEO_BP,    CAL_DAC_MAX_CHANGE_GEO_BP,    cal_vdac_geo_bp },
+    { "GEO_ADDER", 2u, CAL_TARGET_GEO_ADDER_COUNTS, CAL_AVG_N, CAL_SETTLE_SAMPLES_GEO_ADDER, CAL_VERIFY_SAMPLES_GEO_ADDER, CAL_MAX_ITER, CAL_TOL_COUNTS_GEO_ADDER, 1, CAL_DAC_CENTER_GEO_ADDER, CAL_DAC_MAX_CHANGE_GEO_ADDER, cal_vdac_geo_adder },
+    { "GEO_LP",    3u, CAL_TARGET_GEO_LP_COUNTS,    CAL_AVG_N, CAL_SETTLE_SAMPLES_GEO_LP,    CAL_VERIFY_SAMPLES_GEO_LP,    CAL_MAX_ITER, CAL_TOL_COUNTS_GEO_LP,    1, CAL_DAC_CENTER_GEO_LP,    CAL_DAC_MAX_CHANGE_GEO_LP,    cal_vdac_geo_lp },
 };
 
 #define PSOC_CAL_STAGE_COUNT ((uint8)(sizeof(g_psoc_cal_stages) / sizeof(g_psoc_cal_stages[0])))
@@ -184,9 +294,9 @@ static void cal_vdac_hammer_pga(uint8 value) { VDAC_PGA_SetValue(value); }
 static void cal_vdac_hammer_lp(uint8 value)  { VDAC_LP_SetValue(value); }
 
 static const PsocCalStage g_psoc_cal_stages[] = {
-    { "HAMMER_IN",  0u, CAL_TARGET_HAMMER_IN_COUNTS,  CAL_AVG_N, CAL_SETTLE_SAMPLES_HAMMER_IN,  CAL_VERIFY_SAMPLES_HAMMER_IN,  CAL_MAX_ITER, CAL_TOL_COUNTS, 1, cal_vdac_hammer_in },
-    { "HAMMER_PGA", 1u, CAL_TARGET_HAMMER_PGA_COUNTS, CAL_AVG_N, CAL_SETTLE_SAMPLES_HAMMER_PGA, CAL_VERIFY_SAMPLES_HAMMER_PGA, CAL_MAX_ITER, CAL_TOL_COUNTS, 1, cal_vdac_hammer_pga },
-    { "HAMMER_LP",  2u, CAL_TARGET_HAMMER_LP_COUNTS,  CAL_AVG_N, CAL_SETTLE_SAMPLES_HAMMER_LP,  CAL_VERIFY_SAMPLES_HAMMER_LP,  CAL_MAX_ITER, CAL_TOL_COUNTS, 1, cal_vdac_hammer_lp },
+    { "HAMMER_IN",  0u, CAL_TARGET_HAMMER_IN_COUNTS,  CAL_AVG_N, CAL_SETTLE_SAMPLES_HAMMER_IN,  CAL_VERIFY_SAMPLES_HAMMER_IN,  CAL_MAX_ITER, CAL_TOL_COUNTS, 1, CAL_DAC_CENTER_HAMMER_IN,  CAL_DAC_MAX_CHANGE_HAMMER_IN,  cal_vdac_hammer_in },
+    { "HAMMER_PGA", 1u, CAL_TARGET_HAMMER_PGA_COUNTS, CAL_AVG_N, CAL_SETTLE_SAMPLES_HAMMER_PGA, CAL_VERIFY_SAMPLES_HAMMER_PGA, CAL_MAX_ITER, CAL_TOL_COUNTS, 1, CAL_DAC_CENTER_HAMMER_PGA, CAL_DAC_MAX_CHANGE_HAMMER_PGA, cal_vdac_hammer_pga },
+    { "HAMMER_LP",  2u, CAL_TARGET_HAMMER_LP_COUNTS,  CAL_AVG_N, CAL_SETTLE_SAMPLES_HAMMER_LP,  CAL_VERIFY_SAMPLES_HAMMER_LP,  CAL_MAX_ITER, CAL_TOL_COUNTS, 1, CAL_DAC_CENTER_HAMMER_LP,  CAL_DAC_MAX_CHANGE_HAMMER_LP,  cal_vdac_hammer_lp },
 };
 
 #define PSOC_CAL_STAGE_COUNT ((uint8)(sizeof(g_psoc_cal_stages) / sizeof(g_psoc_cal_stages[0])))

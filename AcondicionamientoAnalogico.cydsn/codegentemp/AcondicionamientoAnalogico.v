@@ -1,6 +1,6 @@
 // ======================================================================
 // AcondicionamientoAnalogico.v generated from TopDesign.cysch
-// 06/14/2026 at 15:10
+// 06/14/2026 at 20:22
 // This file is auto generated. ANY EDITS YOU MAKE MAY BE LOST WHEN THIS FILE IS REGENERATED!!!
 // ======================================================================
 
@@ -1226,7 +1226,6 @@ module top ;
           wire  Net_4214;
           wire [7:0] Net_4213;
     electrical  Net_4219;
-    electrical  Net_4306;
     electrical  Net_4511;
     electrical  Net_4510;
     electrical  Net_4307;
@@ -1824,83 +1823,6 @@ module top ;
     
     // -- AMux AMux_IN end --
 
-	wire [0:0] tmpOE__AMux_0_net;
-	wire [0:0] tmpFB_0__AMux_0_net;
-	wire [0:0] tmpIO_0__AMux_0_net;
-	wire [0:0] tmpINTERRUPT_0__AMux_0_net;
-	electrical [0:0] tmpSIOVREF__AMux_0_net;
-
-	cy_psoc3_pins_v1_10
-		#(.id("502e3435-bd16-40f2-afc9-2b353f3bcdbb"),
-		  .drive_mode(3'b000),
-		  .ibuf_enabled(1'b0),
-		  .init_dr_st(1'b0),
-		  .input_clk_en(0),
-		  .input_sync(1'b1),
-		  .input_sync_mode(1'b0),
-		  .intr_mode(2'b00),
-		  .invert_in_clock(0),
-		  .invert_in_clock_en(0),
-		  .invert_in_reset(0),
-		  .invert_out_clock(0),
-		  .invert_out_clock_en(0),
-		  .invert_out_reset(0),
-		  .io_voltage(""),
-		  .layout_mode("CONTIGUOUS"),
-		  .oe_conn(1'b0),
-		  .oe_reset(0),
-		  .oe_sync(1'b0),
-		  .output_clk_en(0),
-		  .output_clock_mode(1'b0),
-		  .output_conn(1'b0),
-		  .output_mode(1'b0),
-		  .output_reset(0),
-		  .output_sync(1'b0),
-		  .pa_in_clock(-1),
-		  .pa_in_clock_en(-1),
-		  .pa_in_reset(-1),
-		  .pa_out_clock(-1),
-		  .pa_out_clock_en(-1),
-		  .pa_out_reset(-1),
-		  .pin_aliases(""),
-		  .pin_mode("A"),
-		  .por_state(4),
-		  .sio_group_cnt(0),
-		  .sio_hyst(1'b1),
-		  .sio_ibuf(""),
-		  .sio_info(2'b00),
-		  .sio_obuf(""),
-		  .sio_refsel(""),
-		  .sio_vtrip(""),
-		  .sio_hifreq(""),
-		  .sio_vohsel(""),
-		  .slew_rate(1'b0),
-		  .spanning(0),
-		  .use_annotation(1'b1),
-		  .vtrip(2'b10),
-		  .width(1),
-		  .ovt_hyst_trim(1'b0),
-		  .ovt_needed(1'b0),
-		  .ovt_slew_control(2'b00),
-		  .input_buffer_sel(2'b00))
-		AMux_0
-		 (.oe(tmpOE__AMux_0_net),
-		  .y({1'b0}),
-		  .fb({tmpFB_0__AMux_0_net[0:0]}),
-		  .analog({Net_4306}),
-		  .io({tmpIO_0__AMux_0_net[0:0]}),
-		  .siovref(tmpSIOVREF__AMux_0_net),
-		  .interrupt({tmpINTERRUPT_0__AMux_0_net[0:0]}),
-		  .annotation({Net_4508}),
-		  .in_clock({1'b0}),
-		  .in_clock_en({1'b1}),
-		  .in_reset({1'b0}),
-		  .out_clock({1'b0}),
-		  .out_clock_en({1'b1}),
-		  .out_reset({1'b0}));
-
-	assign tmpOE__AMux_0_net = (`CYDEV_CHIP_MEMBER_USED == `CYDEV_CHIP_MEMBER_3A && `CYDEV_CHIP_REVISION_USED < `CYDEV_CHIP_REVISION_3A_ES3) ? ~{1'b1} : {1'b1};
-
     // -- AMux AMux_ADC start -- ***
     // -- Mux A --
     
@@ -1909,7 +1831,7 @@ module top ;
             Net_2197,
             Net_4244,
             Net_4307,
-            Net_4306
+            Net_4246
             }),
         .vout(Net_4273)
         );

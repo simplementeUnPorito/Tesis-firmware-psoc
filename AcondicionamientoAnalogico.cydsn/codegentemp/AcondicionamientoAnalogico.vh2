@@ -2,7 +2,7 @@
 --	Conversion of AcondicionamientoAnalogico.v to vh2:
 --
 --	Cypress Semiconductor - WARP Version 6.3 IR 41
---	Sun Jun 14 15:10:13 2026
+--	Sun Jun 14 20:22:36 2026
 --
 
 USE cypress.cypress.all;
@@ -741,15 +741,9 @@ TERMINAL Net_769 : bit;
 TERMINAL Net_4321 : bit;
 TERMINAL Net_4322 : bit;
 TERMINAL Net_1176 : bit;
-SIGNAL tmpOE__AMux_0_net_0 : bit;
-SIGNAL tmpFB_0__AMux_0_net_0 : bit;
-TERMINAL Net_4306 : bit;
-SIGNAL tmpIO_0__AMux_0_net_0 : bit;
-TERMINAL tmpSIOVREF__AMux_0_net_0 : bit;
-TERMINAL Net_4508 : bit;
-SIGNAL tmpINTERRUPT_0__AMux_0_net_0 : bit;
 TERMINAL Net_2197 : bit;
 TERMINAL Net_4244 : bit;
+TERMINAL Net_4246 : bit;
 TERMINAL Net_4273 : bit;
 TERMINAL Net_4194 : bit;
 TERMINAL Net_4219 : bit;
@@ -784,7 +778,6 @@ SIGNAL \PGAgain:Net_40\ : bit;
 SIGNAL \PGAgain:Net_38\ : bit;
 SIGNAL \PGAgain:Net_39\ : bit;
 SIGNAL \PGAgain:Net_41\ : bit;
-TERMINAL Net_4246 : bit;
 TERMINAL \PGAgain:Net_75\ : bit;
 TERMINAL Net_1933 : bit;
 TERMINAL Net_4253 : bit;
@@ -818,6 +811,7 @@ SIGNAL \VDAC_Ref_Adder:Net_83\ : bit;
 SIGNAL \VDAC_Ref_Adder:Net_81\ : bit;
 SIGNAL \VDAC_Ref_Adder:Net_82\ : bit;
 TERMINAL \VDAC_Ref_Adder:Net_77\ : bit;
+TERMINAL Net_4508 : bit;
 SIGNAL tmpOE__BPm_net_0 : bit;
 SIGNAL tmpFB_0__BPm_net_0 : bit;
 TERMINAL Net_4178 : bit;
@@ -2193,76 +2187,6 @@ AMux_IN_CYAMUXSIDE_B:cy_psoc3_amux_v1_0
 	PORT MAP(muxin=>(Net_4265, Net_4322),
 		hw_ctrl_en=>(others => zero),
 		vout=>Net_1176);
-AMux_0:cy_psoc3_pins_v1_10
-	GENERIC MAP(id=>"502e3435-bd16-40f2-afc9-2b353f3bcdbb",
-		drive_mode=>"000",
-		ibuf_enabled=>"0",
-		init_dr_st=>"0",
-		input_sync=>"1",
-		input_clk_en=>'0',
-		input_sync_mode=>"0",
-		intr_mode=>"00",
-		invert_in_clock=>'0',
-		invert_in_clock_en=>'0',
-		invert_in_reset=>'0',
-		invert_out_clock=>'0',
-		invert_out_clock_en=>'0',
-		invert_out_reset=>'0',
-		io_voltage=>"",
-		layout_mode=>"CONTIGUOUS",
-		output_conn=>"0",
-		output_sync=>"0",
-		output_clk_en=>'0',
-		output_mode=>"0",
-		output_reset=>'0',
-		output_clock_mode=>"0",
-		oe_sync=>"0",
-		oe_conn=>"0",
-		oe_reset=>'0',
-		pin_aliases=>"",
-		pin_mode=>"A",
-		por_state=>4,
-		sio_group_cnt=>0,
-		sio_hifreq=>"00000000",
-		sio_hyst=>"1",
-		sio_ibuf=>"00000000",
-		sio_info=>"00",
-		sio_obuf=>"00000000",
-		sio_refsel=>"00000000",
-		sio_vtrip=>"00000000",
-		sio_vohsel=>"00000000",
-		slew_rate=>"0",
-		spanning=>'0',
-		sw_only=>'0',
-		vtrip=>"10",
-		width=>1,
-		port_alias_required=>'0',
-		port_alias_group=>"",
-		use_annotation=>"1",
-		pa_in_clock=>-1,
-		pa_in_clock_en=>-1,
-		pa_in_reset=>-1,
-		pa_out_clock=>-1,
-		pa_out_clock_en=>-1,
-		pa_out_reset=>-1,
-		ovt_needed=>"0",
-		ovt_slew_control=>"00",
-		ovt_hyst_trim=>"0",
-		input_buffer_sel=>"00")
-	PORT MAP(oe=>(tmpOE__Tx_1_net_0),
-		y=>(zero),
-		fb=>(tmpFB_0__AMux_0_net_0),
-		analog=>Net_4306,
-		io=>(tmpIO_0__AMux_0_net_0),
-		siovref=>(tmpSIOVREF__AMux_0_net_0),
-		annotation=>Net_4508,
-		in_clock=>zero,
-		in_clock_en=>tmpOE__Tx_1_net_0,
-		in_reset=>zero,
-		out_clock=>zero,
-		out_clock_en=>tmpOE__Tx_1_net_0,
-		out_reset=>zero,
-		interrupt=>tmpINTERRUPT_0__AMux_0_net_0);
 AMux_ADC:cy_psoc3_amux_v1_0
 	GENERIC MAP(cy_registers=>"",
 		muxin_width=>4,
@@ -2271,7 +2195,7 @@ AMux_ADC:cy_psoc3_amux_v1_0
 		init_mux_sel=>"0000",
 		api_type=>0,
 		connect_mode=>2)
-	PORT MAP(muxin=>(Net_2197, Net_4244, Net_4307, Net_4306),
+	PORT MAP(muxin=>(Net_2197, Net_4244, Net_4307, Net_4246),
 		hw_ctrl_en=>(others => zero),
 		vout=>Net_4273);
 GND_5:cy_annotation_universal_v1_0

@@ -97,6 +97,60 @@ static uint8 cal_measured_out_of_range(int32 measured)
     return (abs_counts(measured) > CAL_OPERATING_RANGE_COUNTS) ? 1u : 0u;
 }
 
+static uint8 cal_stage_min_dac(const PsocCalStage *stage)
+{
+    return (stage->dac_center > stage->dac_max_change)
+        ? (uint8)(stage->dac_center - stage->dac_max_change)
+        : 0u;
+}
+
+static uint8 cal_stage_max_dac(const PsocCalStage *stage)
+{
+    uint16 max_dac = (uint16)stage->dac_center + (uint16)stage->dac_max_change;
+    return (max_dac > 255u) ? 255u : (uint8)max_dac;
+}
+
+static uint8 cal_stage_clamp_dac(const PsocCalStage *stage, uint8 dac)
+{
+    uint8 lo = cal_stage_min_dac(stage);
+    uint8 hi = cal_stage_max_dac(stage);
+    if (dac < lo) { return lo; }
+    if (dac > hi) { return hi; }
+    return dac;
+}
+
+static uint8 cal_stage_center_dac(const PsocCalStage *stage)
+{
+    return cal_stage_clamp_dac(stage, stage->dac_center);
+}
+
+static uint8 cal_stage_probe_dac(const PsocCalStage *stage)
+{
+    uint8 center = cal_stage_center_dac(stage);
+    uint8 lo = cal_stage_min_dac(stage);
+    uint8 hi = cal_stage_max_dac(stage);
+
+    if (stage->direction >= 0) {
+        if ((uint16)center + (uint16)CAL_PROBE_STEP <= hi) {
+            return (uint8)(center + CAL_PROBE_STEP);
+        }
+        if (center > lo) {
+            uint8 down = (center > CAL_PROBE_STEP) ? (uint8)(center - CAL_PROBE_STEP) : lo;
+            return cal_stage_clamp_dac(stage, down);
+        }
+    } else {
+        if (center > lo) {
+            uint8 down = (center > CAL_PROBE_STEP) ? (uint8)(center - CAL_PROBE_STEP) : lo;
+            return cal_stage_clamp_dac(stage, down);
+        }
+        if ((uint16)center + (uint16)CAL_PROBE_STEP <= hi) {
+            return (uint8)(center + CAL_PROBE_STEP);
+        }
+    }
+
+    return (center < hi) ? hi : lo;
+}
+
 PsocCalResult g_psoc_cal_results[PSOC_CAL_MAX_STAGES];
 uint8 g_psoc_cal_result_count = 0u;
 
@@ -141,6 +195,13 @@ typedef struct {
     int32 base_measured;
     int32 best_measured;
     int32 best_abs_error;
+    uint8 candidate_count;
+    uint8 candidate_dac[CAL_BEST_CANDIDATE_COUNT];
+    int32 candidate_measured[CAL_BEST_CANDIDATE_COUNT];
+    int32 candidate_abs_error[CAL_BEST_CANDIDATE_COUNT];
+    uint8 visited_count;
+    uint8 visited_pos;
+    uint8 visited_dac[CAL_VISIT_HISTORY_COUNT];
     int32 acc;
     int32 cum_sum;
     int32 cum_count;
@@ -155,6 +216,412 @@ typedef struct {
 } PsocCalAsync;
 
 static PsocCalAsync g_cal_async = { CAL_ASYNC_IDLE };
+
+static void cal_async_reset_stage_memory(void)
+{
+    uint8 i;
+    g_cal_async.best_dac = 0u;
+    g_cal_async.best_measured = 0L;
+    g_cal_async.best_abs_error = 0x7FFFFFFFL;
+    g_cal_async.candidate_count = 0u;
+    g_cal_async.visited_count = 0u;
+    g_cal_async.visited_pos = 0u;
+    for (i = 0u; i < CAL_BEST_CANDIDATE_COUNT; i++) {
+        g_cal_async.candidate_dac[i] = 0u;
+        g_cal_async.candidate_measured[i] = 0L;
+        g_cal_async.candidate_abs_error[i] = 0x7FFFFFFFL;
+    }
+    for (i = 0u; i < CAL_VISIT_HISTORY_COUNT; i++) {
+        g_cal_async.visited_dac[i] = 0u;
+    }
+}
+
+static uint8 cal_async_seen_dac(uint8 dac)
+{
+    uint8 i;
+    for (i = 0u; i < g_cal_async.visited_count; i++) {
+        if (g_cal_async.visited_dac[i] == dac) {
+            return 1u;
+        }
+    }
+    return 0u;
+}
+
+static void cal_async_remember_dac(uint8 dac)
+{
+    if (g_cal_async.visited_count < CAL_VISIT_HISTORY_COUNT) {
+        g_cal_async.visited_dac[g_cal_async.visited_count] = dac;
+        g_cal_async.visited_count++;
+        return;
+    }
+    g_cal_async.visited_dac[g_cal_async.visited_pos] = dac;
+    g_cal_async.visited_pos =
+        (uint8)((g_cal_async.visited_pos + 1u) % CAL_VISIT_HISTORY_COUNT);
+}
+
+static void cal_async_store_candidate(uint8 dac, int32 measured, int32 abs_error)
+{
+    uint8 i;
+    uint8 worst_i = 0u;
+    int32 worst_error = -1L;
+
+    if (abs_error < g_cal_async.best_abs_error) {
+        g_cal_async.best_abs_error = abs_error;
+        g_cal_async.best_dac = dac;
+        g_cal_async.best_measured = measured;
+    }
+
+    for (i = 0u; i < g_cal_async.candidate_count; i++) {
+        if (g_cal_async.candidate_dac[i] == dac) {
+            if (abs_error < g_cal_async.candidate_abs_error[i]) {
+                g_cal_async.candidate_measured[i] = measured;
+                g_cal_async.candidate_abs_error[i] = abs_error;
+            }
+            return;
+        }
+    }
+
+    if (g_cal_async.candidate_count < CAL_BEST_CANDIDATE_COUNT) {
+        i = g_cal_async.candidate_count;
+        g_cal_async.candidate_count++;
+        g_cal_async.candidate_dac[i] = dac;
+        g_cal_async.candidate_measured[i] = measured;
+        g_cal_async.candidate_abs_error[i] = abs_error;
+        return;
+    }
+
+    for (i = 0u; i < CAL_BEST_CANDIDATE_COUNT; i++) {
+        if (g_cal_async.candidate_abs_error[i] > worst_error) {
+            worst_error = g_cal_async.candidate_abs_error[i];
+            worst_i = i;
+        }
+    }
+
+    if (abs_error < worst_error) {
+        g_cal_async.candidate_dac[worst_i] = dac;
+        g_cal_async.candidate_measured[worst_i] = measured;
+        g_cal_async.candidate_abs_error[worst_i] = abs_error;
+    }
+}
+
+static uint8 cal_async_record_measurement(const PsocCalStage *stage)
+{
+    int32 abs_error = abs_counts(stage->target_counts - g_cal_async.measured);
+    uint8 seen = cal_async_seen_dac(g_cal_async.dac);
+
+    cal_async_store_candidate(g_cal_async.dac, g_cal_async.measured, abs_error);
+    if (!seen) {
+        cal_async_remember_dac(g_cal_async.dac);
+    }
+    return seen;
+}
+
+typedef enum {
+    CAL_SERVO_IDLE = 0u,
+    CAL_SERVO_MEASURE
+} PsocCalServoState;
+
+typedef struct {
+    uint8 enabled;
+    PsocCalServoState state;
+    uint8 stage_index;
+    uint8 dac;
+    int32 acc;
+    int32 cum_sum;
+    int32 cum_count;
+    int32 prev_avg;
+    uint16 avg_count;
+    uint16 discard_count;
+    uint8 settle_windows;
+    uint8 have_prev_avg;
+    uint32 empty_polls;
+    uint32 next_due_ticks;
+
+    uint8 have_last[PSOC_CAL_MAX_STAGES];
+    uint8 last_dac[PSOC_CAL_MAX_STAGES];
+    int32 last_measured[PSOC_CAL_MAX_STAGES];
+    uint8 have_slope[PSOC_CAL_MAX_STAGES];
+    uint8 increasing[PSOC_CAL_MAX_STAGES];
+    uint8 trial_active[PSOC_CAL_MAX_STAGES];
+    uint8 prev_dac[PSOC_CAL_MAX_STAGES];
+    int32 prev_abs_error[PSOC_CAL_MAX_STAGES];
+    int8 last_dir[PSOC_CAL_MAX_STAGES];
+    int32 integral[PSOC_CAL_MAX_STAGES];
+} PsocCalServo;
+
+typedef struct {
+    int32 kp_num;
+    int32 ki_num;
+    int32 ki_div;
+    int32 deadband_counts;
+    uint8 fine_step;
+    uint8 recovery_step;
+} PsocCalServoTune;
+
+static PsocCalServo g_cal_servo = { CAL_SERVO_ENABLE_DEFAULT };
+
+static const PsocCalServoTune g_cal_servo_tune[PSOC_CAL_STAGE_COUNT] = {
+#if PSOC_HW_CLASS == PSOC_HW_GEO
+    { CAL_SERVO_KP_NUM_GEO_PGA,   CAL_SERVO_KI_NUM_GEO_PGA,   CAL_SERVO_KI_DIV_GEO_PGA,   CAL_SERVO_DEADBAND_GEO_PGA,   CAL_SERVO_FINE_STEP_GEO_PGA,   CAL_SERVO_RECOVERY_STEP_GEO_PGA },
+    { CAL_SERVO_KP_NUM_GEO_BP,    CAL_SERVO_KI_NUM_GEO_BP,    CAL_SERVO_KI_DIV_GEO_BP,    CAL_SERVO_DEADBAND_GEO_BP,    CAL_SERVO_FINE_STEP_GEO_BP,    CAL_SERVO_RECOVERY_STEP_GEO_BP },
+    { CAL_SERVO_KP_NUM_GEO_ADDER, CAL_SERVO_KI_NUM_GEO_ADDER, CAL_SERVO_KI_DIV_GEO_ADDER, CAL_SERVO_DEADBAND_GEO_ADDER, CAL_SERVO_FINE_STEP_GEO_ADDER, CAL_SERVO_RECOVERY_STEP_GEO_ADDER },
+    { CAL_SERVO_KP_NUM_GEO_LP,    CAL_SERVO_KI_NUM_GEO_LP,    CAL_SERVO_KI_DIV_GEO_LP,    CAL_SERVO_DEADBAND_GEO_LP,    CAL_SERVO_FINE_STEP_GEO_LP,    CAL_SERVO_RECOVERY_STEP_GEO_LP },
+#else
+    { CAL_SERVO_KP_NUM_HAMMER_IN,  CAL_SERVO_KI_NUM_HAMMER_IN,  CAL_SERVO_KI_DIV_HAMMER_IN,  CAL_SERVO_DEADBAND_HAMMER_IN,  CAL_SERVO_FINE_STEP_HAMMER_IN,  CAL_SERVO_RECOVERY_STEP_HAMMER_IN },
+    { CAL_SERVO_KP_NUM_HAMMER_PGA, CAL_SERVO_KI_NUM_HAMMER_PGA, CAL_SERVO_KI_DIV_HAMMER_PGA, CAL_SERVO_DEADBAND_HAMMER_PGA, CAL_SERVO_FINE_STEP_HAMMER_PGA, CAL_SERVO_RECOVERY_STEP_HAMMER_PGA },
+    { CAL_SERVO_KP_NUM_HAMMER_LP,  CAL_SERVO_KI_NUM_HAMMER_LP,  CAL_SERVO_KI_DIV_HAMMER_LP,  CAL_SERVO_DEADBAND_HAMMER_LP,  CAL_SERVO_FINE_STEP_HAMMER_LP,  CAL_SERVO_RECOVERY_STEP_HAMMER_LP },
+#endif
+};
+
+static int32 cal_servo_clip_integral(int32 value)
+{
+    if (value > CAL_SERVO_INTEGRAL_LIMIT) { return CAL_SERVO_INTEGRAL_LIMIT; }
+    if (value < -CAL_SERVO_INTEGRAL_LIMIT) { return -CAL_SERVO_INTEGRAL_LIMIT; }
+    return value;
+}
+
+static uint16 cal_servo_settle_samples(uint8 stage_index)
+{
+#if PSOC_HW_CLASS == PSOC_HW_GEO
+    switch (stage_index) {
+        case 0u: return CAL_SERVO_SETTLE_SAMPLES_GEO_PGA;
+        case 1u: return CAL_SERVO_SETTLE_SAMPLES_GEO_BP;
+        case 2u: return CAL_SERVO_SETTLE_SAMPLES_GEO_ADDER;
+        default: return CAL_SERVO_SETTLE_SAMPLES_GEO_LP;
+    }
+#else
+    switch (stage_index) {
+        case 0u: return CAL_SERVO_SETTLE_SAMPLES_HAMMER_IN;
+        case 1u: return CAL_SERVO_SETTLE_SAMPLES_HAMMER_PGA;
+        default: return CAL_SERVO_SETTLE_SAMPLES_HAMMER_LP;
+    }
+#endif
+}
+
+static uint8 cal_stage_current_dac(uint8 stage_index)
+{
+    if (stage_index >= g_psoc_cal_result_count) {
+        return cal_stage_center_dac(&g_psoc_cal_stages[stage_index]);
+    }
+    return cal_stage_clamp_dac(&g_psoc_cal_stages[stage_index],
+                               g_psoc_cal_results[stage_index].final_dac);
+}
+
+static void cal_stage_write_result(uint8 stage_index, uint8 dac)
+{
+    if (stage_index < PSOC_CAL_STAGE_COUNT) {
+        uint8 clamped = cal_stage_clamp_dac(&g_psoc_cal_stages[stage_index], dac);
+        g_psoc_cal_stages[stage_index].write(clamped);
+        g_psoc_cal_results[stage_index].final_dac = clamped;
+        if (g_psoc_cal_result_count < PSOC_CAL_STAGE_COUNT) {
+            g_psoc_cal_result_count = PSOC_CAL_STAGE_COUNT;
+        }
+    }
+}
+
+static uint8 cal_servo_apply_measurement(uint8 stage_index, uint8 dac, int32 measured)
+{
+    const PsocCalStage *stage = &g_psoc_cal_stages[stage_index];
+    const PsocCalServoTune *tune = &g_cal_servo_tune[stage_index];
+    PsocCalResult *result = &g_psoc_cal_results[stage_index];
+    int32 error = stage->target_counts - measured;
+    int32 abs_error = abs_counts(error);
+    int8 dir;
+    uint8 step;
+    int16 next;
+    uint8 slope_increasing;
+
+    result->final_measured = measured;
+    result->ok = (abs_error <= stage->tolerance_counts) ? 1u : 0u;
+
+    if (g_cal_servo.have_last[stage_index] &&
+        g_cal_servo.last_dac[stage_index] != dac &&
+        g_cal_servo.last_measured[stage_index] != measured) {
+        slope_increasing =
+            ((measured > g_cal_servo.last_measured[stage_index]) ==
+             (dac > g_cal_servo.last_dac[stage_index])) ? 1u : 0u;
+        g_cal_servo.increasing[stage_index] = slope_increasing;
+        g_cal_servo.have_slope[stage_index] = 1u;
+    }
+
+    if (abs_error <= tune->deadband_counts) {
+        g_cal_servo.integral[stage_index] /= 2L;
+        g_cal_servo.trial_active[stage_index] = 0u;
+        g_cal_servo.have_last[stage_index] = 1u;
+        g_cal_servo.last_dac[stage_index] = dac;
+        g_cal_servo.last_measured[stage_index] = measured;
+        return 1u;
+    }
+
+    if (g_cal_servo.trial_active[stage_index] &&
+        abs_error > (g_cal_servo.prev_abs_error[stage_index] +
+                     CAL_SERVO_WORSE_HYST_COUNTS) &&
+        g_cal_servo.last_dir[stage_index] != 0) {
+        uint8 restore_dac = g_cal_servo.last_dac[stage_index];
+        cal_stage_write_result(stage_index, restore_dac);
+        result->final_measured = g_cal_servo.last_measured[stage_index];
+        result->ok = (g_cal_servo.prev_abs_error[stage_index] <=
+                      stage->tolerance_counts) ? 1u : 0u;
+        g_cal_servo.integral[stage_index] = 0L;
+        g_cal_servo.trial_active[stage_index] = 0u;
+        cal_diag(PSOC_EVT_CAL_LOOP, restore_dac);
+        return 1u;
+    } else {
+        int32 control;
+        uint8 assume_increasing;
+
+        g_cal_servo.integral[stage_index] =
+            cal_servo_clip_integral(g_cal_servo.integral[stage_index] + error);
+        control = (error * tune->kp_num) +
+            ((g_cal_servo.integral[stage_index] * tune->ki_num) /
+             ((tune->ki_div == 0L) ? 1L : tune->ki_div));
+        if (control == 0L) {
+            control = error;
+        }
+
+        assume_increasing = g_cal_servo.have_slope[stage_index]
+            ? g_cal_servo.increasing[stage_index]
+            : ((stage->direction >= 0) ? 1u : 0u);
+        if (assume_increasing) {
+            dir = (control > 0L) ? 1 : -1;
+        } else {
+            dir = (control > 0L) ? -1 : 1;
+        }
+    }
+
+    step = (abs_error > CAL_OPERATING_RANGE_COUNTS)
+        ? tune->recovery_step
+        : tune->fine_step;
+    next = (int16)dac + (int16)((int16)dir * (int16)step);
+    if (next < (int16)cal_stage_min_dac(stage)) {
+        next = (int16)cal_stage_min_dac(stage);
+    }
+    if (next > (int16)cal_stage_max_dac(stage)) {
+        next = (int16)cal_stage_max_dac(stage);
+    }
+
+    g_cal_servo.have_last[stage_index] = 1u;
+    g_cal_servo.last_dac[stage_index] = dac;
+    g_cal_servo.last_measured[stage_index] = measured;
+
+    if ((uint8)next != dac) {
+        if (g_cal_servo.trial_active[stage_index] &&
+            (uint8)next == g_cal_servo.prev_dac[stage_index]) {
+            g_cal_servo.integral[stage_index] = 0L;
+            g_cal_servo.trial_active[stage_index] = 0u;
+            cal_diag(PSOC_EVT_CAL_LOOP, (uint8)next);
+            return 1u;
+        }
+        g_cal_servo.prev_dac[stage_index] = dac;
+        g_cal_servo.prev_abs_error[stage_index] = abs_error;
+        g_cal_servo.last_dir[stage_index] = dir;
+        g_cal_servo.trial_active[stage_index] = 1u;
+        cal_stage_write_result(stage_index, (uint8)next);
+        cal_diag(PSOC_EVT_SERVO_STEP, (uint8)next);
+        return 0u;
+    } else {
+        g_cal_servo.trial_active[stage_index] = 0u;
+        return 1u;
+    }
+}
+
+static void cal_servo_measure_begin(uint8 stage_index)
+{
+    const PsocCalStage *stage = &g_psoc_cal_stages[stage_index];
+
+    g_cal_servo.stage_index = stage_index;
+    g_cal_servo.dac = cal_stage_current_dac(stage_index);
+    g_cal_servo.acc = 0L;
+    g_cal_servo.cum_sum = 0L;
+    g_cal_servo.cum_count = 0L;
+    g_cal_servo.prev_avg = 0L;
+    g_cal_servo.avg_count = 0u;
+    g_cal_servo.discard_count = cal_servo_settle_samples(stage_index);
+    g_cal_servo.settle_windows = 0u;
+    g_cal_servo.have_prev_avg = 0u;
+    g_cal_servo.empty_polls = 0UL;
+
+    ADC_Stop();
+    cal_amux_in_select(CAL_INPUT_REF_CHANNEL);
+    CAL_AMUX_ADC_SELECT(stage->adc_channel);
+    ADC_Start();
+    isr_DelSig_ClearPending();
+    psoc_adc_clear_isr_sample();
+    ADC_StartConvert();
+    cal_diag(PSOC_EVT_SERVO_STAGE, stage_index);
+    g_cal_servo.state = CAL_SERVO_MEASURE;
+}
+
+static uint8 cal_servo_measure_service(void)
+{
+    int32 sample;
+    int32 cum_avg;
+    uint8 stage_index = g_cal_servo.stage_index;
+
+    if (!psoc_adc_take_isr_sample(&sample)) {
+        g_cal_servo.empty_polls++;
+        if (g_cal_servo.empty_polls >= CAL_ASYNC_EMPTY_POLL_LIMIT) {
+            g_cal_servo.state = CAL_SERVO_IDLE;
+            psoc_calibration_restore_capture_path();
+            return 1u;
+        }
+        return 0u;
+    }
+
+    g_cal_servo.empty_polls = 0UL;
+    if (g_cal_servo.discard_count > 0u) {
+        g_cal_servo.discard_count--;
+        return 0u;
+    }
+
+    g_cal_servo.acc += sample;
+    g_cal_servo.avg_count++;
+    if (g_cal_servo.avg_count < CAL_SERVO_AVG_N) {
+        return 0u;
+    }
+
+    g_cal_servo.cum_sum += g_cal_servo.acc;
+    g_cal_servo.cum_count += (int32)CAL_SERVO_AVG_N;
+    g_cal_servo.acc = 0L;
+    g_cal_servo.avg_count = 0u;
+
+    cum_avg = g_cal_servo.cum_sum / g_cal_servo.cum_count;
+    if (g_cal_servo.have_prev_avg &&
+        abs_counts(cum_avg - g_cal_servo.prev_avg) <= CAL_SERVO_SETTLE_TOL_COUNTS) {
+        uint8 locked;
+        cal_diag(PSOC_EVT_CAL_STAGE_DAC, g_cal_servo.dac);
+        cal_diag_i16(PSOC_EVT_CAL_STAGE_MEAS, cum_avg);
+        cal_diag_i32(PSOC_EVT_CAL_STAGE_MEAS32, cum_avg);
+        locked = cal_servo_apply_measurement(stage_index, g_cal_servo.dac, cum_avg);
+        psoc_calibration_restore_capture_path();
+        if (locked) {
+            g_cal_servo.stage_index = (uint8)((stage_index + 1u) % PSOC_CAL_STAGE_COUNT);
+        }
+        g_cal_servo.next_due_ticks = psoc_now_ticks() + CAL_SERVO_PERIOD_TICKS;
+        g_cal_servo.state = CAL_SERVO_IDLE;
+        return 1u;
+    }
+
+    g_cal_servo.prev_avg = cum_avg;
+    g_cal_servo.have_prev_avg = 1u;
+    g_cal_servo.settle_windows++;
+    if (g_cal_servo.settle_windows >= CAL_SERVO_SETTLE_MAX_WINDOWS) {
+        uint8 locked;
+        cal_diag(PSOC_EVT_CAL_STAGE_DAC, g_cal_servo.dac);
+        cal_diag_i16(PSOC_EVT_CAL_STAGE_MEAS, cum_avg);
+        cal_diag_i32(PSOC_EVT_CAL_STAGE_MEAS32, cum_avg);
+        locked = cal_servo_apply_measurement(stage_index, g_cal_servo.dac, cum_avg);
+        psoc_calibration_restore_capture_path();
+        if (locked) {
+            g_cal_servo.stage_index = (uint8)((stage_index + 1u) % PSOC_CAL_STAGE_COUNT);
+        }
+        g_cal_servo.next_due_ticks = psoc_now_ticks() + CAL_SERVO_PERIOD_TICKS;
+        g_cal_servo.state = CAL_SERVO_IDLE;
+        return 1u;
+    }
+
+    return 0u;
+}
 
 void psoc_calibration_start_references(void)
 {
@@ -180,8 +647,13 @@ void psoc_calibration_start_references(void)
 #endif
 
     for (i = 0u; i < PSOC_CAL_STAGE_COUNT; i++) {
-        g_psoc_cal_stages[i].write(CAL_DAC_INIT);
+        uint8 center = cal_stage_center_dac(&g_psoc_cal_stages[i]);
+        g_psoc_cal_stages[i].write(center);
+        g_psoc_cal_results[i].final_dac = center;
+        g_psoc_cal_results[i].final_measured = 0L;
+        g_psoc_cal_results[i].ok = 1u;
     }
+    g_psoc_cal_result_count = PSOC_CAL_STAGE_COUNT;
 }
 
 /* Deja el AMux_ADC en el canal de captura (GEO_LP) pero con AMux_IN en la
@@ -207,13 +679,56 @@ void psoc_calibration_reset_references(void)
     ADC_Stop();
     cal_amux_in_select(CAL_INPUT_REF_CHANNEL);
     for (i = 0u; i < PSOC_CAL_STAGE_COUNT; i++) {
-        g_psoc_cal_stages[i].write(CAL_DAC_INIT);
-        g_psoc_cal_results[i].final_dac = CAL_DAC_INIT;
+        uint8 center = cal_stage_center_dac(&g_psoc_cal_stages[i]);
+        g_psoc_cal_stages[i].write(center);
+        g_psoc_cal_results[i].final_dac = center;
         g_psoc_cal_results[i].final_measured = 0L;
         g_psoc_cal_results[i].ok = 1u;
     }
     g_psoc_cal_result_count = PSOC_CAL_STAGE_COUNT;
     psoc_calibration_restore_capture_path();
+}
+
+void psoc_calibration_servo_enable(uint8 enable)
+{
+    g_cal_servo.enabled = enable ? 1u : 0u;
+    if (!g_cal_servo.enabled) {
+        psoc_calibration_servo_abort();
+    } else {
+        g_cal_servo.next_due_ticks = psoc_now_ticks();
+    }
+}
+
+uint8 psoc_calibration_servo_enabled(void)
+{
+    return g_cal_servo.enabled;
+}
+
+void psoc_calibration_servo_abort(void)
+{
+    if (g_cal_servo.state == CAL_SERVO_MEASURE) {
+        ADC_StopConvert();
+        psoc_calibration_restore_capture_path();
+    }
+    g_cal_servo.state = CAL_SERVO_IDLE;
+    g_cal_servo.next_due_ticks = psoc_now_ticks() + CAL_SERVO_PERIOD_TICKS;
+}
+
+uint8 psoc_calibration_servo_service(void)
+{
+    if (!g_cal_servo.enabled || g_cal_async.busy) {
+        return 0u;
+    }
+
+    if (g_cal_servo.state == CAL_SERVO_IDLE) {
+        uint32 now = psoc_now_ticks();
+        if ((int32)(now - g_cal_servo.next_due_ticks) >= 0) {
+            cal_servo_measure_begin(g_cal_servo.stage_index);
+        }
+        return 0u;
+    }
+
+    return cal_servo_measure_service();
 }
 
 static void async_measure_begin(uint8 dac, PsocCalAsyncState after_measure,
@@ -313,23 +828,23 @@ static void async_finish_stage(uint8 ok)
     uint8 final_dac = g_cal_async.best_dac;
     int32 final_measured = g_cal_async.best_measured;
 
+    if (g_cal_async.best_abs_error <= stage->tolerance_counts) {
+        ok = 1u;
+    }
+
     if (cal_measured_out_of_range(final_measured)) {
-        /* Aunque "ok" hubiera sido 1, una salida a mas de +-0.5V deja al
-         * operacional fuera de rango operativo: preferible quedar sin
-         * calibrar (CAL_DAC_INIT, ~2.5V) a arriesgar saturacion en cascada. */
-        final_dac = CAL_DAC_INIT;
-        final_measured = g_cal_async.base_measured;
+        /* No volver al default: si no hay punto perfecto, igual dejamos el
+         * mejor candidato real encontrado y lo marcamos como no OK. */
         ok = 0u;
 
-        if (g_cal_async.stage_index == (PSOC_CAL_STAGE_COUNT - 1u) &&
-            cal_measured_out_of_range(final_measured)) {
-            /* Ni siquiera en el punto de partida (2.5V) la ultima etapa
-             * (GEO_LP, la que alimenta al canal de captura del ADC) queda en
-             * rango: los datos capturados van a ser inutiles. */
+        if (g_cal_async.stage_index == (PSOC_CAL_STAGE_COUNT - 1u)) {
+            /* La ultima etapa alimenta al canal de captura del ADC; avisar si
+             * incluso el mejor candidato quedo fuera del rango operativo. */
             cal_diag(PSOC_EVT_CAL_LP_BAD, (uint8)g_cal_async.stage_index);
         }
     }
 
+    final_dac = cal_stage_clamp_dac(stage, final_dac);
     stage->write(final_dac);
     result->final_dac = final_dac;
     result->final_measured = final_measured;
@@ -342,6 +857,14 @@ static void async_finish_stage(uint8 ok)
     cal_diag_i32(PSOC_EVT_CAL_STAGE_MEAS32, result->final_measured);
     cal_diag(PSOC_EVT_CAL_STAGE_OK, result->ok);
 
+#if CAL_FAIL_FAST_ON_STAGE_FAIL
+    if (!ok) {
+        g_cal_async.stage_index = PSOC_CAL_STAGE_COUNT;
+        g_cal_async.state = CAL_ASYNC_VERIFY_BEGIN;
+        return;
+    }
+#endif
+
     g_cal_async.stage_index++;
     g_cal_async.state = CAL_ASYNC_STAGE_BEGIN;
 }
@@ -349,7 +872,7 @@ static void async_finish_stage(uint8 ok)
 /* Aborta la calibracion por timeout (CAL_WATCHDOG_TICKS sin terminar).
  * Las etapas ya finalizadas (indices < stage_index durante la busqueda)
  * conservan su mejor valor encontrado; la etapa en curso y las que faltan
- * se fuerzan a CAL_DAC_INIT (punto medio, no saturado). Durante la
+ * se fuerzan al centro nominal de cada etapa. Durante la
  * verificacion (todas las etapas ya calibradas) no se toca ningun DAC. */
 static void cal_async_abort_watchdog(void)
 {
@@ -359,8 +882,9 @@ static void cal_async_abort_watchdog(void)
 
     if (!verify_phase) {
         for (i = g_cal_async.stage_index; i < PSOC_CAL_STAGE_COUNT; i++) {
-            g_psoc_cal_stages[i].write(CAL_DAC_INIT);
-            g_psoc_cal_results[i].final_dac = CAL_DAC_INIT;
+            uint8 center = cal_stage_center_dac(&g_psoc_cal_stages[i]);
+            g_psoc_cal_stages[i].write(center);
+            g_psoc_cal_results[i].final_dac = center;
             g_psoc_cal_results[i].final_measured = 0L;
             g_psoc_cal_results[i].ok = 0u;
         }
@@ -442,13 +966,14 @@ uint8 psoc_calibration_service_async(void)
                 break;
             }
             stage = &g_psoc_cal_stages[g_cal_async.stage_index];
+            cal_async_reset_stage_memory();
             cal_diag(PSOC_EVT_CAL_STAGE_BEGIN, g_cal_async.stage_index);
             ADC_Stop();
             CAL_AMUX_ADC_SELECT(stage->adc_channel);
             ADC_Start();
             isr_DelSig_ClearPending();
             ADC_StartConvert();
-            async_measure_begin(CAL_DAC_INIT, CAL_ASYNC_EVAL_INIT,
+            async_measure_begin(cal_stage_center_dac(stage), CAL_ASYNC_EVAL_INIT,
                                 stage->settle_samples, 1u);
             break;
 
@@ -459,21 +984,15 @@ uint8 psoc_calibration_service_async(void)
         case CAL_ASYNC_EVAL_INIT:
             stage = &g_psoc_cal_stages[g_cal_async.stage_index];
             g_cal_async.base_measured = g_cal_async.measured;
-            g_cal_async.best_dac = g_cal_async.dac;
-            g_cal_async.best_measured = g_cal_async.measured;
-            g_cal_async.best_abs_error = abs_counts(stage->target_counts - g_cal_async.measured);
+            (void)cal_async_record_measurement(stage);
             if (g_cal_async.best_abs_error <= stage->tolerance_counts) {
                 async_finish_stage(1u);
                 break;
             }
-            if (stage->direction >= 0) {
-                g_cal_async.dac = ((uint16)CAL_DAC_INIT + CAL_PROBE_STEP > 255u)
-                    ? (uint8)(CAL_DAC_INIT - CAL_PROBE_STEP)
-                    : (uint8)(CAL_DAC_INIT + CAL_PROBE_STEP);
-            } else {
-                g_cal_async.dac = ((int16)CAL_DAC_INIT - (int16)CAL_PROBE_STEP < 0)
-                    ? (uint8)(CAL_DAC_INIT + CAL_PROBE_STEP)
-                    : (uint8)(CAL_DAC_INIT - CAL_PROBE_STEP);
+            g_cal_async.dac = cal_stage_probe_dac(stage);
+            if (g_cal_async.dac == g_cal_async.best_dac) {
+                async_finish_stage(0u);
+                break;
             }
             async_measure_begin(g_cal_async.dac, CAL_ASYNC_EVAL_PROBE,
                                 stage->settle_samples, 1u);
@@ -481,13 +1000,12 @@ uint8 psoc_calibration_service_async(void)
 
         case CAL_ASYNC_EVAL_PROBE:
             stage = &g_psoc_cal_stages[g_cal_async.stage_index];
-            abs_error = abs_counts(stage->target_counts - g_cal_async.measured);
-            if (abs_error < g_cal_async.best_abs_error) {
-                g_cal_async.best_abs_error = abs_error;
-                g_cal_async.best_dac = g_cal_async.dac;
-                g_cal_async.best_measured = g_cal_async.measured;
+            if (cal_async_record_measurement(stage)) {
+                cal_diag(PSOC_EVT_CAL_LOOP, g_cal_async.dac);
+                async_finish_stage((g_cal_async.best_abs_error <= stage->tolerance_counts) ? 1u : 0u);
+                break;
             }
-            if (abs_error <= stage->tolerance_counts) {
+            if (g_cal_async.best_abs_error <= stage->tolerance_counts) {
                 async_finish_stage(1u);
                 break;
             }
@@ -496,10 +1014,10 @@ uint8 psoc_calibration_service_async(void)
             } else {
                 g_cal_async.increasing =
                     ((g_cal_async.measured > g_cal_async.base_measured) ==
-                     (g_cal_async.dac > CAL_DAC_INIT)) ? 1u : 0u;
+                     (g_cal_async.dac > cal_stage_center_dac(stage))) ? 1u : 0u;
             }
-            g_cal_async.lo = 0u;
-            g_cal_async.hi = 255u;
+            g_cal_async.lo = cal_stage_min_dac(stage);
+            g_cal_async.hi = cal_stage_max_dac(stage);
             g_cal_async.iter = 0u;
             g_cal_async.state = CAL_ASYNC_PLAN_ITER;
             break;
@@ -517,13 +1035,13 @@ uint8 psoc_calibration_service_async(void)
                 uint8 next_dac;
 
                 if (go_up) {
-                    if (g_cal_async.dac == 255u) {
+                    if (g_cal_async.dac >= cal_stage_max_dac(stage)) {
                         async_finish_stage(0u);
                         break;
                     }
                     g_cal_async.lo = (uint8)(g_cal_async.dac + 1u);
                 } else {
-                    if (g_cal_async.dac == 0u) {
+                    if (g_cal_async.dac <= cal_stage_min_dac(stage)) {
                         async_finish_stage(0u);
                         break;
                     }
@@ -534,6 +1052,7 @@ uint8 psoc_calibration_service_async(void)
                     break;
                 }
                 next_dac = (uint8)(g_cal_async.lo + ((g_cal_async.hi - g_cal_async.lo) / 2u));
+                next_dac = cal_stage_clamp_dac(stage, next_dac);
                 if (next_dac == g_cal_async.dac) {
                     async_finish_stage(0u);
                     break;
@@ -546,13 +1065,12 @@ uint8 psoc_calibration_service_async(void)
 
         case CAL_ASYNC_EVAL_ITER:
             stage = &g_psoc_cal_stages[g_cal_async.stage_index];
-            abs_error = abs_counts(stage->target_counts - g_cal_async.measured);
-            if (abs_error < g_cal_async.best_abs_error) {
-                g_cal_async.best_abs_error = abs_error;
-                g_cal_async.best_dac = g_cal_async.dac;
-                g_cal_async.best_measured = g_cal_async.measured;
+            if (cal_async_record_measurement(stage)) {
+                cal_diag(PSOC_EVT_CAL_LOOP, g_cal_async.dac);
+                async_finish_stage((g_cal_async.best_abs_error <= stage->tolerance_counts) ? 1u : 0u);
+                break;
             }
-            if (abs_error <= stage->tolerance_counts) {
+            if (g_cal_async.best_abs_error <= stage->tolerance_counts) {
                 async_finish_stage(1u);
             } else {
                 g_cal_async.state = CAL_ASYNC_PLAN_ITER;

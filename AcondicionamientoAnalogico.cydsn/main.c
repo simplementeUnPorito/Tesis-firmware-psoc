@@ -90,6 +90,10 @@
 #define PSOC_TX1_GPIO_TEST     0
 #endif
 
+#ifndef PSOC_STARTUP_FULL_CAL_ENABLE
+#define PSOC_STARTUP_FULL_CAL_ENABLE 1
+#endif
+
 /* -------------------------------------------------------------------------- */
 static volatile int32  g_adc_raw          = 0;
 
@@ -199,6 +203,7 @@ static uint8 capture_dump_pending(void)
 
 static void psoc_prepare_capture_path(void)
 {
+    psoc_calibration_servo_abort();
     ADC_StopConvert();
     psoc_adc_select_capture_config();
     psoc_calibration_restore_capture_path();
@@ -420,6 +425,7 @@ static uint8 psoc_start_calibration_if_idle(uint8 send_ack)
         }
         return 0u;
     }
+    psoc_calibration_servo_abort();
     uart_send_diag(PSOC_EVT_CAL_START, 0u);
     if (!psoc_calibration_start_async()) {
         uart_send_diag(PSOC_EVT_CAL_DONE, 0u);
@@ -850,9 +856,16 @@ int main(void)
 
     /* ── Loop de arranque: busca el ESP sin bloquear UART/ADC ───────────── */
     wait_for_esp();
+    psoc_calibration_servo_enable(0u);
 
-    /* Autocalibra luego de que el ESP ya recibe UART, sin parar el loop. */
+    /* La calibracion larga de startup queda prendida por defecto. El servo
+     * lento queda desactivado por ahora: primero necesitamos un lock simple y
+     * funcional de los cuatro offsets, sin mantenimiento PI peleando despues. */
+#if PSOC_STARTUP_FULL_CAL_ENABLE
     startup_cal_pending = 1u;
+#else
+    startup_cal_pending = 0u;
+#endif
     startup_cal_due = timer_now_ticks() + MS_TO_TICKS(PSOC_STARTUP_CAL_DELAY_MS);
 
     /* ── 5 parpadeos rápidos al conectar ─────────────────────────────────── */
@@ -880,6 +893,10 @@ int main(void)
             startup_cal_pending = 0u;
             (void)psoc_start_calibration_if_idle(0u);
             continue;
+        }
+
+        if (!startup_cal_pending && g_state == PSOC_IDLE && !capture_dump_pending()) {
+            (void)psoc_calibration_servo_service();
         }
 
         if (g_state == PSOC_IDLE && !capture_dump_pending())

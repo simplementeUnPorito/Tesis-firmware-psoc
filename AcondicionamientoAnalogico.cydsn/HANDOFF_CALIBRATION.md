@@ -2162,3 +2162,106 @@ compilar+programar en PSoC Creator** antes de la próxima corrida.
    - Para GEO_LP específicamente: ¿`measRaw(164)` y `measRaw(165)` son
      "moderados" (cerca del rango operativo) o "extremos"? Esto decide si
      dithering 164↔165 (idea de (d)) tiene sentido.
+
+### 14.13 Sesion 2026-06-14: criterio de parada demasiado fino para GEO y autocalibracion de arranque obligatoria
+
+Log nuevo analizado: la busqueda si encuentra puntos usables en etapas
+intermedias, pero `CAL_TOL_COUNTS=250` era demasiado fino para un VDAC de 8
+bits dentro de una cadena analogica en cascada. Ejemplos del log:
+
+- `GEO_BP`: `dac=140`, `measRaw=1459`.
+- `GEO_ADDER`: `dac=174`, `measRaw=341`.
+
+Con tolerancia 250 esos puntos se rechazaban como "no suficientemente buenos",
+asi que la busqueda seguia probando codigos y podia volver a caer en
+saturacion. El sintoma visto por el usuario ("llega a un valor razonable y
+luego sigue moviendo hasta saturar") coincide con ese criterio de parada.
+
+Cambios aplicados:
+
+- `main.c`: `PSOC_STARTUP_FULL_CAL_ENABLE` vuelve a `1`. El nodo debe hacer
+  una calibracion completa al inicio, despues de detectar ESP/UART, sin esperar
+  al boton "Calibrar".
+- `main.c`: el servo PI no se ejecuta mientras `startup_cal_pending` esta
+  activo. La calibracion completa arranca primero; el servo queda solo como
+  mantenimiento lento posterior.
+- `calibration_tables.h`: tolerancias GEO iniciales mas realistas:
+  - `GEO_PGA = 5000 counts`
+  - `GEO_BP = 5000 counts`
+  - `GEO_ADDER = 2000 counts`
+  - `GEO_LP = 5000 counts`
+- `calibration_tables.h`: deadband del servo GEO sube a `5000 counts` por
+  defecto (`GEO_ADDER = 2000 counts`) y `CAL_SERVO_RECOVERY_STEP` baja de 4 a
+  1 LSB para evitar que el mantenimiento lento persiga saturaciones con pasos
+  agresivos.
+
+Verificacion local: `git diff --check` sin errores; solo warnings normales de
+LF/CRLF. No se compilo ni programo PSoC porque Elias pidio hacerlo manualmente.
+
+### 14.14 Sesion 2026-06-14: memoria de candidatos, deteccion de loop y rango de DAC por `center +/- max_change`
+
+Pedido nuevo del usuario: evitar loops eternos de calibracion, no mover varias
+etapas caoticamente, guardar mejores candidatos y limitar la busqueda sin
+hardcodear rangos absolutos tipo `125..188`.
+
+Cambios aplicados:
+
+- `PsocCalStage` ahora incluye `dac_center` y `dac_max_change`. El rango de
+  busqueda de cada operacional se calcula como:
+  `dac_center - dac_max_change` .. `dac_center + dac_max_change`, con clamp
+  solo al rango fisico del DAC de 8 bits.
+- `calibration_tables.h` define macros tuneables por etapa:
+  - `CAL_DAC_CENTER_GEO_PGA/BP/ADDER/LP`
+  - `CAL_DAC_MAX_CHANGE_GEO_PGA/BP/ADDER/LP`
+  - equivalentes Hammer para futuro.
+  Por ahora GEO usa centro `0x9C` y `MAX_CHANGE=32`; ya no hay limites
+  absolutos GEO hardcodeados.
+- La calibracion larga guarda una lista pequena de candidatos:
+  `CAL_BEST_CANDIDATE_COUNT=4`, con `dac`, `measured` y `abs_error`.
+  La medicion guardada es el promedio acumulado estable que sale de
+  `async_measure_service()`, no una muestra instantanea.
+- La calibracion larga guarda los ultimos `CAL_VISIT_HISTORY_COUNT=8` DACs.
+  Si vuelve a pedir un DAC ya visitado, emite `PSOC_EVT_CAL_LOOP`, corta esa
+  etapa y escribe el mejor candidato visto.
+- El servo de mantenimiento queda mas secuencial:
+  - si una etapa no queda dentro de deadband y el paso mejora, sigue en esa
+    misma etapa;
+  - si el paso empeora, restaura el punto anterior, emite `CAL_LOOP` y recien
+    ahi pasa a la siguiente etapa;
+  - todo paso del servo tambien queda limitado por `center +/- max_change`.
+- ESP esclavo entiende `PSOC_EVT_CAL_LOOP=0x22` y loguea:
+  `CAL loop stage=... dac=... -> usando mejor candidato`.
+
+Verificacion:
+
+- `pio run -e slave2` en `src/esp/Nodo comunicacion/slave` -> SUCCESS
+  (RAM 13.5%, Flash 56.4%).
+- `git diff --check` acotado a fuentes tocadas -> sin errores, solo warnings
+  normales LF/CRLF.
+- `git diff --check` global no es util ahora porque hay artefactos PSoC
+  `CortexM3/Debug/*.lst/*.map` modificados con trailing whitespace generado;
+  no fueron revertidos.
+
+### 14.15 Sesion 2026-06-14: simplificacion agresiva para que lockee y avance
+
+Log nuevo del usuario mostro `GEO_BP dac=147 measRaw=-19894`. Eso estaba
+dentro del rango operativo (`|-19894| < 26214`) pero fuera de la tolerancia
+anterior (`5000`), asi que el firmware seguia buscando. Para salir del loop y
+priorizar funcionamiento:
+
+- Las tolerancias GEO ahora son `CAL_OPERATING_RANGE_COUNTS` para todas las
+  etapas. Si cae dentro de +-0.5V diferencial, se lockea ese VDAC y se pasa a
+  la siguiente etapa.
+- `async_finish_stage()` ya no vuelve al centro/default cuando el mejor
+  candidato queda fuera de rango. Siempre escribe el mejor candidato real que
+  encontro; si esta fuera de rango, reporta `ok=0` y en LP tambien
+  `CAL_LP_BAD`, pero NO pisa el VDAC por default.
+- `async_finish_stage()` recalcula `ok=1` si el mejor candidato guardado entra
+  en tolerancia aunque el camino de salida haya sido loop/max-iter.
+- El servo PI de mantenimiento queda apagado desde `main.c`
+  (`psoc_calibration_servo_enable(0u)`) y `CAL_SERVO_ENABLE_DEFAULT=0u`.
+  Por ahora queda solo la calibracion inicial/secuencial; nada debe seguir
+  tocando los VDACs despues.
+
+Con este firmware, el punto del log `GEO_BP dac=147 measRaw=-19894` debe
+producir `CAL_STAGE_OK=1` y luego `CAL_BEGIN stage=2/GEO_ADDER`.

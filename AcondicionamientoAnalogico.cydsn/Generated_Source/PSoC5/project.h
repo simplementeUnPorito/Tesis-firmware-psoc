@@ -31,8 +31,6 @@
 #include "AMux_1.h"
 #include "PGAshield.h"
 #include "AMux_IN.h"
-#include "AMux_0_aliases.h"
-#include "AMux_0.h"
 #include "AMux_ADC.h"
 #include "Vref_aliases.h"
 #include "Vref.h"
