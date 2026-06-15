@@ -8,11 +8,11 @@
 *
 * ─────────────────────────────────────────────────────────────────────────────
 *  GEO — componentes TopDesign:
-*    UART, ADC, AMux_IN, AMux_ADC, VDAC_ref_*, PGAgain, OPAref, PGAp,
+*    UART, ADC, AMux_ADC, VDAC_ref_*, PGAgain, OPAref, PGAp,
 *    PGAn, LPF_1, LPF_2, OPAbp, OPAadder, OPAlp, Timer, LED, isr_*.
 *
 *  HAMMER — componentes TopDesign:
-*    UART, ADC, AMux_IN, AMux_ADC, VDAC_ref_IN, VDAC_PGA, VDAC_LP,
+*    UART, ADC, AMux_ADC, VDAC_ref_IN, VDAC_PGA, VDAC_LP,
 *    PGA, Opa_ref_IN, Opa_ref_PGA, Opa_LP, LPF_ADC, LPF_ref, Timer, LED.
 * ─────────────────────────────────────────────────────────────────────────────
 *
@@ -90,10 +90,6 @@
 #define PSOC_TX1_GPIO_TEST     0
 #endif
 
-#ifndef PSOC_STARTUP_FULL_CAL_ENABLE
-#define PSOC_STARTUP_FULL_CAL_ENABLE 0
-#endif
-
 /* -------------------------------------------------------------------------- */
 static volatile int32  g_adc_raw          = 0;
 
@@ -115,6 +111,7 @@ static volatile uint16 g_batches_sent = 0u;
 static volatile uint8  g_debug_psoc   = 0u;
 static          uint32 g_dbg_cnt      = 0u;
 static volatile uint8  g_cal_ack_pending = 0u;
+static volatile uint8  g_cal_button_pressed = 0u;
 
 static volatile uint8  rx_state       = 0u;
 static volatile uint8  rx_cmd         = 0u;
@@ -207,21 +204,6 @@ static void psoc_prepare_capture_path(void)
     ADC_StopConvert();
     psoc_adc_select_capture_config();
     psoc_calibration_restore_capture_path();
-}
-
-/* AMux_IN -> entrada real: usar justo antes de armar/iniciar una captura
- * (psoc_arm/psoc_start_now/debug ON), cuando se va a medir la senial real en
- * vez de la referencia/tierra virtual. */
-static void psoc_set_amux_active(void)
-{
-    psoc_calibration_amux_active();
-}
-
-/* AMux_IN -> referencia/tierra virtual: estado IDLE, usar al volver de una
- * captura/calibracion para retomar el monitoreo de GEO_LP vs. referencia. */
-static void psoc_set_amux_idle(void)
-{
-    psoc_calibration_amux_idle();
 }
 
 static void timer_start_runtime(void)
@@ -335,8 +317,13 @@ CY_ISR(isr_SyncIn)
         g_capture_done     = 0u;
         g_state            = PSOC_IDLE;
         CyExitCriticalSection(saved);
-        psoc_set_amux_idle();
     }
+}
+
+CY_ISR(isr_Button_Handler)
+{
+    isr_Button_ClearPending();
+    g_cal_button_pressed = 1u;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -401,7 +388,6 @@ static void psoc_arm(void)
 {
     uint8 saved;
     psoc_prepare_capture_path();
-    psoc_set_amux_active();
     saved = CyEnterCriticalSection();
     capture_reset_locked();
     g_state = PSOC_ARMED;
@@ -412,7 +398,6 @@ static void psoc_arm(void)
 static void psoc_start_now(void)
 {
     psoc_prepare_capture_path();
-    psoc_set_amux_active();
     psoc_enter_sampling(0u);
 }
 
@@ -595,7 +580,6 @@ static void uart_service(void)
                         uart_send_diag(PSOC_EVT_DEBUG_MODE, g_debug_psoc);
                         if (g_debug_psoc) {
                             psoc_prepare_capture_path();
-                            psoc_set_amux_active();
                             psoc_enter_sampling(1u);
                         } else {
                             ADC_StopConvert();
@@ -647,7 +631,6 @@ static void service_runtime(void)
         uart_send_diag(PSOC_EVT_CAPTURE_DONE, diag_u16_sat(g_batches_captured));
         g_capture_done = 0u;
         g_state = PSOC_IDLE;
-        psoc_set_amux_idle();
     }
 
     if (capture_dump_pending()) {
@@ -801,8 +784,6 @@ static void tx1_gpio_write(uint8 value)
 int main(void)
 {
     uint8 i;
-    uint8 startup_cal_pending;
-    uint32 startup_cal_due;
 
     CyGlobalIntEnable;
 
@@ -856,6 +837,9 @@ int main(void)
     isr_DelSig_StartEx(isr_DelSigReady);
     isr_Timer_StartEx(isr_Timer);
     isr_SyncIn_StartEx(isr_SyncIn);
+    Clock_1_Start();
+    isr_Button_ClearPending();
+    isr_Button_StartEx(isr_Button_Handler);
 
     Timer_Stop();
     Timer_WritePeriod(TIMEOUT_COUNTS);
@@ -864,17 +848,6 @@ int main(void)
     /* ── Loop de arranque: busca el ESP sin bloquear UART/ADC ───────────── */
     wait_for_esp();
     psoc_calibration_servo_enable(0u);
-
-    /* La calibracion larga ya no arranca escondida desde el PSoC. El ESP slave
-     * la pide por UART cuando detecta el PSoC, asi el monitor/maestro ven la
-     * corrida completa y el ACK. El servo lento queda desactivado por ahora:
-     * primero necesitamos un lock simple y funcional de los cuatro offsets. */
-#if PSOC_STARTUP_FULL_CAL_ENABLE
-    startup_cal_pending = 1u;
-#else
-    startup_cal_pending = 0u;
-#endif
-    startup_cal_due = timer_now_ticks() + MS_TO_TICKS(PSOC_STARTUP_CAL_DELAY_MS);
 
     /* ── 5 parpadeos rápidos al conectar ─────────────────────────────────── */
     for (i = 0u; i < 5u; i++)
@@ -895,15 +868,15 @@ int main(void)
         }
         now = timer_now_ticks();
 
-        if (startup_cal_pending && g_state == PSOC_IDLE && !capture_dump_pending() &&
-            ticks_due(now, startup_cal_due))
-        {
-            startup_cal_pending = 0u;
-            (void)psoc_start_calibration_if_idle(0u);
+        if (g_cal_button_pressed) {
+            g_cal_button_pressed = 0u;
+            if (g_state == PSOC_IDLE) {
+                (void)psoc_start_calibration_if_idle(0u);
+            }
             continue;
         }
 
-        if (!startup_cal_pending && g_state == PSOC_IDLE && !capture_dump_pending()) {
+        if (g_state == PSOC_IDLE && !capture_dump_pending()) {
             (void)psoc_calibration_servo_service();
         }
 

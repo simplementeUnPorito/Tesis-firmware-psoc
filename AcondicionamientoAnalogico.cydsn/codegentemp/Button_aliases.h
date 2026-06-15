@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: INn_1.h  
+* File Name: Button.h  
 * Version 2.20
 *
 * Description:
@@ -15,8 +15,8 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#if !defined(CY_PINS_INn_1_ALIASES_H) /* Pins INn_1_ALIASES_H */
-#define CY_PINS_INn_1_ALIASES_H
+#if !defined(CY_PINS_Button_ALIASES_H) /* Pins Button_ALIASES_H */
+#define CY_PINS_Button_ALIASES_H
 
 #include "cytypes.h"
 #include "cyfitter.h"
@@ -25,12 +25,12 @@
 /***************************************
 *              Constants        
 ***************************************/
-#define INn_1_0			(INn_1__0__PC)
-#define INn_1_0_INTR	((uint16)((uint16)0x0001u << INn_1__0__SHIFT))
+#define Button_0			(Button__0__PC)
+#define Button_0_INTR	((uint16)((uint16)0x0001u << Button__0__SHIFT))
 
-#define INn_1_INTR_ALL	 ((uint16)(INn_1_0_INTR))
+#define Button_INTR_ALL	 ((uint16)(Button_0_INTR))
 
-#endif /* End Pins INn_1_ALIASES_H */
+#endif /* End Pins Button_ALIASES_H */
 
 
 /* [] END OF FILE */

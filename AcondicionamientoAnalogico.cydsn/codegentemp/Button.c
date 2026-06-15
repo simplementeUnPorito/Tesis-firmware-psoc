@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: INp_1.c  
+* File Name: Button.c  
 * Version 2.20
 *
 * Description:
@@ -15,15 +15,15 @@
 *******************************************************************************/
 
 #include "cytypes.h"
-#include "INp_1.h"
+#include "Button.h"
 
 /* APIs are not generated for P15[7:6] on PSoC 5 */
 #if !(CY_PSOC5A &&\
-	 INp_1__PORT == 15 && ((INp_1__MASK & 0xC0) != 0))
+	 Button__PORT == 15 && ((Button__MASK & 0xC0) != 0))
 
 
 /*******************************************************************************
-* Function Name: INp_1_Write
+* Function Name: Button_Write
 ****************************************************************************//**
 *
 * \brief Writes the value to the physical port (data output register), masking
@@ -52,17 +52,17 @@
 *  this function.
 *
 * \funcusage
-*  \snippet INp_1_SUT.c usage_INp_1_Write
+*  \snippet Button_SUT.c usage_Button_Write
 *******************************************************************************/
-void INp_1_Write(uint8 value)
+void Button_Write(uint8 value)
 {
-    uint8 staticBits = (INp_1_DR & (uint8)(~INp_1_MASK));
-    INp_1_DR = staticBits | ((uint8)(value << INp_1_SHIFT) & INp_1_MASK);
+    uint8 staticBits = (Button_DR & (uint8)(~Button_MASK));
+    Button_DR = staticBits | ((uint8)(value << Button_SHIFT) & Button_MASK);
 }
 
 
 /*******************************************************************************
-* Function Name: INp_1_SetDriveMode
+* Function Name: Button_SetDriveMode
 ****************************************************************************//**
 *
 * \brief Sets the drive mode for each of the Pins component's pins.
@@ -85,16 +85,16 @@ void INp_1_Write(uint8 value)
 *  APIs (primary method) or disable interrupts around this function.
 *
 * \funcusage
-*  \snippet INp_1_SUT.c usage_INp_1_SetDriveMode
+*  \snippet Button_SUT.c usage_Button_SetDriveMode
 *******************************************************************************/
-void INp_1_SetDriveMode(uint8 mode)
+void Button_SetDriveMode(uint8 mode)
 {
-	CyPins_SetPinDriveMode(INp_1_0, mode);
+	CyPins_SetPinDriveMode(Button_0, mode);
 }
 
 
 /*******************************************************************************
-* Function Name: INp_1_Read
+* Function Name: Button_Read
 ****************************************************************************//**
 *
 * \brief Reads the associated physical port (pin status register) and masks 
@@ -108,16 +108,16 @@ void INp_1_SetDriveMode(uint8 mode)
 *  The current value for the pins in the component as a right justified number.
 *
 * \funcusage
-*  \snippet INp_1_SUT.c usage_INp_1_Read  
+*  \snippet Button_SUT.c usage_Button_Read  
 *******************************************************************************/
-uint8 INp_1_Read(void)
+uint8 Button_Read(void)
 {
-    return (INp_1_PS & INp_1_MASK) >> INp_1_SHIFT;
+    return (Button_PS & Button_MASK) >> Button_SHIFT;
 }
 
 
 /*******************************************************************************
-* Function Name: INp_1_ReadDataReg
+* Function Name: Button_ReadDataReg
 ****************************************************************************//**
 *
 * \brief Reads the associated physical port's data output register and masks 
@@ -126,8 +126,8 @@ uint8 INp_1_Read(void)
 *
 * The data output register controls the signal applied to the physical pin in 
 * conjunction with the drive mode parameter. This is not the same as the 
-* preferred INp_1_Read() API because the 
-* INp_1_ReadDataReg() reads the data register instead of the status 
+* preferred Button_Read() API because the 
+* Button_ReadDataReg() reads the data register instead of the status 
 * register. For output pins this is a useful function to determine the value 
 * just written to the pin.
 *
@@ -136,19 +136,19 @@ uint8 INp_1_Read(void)
 *  justified number for the component instance.
 *
 * \funcusage
-*  \snippet INp_1_SUT.c usage_INp_1_ReadDataReg 
+*  \snippet Button_SUT.c usage_Button_ReadDataReg 
 *******************************************************************************/
-uint8 INp_1_ReadDataReg(void)
+uint8 Button_ReadDataReg(void)
 {
-    return (INp_1_DR & INp_1_MASK) >> INp_1_SHIFT;
+    return (Button_DR & Button_MASK) >> Button_SHIFT;
 }
 
 
 /* If interrupt is connected for this Pins component */ 
-#if defined(INp_1_INTSTAT) 
+#if defined(Button_INTSTAT) 
 
     /*******************************************************************************
-    * Function Name: INp_1_SetInterruptMode
+    * Function Name: Button_SetInterruptMode
     ****************************************************************************//**
     *
     * \brief Configures the interrupt mode for each of the Pins component's
@@ -161,12 +161,12 @@ uint8 INp_1_ReadDataReg(void)
     * \param position
     *  The pin position as listed in the Pins component. You may OR these to be 
     *  able to configure the interrupt mode of multiple pins within a Pins 
-    *  component. Or you may use INp_1_INTR_ALL to configure the
+    *  component. Or you may use Button_INTR_ALL to configure the
     *  interrupt mode of all the pins in the Pins component.       
-    *  - INp_1_0_INTR       (First pin in the list)
-    *  - INp_1_1_INTR       (Second pin in the list)
+    *  - Button_0_INTR       (First pin in the list)
+    *  - Button_1_INTR       (Second pin in the list)
     *  - ...
-    *  - INp_1_INTR_ALL     (All pins in Pins component)
+    *  - Button_INTR_ALL     (All pins in Pins component)
     *
     * \param mode
     *  Interrupt mode for the selected pins. Valid options are documented in
@@ -182,19 +182,19 @@ uint8 INp_1_ReadDataReg(void)
     *  port.
     *
     * \funcusage
-    *  \snippet INp_1_SUT.c usage_INp_1_SetInterruptMode
+    *  \snippet Button_SUT.c usage_Button_SetInterruptMode
     *******************************************************************************/
-    void INp_1_SetInterruptMode(uint16 position, uint16 mode)
+    void Button_SetInterruptMode(uint16 position, uint16 mode)
     {
-		if((position & INp_1_0_INTR) != 0u) 
+		if((position & Button_0_INTR) != 0u) 
 		{ 
-			 INp_1_0_INTTYPE_REG = (uint8)mode; 
+			 Button_0_INTTYPE_REG = (uint8)mode; 
 		}
     }
     
     
     /*******************************************************************************
-    * Function Name: INp_1_ClearInterrupt
+    * Function Name: Button_ClearInterrupt
     ****************************************************************************//**
     *
     * \brief Clears any active interrupts attached with the component and returns 
@@ -211,11 +211,11 @@ uint8 INp_1_ReadDataReg(void)
     *  those associated with the Pins component.
     *
     * \funcusage
-    *  \snippet INp_1_SUT.c usage_INp_1_ClearInterrupt
+    *  \snippet Button_SUT.c usage_Button_ClearInterrupt
     *******************************************************************************/
-    uint8 INp_1_ClearInterrupt(void)
+    uint8 Button_ClearInterrupt(void)
     {
-        return (INp_1_INTSTAT & INp_1_MASK) >> INp_1_SHIFT;
+        return (Button_INTSTAT & Button_MASK) >> Button_SHIFT;
     }
 
 #endif /* If Interrupts Are Enabled for this Pins component */ 

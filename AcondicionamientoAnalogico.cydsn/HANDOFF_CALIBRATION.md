@@ -2265,3 +2265,183 @@ priorizar funcionamiento:
 
 Con este firmware, el punto del log `GEO_BP dac=147 measRaw=-19894` debe
 producir `CAL_STAGE_OK=1` y luego `CAL_BEGIN stage=2/GEO_ADDER`.
+
+### 14.16 Sesion 2026-06-15: redisenio de calibracion por VDAC, ventana deslizante, realcheck y boot-cal autonoma
+
+Cambios implementados sobre el estado parcial dejado por Claude/Codex:
+
+- `calibration_tables.h` queda como agregador global y cada VDAC GEO tiene su
+  propio header: `calibration_tables_geo_pga.h`, `_bp.h`, `_adder.h`, `_lp.h`.
+  Ahi viven target, direccion, rango de busqueda, probe step, tolerancia,
+  descartes, promediado de biseccion/verify/realcheck, saturacion, nudge y
+  parametros PI del servo.
+- `PsocCalStage` ahora usa `PsocCalAvgCfg` y `PsocCalRealcheckCfg`. La
+  calibracion principal sigue siendo biseccion en cascada; el PI sigue siendo
+  solo servo lento y permanece deshabilitado por defecto.
+- `async_measure_service()` ya no usa promedio acumulativo. Ahora usa un buffer
+  circular de sumas-de-ventana: `avg_n * window_count` muestras con peso fijo,
+  racha estable `stable_streak` y techo `max_samples`. Defaults GEO:
+  biseccion 64x16/2048, verify 64x16/4096, realcheck 64x64/8192.
+- Anti-saturacion: cada etapa tiene `CAL_SAT_COUNTS_GEO_*` (inicial 120000).
+  Candidatos saturados no pueden ser mejor candidato si existe al menos un
+  candidato no saturado. Si todos saturan, se conserva el menor error para
+  diagnostico y se emite `PSOC_EVT_CAL_STAGE_SAT_ALL`.
+- Fase final `realcheck`: despues de verify, el PSoC cambia a
+  `AMux_IN_Select(0)`, mide las cuatro etapas GEO con la entrada real y aplica
+  nudges de +/-1 LSB hasta 3 veces por etapa. Un nudge solo se acepta si mejora
+  `|error|` y no satura; si empeora o satura, se revierte y se termina esa
+  etapa.
+- Nuevos eventos PSoC/ESP: `CAL_STAGE_SAT`, `CAL_STAGE_SAT_ALL`,
+  `CAL_REALCHECK_BEGIN`, `CAL_REALCHECK_DAC`, `CAL_REALCHECK_MEAS32`,
+  `CAL_REALCHECK_NUDGE`, `CAL_REALCHECK_OK`.
+- Boot-cal autonoma: `PSOC_STARTUP_FULL_CAL_ENABLE=1`. El PSoC calibra al
+  arrancar despues del handshake con ESP. Hasta que termine esa primera
+  calibracion, el parser UART solo acepta PONG/status; arm/start/debug/config
+  responden `CAL_BUSY`/ACK 0.
+- El ESP slave ya no solicita auto-cal al detectar el PSoC
+  (`PSOC_AUTO_CAL_ON_READY=0`), pero el comando manual de calibracion sigue
+  existiendo para banco. El timeout de calibracion del slave sube a 450 s; el
+  watchdog PSoC queda en 400 s.
+- Visibilidad maestro/UI: el slave reusa `MsgCfgAck` para progreso autonomo:
+  `2` generico, `3..6` biseccion por etapa, `7..10` verify, `11..14`
+  realcheck, `0/1` resultado final. `slave_panel.js` vuelve a mostrar el punto
+  de calibracion y `app.js` trata `ok>=2` como progreso sin consumir el ACK
+  final.
+
+Pendiente explicito: el split de `main.c` en modulos (`psoc_uart_proto`,
+`psoc_capture`, `psoc_uart_cmds`) queda diferido hasta confirmar que esta
+calibracion compila y corre en hardware. No se hizo push, flash ni upload.
+
+### 14.17 Cierre 2026-06-15: estado listo para continuar manana
+
+Estado final de esta tanda:
+
+- El plan de calibracion quedo implementado en codigo fuente. No se subio,
+  no se flasheo y no se pusheo nada.
+- No usar el workspace viejo para validar esta parte. La validacion correcta
+  es sobre el proyecto `AcondicionamientoAnalogico` y su dependencia local
+  `src/psoc/Analog_LPF_v1_0.cylib`.
+- El build PSoC se verifico en una copia temporal fuera del repo, con un
+  workspace temporal que contiene solo `AcondicionamientoAnalogico.cyprj`.
+  Esa copia temporal se elimino al terminar. Resultado: build OK.
+- El build ESP slave se verifico con PlatformIO. Resultado: OK.
+- El arbol de trabajo quedo sin artefactos generados de PSoC Creator; solo
+  quedan fuentes/docs/JS y los headers GEO nuevos.
+
+Archivos principales modificados:
+
+- PSoC: `calibration.c`, `calibration.h`, `calibration_tables.h`,
+  `psoc_hw.h`, `main.c`.
+- PSoC nuevos headers por VDAC:
+  `calibration_tables_geo_pga.h`, `calibration_tables_geo_bp.h`,
+  `calibration_tables_geo_adder.h`, `calibration_tables_geo_lp.h`.
+- ESP slave: `src/psoc_uart.h`, `src/main.cpp`, `platformio.ini`.
+- UI master: `data/js/app.js`, `data/js/slave_panel.js`.
+- Handoff: este archivo.
+
+Comandos usados para verificar:
+
+```powershell
+git diff --check -- `
+  'src/psoc/AcondicionamientoAnalogico.cydsn/calibration.c' `
+  'src/psoc/AcondicionamientoAnalogico.cydsn/calibration.h' `
+  'src/psoc/AcondicionamientoAnalogico.cydsn/calibration_tables.h' `
+  'src/psoc/AcondicionamientoAnalogico.cydsn/psoc_hw.h' `
+  'src/psoc/AcondicionamientoAnalogico.cydsn/main.c' `
+  'src/esp/Nodo comunicación/slave/src/psoc_uart.h' `
+  'src/esp/Nodo comunicación/slave/src/main.cpp' `
+  'src/esp/Nodo comunicación/slave/platformio.ini' `
+  'src/esp/Nodo comunicación/master/data/js/app.js' `
+  'src/esp/Nodo comunicación/master/data/js/slave_panel.js' `
+  'src/psoc/AcondicionamientoAnalogico.cydsn/HANDOFF_CALIBRATION.md'
+
+cd 'src/esp/Nodo comunicación/slave'
+pio run
+```
+
+Build PSoC validado:
+
+- Se creo una copia temporal de `src/psoc/AcondicionamientoAnalogico.cydsn`
+  y `src/psoc/Analog_LPF_v1_0.cylib`.
+- Se genero ahi un workspace temporal `AcondicionamientoAnalogico.cywrk` con
+  un solo proyecto: `AcondicionamientoAnalogico.cyprj`.
+- Se ejecuto:
+  `cyprjmgr.exe -wrk <temp>\AcondicionamientoAnalogico.cydsn\AcondicionamientoAnalogico.cywrk -prj AcondicionamientoAnalogico -build -c Debug`.
+- Resultado: `Build Succeeded`, flash `23864/262144`, SRAM `49464/65536`.
+
+Primeros pasos manana:
+
+1. Abrir solo `src/psoc/AcondicionamientoAnalogico.cydsn/AcondicionamientoAnalogico.cyprj`
+   en PSoC Creator si se quiere revisar visualmente.
+2. Compilar/programar PSoC desde `AcondicionamientoAnalogico`; evitar usar
+   `DiferencialToSingleEnded_ESP-000` como referencia para este trabajo.
+3. Programar los ESP slave si corresponde.
+4. Encender y mirar logs esperados:
+   `CAL_START`, `CAL_STAGE_*`, `CAL_STAGE_SAT*`, `CAL_VERIFY_*`,
+   `CAL_REALCHECK_*`, `CAL_DONE`.
+5. Confirmar en UI que el punto `Calibracion` pasa por busy/fase/etapa y
+   termina ok/fail.
+
+Pendientes reales:
+
+- Prueba en hardware de boot-cal autonoma completa.
+- Ajuste fino de valores GEO si el realcheck muestra saturacion o nudges
+  sistematicos.
+- Split/refactor de `main.c` a modulos separados solo despues de confirmar
+  calibracion en hardware.
+- Cuando se prepare commit, no olvidar agregar los cuatro headers GEO nuevos
+  que hoy estan como archivos no trackeados.
+
+### 14.18 Sesion 2026-06-15 (cierre): auto-cal no disparaba — desajuste ESP/PSoC sin flashear
+
+Sintoma reportado: tras programar el ESP slave (S1, COM9) con los cambios de
+"anoche", la auto-calibracion no arranca sola al boot. El log de
+`platformio device monitor` muestra `PSoC: DETECTADO` y `listo, esperando
+ARM`, pero nunca aparece `CAL_START`/`CAL_DONE` cerca del boot — solo eventos
+`CAL_AMUX_IN` horas despues (arm/start manual), sin telemetria de etapas.
+
+Causa: desajuste de despliegue, no un bug de logica.
+
+- El cambio de "anoche" movio el disparo de auto-cal del ESP al PSoC:
+  `PSOC_STARTUP_FULL_CAL_ENABLE` 0→1 en `main.c` (PSoC) + gating con
+  `g_startup_cal_done`, y en el ESP `PSOC_AUTO_CAL_ON_READY` 1→0 (deja de
+  pedir 0xB5 al detectar el PSoC).
+- Pero, segun §14.17, el PSoC **nunca se flasheo** ("no se flasheo"). El PSoC
+  que esta corriendo en la placa sigue siendo el firmware viejo
+  (`PSOC_STARTUP_FULL_CAL_ENABLE=0`, sin auto-cal propia).
+- Resultado: el unico lado que se actualizo en hardware (el ESP) quedo con
+  `PSOC_AUTO_CAL_ON_READY=0` (no pide cal), y el PSoC viejo tampoco se
+  autocalibra al boot. Ningun lado dispara nada — exactamente el sintoma
+  observado (sin `CAL_START` cerca del boot).
+
+Fix aplicado (solo ESP, `src/esp/Nodo comunicación/slave/src/main.cpp`):
+
+- `PSOC_AUTO_CAL_ON_READY` vuelto a `1` (linea ~86). Restaura el disparo
+  ESP→PSoC (`requestPsocCalibration("AUTO")` via 0xB5) al detectar el PSoC,
+  igual que en HEAD (`4a827551`). Funciona contra el PSoC viejo actualmente
+  flasheado sin tocarlo.
+- Logging agregado en `scheduleAutoCalibration()`/`serviceAutoCalibration()`
+  (eventos `[AUTO_CAL] scheduled...`, `[AUTO_CAL] deferred (...)`,
+  `[AUTO_CAL] due -> requesting calibration`, `[AUTO_CAL] request
+  failed...`, mas `LOGM("AUTO_CAL", ...)` para el log del maestro) para poder
+  ver en el monitor serie por que una auto-cal se programa, se posterga o se
+  dispara.
+- Build verificado: `pio run -e slave2` → SUCCESS.
+- **No se toco el PSoC**: `PSOC_STARTUP_FULL_CAL_ENABLE=1` y
+  `g_startup_cal_done` quedan en el arbol de trabajo tal cual los dejo la
+  sesion de anoche (inertes hasta que se flashee el PSoC).
+
+Importante para la proxima sesion / si se flashea el PSoC nuevo:
+
+- Con el PSoC nuevo (`PSOC_STARTUP_FULL_CAL_ENABLE=1`), el PSoC se
+  autocalibra solo al boot. Si en ese momento el ESP sigue con
+  `PSOC_AUTO_CAL_ON_READY=1`, **ambos lados disparan** una calibracion: el
+  PSoC la propia al boot, y el ESP cuando detecta el PSoC (reintenta cada
+  `PSOC_AUTO_CAL_RETRY_MS`=3000ms mientras el PSoC responde `CAL_BUSY`
+  durante su boot-cal). Cuando el PSoC termina su boot-cal
+  (`g_startup_cal_done=1`), el siguiente reintento del ESP puede arrancar
+  una **segunda** calibracion completa.
+- Decision pendiente para cuando se flashee el PSoC nuevo: volver a poner
+  `PSOC_AUTO_CAL_ON_READY=0` en el ESP (boot-cal queda 100% del lado PSoC), o
+  dejarlo en 1 como red de seguridad aceptando una posible doble corrida la
+  primera vez.

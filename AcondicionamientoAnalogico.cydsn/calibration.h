@@ -4,27 +4,56 @@
 #include "project.h"
 #include "psoc_hw.h"
 
-#ifndef PSOC_STARTUP_CAL_DELAY_MS
-#define PSOC_STARTUP_CAL_DELAY_MS 5000u
-#endif
-
 #define PSOC_CAL_MAX_STAGES 4u
 
 typedef void (*PsocCalVdacWrite)(uint8 value);
 typedef void (*PsocCalDiagHook)(uint8 event, uint8 value);
 
+/* Configuracion de promediado por ventana deslizante (ver calibration.c,
+ * async_measure_service). "measured" = promedio de las ultimas
+ * avg_n*window_count muestras (peso constante, no se diluye). Se considera
+ * "estable" cuando ese promedio varia <= settle_tol_counts durante
+ * stable_streak comparaciones consecutivas con el buffer ya lleno; si se
+ * llega a max_samples sin racha estable, se usa el promedio igual. */
+typedef struct {
+    uint8  avg_n;
+    uint8  window_count;
+    uint16 max_samples;
+    int32  settle_tol_counts;
+    uint8  stable_streak;
+} PsocCalAvgCfg;
+
+/* Fase final con la señal real del geofono (entrada fija, sin selector):
+ * ajuste fino de +-1 LSB sobre el resultado de biseccion/verify, hasta
+ * max_nudges veces, revirtiendo si un nudge satura o empeora |error|.
+ * enable=0 salta la etapa (se conserva el resultado de verify tal cual). */
+typedef struct {
+    uint8  enable;
+    int32  tol_counts;
+    uint8  nudge_step;
+    uint8  max_nudges;
+    uint16 discard_samples;
+    uint16 nudge_discard_samples;
+    PsocCalAvgCfg avg;
+} PsocCalRealcheckCfg;
+
 typedef struct {
     const char *name;
     uint8 adc_channel;
     int32 target_counts;
-    uint8 avg_n;
-    uint16 settle_samples;
-    uint16 verify_settle_samples;
-    uint16 max_iter;
-    int32 tolerance_counts;
     int8 direction;
     uint8 dac_center;
     uint8 dac_max_change;
+    uint8 probe_step;
+    uint16 max_iter;
+    int32 tolerance_counts;
+    int32 deadband_counts;
+    int32 sat_counts;
+    uint16 settle_samples;
+    uint16 verify_settle_samples;
+    PsocCalAvgCfg avg;
+    PsocCalAvgCfg verify_avg;
+    PsocCalRealcheckCfg realcheck;
     PsocCalVdacWrite write;
 } PsocCalStage;
 
@@ -44,13 +73,6 @@ void psoc_calibration_start_references(void);
 void psoc_calibration_restore_capture_path(void);
 void psoc_calibration_reset_references(void);
 
-/* Alternan el canal de AMux_IN y reportan el cambio via PSOC_EVT_CAL_AMUX_IN.
- * Usadas por main.c para alternar entre el estado IDLE (AMux_IN=referencia/
- * tierra virtual, monitoreo continuo de GEO_LP vs. referencia) y el estado
- * activo (AMux_IN=entrada real, a punto de medir/capturar, ver
- * psoc_arm/psoc_start_now). */
-void psoc_calibration_amux_active(void);
-void psoc_calibration_amux_idle(void);
 uint8 psoc_calibration_start_async(void);
 uint8 psoc_calibration_service_async(void);
 uint8 psoc_calibration_async_busy(void);

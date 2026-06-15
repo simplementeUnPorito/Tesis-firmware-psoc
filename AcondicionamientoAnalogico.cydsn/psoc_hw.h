@@ -58,6 +58,13 @@
 #define PSOC_EVT_WAIT_ESP         0x20u
 #define PSOC_EVT_ESP_SEEN         0x21u
 #define PSOC_EVT_CAL_LOOP         0x22u
+#define PSOC_EVT_CAL_STAGE_SAT    0x23u  /* value=1 si el candidato actual satura (|medido|>=sat_counts) */
+#define PSOC_EVT_CAL_STAGE_SAT_ALL 0x24u /* todas las mediciones de la etapa saturaron (value=stage_index) */
+#define PSOC_EVT_CAL_REALCHECK_BEGIN 0x25u /* value=stage_index, inicio fase de señal real para esa etapa */
+#define PSOC_EVT_CAL_REALCHECK_DAC   0x26u /* value=dac actual evaluado en realcheck */
+#define PSOC_EVT_CAL_REALCHECK_MEAS32 0x27u /* 4 bytes MSB-first, igual patron que CAL_STAGE_MEAS32 */
+#define PSOC_EVT_CAL_REALCHECK_NUDGE 0x28u /* value=nudge aplicado, signed 8-bit (0xFF=-1,0x01=+1,0x00=revertido/sin cambio) */
+#define PSOC_EVT_CAL_REALCHECK_OK    0x29u /* value=1 si la etapa quedo dentro de tol_counts, 0 si no */
 #define PSOC_EVT_RX_CMD           0x30u
 #define PSOC_EVT_SETN             0x31u
 #define PSOC_EVT_ARMED            0x32u
