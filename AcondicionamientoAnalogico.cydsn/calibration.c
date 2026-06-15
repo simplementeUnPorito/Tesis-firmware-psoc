@@ -934,6 +934,15 @@ uint8 psoc_calibration_async_busy(void)
 
 uint8 psoc_calibration_async_result_ok(void)
 {
+#if PSOC_HW_CLASS == PSOC_HW_GEO
+    /* En GEO el criterio de uso para captura es la salida final (GEO_LP).
+     * Las etapas intermedias se reportan igual como diagnostico, pero si la
+     * cascada termina centrada no queremos marcar la calibracion completa como
+     * fallida en el ESP/web. */
+    if (g_psoc_cal_result_count >= PSOC_CAL_STAGE_COUNT) {
+        return g_psoc_cal_results[PSOC_CAL_STAGE_COUNT - 1u].ok;
+    }
+#endif
     return g_cal_async.ok;
 }
 

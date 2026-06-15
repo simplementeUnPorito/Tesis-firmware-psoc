@@ -7,6 +7,8 @@ This note records the working command-line flow for
 
 - KitProg USB-UART/Programmer: `COM6`
 - PPCLI port name observed on this machine: `KitProg/1D1F17F002152400`
+- PPCLI port name observed on 2026-06-14 after `GetPorts`:
+  `"KitProg (CMSIS-DAP/248355)"`
 - Active PSoC Creator project:
   `C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn`
 
@@ -47,7 +49,13 @@ try {
 }
 ```
 
-Expected port:
+Expected port can vary by KitProg firmware. Today this machine returned:
+
+```text
+KitProg (CMSIS-DAP/248355)
+```
+
+An older run returned:
 
 ```text
 KitProg/1D1F17F002152400
@@ -64,7 +72,7 @@ $out = Join-Path $env:TEMP "psoc_program_acondicionamiento.cli"
 $hex = "C:/Github/Tesis/src/psoc/AcondicionamientoAnalogico.cydsn/CortexM3/ARM_GCC_541/Debug/AcondicionamientoAnalogico.hex"
 
 $lines = Get-Content -LiteralPath $example
-$lines[0] = 'OpenPort KitProg/1D1F17F002152400 "C:\Program Files (x86)\Cypress\Programmer\"'
+$lines[0] = 'OpenPort "KitProg (CMSIS-DAP/248355)" "C:\Program Files (x86)\Cypress\Programmer\"'
 $lines[1] = "HEX_ReadFile `"$hex`""
 if ($lines[-1].Trim().ToLowerInvariant() -ne "quit") { $lines += "quit" }
 Set-Content -LiteralPath $out -Value $lines -Encoding ASCII

@@ -91,7 +91,7 @@
 #endif
 
 #ifndef PSOC_STARTUP_FULL_CAL_ENABLE
-#define PSOC_STARTUP_FULL_CAL_ENABLE 1
+#define PSOC_STARTUP_FULL_CAL_ENABLE 0
 #endif
 
 /* -------------------------------------------------------------------------- */
@@ -513,6 +513,13 @@ static void uart_service(void)
                 if (rx != (uint8)(rx_cmd ^ rx_p1 ^ rx_p2)) { break; }
 
                 if (!g_esp_connected) {
+                    /* Durante reset/upload del ESP, el TX hacia el PSoC puede
+                     * emitir bytes que por casualidad formen un frame valido.
+                     * No aceptar comandos de configuracion/captura como
+                     * handshake: solo PONG/STATUS abren la comunicacion real. */
+                    if (rx_cmd != PSOC_CMD_PONG && rx_cmd != 0xA5u) {
+                        break;
+                    }
                     g_esp_connected = 1u;
                     uart_send_diag(PSOC_EVT_ESP_SEEN, rx_cmd);
                 }
@@ -858,9 +865,10 @@ int main(void)
     wait_for_esp();
     psoc_calibration_servo_enable(0u);
 
-    /* La calibracion larga de startup queda prendida por defecto. El servo
-     * lento queda desactivado por ahora: primero necesitamos un lock simple y
-     * funcional de los cuatro offsets, sin mantenimiento PI peleando despues. */
+    /* La calibracion larga ya no arranca escondida desde el PSoC. El ESP slave
+     * la pide por UART cuando detecta el PSoC, asi el monitor/maestro ven la
+     * corrida completa y el ACK. El servo lento queda desactivado por ahora:
+     * primero necesitamos un lock simple y funcional de los cuatro offsets. */
 #if PSOC_STARTUP_FULL_CAL_ENABLE
     startup_cal_pending = 1u;
 #else

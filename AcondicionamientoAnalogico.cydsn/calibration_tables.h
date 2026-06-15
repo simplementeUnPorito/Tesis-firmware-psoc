@@ -65,23 +65,23 @@
 #endif
 
 #define CAL_AVG_N      32u
-#define CAL_MAX_ITER   12u
+#define CAL_MAX_ITER   16u
 #define CAL_TOL_COUNTS 250L
 
 /* Rango operativo absoluto: ADC_CFG1_COUNTS_PER_VOLT=52429 (ver HANDOFF
- * §4/§13), entonces 0.5V =~ 26214 counts. En GEO lo usamos tambien como
- * criterio de "suficientemente bueno": si cae dentro de este rango, se lockea
- * la etapa y se pasa a la siguiente. Si no cae, igual se conserva el mejor
- * candidato encontrado; no se vuelve al default. */
+ * §4/§13), entonces 0.5V =~ 26214 counts. Se conserva como alarma de salud:
+ * si una etapa queda fuera de esto, el log lo muestra como no OK, pero no se
+ * abandona la cascada ni se vuelve al default. */
 #define CAL_OPERATING_RANGE_COUNTS 26214L
 
-/* GEO ahora acepta "funcional" como dentro del rango operativo. Si una etapa
- * cae ahi se lockea y se pasa a la siguiente; no se sigue buscando perfeccion
- * de pocos counts con un VDAC de 8 bits. */
-#define CAL_TOL_COUNTS_GEO_PGA   CAL_OPERATING_RANGE_COUNTS
-#define CAL_TOL_COUNTS_GEO_BP    CAL_OPERATING_RANGE_COUNTS
-#define CAL_TOL_COUNTS_GEO_ADDER CAL_OPERATING_RANGE_COUNTS
-#define CAL_TOL_COUNTS_GEO_LP    CAL_OPERATING_RANGE_COUNTS
+/* Tolerancia fina GEO: 0.1V aprox. 52429 counts/V * 0.1V = 5243 counts.
+ * Esto fuerza a la busqueda a acercarse mucho mas al cero antes de lockear.
+ * Si no existe un codigo que llegue, igual queda escrito el mejor candidato. */
+#define CAL_FINE_TOL_COUNTS_GEO 5243L
+#define CAL_TOL_COUNTS_GEO_PGA   CAL_FINE_TOL_COUNTS_GEO
+#define CAL_TOL_COUNTS_GEO_BP    CAL_FINE_TOL_COUNTS_GEO
+#define CAL_TOL_COUNTS_GEO_ADDER CAL_FINE_TOL_COUNTS_GEO
+#define CAL_TOL_COUNTS_GEO_LP    CAL_FINE_TOL_COUNTS_GEO
 
 /* Espera en muestras ADC descartadas despues de tocar cada VDAC. CFG1 corre a
  * ~3 kSPS, asi que 300 muestras son aproximadamente 100 ms. Los nodos mas
@@ -116,10 +116,10 @@
 #define CAL_DAC_MAX_CHANGE_GEO 64u
 #define CAL_DAC_MAX_CHANGE_HAMMER 255u
 
-/* Si una etapa no entra al rango operativo, no tiene sentido seguir con las
- * posteriores porque el front-end es una cascada. Deja logueado el mejor punto
- * de la etapa fallida y termina con CAL_DONE=0. */
-#define CAL_FAIL_FAST_ON_STAGE_FAIL 1u
+/* En GEO no cortar en la primera etapa: la etapa siguiente puede compensar
+ * parte del residual, y necesitamos ver el diagnostico completo de las cuatro
+ * etapas aunque una quede fuera de tolerancia. */
+#define CAL_FAIL_FAST_ON_STAGE_FAIL 0u
 
 #define CAL_DAC_CENTER_GEO_PGA   CAL_DAC_CENTER
 #define CAL_DAC_CENTER_GEO_BP    CAL_DAC_CENTER
