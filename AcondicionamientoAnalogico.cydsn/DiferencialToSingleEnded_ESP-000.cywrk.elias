@@ -117,7 +117,6 @@
 <v>DiferencialToSingleEnded_ESP-000\AcondicionamientoAnalogico\Generated_Source\PSoC5\INn</v>
 <v>DiferencialToSingleEnded_ESP-000\AcondicionamientoAnalogico\Generated_Source\PSoC5\INp</v>
 <v>DiferencialToSingleEnded_ESP-000\AcondicionamientoAnalogico\Generated_Source\PSoC5\isr_Button</v>
-<v>DiferencialToSingleEnded_ESP-000\AcondicionamientoAnalogico\Generated_Source\PSoC5\isr_DelSig</v>
 </VisibleNodeIds>
 </CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
 <CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="DiferencialToSingleEnded_ESP-000\AcondicionamientoAnalogico">
@@ -351,7 +350,6 @@
 <v>DiferencialToSingleEnded_ESP-000\AcondicionamientoAnalogico\CortexM3\ARM_GCC_541\Debug\Listing Files\OPAadder.lst</v>
 <v>DiferencialToSingleEnded_ESP-000\AcondicionamientoAnalogico\CortexM3\ARM_GCC_541\Debug\Listing Files\OPAadder_PM.lst</v>
 <v>DiferencialToSingleEnded_ESP-000\AcondicionamientoAnalogico\CortexM3\ARM_GCC_541\Debug\Listing Files\OPAbp.lst</v>
-<v>DiferencialToSingleEnded_ESP-000\AcondicionamientoAnalogico\CortexM3\ARM_GCC_541\Debug\Listing Files\OPAbp_PM.lst</v>
 </VisibleNodeIds>
 </CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
 </TreeStates>
@@ -476,12 +474,16 @@
 </CyGuid_fdba8dfd-b15b-4469-9bbb-9e40c3e70997>
 <Unloaded />
 <OpenDocs>
-<name v=".\main.c" />
 <name v=".\TopDesign\TopDesign.cysch" />
 <name v=".\AcondicionamientoAnalogico.cydwr" />
 <name v=".\calibration.c" />
 <name v=".\calibration_tables.h" />
 <name v=".\Generated_Source\PSoC5\LED.h" />
+<name v=".\psoc_adc.c" />
+<name v=".\calibration.h" />
+<name v=".\psoc_hw.h" />
+<name v=".\psoc_hw.c" />
+<name v=".\Generated_Source\PSoC5\UART.c" />
 </OpenDocs>
 <OpenDocsLayout><![CDATA[<?xml version="1.0"?><!--
 
@@ -489,7 +491,7 @@
   Copyright (c) 2001-2016 Actipro Software LLC.  All rights reserved.
   http://www.actiprosoftware.com
 
---><DocumentLayout Version="1.0"><LayoutData><TabbedMdiRootContainer Orientation="Vertical"><TabbedMdiContainer Size="1439, 703" SelectedTabbedMdiWindow="7f3b4216-dcb4-4ef7-af39-2acfce6a1197"><DocumentWindow Key="C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\main.c" Guid="7f3b4216-dcb4-4ef7-af39-2acfce6a1197" /><DocumentWindow Key="C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\TopDesign\TopDesign.cysch" Guid="52999257-4acb-45fe-b22f-6fa0a5a12d8d" /><DocumentWindow Key="C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\AcondicionamientoAnalogico.cydwr" Guid="f9cd5419-c657-4705-b43d-2e82d3b67eb8" /><DocumentWindow Key="C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\calibration.c" Guid="cf27b793-8b6d-45e0-a227-2a8af344f99c" /><DocumentWindow Key="C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\calibration_tables.h" Guid="b9f55ba3-9ee9-40cf-ae7f-1b9faafed7f1" /><ToolWindow Key="Start Page:bd4649ab-da6b-4d04-a663-c722b8bf99db:Start Page" Guid="956617fa-f323-4092-8b6f-e650096a573c" /><DocumentWindow Key="C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\Generated_Source\PSoC5\LED.h" Guid="24c3fe1b-a993-40f7-9067-04846d894b77" /></TabbedMdiContainer></TabbedMdiRootContainer><FloatingContainers /></LayoutData></DocumentLayout>]]></OpenDocsLayout>
+--><DocumentLayout Version="1.0"><LayoutData><TabbedMdiRootContainer Orientation="Vertical"><TabbedMdiContainer Size="1643, 703" SelectedTabbedMdiWindow="52999257-4acb-45fe-b22f-6fa0a5a12d8d"><DocumentWindow Key="C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\TopDesign\TopDesign.cysch" Guid="52999257-4acb-45fe-b22f-6fa0a5a12d8d" /><DocumentWindow Key="C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\AcondicionamientoAnalogico.cydwr" Guid="f9cd5419-c657-4705-b43d-2e82d3b67eb8" /><DocumentWindow Key="C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\calibration.c" Guid="cf27b793-8b6d-45e0-a227-2a8af344f99c" /><DocumentWindow Key="C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\calibration_tables.h" Guid="b9f55ba3-9ee9-40cf-ae7f-1b9faafed7f1" /><DocumentWindow Key="C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\Generated_Source\PSoC5\LED.h" Guid="24c3fe1b-a993-40f7-9067-04846d894b77" /><DocumentWindow Key="C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\psoc_adc.c" Guid="297807d2-bc96-499e-aa79-0721319fcba0" /><DocumentWindow Key="C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\calibration.h" Guid="10eb5bfb-8b0f-482f-9366-4a86dbd1ca84" /><DocumentWindow Key="C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\psoc_hw.h" Guid="5e404841-9939-42ce-95bf-2dd6b450b872" /><DocumentWindow Key="C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\psoc_hw.c" Guid="e6c24957-8de4-4487-a116-eba178aa1cb0" /><DocumentWindow Key="C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\Generated_Source\PSoC5\UART.c" Guid="8aa3fb67-f874-487d-bb7a-7371aedd3ea0" /><ToolWindow Key="Start Page:bd4649ab-da6b-4d04-a663-c722b8bf99db:Start Page" Guid="956617fa-f323-4092-8b6f-e650096a573c" /></TabbedMdiContainer></TabbedMdiRootContainer><FloatingContainers /></LayoutData></DocumentLayout>]]></OpenDocsLayout>
 <config v="" />
 <AutoUpdate v="true" />
 </CyGuid_843a90a4-0c4b-4e44-991d-05e7fb117a21>
