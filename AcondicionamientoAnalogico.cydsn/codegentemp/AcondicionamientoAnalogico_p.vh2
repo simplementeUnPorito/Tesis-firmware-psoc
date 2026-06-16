@@ -1,5 +1,5 @@
 -- Project:   AcondicionamientoAnalogico
--- Generated: 06/15/2026 22:59:58
+-- Generated: 06/16/2026 19:37:38
 -- PSoC Creator  4.4
 
 ENTITY AcondicionamientoAnalogico IS
@@ -257,21 +257,20 @@ ARCHITECTURE __DEFAULT__ OF AcondicionamientoAnalogico IS
     ATTRIBUTE lib_model OF \UART:BUART:sTX:TxSts\ : LABEL IS "statusicell2";
     ATTRIBUTE lib_model OF \UART:BUART:sRX:RxShifter:u0\ : LABEL IS "datapathcell7";
     ATTRIBUTE lib_model OF \UART:BUART:sRX:RxSts\ : LABEL IS "statusicell3";
-    ATTRIBUTE Location OF \PGAshield:SC\ : LABEL IS "F(SC,1)";
-    ATTRIBUTE Location OF \VDAC_ref_LP:viDAC8\ : LABEL IS "F(VIDAC,1)";
-    ATTRIBUTE Location OF \VDAC_ref_BP:viDAC8\ : LABEL IS "F(VIDAC,0)";
+    ATTRIBUTE Location OF \PGAshield:SC\ : LABEL IS "F(SC,3)";
+    ATTRIBUTE Location OF \VDAC_ref_LP:viDAC8\ : LABEL IS "F(VIDAC,2)";
     ATTRIBUTE Location OF \LPF_2:cy_psoc3_lpf_1\ : LABEL IS "F(LPF,1)";
     ATTRIBUTE Location OF \OPAref:ABuf\ : LABEL IS "F(OpAmp,2)";
-    ATTRIBUTE Location OF \VDAC_ref_PGA:viDAC8\ : LABEL IS "F(VIDAC,2)";
+    ATTRIBUTE Location OF \VDAC_ref_PGA:viDAC8\ : LABEL IS "F(VIDAC,0)";
     ATTRIBUTE Location OF \LPF_1:cy_psoc3_lpf_1\ : LABEL IS "F(LPF,0)";
     ATTRIBUTE Location OF \PGAgain:SC\ : LABEL IS "F(SC,0)";
     ATTRIBUTE Location OF \OPAadder:ABuf\ : LABEL IS "F(OpAmp,1)";
     ATTRIBUTE Location OF \OPAlp:ABuf\ : LABEL IS "F(OpAmp,3)";
-    ATTRIBUTE Location OF \VDAC_Ref_Adder:viDAC8\ : LABEL IS "F(VIDAC,3)";
+    ATTRIBUTE Location OF \VDAC_Ref_Adder:viDAC8\ : LABEL IS "F(VIDAC,1)";
     ATTRIBUTE Location OF \OPAbp:ABuf\ : LABEL IS "F(OpAmp,0)";
     ATTRIBUTE Location OF \ADC:DSM\ : LABEL IS "F(DSM,0)";
-    ATTRIBUTE Location OF \PGAn:SC\ : LABEL IS "F(SC,2)";
-    ATTRIBUTE Location OF \PGAp:SC\ : LABEL IS "F(SC,3)";
+    ATTRIBUTE Location OF \PGAn:SC\ : LABEL IS "F(SC,1)";
+    ATTRIBUTE Location OF \PGAp:SC\ : LABEL IS "F(SC,2)";
     ATTRIBUTE lib_model OF \EdgeDetect:last\ : LABEL IS "macrocell12";
     ATTRIBUTE lib_model OF \Timer:TimerUDB:run_mode\ : LABEL IS "macrocell13";
     ATTRIBUTE lib_model OF Net_2277 : LABEL IS "macrocell14";
@@ -2855,16 +2854,6 @@ BEGIN
             modout => \PGAshield:Net_41\);
 
     \VDAC_ref_LP:viDAC8\:vidaccell
-        GENERIC MAP(
-            cy_registers => "",
-            is_all_if_any => 0,
-            reg_data => 0)
-        PORT MAP(
-            reset => open,
-            idir => open,
-            ioff => open);
-
-    \VDAC_ref_BP:viDAC8\:vidaccell
         GENERIC MAP(
             cy_registers => "",
             is_all_if_any => 0,

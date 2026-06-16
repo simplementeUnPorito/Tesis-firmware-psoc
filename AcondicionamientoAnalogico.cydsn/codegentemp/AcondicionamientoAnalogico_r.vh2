@@ -1,5 +1,5 @@
 -- Project:   AcondicionamientoAnalogico
--- Generated: 06/15/2026 23:00:00
+-- Generated: 06/16/2026 19:37:39
 -- PSoC Creator  4.4
 
 ENTITY AcondicionamientoAnalogico IS
@@ -322,24 +322,23 @@ ARCHITECTURE __DEFAULT__ OF AcondicionamientoAnalogico IS
     ATTRIBUTE Location OF \UART:BUART:sRX:RxBitCounter\ : LABEL IS "U(1,2)";
     ATTRIBUTE lib_model OF \UART:BUART:sRX:RxSts\ : LABEL IS "statusicell3";
     ATTRIBUTE Location OF \UART:BUART:sRX:RxSts\ : LABEL IS "U(1,1)";
-    ATTRIBUTE Location OF \PGAshield:SC\ : LABEL IS "F(SC,1)";
-    ATTRIBUTE Location OF \VDAC_ref_LP:viDAC8\ : LABEL IS "F(VIDAC,1)";
-    ATTRIBUTE Location OF \VDAC_ref_BP:viDAC8\ : LABEL IS "F(VIDAC,0)";
+    ATTRIBUTE Location OF \PGAshield:SC\ : LABEL IS "F(SC,3)";
+    ATTRIBUTE Location OF \VDAC_ref_LP:viDAC8\ : LABEL IS "F(VIDAC,2)";
     ATTRIBUTE Location OF \LPF_2:cy_psoc3_lpf_1\ : LABEL IS "F(LPF,1)";
     ATTRIBUTE Location OF \OPAref:ABuf\ : LABEL IS "F(OpAmp,2)";
-    ATTRIBUTE Location OF \VDAC_ref_PGA:viDAC8\ : LABEL IS "F(VIDAC,2)";
+    ATTRIBUTE Location OF \VDAC_ref_PGA:viDAC8\ : LABEL IS "F(VIDAC,0)";
     ATTRIBUTE Location OF \LPF_1:cy_psoc3_lpf_1\ : LABEL IS "F(LPF,0)";
     ATTRIBUTE Location OF \PGAgain:SC\ : LABEL IS "F(SC,0)";
     ATTRIBUTE Location OF \OPAadder:ABuf\ : LABEL IS "F(OpAmp,1)";
     ATTRIBUTE Location OF \OPAlp:ABuf\ : LABEL IS "F(OpAmp,3)";
-    ATTRIBUTE Location OF \VDAC_Ref_Adder:viDAC8\ : LABEL IS "F(VIDAC,3)";
+    ATTRIBUTE Location OF \VDAC_Ref_Adder:viDAC8\ : LABEL IS "F(VIDAC,1)";
     ATTRIBUTE Location OF \OPAbp:ABuf\ : LABEL IS "F(OpAmp,0)";
     ATTRIBUTE Location OF isr_DelSig : LABEL IS "[IntrContainer=(0)][IntrId=(3)]";
     ATTRIBUTE Location OF \ADC:DSM\ : LABEL IS "F(DSM,0)";
     ATTRIBUTE Location OF \ADC:IRQ\ : LABEL IS "[IntrContainer=(0)][IntrId=(29)]";
     ATTRIBUTE Location OF \ADC:DEC\ : LABEL IS "F(Decimator,0)";
-    ATTRIBUTE Location OF \PGAn:SC\ : LABEL IS "F(SC,2)";
-    ATTRIBUTE Location OF \PGAp:SC\ : LABEL IS "F(SC,3)";
+    ATTRIBUTE Location OF \PGAn:SC\ : LABEL IS "F(SC,1)";
+    ATTRIBUTE Location OF \PGAp:SC\ : LABEL IS "F(SC,2)";
     ATTRIBUTE Location OF isr_Button : LABEL IS "[IntrContainer=(0)][IntrId=(2)]";
     ATTRIBUTE lib_model OF \EdgeDetect:last\ : LABEL IS "macrocell12";
     ATTRIBUTE Location OF \EdgeDetect:last\ : LABEL IS "U(0,1)";
@@ -2925,16 +2924,6 @@ BEGIN
             modout => \PGAshield:Net_41\);
 
     \VDAC_ref_LP:viDAC8\:vidaccell
-        GENERIC MAP(
-            cy_registers => "",
-            is_all_if_any => 0,
-            reg_data => 0)
-        PORT MAP(
-            reset => open,
-            idir => open,
-            ioff => open);
-
-    \VDAC_ref_BP:viDAC8\:vidaccell
         GENERIC MAP(
             cy_registers => "",
             is_all_if_any => 0,

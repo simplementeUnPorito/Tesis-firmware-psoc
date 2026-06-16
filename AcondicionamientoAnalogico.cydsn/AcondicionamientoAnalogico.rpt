@@ -1,4 +1,4 @@
-Loading plugins phase: Elapsed time ==> 0s.178ms
+Loading plugins phase: Elapsed time ==> 0s.158ms
 <CYPRESSTAG name="CyDsfit arguments...">
 cydsfit arguments: -.fdsnotice -.fdswarpdepfile=warp_dependencies.txt -.fdselabdepfile=elab_dependencies.txt -.fdsbldfile=generated_files.txt -.fdsreffile=referenced_files.txt -p C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\AcondicionamientoAnalogico.cyprj -d CY8C5888LTI-LP097 -s C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\Generated_Source\PSoC5 -- -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE
 </CYPRESSTAG>
@@ -8,10 +8,10 @@ ADD: fit.M0029: information: Voltage Reference Information: Vref 'Vdda/2' is con
  * C:\Github\Tesis\src\psoc\Analog_LPF_v1_0.cylib\Analog_LPF_v1_0\Analog_LPF_v1_0.cysch (Instance:cy_psoc3_lpf_1)
 
 </CYPRESSTAG>
-Elaboration phase: Elapsed time ==> 2s.205ms
+Elaboration phase: Elapsed time ==> 1s.981ms
 <CYPRESSTAG name="HDL generation results...">
 </CYPRESSTAG>
-HDL generation phase: Elapsed time ==> 0s.060ms
+HDL generation phase: Elapsed time ==> 0s.063ms
 <CYPRESSTAG name="Synthesis results...">
 
      | | | | | | |
@@ -45,7 +45,7 @@ Options  :    -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE -ya -.fftprj=C:\Github\Tesi
 ======================================================================
 
 vlogfe V6.3 IR 41:  Verilog parser
-Mon Jun 15 22:59:52 2026
+Tue Jun 16 19:37:33 2026
 
 
 ======================================================================
@@ -55,7 +55,7 @@ Options  :    -yv2 -q10 AcondicionamientoAnalogico.v
 ======================================================================
 
 vpp V6.3 IR 41:  Verilog Pre-Processor
-Mon Jun 15 22:59:52 2026
+Tue Jun 16 19:37:33 2026
 
 Flattening file 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\cy_sync_v1_0\cy_sync_v1_0.v'
 Flattening file 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\warp\lib\common\cypress.v'
@@ -115,7 +115,7 @@ Options  :    -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE -ya -.fftprj=C:\Github\Tesi
 ======================================================================
 
 tovif V6.3 IR 41:  High-level synthesis
-Mon Jun 15 22:59:52 2026
+Tue Jun 16 19:37:33 2026
 
 Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\warp\lib\common\std.vhd'.
 Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\warp\lib\common\cypress.vhd'.
@@ -157,7 +157,7 @@ Options  :    -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE -ya -.fftprj=C:\Github\Tesi
 ======================================================================
 
 topld V6.3 IR 41:  Synthesis and optimization
-Mon Jun 15 22:59:53 2026
+Tue Jun 16 19:37:34 2026
 
 Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\warp\lib\common\std.vhd'.
 Linking 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\warp\lib\common\cypress.vhd'.
@@ -295,9 +295,6 @@ Aliasing tmpOE__Vref_net_0 to tmpOE__Tx_1_net_0
 Aliasing \VDAC_ref_LP:Net_83\ to zero
 Aliasing \VDAC_ref_LP:Net_81\ to zero
 Aliasing \VDAC_ref_LP:Net_82\ to zero
-Aliasing \VDAC_ref_BP:Net_83\ to zero
-Aliasing \VDAC_ref_BP:Net_81\ to zero
-Aliasing \VDAC_ref_BP:Net_82\ to zero
 Aliasing \VDAC_ref_PGA:Net_83\ to zero
 Aliasing \VDAC_ref_PGA:Net_81\ to zero
 Aliasing \VDAC_ref_PGA:Net_82\ to zero
@@ -465,58 +462,55 @@ Removing Lhs of wire tmpOE__Vref_net_0[598] = tmpOE__Tx_1_net_0[1]
 Removing Lhs of wire \VDAC_ref_LP:Net_83\[605] = zero[7]
 Removing Lhs of wire \VDAC_ref_LP:Net_81\[606] = zero[7]
 Removing Lhs of wire \VDAC_ref_LP:Net_82\[607] = zero[7]
-Removing Lhs of wire \VDAC_ref_BP:Net_83\[612] = zero[7]
-Removing Lhs of wire \VDAC_ref_BP:Net_81\[613] = zero[7]
-Removing Lhs of wire \VDAC_ref_BP:Net_82\[614] = zero[7]
-Removing Lhs of wire \VDAC_ref_PGA:Net_83\[625] = zero[7]
-Removing Lhs of wire \VDAC_ref_PGA:Net_81\[626] = zero[7]
-Removing Lhs of wire \VDAC_ref_PGA:Net_82\[627] = zero[7]
-Removing Lhs of wire \PGAgain:Net_37\[638] = zero[7]
-Removing Lhs of wire \PGAgain:Net_40\[639] = zero[7]
-Removing Lhs of wire \PGAgain:Net_38\[640] = zero[7]
-Removing Lhs of wire \PGAgain:Net_39\[641] = zero[7]
-Removing Lhs of wire tmpOE__LPo_net_0[672] = tmpOE__Tx_1_net_0[1]
-Removing Lhs of wire tmpOE__LPm_net_0[678] = tmpOE__Tx_1_net_0[1]
-Removing Lhs of wire tmpOE__ADDERm_net_0[688] = tmpOE__Tx_1_net_0[1]
-Removing Lhs of wire \VDAC_Ref_Adder:Net_83\[694] = zero[7]
-Removing Lhs of wire \VDAC_Ref_Adder:Net_81\[695] = zero[7]
-Removing Lhs of wire \VDAC_Ref_Adder:Net_82\[696] = zero[7]
-Removing Lhs of wire tmpOE__BPm_net_0[704] = tmpOE__Tx_1_net_0[1]
-Removing Lhs of wire tmpOE__ADDERo_net_0[714] = tmpOE__Tx_1_net_0[1]
-Removing Lhs of wire tmpOE__BPo_net_0[720] = tmpOE__Tx_1_net_0[1]
-Removing Lhs of wire tmpOE__SEo_net_0[730] = tmpOE__Tx_1_net_0[1]
-Removing Rhs of wire \ADC:Net_488\[755] = \ADC:Net_250\[789]
-Removing Lhs of wire \ADC:Net_481\[757] = zero[7]
-Removing Lhs of wire \ADC:Net_482\[758] = zero[7]
-Removing Lhs of wire \ADC:Net_252\[791] = zero[7]
-Removing Lhs of wire \ADC:soc\[793] = tmpOE__Tx_1_net_0[1]
-Removing Lhs of wire tmpOE__INn_net_0[797] = tmpOE__Tx_1_net_0[1]
-Removing Lhs of wire tmpOE__INp_net_0[804] = tmpOE__Tx_1_net_0[1]
-Removing Lhs of wire \PGAn:Net_37\[814] = zero[7]
-Removing Lhs of wire \PGAn:Net_40\[815] = zero[7]
-Removing Lhs of wire \PGAn:Net_38\[816] = zero[7]
-Removing Lhs of wire \PGAn:Net_39\[817] = zero[7]
-Removing Lhs of wire \PGAp:Net_37\[825] = zero[7]
-Removing Lhs of wire \PGAp:Net_40\[826] = zero[7]
-Removing Lhs of wire \PGAp:Net_38\[827] = zero[7]
-Removing Lhs of wire \PGAp:Net_39\[828] = zero[7]
-Removing Lhs of wire tmpOE__Vshield_net_0[834] = tmpOE__Tx_1_net_0[1]
-Removing Lhs of wire \EdgeDetect:last\\D\[851] = Net_2338[18]
-Removing Lhs of wire \Timer:TimerUDB:capture_last\\D\[852] = zero[7]
-Removing Lhs of wire \Timer:TimerUDB:hwEnable_reg\\D\[853] = \Timer:TimerUDB:control_7\[41]
-Removing Lhs of wire \Timer:TimerUDB:tc_reg_i\\D\[854] = \Timer:TimerUDB:status_tc\[63]
-Removing Lhs of wire \Timer:TimerUDB:capture_out_reg_i\\D\[855] = \Timer:TimerUDB:capt_fifo_load\[59]
-Removing Lhs of wire \UART:BUART:reset_reg\\D\[858] = zero[7]
-Removing Lhs of wire \UART:BUART:rx_bitclk\\D\[873] = \UART:BUART:rx_bitclk_pre\[400]
-Removing Lhs of wire \UART:BUART:rx_parity_error_pre\\D\[882] = \UART:BUART:rx_parity_error_pre\[476]
-Removing Lhs of wire \UART:BUART:rx_break_status\\D\[883] = zero[7]
-Removing Lhs of wire \Debouncer:DEBOUNCER[0]:d_sync_0\\D\[887] = Net_4589[584]
-Removing Lhs of wire \Debouncer:DEBOUNCER[0]:d_sync_1\\D\[888] = \Debouncer:DEBOUNCER[0]:d_sync_0\[843]
-Removing Lhs of wire Net_4593D[890] = zero[7]
-Removing Lhs of wire Net_4594D[891] = zero[7]
+Removing Lhs of wire \VDAC_ref_PGA:Net_83\[618] = zero[7]
+Removing Lhs of wire \VDAC_ref_PGA:Net_81\[619] = zero[7]
+Removing Lhs of wire \VDAC_ref_PGA:Net_82\[620] = zero[7]
+Removing Lhs of wire \PGAgain:Net_37\[631] = zero[7]
+Removing Lhs of wire \PGAgain:Net_40\[632] = zero[7]
+Removing Lhs of wire \PGAgain:Net_38\[633] = zero[7]
+Removing Lhs of wire \PGAgain:Net_39\[634] = zero[7]
+Removing Lhs of wire tmpOE__LPo_net_0[666] = tmpOE__Tx_1_net_0[1]
+Removing Lhs of wire tmpOE__LPm_net_0[672] = tmpOE__Tx_1_net_0[1]
+Removing Lhs of wire tmpOE__ADDERm_net_0[682] = tmpOE__Tx_1_net_0[1]
+Removing Lhs of wire \VDAC_Ref_Adder:Net_83\[688] = zero[7]
+Removing Lhs of wire \VDAC_Ref_Adder:Net_81\[689] = zero[7]
+Removing Lhs of wire \VDAC_Ref_Adder:Net_82\[690] = zero[7]
+Removing Lhs of wire tmpOE__BPm_net_0[698] = tmpOE__Tx_1_net_0[1]
+Removing Lhs of wire tmpOE__ADDERo_net_0[708] = tmpOE__Tx_1_net_0[1]
+Removing Lhs of wire tmpOE__BPo_net_0[714] = tmpOE__Tx_1_net_0[1]
+Removing Lhs of wire tmpOE__SEo_net_0[724] = tmpOE__Tx_1_net_0[1]
+Removing Rhs of wire \ADC:Net_488\[749] = \ADC:Net_250\[783]
+Removing Lhs of wire \ADC:Net_481\[751] = zero[7]
+Removing Lhs of wire \ADC:Net_482\[752] = zero[7]
+Removing Lhs of wire \ADC:Net_252\[785] = zero[7]
+Removing Lhs of wire \ADC:soc\[787] = tmpOE__Tx_1_net_0[1]
+Removing Lhs of wire tmpOE__INn_net_0[791] = tmpOE__Tx_1_net_0[1]
+Removing Lhs of wire tmpOE__INp_net_0[798] = tmpOE__Tx_1_net_0[1]
+Removing Lhs of wire \PGAn:Net_37\[808] = zero[7]
+Removing Lhs of wire \PGAn:Net_40\[809] = zero[7]
+Removing Lhs of wire \PGAn:Net_38\[810] = zero[7]
+Removing Lhs of wire \PGAn:Net_39\[811] = zero[7]
+Removing Lhs of wire \PGAp:Net_37\[819] = zero[7]
+Removing Lhs of wire \PGAp:Net_40\[820] = zero[7]
+Removing Lhs of wire \PGAp:Net_38\[821] = zero[7]
+Removing Lhs of wire \PGAp:Net_39\[822] = zero[7]
+Removing Lhs of wire tmpOE__Vshield_net_0[828] = tmpOE__Tx_1_net_0[1]
+Removing Lhs of wire \EdgeDetect:last\\D\[845] = Net_2338[18]
+Removing Lhs of wire \Timer:TimerUDB:capture_last\\D\[846] = zero[7]
+Removing Lhs of wire \Timer:TimerUDB:hwEnable_reg\\D\[847] = \Timer:TimerUDB:control_7\[41]
+Removing Lhs of wire \Timer:TimerUDB:tc_reg_i\\D\[848] = \Timer:TimerUDB:status_tc\[63]
+Removing Lhs of wire \Timer:TimerUDB:capture_out_reg_i\\D\[849] = \Timer:TimerUDB:capt_fifo_load\[59]
+Removing Lhs of wire \UART:BUART:reset_reg\\D\[852] = zero[7]
+Removing Lhs of wire \UART:BUART:rx_bitclk\\D\[867] = \UART:BUART:rx_bitclk_pre\[400]
+Removing Lhs of wire \UART:BUART:rx_parity_error_pre\\D\[876] = \UART:BUART:rx_parity_error_pre\[476]
+Removing Lhs of wire \UART:BUART:rx_break_status\\D\[877] = zero[7]
+Removing Lhs of wire \Debouncer:DEBOUNCER[0]:d_sync_0\\D\[881] = Net_4589[584]
+Removing Lhs of wire \Debouncer:DEBOUNCER[0]:d_sync_1\\D\[882] = \Debouncer:DEBOUNCER[0]:d_sync_0\[837]
+Removing Lhs of wire Net_4593D[884] = zero[7]
+Removing Lhs of wire Net_4594D[885] = zero[7]
 
 ------------------------------------------------------
-Aliased 0 equations, 179 wires.
+Aliased 0 equations, 176 wires.
 ------------------------------------------------------
 
 ----------------------------------------------------------
@@ -673,12 +667,12 @@ Removing Lhs of wire \Timer:TimerUDB:trig_reg\[74] = \Timer:TimerUDB:timer_enabl
 Removing Rhs of wire \UART:BUART:rx_bitclk_enable\[364] = \UART:BUART:rx_bitclk\[412]
 Removing Lhs of wire \UART:BUART:rx_status_0\[462] = zero[7]
 Removing Lhs of wire \UART:BUART:rx_status_6\[471] = zero[7]
-Removing Lhs of wire \UART:BUART:tx_ctrl_mark_last\\D\[865] = \UART:BUART:tx_ctrl_mark_last\[355]
-Removing Lhs of wire \UART:BUART:rx_markspace_status\\D\[877] = zero[7]
-Removing Lhs of wire \UART:BUART:rx_parity_error_status\\D\[878] = zero[7]
-Removing Lhs of wire \UART:BUART:rx_addr_match_status\\D\[880] = zero[7]
-Removing Lhs of wire \UART:BUART:rx_markspace_pre\\D\[881] = \UART:BUART:rx_markspace_pre\[475]
-Removing Lhs of wire \UART:BUART:rx_parity_bit\\D\[886] = \UART:BUART:rx_parity_bit\[481]
+Removing Lhs of wire \UART:BUART:tx_ctrl_mark_last\\D\[859] = \UART:BUART:tx_ctrl_mark_last\[355]
+Removing Lhs of wire \UART:BUART:rx_markspace_status\\D\[871] = zero[7]
+Removing Lhs of wire \UART:BUART:rx_parity_error_status\\D\[872] = zero[7]
+Removing Lhs of wire \UART:BUART:rx_addr_match_status\\D\[874] = zero[7]
+Removing Lhs of wire \UART:BUART:rx_markspace_pre\\D\[875] = \UART:BUART:rx_markspace_pre\[475]
+Removing Lhs of wire \UART:BUART:rx_parity_bit\\D\[880] = \UART:BUART:rx_parity_bit\[481]
 
 ------------------------------------------------------
 Aliased 0 equations, 11 wires.
@@ -717,14 +711,14 @@ CYPRESS_DIR    : C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\wa
 Warp Program   : C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\warp\bin\warp.exe
 Warp Arguments : -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE -ya -.fftprj=C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\AcondicionamientoAnalogico.cyprj -dcpsoc3 AcondicionamientoAnalogico.v -verilog
 </CYPRESSTAG>
-Warp synthesis phase: Elapsed time ==> 1s.398ms
+Warp synthesis phase: Elapsed time ==> 1s.027ms
 <CYPRESSTAG name="Fitter results...">
 <CYPRESSTAG name="Fitter startup details...">
-cyp3fit: V4.4.0.80, Family: PSoC3, Started at: Monday, 15 June 2026 22:59:53
+cyp3fit: V4.4.0.80, Family: PSoC3, Started at: Tuesday, 16 June 2026 19:37:34
 Options: -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE -ya -.fftprj=C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\AcondicionamientoAnalogico.cyprj -d CY8C5888LTI-LP097 AcondicionamientoAnalogico.v -verilog
 </CYPRESSTAG>
 <CYPRESSTAG name="Design parsing">
-Design parsing phase: Elapsed time ==> 0s.033ms
+Design parsing phase: Elapsed time ==> 0s.017ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Tech Mapping">
 <CYPRESSTAG name="Initial Mapping" icon="FILE_RPT_TECHM">
@@ -766,7 +760,7 @@ Done removing unused cells.
         EnableIn: Constant 1 was determined to be synchronous to ClockIn
         ClockOut: Clock_1, EnableOut: Constant 1
 </CYPRESSTAG>
-ADD: pft.M0040: information: The following 2 pin(s) will be assigned a location by the fitter: AMux_1(0), Vshield(0)
+ADD: pft.M0040: information: The following 1 pin(s) will be assigned a location by the fitter: AMux_1(0)
 
 
 Removing unused cells resulting from optimization
@@ -1075,8 +1069,7 @@ Design Equations
             IO Voltage: 0
         PORT MAP (
             pa_out => AMux_1(0)__PA ,
-            analog_term => Net_4307 ,
-            annotation => Net_4601 ,
+            analog_term => Net_4655 ,
             pad => AMux_1(0)_PAD );
 
     Pin : Name = Button(0)
@@ -1153,7 +1146,7 @@ Design Equations
             IO Voltage: 0
         PORT MAP (
             pa_out => Vref(0)__PA ,
-            analog_term => Net_4600 ,
+            analog_term => Net_4653 ,
             annotation => Net_4219 ,
             pad => Vref(0)_PAD );
         Properties:
@@ -1194,7 +1187,7 @@ Design Equations
             IO Voltage: 0
         PORT MAP (
             pa_out => LPo(0)__PA ,
-            analog_term => Net_2197 ,
+            analog_term => Net_4600 ,
             annotation => Net_2018 ,
             pad => LPo(0)_PAD );
         Properties:
@@ -1277,7 +1270,7 @@ Design Equations
         PORT MAP (
             pa_out => ADDERm(0)__PA ,
             analog_term => Net_4183 ,
-            annotation => Net_4601 ,
+            annotation => Net_4644 ,
             pad => ADDERm(0)_PAD );
         Properties:
         {
@@ -1358,7 +1351,7 @@ Design Equations
             IO Voltage: 0
         PORT MAP (
             pa_out => ADDERo(0)__PA ,
-            analog_term => Net_4244 ,
+            analog_term => Net_4654 ,
             annotation => Net_1933 ,
             pad => ADDERo(0)_PAD );
         Properties:
@@ -1399,8 +1392,8 @@ Design Equations
             IO Voltage: 0
         PORT MAP (
             pa_out => BPo(0)__PA ,
-            analog_term => Net_4587 ,
-            annotation => Net_2040 ,
+            analog_term => Net_4307 ,
+            annotation => Net_4645 ,
             pad => BPo(0)_PAD );
         Properties:
         {
@@ -1440,7 +1433,7 @@ Design Equations
             IO Voltage: 0
         PORT MAP (
             pa_out => SEo(0)__PA ,
-            analog_term => Net_4246 ,
+            analog_term => Net_4656 ,
             annotation => Net_4508 ,
             pad => SEo(0)_PAD );
         Properties:
@@ -1565,6 +1558,9 @@ Design Equations
             pa_out => Vshield(0)__PA ,
             analog_term => Net_4510 ,
             pad => Vshield(0)_PAD );
+        Properties:
+        {
+        }
     </CYPRESSTAG>
     <CYPRESSTAG name="Macrocell listing" icon="FILE_RPT_EQUATION">
 
@@ -2589,10 +2585,10 @@ LPF                           :    2 :    0 :    2 : 100.00 %
 SAR ADC                       :    0 :    2 :    2 :  0.00 %
 Analog (SC/CT) Blocks         :    4 :    0 :    4 : 100.00 %
 DAC                           :      :      :      :        
-  VIDAC                       :    4 :    0 :    4 : 100.00 %
+  VIDAC                       :    3 :    1 :    4 : 75.00 %
 </CYPRESSTAG>
-Technology Mapping: Elapsed time ==> 0s.315ms
-Tech Mapping phase: Elapsed time ==> 0s.365ms
+Technology Mapping: Elapsed time ==> 0s.125ms
+Tech Mapping phase: Elapsed time ==> 0s.171ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Analog Placement">
 Initial Analog Placement Results:
@@ -2611,12 +2607,12 @@ IO_7@[IOP=(0)][IoId=(7)] : SEo(0) (fixed)
 IO_6@[IOP=(12)][IoId=(6)] : SYNC_IN(0) (fixed)
 IO_5@[IOP=(1)][IoId=(5)] : Tx_1(0) (fixed)
 IO_0@[IOP=(0)][IoId=(0)] : Vref(0) (fixed)
+IO_1@[IOP=(15)][IoId=(1)] : Vshield(0) (fixed)
 OpAmp[2]@[FFB(OpAmp,2)] : \OPAref:ABuf\ (fixed)
 OpAmp[3]@[FFB(OpAmp,3)] : \OPAlp:ABuf\ (fixed)
 OpAmp[0]@[FFB(OpAmp,0)] : \OPAbp:ABuf\ (fixed)
 OpAmp[1]@[FFB(OpAmp,1)] : \OPAadder:ABuf\ (fixed)
-IO_4@[IOP=(2)][IoId=(4)] : AMux_1(0)
-IO_3@[IOP=(3)][IoId=(3)] : Vshield(0)
+IO_6@[IOP=(0)][IoId=(6)] : AMux_1(0)
 DSM[0]@[FFB(DSM,0)] : \ADC:DSM\
 LPF[1]@[FFB(LPF,1)] : \LPF_1:cy_psoc3_lpf_1\
 LPF[0]@[FFB(LPF,0)] : \LPF_2:cy_psoc3_lpf_1\
@@ -2625,13 +2621,11 @@ SC[0]@[FFB(SC,0)] : \PGAn:SC\
 SC[3]@[FFB(SC,3)] : \PGAp:SC\
 SC[1]@[FFB(SC,1)] : \PGAshield:SC\
 VIDAC[3]@[FFB(VIDAC,3)] : \VDAC_Ref_Adder:viDAC8\
-VIDAC[2]@[FFB(VIDAC,2)] : \VDAC_ref_BP:viDAC8\
-VIDAC[1]@[FFB(VIDAC,1)] : \VDAC_ref_LP:viDAC8\
-VIDAC[0]@[FFB(VIDAC,0)] : \VDAC_ref_PGA:viDAC8\
+VIDAC[2]@[FFB(VIDAC,2)] : \VDAC_ref_LP:viDAC8\
+VIDAC[1]@[FFB(VIDAC,1)] : \VDAC_ref_PGA:viDAC8\
 Vref[1]@[FFB(Vref,1)] : vRef_1
-Log: apr.M0058: The analog placement iterative improvement is 32% done. (App=cydsfit)
-Log: apr.M0058: The analog placement iterative improvement is 52% done. (App=cydsfit)
-Log: apr.M0058: The analog placement iterative improvement is 92% done. (App=cydsfit)
+Log: apr.M0058: The analog placement iterative improvement is 33% done. (App=cydsfit)
+Log: apr.M0058: The analog placement iterative improvement is 72% done. (App=cydsfit)
 Analog Placement Results:
 IO_4@[IOP=(3)][IoId=(4)] : ADDERm(0) (fixed)
 IO_6@[IOP=(3)][IoId=(6)] : ADDERo(0) (fixed)
@@ -2648,302 +2642,190 @@ IO_7@[IOP=(0)][IoId=(7)] : SEo(0) (fixed)
 IO_6@[IOP=(12)][IoId=(6)] : SYNC_IN(0) (fixed)
 IO_5@[IOP=(1)][IoId=(5)] : Tx_1(0) (fixed)
 IO_0@[IOP=(0)][IoId=(0)] : Vref(0) (fixed)
+IO_1@[IOP=(15)][IoId=(1)] : Vshield(0) (fixed)
 OpAmp[2]@[FFB(OpAmp,2)] : \OPAref:ABuf\ (fixed)
 OpAmp[3]@[FFB(OpAmp,3)] : \OPAlp:ABuf\ (fixed)
 OpAmp[0]@[FFB(OpAmp,0)] : \OPAbp:ABuf\ (fixed)
 OpAmp[1]@[FFB(OpAmp,1)] : \OPAadder:ABuf\ (fixed)
 IO_6@[IOP=(1)][IoId=(6)] : AMux_1(0)
-IO_7@[IOP=(1)][IoId=(7)] : Vshield(0)
 DSM[0]@[FFB(DSM,0)] : \ADC:DSM\
 LPF[0]@[FFB(LPF,0)] : \LPF_1:cy_psoc3_lpf_1\
 LPF[1]@[FFB(LPF,1)] : \LPF_2:cy_psoc3_lpf_1\
 SC[0]@[FFB(SC,0)] : \PGAgain:SC\
-SC[2]@[FFB(SC,2)] : \PGAn:SC\
-SC[3]@[FFB(SC,3)] : \PGAp:SC\
-SC[1]@[FFB(SC,1)] : \PGAshield:SC\
-VIDAC[3]@[FFB(VIDAC,3)] : \VDAC_Ref_Adder:viDAC8\
-VIDAC[0]@[FFB(VIDAC,0)] : \VDAC_ref_BP:viDAC8\
-VIDAC[1]@[FFB(VIDAC,1)] : \VDAC_ref_LP:viDAC8\
-VIDAC[2]@[FFB(VIDAC,2)] : \VDAC_ref_PGA:viDAC8\
+SC[1]@[FFB(SC,1)] : \PGAn:SC\
+SC[2]@[FFB(SC,2)] : \PGAp:SC\
+SC[3]@[FFB(SC,3)] : \PGAshield:SC\
+VIDAC[1]@[FFB(VIDAC,1)] : \VDAC_Ref_Adder:viDAC8\
+VIDAC[2]@[FFB(VIDAC,2)] : \VDAC_ref_LP:viDAC8\
+VIDAC[0]@[FFB(VIDAC,0)] : \VDAC_ref_PGA:viDAC8\
 Vref[1]@[FFB(Vref,1)] : vRef_1
 
-Analog Placement phase: Elapsed time ==> 3s.743ms
+Analog Placement phase: Elapsed time ==> 3s.099ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Analog Routing">
-Net "Net_4246" overuses wire "sc0 out Wire"
-Net "Net_4246" overuses wire "AGL[7]"
+Net "Net_4656" overuses wire "sc0 out Wire"
+Net "Net_4656" overuses wire "AGL[7]"
+Net "Net_4547" overuses wire "sc0 out Wire"
 Net "Net_4547" overuses wire "AGL[5]"
-Net "Net_4517" overuses wire "sc3 Vin Wire"
-Net "Net_4517" overuses wire "sc3vin2sc2out Sw__0b"
-Net "Net_4517" overuses wire "sc2 out Wire"
 Net "Net_4517" overuses wire "AGL[4]"
-Net "Net_4600" overuses wire "AGL[7]"
+Net "Net_4653" overuses wire "AGL[5]"
+Net "Net_4510" overuses wire "AGR[4]"
+Net "Net_4510" overuses wire "SIO Ref[0] Sw__0b"
+Net "Net_4510" overuses wire "SIO Ref[0] Sw__1b"
 Net "Net_4510" overuses wire "AGR[5]"
-Net "Net_2195" overuses wire "AGR[0]"
+Net "Net_2195" overuses wire "AGL[0]"
 Net "Net_4201" overuses wire "AGR[0]"
-Net "Net_4204" overuses wire "sc0 out Wire"
-Net "Net_4204" overuses wire "AGL[5]"
-Net "Net_4253" overuses wire "AGR[5]"
-Net "Net_4200" overuses wire "AGL[5]"
-Net "Net_4200" overuses wire "AGL[4]"
-Net "Net_2158" overuses wire "sc3 Vin Wire"
-Net "Net_2158" overuses wire "sc3vin2sc2out Sw__0b"
-Net "Net_2158" overuses wire "sc2 out Wire"
+Net "Net_4204" overuses wire "AGR[4]"
+Net "Net_4204" overuses wire "AGR[4]"
+Net "Net_4204" overuses wire "AGL[4]"
+Net "Net_4285" overuses wire "AGL[5]"
+Net "Net_4285" overuses wire "AGR[5]"
+Net "Net_4200" overuses wire "AGL[0]"
+Net "Net_4200" overuses wire "AGR[0]"
+Net "Net_4200" overuses wire "AGL[0]"
 Net "AmuxEye::AMux_ADC" overuses wire "AGL[7]"
-Net "Net_4246" overuses wire "amuxbusL"
-Net "Net_4547" overuses wire "sc2 Vin Wire"
-Net "Net_4547" overuses wire "amuxbusL"
-Net "Net_4517" overuses wire "sc3 Vin Wire"
-Net "Net_4517" overuses wire "AGR[4]"
-Net "Net_4517" overuses wire "AGL[4]"
-Net "Net_4600" overuses wire "AGL[7]"
-Net "Net_2195" overuses wire "sc2 Vin Wire"
-Net "Net_4204" overuses wire "AGR[6]"
-Net "Net_4204" overuses wire "AGL2AGR[6] Sw__0b"
+Net "Net_4656" overuses wire "sc0 out Wire"
+Net "Net_4656" overuses wire "AGL[7]"
+Net "Net_4547" overuses wire "sc0 out Wire"
+Net "Net_2195" overuses wire "sc2 out Wire"
+Net "Net_2195" overuses wire "AGL[0]"
+Net "Net_4201" overuses wire "AGR[0]"
+Net "Net_4204" overuses wire "sc2 out Wire"
 Net "Net_4204" overuses wire "AGL[6]"
-Net "Net_4253" overuses wire "AGR[4]"
-Net "Net_4200" overuses wire "AGL[4]"
-Net "Net_2158" overuses wire "sc3 Vin Wire"
+Net "Net_4200" overuses wire "AGL[0]"
+Net "Net_4200" overuses wire "AGR[0]"
+Net "Net_4200" overuses wire "AGL[0]"
 Net "AmuxEye::AMux_ADC" overuses wire "AGL[7]"
 Net "AmuxEye::AMux_ADC" overuses wire "AGL[6]"
-Net "AmuxEye::AMux_ADC" overuses wire "AGL2AGR[6] Sw__0b"
+Net "Net_4656" overuses wire "AGL[7]"
+Net "Net_4517" overuses wire "sc2 Vin Wire"
+Net "Net_4510" overuses wire "sc3 out Wire"
+Net "Net_2195" overuses wire "sc2 out Wire"
+Net "Net_4204" overuses wire "sc2 out Wire"
+Net "Net_4204" overuses wire "AGL[6]"
+Net "Net_4200" overuses wire "sc2 Vin Wire"
+Net "Net_4200" overuses wire "sc3 out Wire"
+Net "Net_4200" overuses wire "AGR[6]"
+Net "Net_4200" overuses wire "sc2 Vin Wire"
+Net "AmuxEye::AMux_ADC" overuses wire "AGL[6]"
 Net "AmuxEye::AMux_ADC" overuses wire "AGR[6]"
-Net "Net_4246" overuses wire "sc0 out Wire"
-Net "Net_4246" overuses wire "AGL[7]"
-Net "Net_2197" overuses wire "GPIO P3[7] Wire"
-Net "Net_4547" overuses wire "sc2 Vin Wire"
-Net "Net_4600" overuses wire "AGL[5]"
-Net "Net_2195" overuses wire "sc2 Vin Wire"
-Net "Net_2192" overuses wire "abusL0"
-Net "Net_4204" overuses wire "sc0 out Wire"
-Net "Net_4200" overuses wire "AGL[5]"
-Net "Net_4200" overuses wire "abusL0"
-Net "Net_2158" overuses wire "dsm0+ Wire"
+Net "AmuxEye::AMux_ADC" overuses wire "AGL[7]"
+Net "Net_4656" overuses wire "AGL[7]"
+Net "Net_4517" overuses wire "AGL[4]"
+Net "Net_4653" overuses wire "AGL[1]"
+Net "Net_4510" overuses wire "AGR[2]"
+Net "Net_4204" overuses wire "AGL[4]"
+Net "Net_4200" overuses wire "AGL[1]"
+Net "Net_4200" overuses wire "dsm0+ Wire"
+Net "Net_4200" overuses wire "AGR[2]"
 Net "AmuxEye::AMux_ADC" overuses wire "dsm0+ Wire"
 Net "AmuxEye::AMux_ADC" overuses wire "AGL[7]"
-Net "AmuxEye::AMux_ADC" overuses wire "GPIO P3[7] Sw__1b"
-Net "AmuxEye::AMux_ADC" overuses wire "GPIO P3[7] Wire"
-Net "AmuxNose::AMux_ADC" overuses wire "GPIO P3[7] Sw__1b"
-Net "Net_4246" overuses wire "sc0 out Wire"
-Net "Net_4517" overuses wire "sc3 Vin Wire"
-Net "Net_4517" overuses wire "AGL[4]"
-Net "Net_4600" overuses wire "AGL[5]"
-Net "Net_2195" overuses wire "AGR[0]"
-Net "Net_4201" overuses wire "AGR[0]"
-Net "Net_4204" overuses wire "sc0 out Wire"
-Net "Net_4200" overuses wire "AGL[5]"
-Net "Net_4200" overuses wire "AGL[4]"
-Net "Net_2158" overuses wire "sc3 Vin Wire"
-Net "AmuxEye::AMux_ADC" overuses wire "GPIO P1[6] Wire"
-Net "AmuxNose::AMux_ADC" overuses wire "GPIO P1[6] Wire"
-Net "Net_4244" overuses wire "GPIO P3[6] Wire"
-Net "Net_4547" overuses wire "amuxbusL"
-Net "Net_4517" overuses wire "sc3 Vin Wire"
-Net "Net_4517" overuses wire "AGL[4]"
-Net "Net_4600" overuses wire "amuxbusL"
-Net "Net_4201" overuses wire "amuxbusR"
-Net "Net_4204" overuses wire "AGR[6]"
-Net "Net_4204" overuses wire "AGL2AGR[6] Sw__0b"
+Net "AmuxEye::AMux_ADC" overuses wire "dsm0+ Wire"
+Net "Net_4654" overuses wire "GPIO P3[6] Wire"
+Net "Net_4600" overuses wire "GPIO P3[7] Wire"
+Net "Net_4653" overuses wire "AGL[3]"
+Net "Net_4510" overuses wire "AGR[6]"
+Net "Net_4510" overuses wire "amuxbusR"
+Net "Net_2195" overuses wire "sc2 out Wire"
+Net "Net_4204" overuses wire "sc2 out Wire"
 Net "Net_4204" overuses wire "AGL[6]"
-Net "Net_4200" overuses wire "AGL[4]"
-Net "Net_2158" overuses wire "sc3 Vin Wire"
+Net "Net_4200" overuses wire "dsm0+ Wire"
+Net "Net_2158" overuses wire "AGL[3]"
+Net "AmuxEye::AMux_ADC" overuses wire "dsm0+ Wire"
+Net "AmuxEye::AMux_ADC" overuses wire "dsm0+ Wire"
 Net "AmuxEye::AMux_ADC" overuses wire "AGL[6]"
-Net "AmuxEye::AMux_ADC" overuses wire "AGL2AGR[6] Sw__0b"
 Net "AmuxEye::AMux_ADC" overuses wire "AGR[6]"
 Net "AmuxEye::AMux_ADC" overuses wire "GPIO P3[6] Sw__1b"
 Net "AmuxEye::AMux_ADC" overuses wire "GPIO P3[6] Wire"
 Net "AmuxEye::AMux_ADC" overuses wire "amuxbusR"
-Net "AmuxEye::AMux_ADC" overuses wire "AGL[6]"
+Net "AmuxEye::AMux_ADC" overuses wire "GPIO P3[7] Sw__0b"
+Net "AmuxEye::AMux_ADC" overuses wire "GPIO P3[7] Wire"
 Net "AmuxNose::AMux_ADC" overuses wire "GPIO P3[6] Sw__1b"
-Net "Net_4246" overuses wire "sc0 out Wire"
-Net "Net_4246" overuses wire "AGL[7]"
-Net "Net_4547" overuses wire "AGL[5]"
-Net "Net_4510" overuses wire "sc1 out Wire"
-Net "Net_2192" overuses wire "sc0 Vin Wire"
-Net "Net_2192" overuses wire "abusL0"
-Net "Net_4204" overuses wire "sc0 out Wire"
-Net "Net_4200" overuses wire "AGL[5]"
-Net "Net_4200" overuses wire "abusL0"
-Net "Net_2158" overuses wire "sc1 out Wire"
-Net "Net_2158" overuses wire "sc0 Vin Wire"
-Net "AmuxEye::AMux_ADC" overuses wire "AGL[7]"
-Net "Net_4246" overuses wire "sc0 out Wire"
-Net "Net_4547" overuses wire "AGL[5]"
-Net "Net_4517" overuses wire "AGL[4]"
-Net "Net_4600" overuses wire "AGL[1]"
-Net "Net_2195" overuses wire "AGL[0]"
-Net "Net_4204" overuses wire "sc0 out Wire"
-Net "Net_4506" overuses wire "v0 Wire"
-Net "Net_4200" overuses wire "AGL[5]"
-Net "Net_4200" overuses wire "AGL[4]"
-Net "Net_2158" overuses wire "AGL[1]"
-Net "Net_2158" overuses wire "v0 Wire"
-Net "Net_2158" overuses wire "AGL[0]"
-Net "Net_4547" overuses wire "amuxbusL"
-Net "Net_4600" overuses wire "amuxbusL"
-Net "Net_2195" overuses wire "AGL[0]"
-Net "Net_2192" overuses wire "abusL0"
-Net "Net_4204" overuses wire "abusR2"
-Net "Net_4253" overuses wire "abusR2"
-Net "Net_4200" overuses wire "abusL0"
-Net "Net_2158" overuses wire "SIO Ref[2] Sw__1b"
-Net "Net_2158" overuses wire "SIO Ref[2] Sw__0b"
-Net "Net_2158" overuses wire "AGL[0]"
-Net "Net_4517" overuses wire "sc3 Vin Wire"
-Net "Net_4600" overuses wire "AGL[3]"
-Net "Net_4204" overuses wire "abusR3"
-Net "Net_4285" overuses wire "abusR3"
-Net "Net_4200" overuses wire "dsm0+ Wire"
-Net "Net_4200" overuses wire "AGL[3]"
-Net "Net_4200" overuses wire "dsm0+ Wire"
-Net "Net_2158" overuses wire "sc3 Vin Wire"
-Net "AmuxEye::AMux_ADC" overuses wire "dsm0+ Wire"
-Net "Net_4547" overuses wire "AGL[5]"
-Net "Net_4517" overuses wire "AGL[4]"
-Net "Net_4201" overuses wire "cmp1_vref"
-Net "Net_4200" overuses wire "AGL[5]"
-Net "Net_4200" overuses wire "AGL[4]"
-Net "Net_2158" overuses wire "AGR[7]"
-Net "Net_2158" overuses wire "cmp1_vref"
-Net "AmuxEye::AMux_ADC" overuses wire "AGR[7]"
-Net "AmuxEye::AMux_ADC" overuses wire "AGR[7]"
-Net "AmuxEye::AMux_ADC" overuses wire "AGR[7]"
-Net "Net_4547" overuses wire "amuxbusL"
-Net "Net_4600" overuses wire "amuxbusL"
-Net "Net_4510" overuses wire "AGR[3]"
-Net "Net_2192" overuses wire "abusL0"
-Net "Net_4200" overuses wire "abusL0"
-Net "Net_2158" overuses wire "AGR[3]"
-Net "Net_4547" overuses wire "AGL[5]"
-Net "Net_4517" overuses wire "AGL[4]"
-Net "Net_4510" overuses wire "AGR[7]"
-Net "Net_4200" overuses wire "AGL[5]"
-Net "Net_4200" overuses wire "AGL[4]"
-Net "AmuxEye::AMux_ADC" overuses wire "AGR[7]"
-Net "AmuxEye::AMux_ADC" overuses wire "AGR[7]"
-Net "AmuxEye::AMux_ADC" overuses wire "AGR[7]"
-Net "Net_4547" overuses wire "amuxbusL"
-Net "Net_4517" overuses wire "GPIO P0[4] Mux__8b"
-Net "Net_4517" overuses wire "abuf2+ Wire"
-Net "Net_4600" overuses wire "amuxbusL"
+Net "AmuxNose::AMux_ADC" overuses wire "GPIO P3[7] Sw__0b"
+Net "Net_4547" overuses wire "AGR[5]"
+Net "Net_4653" overuses wire "v0 Wire"
+Net "Net_4510" overuses wire "AGR[4]"
 Net "Net_4510" overuses wire "AGR[5]"
-Net "Net_4204" overuses wire "GPIO P0[4] Mux__7b"
-Net "Net_4204" overuses wire "abuf2+ Wire"
-Net "Net_4253" overuses wire "AGR[5]"
-Net "Net_4246" overuses wire "AGL[7]"
-Net "Net_4517" overuses wire "AGL[4]"
-Net "Net_4600" overuses wire "AGL[7]"
-Net "Net_4200" overuses wire "AGL[4]"
-Net "Net_4246" overuses wire "AGL[7]"
-Net "Net_4600" overuses wire "AGL[7]"
-Net "Net_4200" overuses wire "sc2 out Wire"
-Net "Net_4200" overuses wire "AGL[2]"
-Net "Net_2158" overuses wire "sc2 out Wire"
-Net "AmuxEye::AMux_ADC" overuses wire "AGL[2]"
-Net "AmuxEye::AMux_ADC" overuses wire "AGL[2]"
-Net "Net_4246" overuses wire "AGL[7]"
-Net "Net_4600" overuses wire "AGL[7]"
-Net "Net_4510" overuses wire "sc1 out Wire"
-Net "AmuxEye::AMux_ADC" overuses wire "sc1 out Wire"
-Net "Net_4600" overuses wire "AGL[5]"
-Net "Net_4200" overuses wire "AGL[5]"
-Net "Net_4246" overuses wire "AGL[7]"
-Net "Net_4600" overuses wire "AGL[7]"
-Net "Net_4600" overuses wire "AGL[5]"
-Net "Net_4200" overuses wire "AGL[5]"
-Net "Net_4246" overuses wire "AGL[7]"
-Net "Net_4600" overuses wire "AGL[7]"
-Net "Net_4547" overuses wire "amuxbusL"
-Net "Net_4600" overuses wire "amuxbusL"
-Net "Net_4600" overuses wire "AGL[1]"
-Net "AmuxEye::AMux_ADC" overuses wire "AGL[1]"
-Net "AmuxEye::AMux_ADC" overuses wire "AGL[1]"
-Net "AmuxEye::AMux_ADC" overuses wire "AGL[1]"
-Net "Net_4246" overuses wire "AGL[7]"
-Net "Net_4600" overuses wire "AGL[7]"
-Net "Net_4600" overuses wire "AGL[5]"
-Net "Net_4200" overuses wire "AGL[5]"
-Net "Net_4547" overuses wire "amuxbusL"
-Net "Net_4600" overuses wire "amuxbusL"
-Net "Net_4600" overuses wire "AGL[3]"
-Net "Net_2158" overuses wire "AGL[3]"
-Net "Net_4600" overuses wire "AGL[5]"
-Net "Net_4200" overuses wire "AGL[5]"
-Net "Net_4246" overuses wire "AGL[7]"
-Net "Net_4600" overuses wire "AGL[7]"
-Net "Net_4517" overuses wire "AGL[4]"
-Net "Net_4600" overuses wire "AGL[4]"
-Net "Net_4600" overuses wire "abusL1"
-Net "Net_4506" overuses wire "abusL1"
-Net "Net_4246" overuses wire "AGL[7]"
-Net "Net_4600" overuses wire "AGL[7]"
-Net "Net_4600" overuses wire "AGL[5]"
-Net "Net_4200" overuses wire "AGL[5]"
-Net "Net_4547" overuses wire "amuxbusL"
-Net "Net_4600" overuses wire "amuxbusL"
-Net "Net_4600" overuses wire "AGL[1]"
-Net "AmuxEye::AMux_ADC" overuses wire "AGL[1]"
-Net "Net_4517" overuses wire "AGL[4]"
-Net "Net_4600" overuses wire "AGL[4]"
-Net "Net_4600" overuses wire "comp0- Wire"
-Net "Net_4600" overuses wire "abusL3"
-Net "Net_4204" overuses wire "abusL3"
-Net "Net_4200" overuses wire "comp0- Wire"
-Net "Net_4200" overuses wire "AGL[3]"
-Net "Net_4200" overuses wire "dsm0+ Wire"
-Net "Net_2158" overuses wire "AGL[3]"
-Net "AmuxEye::AMux_ADC" overuses wire "dsm0+ Wire"
-Net "AmuxEye::AMux_ADC" overuses wire "dsm0+ Wire"
-Net "Net_4200" overuses wire "sc2 out Wire"
-Net "Net_4200" overuses wire "AGL[2]"
-Net "Net_2158" overuses wire "sc2 out Wire"
-Net "AmuxEye::AMux_ADC" overuses wire "AGL[2]"
-Net "Net_4517" overuses wire "sc3 Vin Wire"
 Net "Net_2192" overuses wire "abusL0"
-Net "Net_4200" overuses wire "abusL0"
-Net "Net_2158" overuses wire "sc3 Vin Wire"
-Net "Net_4517" overuses wire "sc3 Vin Wire"
-Net "Net_2158" overuses wire "sc3 Vin Wire"
-Net "Net_4200" overuses wire "AGL[6]"
-Net "Net_2158" overuses wire "AGL[6]"
+Net "Net_4204" overuses wire "AGR[4]"
+Net "Net_4204" overuses wire "abusL0"
+Net "Net_4200" overuses wire "v0 Wire"
+Net "Net_4656" overuses wire "sc0 out Wire"
+Net "Net_4547" overuses wire "sc0 out Wire"
+Net "Net_4547" overuses wire "AGL[5]"
+Net "Net_4653" overuses wire "AGL[5]"
+Net "Net_4204" overuses wire "abusR1"
+Net "Net_4204" overuses wire "abusR1"
+Net "Net_4253" overuses wire "abusR1"
+Net "Net_4547" overuses wire "AGR[5]"
+Net "Net_4547" overuses wire "AGL[5]"
+Net "Net_4653" overuses wire "AGL[5]"
+Net "Net_4510" overuses wire "AGR[4]"
+Net "Net_4510" overuses wire "AGR[5]"
 Net "Net_2192" overuses wire "abusL0"
-Net "Net_4200" overuses wire "abusL0"
-Net "Net_2192" overuses wire "abusL0"
-Net "Net_4200" overuses wire "abusL0"
-Net "Net_4200" overuses wire "AGL[2]"
-Net "AmuxEye::AMux_ADC" overuses wire "AGL[2]"
-Net "Net_4200" overuses wire "AGL[6]"
-Net "Net_2158" overuses wire "AGL[6]"
-Net "Net_2195" overuses wire "AGL[0]"
-Net "Net_4200" overuses wire "AGL[0]"
-Net "Net_2192" overuses wire "abusL0"
-Net "Net_4200" overuses wire "abusL0"
-Net "Net_4200" overuses wire "AGL[6]"
-Net "Net_2158" overuses wire "AGL[6]"
-Net "Net_4517" overuses wire "sc3 Vin Wire"
-Net "Net_2195" overuses wire "AGL[0]"
-Net "Net_4200" overuses wire "AGL[0]"
-Net "Net_2158" overuses wire "sc3 Vin Wire"
-Net "Net_4510" overuses wire "sc1 out Wire"
-Net "Net_2192" overuses wire "sc0 Vin Wire"
-Net "Net_4200" overuses wire "abusL2"
-Net "Net_4200" overuses wire "abusL2"
+Net "Net_4204" overuses wire "AGR[4]"
+Net "Net_4204" overuses wire "abusL0"
 Net "Net_2158" overuses wire "sc1 out Wire"
-Net "Net_2158" overuses wire "sc0 Vin Wire"
-Net "Net_2158" overuses wire "abusL2"
-Net "Net_4517" overuses wire "sc3 Vin Wire"
-Net "Net_4201" overuses wire "cmp1_vref"
-Net "Net_4200" overuses wire "cmp1_vref"
-Net "Net_2158" overuses wire "sc3 Vin Wire"
-Net "Net_2158" overuses wire "AGR[2]"
-Net "Net_2158" overuses wire "AGL2AGR[2] Sw__0b"
-Net "Net_2158" overuses wire "AGL[2]"
-Net "AmuxEye::AMux_ADC" overuses wire "AGL[2]"
-Net "AmuxEye::AMux_ADC" overuses wire "AGL2AGR[2] Sw__0b"
-Net "AmuxEye::AMux_ADC" overuses wire "AGR[2]"
-Net "Net_4517" overuses wire "sc3 Vin Wire"
-Net "Net_2158" overuses wire "sc3 Vin Wire"
-Analog Routing phase: Elapsed time ==> 0s.467ms
+Net "AmuxEye::AMux_ADC" overuses wire "sc1 out Wire"
+Net "AmuxEye::AMux_ADC" overuses wire "GPIO P3[3] Wire"
+Net "AmuxNose::AMux_ADC" overuses wire "GPIO P3[3] Wire"
+Net "Net_4656" overuses wire "sc0 out Wire"
+Net "Net_4656" overuses wire "AGL[7]"
+Net "Net_4547" overuses wire "sc0 out Wire"
+Net "Net_4653" overuses wire "AGL[7]"
+Net "Net_4510" overuses wire "abusR2"
+Net "Net_4285" overuses wire "abusR2"
+Net "Net_2158" overuses wire "sc1 out Wire"
+Net "AmuxEye::AMux_ADC" overuses wire "sc1 out Wire"
+Net "AmuxEye::AMux_ADC" overuses wire "GPIO P15[3] Sw__1b"
+Net "AmuxEye::AMux_ADC" overuses wire "GPIO P15[3] Wire"
+Net "AmuxNose::AMux_ADC" overuses wire "GPIO P15[3] Sw__1b"
+Net "AmuxNose::AMux_ADC" overuses wire "GPIO P15[3] Wire"
+Net "Net_4656" overuses wire "AGL[7]"
+Net "Net_4547" overuses wire "AGR[5]"
+Net "Net_4547" overuses wire "AGL[5]"
+Net "Net_4653" overuses wire "AGL[5]"
+Net "Net_4510" overuses wire "AGR[5]"
+Net "AmuxEye::AMux_ADC" overuses wire "AGL[7]"
+Net "AmuxEye::AMux_ADC" overuses wire "GPIO P3[3] Sw__1b"
+Net "AmuxEye::AMux_ADC" overuses wire "GPIO P3[3] Wire"
+Net "AmuxNose::AMux_ADC" overuses wire "GPIO P3[3] Sw__1b"
+Net "AmuxNose::AMux_ADC" overuses wire "GPIO P3[3] Wire"
+Net "Net_4656" overuses wire "amuxbusL"
+Net "Net_4547" overuses wire "amuxbusL"
+Net "Net_4200" overuses wire "amuxbusL"
+Net "Net_2195" overuses wire "AGL[0]"
+Net "Net_4201" overuses wire "AGR[0]"
+Net "Net_4200" overuses wire "AGL[0]"
+Net "Net_4200" overuses wire "AGR[0]"
+Net "Net_4200" overuses wire "AGL[0]"
+Net "Net_4200" overuses wire "AGL[1]"
+Net "AmuxEye::AMux_ADC" overuses wire "AGL[1]"
+Net "Net_4204" overuses wire "abusL1"
+Net "Net_4200" overuses wire "abusL1"
+Net "Net_2195" overuses wire "sc2 out Wire"
+Net "Net_4204" overuses wire "sc2 out Wire"
+Net "Net_4204" overuses wire "AGR[6]"
+Net "AmuxEye::AMux_ADC" overuses wire "AGR[6]"
+Net "Net_4653" overuses wire "abusL3"
+Net "Net_4204" overuses wire "abusR3"
+Net "Net_4204" overuses wire "abusL3"
+Net "Net_4253" overuses wire "abusR3"
+Net "Net_4204" overuses wire "abusL1"
+Net "Net_4200" overuses wire "abusL1"
+Net "Net_4204" overuses wire "abusR3"
+Net "Net_4253" overuses wire "abusR3"
+Net "Net_2195" overuses wire "sc2 out Wire"
+Net "Net_4204" overuses wire "sc2 out Wire"
+Net "Net_4204" overuses wire "AGR[6]"
+Net "AmuxEye::AMux_ADC" overuses wire "AGR[6]"
+Net "Net_4204" overuses wire "abusR3"
+Net "Net_4253" overuses wire "abusR3"
+Net "Net_4204" overuses wire "abusL1"
+Net "Net_4200" overuses wire "abusL1"
+Net "Net_2195" overuses wire "sc2 out Wire"
+Net "Net_4204" overuses wire "sc2 out Wire"
+Analog Routing phase: Elapsed time ==> 0s.274ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Analog Code Generation">
 ============ Analog Final Answer Routes ============
@@ -2952,20 +2834,20 @@ Map of net to items {
   Net: Net_4640 {
     dsm_0_vplus
   }
-  Net: Net_4246 {
+  Net: Net_4656 {
     sc_0_vout
     agl7_x_sc_0_vout
     agl7
     agl7_x_p0_7
     p0_7
   }
-  Net: Net_4307 {
+  Net: Net_4655 {
     p15_3
   }
-  Net: Net_4244 {
+  Net: Net_4654 {
     p3_6
   }
-  Net: Net_2197 {
+  Net: Net_4600 {
     p3_7
   }
   Net: Net_4183 {
@@ -2978,21 +2860,21 @@ Map of net to items {
     opamp_0_vminus_x_p0_3
     p0_3
   }
-  Net: Net_4587 {
+  Net: Net_4307 {
     p0_1
   }
   Net: Net_4547 {
-    sc_2_vin
-    amuxbusl_x_sc_2_vin
+    sc_1_vin
+    amuxbusr_x_sc_1_vin
+    amuxbusr
+    amuxbusl_x_amuxbusr
     amuxbusl
     amuxbusl_x_p0_5
     p0_5
   }
   Net: Net_4517 {
-    sc_3_vin
-    agr4_x_sc_3_vin
-    agr4
-    agl4_x_agr4
+    sc_2_vin
+    agl4_x_sc_2_vin
     agl4
     agl4_x_p0_4
     p0_4
@@ -3002,7 +2884,7 @@ Map of net to items {
     opamp_3_vminus_x_p3_2
     p3_2
   }
-  Net: Net_4600 {
+  Net: Net_4653 {
     p0_0
     opamp_2_vminus_x_p0_0
     opamp_2_vminus
@@ -3010,10 +2892,16 @@ Map of net to items {
     agl5
     agl5_x_dsm_0_vminus
     dsm_0_vminus
+    agl5_x_opamp_0_vplus
+    opamp_0_vplus
   }
   Net: Net_4510 {
-    sc_1_vout
-    agr5_x_sc_1_vout
+    sc_3_vout
+    agr4_x_sc_3_vout
+    agr4
+    agr4_x_vidac_3_vout
+    vidac_3_vout
+    agr5_x_vidac_3_vout
     agr5
     agr5_x_p15_1
     p15_1
@@ -3027,10 +2915,8 @@ Map of net to items {
   Net: \ADC:Net_34\ {
   }
   Net: Net_2195 {
-    sc_3_vout
-    agr0_x_sc_3_vout
-    agr0
-    agl0_x_agr0
+    sc_2_vout
+    agl0_x_sc_2_vout
     agl0
     agl0_x_lpf_0_vin
     lpf_0_vin
@@ -3048,82 +2934,71 @@ Map of net to items {
     comp_vref_vdda
     comp_vref_vdda_x_comp_vref_vdda_0256
     comp_vref_vdda_0256
-    comp_3_vminus_x_comp_vref_vdda_0256
-    comp_3_vminus
-    amuxbusr_x_comp_3_vminus
-    amuxbusr
-    amuxbusr_x_lpf_1_vin
+    comp_1_vminus_x_comp_vref_vdda_0256
+    comp_1_vminus
+    agr0_x_comp_1_vminus
+    agr0
+    agr0_x_lpf_1_vin
     lpf_1_vin
   }
   Net: Net_4204 {
-    sc_1_vin
-    abusr3_x_sc_1_vin
-    abusr3
-    abusl3_x_abusr3
-    abusl3
-    abusl3_x_opamp_2_vplus
+    sc_3_vin
+    abusr1_x_sc_3_vin
+    abusr1
+    abusl1_x_abusr1
+    abusl1
+    abusl1_x_opamp_2_vplus
     opamp_2_vplus
-    abusr0_x_sc_1_vin
+    abusr1_x_lcd_v0
+    lcd_v0
+    abusr0_x_lcd_v0
     abusr0
     abusr0_x_lpf_1_vout
     lpf_1_vout
   }
   Net: Net_4253 {
-    vidac_3_vout
-    abusr2_x_vidac_3_vout
-    abusr2
-    abusr2_x_opamp_1_vplus
+    vidac_1_vout
+    abusr3_x_vidac_1_vout
+    abusr3
+    abusr3_x_opamp_1_vplus
     opamp_1_vplus
   }
-  Net: Net_4506 {
-    vidac_0_vout
-    abusl1_x_vidac_0_vout
-    abusl1
-    abusl1_x_opamp_0_vplus
-    opamp_0_vplus
-  }
   Net: Net_4285 {
-    vidac_1_vout
-    abusr1_x_vidac_1_vout
-    abusr1
-    abusr1_x_opamp_3_vplus
-    opamp_3_vplus
-  }
-  Net: Net_4200 {
     vidac_2_vout
     abusl2_x_vidac_2_vout
     abusl2
-    abusl2_x_comp_0_vminus
+    abusl2_x_abusr2
+    abusr2
+    abusr2_x_opamp_3_vplus
+    opamp_3_vplus
+  }
+  Net: Net_4200 {
+    vidac_0_vout
+    abusl3_x_vidac_0_vout
+    abusl3
+    abusl3_x_comp_0_vminus
     comp_0_vminus
-    agl6_x_comp_0_vminus
-    agl6
-    agl6_x_sc_0_vref
+    agl2_x_comp_0_vminus
+    agl2
+    agl2_x_agr2
+    agr2
+    agr2_x_sc_1_vref
+    sc_1_vref
+    agl2_x_sc_0_vref
     sc_0_vref
-    abusl2_x_comp_2_vminus
-    comp_2_vminus
-    agl1_x_comp_2_vminus
-    agl1
-    agl1_x_sc_2_vref
-    sc_2_vref
   }
   Net: Net_2158 {
-    sc_3_vref
-    agr1_x_sc_3_vref
-    agr1
-    agr1_x_comp_3_vplus
-    comp_3_vplus
-    agr2_x_comp_3_vplus
-    agr2
-    agl2_x_agr2
-    agl2
-    agl2_x_sc_2_vout
-    sc_2_vout
+    sc_2_vref
+    agl3_x_sc_2_vref
+    agl3
+    agl3_x_agr3
+    agr3
+    agr3_x_sc_1_vout
+    sc_1_vout
   }
   Net: \PGAshield:Net_17\ {
   }
   Net: \VDAC_Ref_Adder:Net_77\ {
-  }
-  Net: \VDAC_ref_BP:Net_77\ {
   }
   Net: \VDAC_ref_LP:Net_77\ {
   }
@@ -3131,15 +3006,17 @@ Map of net to items {
   }
   Net: AmuxNet::AMux_ADC {
     dsm_0_vplus
-    agl3_x_dsm_0_vplus
-    agl3
-    agl3_x_agr3
-    agr3
-    agr3_x_comp_1_vplus
-    comp_1_vplus
-    agr7_x_comp_1_vplus
+    agl1_x_dsm_0_vplus
+    agl1
+    agl1_x_agr1
+    agr1
+    agr1_x_comp_3_vminus
+    comp_3_vminus
+    agr7_x_comp_3_vminus
     agr7
     agr7_x_p3_7
+    agr7_x_comp_1_vplus
+    comp_1_vplus
     agr6_x_comp_1_vplus
     agr6
     agr6_x_p3_6
@@ -3152,51 +3029,55 @@ Map of net to items {
   }
 }
 Map of item to net {
-  sc_0_vout                                        -> Net_4246
-  agl7_x_sc_0_vout                                 -> Net_4246
-  agl7                                             -> Net_4246
-  agl7_x_p0_7                                      -> Net_4246
-  p0_7                                             -> Net_4246
-  p3_6                                             -> Net_4244
-  p3_7                                             -> Net_2197
+  sc_0_vout                                        -> Net_4656
+  agl7_x_sc_0_vout                                 -> Net_4656
+  agl7                                             -> Net_4656
+  agl7_x_p0_7                                      -> Net_4656
+  p0_7                                             -> Net_4656
+  p3_6                                             -> Net_4654
+  p3_7                                             -> Net_4600
   opamp_1_vminus                                   -> Net_4183
   opamp_1_vminus_x_p3_4                            -> Net_4183
   p3_4                                             -> Net_4183
   opamp_0_vminus                                   -> Net_4178
   opamp_0_vminus_x_p0_3                            -> Net_4178
   p0_3                                             -> Net_4178
-  p0_1                                             -> Net_4587
-  sc_2_vin                                         -> Net_4547
-  amuxbusl_x_sc_2_vin                              -> Net_4547
+  p0_1                                             -> Net_4307
+  sc_1_vin                                         -> Net_4547
+  amuxbusr_x_sc_1_vin                              -> Net_4547
+  amuxbusr                                         -> Net_4547
+  amuxbusl_x_amuxbusr                              -> Net_4547
   amuxbusl                                         -> Net_4547
   amuxbusl_x_p0_5                                  -> Net_4547
   p0_5                                             -> Net_4547
-  sc_3_vin                                         -> Net_4517
-  agr4_x_sc_3_vin                                  -> Net_4517
-  agr4                                             -> Net_4517
-  agl4_x_agr4                                      -> Net_4517
+  sc_2_vin                                         -> Net_4517
+  agl4_x_sc_2_vin                                  -> Net_4517
   agl4                                             -> Net_4517
   agl4_x_p0_4                                      -> Net_4517
   p0_4                                             -> Net_4517
   opamp_3_vminus                                   -> Net_4184
   opamp_3_vminus_x_p3_2                            -> Net_4184
   p3_2                                             -> Net_4184
-  p0_0                                             -> Net_4600
-  opamp_2_vminus_x_p0_0                            -> Net_4600
-  opamp_2_vminus                                   -> Net_4600
-  agl5_x_opamp_2_vminus                            -> Net_4600
-  agl5                                             -> Net_4600
-  agl5_x_dsm_0_vminus                              -> Net_4600
-  dsm_0_vminus                                     -> Net_4600
-  sc_1_vout                                        -> Net_4510
-  agr5_x_sc_1_vout                                 -> Net_4510
+  p0_0                                             -> Net_4653
+  opamp_2_vminus_x_p0_0                            -> Net_4653
+  opamp_2_vminus                                   -> Net_4653
+  agl5_x_opamp_2_vminus                            -> Net_4653
+  agl5                                             -> Net_4653
+  agl5_x_dsm_0_vminus                              -> Net_4653
+  dsm_0_vminus                                     -> Net_4653
+  agl5_x_opamp_0_vplus                             -> Net_4653
+  opamp_0_vplus                                    -> Net_4653
+  sc_3_vout                                        -> Net_4510
+  agr4_x_sc_3_vout                                 -> Net_4510
+  agr4                                             -> Net_4510
+  agr4_x_vidac_3_vout                              -> Net_4510
+  vidac_3_vout                                     -> Net_4510
+  agr5_x_vidac_3_vout                              -> Net_4510
   agr5                                             -> Net_4510
   agr5_x_p15_1                                     -> Net_4510
   p15_1                                            -> Net_4510
-  sc_3_vout                                        -> Net_2195
-  agr0_x_sc_3_vout                                 -> Net_2195
-  agr0                                             -> Net_2195
-  agl0_x_agr0                                      -> Net_2195
+  sc_2_vout                                        -> Net_2195
+  agl0_x_sc_2_vout                                 -> Net_2195
   agl0                                             -> Net_2195
   agl0_x_lpf_0_vin                                 -> Net_2195
   lpf_0_vin                                        -> Net_2195
@@ -3210,75 +3091,70 @@ Map of item to net {
   comp_vref_vdda                                   -> Net_4201
   comp_vref_vdda_x_comp_vref_vdda_0256             -> Net_4201
   comp_vref_vdda_0256                              -> Net_4201
-  comp_3_vminus_x_comp_vref_vdda_0256              -> Net_4201
-  comp_3_vminus                                    -> Net_4201
-  amuxbusr_x_comp_3_vminus                         -> Net_4201
-  amuxbusr                                         -> Net_4201
-  amuxbusr_x_lpf_1_vin                             -> Net_4201
+  comp_1_vminus_x_comp_vref_vdda_0256              -> Net_4201
+  comp_1_vminus                                    -> Net_4201
+  agr0_x_comp_1_vminus                             -> Net_4201
+  agr0                                             -> Net_4201
+  agr0_x_lpf_1_vin                                 -> Net_4201
   lpf_1_vin                                        -> Net_4201
-  sc_1_vin                                         -> Net_4204
-  abusr3_x_sc_1_vin                                -> Net_4204
-  abusr3                                           -> Net_4204
-  abusl3_x_abusr3                                  -> Net_4204
-  abusl3                                           -> Net_4204
-  abusl3_x_opamp_2_vplus                           -> Net_4204
+  sc_3_vin                                         -> Net_4204
+  abusr1_x_sc_3_vin                                -> Net_4204
+  abusr1                                           -> Net_4204
+  abusl1_x_abusr1                                  -> Net_4204
+  abusl1                                           -> Net_4204
+  abusl1_x_opamp_2_vplus                           -> Net_4204
   opamp_2_vplus                                    -> Net_4204
-  abusr0_x_sc_1_vin                                -> Net_4204
+  abusr1_x_lcd_v0                                  -> Net_4204
+  lcd_v0                                           -> Net_4204
+  abusr0_x_lcd_v0                                  -> Net_4204
   abusr0                                           -> Net_4204
   abusr0_x_lpf_1_vout                              -> Net_4204
   lpf_1_vout                                       -> Net_4204
-  vidac_3_vout                                     -> Net_4253
-  abusr2_x_vidac_3_vout                            -> Net_4253
-  abusr2                                           -> Net_4253
-  abusr2_x_opamp_1_vplus                           -> Net_4253
+  vidac_1_vout                                     -> Net_4253
+  abusr3_x_vidac_1_vout                            -> Net_4253
+  abusr3                                           -> Net_4253
+  abusr3_x_opamp_1_vplus                           -> Net_4253
   opamp_1_vplus                                    -> Net_4253
-  vidac_0_vout                                     -> Net_4506
-  abusl1_x_vidac_0_vout                            -> Net_4506
-  abusl1                                           -> Net_4506
-  abusl1_x_opamp_0_vplus                           -> Net_4506
-  opamp_0_vplus                                    -> Net_4506
-  vidac_1_vout                                     -> Net_4285
-  abusr1_x_vidac_1_vout                            -> Net_4285
-  abusr1                                           -> Net_4285
-  abusr1_x_opamp_3_vplus                           -> Net_4285
+  vidac_2_vout                                     -> Net_4285
+  abusl2_x_vidac_2_vout                            -> Net_4285
+  abusl2                                           -> Net_4285
+  abusl2_x_abusr2                                  -> Net_4285
+  abusr2                                           -> Net_4285
+  abusr2_x_opamp_3_vplus                           -> Net_4285
   opamp_3_vplus                                    -> Net_4285
-  vidac_2_vout                                     -> Net_4200
-  abusl2_x_vidac_2_vout                            -> Net_4200
-  abusl2                                           -> Net_4200
-  abusl2_x_comp_0_vminus                           -> Net_4200
+  vidac_0_vout                                     -> Net_4200
+  abusl3_x_vidac_0_vout                            -> Net_4200
+  abusl3                                           -> Net_4200
+  abusl3_x_comp_0_vminus                           -> Net_4200
   comp_0_vminus                                    -> Net_4200
-  agl6_x_comp_0_vminus                             -> Net_4200
-  agl6                                             -> Net_4200
-  agl6_x_sc_0_vref                                 -> Net_4200
+  agl2_x_comp_0_vminus                             -> Net_4200
+  agl2                                             -> Net_4200
+  agl2_x_agr2                                      -> Net_4200
+  agr2                                             -> Net_4200
+  agr2_x_sc_1_vref                                 -> Net_4200
+  sc_1_vref                                        -> Net_4200
+  agl2_x_sc_0_vref                                 -> Net_4200
   sc_0_vref                                        -> Net_4200
-  abusl2_x_comp_2_vminus                           -> Net_4200
-  comp_2_vminus                                    -> Net_4200
-  agl1_x_comp_2_vminus                             -> Net_4200
-  agl1                                             -> Net_4200
-  agl1_x_sc_2_vref                                 -> Net_4200
-  sc_2_vref                                        -> Net_4200
-  sc_3_vref                                        -> Net_2158
-  agr1_x_sc_3_vref                                 -> Net_2158
-  agr1                                             -> Net_2158
-  agr1_x_comp_3_vplus                              -> Net_2158
-  comp_3_vplus                                     -> Net_2158
-  agr2_x_comp_3_vplus                              -> Net_2158
-  agr2                                             -> Net_2158
-  agl2_x_agr2                                      -> Net_2158
-  agl2                                             -> Net_2158
-  agl2_x_sc_2_vout                                 -> Net_2158
-  sc_2_vout                                        -> Net_2158
+  sc_2_vref                                        -> Net_2158
+  agl3_x_sc_2_vref                                 -> Net_2158
+  agl3                                             -> Net_2158
+  agl3_x_agr3                                      -> Net_2158
+  agr3                                             -> Net_2158
+  agr3_x_sc_1_vout                                 -> Net_2158
+  sc_1_vout                                        -> Net_2158
   dsm_0_vplus                                      -> Net_4640
-  p15_3                                            -> Net_4307
-  agl3_x_dsm_0_vplus                               -> AmuxNet::AMux_ADC
-  agl3                                             -> AmuxNet::AMux_ADC
-  agl3_x_agr3                                      -> AmuxNet::AMux_ADC
-  agr3                                             -> AmuxNet::AMux_ADC
-  agr3_x_comp_1_vplus                              -> AmuxNet::AMux_ADC
-  comp_1_vplus                                     -> AmuxNet::AMux_ADC
-  agr7_x_comp_1_vplus                              -> AmuxNet::AMux_ADC
+  p15_3                                            -> Net_4655
+  agl1_x_dsm_0_vplus                               -> AmuxNet::AMux_ADC
+  agl1                                             -> AmuxNet::AMux_ADC
+  agl1_x_agr1                                      -> AmuxNet::AMux_ADC
+  agr1                                             -> AmuxNet::AMux_ADC
+  agr1_x_comp_3_vminus                             -> AmuxNet::AMux_ADC
+  comp_3_vminus                                    -> AmuxNet::AMux_ADC
+  agr7_x_comp_3_vminus                             -> AmuxNet::AMux_ADC
   agr7                                             -> AmuxNet::AMux_ADC
   agr7_x_p3_7                                      -> AmuxNet::AMux_ADC
+  agr7_x_comp_1_vplus                              -> AmuxNet::AMux_ADC
+  comp_1_vplus                                     -> AmuxNet::AMux_ADC
   agr6_x_comp_1_vplus                              -> AmuxNet::AMux_ADC
   agr6                                             -> AmuxNet::AMux_ADC
   agr6_x_p3_6                                      -> AmuxNet::AMux_ADC
@@ -3293,74 +3169,78 @@ Mux Info {
      IsStaticSwitching: False
      IsAtMostOneSwitch: True
     Arm: 0 {
-      Net:   Net_4246
+      Net:   Net_4656
       Outer: agl7_x_agr7
-      Inner: agl3_x_dsm_0_vplus
+      Inner: agl1_x_dsm_0_vplus
       Path {
         agl7
         agl7_x_agr7
         agr7
-        agr7_x_comp_1_vplus
-        comp_1_vplus
-        agr3_x_comp_1_vplus
-        agr3
-        agl3_x_agr3
-        agl3
-        agl3_x_dsm_0_vplus
+        agr7_x_comp_3_vminus
+        comp_3_vminus
+        agr1_x_comp_3_vminus
+        agr1
+        agl1_x_agr1
+        agl1
+        agl1_x_dsm_0_vplus
         dsm_0_vplus
       }
     }
     Arm: 1 {
-      Net:   Net_4307
+      Net:   Net_4655
       Outer: agr7_x_p15_3
-      Inner: agl3_x_dsm_0_vplus
+      Inner: agl1_x_dsm_0_vplus
       Path {
         p15_3
         agr7_x_p15_3
         agr7
-        agr7_x_comp_1_vplus
-        comp_1_vplus
-        agr3_x_comp_1_vplus
-        agr3
-        agl3_x_agr3
-        agl3
-        agl3_x_dsm_0_vplus
+        agr7_x_comp_3_vminus
+        comp_3_vminus
+        agr1_x_comp_3_vminus
+        agr1
+        agl1_x_agr1
+        agl1
+        agl1_x_dsm_0_vplus
         dsm_0_vplus
       }
     }
     Arm: 2 {
-      Net:   Net_4244
+      Net:   Net_4654
       Outer: agr6_x_p3_6
-      Inner: agl3_x_dsm_0_vplus
+      Inner: agl1_x_dsm_0_vplus
       Path {
         p3_6
         agr6_x_p3_6
         agr6
         agr6_x_comp_1_vplus
         comp_1_vplus
-        agr3_x_comp_1_vplus
-        agr3
-        agl3_x_agr3
-        agl3
-        agl3_x_dsm_0_vplus
+        agr7_x_comp_1_vplus
+        agr7
+        agr7_x_comp_3_vminus
+        comp_3_vminus
+        agr1_x_comp_3_vminus
+        agr1
+        agl1_x_agr1
+        agl1
+        agl1_x_dsm_0_vplus
         dsm_0_vplus
       }
     }
     Arm: 3 {
-      Net:   Net_2197
+      Net:   Net_4600
       Outer: agr7_x_p3_7
-      Inner: agl3_x_dsm_0_vplus
+      Inner: agl1_x_dsm_0_vplus
       Path {
         p3_7
         agr7_x_p3_7
         agr7
-        agr7_x_comp_1_vplus
-        comp_1_vplus
-        agr3_x_comp_1_vplus
-        agr3
-        agl3_x_agr3
-        agl3
-        agl3_x_dsm_0_vplus
+        agr7_x_comp_3_vminus
+        comp_3_vminus
+        agr1_x_comp_3_vminus
+        agr1
+        agl1_x_agr1
+        agl1
+        agl1_x_dsm_0_vplus
         dsm_0_vplus
       }
     }
@@ -3370,11 +3250,11 @@ Dump of CyP35AnalogRoutingResultsDB
 IsVddaHalfUsedForComp = True
 IsVddaHalfUsedForSar0 = False
 IsVddaHalfUsedForSar1 = False
-Analog Code Generation phase: Elapsed time ==> 0s.244ms
+Analog Code Generation phase: Elapsed time ==> 0s.254ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Digital Placement">
 <CYPRESSTAG name="Detailed placement messages">
-I2076: Total run-time: 1.0 sec.
+I2076: Total run-time: 0.9 sec.
 
 </CYPRESSTAG>
 <CYPRESSTAG name="PLD Packing">
@@ -3405,7 +3285,7 @@ PLD Packing: Elapsed time ==> 0s.000ms
 Initial Partitioning Summary not displayed at this verbose level.</CYPRESSTAG>
 <CYPRESSTAG name="Final Partitioning Summary">
 Final Partitioning Summary not displayed at this verbose level.</CYPRESSTAG>
-Partitioning: Elapsed time ==> 0s.070ms
+Partitioning: Elapsed time ==> 0s.079ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Final Placement Summary">
 
@@ -4637,7 +4517,7 @@ Pin : Name = Vref(0)
         IO Voltage: 0
     PORT MAP (
         pa_out => Vref(0)__PA ,
-        analog_term => Net_4600 ,
+        analog_term => Net_4653 ,
         annotation => Net_4219 ,
         pad => Vref(0)_PAD );
     Properties:
@@ -4679,8 +4559,8 @@ Pin : Name = BPo(0)
         IO Voltage: 0
     PORT MAP (
         pa_out => BPo(0)__PA ,
-        analog_term => Net_4587 ,
-        annotation => Net_2040 ,
+        analog_term => Net_4307 ,
+        annotation => Net_4645 ,
         pad => BPo(0)_PAD );
     Properties:
     {
@@ -4847,7 +4727,7 @@ Pin : Name = SEo(0)
         IO Voltage: 0
     PORT MAP (
         pa_out => SEo(0)__PA ,
-        analog_term => Net_4246 ,
+        analog_term => Net_4656 ,
         annotation => Net_4508 ,
         pad => SEo(0)_PAD );
     Properties:
@@ -5099,7 +4979,7 @@ Pin : Name = ADDERm(0)
     PORT MAP (
         pa_out => ADDERm(0)__PA ,
         analog_term => Net_4183 ,
-        annotation => Net_4601 ,
+        annotation => Net_4644 ,
         pad => ADDERm(0)_PAD );
     Properties:
     {
@@ -5140,7 +5020,7 @@ Pin : Name = ADDERo(0)
         IO Voltage: 0
     PORT MAP (
         pa_out => ADDERo(0)__PA ,
-        analog_term => Net_4244 ,
+        analog_term => Net_4654 ,
         annotation => Net_1933 ,
         pad => ADDERo(0)_PAD );
     Properties:
@@ -5182,7 +5062,7 @@ Pin : Name = LPo(0)
         IO Voltage: 0
     PORT MAP (
         pa_out => LPo(0)__PA ,
-        analog_term => Net_2197 ,
+        analog_term => Net_4600 ,
         annotation => Net_2018 ,
         pad => LPo(0)_PAD );
     Properties:
@@ -5308,8 +5188,7 @@ Pin : Name = AMux_1(0)
         IO Voltage: 0
     PORT MAP (
         pa_out => AMux_1(0)__PA ,
-        analog_term => Net_4307 ,
-        annotation => Net_4601 ,
+        analog_term => Net_4655 ,
         pad => AMux_1(0)_PAD );
     Properties:
     {
@@ -5355,7 +5234,7 @@ DSM group 0:
         PORT MAP (
             aclock => \ADC:Net_488\ ,
             vplus => Net_4640 ,
-            vminus => Net_4600 ,
+            vminus => Net_4653 ,
             reset_dec => \ADC:mod_reset\ ,
             extclk_cp_udb => \ADC:Net_93_local\ ,
             ext_pin_1 => \ADC:Net_249\ ,
@@ -5409,23 +5288,12 @@ SC group 0:
             vref => Net_4200 ,
             vin => Net_2192 ,
             modout => \PGAgain:Net_41\ ,
-            vout => Net_4246 );
+            vout => Net_4656 );
         Properties:
         {
             cy_registers = ""
         }
     SC Block @ F(SC,1): 
-    sccell: Name =\PGAshield:SC\
-        PORT MAP (
-            vref => \PGAshield:Net_17\ ,
-            vin => Net_4204 ,
-            modout => \PGAshield:Net_41\ ,
-            vout => Net_4510 );
-        Properties:
-        {
-            cy_registers = ""
-        }
-    SC Block @ F(SC,2): 
     sccell: Name =\PGAn:SC\
         PORT MAP (
             vref => Net_4200 ,
@@ -5436,7 +5304,7 @@ SC group 0:
         {
             cy_registers = ""
         }
-    SC Block @ F(SC,3): 
+    SC Block @ F(SC,2): 
     sccell: Name =\PGAp:SC\
         PORT MAP (
             vref => Net_2158 ,
@@ -5447,33 +5315,22 @@ SC group 0:
         {
             cy_registers = ""
         }
+    SC Block @ F(SC,3): 
+    sccell: Name =\PGAshield:SC\
+        PORT MAP (
+            vref => \PGAshield:Net_17\ ,
+            vin => Net_4204 ,
+            modout => \PGAshield:Net_41\ ,
+            vout => Net_4510 );
+        Properties:
+        {
+            cy_registers = ""
+        }
 SPC group 0: empty
 Timer group 0: empty
 USB group 0: empty
 VIDAC group 0: 
     VIDAC Block @ F(VIDAC,0): 
-    vidaccell: Name =\VDAC_ref_BP:viDAC8\
-        PORT MAP (
-            vout => Net_4506 ,
-            iout => \VDAC_ref_BP:Net_77\ );
-        Properties:
-        {
-            cy_registers = ""
-            is_all_if_any = 0
-            reg_data = 0
-        }
-    VIDAC Block @ F(VIDAC,1): 
-    vidaccell: Name =\VDAC_ref_LP:viDAC8\
-        PORT MAP (
-            vout => Net_4285 ,
-            iout => \VDAC_ref_LP:Net_77\ );
-        Properties:
-        {
-            cy_registers = ""
-            is_all_if_any = 0
-            reg_data = 0
-        }
-    VIDAC Block @ F(VIDAC,2): 
     vidaccell: Name =\VDAC_ref_PGA:viDAC8\
         PORT MAP (
             vout => Net_4200 ,
@@ -5484,7 +5341,7 @@ VIDAC group 0:
             is_all_if_any = 0
             reg_data = 0
         }
-    VIDAC Block @ F(VIDAC,3): 
+    VIDAC Block @ F(VIDAC,1): 
     vidaccell: Name =\VDAC_Ref_Adder:viDAC8\
         PORT MAP (
             vout => Net_4253 ,
@@ -5495,13 +5352,24 @@ VIDAC group 0:
             is_all_if_any = 0
             reg_data = 0
         }
+    VIDAC Block @ F(VIDAC,2): 
+    vidaccell: Name =\VDAC_ref_LP:viDAC8\
+        PORT MAP (
+            vout => Net_4285 ,
+            iout => \VDAC_ref_LP:Net_77\ );
+        Properties:
+        {
+            cy_registers = ""
+            is_all_if_any = 0
+            reg_data = 0
+        }
 OpAmp group 0: 
     Opamp Block @ F(OpAmp,0): 
     abufcell: Name =\OPAbp:ABuf\
         PORT MAP (
-            vplus => Net_4506 ,
+            vplus => Net_4653 ,
             vminus => Net_4178 ,
-            vout => Net_4587 );
+            vout => Net_4307 );
         Properties:
         {
             cy_registers = ""
@@ -5511,7 +5379,7 @@ OpAmp group 0:
         PORT MAP (
             vplus => Net_4253 ,
             vminus => Net_4183 ,
-            vout => Net_4244 );
+            vout => Net_4654 );
         Properties:
         {
             cy_registers = ""
@@ -5520,8 +5388,8 @@ OpAmp group 0:
     abufcell: Name =\OPAref:ABuf\
         PORT MAP (
             vplus => Net_4204 ,
-            vminus => Net_4600 ,
-            vout => Net_4600 );
+            vminus => Net_4653 ,
+            vout => Net_4653 );
         Properties:
         {
             cy_registers = ""
@@ -5531,7 +5399,7 @@ OpAmp group 0:
         PORT MAP (
             vplus => Net_4285 ,
             vminus => Net_4184 ,
-            vout => Net_2197 );
+            vout => Net_4600 );
         Properties:
         {
             cy_registers = ""
@@ -5576,10 +5444,10 @@ Blocks not positioned by the digital component placer:
     Amux Block @ <No Location>: 
     amuxcell: Name =AMux_ADC
         PORT MAP (
-            muxin_3 => Net_2197 ,
-            muxin_2 => Net_4244 ,
-            muxin_1 => Net_4307 ,
-            muxin_0 => Net_4246 ,
+            muxin_3 => Net_4600 ,
+            muxin_2 => Net_4654 ,
+            muxin_1 => Net_4655 ,
+            muxin_0 => Net_4656 ,
             vout => Net_4640 );
         Properties:
         {
@@ -5600,12 +5468,12 @@ Port Configuration report
      |     |       | Interrupt |                  |            | 
 Port | Pin | Fixed |      Type |       Drive Mode |       Name | Connections
 -----+-----+-------+-----------+------------------+------------+-----------------
-   0 |   0 |     * |      NONE |      HI_Z_ANALOG |    Vref(0) | Analog(Net_4600)
-     |   1 |     * |      NONE |      HI_Z_ANALOG |     BPo(0) | Analog(Net_4587)
+   0 |   0 |     * |      NONE |      HI_Z_ANALOG |    Vref(0) | Analog(Net_4653)
+     |   1 |     * |      NONE |      HI_Z_ANALOG |     BPo(0) | Analog(Net_4307)
      |   3 |     * |      NONE |      HI_Z_ANALOG |     BPm(0) | Analog(Net_4178)
      |   4 |     * |      NONE |      HI_Z_ANALOG |     INp(0) | Analog(Net_4517)
      |   5 |     * |      NONE |      HI_Z_ANALOG |     INn(0) | Analog(Net_4547)
-     |   7 |     * |      NONE |      HI_Z_ANALOG |     SEo(0) | Analog(Net_4246)
+     |   7 |     * |      NONE |      HI_Z_ANALOG |     SEo(0) | Analog(Net_4656)
 -----+-----+-------+-----------+------------------+------------+-----------------
    1 |   2 |     * |      NONE |     HI_Z_DIGITAL |    Rx_1(0) | FB(Net_2326)
      |   5 |     * |      NONE |    OPEN_DRAIN_LO |    Tx_1(0) | In(Net_2330)
@@ -5615,44 +5483,44 @@ Port | Pin | Fixed |      Type |       Drive Mode |       Name | Connections
 -----+-----+-------+-----------+------------------+------------+-----------------
    3 |   2 |     * |      NONE |      HI_Z_ANALOG |     LPm(0) | Analog(Net_4184)
      |   4 |     * |      NONE |      HI_Z_ANALOG |  ADDERm(0) | Analog(Net_4183)
-     |   6 |     * |      NONE |      HI_Z_ANALOG |  ADDERo(0) | Analog(Net_4244)
-     |   7 |     * |      NONE |      HI_Z_ANALOG |     LPo(0) | Analog(Net_2197)
+     |   6 |     * |      NONE |      HI_Z_ANALOG |  ADDERo(0) | Analog(Net_4654)
+     |   7 |     * |      NONE |      HI_Z_ANALOG |     LPo(0) | Analog(Net_4600)
 -----+-----+-------+-----------+------------------+------------+-----------------
   12 |   6 |     * |      NONE |     HI_Z_DIGITAL | SYNC_IN(0) | FB(Net_2336)
 -----+-----+-------+-----------+------------------+------------+-----------------
-  15 |   1 |       |      NONE |      HI_Z_ANALOG | Vshield(0) | Analog(Net_4510)
-     |   3 |       |      NONE |      HI_Z_ANALOG |  AMux_1(0) | Analog(Net_4307)
+  15 |   1 |     * |      NONE |      HI_Z_ANALOG | Vshield(0) | Analog(Net_4510)
+     |   3 |       |      NONE |      HI_Z_ANALOG |  AMux_1(0) | Analog(Net_4655)
 ---------------------------------------------------------------------------------
 </CYPRESSTAG>
 </CYPRESSTAG>
 </CYPRESSTAG>
 Digital component placer commit/Report: Elapsed time ==> 0s.063ms
-Digital Placement phase: Elapsed time ==> 1s.413ms
+Digital Placement phase: Elapsed time ==> 1s.203ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Digital Routing">
 "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\bin/sjrouter.exe" --xml-path "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\dev\psoc5/psoc5lp/route_arch-rrg.cydata" --vh2-path "AcondicionamientoAnalogico_r.vh2" --pcf-path "AcondicionamientoAnalogico.pco" --des-name "AcondicionamientoAnalogico" --dsf-path "AcondicionamientoAnalogico.dsf" --sdc-path "AcondicionamientoAnalogico.sdc" --lib-path "AcondicionamientoAnalogico_r.lib"
 Routing successful.
-Digital Routing phase: Elapsed time ==> 1s.530ms
+Digital Routing phase: Elapsed time ==> 1s.437ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Bitstream Generation">
-Bitstream Generation phase: Elapsed time ==> 0s.155ms
+Bitstream Generation phase: Elapsed time ==> 0s.134ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Bitstream Verification">
-Bitstream Verification phase: Elapsed time ==> 0s.049ms
+Bitstream Verification phase: Elapsed time ==> 0s.031ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Static timing analysis">
 Timing report is in AcondicionamientoAnalogico_timing.html.
-Static timing analysis phase: Elapsed time ==> 0s.358ms
+Static timing analysis phase: Elapsed time ==> 0s.333ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Data reporting">
 Data reporting phase: Elapsed time ==> 0s.000ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Database update...">
-Design database save phase: Elapsed time ==> 0s.205ms
+Design database save phase: Elapsed time ==> 0s.191ms
 </CYPRESSTAG>
-cydsfit: Elapsed time ==> 8s.584ms
+cydsfit: Elapsed time ==> 7s.173ms
 </CYPRESSTAG>
-Fitter phase: Elapsed time ==> 8s.584ms
-API generation phase: Elapsed time ==> 2s.001ms
-Dependency generation phase: Elapsed time ==> 0s.011ms
+Fitter phase: Elapsed time ==> 7s.173ms
+API generation phase: Elapsed time ==> 1s.712ms
+Dependency generation phase: Elapsed time ==> 0s.016ms
 Cleanup phase: Elapsed time ==> 0s.000ms

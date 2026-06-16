@@ -36,7 +36,6 @@
 #include "Vref_aliases.h"
 #include "Vref.h"
 #include "VDAC_ref_LP.h"
-#include "VDAC_ref_BP.h"
 #include "LPF_2.h"
 #include "OPAref.h"
 #include "VDAC_ref_PGA.h"
