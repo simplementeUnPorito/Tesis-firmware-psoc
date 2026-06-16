@@ -77,6 +77,8 @@
 #define PSOC_EVT_START_NOW        0x39u
 #define PSOC_EVT_DEBUG_MODE       0x3Au
 #define PSOC_EVT_STATUS_REQ       0x3Bu
+#define PSOC_EVT_BUTTON           0x3Cu
+#define PSOC_EVT_BUTTON_IGNORED   0x3Du
 
 #define PSOC_CMD_STATUS    0xA5u
 #define PSOC_CMD_PGA       0xA6u

@@ -6,6 +6,37 @@
  * etapas (ver HANDOFF_CALIBRATION.md, seccion "headers por VDAC" para la guia
  * de ajuste rapido vs. final). */
 
+/* Guia de ajuste de parametros:
+ * CAL_TARGET_COUNTS_*: valor ADC objetivo; para reposo diferencial GEO es 0.
+ * CAL_DIRECTION_*: sentido inicial esperado; el firmware lo verifica con el probe.
+ * CAL_DAC_CENTER_*: codigo VDAC inicial y centro del rango de busqueda.
+ * CAL_DAC_MAX_CHANGE_*: semiancho del rango; mas chico acelera si el centro es bueno.
+ * CAL_PROBE_STEP_*: primer salto para detectar pendiente; mas grande detecta mejor,
+ *   pero puede tocar zonas no lineales si el rango util es chico.
+ * CAL_MAX_ITER_*: tope de biseccion; con rango +-64, 7-8 suele alcanzar.
+ * CAL_TOL_COUNTS_*: TOL formal. Si |medido-target| <= TOL, el punto es OK.
+ * CAL_DEADBAND_COUNTS_*: zona de no-movimiento durante biseccion. Evita perseguir
+ *   ruido/LSB cuando ya esta cerca. Si DEADBAND > TOL converge mas rapido pero
+ *   verify puede marcar la etapa como fuera de tolerancia.
+ * CAL_SETTLE_SAMPLES_*: muestras descartadas tras cambiar DAC/AMux antes de medir.
+ * CAL_AVG_N_* y CAL_AVG_WINDOW_COUNT_*: piso de promediado = N*WINDOW.
+ *   Bajarlos acelera y aumenta ruido; subirlos suaviza y tarda mas.
+ * CAL_AVG_MAX_SAMPLES_*: techo de muestras por medicion de biseccion.
+ * CAL_AVG_SETTLE_TOL_*: cambio permitido entre promedios para considerar estable.
+ *   Mas grande corta antes; mas chico exige mas estabilidad.
+ * CAL_AVG_STABLE_STREAK_*: cantidad de comparaciones estables consecutivas.
+ * CAL_VERIFY_AVG_MAX_SAMPLES_*: techo de muestras en la confirmacion verify.
+ * CAL_SAT_COUNTS_*: umbral de riel/saturacion real, no banda buena.
+ * CAL_REALCHECK_ENABLE_*: 1 mide con entrada real y ajusta fino; 0 salta esa fase.
+ * CAL_REALCHECK_TOL_COUNTS_*: TOL formal durante realcheck.
+ * CAL_REALCHECK_NUDGE_STEP_*: paso fino en LSB VDAC.
+ * CAL_REALCHECK_MAX_NUDGES_*: cantidad maxima de nudges; mas alto tarda mas.
+ * CAL_REALCHECK_DISCARD_SAMPLES_*: descarte al entrar al realcheck.
+ * CAL_REALCHECK_NUDGE_DISCARD_SAMPLES_*: descarte despues de cada nudge.
+ * CAL_REALCHECK_AVG_*: promediado propio del realcheck; suele ser el mayor costo.
+ * CAL_SERVO_*: parametros del mantenimiento lento en IDLE; hoy desactivado por
+ *   CAL_SERVO_ENABLE_DEFAULT=0, no afectan la calibracion manual salvo que lo actives. */
+
 /* ===== Identidad / objetivo =====
  * ADC_CFG1 diferencial signed 18 bit, 0 counts = 0V diferencial (señal del
  * geofono en reposo). direction=1: valor inicial del sentido
@@ -25,15 +56,16 @@
 #define CAL_MAX_ITER_GEO_LP        16u
 #define CAL_TOL_COUNTS_GEO_LP      5243L
 
-/* deadband_counts: igual a tolerance_counts -> CAL_ASYNC_PLAN_ITER corta la
- * busqueda en cuanto el punto actual (no solo el mejor historico) cae dentro
- * de tolerancia, evitando oscilar cerca del objetivo (histeresis). */
+/* TOL vs DEADBAND:
+ * TOL define si el resultado es suficientemente bueno.
+ * DEADBAND define cuando dejamos de mover el DAC aunque todavia podria haber
+ * ruido alrededor. Igual a TOL = criterio conservador y simple. */
 #define CAL_DEADBAND_COUNTS_GEO_LP 5243L
 
-/* ===== Asentamiento: muestras descartadas tras escribir el VDAC, antes de
- * empezar a promediar (a ~3 kSPS). No cambia con el rediseño de promediado. */
-#define CAL_SETTLE_SAMPLES_GEO_LP        6000u
-#define CAL_VERIFY_SETTLE_SAMPLES_GEO_LP 9000u
+/* ===== Asentamiento: tiempo simulado 6 ms, convertido a muestras con
+ * ADC_DEFAULT_SRATE y CAL_SETTLE_FACTOR/DEN. */
+#define CAL_SETTLE_SAMPLES_GEO_LP        CAL_SETTLE_SAMPLES_FROM_MS(6u)
+#define CAL_VERIFY_SETTLE_SAMPLES_GEO_LP CAL_SETTLE_SAMPLES_FROM_MS(6u)
 
 /* ===== Promediado/convergencia: biseccion =====
  * measured = promedio de las ultimas avg_n*window_count muestras (peso
@@ -76,8 +108,8 @@
 #define CAL_REALCHECK_TOL_COUNTS_GEO_LP        5243L
 #define CAL_REALCHECK_NUDGE_STEP_GEO_LP        1u
 #define CAL_REALCHECK_MAX_NUDGES_GEO_LP        3u
-#define CAL_REALCHECK_DISCARD_SAMPLES_GEO_LP       1500u /* settle al cambiar AMux_ADC */
-#define CAL_REALCHECK_NUDGE_DISCARD_SAMPLES_GEO_LP  200u /* settle tras un nudge de +-1 LSB */
+#define CAL_REALCHECK_DISCARD_SAMPLES_GEO_LP       CAL_SETTLE_SAMPLES_FROM_MS(6u)
+#define CAL_REALCHECK_NUDGE_DISCARD_SAMPLES_GEO_LP CAL_SETTLE_SAMPLES_FROM_MS(6u)
 #define CAL_REALCHECK_AVG_N_GEO_LP              64u
 #define CAL_REALCHECK_AVG_WINDOW_COUNT_GEO_LP   64u   /* piso 4096 muestras (~1.4s) */
 #define CAL_REALCHECK_AVG_MAX_SAMPLES_GEO_LP    8192u /* techo ~2.7s */
@@ -93,6 +125,6 @@
 #define CAL_SERVO_DEADBAND_GEO_LP       5000L
 #define CAL_SERVO_FINE_STEP_GEO_LP      1u
 #define CAL_SERVO_RECOVERY_STEP_GEO_LP  1u
-#define CAL_SERVO_SETTLE_SAMPLES_GEO_LP 3000u
+#define CAL_SERVO_SETTLE_SAMPLES_GEO_LP CAL_SETTLE_SAMPLES_FROM_MS(6u)
 
 #endif

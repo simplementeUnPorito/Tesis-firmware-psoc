@@ -2,7 +2,7 @@
 --	Conversion of AcondicionamientoAnalogico.v to vh2:
 --
 --	Cypress Semiconductor - WARP Version 6.3 IR 41
---	Mon Jun 15 19:21:38 2026
+--	Mon Jun 15 22:59:53 2026
 --
 
 USE cypress.cypress.all;
@@ -744,7 +744,7 @@ SIGNAL tmpINTERRUPT_0__Button_net_0 : bit;
 TERMINAL Net_2197 : bit;
 TERMINAL Net_4244 : bit;
 TERMINAL Net_4246 : bit;
-TERMINAL Net_4273 : bit;
+TERMINAL Net_4640 : bit;
 TERMINAL Net_4194 : bit;
 TERMINAL Net_4219 : bit;
 SIGNAL tmpOE__Vref_net_0 : bit;
@@ -2263,7 +2263,7 @@ AMux_ADC:cy_psoc3_amux_v1_0
 		connect_mode=>2)
 	PORT MAP(muxin=>(Net_2197, Net_4244, Net_4307, Net_4246),
 		hw_ctrl_en=>(others => zero),
-		vout=>Net_4273);
+		vout=>Net_4640);
 GND_5:cy_annotation_universal_v1_0
 	GENERIC MAP(comp_name=>"Gnd_v1_0",
 		port_names=>"T1",
@@ -3095,7 +3095,7 @@ isr_DelSig:cy_isr_v1_0
 	GENERIC MAP(cy_registers=>"",
 		resolution=>18)
 	PORT MAP(aclock=>\ADC:Net_488\,
-		vplus=>Net_4273,
+		vplus=>Net_4640,
 		vminus=>\ADC:Net_520\,
 		modbit=>zero,
 		reset_udb=>zero,

@@ -410,6 +410,9 @@ static uint8 psoc_start_calibration_if_idle(uint8 send_ack)
         }
         return 0u;
     }
+    g_batches_sent = 0u;
+    g_batches_captured = 0u;
+    g_capture_done = 0u;
     psoc_calibration_servo_abort();
     uart_send_diag(PSOC_EVT_CAL_START, 0u);
     if (!psoc_calibration_start_async()) {
@@ -421,6 +424,22 @@ static uint8 psoc_start_calibration_if_idle(uint8 send_ack)
     }
     g_cal_ack_pending = send_ack ? 1u : 0u;
     g_state = PSOC_CALIBRATING;
+    return 1u;
+}
+
+static uint8 service_button_calibration(void)
+{
+    if (!g_cal_button_pressed) {
+        return 0u;
+    }
+
+    g_cal_button_pressed = 0u;
+    uart_send_diag(PSOC_EVT_BUTTON, g_state);
+    if (g_state == PSOC_IDLE) {
+        (void)psoc_start_calibration_if_idle(0u);
+    } else {
+        uart_send_diag(PSOC_EVT_BUTTON_IGNORED, g_state);
+    }
     return 1u;
 }
 
@@ -689,6 +708,7 @@ static void wait_ticks(uint32 ticks)
 {
     uint32 due = timer_now_ticks() + ticks;
     while (!ticks_due(timer_now_ticks(), due)) {
+        (void)service_button_calibration();
         service_runtime();
     }
 }
@@ -703,6 +723,7 @@ static void wait_for_esp(void)
     while (!g_esp_connected)
     {
         uint32 now;
+        (void)service_button_calibration();
         service_runtime();
         now = timer_now_ticks();
 
@@ -862,19 +883,15 @@ int main(void)
         static uint32 idlePingDue = 0u;
         uint32 now;
 
+        if (service_button_calibration()) {
+            continue;
+        }
         service_runtime();
+
         if (g_state == PSOC_SAMPLING || capture_dump_pending()) {
             continue;   /* Sin LED ni pings durante captura y volcado */
         }
         now = timer_now_ticks();
-
-        if (g_cal_button_pressed) {
-            g_cal_button_pressed = 0u;
-            if (g_state == PSOC_IDLE) {
-                (void)psoc_start_calibration_if_idle(0u);
-            }
-            continue;
-        }
 
         if (g_state == PSOC_IDLE && !capture_dump_pending()) {
             (void)psoc_calibration_servo_service();

@@ -76,17 +76,26 @@ static int32 abs_counts(int32 value)
     return (value < 0) ? -value : value;
 }
 
-/* Reduce las cuentas crudas del ADC (18 bits, +-131072) a una escala
- * comparable con los codigos del VDAC8 (8 bits, 0-255): 1 cuenta escalada
- * equivale aproximadamente a 1 codigo de DAC. Por redondeo de '>>' con
- * signo, valores negativos redondean hacia -infinito (ej: -1 >> 10 == -1,
- * no 0); se acepta la asimetria de unas pocas cuentas escaladas cerca de
- * cero sin compensarla. */
+/* Reduce las cuentas crudas del ADC a una escala comparable con los codigos
+ * del VDAC8. El ADC ve un span simplificado de 0..5V (signed +-2.5V alrededor
+ * de VDDA/2), mientras el VDAC usa 0..4.080V; por eso al shift de 18->8 bits
+ * se le aplica la correccion de spans 5000/4080. */
 #define CAL_DAC_SCALE_SHIFT 10
+#define CAL_ADC_SPAN_MV    5000L
+#define CAL_VDAC_SPAN_MV   4080L
+
+static int32 cal_div_round_signed(int32 value, int32 divisor)
+{
+    if (value >= 0L) {
+        return (value + (divisor / 2L)) / divisor;
+    }
+    return -(((-value) + (divisor / 2L)) / divisor);
+}
 
 static int32 cal_scale_counts(int32 value)
 {
-    return value >> CAL_DAC_SCALE_SHIFT;
+    int32 shifted = value >> CAL_DAC_SCALE_SHIFT;
+    return cal_div_round_signed(shifted * CAL_ADC_SPAN_MV, CAL_VDAC_SPAN_MV);
 }
 
 /* Ver CAL_OPERATING_RANGE_COUNTS (calibration_tables.h): +-0.5V absolutos.
@@ -1166,10 +1175,13 @@ uint8 psoc_calibration_async_result_ok(void)
 #if PSOC_HW_CLASS == PSOC_HW_GEO
     /* En GEO el criterio de uso para captura es la salida final (GEO_LP).
      * Las etapas intermedias se reportan igual como diagnostico, pero si la
-     * cascada termina centrada no queremos marcar la calibracion completa como
-     * fallida en el ESP/web. */
+     * cascada termina dentro de rango operativo no queremos marcar la
+     * calibracion completa como fallida en el ESP/web solo por tolerancias
+     * finas de verify/realcheck. */
     if (g_psoc_cal_result_count >= PSOC_CAL_STAGE_COUNT) {
-        return g_psoc_cal_results[PSOC_CAL_STAGE_COUNT - 1u].ok;
+        return cal_measured_out_of_range(
+            g_psoc_cal_results[PSOC_CAL_STAGE_COUNT - 1u].final_measured
+        ) ? 0u : 1u;
     }
 #endif
     return g_cal_async.ok;

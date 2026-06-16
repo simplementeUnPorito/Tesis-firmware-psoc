@@ -1,6 +1,6 @@
 // ======================================================================
 // AcondicionamientoAnalogico.v generated from TopDesign.cysch
-// 06/15/2026 at 19:21
+// 06/15/2026 at 22:59
 // This file is auto generated. ANY EDITS YOU MAKE MAY BE LOST WHEN THIS FILE IS REGENERATED!!!
 // ======================================================================
 
@@ -1222,10 +1222,10 @@ module top ;
           wire  Net_4594;
           wire  Net_4591;
     electrical  Net_4512;
-          wire  Net_4175;
-    electrical  Net_4174;
-          wire  Net_4173;
-          wire  Net_4172;
+          wire  Net_4628;
+    electrical  Net_4627;
+          wire  Net_4626;
+          wire  Net_4625;
     electrical  Net_4574;
     electrical  Net_4587;
     electrical  Net_4178;
@@ -1273,6 +1273,8 @@ module top ;
           wire  Net_2338;
           wire  Net_2336;
           wire  Net_2330;
+    electrical  Net_4640;
+          wire  Net_4270;
     electrical  Net_4517;
     electrical  Net_4547;
     electrical  Net_4584;
@@ -1283,8 +1285,6 @@ module top ;
     electrical  Net_4204;
     electrical  Net_4253;
     electrical  Net_4285;
-    electrical  Net_4273;
-          wire  Net_4270;
     electrical  Net_2197;
     electrical  Net_4200;
     electrical  Net_4506;
@@ -1891,7 +1891,7 @@ module top ;
             Net_4307,
             Net_4246
             }),
-        .vout(Net_4273)
+        .vout(Net_4640)
         );
     
     defparam AMux_ADC.muxin_width = 4;
@@ -2841,10 +2841,10 @@ module top ;
         .aclk(1'b0),
         .eoc(Net_4270),
         .mi(1'b0),
-        .nVref(Net_4174),
+        .nVref(Net_4627),
         .soc(1'b1),
         .vminus(Net_4600),
-        .vplus(Net_4273));
+        .vplus(Net_4640));
 
 	wire [0:0] tmpOE__INn_net;
 	wire [0:0] tmpFB_0__INn_net;

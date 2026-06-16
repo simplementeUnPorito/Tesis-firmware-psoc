@@ -20,6 +20,25 @@
  * compilable).
  * ============================================================ */
 
+/* Guia global:
+ * CAL_AMUX_SETTLE_MS / CAL_DAC_SETTLE_MS: defaults legacy de espera fija.
+ *   La calibracion GEO actual usa principalmente *_SETTLE_SAMPLES_* por etapa.
+ * CAL_TARGET_1V_COUNTS / CAL_TARGET_1V5_COUNTS: objetivos auxiliares del
+ *   bloque HAMMER, en cuentas ADC.
+ * CAL_OPERATING_RANGE_COUNTS: banda buena absoluta. Si GEO_LP termina dentro
+ *   de este rango, la calibracion final se considera usable para la GUI.
+ * CAL_AVG_WINDOW_MAX: limite del buffer interno de promediado; debe ser >= al
+ *   mayor *_AVG_WINDOW_COUNT_* usado.
+ * CAL_DAC_INIT / CAL_DAC_CENTER: centro nominal del VDAC, 0x9C ~= 2.5 V.
+ * CAL_FAIL_FAST_ON_STAGE_FAIL: en GEO queda 0 para completar todas las etapas
+ *   y obtener logs aunque una etapa no cierre perfecto.
+ * CAL_BEST_CANDIDATE_COUNT: cuantos mejores puntos guarda la biseccion.
+ * CAL_VISIT_HISTORY_COUNT: memoria de DACs visitados para evitar loops.
+ * CAL_WATCHDOG_TICKS: timeout global de la calibracion; tick = 10 ms.
+ * CAL_SERVO_ENABLE_DEFAULT: habilita el servo lento en IDLE; hoy 0.
+ * CAL_SERVO_* globales: timing/limites del servo, no de la corrida manual.
+ * Bloque HAMMER: no es usado por el hardware GEO actual; queda compilable. */
+
 #ifndef CAL_AMUX_SETTLE_MS
 #define CAL_AMUX_SETTLE_MS 5u
 #endif
@@ -62,6 +81,23 @@
  * CAL_REALCHECK_AVG_WINDOW_COUNT_GEO_* = 64). Una sola instancia porque las
  * etapas se procesan secuencialmente. */
 #define CAL_AVG_WINDOW_MAX 64u
+
+/* Descartes por asentamiento calculados desde el sample rate real del ADC.
+ * CAL_SETTLE_FACTOR esta en calibration.h. Con factor 3x y
+ * ADC_DEFAULT_SRATE=3000:
+ *   PGA 220ms -> 1980 muestras, BP 100us -> 1, Adder 200us -> 2,
+ *   LP 6ms -> 54. */
+#ifndef ADC_DEFAULT_SRATE
+#define ADC_DEFAULT_SRATE 3000u
+#endif
+
+#define CAL_SETTLE_SAMPLES_FROM_US(us) \
+    ((uint16)((((uint32)(us) * (uint32)ADC_DEFAULT_SRATE * (uint32)CAL_SETTLE_FACTOR) + \
+               ((uint32)CAL_SETTLE_FACTOR_DEN * 1000000UL) - 1UL) / \
+              ((uint32)CAL_SETTLE_FACTOR_DEN * 1000000UL)))
+
+#define CAL_SETTLE_SAMPLES_FROM_MS(ms) \
+    CAL_SETTLE_SAMPLES_FROM_US(((uint32)(ms) * 1000UL))
 
 /* Punto de partida obligatorio de la busqueda binaria: 0x9C = 156 ->
  * 156 * 16mV (VDAC8 1x) = 2.496V =~ 2.5V (centro de rango / "tierra
