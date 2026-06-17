@@ -49,7 +49,9 @@
  * probe_step es el primer paso (antes de la biseccion) para detectar el signo
  * real de la pendiente. max_iter limita las iteraciones de biseccion.
  * tolerance_counts: 0.1V aprox = 52429 counts/V * 0.1V = 5243 counts. */
+#ifndef CAL_DAC_CENTER_GEO_BP
 #define CAL_DAC_CENTER_GEO_BP      0x9Cu
+#endif
 #define CAL_DAC_MAX_CHANGE_GEO_BP  64u
 #define CAL_PROBE_STEP_GEO_BP      32u
 #define CAL_MAX_ITER_GEO_BP        16u
@@ -117,5 +119,34 @@
 #define CAL_SERVO_FINE_STEP_GEO_BP      1u
 #define CAL_SERVO_RECOVERY_STEP_GEO_BP  1u
 #define CAL_SERVO_SETTLE_SAMPLES_GEO_BP CAL_SETTLE_SAMPLES_FROM_US(100u)
+
+/* ===== MODO SKIP (bypass de busqueda binaria) =====
+ * Para deshabilitar la calibracion de GEO_BP y dejar VDAC_ref_BP fijo:
+ *   En PSoC Creator: Project > Build Settings > Compiler > Preprocessor Definitions
+ *   Agregar:  CAL_GEO_BP_SKIP=1u
+ *   Agregar:  CAL_DAC_CENTER_GEO_BP=0x94u  (o el codigo que funcione, default 0x9C)
+ * Con SKIP activo: la etapa escribe el valor fijo, mide una vez (tolerancia
+ * maxima = siempre pasa), y reporta ok=1 sin ejecutar biseccion ni realcheck.
+ * El VDAC_ref_BP sigue siendo iniciado por psoc_calibration_start_references(). */
+#ifndef CAL_GEO_BP_SKIP
+#define CAL_GEO_BP_SKIP 0u
+#endif
+
+#if CAL_GEO_BP_SKIP
+  #undef  CAL_DAC_MAX_CHANGE_GEO_BP
+  #define CAL_DAC_MAX_CHANGE_GEO_BP   0u
+  #undef  CAL_PROBE_STEP_GEO_BP
+  #define CAL_PROBE_STEP_GEO_BP       1u
+  #undef  CAL_MAX_ITER_GEO_BP
+  #define CAL_MAX_ITER_GEO_BP         1u
+  #undef  CAL_TOL_COUNTS_GEO_BP
+  #define CAL_TOL_COUNTS_GEO_BP       131071L
+  #undef  CAL_DEADBAND_COUNTS_GEO_BP
+  #define CAL_DEADBAND_COUNTS_GEO_BP  131071L
+  #undef  CAL_REALCHECK_ENABLE_GEO_BP
+  #define CAL_REALCHECK_ENABLE_GEO_BP 0u
+  #undef  CAL_REALCHECK_MAX_NUDGES_GEO_BP
+  #define CAL_REALCHECK_MAX_NUDGES_GEO_BP 0u
+#endif
 
 #endif

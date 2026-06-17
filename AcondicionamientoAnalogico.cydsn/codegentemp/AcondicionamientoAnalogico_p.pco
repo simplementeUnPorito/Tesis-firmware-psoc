@@ -1,65 +1,68 @@
 dont_use_io iocell 1 0
 dont_use_io iocell 1 1
 dont_use_io iocell 1 3
-set_location "Net_2348" macrocell 0 1 1 3
-set_location "\Timer:TimerUDB:run_mode\" macrocell 3 1 0 3
-set_location "\Timer:TimerUDB:sT32:timerdp:u0\" datapathcell 2 0 2 
-set_location "\UART:BUART:sRX:RxShifter:u0\" datapathcell 1 1 2 
-set_location "\UART:BUART:sTX:TxSts\" statusicell 1 0 4 
-set_location "\Timer:TimerUDB:sT32:timerdp:u3\" datapathcell 2 1 2 
-set_location "__ONE__" macrocell 0 3 0 2
-set_location "\UART:BUART:txn\" macrocell 0 0 0 0
-set_location "\Timer:TimerUDB:timer_enable\" macrocell 3 0 0 0
-set_location "\UART:BUART:tx_ctrl_mark_last\" macrocell 0 1 0 2
-set_location "\UART:BUART:counter_load_not\" macrocell 0 0 1 1
-set_location "\Timer:TimerUDB:status_tc\" macrocell 2 1 0 3
-set_location "\UART:BUART:pollcount_1\" macrocell 1 1 1 1
-set_location "\UART:BUART:rx_state_3\" macrocell 1 2 0 2
-set_location "Net_2330" macrocell 0 1 0 1
-set_location "\UART:BUART:sRX:RxSts\" statusicell 1 1 4 
-set_location "\UART:BUART:rx_bitclk_enable\" macrocell 1 1 0 0
+dont_use_io iocell 3 0
+set_location "Net_2348" macrocell 0 2 0 0
+set_location "\Timer:TimerUDB:run_mode\" macrocell 2 1 1 0
+set_location "\Timer:TimerUDB:status_tc\" macrocell 2 1 1 3
 set_location "\Timer:TimerUDB:sT32:timerdp:u2\" datapathcell 3 1 2 
-set_location "\UART:BUART:rx_counter_load\" macrocell 1 2 0 1
-set_location "\UART:BUART:rx_state_0\" macrocell 1 2 0 0
+set_location "\UART:BUART:sTX:TxSts\" statusicell 1 0 4 
+set_location "\UART:BUART:sRX:RxShifter:u0\" datapathcell 1 1 2 
+set_location "__ONE__" macrocell 1 4 0 2
+set_location "\UART:BUART:txn\" macrocell 0 0 0 1
+set_location "\Timer:TimerUDB:timer_enable\" macrocell 2 0 0 0
+set_location "\UART:BUART:rx_status_5\" macrocell 1 1 1 2
+set_location "\UART:BUART:tx_ctrl_mark_last\" macrocell 1 2 1 3
+set_location "\UART:BUART:counter_load_not\" macrocell 0 1 0 0
+set_location "\UART:BUART:pollcount_1\" macrocell 1 1 0 3
+set_location "\UART:BUART:rx_state_3\" macrocell 1 2 0 2
+set_location "Net_2330" macrocell 0 1 0 2
+set_location "\UART:BUART:sRX:RxSts\" statusicell 1 1 4 
+set_location "\Timer:TimerUDB:trig_disable\" macrocell 2 0 1 1
+set_location "\UART:BUART:rx_bitclk_enable\" macrocell 1 2 0 1
+set_location "\UART:BUART:rx_counter_load\" macrocell 1 2 0 0
+set_location "\UART:BUART:rx_state_0\" macrocell 1 2 1 2
 set_location "\UART:BUART:tx_status_0\" macrocell 1 0 0 1
 set_location "\UART:BUART:rx_state_2\" macrocell 1 2 1 0
-set_location "\UART:BUART:rx_status_4\" macrocell 1 1 0 3
-set_location "\UART:BUART:rx_last\" macrocell 1 1 1 0
-set_location "\UART:BUART:tx_status_2\" macrocell 1 0 0 3
+set_location "\UART:BUART:rx_last\" macrocell 1 1 0 2
+set_location "\UART:BUART:tx_status_2\" macrocell 1 0 1 3
 set_location "\UART:BUART:rx_load_fifo\" macrocell 1 2 1 1
 set_location "\UART:BUART:tx_state_1\" macrocell 0 0 1 2
-set_location "Net_2277" macrocell 2 1 1 2
-set_location "\Timer:TimerUDB:trig_disable\" macrocell 3 0 1 3
+set_location "\Timer:TimerUDB:sT32:timerdp:u0\" datapathcell 2 0 2 
 set_location "\UART:BUART:tx_bitclk\" macrocell 1 0 1 1
 set_location "\UART:BUART:tx_state_0\" macrocell 1 0 0 0
-set_location "\EdgeDetect:last\" macrocell 0 1 1 2
-set_location "\UART:BUART:rx_status_5\" macrocell 1 1 0 1
-set_location "\UART:BUART:rx_state_stop1_reg\" macrocell 0 2 1 0
+set_location "\EdgeDetect:last\" macrocell 0 2 1 1
+set_location "\UART:BUART:rx_state_stop1_reg\" macrocell 1 1 1 3
 set_location "\UART:BUART:sRX:RxBitCounter\" count7cell 1 2 7 
-set_location "\Timer:TimerUDB:sT32:timerdp:u1\" datapathcell 3 0 2 
 set_location "\Debouncer:DEBOUNCER[0]:d_sync_0\" macrocell 0 2 0 2
-set_location "\UART:BUART:sTX:TxShifter:u0\" datapathcell 1 0 2 
-set_location "\UART:BUART:rx_status_3\" macrocell 1 2 1 2
+set_location "\UART:BUART:sTX:sCLOCK:TxBitClkGen\" datapathcell 0 1 2 
+set_location "\UART:BUART:rx_status_4\" macrocell 1 1 1 0
+set_location "\Timer:TimerUDB:sT32:timerdp:u3\" datapathcell 2 1 2 
+set_location "\UART:BUART:rx_status_3\" macrocell 1 1 0 0
 set_location "\UART:BUART:tx_state_2\" macrocell 0 0 1 0
-set_location "\UART:BUART:pollcount_0\" macrocell 1 1 1 3
-set_location "\UART:BUART:sTX:sCLOCK:TxBitClkGen\" datapathcell 0 0 2 
+set_location "\UART:BUART:pollcount_0\" macrocell 1 0 1 0
+set_location "\UART:BUART:sTX:TxShifter:u0\" datapathcell 1 0 2 
+set_location "Net_2277" macrocell 2 1 0 3
 set_location "\Timer:TimerUDB:rstSts:stsreg\" statusicell 2 1 4 
-set_location "Net_4595" macrocell 0 2 0 0
+set_location "Net_4595" macrocell 0 2 0 3
 set_location "\Debouncer:DEBOUNCER[0]:d_sync_1\" macrocell 0 2 0 1
-set_location "\UART:BUART:rx_postpoll\" macrocell 1 1 1 2
+set_location "\Timer:TimerUDB:sT32:timerdp:u1\" datapathcell 3 0 2 
+set_location "\UART:BUART:rx_postpoll\" macrocell 1 1 0 1
 set_location "ClockBlock_100k__SYNC" synccell 3 0 5 0
 set_location "\ADC:DEC\" decimatorcell -1 -1 0
-set_location "ClockBlock" clockblockcell -1 -1 0
+set_location "isr_DMA" interrupt -1 -1 3
 set_location "\ADC:DSM\" dsmodcell -1 -1 0
 # Note: port 12 is the logical name for port 7
 set_io "SYNC_IN(0)" iocell 12 6
-set_location "\VDAC_ref_LP:viDAC8\" vidaccell -1 -1 2
+set_location "ClockBlock" clockblockcell -1 -1 0
+set_location "\VDAC_ref_LP:viDAC8\" vidaccell -1 -1 1
+set_location "\VDAC_ref_BP:viDAC8\" vidaccell -1 -1 2
 set_location "\VDAC_ref_PGA:viDAC8\" vidaccell -1 -1 0
-set_location "\VDAC_Ref_Adder:viDAC8\" vidaccell -1 -1 1
-set_location "\Timer:TimerUDB:sCTRLReg:SyncCtl:ctrlreg\" controlcell 3 1 6 
+set_location "\VDAC_Ref_Adder:viDAC8\" vidaccell -1 -1 3
+set_location "\Timer:TimerUDB:sCTRLReg:SyncCtl:ctrlreg\" controlcell 2 0 6 
+set_location "isr_SyncIn" interrupt -1 -1 5
 set_location "isr_Button" interrupt -1 -1 2
-set_location "isr_SyncIn" interrupt -1 -1 4
-set_location "isr_Timer" interrupt -1 -1 5
+set_location "isr_Timer" interrupt -1 -1 6
 set_location "\LPF_1:cy_psoc3_lpf_1\" lpfcell -1 -1 0
 set_location "\LPF_2:cy_psoc3_lpf_1\" lpfcell -1 -1 1
 set_io "Rx_1(0)" iocell 1 2
@@ -67,20 +70,23 @@ set_location "\OPAref:ABuf\" abufcell -1 -1 2
 set_location "\OPAadder:ABuf\" abufcell -1 -1 1
 set_location "\OPAlp:ABuf\" abufcell -1 -1 3
 set_location "\OPAbp:ABuf\" abufcell -1 -1 0
+set_location "DMA" drqcell -1 -1 8
 set_io "Tx_1(0)" iocell 1 5
 set_location "\Sync:genblk1[0]:INST\" synccell 0 1 5 0
+set_location "\Filter:DFB\" dfbcell -1 -1 0
 set_location "\UART:TXInternalInterrupt\" interrupt -1 -1 1
-set_location "\UART:RXInternalInterrupt\" interrupt -1 -1 0
-set_location "isr_DelSig" interrupt -1 -1 3
+set_location "isr_DelSig" interrupt -1 -1 4
 set_location "\ADC:IRQ\" interrupt -1 -1 29
-set_location "\PGAshield:SC\" sccell -1 -1 3
-set_location "\PGAgain:SC\" sccell -1 -1 0
-set_location "\PGAn:SC\" sccell -1 -1 1
+set_location "\UART:RXInternalInterrupt\" interrupt -1 -1 0
+set_location "\PGAshield:SC\" sccell -1 -1 1
+set_location "\PGAgain:SC\" sccell -1 -1 3
+set_location "\PGAn:SC\" sccell -1 -1 0
 set_location "\PGAp:SC\" sccell -1 -1 2
 set_io "LED(0)" iocell 2 1
 # Note: port 15 is the logical name for port 8
-set_io "AMux_1(0)" iocell 15 3
+set_io "AMux(0)" iocell 15 3
 set_io "Vref(0)" iocell 0 0
+set_io "Vref_BP(0)" iocell 0 2
 set_io "LPo(0)" iocell 3 7
 set_io "LPm(0)" iocell 3 2
 set_io "ADDERm(0)" iocell 3 4
@@ -92,5 +98,9 @@ set_io "INn(0)" iocell 0 5
 set_io "INp(0)" iocell 0 4
 # Note: port 15 is the logical name for port 8
 set_io "Vshield(0)" iocell 15 1
+set_io "Vref_PGA(0)" iocell 0 6
+set_io "Vref_ADDER(0)" iocell 3 5
+set_io "Vref_LP(0)" iocell 3 3
+set_io "AMuxCapacitor(0)" iocell 1 7
 set_location "ClockBlock_100k__SYNC_1" synccell 3 0 5 1
 set_io "Button(0)" iocell 2 2

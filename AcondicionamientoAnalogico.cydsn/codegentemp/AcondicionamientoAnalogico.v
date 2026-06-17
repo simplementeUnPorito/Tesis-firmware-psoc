@@ -1,6 +1,6 @@
 // ======================================================================
 // AcondicionamientoAnalogico.v generated from TopDesign.cysch
-// 06/16/2026 at 19:37
+// 06/17/2026 at 17:36
 // This file is auto generated. ANY EDITS YOU MAKE MAY BE LOST WHEN THIS FILE IS REGENERATED!!!
 // ======================================================================
 
@@ -502,7 +502,7 @@ endmodule
 `include "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyComponentLibrary\CyComponentLibrary.cylib\AMux_v1_80\AMux_v1_80.v"
 `endif
 
-// VDAC8_v1_90(Data_Source=0, Initial_Value=156, Strobe_Mode=0, VDAC_Range=4, VDAC_Speed=2, Voltage=2496, CY_API_CALLBACK_HEADER_INCLUDE=#include "cyapicallbacks.h", CY_COMMENT=, CY_COMPONENT_NAME=VDAC8_v1_90, CY_CONFIG_TITLE=VDAC_ref_LP, CY_CONST_CONFIG=true, CY_CONTROL_FILE=<:default:>, CY_DATASHEET_FILE=<:default:>, CY_FITTER_NAME=VDAC_ref_LP, CY_INSTANCE_SHORT_NAME=VDAC_ref_LP, CY_MAJOR_VERSION=1, CY_MINOR_VERSION=90, CY_PDL_DRIVER_NAME=, CY_PDL_DRIVER_REQ_VERSION=, CY_PDL_DRIVER_SUBGROUP=, CY_PDL_DRIVER_VARIANT=, CY_REMOVE=false, CY_SUPPRESS_API_GEN=false, CY_VERSION=PSoC Creator  4.4, INSTANCE_NAME=VDAC_ref_LP, )
+// VDAC8_v1_90(Data_Source=0, Initial_Value=156, Strobe_Mode=0, VDAC_Range=4, VDAC_Speed=0, Voltage=2496, CY_API_CALLBACK_HEADER_INCLUDE=#include "cyapicallbacks.h", CY_COMMENT=, CY_COMPONENT_NAME=VDAC8_v1_90, CY_CONFIG_TITLE=VDAC_ref_LP, CY_CONST_CONFIG=true, CY_CONTROL_FILE=<:default:>, CY_DATASHEET_FILE=<:default:>, CY_FITTER_NAME=VDAC_ref_LP, CY_INSTANCE_SHORT_NAME=VDAC_ref_LP, CY_MAJOR_VERSION=1, CY_MINOR_VERSION=90, CY_PDL_DRIVER_NAME=, CY_PDL_DRIVER_REQ_VERSION=, CY_PDL_DRIVER_SUBGROUP=, CY_PDL_DRIVER_VARIANT=, CY_REMOVE=false, CY_SUPPRESS_API_GEN=false, CY_VERSION=PSoC Creator  4.4, INSTANCE_NAME=VDAC_ref_LP, )
 module VDAC8_v1_90_3 (
     data,
     strobe,
@@ -610,7 +610,7 @@ endmodule
 `include "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\cy_vref_v1_70\cy_vref_v1_70.v"
 `endif
 
-// VDAC8_v1_90(Data_Source=0, Initial_Value=156, Strobe_Mode=0, VDAC_Range=4, VDAC_Speed=2, Voltage=2496, CY_API_CALLBACK_HEADER_INCLUDE=#include "cyapicallbacks.h", CY_COMMENT=, CY_COMPONENT_NAME=VDAC8_v1_90, CY_CONFIG_TITLE=VDAC_ref_PGA, CY_CONST_CONFIG=true, CY_CONTROL_FILE=<:default:>, CY_DATASHEET_FILE=<:default:>, CY_FITTER_NAME=VDAC_ref_PGA, CY_INSTANCE_SHORT_NAME=VDAC_ref_PGA, CY_MAJOR_VERSION=1, CY_MINOR_VERSION=90, CY_PDL_DRIVER_NAME=, CY_PDL_DRIVER_REQ_VERSION=, CY_PDL_DRIVER_SUBGROUP=, CY_PDL_DRIVER_VARIANT=, CY_REMOVE=false, CY_SUPPRESS_API_GEN=false, CY_VERSION=PSoC Creator  4.4, INSTANCE_NAME=VDAC_ref_PGA, )
+// VDAC8_v1_90(Data_Source=0, Initial_Value=156, Strobe_Mode=0, VDAC_Range=4, VDAC_Speed=0, Voltage=2496, CY_API_CALLBACK_HEADER_INCLUDE=#include "cyapicallbacks.h", CY_COMMENT=, CY_COMPONENT_NAME=VDAC8_v1_90, CY_CONFIG_TITLE=VDAC_ref_PGA, CY_CONST_CONFIG=true, CY_CONTROL_FILE=<:default:>, CY_DATASHEET_FILE=<:default:>, CY_FITTER_NAME=VDAC_ref_PGA, CY_INSTANCE_SHORT_NAME=VDAC_ref_PGA, CY_MAJOR_VERSION=1, CY_MINOR_VERSION=90, CY_PDL_DRIVER_NAME=, CY_PDL_DRIVER_REQ_VERSION=, CY_PDL_DRIVER_SUBGROUP=, CY_PDL_DRIVER_VARIANT=, CY_REMOVE=false, CY_SUPPRESS_API_GEN=false, CY_VERSION=PSoC Creator  4.4, INSTANCE_NAME=VDAC_ref_PGA, )
 module VDAC8_v1_90_6 (
     data,
     strobe,
@@ -788,7 +788,7 @@ module OpAmp_v1_90_10 (
 
 endmodule
 
-// VDAC8_v1_90(Data_Source=0, Initial_Value=156, Strobe_Mode=0, VDAC_Range=4, VDAC_Speed=2, Voltage=2496, CY_API_CALLBACK_HEADER_INCLUDE=#include "cyapicallbacks.h", CY_COMMENT=, CY_COMPONENT_NAME=VDAC8_v1_90, CY_CONFIG_TITLE=VDAC_Ref_Adder, CY_CONST_CONFIG=true, CY_CONTROL_FILE=<:default:>, CY_DATASHEET_FILE=<:default:>, CY_FITTER_NAME=VDAC_Ref_Adder, CY_INSTANCE_SHORT_NAME=VDAC_Ref_Adder, CY_MAJOR_VERSION=1, CY_MINOR_VERSION=90, CY_PDL_DRIVER_NAME=, CY_PDL_DRIVER_REQ_VERSION=, CY_PDL_DRIVER_SUBGROUP=, CY_PDL_DRIVER_VARIANT=, CY_REMOVE=false, CY_SUPPRESS_API_GEN=false, CY_VERSION=PSoC Creator  4.4, INSTANCE_NAME=VDAC_Ref_Adder, )
+// VDAC8_v1_90(Data_Source=0, Initial_Value=156, Strobe_Mode=0, VDAC_Range=4, VDAC_Speed=0, Voltage=2496, CY_API_CALLBACK_HEADER_INCLUDE=#include "cyapicallbacks.h", CY_COMMENT=, CY_COMPONENT_NAME=VDAC8_v1_90, CY_CONFIG_TITLE=VDAC_Ref_Adder, CY_CONST_CONFIG=true, CY_CONTROL_FILE=<:default:>, CY_DATASHEET_FILE=<:default:>, CY_FITTER_NAME=VDAC_Ref_Adder, CY_INSTANCE_SHORT_NAME=VDAC_Ref_Adder, CY_MAJOR_VERSION=1, CY_MINOR_VERSION=90, CY_PDL_DRIVER_NAME=, CY_PDL_DRIVER_REQ_VERSION=, CY_PDL_DRIVER_SUBGROUP=, CY_PDL_DRIVER_VARIANT=, CY_REMOVE=false, CY_SUPPRESS_API_GEN=false, CY_VERSION=PSoC Creator  4.4, INSTANCE_NAME=VDAC_Ref_Adder, )
 module VDAC8_v1_90_11 (
     data,
     strobe,
@@ -1165,21 +1165,120 @@ endmodule
 `include "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyComponentLibrary\CyComponentLibrary.cylib\Debouncer_v1_0\Debouncer_v1_0.v"
 `endif
 
+// VDAC8_v1_90(Data_Source=0, Initial_Value=156, Strobe_Mode=0, VDAC_Range=4, VDAC_Speed=0, Voltage=2496, CY_API_CALLBACK_HEADER_INCLUDE=#include "cyapicallbacks.h", CY_COMMENT=, CY_COMPONENT_NAME=VDAC8_v1_90, CY_CONFIG_TITLE=VDAC_ref_BP, CY_CONST_CONFIG=true, CY_CONTROL_FILE=<:default:>, CY_DATASHEET_FILE=<:default:>, CY_FITTER_NAME=VDAC_ref_BP, CY_INSTANCE_SHORT_NAME=VDAC_ref_BP, CY_MAJOR_VERSION=1, CY_MINOR_VERSION=90, CY_PDL_DRIVER_NAME=, CY_PDL_DRIVER_REQ_VERSION=, CY_PDL_DRIVER_SUBGROUP=, CY_PDL_DRIVER_VARIANT=, CY_REMOVE=false, CY_SUPPRESS_API_GEN=false, CY_VERSION=PSoC Creator  4.4, INSTANCE_NAME=VDAC_ref_BP, )
+module VDAC8_v1_90_16 (
+    data,
+    strobe,
+    vOut);
+    input      [7:0] data;
+    input       strobe;
+    inout       vOut;
+    electrical  vOut;
+
+    parameter Data_Source = 0;
+    parameter Initial_Value = 156;
+    parameter Strobe_Mode = 0;
+
+    electrical  Net_77;
+          wire  Net_83;
+          wire  Net_82;
+          wire  Net_81;
+
+    cy_psoc3_vidac8_v1_0 viDAC8 (
+        .data(data[7:0]),
+        .idir(Net_81),
+        .ioff(Net_82),
+        .iout(Net_77),
+        .reset(Net_83),
+        .strobe(strobe),
+        .strobe_udb(strobe),
+        .vout(vOut));
+    defparam viDAC8.is_all_if_any = 0;
+    defparam viDAC8.reg_data = 0;
+
+    ZeroTerminal ZeroTerminal_1 (
+        .z(Net_81));
+
+    ZeroTerminal ZeroTerminal_2 (
+        .z(Net_82));
+
+    ZeroTerminal ZeroTerminal_3 (
+        .z(Net_83));
+
+    cy_analog_noconnect_v1_0 cy_analog_noconnect_1 (
+        .noconnect(Net_77));
+
+
+
+endmodule
+
+// Filter_v2_30(ChannelEnableA=true, ChannelEnableB=false, ChannelSettingsA=<enabled=true>\r\n<userEntryEnabled=false>\r\n<sampleRate=2.929>\r\n<filterGain_dB=0>\r\n<filterGain_Linear=1>\r\n<gainScale=DB>\r\n<width=WIDTH_16>\r\n<signal=DMA>\r\n<stage_count=1>\r\n<bus_clock=0.3954>\r\n<stage0=\r\n    <design_type=FIR>\r\n    <pass_type=LOW_PASS>\r\n    <window_type=HAMMING>\r\n    <tap_count=128>\r\n    <primary_freq=0.2>\r\n    <bandwidth=10>\r\n    <UserCoefficient=>\r\n    <userTapCount=1>\r\n>\r\n<stage1=\r\n    <design_type=FIR>\r\n    <pass_type=LOW_PASS>\r\n    <window_type=HAMMING>\r\n    <tap_count=16>\r\n    <primary_freq=15>\r\n    <bandwidth=10>\r\n    <UserCoefficient=>\r\n    <userTapCount=1>\r\n>\r\n<stage2=\r\n    <design_type=FIR>\r\n    <pass_type=LOW_PASS>\r\n    <window_type=HAMMING>\r\n    <tap_count=16>\r\n    <primary_freq=15>\r\n    <bandwidth=10>\r\n    <UserCoefficient=>\r\n    <userTapCount=1>\r\n>\r\n<stage3=\r\n    <design_type=FIR>\r\n    <pass_type=LOW_PASS>\r\n    <window_type=HAMMING>\r\n    <tap_count=16>\r\n    <primary_freq=15>\r\n    <bandwidth=10>\r\n    <UserCoefficient=>\r\n    <userTapCount=1>\r\n>\r\n<stage4=\r\n    <design_type=FIR>\r\n    <pass_type=LOW_PASS>\r\n    <window_type=HAMMING>\r\n    <tap_count=16>\r\n    <primary_freq=15>\r\n    <bandwidth=10>\r\n    <UserCoefficient=>\r\n    <userTapCount=1>\r\n>\r\n<stage5=\r\n    <design_type=FIR>\r\n    <pass_type=LOW_PASS>\r\n    <window_type=HAMMING>\r\n    <tap_count=16>\r\n    <primary_freq=15>\r\n    <bandwidth=10>\r\n    <UserCoefficient=>\r\n    <userTapCount=1>\r\n>\r\n<stage6=\r\n    <design_type=FIR>\r\n    <pass_type=LOW_PASS>\r\n    <window_type=HAMMING>\r\n    <tap_count=16>\r\n    <primary_freq=15>\r\n    <bandwidth=10>\r\n    <UserCoefficient=>\r\n    <userTapCount=1>\r\n>\r\n<stage7=\r\n    <design_type=FIR>\r\n    <pass_type=LOW_PASS>\r\n    <window_type=HAMMING>\r\n    <tap_count=16>\r\n    <primary_freq=15>\r\n    <bandwidth=10>\r\n    <UserCoefficient=>\r\n    <userTapCount=1>\r\n>\r\n, ChannelSettingsB="", ChannelTypeA=1, ChannelTypeB=0, CoefficientEntryEnableA=false, CoefficientEntryEnableB=false, DisplaySettingsA=50307, DisplaySettingsB=50307, DmaEnableA=true, DmaEnableB=false, IrqEnableA=false, IrqEnableB=false, MinBusClockVal=0.3954, CY_API_CALLBACK_HEADER_INCLUDE=#include "cyapicallbacks.h", CY_COMMENT=, CY_COMPONENT_NAME=Filter_v2_30, CY_CONFIG_TITLE=Filter, CY_CONST_CONFIG=true, CY_CONTROL_FILE=<:default:>, CY_DATASHEET_FILE=<:default:>, CY_FITTER_NAME=Filter, CY_INSTANCE_SHORT_NAME=Filter, CY_MAJOR_VERSION=2, CY_MINOR_VERSION=30, CY_PDL_DRIVER_NAME=, CY_PDL_DRIVER_REQ_VERSION=, CY_PDL_DRIVER_SUBGROUP=, CY_PDL_DRIVER_VARIANT=, CY_REMOVE=false, CY_SUPPRESS_API_GEN=false, CY_VERSION=PSoC Creator  4.4, INSTANCE_NAME=Filter, )
+module Filter_v2_30_17 (
+    DMA_Req_A,
+    DMA_Req_B,
+    Interrupt);
+    output      DMA_Req_A;
+    output      DMA_Req_B;
+    output      Interrupt;
+
+
+          wire  Net_9;
+          wire  Net_8;
+          wire  Net_5;
+          wire  Net_4;
+          wire  Net_1;
+
+    ZeroTerminal ZeroTerminal_1 (
+        .z(Net_1));
+
+    cy_psoc3_dfb_v1_0 DFB (
+        .clock(Net_1),
+        .dmareq_1(DMA_Req_A),
+        .dmareq_2(DMA_Req_B),
+        .in_1(Net_4),
+        .in_2(Net_5),
+        .interrupt(Interrupt),
+        .out_1(Net_8),
+        .out_2(Net_9));
+
+    ZeroTerminal ZeroTerminal_4 (
+        .z(Net_5));
+
+    ZeroTerminal ZeroTerminal_5 (
+        .z(Net_4));
+
+
+
+endmodule
+
 // top
 module top ;
 
+          wire  Net_4732;
+          wire  Net_4733;
+          wire  Net_4730;
+          wire  Net_4728;
+    electrical  Net_4726;
+    electrical  Net_4724;
+    electrical  Net_4711;
+    electrical  Net_4709;
+    electrical  Net_4708;
+    electrical  Net_4714;
+    electrical  Net_4693;
+    electrical  Net_4692;
+    electrical  Net_4691;
+          wire  Net_4696;
+          wire [7:0] Net_4695;
           wire  Net_4599;
           wire  Net_4592;
           wire  Net_4595;
           wire  Net_4593;
           wire  Net_4594;
           wire  Net_4591;
-    electrical  Net_4512;
           wire  Net_4628;
     electrical  Net_4627;
           wire  Net_4626;
           wire  Net_4625;
-    electrical  Net_4574;
     electrical  Net_4307;
     electrical  Net_4178;
           wire  Net_4182;
@@ -1188,21 +1287,18 @@ module top ;
     electrical  Net_4185;
     electrical  Net_4186;
     electrical  Net_4183;
-    electrical  Net_4572;
           wire  Net_4208;
           wire [7:0] Net_4207;
     electrical  Net_4203;
     electrical  Net_4201;
-    electrical  Net_4651;
-          wire  Net_4211;
-          wire [7:0] Net_4210;
+    electrical  Net_4690;
           wire  Net_4214;
           wire [7:0] Net_4213;
-    electrical  Net_4219;
+    electrical  Net_4706;
           wire  Net_4589;
     electrical  Net_4511;
-    electrical  Net_4510;
-    electrical  Net_4601;
+    electrical  Net_4665;
+    electrical  Net_4655;
     electrical  Net_2384;
           wire  Net_2334;
           wire  Net_2333;
@@ -1227,28 +1323,33 @@ module top ;
           wire  Net_2338;
           wire  Net_2336;
           wire  Net_2330;
+          wire  Net_4731;
+    electrical  Net_4725;
+    electrical  Net_4718;
+    electrical  Net_4715;
+    electrical  Net_4219;
+    electrical  Net_4512;
+    electrical  Net_4723;
+    electrical  Net_2058;
+    electrical  Net_4666;
+    electrical  Net_4640;
     electrical  Net_2192;
     electrical  Net_2195;
     electrical  Net_4547;
     electrical  Net_2158;
     electrical  Net_4517;
-    electrical  Net_4655;
-    electrical  Net_4640;
           wire  Net_4270;
     electrical  Net_4584;
-    electrical  Net_2058;
     electrical  Net_4585;
-    electrical  Net_1190;
-    electrical  Net_2061;
     electrical  Net_4204;
-    electrical  Net_4253;
     electrical  Net_4285;
-    electrical  Net_4200;
+    electrical  Net_4664;
     electrical  Net_4600;
-    electrical  Net_4653;
+    electrical  Net_4661;
     electrical  Net_4656;
     electrical  Net_4508;
     electrical  Net_2033;
+    electrical  Net_4645;
     electrical  Net_1938;
     electrical  Net_4194;
     electrical  Net_2018;
@@ -1256,7 +1357,6 @@ module top ;
     electrical  Net_2005;
     electrical  Net_1933;
     electrical  Net_4654;
-    electrical  Net_4645;
     electrical  Net_4644;
           wire  Net_10;
     electrical  Net_2381;
@@ -1679,11 +1779,11 @@ module top ;
     defparam ESP_Vdd.port_names = "T1";
     defparam ESP_Vdd.width = 1;
 
-	wire [0:0] tmpOE__AMux_1_net;
-	wire [0:0] tmpFB_0__AMux_1_net;
-	wire [0:0] tmpIO_0__AMux_1_net;
-	wire [0:0] tmpINTERRUPT_0__AMux_1_net;
-	electrical [0:0] tmpSIOVREF__AMux_1_net;
+	wire [0:0] tmpOE__AMux_net;
+	wire [0:0] tmpFB_0__AMux_net;
+	wire [0:0] tmpIO_0__AMux_net;
+	wire [0:0] tmpINTERRUPT_0__AMux_net;
+	electrical [0:0] tmpSIOVREF__AMux_net;
 
 	cy_psoc3_pins_v1_10
 		#(.id("722a3d3a-e5ae-4944-ba2b-f19c6576e1ec"),
@@ -1738,15 +1838,15 @@ module top ;
 		  .ovt_needed(1'b0),
 		  .ovt_slew_control(2'b00),
 		  .input_buffer_sel(2'b00))
-		AMux_1
-		 (.oe(tmpOE__AMux_1_net),
+		AMux
+		 (.oe(tmpOE__AMux_net),
 		  .y({1'b0}),
-		  .fb({tmpFB_0__AMux_1_net[0:0]}),
+		  .fb({tmpFB_0__AMux_net[0:0]}),
 		  .analog({Net_4655}),
-		  .io({tmpIO_0__AMux_1_net[0:0]}),
-		  .siovref(tmpSIOVREF__AMux_1_net),
-		  .interrupt({tmpINTERRUPT_0__AMux_1_net[0:0]}),
-		  .annotation({Net_4601}),
+		  .io({tmpIO_0__AMux_net[0:0]}),
+		  .siovref(tmpSIOVREF__AMux_net),
+		  .interrupt({tmpINTERRUPT_0__AMux_net[0:0]}),
+		  .annotation({Net_4645}),
 		  .in_clock({1'b0}),
 		  .in_clock_en({1'b1}),
 		  .in_reset({1'b0}),
@@ -1754,11 +1854,11 @@ module top ;
 		  .out_clock_en({1'b1}),
 		  .out_reset({1'b0}));
 
-	assign tmpOE__AMux_1_net = (`CYDEV_CHIP_MEMBER_USED == `CYDEV_CHIP_MEMBER_3A && `CYDEV_CHIP_REVISION_USED < `CYDEV_CHIP_REVISION_3A_ES3) ? ~{1'b1} : {1'b1};
+	assign tmpOE__AMux_net = (`CYDEV_CHIP_MEMBER_USED == `CYDEV_CHIP_MEMBER_3A && `CYDEV_CHIP_REVISION_USED < `CYDEV_CHIP_REVISION_3A_ES3) ? ~{1'b1} : {1'b1};
 
     PGA_v2_0_2 PGAshield (
         .Vin(Net_4204),
-        .Vout(Net_4510),
+        .Vout(Net_4665),
         .Vref(Net_4511));
 
 	wire [0:0] tmpOE__Button_net;
@@ -1840,6 +1940,7 @@ module top ;
     
     cy_psoc3_amux_v1_0 AMux_ADC(
         .muxin({
+            Net_4706,
             Net_4600,
             Net_4654,
             Net_4655,
@@ -1848,8 +1949,8 @@ module top ;
         .vout(Net_4640)
         );
     
-    defparam AMux_ADC.muxin_width = 4;
-    defparam AMux_ADC.init_mux_sel = 4'h0;
+    defparam AMux_ADC.muxin_width = 5;
+    defparam AMux_ADC.init_mux_sel = 5'h0;
     defparam AMux_ADC.one_active = 1;
     defparam AMux_ADC.connect_mode = 2;
     
@@ -1936,7 +2037,7 @@ module top ;
 		 (.oe(tmpOE__Vref_net),
 		  .y({1'b0}),
 		  .fb({tmpFB_0__Vref_net[0:0]}),
-		  .analog({Net_4653}),
+		  .analog({Net_4661}),
 		  .io({tmpIO_0__Vref_net[0:0]}),
 		  .siovref(tmpSIOVREF__Vref_net),
 		  .interrupt({tmpINTERRUPT_0__Vref_net[0:0]}),
@@ -1958,13 +2059,90 @@ module top ;
     defparam VDAC_ref_LP.Initial_Value = 156;
     defparam VDAC_ref_LP.Strobe_Mode = 0;
 
+	wire [0:0] tmpOE__Vref_BP_net;
+	wire [0:0] tmpFB_0__Vref_BP_net;
+	wire [0:0] tmpIO_0__Vref_BP_net;
+	wire [0:0] tmpINTERRUPT_0__Vref_BP_net;
+	electrical [0:0] tmpSIOVREF__Vref_BP_net;
+
+	cy_psoc3_pins_v1_10
+		#(.id("21660380-cb52-4656-a735-42dfba73e25f"),
+		  .drive_mode(3'b000),
+		  .ibuf_enabled(1'b0),
+		  .init_dr_st(1'b0),
+		  .input_clk_en(0),
+		  .input_sync(1'b1),
+		  .input_sync_mode(1'b0),
+		  .intr_mode(2'b00),
+		  .invert_in_clock(0),
+		  .invert_in_clock_en(0),
+		  .invert_in_reset(0),
+		  .invert_out_clock(0),
+		  .invert_out_clock_en(0),
+		  .invert_out_reset(0),
+		  .io_voltage(""),
+		  .layout_mode("CONTIGUOUS"),
+		  .oe_conn(1'b0),
+		  .oe_reset(0),
+		  .oe_sync(1'b0),
+		  .output_clk_en(0),
+		  .output_clock_mode(1'b0),
+		  .output_conn(1'b0),
+		  .output_mode(1'b0),
+		  .output_reset(0),
+		  .output_sync(1'b0),
+		  .pa_in_clock(-1),
+		  .pa_in_clock_en(-1),
+		  .pa_in_reset(-1),
+		  .pa_out_clock(-1),
+		  .pa_out_clock_en(-1),
+		  .pa_out_reset(-1),
+		  .pin_aliases(""),
+		  .pin_mode("A"),
+		  .por_state(4),
+		  .sio_group_cnt(0),
+		  .sio_hyst(1'b1),
+		  .sio_ibuf(""),
+		  .sio_info(2'b00),
+		  .sio_obuf(""),
+		  .sio_refsel(""),
+		  .sio_vtrip(""),
+		  .sio_hifreq(""),
+		  .sio_vohsel(""),
+		  .slew_rate(1'b0),
+		  .spanning(0),
+		  .use_annotation(1'b1),
+		  .vtrip(2'b10),
+		  .width(1),
+		  .ovt_hyst_trim(1'b0),
+		  .ovt_needed(1'b0),
+		  .ovt_slew_control(2'b00),
+		  .input_buffer_sel(2'b00))
+		Vref_BP
+		 (.oe(tmpOE__Vref_BP_net),
+		  .y({1'b0}),
+		  .fb({tmpFB_0__Vref_BP_net[0:0]}),
+		  .analog({Net_4666}),
+		  .io({tmpIO_0__Vref_BP_net[0:0]}),
+		  .siovref(tmpSIOVREF__Vref_BP_net),
+		  .interrupt({tmpINTERRUPT_0__Vref_BP_net[0:0]}),
+		  .annotation({Net_4690}),
+		  .in_clock({1'b0}),
+		  .in_clock_en({1'b1}),
+		  .in_reset({1'b0}),
+		  .out_clock({1'b0}),
+		  .out_clock_en({1'b1}),
+		  .out_reset({1'b0}));
+
+	assign tmpOE__Vref_BP_net = (`CYDEV_CHIP_MEMBER_USED == `CYDEV_CHIP_MEMBER_3A && `CYDEV_CHIP_REVISION_USED < `CYDEV_CHIP_REVISION_3A_ES3) ? ~{1'b1} : {1'b1};
+
     Analog_LPF_v1_0_4 LPF_2 (
         .Vin(Net_4201),
         .Vout(Net_4204));
 
     OpAmp_v1_90_5 OPAref (
         .Vminus(Net_4203),
-        .Vout(Net_4653),
+        .Vout(Net_4661),
         .Vplus(Net_4204));
     defparam OPAref.Mode = 1;
 
@@ -1980,14 +2158,14 @@ module top ;
     VDAC8_v1_90_6 VDAC_ref_PGA (
         .data(8'b00000000),
         .strobe(1'b0),
-        .vOut(Net_4200));
+        .vOut(Net_4664));
     defparam VDAC_ref_PGA.Data_Source = 0;
     defparam VDAC_ref_PGA.Initial_Value = 156;
     defparam VDAC_ref_PGA.Strobe_Mode = 0;
 
     cy_annotation_universal_v1_0 GND_3 (
         .connect({
-            Net_4572
+            Net_2058
         })
     );
     defparam GND_3.comp_name = "Gnd_v1_0";
@@ -2001,7 +2179,7 @@ module top ;
     PGA_v2_0_8 PGAgain (
         .Vin(Net_2192),
         .Vout(Net_4656),
-        .Vref(Net_4200));
+        .Vref(Net_4664));
 
     cy_annotation_universal_v1_0 C_2 (
         .connect({
@@ -2026,7 +2204,7 @@ module top ;
     OpAmp_v1_90_9 OPAadder (
         .Vminus(Net_4183),
         .Vout(Net_4654),
-        .Vplus(Net_4253));
+        .Vplus(Net_4725));
     defparam OPAadder.Mode = 0;
 
     cy_annotation_universal_v1_0 C_1 (
@@ -2368,7 +2546,7 @@ module top ;
     VDAC8_v1_90_11 VDAC_Ref_Adder (
         .data(8'b00000000),
         .strobe(1'b0),
-        .vOut(Net_4253));
+        .vOut(Net_4725));
     defparam VDAC_Ref_Adder.Data_Source = 0;
     defparam VDAC_Ref_Adder.Initial_Value = 156;
     defparam VDAC_Ref_Adder.Strobe_Mode = 0;
@@ -2657,7 +2835,7 @@ module top ;
     OpAmp_v1_90_12 OPAbp (
         .Vminus(Net_4178),
         .Vout(Net_4307),
-        .Vplus(Net_4653));
+        .Vplus(Net_4666));
     defparam OPAbp.Mode = 0;
 
 	wire [0:0] tmpOE__SEo_net;
@@ -2737,44 +2915,43 @@ module top ;
 
 	assign tmpOE__SEo_net = (`CYDEV_CHIP_MEMBER_USED == `CYDEV_CHIP_MEMBER_3A && `CYDEV_CHIP_REVISION_USED < `CYDEV_CHIP_REVISION_3A_ES3) ? ~{1'b1} : {1'b1};
 
-    cy_annotation_universal_v1_0 C_5 (
+    cy_annotation_universal_v1_0 GND_1 (
         .connect({
-            Net_2058,
-            Net_4574
+            Net_4512
         })
     );
-    defparam C_5.comp_name = "Capacitor_v1_0";
-    defparam C_5.port_names = "T1, T2";
-    defparam C_5.width = 2;
-
-    cy_annotation_universal_v1_0 C_11 (
-        .connect({
-            Net_2061,
-            Net_4585
-        })
-    );
-    defparam C_11.comp_name = "Capacitor_v1_0";
-    defparam C_11.port_names = "T1, T2";
-    defparam C_11.width = 2;
+    defparam GND_1.comp_name = "Gnd_v1_0";
+    defparam GND_1.port_names = "T1";
+    defparam GND_1.width = 1;
 
     cy_annotation_universal_v1_0 C_6 (
         .connect({
-            Net_1190,
-            Net_4584
+            Net_4219,
+            Net_4715
         })
     );
     defparam C_6.comp_name = "Capacitor_v1_0";
     defparam C_6.port_names = "T1, T2";
     defparam C_6.width = 2;
 
-    cy_annotation_universal_v1_0 GND_1 (
+    cy_annotation_universal_v1_0 C_5 (
         .connect({
-            Net_4574
+            Net_4512,
+            Net_4718
         })
     );
-    defparam GND_1.comp_name = "Gnd_v1_0";
-    defparam GND_1.port_names = "T1";
-    defparam GND_1.width = 1;
+    defparam C_5.comp_name = "Capacitor_v1_0";
+    defparam C_5.port_names = "T1, T2";
+    defparam C_5.width = 2;
+
+    cy_annotation_universal_v1_0 GND_10 (
+        .connect({
+            Net_4718
+        })
+    );
+    defparam GND_10.comp_name = "Gnd_v1_0";
+    defparam GND_10.port_names = "T1";
+    defparam GND_10.width = 1;
 
 
 	cy_isr_v1_0
@@ -2789,7 +2966,7 @@ module top ;
         .mi(1'b0),
         .nVref(Net_4627),
         .soc(1'b1),
-        .vminus(Net_4653),
+        .vminus(Net_4661),
         .vplus(Net_4640));
 
 	wire [0:0] tmpOE__INn_net;
@@ -2969,7 +3146,7 @@ module top ;
     PGA_v2_0_14 PGAn (
         .Vin(Net_4547),
         .Vout(Net_2158),
-        .Vref(Net_4200));
+        .Vref(Net_4664));
 
     PGA_v2_0_15 PGAp (
         .Vin(Net_4517),
@@ -3039,7 +3216,7 @@ module top ;
 		 (.oe(tmpOE__Vshield_net),
 		  .y({1'b0}),
 		  .fb({tmpFB_0__Vshield_net[0:0]}),
-		  .analog({Net_4510}),
+		  .analog({Net_4665}),
 		  .io({tmpIO_0__Vshield_net[0:0]}),
 		  .siovref(tmpSIOVREF__Vshield_net),
 		  .interrupt({tmpINTERRUPT_0__Vshield_net[0:0]}),
@@ -3082,6 +3259,476 @@ module top ;
 		#(.int_type(2'b10))
 		isr_Button
 		 (.int_signal(Net_4595));
+
+
+    VDAC8_v1_90_16 VDAC_ref_BP (
+        .data(8'b00000000),
+        .strobe(1'b0),
+        .vOut(Net_4666));
+    defparam VDAC_ref_BP.Data_Source = 0;
+    defparam VDAC_ref_BP.Initial_Value = 156;
+    defparam VDAC_ref_BP.Strobe_Mode = 0;
+
+	wire [0:0] tmpOE__Vref_PGA_net;
+	wire [0:0] tmpFB_0__Vref_PGA_net;
+	wire [0:0] tmpIO_0__Vref_PGA_net;
+	wire [0:0] tmpINTERRUPT_0__Vref_PGA_net;
+	electrical [0:0] tmpSIOVREF__Vref_PGA_net;
+
+	cy_psoc3_pins_v1_10
+		#(.id("6dca8981-f62c-4f5a-a751-5b73bdd201af"),
+		  .drive_mode(3'b000),
+		  .ibuf_enabled(1'b0),
+		  .init_dr_st(1'b0),
+		  .input_clk_en(0),
+		  .input_sync(1'b1),
+		  .input_sync_mode(1'b0),
+		  .intr_mode(2'b00),
+		  .invert_in_clock(0),
+		  .invert_in_clock_en(0),
+		  .invert_in_reset(0),
+		  .invert_out_clock(0),
+		  .invert_out_clock_en(0),
+		  .invert_out_reset(0),
+		  .io_voltage(""),
+		  .layout_mode("CONTIGUOUS"),
+		  .oe_conn(1'b0),
+		  .oe_reset(0),
+		  .oe_sync(1'b0),
+		  .output_clk_en(0),
+		  .output_clock_mode(1'b0),
+		  .output_conn(1'b0),
+		  .output_mode(1'b0),
+		  .output_reset(0),
+		  .output_sync(1'b0),
+		  .pa_in_clock(-1),
+		  .pa_in_clock_en(-1),
+		  .pa_in_reset(-1),
+		  .pa_out_clock(-1),
+		  .pa_out_clock_en(-1),
+		  .pa_out_reset(-1),
+		  .pin_aliases(""),
+		  .pin_mode("A"),
+		  .por_state(4),
+		  .sio_group_cnt(0),
+		  .sio_hyst(1'b1),
+		  .sio_ibuf(""),
+		  .sio_info(2'b00),
+		  .sio_obuf(""),
+		  .sio_refsel(""),
+		  .sio_vtrip(""),
+		  .sio_hifreq(""),
+		  .sio_vohsel(""),
+		  .slew_rate(1'b0),
+		  .spanning(0),
+		  .use_annotation(1'b1),
+		  .vtrip(2'b10),
+		  .width(1),
+		  .ovt_hyst_trim(1'b0),
+		  .ovt_needed(1'b0),
+		  .ovt_slew_control(2'b00),
+		  .input_buffer_sel(2'b00))
+		Vref_PGA
+		 (.oe(tmpOE__Vref_PGA_net),
+		  .y({1'b0}),
+		  .fb({tmpFB_0__Vref_PGA_net[0:0]}),
+		  .analog({Net_4664}),
+		  .io({tmpIO_0__Vref_PGA_net[0:0]}),
+		  .siovref(tmpSIOVREF__Vref_PGA_net),
+		  .interrupt({tmpINTERRUPT_0__Vref_PGA_net[0:0]}),
+		  .annotation({Net_4691}),
+		  .in_clock({1'b0}),
+		  .in_clock_en({1'b1}),
+		  .in_reset({1'b0}),
+		  .out_clock({1'b0}),
+		  .out_clock_en({1'b1}),
+		  .out_reset({1'b0}));
+
+	assign tmpOE__Vref_PGA_net = (`CYDEV_CHIP_MEMBER_USED == `CYDEV_CHIP_MEMBER_3A && `CYDEV_CHIP_REVISION_USED < `CYDEV_CHIP_REVISION_3A_ES3) ? ~{1'b1} : {1'b1};
+
+	wire [0:0] tmpOE__Vref_ADDER_net;
+	wire [0:0] tmpFB_0__Vref_ADDER_net;
+	wire [0:0] tmpIO_0__Vref_ADDER_net;
+	wire [0:0] tmpINTERRUPT_0__Vref_ADDER_net;
+	electrical [0:0] tmpSIOVREF__Vref_ADDER_net;
+
+	cy_psoc3_pins_v1_10
+		#(.id("b7698a5a-9f16-4afe-84f5-368c95424baf"),
+		  .drive_mode(3'b000),
+		  .ibuf_enabled(1'b0),
+		  .init_dr_st(1'b0),
+		  .input_clk_en(0),
+		  .input_sync(1'b1),
+		  .input_sync_mode(1'b0),
+		  .intr_mode(2'b00),
+		  .invert_in_clock(0),
+		  .invert_in_clock_en(0),
+		  .invert_in_reset(0),
+		  .invert_out_clock(0),
+		  .invert_out_clock_en(0),
+		  .invert_out_reset(0),
+		  .io_voltage(""),
+		  .layout_mode("CONTIGUOUS"),
+		  .oe_conn(1'b0),
+		  .oe_reset(0),
+		  .oe_sync(1'b0),
+		  .output_clk_en(0),
+		  .output_clock_mode(1'b0),
+		  .output_conn(1'b0),
+		  .output_mode(1'b0),
+		  .output_reset(0),
+		  .output_sync(1'b0),
+		  .pa_in_clock(-1),
+		  .pa_in_clock_en(-1),
+		  .pa_in_reset(-1),
+		  .pa_out_clock(-1),
+		  .pa_out_clock_en(-1),
+		  .pa_out_reset(-1),
+		  .pin_aliases(""),
+		  .pin_mode("A"),
+		  .por_state(4),
+		  .sio_group_cnt(0),
+		  .sio_hyst(1'b1),
+		  .sio_ibuf(""),
+		  .sio_info(2'b00),
+		  .sio_obuf(""),
+		  .sio_refsel(""),
+		  .sio_vtrip(""),
+		  .sio_hifreq(""),
+		  .sio_vohsel(""),
+		  .slew_rate(1'b0),
+		  .spanning(0),
+		  .use_annotation(1'b1),
+		  .vtrip(2'b10),
+		  .width(1),
+		  .ovt_hyst_trim(1'b0),
+		  .ovt_needed(1'b0),
+		  .ovt_slew_control(2'b00),
+		  .input_buffer_sel(2'b00))
+		Vref_ADDER
+		 (.oe(tmpOE__Vref_ADDER_net),
+		  .y({1'b0}),
+		  .fb({tmpFB_0__Vref_ADDER_net[0:0]}),
+		  .analog({Net_4725}),
+		  .io({tmpIO_0__Vref_ADDER_net[0:0]}),
+		  .siovref(tmpSIOVREF__Vref_ADDER_net),
+		  .interrupt({tmpINTERRUPT_0__Vref_ADDER_net[0:0]}),
+		  .annotation({Net_4692}),
+		  .in_clock({1'b0}),
+		  .in_clock_en({1'b1}),
+		  .in_reset({1'b0}),
+		  .out_clock({1'b0}),
+		  .out_clock_en({1'b1}),
+		  .out_reset({1'b0}));
+
+	assign tmpOE__Vref_ADDER_net = (`CYDEV_CHIP_MEMBER_USED == `CYDEV_CHIP_MEMBER_3A && `CYDEV_CHIP_REVISION_USED < `CYDEV_CHIP_REVISION_3A_ES3) ? ~{1'b1} : {1'b1};
+
+	wire [0:0] tmpOE__Vref_LP_net;
+	wire [0:0] tmpFB_0__Vref_LP_net;
+	wire [0:0] tmpIO_0__Vref_LP_net;
+	wire [0:0] tmpINTERRUPT_0__Vref_LP_net;
+	electrical [0:0] tmpSIOVREF__Vref_LP_net;
+
+	cy_psoc3_pins_v1_10
+		#(.id("c8eed0ad-f4a0-4055-b31d-7dda03abcdb0"),
+		  .drive_mode(3'b000),
+		  .ibuf_enabled(1'b0),
+		  .init_dr_st(1'b0),
+		  .input_clk_en(0),
+		  .input_sync(1'b1),
+		  .input_sync_mode(1'b0),
+		  .intr_mode(2'b00),
+		  .invert_in_clock(0),
+		  .invert_in_clock_en(0),
+		  .invert_in_reset(0),
+		  .invert_out_clock(0),
+		  .invert_out_clock_en(0),
+		  .invert_out_reset(0),
+		  .io_voltage(""),
+		  .layout_mode("CONTIGUOUS"),
+		  .oe_conn(1'b0),
+		  .oe_reset(0),
+		  .oe_sync(1'b0),
+		  .output_clk_en(0),
+		  .output_clock_mode(1'b0),
+		  .output_conn(1'b0),
+		  .output_mode(1'b0),
+		  .output_reset(0),
+		  .output_sync(1'b0),
+		  .pa_in_clock(-1),
+		  .pa_in_clock_en(-1),
+		  .pa_in_reset(-1),
+		  .pa_out_clock(-1),
+		  .pa_out_clock_en(-1),
+		  .pa_out_reset(-1),
+		  .pin_aliases(""),
+		  .pin_mode("A"),
+		  .por_state(4),
+		  .sio_group_cnt(0),
+		  .sio_hyst(1'b1),
+		  .sio_ibuf(""),
+		  .sio_info(2'b00),
+		  .sio_obuf(""),
+		  .sio_refsel(""),
+		  .sio_vtrip(""),
+		  .sio_hifreq(""),
+		  .sio_vohsel(""),
+		  .slew_rate(1'b0),
+		  .spanning(0),
+		  .use_annotation(1'b1),
+		  .vtrip(2'b10),
+		  .width(1),
+		  .ovt_hyst_trim(1'b0),
+		  .ovt_needed(1'b0),
+		  .ovt_slew_control(2'b00),
+		  .input_buffer_sel(2'b00))
+		Vref_LP
+		 (.oe(tmpOE__Vref_LP_net),
+		  .y({1'b0}),
+		  .fb({tmpFB_0__Vref_LP_net[0:0]}),
+		  .analog({Net_4285}),
+		  .io({tmpIO_0__Vref_LP_net[0:0]}),
+		  .siovref(tmpSIOVREF__Vref_LP_net),
+		  .interrupt({tmpINTERRUPT_0__Vref_LP_net[0:0]}),
+		  .annotation({Net_4693}),
+		  .in_clock({1'b0}),
+		  .in_clock_en({1'b1}),
+		  .in_reset({1'b0}),
+		  .out_clock({1'b0}),
+		  .out_clock_en({1'b1}),
+		  .out_reset({1'b0}));
+
+	assign tmpOE__Vref_LP_net = (`CYDEV_CHIP_MEMBER_USED == `CYDEV_CHIP_MEMBER_3A && `CYDEV_CHIP_REVISION_USED < `CYDEV_CHIP_REVISION_3A_ES3) ? ~{1'b1} : {1'b1};
+
+    cy_annotation_universal_v1_0 GND_9 (
+        .connect({
+            Net_4715
+        })
+    );
+    defparam GND_9.comp_name = "Gnd_v1_0";
+    defparam GND_9.port_names = "T1";
+    defparam GND_9.width = 1;
+
+    cy_annotation_universal_v1_0 GND_8 (
+        .connect({
+            Net_4714
+        })
+    );
+    defparam GND_8.comp_name = "Gnd_v1_0";
+    defparam GND_8.port_names = "T1";
+    defparam GND_8.width = 1;
+
+	wire [0:0] tmpOE__AMuxCapacitor_net;
+	wire [0:0] tmpFB_0__AMuxCapacitor_net;
+	wire [0:0] tmpIO_0__AMuxCapacitor_net;
+	wire [0:0] tmpINTERRUPT_0__AMuxCapacitor_net;
+	electrical [0:0] tmpSIOVREF__AMuxCapacitor_net;
+
+	cy_psoc3_pins_v1_10
+		#(.id("6607d90a-4585-4268-9b0e-8e04a1da165e"),
+		  .drive_mode(3'b000),
+		  .ibuf_enabled(1'b0),
+		  .init_dr_st(1'b0),
+		  .input_clk_en(0),
+		  .input_sync(1'b1),
+		  .input_sync_mode(1'b0),
+		  .intr_mode(2'b00),
+		  .invert_in_clock(0),
+		  .invert_in_clock_en(0),
+		  .invert_in_reset(0),
+		  .invert_out_clock(0),
+		  .invert_out_clock_en(0),
+		  .invert_out_reset(0),
+		  .io_voltage(""),
+		  .layout_mode("CONTIGUOUS"),
+		  .oe_conn(1'b0),
+		  .oe_reset(0),
+		  .oe_sync(1'b0),
+		  .output_clk_en(0),
+		  .output_clock_mode(1'b0),
+		  .output_conn(1'b0),
+		  .output_mode(1'b0),
+		  .output_reset(0),
+		  .output_sync(1'b0),
+		  .pa_in_clock(-1),
+		  .pa_in_clock_en(-1),
+		  .pa_in_reset(-1),
+		  .pa_out_clock(-1),
+		  .pa_out_clock_en(-1),
+		  .pa_out_reset(-1),
+		  .pin_aliases(""),
+		  .pin_mode("A"),
+		  .por_state(4),
+		  .sio_group_cnt(0),
+		  .sio_hyst(1'b1),
+		  .sio_ibuf(""),
+		  .sio_info(2'b00),
+		  .sio_obuf(""),
+		  .sio_refsel(""),
+		  .sio_vtrip(""),
+		  .sio_hifreq(""),
+		  .sio_vohsel(""),
+		  .slew_rate(1'b0),
+		  .spanning(0),
+		  .use_annotation(1'b1),
+		  .vtrip(2'b10),
+		  .width(1),
+		  .ovt_hyst_trim(1'b0),
+		  .ovt_needed(1'b0),
+		  .ovt_slew_control(2'b00),
+		  .input_buffer_sel(2'b00))
+		AMuxCapacitor
+		 (.oe(tmpOE__AMuxCapacitor_net),
+		  .y({1'b0}),
+		  .fb({tmpFB_0__AMuxCapacitor_net[0:0]}),
+		  .analog({Net_4706}),
+		  .io({tmpIO_0__AMuxCapacitor_net[0:0]}),
+		  .siovref(tmpSIOVREF__AMuxCapacitor_net),
+		  .interrupt({tmpINTERRUPT_0__AMuxCapacitor_net[0:0]}),
+		  .annotation({Net_4708}),
+		  .in_clock({1'b0}),
+		  .in_clock_en({1'b1}),
+		  .in_reset({1'b0}),
+		  .out_clock({1'b0}),
+		  .out_clock_en({1'b1}),
+		  .out_reset({1'b0}));
+
+	assign tmpOE__AMuxCapacitor_net = (`CYDEV_CHIP_MEMBER_USED == `CYDEV_CHIP_MEMBER_3A && `CYDEV_CHIP_REVISION_USED < `CYDEV_CHIP_REVISION_3A_ES3) ? ~{1'b1} : {1'b1};
+
+    cy_annotation_universal_v1_0 C_3 (
+        .connect({
+            Net_4709,
+            Net_4708
+        })
+    );
+    defparam C_3.comp_name = "Capacitor_v1_0";
+    defparam C_3.port_names = "T1, T2";
+    defparam C_3.width = 2;
+
+    cy_annotation_universal_v1_0 GND_6 (
+        .connect({
+            Net_4709
+        })
+    );
+    defparam GND_6.comp_name = "Gnd_v1_0";
+    defparam GND_6.port_names = "T1";
+    defparam GND_6.width = 1;
+
+    cy_annotation_universal_v1_0 GND_7 (
+        .connect({
+            Net_4711
+        })
+    );
+    defparam GND_7.comp_name = "Gnd_v1_0";
+    defparam GND_7.port_names = "T1";
+    defparam GND_7.width = 1;
+
+    cy_annotation_universal_v1_0 C_10 (
+        .connect({
+            Net_4691,
+            Net_4711
+        })
+    );
+    defparam C_10.comp_name = "Capacitor_v1_0";
+    defparam C_10.port_names = "T1, T2";
+    defparam C_10.width = 2;
+
+    cy_annotation_universal_v1_0 C_12 (
+        .connect({
+            Net_4690,
+            Net_4714
+        })
+    );
+    defparam C_12.comp_name = "Capacitor_v1_0";
+    defparam C_12.port_names = "T1, T2";
+    defparam C_12.width = 2;
+
+    cy_annotation_universal_v1_0 C_13 (
+        .connect({
+            Net_4219,
+            Net_4715
+        })
+    );
+    defparam C_13.comp_name = "Capacitor_v1_0";
+    defparam C_13.port_names = "T1, T2";
+    defparam C_13.width = 2;
+
+    cy_annotation_universal_v1_0 C_11 (
+        .connect({
+            Net_4512,
+            Net_4718
+        })
+    );
+    defparam C_11.comp_name = "Capacitor_v1_0";
+    defparam C_11.port_names = "T1, T2";
+    defparam C_11.width = 2;
+
+    cy_annotation_universal_v1_0 GND_11 (
+        .connect({
+            Net_4723
+        })
+    );
+    defparam GND_11.comp_name = "Gnd_v1_0";
+    defparam GND_11.port_names = "T1";
+    defparam GND_11.width = 1;
+
+    cy_annotation_universal_v1_0 GND_12 (
+        .connect({
+            Net_4724
+        })
+    );
+    defparam GND_12.comp_name = "Gnd_v1_0";
+    defparam GND_12.port_names = "T1";
+    defparam GND_12.width = 1;
+
+    cy_annotation_universal_v1_0 C_14 (
+        .connect({
+            Net_4693,
+            Net_4724
+        })
+    );
+    defparam C_14.comp_name = "Capacitor_v1_0";
+    defparam C_14.port_names = "T1, T2";
+    defparam C_14.width = 2;
+
+    cy_annotation_universal_v1_0 GND_13 (
+        .connect({
+            Net_4726
+        })
+    );
+    defparam GND_13.comp_name = "Gnd_v1_0";
+    defparam GND_13.port_names = "T1";
+    defparam GND_13.width = 1;
+
+    cy_annotation_universal_v1_0 C_15 (
+        .connect({
+            Net_4692,
+            Net_4726
+        })
+    );
+    defparam C_15.comp_name = "Capacitor_v1_0";
+    defparam C_15.port_names = "T1, T2";
+    defparam C_15.width = 2;
+
+    Filter_v2_30_17 Filter (
+        .DMA_Req_A(Net_4731),
+        .DMA_Req_B(Net_4728),
+        .Interrupt(Net_4730));
+
+
+	cy_dma_v1_0
+		#(.drq_type(2'b10))
+		DMA
+		 (.drq(Net_4731),
+		  .nrq(Net_4733),
+		  .trq(1'b0));
+
+
+
+	cy_isr_v1_0
+		#(.int_type(2'b10))
+		isr_DMA
+		 (.int_signal(Net_4733));
 
 
 

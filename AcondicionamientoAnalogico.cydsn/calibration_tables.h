@@ -240,9 +240,7 @@
 #if !defined(VDAC_ref_PGA_DEFAULT_DATA)
     #error "AnalogGeo requiere el componente VDAC_ref_PGA."
 #endif
-#if !defined(VDAC_ref_BP_DEFAULT_DATA)
-    #error "AnalogGeo requiere el componente VDAC_ref_BP."
-#endif
+/* VDAC_ref_BP es opcional: si no esta en TopDesign, GEO_BP se omite. */
 #if !defined(VDAC_Ref_Adder_DEFAULT_DATA)
     #error "AnalogGeo requiere el componente VDAC_Ref_Adder."
 #endif
@@ -251,7 +249,9 @@
 #endif
 
 static void cal_vdac_geo_pga(uint8 value)   { VDAC_ref_PGA_SetValue(value); }
+#if defined(VDAC_ref_BP_DEFAULT_DATA) || defined(CY_DVDAC_VDAC_ref_BP_H)
 static void cal_vdac_geo_bp(uint8 value)    { VDAC_ref_BP_SetValue(value); }
+#endif
 static void cal_vdac_geo_adder(uint8 value) { VDAC_Ref_Adder_SetValue(value); }
 static void cal_vdac_geo_lp(uint8 value)    { VDAC_ref_LP_SetValue(value); }
 
@@ -270,6 +270,7 @@ static const PsocCalStage g_psoc_cal_stages[] = {
         },
         cal_vdac_geo_pga
     },
+#if defined(VDAC_ref_BP_DEFAULT_DATA) || defined(CY_DVDAC_VDAC_ref_BP_H)
     {
         "GEO_BP", 1u, CAL_TARGET_COUNTS_GEO_BP, CAL_DIRECTION_GEO_BP,
         CAL_DAC_CENTER_GEO_BP, CAL_DAC_MAX_CHANGE_GEO_BP, CAL_PROBE_STEP_GEO_BP,
@@ -284,6 +285,7 @@ static const PsocCalStage g_psoc_cal_stages[] = {
         },
         cal_vdac_geo_bp
     },
+#endif
     {
         "GEO_ADDER", 2u, CAL_TARGET_COUNTS_GEO_ADDER, CAL_DIRECTION_GEO_ADDER,
         CAL_DAC_CENTER_GEO_ADDER, CAL_DAC_MAX_CHANGE_GEO_ADDER, CAL_PROBE_STEP_GEO_ADDER,

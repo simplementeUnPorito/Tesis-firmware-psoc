@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: AMux_1.h  
+* File Name: AMux.h  
 * Version 2.20
 *
 * Description:
@@ -15,8 +15,8 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#if !defined(CY_PINS_AMux_1_ALIASES_H) /* Pins AMux_1_ALIASES_H */
-#define CY_PINS_AMux_1_ALIASES_H
+#if !defined(CY_PINS_AMux_ALIASES_H) /* Pins AMux_ALIASES_H */
+#define CY_PINS_AMux_ALIASES_H
 
 #include "cytypes.h"
 #include "cyfitter.h"
@@ -25,12 +25,12 @@
 /***************************************
 *              Constants        
 ***************************************/
-#define AMux_1_0			(AMux_1__0__PC)
-#define AMux_1_0_INTR	((uint16)((uint16)0x0001u << AMux_1__0__SHIFT))
+#define AMux_0			(AMux__0__PC)
+#define AMux_0_INTR	((uint16)((uint16)0x0001u << AMux__0__SHIFT))
 
-#define AMux_1_INTR_ALL	 ((uint16)(AMux_1_0_INTR))
+#define AMux_INTR_ALL	 ((uint16)(AMux_0_INTR))
 
-#endif /* End Pins AMux_1_ALIASES_H */
+#endif /* End Pins AMux_ALIASES_H */
 
 
 /* [] END OF FILE */

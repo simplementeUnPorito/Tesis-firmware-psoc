@@ -447,7 +447,9 @@ static PsocCalServo g_cal_servo = { CAL_SERVO_ENABLE_DEFAULT };
 static const PsocCalServoTune g_cal_servo_tune[PSOC_CAL_STAGE_COUNT] = {
 #if PSOC_HW_CLASS == PSOC_HW_GEO
     { CAL_SERVO_KP_NUM_GEO_PGA,   CAL_SERVO_KI_NUM_GEO_PGA,   CAL_SERVO_KI_DIV_GEO_PGA,   CAL_SERVO_DEADBAND_GEO_PGA,   CAL_SERVO_FINE_STEP_GEO_PGA,   CAL_SERVO_RECOVERY_STEP_GEO_PGA },
+#if defined(VDAC_ref_BP_DEFAULT_DATA) || defined(CY_DVDAC_VDAC_ref_BP_H)
     { CAL_SERVO_KP_NUM_GEO_BP,    CAL_SERVO_KI_NUM_GEO_BP,    CAL_SERVO_KI_DIV_GEO_BP,    CAL_SERVO_DEADBAND_GEO_BP,    CAL_SERVO_FINE_STEP_GEO_BP,    CAL_SERVO_RECOVERY_STEP_GEO_BP },
+#endif
     { CAL_SERVO_KP_NUM_GEO_ADDER, CAL_SERVO_KI_NUM_GEO_ADDER, CAL_SERVO_KI_DIV_GEO_ADDER, CAL_SERVO_DEADBAND_GEO_ADDER, CAL_SERVO_FINE_STEP_GEO_ADDER, CAL_SERVO_RECOVERY_STEP_GEO_ADDER },
     { CAL_SERVO_KP_NUM_GEO_LP,    CAL_SERVO_KI_NUM_GEO_LP,    CAL_SERVO_KI_DIV_GEO_LP,    CAL_SERVO_DEADBAND_GEO_LP,    CAL_SERVO_FINE_STEP_GEO_LP,    CAL_SERVO_RECOVERY_STEP_GEO_LP },
 #else
@@ -469,8 +471,12 @@ static uint16 cal_servo_settle_samples(uint8 stage_index)
 #if PSOC_HW_CLASS == PSOC_HW_GEO
     switch (stage_index) {
         case 0u: return CAL_SERVO_SETTLE_SAMPLES_GEO_PGA;
+#if defined(VDAC_ref_BP_DEFAULT_DATA) || defined(CY_DVDAC_VDAC_ref_BP_H)
         case 1u: return CAL_SERVO_SETTLE_SAMPLES_GEO_BP;
         case 2u: return CAL_SERVO_SETTLE_SAMPLES_GEO_ADDER;
+#else
+        case 1u: return CAL_SERVO_SETTLE_SAMPLES_GEO_ADDER;
+#endif
         default: return CAL_SERVO_SETTLE_SAMPLES_GEO_LP;
     }
 #else
@@ -718,7 +724,9 @@ void psoc_calibration_start_references(void)
 
 #if PSOC_HW_CLASS == PSOC_HW_GEO
     VDAC_ref_PGA_Start();
+#if defined(VDAC_ref_BP_DEFAULT_DATA) || defined(CY_DVDAC_VDAC_ref_BP_H)
     VDAC_ref_BP_Start();
+#endif
     VDAC_Ref_Adder_Start();
     VDAC_ref_LP_Start();
 #else

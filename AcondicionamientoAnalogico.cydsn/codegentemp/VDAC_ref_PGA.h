@@ -84,7 +84,7 @@ void VDAC_ref_PGA_Wakeup(void)          ;
  /* Default DAC range */
 #define VDAC_ref_PGA_DEFAULT_RANGE    4u
  /* Default DAC speed */
-#define VDAC_ref_PGA_DEFAULT_SPEED    2u
+#define VDAC_ref_PGA_DEFAULT_SPEED    0u
  /* Default Control */
 #define VDAC_ref_PGA_DEFAULT_CNTL      0x00u
 /* Default Strobe mode */

@@ -1,0 +1,1642 @@
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 2
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"AMuxCapacitor.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.section	.gnu.lto_.profile.d74b8bf0,"",%progbits
+  19 0000 789C6361 		.ascii	"x\234ca`d`a`\000\222\022\"\000\000\256\0007"
+  19      60646061 
+  19      60009212 
+  19      220000AE 
+  19      0037
+  20              		.text
+  21              		.section	.gnu.lto_.icf.d74b8bf0,"",%progbits
+  22 0000 789C6361 		.ascii	"x\234ca`d\000\001)\006\004`a\270\374ho\033'\343\315"
+  22      60640001 
+  22      29060460 
+  22      61B8FC68 
+  22      6F1B27E3 
+  23 0015 EF1D2738 		.ascii	"\357\035'8\231\236n\231<\225\227\271\361\342\336s<\014"
+  23      999E6E99 
+  23      3C9597B9 
+  23      F1E2DE73 
+  23      3C0C
+  24 0027 00A8690C 		.ascii	"\000\250i\014\013"
+  24      0B
+  25              		.text
+  26              		.section	.gnu.lto_.jmpfuncs.d74b8bf0,"",%progbits
+  27 0000 789C6361 		.ascii	"x\234ca`d\000\001!\006\004`a`dd\254g\004\021L\014\014"
+  27      60640001 
+  27      21060460 
+  27      61606464 
+  27      AC670411 
+  28 0017 CC401100 		.ascii	"\314@\021\000\016\"\001&"
+  28      0E220126 
+  29              		.text
+  30              		.section	.gnu.lto_.inline.d74b8bf0,"",%progbits
+  31 0000 789C6361 		.ascii	"x\234ca`d\000\201$\006\004`a`\340`gdd\340\000J1s\034"
+  31      60640081 
+  31      24060460 
+  31      6160E060 
+  31      676464E0 
+  32 0019 B063605B 		.ascii	"\260c`[ \317\304\300t\201\237\005$\313\210O\222\211"
+  32      20CFC4C0 
+  32      74819F05 
+  32      24CB884F 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 2
+
+
+  32      9289
+  33 002b 818D9591 		.ascii	"\201\215\225\221\201\211\355\203\036D\034\010\2301\205"
+  33      8189ED83 
+  33      1E441C08 
+  33      983185
+  34 003a 1800EEF5 		.ascii	"\030\000\356\365\012\002"
+  34      0A02
+  35              		.text
+  36              		.section	.gnu.lto_.pureconst.d74b8bf0,"",%progbits
+  37 0000 789C6361 		.ascii	"x\234ca`d\340d```a\220b\224b\222b\226\002\000\002\261"
+  37      6064E064 
+  37      60606061 
+  37      90629462 
+  37      92629602 
+  38 0017 0081     		.ascii	"\000\201"
+  39              		.text
+  40              		.section	.gnu.lto_AMuxCapacitor_Write.d74b8bf0,"",%progbits
+  41 0000 789C5550 		.ascii	"x\234UP=k\024Q\024\275\347\275\235\335\325h\374\001"
+  41      3D6B1451 
+  41      14BDE7BD 
+  41      9DDDD568 
+  41      FC01
+  42 0012 D9224D58 		.ascii	"\331\"MXb!\001\261\261\323\024\251\204\220\264\021\031"
+  42      622101B1 
+  42      B1D314A9 
+  42      8490B411 
+  42      19
+  43 0023 D6291662 		.ascii	"\326)\026bV6\263\301.o\262;\033H\265\026&U\014DB\326"
+  43      5636B3C1 
+  43      2E6FB23B 
+  43      1B48B516 
+  43      26550C44 
+  44 0039 AF7CD809 		.ascii	"\257|\330\011B\206\251l\242M*\021\221\024\023\260\332"
+  44      4286A96C 
+  44      A24D2A11 
+  44      911413B0 
+  44      DA
+  45 004a C02E0966 		.ascii	"\300.\011fu\274w\2461\017\336\2747\367\235s\356\271"
+  45      75BC77A6 
+  45      310FDEBC 
+  45      37F79D73 
+  45      EEB9
+  46 005c 27432059 		.ascii	"'C YJ\021\335\345s\21074A\265\276\020yy\005\310\305"
+  46      4A11DDE5 
+  46      73883734 
+  46      41B5BE10 
+  46      797905C8 
+  47 0071 E4418B0A 		.ascii	"\344A\213\012\213\350\251?\012\341r\364Q\215n\033^?"
+  47      8BE8A93F 
+  47      0AE172F4 
+  47      518D6E1B 
+  47      5E3F
+  48 0083 B75E6AD3 		.ascii	"\267^j\323\016\340k\242X%J\204m\2142\352\344\323\362"
+  48      0EE06BA2 
+  48      58254A84 
+  48      6D8C32EA 
+  48      E4D3F2
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 3
+
+
+  49 0096 11F44D10 		.ascii	"\021\364M\020\337\233a\2573P\3342f\311\230\347\017\215"
+  49      DF9B61AF 
+  49      3350DC32 
+  49      66C998E7 
+  49      0F8D
+  50 00a8 F635D086 		.ascii	"\3665\320\206f\006n\0270V .\020^\243(\340\363oG;\203"
+  50      66066E17 
+  50      3056202E 
+  50      105EA328 
+  50      E0F36F47 
+  51 00be 7A2C21B6 		.ascii	"z,!\266L\264ym\344\225\020\203\263'k&\360\206\205\373"
+  51      4CB4796D 
+  51      E4951083 
+  51      B3276B26 
+  51      F08685FB 
+  52 00d2 E67FAE2C 		.ascii	"\346\177\256,\206\036\357\377}q=\333\020W\303x\213\221"
+  52      861EEFFF 
+  52      7D713DDB 
+  52      1057C378 
+  52      8B91
+  53 00e4 D40FDE21 		.ascii	"\324\017\336!\313\023B*\273S\201\211\343\272\011zVO"
+  53      CB13422A 
+  53      BB538189 
+  53      E3BA097A 
+  53      564F
+  54 00f6 E7153755 		.ascii	"\347\0257U<)?d \275-)d\345C\324\341-\203\237r.|\352"
+  54      3C293F64 
+  54      20BD2D29 
+  54      64E543D4 
+  54      E12D839F 
+  55 010e 08E1EF95 		.ascii	"\010\341\357\225\037k9\221\253k\011a\325\017\277\346"
+  55      1F6B3991 
+  55      AB6B0961 
+  55      D50FBFE6 
+  56 011e BACAD73A 		.ascii	"\272\312\327:1\332n\364\373*\375mmz&\303\245\303x\257"
+  56      31DA6EF4 
+  56      FB2AFD6D 
+  56      6D7A26C3 
+  56      A5C378AF 
+  57 0132 3FB88175 		.ascii	"?\270\201u\257\301\361d\260\203\002\336\203\355b\027"
+  57      AFC1F164 
+  57      B08302DE 
+  57      83ED6217 
+  58 0142 1BA008F5 		.ascii	"\033\240\010\365~\363;RA\235j^|\216\016n\210\010\020"
+  58      7EF33B52 
+  58      419D6A5E 
+  58      7C8E0E6E 
+  58      880810
+  59 0155 13F6187C 		.ascii	"\023\366\030|\014\225L\300&\031%\244N3:\271\222\262"
+  59      0C954CC0 
+  59      261925A4 
+  59      4E333AB9 
+  59      92B2
+  60 0167 ACBA963E 		.ascii	"\254\272\226>\335\025\377L\013\313B\016\373Lb\324y\263"
+  60      DD15FF4C 
+  60      0BCB420E 
+  60      FB4C62D4 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 4
+
+
+  60      79B3
+  61 0179 AB5250AA 		.ascii	"\253RP\252nq1\\M\272]r\346\0313p\331\334\0076\307,\372"
+  61      6E71315C 
+  61      4DBA5D72 
+  61      E6193370 
+  61      D9DC0736 
+  62 0190 85A5E0C2 		.ascii	"\205\245\340\302\022B\022pGA\202\340X\212\023\316\234"
+  62      12421270 
+  62      474182E0 
+  62      588A13CE 
+  62      9C
+  63 01a1 53B55DE7 		.ascii	"S\265]\347\361\243\351J\255Zrf&\247+\343wf\356=\250"
+  63      F1A3E94A 
+  63      AD5A7266 
+  63      26A72BE3 
+  63      7766EE3D 
+  64 01b6 3D1BB79F 		.ascii	"=\033\267\237\332\245\262[\251\336*\221\265`\317\326"
+  64      DAA5B25B 
+  64      A9DE2A91 
+  64      B560CFD6 
+  65 01c6 9CABF3AE 		.ascii	"\234\253\363\256\355\226K\367\313\356\374?\261\203\274"
+  65      ED964BF7 
+  65      CBEEFC3F 
+  65      B183BC
+  66 01d5 02       		.ascii	"\002"
+  67              		.text
+  68              		.section	.gnu.lto_AMuxCapacitor_SetDriveMode.d74b8bf0,"",%progbits
+  69 0000 789C7D51 		.ascii	"x\234}QMK\033Q\024\275\347\275\311L\322`\376\200Yt\027"
+  69      4D4B1B51 
+  69      14BDE7BD 
+  69      C94CD260 
+  69      FE805974 
+  70 0015 741184D2 		.ascii	"t\021\204\322\037P\004]\025D\267J\011q\026.4mPp\347"
+  70      1F50045D 
+  70      1544B74A 
+  70      0971162E 
+  70      346D5070 
+  71 002a CB1705BB 		.ascii	"\313\027\005\273P\010\272\021\211\033\361\373\013\273"
+  71      5008BA11 
+  71      891BF1FB 
+  71      0BBB
+  72 0038 E92E0674 		.ascii	"\351.\006tSH\013\005\027.Jq\021JiJl\015\212V\343\275"
+  72      53480B05 
+  72      172E4A71 
+  72      114A694A 
+  72      6C0D8A56 
+  73 004e 332EB2F2 		.ascii	"3.\262\3621\357~\034\3169\334\373\306\"\220\234\237"
+  73      31EF7E1C 
+  73      CE39DCFB 
+  73      C622909C 
+  73      9F
+  74 005f 9CE29C3B 		.ascii	"\234\342\234;\371B\023\324|\225(\023T\200\024&\010\232"
+  74      F94213D4 
+  74      7C952813 
+  74      54801426 
+  74      089A
+  75 0071 51984153 		.ascii	"Q\230AS\335)T\336\327>\251\2565\303\347\307\361\237"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 5
+
+
+  75      DD2954DE 
+  75      D73EA9AE 
+  75      35C3E7C7 
+  75      F19F
+  76 0083 1EB35E46 		.ascii	"\036\263^FA\023\265\224\347DXC\027\263\376\035\256\026"
+  76      4113B594 
+  76      E7445843 
+  76      17B3FE1D 
+  76      AE16
+  77 0095 C3BA1BC4 		.ascii	"\303\272\033\304\365E\265\361=\022[5&kLi\304\350\202"
+  77      F545B5F1 
+  77      3D125B35 
+  77      266B4C69 
+  77      C4E882
+  78 00a8 06D6A159 		.ascii	"\006\326\241Y\201\027Q\364D\211\001\302\006bB>?\270"
+  78      811751F4 
+  78      448901C2 
+  78      0662423E 
+  78      3FB8
+  79 00ba 5FE8B0F3 		.ascii	"_\350\260\363b\377\3347\305&l\031so\260lZ\255\234)_"
+  79      62FFDC37 
+  79      C5266C19 
+  79      736FB06C 
+  79      5AAD9C29 
+  80 00cf D9473776 		.ascii	"\331G7vX\261Li\016\332\222\020\2008\330R:\022\202\022"
+  80      58B14C69 
+  80      0EDA9210 
+  80      8038D852 
+  80      3A128212 
+  81 00e3 42C2216A 		.ascii	"B\302!j\360\225E.\224\222\254k\250\334\314\326\226,"
+  81      F095452E 
+  81      9492AC6B 
+  81      A8DCCCD6 
+  81      962C
+  82 00f5 71CE6959 		.ascii	"q\316iYj\261P\371\342\\\252\202\266\274\211\277\026"
+  82      6AB150F9 
+  82      E25CAA82 
+  82      B6BC89BF 
+  82      16
+  83 0106 7F7FD37E 		.ascii	"\177\177\323~;\267\2221\026C\037?7\353\317JX\316\344"
+  83      3BB79231 
+  83      16431F3F 
+  83      37EBCF4A 
+  83      58CEE4
+  84 0119 79DD00B6 		.ascii	"y\335\000\266\021\305\026\242<\335\016J\240\032\262"
+  84      11C516A2 
+  84      3CDD0E4A 
+  84      A01AB2
+  85 0128 7F1DDF4E 		.ascii	"\177\035\337N\263#\367\271\377\266\337[\014\261\376"
+  85      B323F7B9 
+  85      FFB6DF5B 
+  85      0CB1FE
+  86 0137 ECE4C35D 		.ascii	"\354\344\303]H,5\336a\227\225m\022\376\002\355\022\207"
+  86      482C35DE 
+  86      6197956D 
+  86      12FE02ED 
+  86      1287
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 6
+
+
+  87 0149 2196D44F 		.ascii	"!\226\324O\267\266\265/\211`\317\223\344\256\037)A\317"
+  87      B7B6B52F 
+  87      8960CF93 
+  87      E4AE1F29 
+  87      41CF
+  88 015b D8697709 		.ascii	"\330iw\0111\312}e\021\322?5\362>\217\314|\372\205l\371"
+  88      31CA7D65 
+  88      11D23F35 
+  88      F23E8FCC 
+  88      7CFA856C 
+  89 0170 B64FD8DE 		.ascii	"\266O\330\336\257k(\310\363\360c\305\372\335\0117\235"
+  89      AF6B28C8 
+  89      F3F063C5 
+  89      FADD0937 
+  89      9D
+  90 0181 987447DF 		.ascii	"\230tG\337\014\245\246\322Iwx`(\325\373r\370\325\353"
+  90      0CA5A6D2 
+  90      49777860 
+  90      28D5FB72 
+  90      F8D5EB
+  91 0194 A9E9DEC4 		.ascii	"\251\351\336\304\333Drl2\225\216'\311\032O\215\272\017"
+  91      DB44726C 
+  91      32958E27 
+  91      C91A4F8D 
+  91      BA0F
+  92 01a6 BD6FA999 		.ascii	"\275o\251\231"
+  93              		.text
+  94              		.section	.gnu.lto_AMuxCapacitor_Read.d74b8bf0,"",%progbits
+  95 0000 789C354F 		.ascii	"x\2345O\277KBQ\024>\337\275\317\367D\350/\310\241-\\"
+  95      BF4B4251 
+  95      143EDFBD 
+  95      CFF744E8 
+  95      2FC8A12D 
+  96 0015 228820DA 		.ascii	"\"\210 \332B\250)\210\034Z\204\020sh\311\020\2056\257"
+  96      42A82988 
+  96      1C5A8410 
+  96      7368C910 
+  96      8536AF
+  97 0028 3F5E8134 		.ascii	"?^\2014\324PM\025\004\241Y!-\321hBQ\0045\025M\021!o"
+  97      D4504D15 
+  97      04A15921 
+  97      2DD16842 
+  97      51043515 
+  98 0040 682A3304 		.ascii	"h*3\004)\355\334^\035\270\347\334\373\335\357;\3379"
+  98      29EDDC5E 
+  98      1DB8E7DC 
+  98      FBDDEF3B 
+  98      DF39
+  99 0052 068174CC 		.ascii	"\006\201t\314p\011p\355\345\003I\020k\267D\031\257\000"
+  99      700970ED 
+  99      E5034910 
+  99      6BB74419 
+  99      AF00
+ 100 0064 F4457941 		.ascii	"\364EyAi\2014>\305\267\300M\353j\325\027(*\225U\317"
+ 100      6981343E 
+ 100      C5B7C04D 
+ 100      EB6AD517 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 7
+
+
+ 100      282A9555 
+ 101 0079 FBED91AD 		.ascii	"\373\355\221\255R\025\266$\352\012\302\220\037\203~"
+ 101      5215B624 
+ 101      EA0AC290 
+ 101      1F837E
+ 102 0088 DDA28800 		.ascii	"\335\242\210\0001\365\345\244\263\321c\346\025G\237"
+ 102      31F5E5A4 
+ 102      B3D163E6 
+ 102      15479F
+ 103 0097 26F04F09 		.ascii	"&\360O\011\246\266\254LWU\267\233S\325{\353\374\321"
+ 103      A6B6AC4C 
+ 103      5755B79B 
+ 103      53D57BEB 
+ 103      FCD1
+ 104 00a9 B240B664 		.ascii	"\262@\266d_N\006'\341\321\311$\335\226\336X\246\207"
+ 104      5F4E0627 
+ 104      E1D1C924 
+ 104      DD96DE58 
+ 104      A687
+ 105 00bb 78174257 		.ascii	"x\027BW\351\240\326.<\355\214\352N9)\331e\323\256\335"
+ 105      E9A0D62E 
+ 105      3CED8CEA 
+ 105      4E3929D9 
+ 105      65D3AEDD 
+ 106 00cf 594D614B 		.ascii	"YMaK\011mz\361\220\3770\334\347\372^F\031\014\225\317"
+ 106      096D7AF1 
+ 106      90FF30DC 
+ 106      E7FA5E46 
+ 106      190C95CF 
+ 107 00e3 2A1DEC62 		.ascii	"*\035\354b;\223\347Q\015\224\341\307\001xP\0342J\016"
+ 107      3B93E751 
+ 107      0D94E1C7 
+ 107      0178501C 
+ 107      324A0E
+ 108 00f6 725FE394 		.ascii	"r_\343\224\223p\333\235:\327\227>\255\007\024p\304<"
+ 108      9370DB9D 
+ 108      3AD7973E 
+ 108      AD071470 
+ 108      C43C
+ 109 0108 07D9C64A 		.ascii	"\007\331\306JS\272\216\006\023\265\244\261\\7]\304\303"
+ 109      53BA8E06 
+ 109      13B5A4B1 
+ 109      5C375DC4 
+ 109      C3
+ 110 0119 20EB9A05 		.ascii	" \353\232\005\273%\265N\300\302\361\277\254\016\227"
+ 110      BB25B54E 
+ 110      C0C2F1BF 
+ 110      AC0E97
+ 111 0128 A479F40A 		.ascii	"\244y\364\012\361\367\242\337\315\2407\342\375\372'"
+ 111      F1F7A2DF 
+ 111      CDA037E2 
+ 111      FDFA27
+ 112 0137 620BB144 		.ascii	"b\013\261D$\031\233\233\015\305S\211h,<\025\212\007"
+ 112      24199B9B 
+ 112      0DC55389 
+ 112      682C3C15 
+ 112      8A07
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 8
+
+
+ 113 0149 87C36393 		.ascii	"\207\303c\223\251\245`d1\022\235O\306\023\003Q\372\001"
+ 113      A9A56064 
+ 113      31129D4F 
+ 113      C6130351 
+ 113      FA01
+ 114 015b 77C17F17 		.ascii	"w\301\177\027"
+ 115              		.text
+ 116              		.section	.gnu.lto_AMuxCapacitor_ReadDataReg.d74b8bf0,"",%progbits
+ 117 0000 789C354F 		.ascii	"x\2345O\275KBQ\024?\277{\237OyP\377@\016m\341\022A4"
+ 117      BD4B4251 
+ 117      143FBF7B 
+ 117      9F4F7950 
+ 117      FF400E6D 
+ 118 0018 D416424D 		.ascii	"\324\026BMA\344\320\"\204\330\033Z2D\241\315\253\317"
+ 118      41E4D022 
+ 118      84D81B5A 
+ 118      3244A1CD 
+ 118      ABCF
+ 119 002a 57200D2E 		.ascii	"W \015.\325\024A\020j\037TK[`\016QD\037\177B\204\274"
+ 119      D5144110 
+ 119      6A1F544B 
+ 119      5B600E51 
+ 119      441F7F42 
+ 120 0040 A1A9C410 		.ascii	"\241\251\304\020\302\264s{u\340\236s\357\271\277\217"
+ 120      C2B4737B 
+ 120      75E09E73 
+ 120      EFB9BF8F 
+ 121 0050 730C02E9 		.ascii	"s\014\002\351X\344\022\341:\304\007\222 \312\217D\371"
+ 121      58E412E1 
+ 121      3AC40792 
+ 121      20CA8F44 
+ 121      F9
+ 122 0061 9000F445 		.ascii	"\220\000\364E\205@9\201\034>\305\267\300}\347v\313\212"
+ 122      85403981 
+ 122      1C3EC5B7 
+ 122      C07DE776 
+ 122      CB8A
+ 123 0073 54942AA8 		.ascii	"T\224*\250\227\303\312\344n\265\016W\022\365\005a<\214"
+ 123      97C3CAE4 
+ 123      6EB50E57 
+ 123      12F50561 
+ 123      3C8C
+ 124 0085 B1B096A8 		.ascii	"\261\260\226\250 B\014}\275\350m\017\230E\3051\254\001"
+ 124      20420C7D 
+ 124      BDE86D0F 
+ 124      9845C531 
+ 124      AC01
+ 125 0097 FC5385A9 		.ascii	"\374S\205\251-\317\026\352\252\337wT\375\312\272~\266"
+ 125      2DCF16EA 
+ 125      AADF7754 
+ 125      FDCABA7E 
+ 125      B6
+ 126 00a8 822057B2 		.ascii	"\202 W\262/'\203\223\010\350d\222\226\245w\246\351!"
+ 126      2F278393 
+ 126      08E86492 
+ 126      96A577A6 
+ 126      E921
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 9
+
+
+ 127 00ba 3E84D055 		.ascii	">\204\320Uzh|\225z\265)\255\344H\311.;n\343)\330\026"
+ 127      7A687C95 
+ 127      7AB529AD 
+ 127      E448C92E 
+ 127      3B6EE329 
+ 128 00d0 AE94D0A6 		.ascii	"\256\224\320\246\325b\267+\374g\371 \257\014n=\364\317"
+ 128      D562B72B 
+ 128      FC67F920 
+ 128      AF0C6E3D 
+ 128      F4CF
+ 129 00e2 BB83FBD8 		.ascii	"\273\203\373\330\313\027yT\003G\010\243\006\036\024"
+ 129      CB177954 
+ 129      034708A3 
+ 129      061E14
+ 130 00f1 C7D80779 		.ascii	"\307\330\007yp\2723\344H\370r\227\336\335\215\245\371"
+ 130      70BA33E4 
+ 130      48F87297 
+ 130      DEDD8DA5 
+ 130      F9
+ 131 0102 80024E18 		.ascii	"\200\002N\030\347\241\320\332lK\337\321`\240\246\264"
+ 131      E7A1D0DA 
+ 131      6C4BDFD1 
+ 131      60A0A6B4 
+ 132 0112 369AA6DF 		.ascii	"6\232\246\337\011p\223y\355\222\333\221\232'\020\304"
+ 132      09709379 
+ 132      ED92DB91 
+ 132      9A2710C4 
+ 133 0122 E93FAD09 		.ascii	"\351?\255\011\037\244q\364\006\361\367\242\337\315\240"
+ 133      1FA471F4 
+ 133      06F1F7A2 
+ 133      DFCDA0
+ 134 0131 37E2FD46 		.ascii	"7\342\375Ff\355U;\235\310\330\313K\261T6\235\264\343"
+ 134      66ED553B 
+ 134      9DC8D8CB 
+ 134      4BB15436 
+ 134      9DB4E3
+ 135 0144 F3B15474 		.ascii	"\363\261Tt\">=\227]\217&\326\022\311\225L*=\232\244"
+ 135      223E3D97 
+ 135      5D8F26D6 
+ 135      12C9954C 
+ 135      2A3D9AA4 
+ 136 0158 1F75557F 		.ascii	"\037uU\177["
+ 136      5B
+ 137              		.text
+ 138              		.section	.gnu.lto_.symbol_nodes.d74b8bf0,"",%progbits
+ 139 0000 789C6361 		.ascii	"x\234ca`dpc\000\002&\206z\006\206\011\347\030@\324\256"
+ 139      60647063 
+ 139      00022686 
+ 139      7A068609 
+ 139      E71840D4 
+ 140 0015 0645A000 		.ascii	"\006E\240\000c=#\252\000S=\023\252\000s=3\212\000\003"
+ 140      633D23AA 
+ 140      00533D13 
+ 140      AA00733D 
+ 140      338A0003 
+ 141 0029 0026B60F 		.ascii	"\000&\266\017<"
+ 141      3C
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 10
+
+
+ 142              		.text
+ 143              		.section	.gnu.lto_.refs.d74b8bf0,"",%progbits
+ 144 0000 789C6361 		.ascii	"x\234ca`\004B \000\000\0009\000\007"
+ 144      60044220 
+ 144      00000039 
+ 144      0007
+ 145              		.text
+ 146              		.section	.gnu.lto_.decls.d74b8bf0,"",%progbits
+ 147 0000 789C8D53 		.ascii	"x\234\215S]H\024Q\024\276gf\034m\374\013\213\260Xh\363"
+ 147      5D481451 
+ 147      14BE6766 
+ 147      1C6DFC0B 
+ 147      8BB05868 
+ 148 0015 259F9624 		.ascii	"%\237\226$\002\037\"\013%\237\314P\264\027AV\035\312"
+ 148      021F220B 
+ 148      259FCC50 
+ 148      B4174156 
+ 148      1DCA
+ 149 0027 1757B635 		.ascii	"\027W\2665\362\355\246\006\271=\244\222\232?\241\365"
+ 149      F2EDA606 
+ 149      B93DA492 
+ 149      9A3FA1F5 
+ 150 0037 609ABA5A 		.ascii	"`\232\272Z\376\356\252i\202&\241\241\010BXd\231\204"
+ 150      FEEEAA69 
+ 150      8226A1A1 
+ 150      08425864 
+ 150      9984
+ 151 0049 A460E48B 		.ascii	"\244`\344\213\017\266\235{g\246Yu\003\017sf\316\271"
+ 151      0FB69D7B 
+ 151      67A65975 
+ 151      030F7366 
+ 151      CEB9
+ 152 005b F77CDFF9 		.ascii	"\367|\337\371\356\231\031\211\000a\226$\0212\202O\013"
+ 152      EE991989 
+ 152      00619624 
+ 152      1132824F 
+ 152      0B
+ 153 006c A67EB410 		.ascii	"\246~\264\020\214\263\211i\270M\372\320\007\320\207"
+ 153      8CB38969 
+ 153      B84DFAD0 
+ 153      07D087
+ 154 007b D17DE4A0 		.ascii	"\321}\344\240\261}Y\307y\030\027\3728\372\030z\272^"
+ 154      B17D59C7 
+ 154      791817FA 
+ 154      38FA187A 
+ 154      BA5E
+ 155 008d 037ADD7E 		.ascii	"\003z\335~\033\010\202\235\014\300\033\330\201 X\246"
+ 155      1B08829D 
+ 155      0CC01BD8 
+ 155      812058A6 
+ 156 009d 27240097 		.ascii	"'$\000\227\036\0047\034\004\347;\004.\3309w\005\360"
+ 156      1E04371C 
+ 156      04E73B04 
+ 156      2ED83977 
+ 156      05F0
+ 157 00af B7F43F0A 		.ascii	"\267\364?\012[\206\217 \022}\200\004@\273\003w\2429"
+ 157      5B868F20 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 11
+
+
+ 157      127D8004 
+ 157      40BB0377 
+ 157      A239
+ 158 00c1 4F311088 		.ascii	"O1\020\210\026\030K\377\214\350%\202\021\232d\374\322"
+ 158      16184BFF 
+ 158      8CE82582 
+ 158      119A64FC 
+ 158      D2
+ 159 00d2 F1E0378C 		.ascii	"\361\3407\214\223\230\354\240\203\264\334\320\255\203"
+ 159      9398ECA0 
+ 159      83B4DCD0 
+ 159      AD83
+ 160 00e0 40301B80 		.ascii	"@0\033\200\226\032\210\000\276}\212\014\315F\033\"\030"
+ 160      961A8800 
+ 160      BE7D8A0C 
+ 160      CD461B22 
+ 160      18
+ 161 00f1 87AEEFFA 		.ascii	"\207\256\357\372a\025\005`\341\227\235\366\253\266."
+ 161      61150560 
+ 161      E1979DF6 
+ 161      ABB62E
+ 162 0100 8A5645A9 		.ascii	"\212VE\251`3\007\323s\377{G\330\266\000\026\005\374"
+ 162      603307D3 
+ 162      73FF7B47 
+ 162      D8B60016 
+ 162      05FC
+ 163 0112 C0F20DEF 		.ascii	"\300\362\015\357N\244\226\263\355\206\352\325?\341\342"
+ 163      4EA496B3 
+ 163      ED86EAD5 
+ 163      3FE1E2
+ 164 0121 69160B8B 		.ascii	"i\026\013\213\253\235\353\022\304+m\214f\245i\355\222"
+ 164      AB9DEB12 
+ 164      C42B6D8C 
+ 164      66A569ED 
+ 164      92
+ 165 0132 97D2A3E0 		.ascii	"\227\322\243\340\001\005\272@\204\016`\254\210\303\373"
+ 165      0105BA40 
+ 165      840E60AC 
+ 165      88C3FB
+ 166 0141 034ACBE8 		.ascii	"\003J\313\350\326s*\307\0228o\201s\026\002\335\020\317"
+ 166      D6732AC7 
+ 166      12386F81 
+ 166      731602DD 
+ 166      10CF
+ 167 0153 38591574 		.ascii	"8Y\025t\202\005^\202\205\361\257\325\267\374\224%T\314"
+ 167      82055E82 
+ 167      85F1AFD5 
+ 167      B7FC9425 
+ 167      54CC
+ 168 0165 79F224B6 		.ascii	"y\362$\266\266P\321\333,\242\204\030\005$L\177\3155"
+ 168      B650D1DB 
+ 168      2CA28418 
+ 168      05244C7F 
+ 168      CD35
+ 169 0177 AE46617A 		.ascii	"\256Faz\\\001+\246]\276O\033rl\035?J9\265J\220}\002"
+ 169      5C012BA6 
+ 169      5DBE4F1B 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 12
+
+
+ 169      726C1D3F 
+ 169      4A39B54A 
+ 170 018e 5E21612F 		.ascii	"^!a/\022\022x\015\261x\357\001I;\235\247\257yV\216k"
+ 170      1212780D 
+ 170      B178EF01 
+ 170      493B9DA7 
+ 170      AF79568E 
+ 171 01a3 A5ADBD74 		.ascii	"\245\255\275t\245e\372b]9\235A\234\225\225A\273)\272"
+ 171      A565FA62 
+ 171      5D399D41 
+ 171      9C959541 
+ 171      BB29BA
+ 172 01b6 9D7D1604 		.ascii	"\235}\026\004^\3002\216\260\017\342\0209Q\371\355s\244"
+ 172      5EC0328E 
+ 172      B00FE210 
+ 172      3951F9ED 
+ 172      73A4
+ 173 01c8 E8E04358 		.ascii	"\350\340CX\253\363~=\242\261LlOG\320\252{\224^\346\034"
+ 173      ABF37E3D 
+ 173      A2B14C6C 
+ 173      4F47D0AA 
+ 173      7B945EE6 
+ 174 01dd FD26477F 		.ascii	"\375&G\177 \307\000\347\250~\2749%\213n\340$\363\017"
+ 174      20C700E7 
+ 174      A87EBC39 
+ 174      258B6EE0 
+ 174      24F30F
+ 175 01f0 A7CAA303 		.ascii	"\247\312\243\003u\263\003\233\302\207\270\360<]\367"
+ 175      75B3039B 
+ 175      C287B8F0 
+ 175      3C5DF7
+ 176 01ff FAEC0777 		.ascii	"\372\354\007w\270\336q\361\235\330@'*\020'\260*\030"
+ 176      B8DE71F1 
+ 176      9DD84027 
+ 176      2A1027B0 
+ 176      2A18
+ 177 0211 347B0E06 		.ascii	"4{\016\006\366\034\346=\33555m\262\370T\3539\273Z\355"
+ 177      F61CE63D 
+ 177      DD35356D 
+ 177      B2F854EB 
+ 177      39BB5AED 
+ 178 0225 89D6697C 		.ascii	"\211\326i|\357\015\341\214\304k\222x\003I|\234d\273"
+ 178      EF0DE18C 
+ 178      C46B9278 
+ 178      03497C9C 
+ 178      64BB
+ 179 0237 E2F792AC 		.ascii	"\342\367\222\254\340[,?\334[\234[\177\346\017\025\207"
+ 179      E05B2C3F 
+ 179      DC5B9C5B 
+ 179      7FE60F15 
+ 179      87
+ 180 0248 7853A1AF 		.ascii	"xS\241\257\266\2416\024\224\370 \3607A\340\372\327\324"
+ 180      B6A13614 
+ 180      94F820F0 
+ 180      3741E0FA 
+ 180      D7D4
+ 181 025a 9D555DC9 		.ascii	"\235U]\311N8\206S\0315\305\215\200\242M\244\177~\263"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 13
+
+
+ 181      4E388653 
+ 181      1935C58D 
+ 181      80A24DA4 
+ 181      7F7EB3
+ 182 026d 2724C2CD 		.ascii	"'$\302\315>,\034_\314L\024\2574\3477\016\021\374\027"
+ 182      3E2C1C5F 
+ 182      CC4C14AF 
+ 182      34E7370E 
+ 182      11FC17
+ 183 0280 C0E7AE20 		.ascii	"\300\347\256 \216.55\213\270\307.\245\221\242\024\272"
+ 183      8E2E3535 
+ 183      8BB8C72E 
+ 183      A591A214 
+ 183      BA
+ 184 0291 00308964 		.ascii	"\0000\211d<\331J\3421[\246[eT~\022eH$|\203\300\004\""
+ 184      3CD94AE2 
+ 184      315BA65B 
+ 184      65547E12 
+ 184      6548247C 
+ 185 02a9 DF22314F 		.ascii	"\337\"1O\217]I+\271\233l/\266\347\027\272\034\316\334"
+ 185      8F5D492B 
+ 185      B99B6C2F 
+ 185      B6E717BA 
+ 185      1CCEDC
+ 186 02bc 1BCE4297 		.ascii	"\033\316B\227\032\226z-\313\232\234\220@BJ\012\213\\"
+ 186      1A967A2D 
+ 186      CB9A9C90 
+ 186      40424A0A 
+ 186      8B5C
+ 187 02ce 896752D5 		.ascii	"\211gR\325\"\325iw\251\005\271\231\216\022g\276\232"
+ 187      22D56977 
+ 187      A905B999 
+ 187      8E1267BE 
+ 187      9A
+ 188 02df 733DD391 		.ascii	"s=\323\221|!'\277\324UZ\254\336\266\335\"g\377S\261"
+ 188      7C2127BF 
+ 188      D4555AAC 
+ 188      DEB6DD22 
+ 188      67FF53B1 
+ 189 02f3 87DB964F 		.ascii	"\207\333\226ON\355m\226\251\272R\234\205w\3244G\201"
+ 189      4EED6D96 
+ 189      A9BA529C 
+ 189      8577D434 
+ 189      4781
+ 190 0305 1AB3772B 		.ascii	"\032\263w+C\265\027\234<\270\224bw\3313\324\233\222"
+ 190      43B5179C 
+ 190      3CB89462 
+ 190      77D933D4 
+ 190      9B92
+ 191 0317 53BD99F8 		.ascii	"S\275\231\370\027\013\236p|"
+ 191      170B9E70 
+ 191      7C
+ 192              		.text
+ 193              		.section	.gnu.lto_.symtab.d74b8bf0,"",%progbits
+ 194 0000 414D7578 		.ascii	"AMuxCapacitor_Write\000"
+ 194      43617061 
+ 194      6369746F 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 14
+
+
+ 194      725F5772 
+ 194      69746500 
+ 195 0014 00       		.ascii	"\000"
+ 196 0015 00       		.ascii	"\000"
+ 197 0016 00       		.ascii	"\000"
+ 198 0017 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 198      00000000 
+ 199 001f B3000000 		.ascii	"\263\000\000\000"
+ 200 0023 414D7578 		.ascii	"AMuxCapacitor_SetDriveMode\000"
+ 200      43617061 
+ 200      6369746F 
+ 200      725F5365 
+ 200      74447269 
+ 201 003e 00       		.ascii	"\000"
+ 202 003f 00       		.ascii	"\000"
+ 203 0040 00       		.ascii	"\000"
+ 204 0041 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 204      00000000 
+ 205 0049 B5000000 		.ascii	"\265\000\000\000"
+ 206 004d 414D7578 		.ascii	"AMuxCapacitor_Read\000"
+ 206      43617061 
+ 206      6369746F 
+ 206      725F5265 
+ 206      616400
+ 207 0060 00       		.ascii	"\000"
+ 208 0061 00       		.ascii	"\000"
+ 209 0062 00       		.ascii	"\000"
+ 210 0063 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 210      00000000 
+ 211 006b B8000000 		.ascii	"\270\000\000\000"
+ 212 006f 414D7578 		.ascii	"AMuxCapacitor_ReadDataReg\000"
+ 212      43617061 
+ 212      6369746F 
+ 212      725F5265 
+ 212      61644461 
+ 213 0089 00       		.ascii	"\000"
+ 214 008a 00       		.ascii	"\000"
+ 215 008b 00       		.ascii	"\000"
+ 216 008c 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 216      00000000 
+ 217 0094 BA000000 		.ascii	"\272\000\000\000"
+ 218              		.text
+ 219              		.section	.gnu.lto_.opts,"",%progbits
+ 220 0000 272D666D 		.ascii	"'-fmath-errno' '-fsigned-zeros' '-ftrapping-math' '"
+ 220      6174682D 
+ 220      6572726E 
+ 220      6F272027 
+ 220      2D667369 
+ 221 0033 2D666E6F 		.ascii	"-fno-trapv' '-fno-openmp' '-fno-openacc' '-mcpu=cor"
+ 221      2D747261 
+ 221      70762720 
+ 221      272D666E 
+ 221      6F2D6F70 
+ 222 0066 7465782D 		.ascii	"tex-m3' '-mthumb' '-g' '-O3' '-ffunction-sections' "
+ 222      6D332720 
+ 222      272D6D74 
+ 222      68756D62 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 15
+
+
+ 222      2720272D 
+ 223 0099 272D6666 		.ascii	"'-ffat-lto-objects' '-finline-functions' '-flto'\000"
+ 223      61742D6C 
+ 223      746F2D6F 
+ 223      626A6563 
+ 223      74732720 
+ 224              		.text
+ 225              		.cfi_sections	.debug_frame
+ 226              		.section	.text.AMuxCapacitor_Write,"ax",%progbits
+ 227              		.align	2
+ 228              		.global	AMuxCapacitor_Write
+ 229              		.thumb
+ 230              		.thumb_func
+ 231              		.type	AMuxCapacitor_Write, %function
+ 232              	AMuxCapacitor_Write:
+ 233              	.LFB0:
+ 234              		.file 1 "Generated_Source\\PSoC5\\AMuxCapacitor.c"
+   1:Generated_Source\PSoC5/AMuxCapacitor.c **** /*******************************************************************************
+   2:Generated_Source\PSoC5/AMuxCapacitor.c **** * File Name: AMuxCapacitor.c  
+   3:Generated_Source\PSoC5/AMuxCapacitor.c **** * Version 2.20
+   4:Generated_Source\PSoC5/AMuxCapacitor.c **** *
+   5:Generated_Source\PSoC5/AMuxCapacitor.c **** * Description:
+   6:Generated_Source\PSoC5/AMuxCapacitor.c **** *  This file contains API to enable firmware control of a Pins component.
+   7:Generated_Source\PSoC5/AMuxCapacitor.c **** *
+   8:Generated_Source\PSoC5/AMuxCapacitor.c **** * Note:
+   9:Generated_Source\PSoC5/AMuxCapacitor.c **** *
+  10:Generated_Source\PSoC5/AMuxCapacitor.c **** ********************************************************************************
+  11:Generated_Source\PSoC5/AMuxCapacitor.c **** * Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+  12:Generated_Source\PSoC5/AMuxCapacitor.c **** * You may use this file only in accordance with the license, terms, conditions, 
+  13:Generated_Source\PSoC5/AMuxCapacitor.c **** * disclaimers, and limitations in the end user license agreement accompanying 
+  14:Generated_Source\PSoC5/AMuxCapacitor.c **** * the software package with which this file was provided.
+  15:Generated_Source\PSoC5/AMuxCapacitor.c **** *******************************************************************************/
+  16:Generated_Source\PSoC5/AMuxCapacitor.c **** 
+  17:Generated_Source\PSoC5/AMuxCapacitor.c **** #include "cytypes.h"
+  18:Generated_Source\PSoC5/AMuxCapacitor.c **** #include "AMuxCapacitor.h"
+  19:Generated_Source\PSoC5/AMuxCapacitor.c **** 
+  20:Generated_Source\PSoC5/AMuxCapacitor.c **** /* APIs are not generated for P15[7:6] on PSoC 5 */
+  21:Generated_Source\PSoC5/AMuxCapacitor.c **** #if !(CY_PSOC5A &&\
+  22:Generated_Source\PSoC5/AMuxCapacitor.c **** 	 AMuxCapacitor__PORT == 15 && ((AMuxCapacitor__MASK & 0xC0) != 0))
+  23:Generated_Source\PSoC5/AMuxCapacitor.c **** 
+  24:Generated_Source\PSoC5/AMuxCapacitor.c **** 
+  25:Generated_Source\PSoC5/AMuxCapacitor.c **** /*******************************************************************************
+  26:Generated_Source\PSoC5/AMuxCapacitor.c **** * Function Name: AMuxCapacitor_Write
+  27:Generated_Source\PSoC5/AMuxCapacitor.c **** ****************************************************************************//**
+  28:Generated_Source\PSoC5/AMuxCapacitor.c **** *
+  29:Generated_Source\PSoC5/AMuxCapacitor.c **** * \brief Writes the value to the physical port (data output register), masking
+  30:Generated_Source\PSoC5/AMuxCapacitor.c **** *  and shifting the bits appropriately. 
+  31:Generated_Source\PSoC5/AMuxCapacitor.c **** *
+  32:Generated_Source\PSoC5/AMuxCapacitor.c **** * The data output register controls the signal applied to the physical pin in 
+  33:Generated_Source\PSoC5/AMuxCapacitor.c **** * conjunction with the drive mode parameter. This function avoids changing 
+  34:Generated_Source\PSoC5/AMuxCapacitor.c **** * other bits in the port by using the appropriate method (read-modify-write or
+  35:Generated_Source\PSoC5/AMuxCapacitor.c **** * bit banding).
+  36:Generated_Source\PSoC5/AMuxCapacitor.c **** *
+  37:Generated_Source\PSoC5/AMuxCapacitor.c **** * <b>Note</b> This function should not be used on a hardware digital output pin 
+  38:Generated_Source\PSoC5/AMuxCapacitor.c **** * as it is driven by the hardware signal attached to it.
+  39:Generated_Source\PSoC5/AMuxCapacitor.c **** *
+  40:Generated_Source\PSoC5/AMuxCapacitor.c **** * \param value
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 16
+
+
+  41:Generated_Source\PSoC5/AMuxCapacitor.c **** *  Value to write to the component instance.
+  42:Generated_Source\PSoC5/AMuxCapacitor.c **** *
+  43:Generated_Source\PSoC5/AMuxCapacitor.c **** * \return 
+  44:Generated_Source\PSoC5/AMuxCapacitor.c **** *  None 
+  45:Generated_Source\PSoC5/AMuxCapacitor.c **** *
+  46:Generated_Source\PSoC5/AMuxCapacitor.c **** * \sideeffect
+  47:Generated_Source\PSoC5/AMuxCapacitor.c **** *  If you use read-modify-write operations that are not atomic; the Interrupt 
+  48:Generated_Source\PSoC5/AMuxCapacitor.c **** *  Service Routines (ISR) can cause corruption of this function. An ISR that 
+  49:Generated_Source\PSoC5/AMuxCapacitor.c **** *  interrupts this function and performs writes to the Pins component data 
+  50:Generated_Source\PSoC5/AMuxCapacitor.c **** *  register can cause corrupted port data. To avoid this issue, you should 
+  51:Generated_Source\PSoC5/AMuxCapacitor.c **** *  either use the Per-Pin APIs (primary method) or disable interrupts around 
+  52:Generated_Source\PSoC5/AMuxCapacitor.c **** *  this function.
+  53:Generated_Source\PSoC5/AMuxCapacitor.c **** *
+  54:Generated_Source\PSoC5/AMuxCapacitor.c **** * \funcusage
+  55:Generated_Source\PSoC5/AMuxCapacitor.c **** *  \snippet AMuxCapacitor_SUT.c usage_AMuxCapacitor_Write
+  56:Generated_Source\PSoC5/AMuxCapacitor.c **** *******************************************************************************/
+  57:Generated_Source\PSoC5/AMuxCapacitor.c **** void AMuxCapacitor_Write(uint8 value)
+  58:Generated_Source\PSoC5/AMuxCapacitor.c **** {
+ 235              		.loc 1 58 0
+ 236              		.cfi_startproc
+ 237              		@ args = 0, pretend = 0, frame = 0
+ 238              		@ frame_needed = 0, uses_anonymous_args = 0
+ 239              		@ link register save eliminated.
+ 240              	.LVL0:
+  59:Generated_Source\PSoC5/AMuxCapacitor.c ****     uint8 staticBits = (AMuxCapacitor_DR & (uint8)(~AMuxCapacitor_MASK));
+ 241              		.loc 1 59 0
+ 242 0000 044A     		ldr	r2, .L2
+ 243 0002 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 244              	.LVL1:
+  60:Generated_Source\PSoC5/AMuxCapacitor.c ****     AMuxCapacitor_DR = staticBits | ((uint8)(value << AMuxCapacitor_SHIFT) & AMuxCapacitor_MASK);
+ 245              		.loc 1 60 0
+ 246 0004 03F07F03 		and	r3, r3, #127
+ 247              	.LVL2:
+ 248 0008 43EAC010 		orr	r0, r3, r0, lsl #7
+ 249              	.LVL3:
+ 250 000c C0B2     		uxtb	r0, r0
+ 251 000e 1070     		strb	r0, [r2]
+ 252 0010 7047     		bx	lr
+ 253              	.L3:
+ 254 0012 00BF     		.align	2
+ 255              	.L2:
+ 256 0014 10510040 		.word	1073762576
+ 257              		.cfi_endproc
+ 258              	.LFE0:
+ 259              		.size	AMuxCapacitor_Write, .-AMuxCapacitor_Write
+ 260              		.section	.text.AMuxCapacitor_SetDriveMode,"ax",%progbits
+ 261              		.align	2
+ 262              		.global	AMuxCapacitor_SetDriveMode
+ 263              		.thumb
+ 264              		.thumb_func
+ 265              		.type	AMuxCapacitor_SetDriveMode, %function
+ 266              	AMuxCapacitor_SetDriveMode:
+ 267              	.LFB1:
+  61:Generated_Source\PSoC5/AMuxCapacitor.c **** }
+  62:Generated_Source\PSoC5/AMuxCapacitor.c **** 
+  63:Generated_Source\PSoC5/AMuxCapacitor.c **** 
+  64:Generated_Source\PSoC5/AMuxCapacitor.c **** /*******************************************************************************
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 17
+
+
+  65:Generated_Source\PSoC5/AMuxCapacitor.c **** * Function Name: AMuxCapacitor_SetDriveMode
+  66:Generated_Source\PSoC5/AMuxCapacitor.c **** ****************************************************************************//**
+  67:Generated_Source\PSoC5/AMuxCapacitor.c **** *
+  68:Generated_Source\PSoC5/AMuxCapacitor.c **** * \brief Sets the drive mode for each of the Pins component's pins.
+  69:Generated_Source\PSoC5/AMuxCapacitor.c **** * 
+  70:Generated_Source\PSoC5/AMuxCapacitor.c **** * <b>Note</b> This affects all pins in the Pins component instance. Use the
+  71:Generated_Source\PSoC5/AMuxCapacitor.c **** * Per-Pin APIs if you wish to control individual pin's drive modes.
+  72:Generated_Source\PSoC5/AMuxCapacitor.c **** *
+  73:Generated_Source\PSoC5/AMuxCapacitor.c **** * \param mode
+  74:Generated_Source\PSoC5/AMuxCapacitor.c **** *  Mode for the selected signals. Valid options are documented in 
+  75:Generated_Source\PSoC5/AMuxCapacitor.c **** *  \ref driveMode.
+  76:Generated_Source\PSoC5/AMuxCapacitor.c **** *
+  77:Generated_Source\PSoC5/AMuxCapacitor.c **** * \return
+  78:Generated_Source\PSoC5/AMuxCapacitor.c **** *  None
+  79:Generated_Source\PSoC5/AMuxCapacitor.c **** *
+  80:Generated_Source\PSoC5/AMuxCapacitor.c **** * \sideeffect
+  81:Generated_Source\PSoC5/AMuxCapacitor.c **** *  If you use read-modify-write operations that are not atomic, the ISR can
+  82:Generated_Source\PSoC5/AMuxCapacitor.c **** *  cause corruption of this function. An ISR that interrupts this function 
+  83:Generated_Source\PSoC5/AMuxCapacitor.c **** *  and performs writes to the Pins component Drive Mode registers can cause 
+  84:Generated_Source\PSoC5/AMuxCapacitor.c **** *  corrupted port data. To avoid this issue, you should either use the Per-Pin
+  85:Generated_Source\PSoC5/AMuxCapacitor.c **** *  APIs (primary method) or disable interrupts around this function.
+  86:Generated_Source\PSoC5/AMuxCapacitor.c **** *
+  87:Generated_Source\PSoC5/AMuxCapacitor.c **** * \funcusage
+  88:Generated_Source\PSoC5/AMuxCapacitor.c **** *  \snippet AMuxCapacitor_SUT.c usage_AMuxCapacitor_SetDriveMode
+  89:Generated_Source\PSoC5/AMuxCapacitor.c **** *******************************************************************************/
+  90:Generated_Source\PSoC5/AMuxCapacitor.c **** void AMuxCapacitor_SetDriveMode(uint8 mode)
+  91:Generated_Source\PSoC5/AMuxCapacitor.c **** {
+ 268              		.loc 1 91 0
+ 269              		.cfi_startproc
+ 270              		@ args = 0, pretend = 0, frame = 0
+ 271              		@ frame_needed = 0, uses_anonymous_args = 0
+ 272              		@ link register save eliminated.
+ 273              	.LVL4:
+  92:Generated_Source\PSoC5/AMuxCapacitor.c **** 	CyPins_SetPinDriveMode(AMuxCapacitor_0, mode);
+ 274              		.loc 1 92 0
+ 275 0000 044A     		ldr	r2, .L5
+ 276 0002 00F00E00 		and	r0, r0, #14
+ 277              	.LVL5:
+ 278 0006 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 279 0008 03F0F103 		and	r3, r3, #241
+ 280 000c 1843     		orrs	r0, r0, r3
+ 281 000e 1070     		strb	r0, [r2]
+ 282 0010 7047     		bx	lr
+ 283              	.L6:
+ 284 0012 00BF     		.align	2
+ 285              	.L5:
+ 286 0014 0F500040 		.word	1073762319
+ 287              		.cfi_endproc
+ 288              	.LFE1:
+ 289              		.size	AMuxCapacitor_SetDriveMode, .-AMuxCapacitor_SetDriveMode
+ 290              		.section	.text.AMuxCapacitor_Read,"ax",%progbits
+ 291              		.align	2
+ 292              		.global	AMuxCapacitor_Read
+ 293              		.thumb
+ 294              		.thumb_func
+ 295              		.type	AMuxCapacitor_Read, %function
+ 296              	AMuxCapacitor_Read:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 18
+
+
+ 297              	.LFB2:
+  93:Generated_Source\PSoC5/AMuxCapacitor.c **** }
+  94:Generated_Source\PSoC5/AMuxCapacitor.c **** 
+  95:Generated_Source\PSoC5/AMuxCapacitor.c **** 
+  96:Generated_Source\PSoC5/AMuxCapacitor.c **** /*******************************************************************************
+  97:Generated_Source\PSoC5/AMuxCapacitor.c **** * Function Name: AMuxCapacitor_Read
+  98:Generated_Source\PSoC5/AMuxCapacitor.c **** ****************************************************************************//**
+  99:Generated_Source\PSoC5/AMuxCapacitor.c **** *
+ 100:Generated_Source\PSoC5/AMuxCapacitor.c **** * \brief Reads the associated physical port (pin status register) and masks 
+ 101:Generated_Source\PSoC5/AMuxCapacitor.c **** *  the required bits according to the width and bit position of the component
+ 102:Generated_Source\PSoC5/AMuxCapacitor.c **** *  instance. 
+ 103:Generated_Source\PSoC5/AMuxCapacitor.c **** *
+ 104:Generated_Source\PSoC5/AMuxCapacitor.c **** * The pin's status register returns the current logic level present on the 
+ 105:Generated_Source\PSoC5/AMuxCapacitor.c **** * physical pin.
+ 106:Generated_Source\PSoC5/AMuxCapacitor.c **** *
+ 107:Generated_Source\PSoC5/AMuxCapacitor.c **** * \return 
+ 108:Generated_Source\PSoC5/AMuxCapacitor.c **** *  The current value for the pins in the component as a right justified number.
+ 109:Generated_Source\PSoC5/AMuxCapacitor.c **** *
+ 110:Generated_Source\PSoC5/AMuxCapacitor.c **** * \funcusage
+ 111:Generated_Source\PSoC5/AMuxCapacitor.c **** *  \snippet AMuxCapacitor_SUT.c usage_AMuxCapacitor_Read  
+ 112:Generated_Source\PSoC5/AMuxCapacitor.c **** *******************************************************************************/
+ 113:Generated_Source\PSoC5/AMuxCapacitor.c **** uint8 AMuxCapacitor_Read(void)
+ 114:Generated_Source\PSoC5/AMuxCapacitor.c **** {
+ 298              		.loc 1 114 0
+ 299              		.cfi_startproc
+ 300              		@ args = 0, pretend = 0, frame = 0
+ 301              		@ frame_needed = 0, uses_anonymous_args = 0
+ 302              		@ link register save eliminated.
+ 115:Generated_Source\PSoC5/AMuxCapacitor.c ****     return (AMuxCapacitor_PS & AMuxCapacitor_MASK) >> AMuxCapacitor_SHIFT;
+ 303              		.loc 1 115 0
+ 304 0000 014B     		ldr	r3, .L8
+ 305 0002 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 116:Generated_Source\PSoC5/AMuxCapacitor.c **** }
+ 306              		.loc 1 116 0
+ 307 0004 C009     		lsrs	r0, r0, #7
+ 308 0006 7047     		bx	lr
+ 309              	.L9:
+ 310              		.align	2
+ 311              	.L8:
+ 312 0008 11510040 		.word	1073762577
+ 313              		.cfi_endproc
+ 314              	.LFE2:
+ 315              		.size	AMuxCapacitor_Read, .-AMuxCapacitor_Read
+ 316              		.section	.text.AMuxCapacitor_ReadDataReg,"ax",%progbits
+ 317              		.align	2
+ 318              		.global	AMuxCapacitor_ReadDataReg
+ 319              		.thumb
+ 320              		.thumb_func
+ 321              		.type	AMuxCapacitor_ReadDataReg, %function
+ 322              	AMuxCapacitor_ReadDataReg:
+ 323              	.LFB3:
+ 117:Generated_Source\PSoC5/AMuxCapacitor.c **** 
+ 118:Generated_Source\PSoC5/AMuxCapacitor.c **** 
+ 119:Generated_Source\PSoC5/AMuxCapacitor.c **** /*******************************************************************************
+ 120:Generated_Source\PSoC5/AMuxCapacitor.c **** * Function Name: AMuxCapacitor_ReadDataReg
+ 121:Generated_Source\PSoC5/AMuxCapacitor.c **** ****************************************************************************//**
+ 122:Generated_Source\PSoC5/AMuxCapacitor.c **** *
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 19
+
+
+ 123:Generated_Source\PSoC5/AMuxCapacitor.c **** * \brief Reads the associated physical port's data output register and masks 
+ 124:Generated_Source\PSoC5/AMuxCapacitor.c **** *  the correct bits according to the width and bit position of the component 
+ 125:Generated_Source\PSoC5/AMuxCapacitor.c **** *  instance. 
+ 126:Generated_Source\PSoC5/AMuxCapacitor.c **** *
+ 127:Generated_Source\PSoC5/AMuxCapacitor.c **** * The data output register controls the signal applied to the physical pin in 
+ 128:Generated_Source\PSoC5/AMuxCapacitor.c **** * conjunction with the drive mode parameter. This is not the same as the 
+ 129:Generated_Source\PSoC5/AMuxCapacitor.c **** * preferred AMuxCapacitor_Read() API because the 
+ 130:Generated_Source\PSoC5/AMuxCapacitor.c **** * AMuxCapacitor_ReadDataReg() reads the data register instead of the status 
+ 131:Generated_Source\PSoC5/AMuxCapacitor.c **** * register. For output pins this is a useful function to determine the value 
+ 132:Generated_Source\PSoC5/AMuxCapacitor.c **** * just written to the pin.
+ 133:Generated_Source\PSoC5/AMuxCapacitor.c **** *
+ 134:Generated_Source\PSoC5/AMuxCapacitor.c **** * \return 
+ 135:Generated_Source\PSoC5/AMuxCapacitor.c **** *  The current value of the data register masked and shifted into a right 
+ 136:Generated_Source\PSoC5/AMuxCapacitor.c **** *  justified number for the component instance.
+ 137:Generated_Source\PSoC5/AMuxCapacitor.c **** *
+ 138:Generated_Source\PSoC5/AMuxCapacitor.c **** * \funcusage
+ 139:Generated_Source\PSoC5/AMuxCapacitor.c **** *  \snippet AMuxCapacitor_SUT.c usage_AMuxCapacitor_ReadDataReg 
+ 140:Generated_Source\PSoC5/AMuxCapacitor.c **** *******************************************************************************/
+ 141:Generated_Source\PSoC5/AMuxCapacitor.c **** uint8 AMuxCapacitor_ReadDataReg(void)
+ 142:Generated_Source\PSoC5/AMuxCapacitor.c **** {
+ 324              		.loc 1 142 0
+ 325              		.cfi_startproc
+ 326              		@ args = 0, pretend = 0, frame = 0
+ 327              		@ frame_needed = 0, uses_anonymous_args = 0
+ 328              		@ link register save eliminated.
+ 143:Generated_Source\PSoC5/AMuxCapacitor.c ****     return (AMuxCapacitor_DR & AMuxCapacitor_MASK) >> AMuxCapacitor_SHIFT;
+ 329              		.loc 1 143 0
+ 330 0000 014B     		ldr	r3, .L11
+ 331 0002 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 144:Generated_Source\PSoC5/AMuxCapacitor.c **** }
+ 332              		.loc 1 144 0
+ 333 0004 C009     		lsrs	r0, r0, #7
+ 334 0006 7047     		bx	lr
+ 335              	.L12:
+ 336              		.align	2
+ 337              	.L11:
+ 338 0008 10510040 		.word	1073762576
+ 339              		.cfi_endproc
+ 340              	.LFE3:
+ 341              		.size	AMuxCapacitor_ReadDataReg, .-AMuxCapacitor_ReadDataReg
+ 342              		.text
+ 343              	.Letext0:
+ 344              		.file 2 "Generated_Source\\PSoC5\\cytypes.h"
+ 345              		.section	.debug_info,"",%progbits
+ 346              	.Ldebug_info0:
+ 347 0000 1D010000 		.4byte	0x11d
+ 348 0004 0400     		.2byte	0x4
+ 349 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 350 000a 04       		.byte	0x4
+ 351 000b 01       		.uleb128 0x1
+ 352 000c 54000000 		.4byte	.LASF20
+ 353 0010 0C       		.byte	0xc
+ 354 0011 A2010000 		.4byte	.LASF21
+ 355 0015 0D010000 		.4byte	.LASF22
+ 356 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 357 001d 00000000 		.4byte	0
+ 358 0021 00000000 		.4byte	.Ldebug_line0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 20
+
+
+ 359 0025 02       		.uleb128 0x2
+ 360 0026 01       		.byte	0x1
+ 361 0027 06       		.byte	0x6
+ 362 0028 F5010000 		.4byte	.LASF0
+ 363 002c 02       		.uleb128 0x2
+ 364 002d 01       		.byte	0x1
+ 365 002e 08       		.byte	0x8
+ 366 002f 46000000 		.4byte	.LASF1
+ 367 0033 02       		.uleb128 0x2
+ 368 0034 02       		.byte	0x2
+ 369 0035 05       		.byte	0x5
+ 370 0036 DC010000 		.4byte	.LASF2
+ 371 003a 02       		.uleb128 0x2
+ 372 003b 02       		.byte	0x2
+ 373 003c 07       		.byte	0x7
+ 374 003d 47010000 		.4byte	.LASF3
+ 375 0041 02       		.uleb128 0x2
+ 376 0042 04       		.byte	0x4
+ 377 0043 05       		.byte	0x5
+ 378 0044 EC010000 		.4byte	.LASF4
+ 379 0048 02       		.uleb128 0x2
+ 380 0049 04       		.byte	0x4
+ 381 004a 07       		.byte	0x7
+ 382 004b FB000000 		.4byte	.LASF5
+ 383 004f 02       		.uleb128 0x2
+ 384 0050 08       		.byte	0x8
+ 385 0051 05       		.byte	0x5
+ 386 0052 C9010000 		.4byte	.LASF6
+ 387 0056 02       		.uleb128 0x2
+ 388 0057 08       		.byte	0x8
+ 389 0058 07       		.byte	0x7
+ 390 0059 6E010000 		.4byte	.LASF7
+ 391 005d 03       		.uleb128 0x3
+ 392 005e 04       		.byte	0x4
+ 393 005f 05       		.byte	0x5
+ 394 0060 696E7400 		.ascii	"int\000"
+ 395 0064 02       		.uleb128 0x2
+ 396 0065 04       		.byte	0x4
+ 397 0066 07       		.byte	0x7
+ 398 0067 61010000 		.4byte	.LASF8
+ 399 006b 04       		.uleb128 0x4
+ 400 006c E6010000 		.4byte	.LASF12
+ 401 0070 02       		.byte	0x2
+ 402 0071 E901     		.2byte	0x1e9
+ 403 0073 2C000000 		.4byte	0x2c
+ 404 0077 02       		.uleb128 0x2
+ 405 0078 04       		.byte	0x4
+ 406 0079 04       		.byte	0x4
+ 407 007a 40000000 		.4byte	.LASF9
+ 408 007e 02       		.uleb128 0x2
+ 409 007f 08       		.byte	0x8
+ 410 0080 04       		.byte	0x4
+ 411 0081 5A010000 		.4byte	.LASF10
+ 412 0085 02       		.uleb128 0x2
+ 413 0086 01       		.byte	0x1
+ 414 0087 08       		.byte	0x8
+ 415 0088 D7010000 		.4byte	.LASF11
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 21
+
+
+ 416 008c 04       		.uleb128 0x4
+ 417 008d 9D010000 		.4byte	.LASF13
+ 418 0091 02       		.byte	0x2
+ 419 0092 9302     		.2byte	0x293
+ 420 0094 98000000 		.4byte	0x98
+ 421 0098 05       		.uleb128 0x5
+ 422 0099 6B000000 		.4byte	0x6b
+ 423 009d 06       		.uleb128 0x6
+ 424 009e 2C000000 		.4byte	.LASF14
+ 425 00a2 01       		.byte	0x1
+ 426 00a3 39       		.byte	0x39
+ 427 00a4 00000000 		.4byte	.LFB0
+ 428 00a8 18000000 		.4byte	.LFE0-.LFB0
+ 429 00ac 01       		.uleb128 0x1
+ 430 00ad 9C       		.byte	0x9c
+ 431 00ae D1000000 		.4byte	0xd1
+ 432 00b2 07       		.uleb128 0x7
+ 433 00b3 1B000000 		.4byte	.LASF16
+ 434 00b7 01       		.byte	0x1
+ 435 00b8 39       		.byte	0x39
+ 436 00b9 6B000000 		.4byte	0x6b
+ 437 00bd 00000000 		.4byte	.LLST0
+ 438 00c1 08       		.uleb128 0x8
+ 439 00c2 21000000 		.4byte	.LASF23
+ 440 00c6 01       		.byte	0x1
+ 441 00c7 3B       		.byte	0x3b
+ 442 00c8 6B000000 		.4byte	0x6b
+ 443 00cc 21000000 		.4byte	.LLST1
+ 444 00d0 00       		.byte	0
+ 445 00d1 06       		.uleb128 0x6
+ 446 00d2 00000000 		.4byte	.LASF15
+ 447 00d6 01       		.byte	0x1
+ 448 00d7 5A       		.byte	0x5a
+ 449 00d8 00000000 		.4byte	.LFB1
+ 450 00dc 18000000 		.4byte	.LFE1-.LFB1
+ 451 00e0 01       		.uleb128 0x1
+ 452 00e1 9C       		.byte	0x9c
+ 453 00e2 F6000000 		.4byte	0xf6
+ 454 00e6 07       		.uleb128 0x7
+ 455 00e7 98010000 		.4byte	.LASF17
+ 456 00eb 01       		.byte	0x1
+ 457 00ec 5A       		.byte	0x5a
+ 458 00ed 6B000000 		.4byte	0x6b
+ 459 00f1 39000000 		.4byte	.LLST2
+ 460 00f5 00       		.byte	0
+ 461 00f6 09       		.uleb128 0x9
+ 462 00f7 85010000 		.4byte	.LASF18
+ 463 00fb 01       		.byte	0x1
+ 464 00fc 71       		.byte	0x71
+ 465 00fd 6B000000 		.4byte	0x6b
+ 466 0101 00000000 		.4byte	.LFB2
+ 467 0105 0C000000 		.4byte	.LFE2-.LFB2
+ 468 0109 01       		.uleb128 0x1
+ 469 010a 9C       		.byte	0x9c
+ 470 010b 09       		.uleb128 0x9
+ 471 010c 01020000 		.4byte	.LASF19
+ 472 0110 01       		.byte	0x1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 22
+
+
+ 473 0111 8D       		.byte	0x8d
+ 474 0112 6B000000 		.4byte	0x6b
+ 475 0116 00000000 		.4byte	.LFB3
+ 476 011a 0C000000 		.4byte	.LFE3-.LFB3
+ 477 011e 01       		.uleb128 0x1
+ 478 011f 9C       		.byte	0x9c
+ 479 0120 00       		.byte	0
+ 480              		.section	.debug_abbrev,"",%progbits
+ 481              	.Ldebug_abbrev0:
+ 482 0000 01       		.uleb128 0x1
+ 483 0001 11       		.uleb128 0x11
+ 484 0002 01       		.byte	0x1
+ 485 0003 25       		.uleb128 0x25
+ 486 0004 0E       		.uleb128 0xe
+ 487 0005 13       		.uleb128 0x13
+ 488 0006 0B       		.uleb128 0xb
+ 489 0007 03       		.uleb128 0x3
+ 490 0008 0E       		.uleb128 0xe
+ 491 0009 1B       		.uleb128 0x1b
+ 492 000a 0E       		.uleb128 0xe
+ 493 000b 55       		.uleb128 0x55
+ 494 000c 17       		.uleb128 0x17
+ 495 000d 11       		.uleb128 0x11
+ 496 000e 01       		.uleb128 0x1
+ 497 000f 10       		.uleb128 0x10
+ 498 0010 17       		.uleb128 0x17
+ 499 0011 00       		.byte	0
+ 500 0012 00       		.byte	0
+ 501 0013 02       		.uleb128 0x2
+ 502 0014 24       		.uleb128 0x24
+ 503 0015 00       		.byte	0
+ 504 0016 0B       		.uleb128 0xb
+ 505 0017 0B       		.uleb128 0xb
+ 506 0018 3E       		.uleb128 0x3e
+ 507 0019 0B       		.uleb128 0xb
+ 508 001a 03       		.uleb128 0x3
+ 509 001b 0E       		.uleb128 0xe
+ 510 001c 00       		.byte	0
+ 511 001d 00       		.byte	0
+ 512 001e 03       		.uleb128 0x3
+ 513 001f 24       		.uleb128 0x24
+ 514 0020 00       		.byte	0
+ 515 0021 0B       		.uleb128 0xb
+ 516 0022 0B       		.uleb128 0xb
+ 517 0023 3E       		.uleb128 0x3e
+ 518 0024 0B       		.uleb128 0xb
+ 519 0025 03       		.uleb128 0x3
+ 520 0026 08       		.uleb128 0x8
+ 521 0027 00       		.byte	0
+ 522 0028 00       		.byte	0
+ 523 0029 04       		.uleb128 0x4
+ 524 002a 16       		.uleb128 0x16
+ 525 002b 00       		.byte	0
+ 526 002c 03       		.uleb128 0x3
+ 527 002d 0E       		.uleb128 0xe
+ 528 002e 3A       		.uleb128 0x3a
+ 529 002f 0B       		.uleb128 0xb
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 23
+
+
+ 530 0030 3B       		.uleb128 0x3b
+ 531 0031 05       		.uleb128 0x5
+ 532 0032 49       		.uleb128 0x49
+ 533 0033 13       		.uleb128 0x13
+ 534 0034 00       		.byte	0
+ 535 0035 00       		.byte	0
+ 536 0036 05       		.uleb128 0x5
+ 537 0037 35       		.uleb128 0x35
+ 538 0038 00       		.byte	0
+ 539 0039 49       		.uleb128 0x49
+ 540 003a 13       		.uleb128 0x13
+ 541 003b 00       		.byte	0
+ 542 003c 00       		.byte	0
+ 543 003d 06       		.uleb128 0x6
+ 544 003e 2E       		.uleb128 0x2e
+ 545 003f 01       		.byte	0x1
+ 546 0040 3F       		.uleb128 0x3f
+ 547 0041 19       		.uleb128 0x19
+ 548 0042 03       		.uleb128 0x3
+ 549 0043 0E       		.uleb128 0xe
+ 550 0044 3A       		.uleb128 0x3a
+ 551 0045 0B       		.uleb128 0xb
+ 552 0046 3B       		.uleb128 0x3b
+ 553 0047 0B       		.uleb128 0xb
+ 554 0048 27       		.uleb128 0x27
+ 555 0049 19       		.uleb128 0x19
+ 556 004a 11       		.uleb128 0x11
+ 557 004b 01       		.uleb128 0x1
+ 558 004c 12       		.uleb128 0x12
+ 559 004d 06       		.uleb128 0x6
+ 560 004e 40       		.uleb128 0x40
+ 561 004f 18       		.uleb128 0x18
+ 562 0050 9742     		.uleb128 0x2117
+ 563 0052 19       		.uleb128 0x19
+ 564 0053 01       		.uleb128 0x1
+ 565 0054 13       		.uleb128 0x13
+ 566 0055 00       		.byte	0
+ 567 0056 00       		.byte	0
+ 568 0057 07       		.uleb128 0x7
+ 569 0058 05       		.uleb128 0x5
+ 570 0059 00       		.byte	0
+ 571 005a 03       		.uleb128 0x3
+ 572 005b 0E       		.uleb128 0xe
+ 573 005c 3A       		.uleb128 0x3a
+ 574 005d 0B       		.uleb128 0xb
+ 575 005e 3B       		.uleb128 0x3b
+ 576 005f 0B       		.uleb128 0xb
+ 577 0060 49       		.uleb128 0x49
+ 578 0061 13       		.uleb128 0x13
+ 579 0062 02       		.uleb128 0x2
+ 580 0063 17       		.uleb128 0x17
+ 581 0064 00       		.byte	0
+ 582 0065 00       		.byte	0
+ 583 0066 08       		.uleb128 0x8
+ 584 0067 34       		.uleb128 0x34
+ 585 0068 00       		.byte	0
+ 586 0069 03       		.uleb128 0x3
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 24
+
+
+ 587 006a 0E       		.uleb128 0xe
+ 588 006b 3A       		.uleb128 0x3a
+ 589 006c 0B       		.uleb128 0xb
+ 590 006d 3B       		.uleb128 0x3b
+ 591 006e 0B       		.uleb128 0xb
+ 592 006f 49       		.uleb128 0x49
+ 593 0070 13       		.uleb128 0x13
+ 594 0071 02       		.uleb128 0x2
+ 595 0072 17       		.uleb128 0x17
+ 596 0073 00       		.byte	0
+ 597 0074 00       		.byte	0
+ 598 0075 09       		.uleb128 0x9
+ 599 0076 2E       		.uleb128 0x2e
+ 600 0077 00       		.byte	0
+ 601 0078 3F       		.uleb128 0x3f
+ 602 0079 19       		.uleb128 0x19
+ 603 007a 03       		.uleb128 0x3
+ 604 007b 0E       		.uleb128 0xe
+ 605 007c 3A       		.uleb128 0x3a
+ 606 007d 0B       		.uleb128 0xb
+ 607 007e 3B       		.uleb128 0x3b
+ 608 007f 0B       		.uleb128 0xb
+ 609 0080 27       		.uleb128 0x27
+ 610 0081 19       		.uleb128 0x19
+ 611 0082 49       		.uleb128 0x49
+ 612 0083 13       		.uleb128 0x13
+ 613 0084 11       		.uleb128 0x11
+ 614 0085 01       		.uleb128 0x1
+ 615 0086 12       		.uleb128 0x12
+ 616 0087 06       		.uleb128 0x6
+ 617 0088 40       		.uleb128 0x40
+ 618 0089 18       		.uleb128 0x18
+ 619 008a 9742     		.uleb128 0x2117
+ 620 008c 19       		.uleb128 0x19
+ 621 008d 00       		.byte	0
+ 622 008e 00       		.byte	0
+ 623 008f 00       		.byte	0
+ 624              		.section	.debug_loc,"",%progbits
+ 625              	.Ldebug_loc0:
+ 626              	.LLST0:
+ 627 0000 00000000 		.4byte	.LVL0
+ 628 0004 0C000000 		.4byte	.LVL3
+ 629 0008 0100     		.2byte	0x1
+ 630 000a 50       		.byte	0x50
+ 631 000b 0C000000 		.4byte	.LVL3
+ 632 000f 18000000 		.4byte	.LFE0
+ 633 0013 0400     		.2byte	0x4
+ 634 0015 F3       		.byte	0xf3
+ 635 0016 01       		.uleb128 0x1
+ 636 0017 50       		.byte	0x50
+ 637 0018 9F       		.byte	0x9f
+ 638 0019 00000000 		.4byte	0
+ 639 001d 00000000 		.4byte	0
+ 640              	.LLST1:
+ 641 0021 04000000 		.4byte	.LVL1
+ 642 0025 08000000 		.4byte	.LVL2
+ 643 0029 0600     		.2byte	0x6
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 25
+
+
+ 644 002b 73       		.byte	0x73
+ 645 002c 00       		.sleb128 0
+ 646 002d 08       		.byte	0x8
+ 647 002e 7F       		.byte	0x7f
+ 648 002f 1A       		.byte	0x1a
+ 649 0030 9F       		.byte	0x9f
+ 650 0031 00000000 		.4byte	0
+ 651 0035 00000000 		.4byte	0
+ 652              	.LLST2:
+ 653 0039 00000000 		.4byte	.LVL4
+ 654 003d 06000000 		.4byte	.LVL5
+ 655 0041 0100     		.2byte	0x1
+ 656 0043 50       		.byte	0x50
+ 657 0044 06000000 		.4byte	.LVL5
+ 658 0048 18000000 		.4byte	.LFE1
+ 659 004c 0400     		.2byte	0x4
+ 660 004e F3       		.byte	0xf3
+ 661 004f 01       		.uleb128 0x1
+ 662 0050 50       		.byte	0x50
+ 663 0051 9F       		.byte	0x9f
+ 664 0052 00000000 		.4byte	0
+ 665 0056 00000000 		.4byte	0
+ 666              		.section	.debug_aranges,"",%progbits
+ 667 0000 34000000 		.4byte	0x34
+ 668 0004 0200     		.2byte	0x2
+ 669 0006 00000000 		.4byte	.Ldebug_info0
+ 670 000a 04       		.byte	0x4
+ 671 000b 00       		.byte	0
+ 672 000c 0000     		.2byte	0
+ 673 000e 0000     		.2byte	0
+ 674 0010 00000000 		.4byte	.LFB0
+ 675 0014 18000000 		.4byte	.LFE0-.LFB0
+ 676 0018 00000000 		.4byte	.LFB1
+ 677 001c 18000000 		.4byte	.LFE1-.LFB1
+ 678 0020 00000000 		.4byte	.LFB2
+ 679 0024 0C000000 		.4byte	.LFE2-.LFB2
+ 680 0028 00000000 		.4byte	.LFB3
+ 681 002c 0C000000 		.4byte	.LFE3-.LFB3
+ 682 0030 00000000 		.4byte	0
+ 683 0034 00000000 		.4byte	0
+ 684              		.section	.debug_ranges,"",%progbits
+ 685              	.Ldebug_ranges0:
+ 686 0000 00000000 		.4byte	.LFB0
+ 687 0004 18000000 		.4byte	.LFE0
+ 688 0008 00000000 		.4byte	.LFB1
+ 689 000c 18000000 		.4byte	.LFE1
+ 690 0010 00000000 		.4byte	.LFB2
+ 691 0014 0C000000 		.4byte	.LFE2
+ 692 0018 00000000 		.4byte	.LFB3
+ 693 001c 0C000000 		.4byte	.LFE3
+ 694 0020 00000000 		.4byte	0
+ 695 0024 00000000 		.4byte	0
+ 696              		.section	.debug_line,"",%progbits
+ 697              	.Ldebug_line0:
+ 698 0000 96000000 		.section	.debug_str,"MS",%progbits,1
+ 698      02004A00 
+ 698      00000201 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 26
+
+
+ 698      FB0E0D00 
+ 698      01010101 
+ 699              	.LASF15:
+ 700 0000 414D7578 		.ascii	"AMuxCapacitor_SetDriveMode\000"
+ 700      43617061 
+ 700      6369746F 
+ 700      725F5365 
+ 700      74447269 
+ 701              	.LASF16:
+ 702 001b 76616C75 		.ascii	"value\000"
+ 702      6500
+ 703              	.LASF23:
+ 704 0021 73746174 		.ascii	"staticBits\000"
+ 704      69634269 
+ 704      747300
+ 705              	.LASF14:
+ 706 002c 414D7578 		.ascii	"AMuxCapacitor_Write\000"
+ 706      43617061 
+ 706      6369746F 
+ 706      725F5772 
+ 706      69746500 
+ 707              	.LASF9:
+ 708 0040 666C6F61 		.ascii	"float\000"
+ 708      7400
+ 709              	.LASF1:
+ 710 0046 756E7369 		.ascii	"unsigned char\000"
+ 710      676E6564 
+ 710      20636861 
+ 710      7200
+ 711              	.LASF20:
+ 712 0054 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 712      43313120 
+ 712      352E342E 
+ 712      31203230 
+ 712      31363036 
+ 713 0087 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"
+ 713      20726576 
+ 713      6973696F 
+ 713      6E203233 
+ 713      37373135 
+ 714 00ba 33202D66 		.ascii	"3 -ffunction-sections -ffat-lto-objects -finline-fu"
+ 714      66756E63 
+ 714      74696F6E 
+ 714      2D736563 
+ 714      74696F6E 
+ 715 00ed 6E637469 		.ascii	"nctions -flto\000"
+ 715      6F6E7320 
+ 715      2D666C74 
+ 715      6F00
+ 716              	.LASF5:
+ 717 00fb 6C6F6E67 		.ascii	"long unsigned int\000"
+ 717      20756E73 
+ 717      69676E65 
+ 717      6420696E 
+ 717      7400
+ 718              	.LASF22:
+ 719 010d 433A5C47 		.ascii	"C:\\Github\\Tesis\\src\\psoc\\AcondicionamientoAnal"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 27
+
+
+ 719      69746875 
+ 719      625C5465 
+ 719      7369735C 
+ 719      7372635C 
+ 720 013b 6F676963 		.ascii	"ogico.cydsn\000"
+ 720      6F2E6379 
+ 720      64736E00 
+ 721              	.LASF3:
+ 722 0147 73686F72 		.ascii	"short unsigned int\000"
+ 722      7420756E 
+ 722      7369676E 
+ 722      65642069 
+ 722      6E7400
+ 723              	.LASF10:
+ 724 015a 646F7562 		.ascii	"double\000"
+ 724      6C6500
+ 725              	.LASF8:
+ 726 0161 756E7369 		.ascii	"unsigned int\000"
+ 726      676E6564 
+ 726      20696E74 
+ 726      00
+ 727              	.LASF7:
+ 728 016e 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 728      206C6F6E 
+ 728      6720756E 
+ 728      7369676E 
+ 728      65642069 
+ 729              	.LASF18:
+ 730 0185 414D7578 		.ascii	"AMuxCapacitor_Read\000"
+ 730      43617061 
+ 730      6369746F 
+ 730      725F5265 
+ 730      616400
+ 731              	.LASF17:
+ 732 0198 6D6F6465 		.ascii	"mode\000"
+ 732      00
+ 733              	.LASF13:
+ 734 019d 72656738 		.ascii	"reg8\000"
+ 734      00
+ 735              	.LASF21:
+ 736 01a2 47656E65 		.ascii	"Generated_Source\\PSoC5\\AMuxCapacitor.c\000"
+ 736      72617465 
+ 736      645F536F 
+ 736      75726365 
+ 736      5C50536F 
+ 737              	.LASF6:
+ 738 01c9 6C6F6E67 		.ascii	"long long int\000"
+ 738      206C6F6E 
+ 738      6720696E 
+ 738      7400
+ 739              	.LASF11:
+ 740 01d7 63686172 		.ascii	"char\000"
+ 740      00
+ 741              	.LASF2:
+ 742 01dc 73686F72 		.ascii	"short int\000"
+ 742      7420696E 
+ 742      7400
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccNbKxBa.s 			page 28
+
+
+ 743              	.LASF12:
+ 744 01e6 75696E74 		.ascii	"uint8\000"
+ 744      3800
+ 745              	.LASF4:
+ 746 01ec 6C6F6E67 		.ascii	"long int\000"
+ 746      20696E74 
+ 746      00
+ 747              	.LASF0:
+ 748 01f5 7369676E 		.ascii	"signed char\000"
+ 748      65642063 
+ 748      68617200 
+ 749              	.LASF19:
+ 750 0201 414D7578 		.ascii	"AMuxCapacitor_ReadDataReg\000"
+ 750      43617061 
+ 750      6369746F 
+ 750      725F5265 
+ 750      61644461 
+ 751              		.comm	__gnu_lto_v1,1,1
+ 752              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran
