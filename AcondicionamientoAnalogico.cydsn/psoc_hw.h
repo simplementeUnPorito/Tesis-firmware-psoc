@@ -80,15 +80,17 @@
 #define PSOC_EVT_BUTTON           0x3Cu
 #define PSOC_EVT_BUTTON_IGNORED   0x3Du
 
-#define PSOC_CMD_STATUS    0xA5u
-#define PSOC_CMD_PGA       0xA6u
-#define PSOC_CMD_PGAVDAC   0xA9u
-#define PSOC_CMD_VDAC      0xAAu
-#define PSOC_CMD_SETN      0xA3u
-#define PSOC_CMD_PRESTART  0xB1u
-#define PSOC_CMD_DEBUG     0xB3u
-#define PSOC_CMD_START_NOW 0xB4u
-#define PSOC_CMD_CALIBRATE 0xB5u
+#define PSOC_CMD_STATUS         0xA5u
+#define PSOC_CMD_PGA            0xA6u
+#define PSOC_CMD_PGAVDAC        0xA9u
+#define PSOC_CMD_VDAC           0xAAu
+#define PSOC_CMD_SETN           0xA3u
+#define PSOC_CMD_PRESTART       0xB1u
+#define PSOC_CMD_DEBUG          0xB3u
+#define PSOC_CMD_START_NOW      0xB4u
+#define PSOC_CMD_CALIBRATE      0xB5u
+#define PSOC_CMD_SAVE_EEPROM    0xB6u  /* Guardar config calibración en EEPROM */
+#define PSOC_CMD_SELECT_STREAM  0xB7u  /* Param: 0=crudo, 1=filtrado FIR */
 
 void psoc_hw_start_analog(uint8 pga_code, uint8 pgavdac_code);
 void psoc_hw_set_pga(uint8 code);

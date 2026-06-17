@@ -85,6 +85,12 @@ void psoc_calibration_start_references(void);
 void psoc_calibration_restore_capture_path(void);
 void psoc_calibration_reset_references(void);
 
+/* Aplica dac_values[count] como punto de inicio de calibración:
+ * escribe cada DAC al hardware y puebla g_psoc_cal_results.
+ * Llamar después de psoc_calibration_start_references() para arrancar
+ * desde los valores guardados en EEPROM en vez de los defaults. */
+void psoc_calibration_seed_dac(const uint8 *dac_values, uint8 count);
+
 uint8 psoc_calibration_start_async(void);
 uint8 psoc_calibration_service_async(void);
 uint8 psoc_calibration_async_busy(void);

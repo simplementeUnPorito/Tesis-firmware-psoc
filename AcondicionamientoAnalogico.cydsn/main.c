@@ -41,9 +41,17 @@
 #include "psoc_hw.h"
 #include "psoc_adc.h"
 #include "calibration.h"
+#include "psoc_nv.h"
 #include "LED.h"
+#include "DMA_DelSig_RAM_dma.h"
+#include "DMA_DelSig_FIlter_dma.h"
+#include "DMA_Filter_dma.h"
+#include "Filter.h"
+#include "Filter_PVT.h"
 /* -------------------------------------------------------------------------- */
 #define LEGACY_VDAC_SHADOW_INIT 0x9Cu
+#define FILTER_FIR_NTAPS   128u
+#define FILTER_GROUP_DELAY ((FILTER_FIR_NTAPS - 1u) / 2u)   /* 63 muestras */
 #define TIMER_TICK_MS      10u
 #define TIMEOUT_COUNTS     240000u    /* 10 ms @ 24 MHz — tick de sistema */
 
@@ -92,6 +100,15 @@
 
 /* -------------------------------------------------------------------------- */
 static volatile int32  g_adc_raw          = 0;
+
+/* Buffers destino DMA — 3 bytes LE (24 bits signed) por muestra */
+static volatile uint8  g_dma_raw_buf[3]   = {0u, 0u, 0u};
+static volatile uint8  g_dma_filt_buf[3]  = {0u, 0u, 0u};
+
+/* 0 = enviar crudo (default); 1 = enviar filtrado por FIR hardware */
+static volatile uint8  g_stream_mode      = 0u;
+/* Muestras filtradas a descartar tras SyncIn (compensa retardo de grupo FIR) */
+static volatile uint16 g_fir_discard      = 0u;
 
 static volatile uint8  g_capture_raw[PSOC_CAPTURE_MAX_BATCHES][CAPTURE_BATCH_BYTES];
 static volatile uint16 g_batch_fill       = 0u;
@@ -246,10 +263,20 @@ static void psoc_enter_sampling(uint8 debugMode)
     ADC_StartConvert();
 }
 
-CY_ISR(isr_DelSigReady)
+/* Reconstruye int32 signed a partir de 3 bytes LE (24 bits, extensión de signo) */
+static int32 dma_buf_to_i24(const volatile uint8 *buf)
 {
-    g_adc_raw = psoc_adc_counts_right_aligned(ADC_GetResult32());
-    psoc_adc_note_isr_sample(g_adc_raw);
+    uint32 u = (uint32)buf[0] | ((uint32)buf[1] << 8u) | ((uint32)buf[2] << 16u);
+    return (u & 0x00800000UL) ? (int32)(u | 0xFF000000UL) : (int32)u;
+}
+
+/* ISR: muestra RAW del ADC (DMA_DelSig_RAM depositó 3 bytes en g_dma_raw_buf) */
+CY_ISR(isr_DMA_ADC_Handler)
+{
+    g_adc_raw = psoc_adc_counts_right_aligned(dma_buf_to_i24(g_dma_raw_buf));
+    psoc_adc_note_isr_sample(g_adc_raw);   /* mantiene ruta calibración activa */
+
+    if (g_stream_mode != 0u) { return; }   /* modo FIR: el filtro captura */
 
     if (g_state == PSOC_SAMPLING && g_capture_done == 0u &&
         g_batches_captured < capture_target_batches() &&
@@ -260,6 +287,36 @@ CY_ISR(isr_DelSigReady)
         g_capture_raw[g_batches_captured][pos]      = (uint8)( val        & 0xFFu);
         g_capture_raw[g_batches_captured][pos + 1u] = (uint8)((val >>  8u) & 0xFFu);
         g_capture_raw[g_batches_captured][pos + 2u] = (uint8)((val >> 16u) & 0xFFu);
+        g_batch_fill++;
+        if (g_batch_fill >= BATCH_SAMPLES)
+        {
+            g_batch_fill = 0u;
+            g_batches_captured++;
+            if (g_batches_captured >= capture_target_batches()) {
+                g_capture_done = 1u;
+            }
+        }
+    }
+}
+
+/* ISR: muestra FILTRADA (DMA_Filter depositó 3 bytes en g_dma_filt_buf) */
+CY_ISR(isr_DMA_Filter_Handler)
+{
+    int32 filt;
+
+    if (g_fir_discard > 0u) { g_fir_discard--; return; }  /* descarte retardo grupo FIR */
+    if (g_stream_mode == 0u) { return; }                   /* modo RAW: no capturar filtrado */
+
+    filt = dma_buf_to_i24(g_dma_filt_buf);
+
+    if (g_state == PSOC_SAMPLING && g_capture_done == 0u &&
+        g_batches_captured < capture_target_batches() &&
+        g_batch_fill < BATCH_SAMPLES)
+    {
+        uint16 pos = (uint16)(g_batch_fill * SAMPLE_BYTES);
+        g_capture_raw[g_batches_captured][pos]      = (uint8)( filt        & 0xFFu);
+        g_capture_raw[g_batches_captured][pos + 1u] = (uint8)((filt >>  8u) & 0xFFu);
+        g_capture_raw[g_batches_captured][pos + 2u] = (uint8)((filt >> 16u) & 0xFFu);
         g_batch_fill++;
         if (g_batch_fill >= BATCH_SAMPLES)
         {
@@ -301,6 +358,9 @@ CY_ISR(isr_SyncIn)
         uart_send_diag(PSOC_EVT_SYNC_RISE, g_state);
         if (g_state == PSOC_ARMED)
         {
+            if (g_stream_mode != 0u) {
+                g_fir_discard = FILTER_GROUP_DELAY;  /* compensar retardo grupo FIR */
+            }
             psoc_enter_sampling(g_debug_psoc);
         }
     }
@@ -491,6 +551,7 @@ static void uart_service(void)
                 {
                     case 0xA5u: case 0xA6u: case 0xA9u: case 0xAAu:
                     case 0xB1u: case 0xB3u: case 0xB4u: case PSOC_CMD_CALIBRATE:
+                    case PSOC_CMD_SAVE_EEPROM: case PSOC_CMD_SELECT_STREAM:
                     case PSOC_CMD_PONG:
                         rx_cmd = rx; rx_state = 2u; break;
                     case 0xA3u:
@@ -612,6 +673,31 @@ static void uart_service(void)
                         break;
                     case PSOC_CMD_CALIBRATE:
                         (void)psoc_start_calibration_if_idle(1u);
+                        led_toggle();
+                        break;
+                    case PSOC_CMD_SAVE_EEPROM:
+                        /* Guardar los DAC de calibración actuales en EEPROM */
+                        {
+                            uint8 dac_snap[PSOC_NV_CAL_STAGES];
+                            uint8 ok_snap = 0u;
+                            uint8 k;
+                            for (k = 0u; k < PSOC_NV_CAL_STAGES && k < g_psoc_cal_result_count; k++) {
+                                dac_snap[k] = g_psoc_cal_results[k].final_dac;
+                            }
+                            if (g_psoc_cal_result_count >= PSOC_NV_CAL_STAGES) {
+                                ok_snap = psoc_nv_save(dac_snap, PSOC_NV_CAL_STAGES);
+                            }
+                            uart_send_cfg_ack(PSOC_CMD_SAVE_EEPROM, ok_snap);
+                        }
+                        led_toggle();
+                        break;
+                    case PSOC_CMD_SELECT_STREAM:
+                        /* rx_p1: 0=crudo, 1=filtrado FIR */
+                        g_stream_mode = (rx_p1 != 0u) ? 1u : 0u;
+                        if (g_stream_mode != 0u) {
+                            g_fir_discard = 0u;  /* reset — se recarga en próximo SyncIn */
+                        }
+                        uart_send_cfg_ack(PSOC_CMD_SELECT_STREAM, g_stream_mode);
                         led_toggle();
                         break;
                     default: break;
@@ -802,6 +888,53 @@ static void tx1_gpio_write(uint8 value)
 }
 #endif
 
+/* Inicializa los tres canales DMA para la cadena ADC → [RAM | Filter → RAM].
+ * Los TDs se configuran en modo circular (nextTd == mismo TD) para que cada
+ * trigger del ADC/Filtro recicle automáticamente sin intervención de la CPU. */
+static void dma_adc_init(void)
+{
+    uint8 td;
+
+    /* ── Raw: ADC DelSig → g_dma_raw_buf (3 bytes, dispara isr_DMA) ────────── */
+    DMA_DelSig_RAM_DmaInitialize(3u, 1u,
+        HI16(ADC_DEC_OUTSAMP_PTR),
+        HI16((uint32)(void *)g_dma_raw_buf));
+    td = CyDmaTdAllocate();
+    CyDmaTdSetConfiguration(td, 3u, td,
+        DMA_DelSig_RAM__TD_TERMOUT_EN | TD_INC_DST_ADR);
+    CyDmaTdSetAddress(td,
+        LO16(ADC_DEC_OUTSAMP_PTR),
+        LO16((uint32)(void *)g_dma_raw_buf));
+    CyDmaChSetInitialTd(DMA_DelSig_RAM_DmaHandle, td);
+    CyDmaChEnable(DMA_DelSig_RAM_DmaHandle, 1u);
+
+    /* ── Filter input: ADC DelSig → Filter_STAGEA (3 bytes) ─────────────────── */
+    DMA_DelSig_FIlter_DmaInitialize(3u, 1u,
+        HI16(ADC_DEC_OUTSAMP_PTR),
+        HI16((uint32)Filter_STAGEA_PTR));
+    td = CyDmaTdAllocate();
+    CyDmaTdSetConfiguration(td, 3u, td,
+        DMA_DelSig_FIlter__TD_TERMOUT_EN | TD_INC_DST_ADR);
+    CyDmaTdSetAddress(td,
+        LO16(ADC_DEC_OUTSAMP_PTR),
+        LO16((uint32)Filter_STAGEA_PTR));
+    CyDmaChSetInitialTd(DMA_DelSig_FIlter_DmaHandle, td);
+    CyDmaChEnable(DMA_DelSig_FIlter_DmaHandle, 1u);
+
+    /* ── Filter output: Filter_HOLDA → g_dma_filt_buf (3 bytes, dispara isr_DMA_Filter) */
+    DMA_Filter_DmaInitialize(3u, 1u,
+        HI16((uint32)Filter_HOLDA_PTR),
+        HI16((uint32)(void *)g_dma_filt_buf));
+    td = CyDmaTdAllocate();
+    CyDmaTdSetConfiguration(td, 3u, td,
+        DMA_Filter__TD_TERMOUT_EN | TD_INC_SRC_ADR | TD_INC_DST_ADR);
+    CyDmaTdSetAddress(td,
+        LO16((uint32)Filter_HOLDA_PTR),
+        LO16((uint32)(void *)g_dma_filt_buf));
+    CyDmaChSetInitialTd(DMA_Filter_DmaHandle, td);
+    CyDmaChEnable(DMA_Filter_DmaHandle, 1u);
+}
+
 int main(void)
 {
     uint8 i;
@@ -850,12 +983,27 @@ int main(void)
 
     uart_send_diag(PSOC_EVT_BOOT, PSOC_HW_CLASS);
 
+    EEPROM_Start();
+
     psoc_hw_start_analog(g_pga_code, g_pgavdac_code);
     psoc_calibration_start_references();
+
+    /* Cargar config guardada en EEPROM (si CRC válido) para converger más rápido */
+    {
+        uint8 nv_dac[PSOC_NV_CAL_STAGES];
+        if (psoc_nv_load(nv_dac, PSOC_NV_CAL_STAGES)) {
+            psoc_calibration_seed_dac(nv_dac, PSOC_NV_CAL_STAGES);
+        }
+    }
+
+    Filter_Start();
+    dma_adc_init();
+
     psoc_prepare_capture_path();
     uart_send_diag(PSOC_EVT_ANALOG_READY, 0u);
 
-    isr_DelSig_StartEx(isr_DelSigReady);
+    isr_DMA_StartEx(isr_DMA_ADC_Handler);
+    isr_DMA_Filter_StartEx(isr_DMA_Filter_Handler);
     isr_Timer_StartEx(isr_Timer);
     isr_SyncIn_StartEx(isr_SyncIn);
     Clock_1_Start();

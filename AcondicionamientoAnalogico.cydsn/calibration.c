@@ -509,6 +509,14 @@ static void cal_stage_write_result(uint8 stage_index, uint8 dac)
     }
 }
 
+void psoc_calibration_seed_dac(const uint8 *dac_values, uint8 count)
+{
+    uint8 i;
+    for (i = 0u; i < count && i < PSOC_CAL_STAGE_COUNT; i++) {
+        cal_stage_write_result(i, dac_values[i]);
+    }
+}
+
 static uint8 cal_servo_apply_measurement(uint8 stage_index, uint8 dac, int32 measured)
 {
     const PsocCalStage *stage = &g_psoc_cal_stages[stage_index];
