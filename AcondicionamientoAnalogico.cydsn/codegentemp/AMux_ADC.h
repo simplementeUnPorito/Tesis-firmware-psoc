@@ -51,7 +51,7 @@ void AMux_ADC_FastSelect(uint8 channel) ;
 
 #define AMux_ADC_CHANNELS  5u
 #define AMux_ADC_MUXTYPE   1
-#define AMux_ADC_ATMOSTONE 1
+#define AMux_ADC_ATMOSTONE 0
 
 /***************************************
 *             API Constants

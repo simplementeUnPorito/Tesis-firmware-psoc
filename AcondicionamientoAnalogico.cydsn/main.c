@@ -43,11 +43,14 @@
 #include "calibration.h"
 #include "psoc_nv.h"
 #include "LED.h"
-#include "DMA_DelSig_RAM_dma.h"
-#include "DMA_DelSig_FIlter_dma.h"
-#include "DMA_Filter_dma.h"
+#include "DMA_DelSig_RAM_Single_dma.h"
+#include "DMA_DelSig_RAM_Lote_dma.h"
+#include "DMA_Filter_RAM_Single_dma.h"
+#include "DMA_Filter_RAM_Lote_dma.h"
+#include "DMA_DelSig_Filter_dma.h"
 #include "Filter.h"
 #include "Filter_PVT.h"
+#include "Reg_Select.h"
 /* -------------------------------------------------------------------------- */
 #define LEGACY_VDAC_SHADOW_INIT 0x9Cu
 #define FILTER_FIR_NTAPS   128u
@@ -62,6 +65,13 @@
 
 #ifndef PSOC_CAPTURE_MAX_BATCHES
 #define PSOC_CAPTURE_MAX_BATCHES 512u
+#endif
+
+/* Tamaño del lote HW (canales DMA_*_RAM_Lote) para promediado por DMA.
+ * Hoy ningún consumidor lo usa todavía (la ruta queda en Single); el canal
+ * ya está armado e inicializado para cuando se conecte el promediado. */
+#ifndef DMA_LOTE_SAMPLES
+#define DMA_LOTE_SAMPLES   30u
 #endif
 
 #define PING_PERIOD_MS     700u
@@ -104,6 +114,11 @@ static volatile int32  g_adc_raw          = 0;
 /* Buffers destino DMA — 3 bytes LE (24 bits signed) por muestra */
 static volatile uint8  g_dma_raw_buf[3]   = {0u, 0u, 0u};
 static volatile uint8  g_dma_filt_buf[3]  = {0u, 0u, 0u};
+
+/* Buffers del canal Lote (mux HW) — reservados para promediado por DMA;
+ * la ruta hoy siempre selecciona Single, así que quedan sin tocar. */
+static volatile uint8  g_dma_raw_lote_buf[DMA_LOTE_SAMPLES * 3u];
+static volatile uint8  g_dma_filt_lote_buf[DMA_LOTE_SAMPLES * 3u];
 
 /* 0 = enviar crudo (default); 1 = enviar filtrado por FIR hardware */
 static volatile uint8  g_stream_mode      = 0u;
@@ -270,8 +285,8 @@ static int32 dma_buf_to_i24(const volatile uint8 *buf)
     return (u & 0x00800000UL) ? (int32)(u | 0xFF000000UL) : (int32)u;
 }
 
-/* ISR: muestra RAW del ADC (DMA_DelSig_RAM depositó 3 bytes en g_dma_raw_buf) */
-CY_ISR(isr_DMA_ADC_Handler)
+/* ISR: muestra RAW del ADC (DMA_DelSig_RAM_Single depositó 3 bytes en g_dma_raw_buf) */
+CY_ISR(isr_DMA_DelSig_RAM_Handler)
 {
     g_adc_raw = psoc_adc_counts_right_aligned(dma_buf_to_i24(g_dma_raw_buf));
     psoc_adc_note_isr_sample(g_adc_raw);   /* mantiene ruta calibración activa */
@@ -299,8 +314,8 @@ CY_ISR(isr_DMA_ADC_Handler)
     }
 }
 
-/* ISR: muestra FILTRADA (DMA_Filter depositó 3 bytes en g_dma_filt_buf) */
-CY_ISR(isr_DMA_Filter_Handler)
+/* ISR: muestra FILTRADA (DMA_Filter_RAM_Single depositó 3 bytes en g_dma_filt_buf) */
+CY_ISR(isr_DMA_Filter_RAM_Handler)
 {
     int32 filt;
 
@@ -428,6 +443,19 @@ static uint8 ticks_due(uint32 now, uint32 due)
     return ((int32)(now - due) >= 0) ? 1u : 0u;
 }
 
+/* Selecciona, vía Reg_Select, qué resultado final usan los DMA *_RAM y si cada
+ * camino corre en Single (1 muestra/disparo) o Lote (DMA_LOTE_SAMPLES/disparo).
+ * La exclusión Single/Lote y raw/Filter la imponen las compuertas del TopDesign;
+ * acá solo se escribe el bit pattern que las gobierna (control_0/1/2). */
+static void dma_route_select(uint8 use_filter, uint8 raw_lote, uint8 filt_lote)
+{
+    uint8 reg = 0u;
+    if (use_filter) { reg |= 0x02u; }   /* control_1 */
+    if (filt_lote)  { reg |= 0x01u; }   /* control_0 */
+    if (raw_lote)   { reg |= 0x04u; }   /* control_2 */
+    Reg_Select_Write(reg);
+}
+
 static void PGAgain_Set(uint8 code)
 {
     if (code <= 8u) {
@@ -474,6 +502,7 @@ static uint8 psoc_start_calibration_if_idle(uint8 send_ack)
     g_batches_captured = 0u;
     g_capture_done = 0u;
     psoc_calibration_servo_abort();
+    dma_route_select(0u, 0u, 0u);  /* fuerza raw+Single: calibración necesita ADC crudo */
     uart_send_diag(PSOC_EVT_CAL_START, 0u);
     if (!psoc_calibration_start_async()) {
         uart_send_diag(PSOC_EVT_CAL_DONE, 0u);
@@ -694,6 +723,7 @@ static void uart_service(void)
                     case PSOC_CMD_SELECT_STREAM:
                         /* rx_p1: 0=crudo, 1=filtrado FIR */
                         g_stream_mode = (rx_p1 != 0u) ? 1u : 0u;
+                        dma_route_select(g_stream_mode, 0u, 0u);
                         if (g_stream_mode != 0u) {
                             g_fir_discard = 0u;  /* reset — se recarga en próximo SyncIn */
                         }
@@ -717,6 +747,7 @@ static void service_runtime(void)
             uint8 ok = psoc_calibration_async_result_ok();
             g_state = PSOC_IDLE;
             timer_start_runtime();
+            dma_route_select(g_stream_mode, 0u, 0u);  /* restaura ruta previa a la calibración */
             uart_send_diag(PSOC_EVT_CAL_DONE, ok);
             if (g_cal_ack_pending) {
                 g_cal_ack_pending = 0u;
@@ -888,51 +919,85 @@ static void tx1_gpio_write(uint8 value)
 }
 #endif
 
-/* Inicializa los tres canales DMA para la cadena ADC → [RAM | Filter → RAM].
- * Los TDs se configuran en modo circular (nextTd == mismo TD) para que cada
- * trigger del ADC/Filtro recicle automáticamente sin intervención de la CPU. */
+/* Inicializa los cinco canales DMA del mux Single/Lote:
+ *   DMA_DelSig_RAM_Single/Lote   ADC → RAM
+ *   DMA_Filter_RAM_Single/Lote   Filter → RAM
+ *   DMA_DelSig_Filter            ADC → Filter (siempre activo, sin ISR)
+ * Todos los TD son circulares (nextTd == mismo TD): cada canal recicla solo.
+ * Los cinco quedan habilitados aunque solo uno por par esté "vivo" — cuál
+ * recibe el trigger real lo decide la lógica combinacional gobernada por
+ * Reg_Select, no el software. */
 static void dma_adc_init(void)
 {
     uint8 td;
 
-    /* ── Raw: ADC DelSig → g_dma_raw_buf (3 bytes, dispara isr_DMA) ────────── */
-    DMA_DelSig_RAM_DmaInitialize(3u, 1u,
-        HI16(ADC_DEC_OUTSAMP_PTR),
+    /* ── Raw Single: ADC DelSig → g_dma_raw_buf (3 bytes/disparo) ────────── */
+    DMA_DelSig_RAM_Single_DmaInitialize(3u, 1u,
+        HI16((uint32)ADC_DEC_SAMP_PTR),
         HI16((uint32)(void *)g_dma_raw_buf));
     td = CyDmaTdAllocate();
     CyDmaTdSetConfiguration(td, 3u, td,
-        DMA_DelSig_RAM__TD_TERMOUT_EN | TD_INC_DST_ADR);
+        DMA_DelSig_RAM_Single__TD_TERMOUT_EN | TD_INC_DST_ADR);
     CyDmaTdSetAddress(td,
-        LO16(ADC_DEC_OUTSAMP_PTR),
+        LO16((uint32)ADC_DEC_SAMP_PTR),
         LO16((uint32)(void *)g_dma_raw_buf));
-    CyDmaChSetInitialTd(DMA_DelSig_RAM_DmaHandle, td);
-    CyDmaChEnable(DMA_DelSig_RAM_DmaHandle, 1u);
+    CyDmaChSetInitialTd(DMA_DelSig_RAM_Single_DmaHandle, td);
+    CyDmaChEnable(DMA_DelSig_RAM_Single_DmaHandle, 1u);
 
-    /* ── Filter input: ADC DelSig → Filter_STAGEA (3 bytes) ─────────────────── */
-    DMA_DelSig_FIlter_DmaInitialize(3u, 1u,
-        HI16(ADC_DEC_OUTSAMP_PTR),
+    /* ── Raw Lote: ADC DelSig → g_dma_raw_lote_buf (lote de DMA_LOTE_SAMPLES) ── */
+    DMA_DelSig_RAM_Lote_DmaInitialize(3u, 1u,
+        HI16((uint32)ADC_DEC_SAMP_PTR),
+        HI16((uint32)(void *)g_dma_raw_lote_buf));
+    td = CyDmaTdAllocate();
+    CyDmaTdSetConfiguration(td, (uint16)(3u * DMA_LOTE_SAMPLES), td,
+        DMA_DelSig_RAM_Lote__TD_TERMOUT_EN | TD_INC_DST_ADR);
+    CyDmaTdSetAddress(td,
+        LO16((uint32)ADC_DEC_SAMP_PTR),
+        LO16((uint32)(void *)g_dma_raw_lote_buf));
+    CyDmaChSetInitialTd(DMA_DelSig_RAM_Lote_DmaHandle, td);
+    CyDmaChEnable(DMA_DelSig_RAM_Lote_DmaHandle, 1u);
+
+    /* ── Filter input: ADC DelSig → Filter_STAGEA (siempre activo, sin ISR) ── */
+    DMA_DelSig_Filter_DmaInitialize(3u, 1u,
+        HI16((uint32)ADC_DEC_SAMP_PTR),
         HI16((uint32)Filter_STAGEA_PTR));
     td = CyDmaTdAllocate();
     CyDmaTdSetConfiguration(td, 3u, td,
-        DMA_DelSig_FIlter__TD_TERMOUT_EN | TD_INC_DST_ADR);
+        DMA_DelSig_Filter__TD_TERMOUT_EN | TD_INC_DST_ADR);
     CyDmaTdSetAddress(td,
-        LO16(ADC_DEC_OUTSAMP_PTR),
+        LO16((uint32)ADC_DEC_SAMP_PTR),
         LO16((uint32)Filter_STAGEA_PTR));
-    CyDmaChSetInitialTd(DMA_DelSig_FIlter_DmaHandle, td);
-    CyDmaChEnable(DMA_DelSig_FIlter_DmaHandle, 1u);
+    CyDmaChSetInitialTd(DMA_DelSig_Filter_DmaHandle, td);
+    CyDmaChEnable(DMA_DelSig_Filter_DmaHandle, 1u);
 
-    /* ── Filter output: Filter_HOLDA → g_dma_filt_buf (3 bytes, dispara isr_DMA_Filter) */
-    DMA_Filter_DmaInitialize(3u, 1u,
+    /* ── Filter Single: Filter_HOLDA → g_dma_filt_buf (3 bytes/disparo) ──── */
+    DMA_Filter_RAM_Single_DmaInitialize(3u, 1u,
         HI16((uint32)Filter_HOLDA_PTR),
         HI16((uint32)(void *)g_dma_filt_buf));
     td = CyDmaTdAllocate();
     CyDmaTdSetConfiguration(td, 3u, td,
-        DMA_Filter__TD_TERMOUT_EN | TD_INC_SRC_ADR | TD_INC_DST_ADR);
+        DMA_Filter_RAM_Single__TD_TERMOUT_EN | TD_INC_SRC_ADR | TD_INC_DST_ADR);
     CyDmaTdSetAddress(td,
         LO16((uint32)Filter_HOLDA_PTR),
         LO16((uint32)(void *)g_dma_filt_buf));
-    CyDmaChSetInitialTd(DMA_Filter_DmaHandle, td);
-    CyDmaChEnable(DMA_Filter_DmaHandle, 1u);
+    CyDmaChSetInitialTd(DMA_Filter_RAM_Single_DmaHandle, td);
+    CyDmaChEnable(DMA_Filter_RAM_Single_DmaHandle, 1u);
+
+    /* ── Filter Lote: Filter_HOLDA → g_dma_filt_lote_buf ─────────────────── */
+    DMA_Filter_RAM_Lote_DmaInitialize(3u, 1u,
+        HI16((uint32)Filter_HOLDA_PTR),
+        HI16((uint32)(void *)g_dma_filt_lote_buf));
+    td = CyDmaTdAllocate();
+    CyDmaTdSetConfiguration(td, (uint16)(3u * DMA_LOTE_SAMPLES), td,
+        DMA_Filter_RAM_Lote__TD_TERMOUT_EN | TD_INC_SRC_ADR | TD_INC_DST_ADR);
+    CyDmaTdSetAddress(td,
+        LO16((uint32)Filter_HOLDA_PTR),
+        LO16((uint32)(void *)g_dma_filt_lote_buf));
+    CyDmaChSetInitialTd(DMA_Filter_RAM_Lote_DmaHandle, td);
+    CyDmaChEnable(DMA_Filter_RAM_Lote_DmaHandle, 1u);
+
+    /* Ruta por defecto: raw + Single — igual al comportamiento previo al mux. */
+    dma_route_select(0u, 0u, 0u);
 }
 
 int main(void)
@@ -1002,8 +1067,8 @@ int main(void)
     psoc_prepare_capture_path();
     uart_send_diag(PSOC_EVT_ANALOG_READY, 0u);
 
-    isr_DMA_StartEx(isr_DMA_ADC_Handler);
-    isr_DMA_Filter_StartEx(isr_DMA_Filter_Handler);
+    isr_DMA_DelSig_RAM_StartEx(isr_DMA_DelSig_RAM_Handler);
+    isr_DMA_Filter_RAM_StartEx(isr_DMA_Filter_RAM_Handler);
     isr_Timer_StartEx(isr_Timer);
     isr_SyncIn_StartEx(isr_SyncIn);
     Clock_1_Start();

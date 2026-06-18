@@ -1,6 +1,6 @@
 // ======================================================================
 // AcondicionamientoAnalogico.v generated from TopDesign.cysch
-// 06/17/2026 at 17:36
+// 06/18/2026 at 19:06
 // This file is auto generated. ANY EDITS YOU MAKE MAY BE LOST WHEN THIS FILE IS REGENERATED!!!
 // ======================================================================
 
@@ -1251,11 +1251,81 @@ module Filter_v2_30_17 (
 
 endmodule
 
+// Component: and_v1_0
+`ifdef CY_BLK_DIR
+`undef CY_BLK_DIR
+`endif
+
+`ifdef WARP
+`define CY_BLK_DIR "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\and_v1_0"
+`include "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\and_v1_0\and_v1_0.v"
+`else
+`define CY_BLK_DIR "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\and_v1_0"
+`include "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\and_v1_0\and_v1_0.v"
+`endif
+
+// Component: xor_v1_0
+`ifdef CY_BLK_DIR
+`undef CY_BLK_DIR
+`endif
+
+`ifdef WARP
+`define CY_BLK_DIR "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\xor_v1_0"
+`include "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\xor_v1_0\xor_v1_0.v"
+`else
+`define CY_BLK_DIR "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\xor_v1_0"
+`include "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\xor_v1_0\xor_v1_0.v"
+`endif
+
+// Component: not_v1_0
+`ifdef CY_BLK_DIR
+`undef CY_BLK_DIR
+`endif
+
+`ifdef WARP
+`define CY_BLK_DIR "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\not_v1_0"
+`include "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\not_v1_0\not_v1_0.v"
+`else
+`define CY_BLK_DIR "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\not_v1_0"
+`include "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\not_v1_0\not_v1_0.v"
+`endif
+
+// Component: CyControlReg_v1_80
+`ifdef CY_BLK_DIR
+`undef CY_BLK_DIR
+`endif
+
+`ifdef WARP
+`define CY_BLK_DIR "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\CyControlReg_v1_80"
+`include "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\CyControlReg_v1_80\CyControlReg_v1_80.v"
+`else
+`define CY_BLK_DIR "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\CyControlReg_v1_80"
+`include "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\CyControlReg_v1_80\CyControlReg_v1_80.v"
+`endif
+
 // top
 module top ;
 
+          wire  Net_4849;
+          wire  Net_4846;
+          wire  Net_4839;
+          wire  Net_4847;
+          wire  Net_4844;
+          wire  Net_4937;
+          wire  Net_4936;
+          wire  Net_4935;
+          wire  Net_4934;
+          wire  Net_4933;
+          wire  Net_4932;
+          wire  Net_4931;
+          wire  Net_4816;
+          wire  Net_4797;
+          wire  Net_4796;
+          wire  Net_4822;
+          wire  Net_4850;
+          wire  Net_4815;
+          wire  Net_4851;
           wire  Net_4732;
-          wire  Net_4733;
           wire  Net_4730;
           wire  Net_4728;
     electrical  Net_4726;
@@ -1279,6 +1349,7 @@ module top ;
     electrical  Net_4627;
           wire  Net_4626;
           wire  Net_4625;
+          wire  Net_4818;
     electrical  Net_4307;
     electrical  Net_4178;
           wire  Net_4182;
@@ -1299,19 +1370,19 @@ module top ;
     electrical  Net_4511;
     electrical  Net_4665;
     electrical  Net_4655;
-    electrical  Net_2384;
-          wire  Net_2334;
-          wire  Net_2333;
-          wire  Net_2332;
-          wire  Net_2331;
-          wire  Net_2329;
-          wire  Net_2328;
-          wire  Net_2327;
-          wire  Net_2325;
-          wire  Net_2324;
-          wire  Net_2323;
-          wire  Net_2322;
-          wire  Net_2326;
+    electrical  Net_4757;
+          wire  Net_4770;
+          wire  Net_4769;
+          wire  Net_4768;
+          wire  Net_4767;
+          wire  Net_4766;
+          wire  Net_4765;
+          wire  Net_4764;
+          wire  Net_4763;
+          wire  Net_4762;
+          wire  Net_4761;
+          wire  Net_4760;
+          wire  Net_4759;
           wire  Net_2278;
           wire  Net_2277;
           wire  Net_2276;
@@ -1322,8 +1393,22 @@ module top ;
           wire  Net_2437;
           wire  Net_2338;
           wire  Net_2336;
-          wire  Net_2330;
+          wire  Net_4758;
+          wire  Net_4843;
+          wire  Net_4929;
+          wire  Net_4905;
+          wire  Net_4899;
+          wire  Net_4891;
+          wire  Net_4892;
+          wire  Net_4928;
+          wire  Net_4927;
+          wire  Net_4854;
+          wire  Net_4848;
+          wire  Net_4733;
+          wire  Net_4817;
+          wire  Net_4922;
           wire  Net_4731;
+    electrical  Net_2381;
     electrical  Net_4725;
     electrical  Net_4718;
     electrical  Net_4715;
@@ -1338,9 +1423,9 @@ module top ;
     electrical  Net_4547;
     electrical  Net_2158;
     electrical  Net_4517;
-          wire  Net_4270;
     electrical  Net_4584;
     electrical  Net_4585;
+          wire  EOC;
     electrical  Net_4204;
     electrical  Net_4285;
     electrical  Net_4664;
@@ -1359,7 +1444,6 @@ module top ;
     electrical  Net_4654;
     electrical  Net_4644;
           wire  Net_10;
-    electrical  Net_2381;
           wire  Net_2337;
           wire  Net_2348;
           wire  Net_12;
@@ -1425,7 +1509,7 @@ module top ;
 		  .input_buffer_sel(2'b00))
 		Tx_1
 		 (.oe(tmpOE__Tx_1_net),
-		  .y({Net_2330}),
+		  .y({Net_4758}),
 		  .fb({tmpFB_0__Tx_1_net[0:0]}),
 		  .io({tmpIO_0__Tx_1_net[0:0]}),
 		  .siovref(tmpSIOVREF__Tx_1_net),
@@ -1720,7 +1804,7 @@ module top ;
 		Rx_1
 		 (.oe(tmpOE__Rx_1_net),
 		  .y({1'b0}),
-		  .fb({Net_2326}),
+		  .fb({Net_4759}),
 		  .io({tmpIO_0__Rx_1_net[0:0]}),
 		  .siovref(tmpSIOVREF__Rx_1_net),
 		  .interrupt({tmpINTERRUPT_0__Rx_1_net[0:0]}),
@@ -1737,16 +1821,16 @@ module top ;
         .clock(1'b0),
         .cts_n(1'b0),
         .reset(1'b0),
-        .rts_n(Net_2325),
-        .rx(Net_2326),
-        .rx_clk(Net_2327),
-        .rx_data(Net_2328),
-        .rx_interrupt(Net_2329),
-        .tx(Net_2330),
-        .tx_clk(Net_2331),
-        .tx_data(Net_2332),
-        .tx_en(Net_2333),
-        .tx_interrupt(Net_2334));
+        .rts_n(Net_4763),
+        .rx(Net_4759),
+        .rx_clk(Net_4764),
+        .rx_data(Net_4765),
+        .rx_interrupt(Net_4766),
+        .tx(Net_4758),
+        .tx_clk(Net_4767),
+        .tx_data(Net_4768),
+        .tx_en(Net_4769),
+        .tx_interrupt(Net_4770));
     defparam UART.Address1 = 0;
     defparam UART.Address2 = 0;
     defparam UART.EnIntRXInterrupt = 1;
@@ -1763,7 +1847,7 @@ module top ;
     cy_annotation_universal_v1_0 R_1 (
         .connect({
             Net_2381,
-            Net_2384
+            Net_4757
         })
     );
     defparam R_1.comp_name = "Resistor_v1_0";
@@ -1772,7 +1856,7 @@ module top ;
 
     cy_annotation_universal_v1_0 ESP_Vdd (
         .connect({
-            Net_2384
+            Net_4757
         })
     );
     defparam ESP_Vdd.comp_name = "Power_v1_0";
@@ -1951,7 +2035,7 @@ module top ;
     
     defparam AMux_ADC.muxin_width = 5;
     defparam AMux_ADC.init_mux_sel = 5'h0;
-    defparam AMux_ADC.one_active = 1;
+    defparam AMux_ADC.one_active = 0;
     defparam AMux_ADC.connect_mode = 2;
     
     // -- AMux AMux_ADC end --
@@ -2954,15 +3038,17 @@ module top ;
     defparam GND_10.width = 1;
 
 
-	cy_isr_v1_0
-		#(.int_type(2'b10))
-		isr_DelSig
-		 (.int_signal(Net_4270));
+	cy_dma_v1_0
+		#(.drq_type(2'b10))
+		DMA_Filter_RAM_Lote
+		 (.drq(Net_4899),
+		  .nrq(Net_4817),
+		  .trq(1'b0));
 
 
     ADC_DelSig_v3_30_13 ADC (
         .aclk(1'b0),
-        .eoc(Net_4270),
+        .eoc(EOC),
         .mi(1'b0),
         .nVref(Net_4627),
         .soc(1'b1),
@@ -3718,8 +3804,8 @@ module top ;
 
 	cy_dma_v1_0
 		#(.drq_type(2'b10))
-		DMA
-		 (.drq(Net_4731),
+		DMA_Filter_RAM_Single
+		 (.drq(Net_4905),
 		  .nrq(Net_4733),
 		  .trq(1'b0));
 
@@ -3727,9 +3813,109 @@ module top ;
 
 	cy_isr_v1_0
 		#(.int_type(2'b10))
-		isr_DMA
-		 (.int_signal(Net_4733));
+		isr_DMA_Filter_RAM
+		 (.int_signal(Net_4851));
 
+
+
+    assign Net_4815 = Net_4731 & Net_4922;
+
+
+    assign Net_4850 = Net_4854 ^ Net_4848;
+
+
+    assign Net_4822 = ~Net_4922;
+
+
+    assign Net_4851 = Net_4733 ^ Net_4817;
+
+
+	cy_dma_v1_0
+		#(.drq_type(2'b10))
+		DMA_DelSig_Filter
+		 (.drq(Net_4843),
+		  .nrq(Net_4796),
+		  .trq(1'b0));
+
+
+
+    assign Net_4816 = Net_4731 & Net_4822;
+
+    CyControlReg_v1_80 Reg_Select (
+        .clock(1'b0),
+        .control_0(Net_4922),
+        .control_1(Net_4928),
+        .control_2(Net_4927),
+        .control_3(Net_4932),
+        .control_4(Net_4933),
+        .control_5(Net_4934),
+        .control_6(Net_4935),
+        .control_7(Net_4936),
+        .reset(1'b0));
+    defparam Reg_Select.Bit0Mode = 0;
+    defparam Reg_Select.Bit1Mode = 0;
+    defparam Reg_Select.Bit2Mode = 0;
+    defparam Reg_Select.Bit3Mode = 0;
+    defparam Reg_Select.Bit4Mode = 0;
+    defparam Reg_Select.Bit5Mode = 0;
+    defparam Reg_Select.Bit6Mode = 0;
+    defparam Reg_Select.Bit7Mode = 0;
+    defparam Reg_Select.BitValue = 0;
+    defparam Reg_Select.BusDisplay = 0;
+    defparam Reg_Select.ExtrReset = 0;
+    defparam Reg_Select.NumOutputs = 3;
+
+
+    assign Net_4844 = Net_4927 & EOC;
+
+
+    assign Net_4892 = Net_4929 & Net_4844;
+
+
+    assign Net_4847 = Net_4839 & EOC;
+
+
+    assign Net_4839 = ~Net_4927;
+
+
+	cy_dma_v1_0
+		#(.drq_type(2'b10))
+		DMA_DelSig_RAM_Single
+		 (.drq(Net_4892),
+		  .nrq(Net_4854),
+		  .trq(1'b0));
+
+
+
+	cy_dma_v1_0
+		#(.drq_type(2'b10))
+		DMA_DelSig_RAM_Lote
+		 (.drq(Net_4891),
+		  .nrq(Net_4848),
+		  .trq(1'b0));
+
+
+
+	cy_isr_v1_0
+		#(.int_type(2'b10))
+		isr_DMA_DelSig_RAM
+		 (.int_signal(Net_4850));
+
+
+
+    assign Net_4891 = Net_4929 & Net_4847;
+
+
+    assign Net_4899 = Net_4816 & Net_4928;
+
+
+    assign Net_4905 = Net_4815 & Net_4928;
+
+
+    assign Net_4843 = Net_4928 & EOC;
+
+
+    assign Net_4929 = ~Net_4928;
 
 
 

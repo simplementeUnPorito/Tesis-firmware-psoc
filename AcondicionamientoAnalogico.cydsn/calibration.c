@@ -642,7 +642,7 @@ static void cal_servo_measure_begin(uint8 stage_index)
     ADC_Stop();
     CAL_AMUX_ADC_SELECT(stage->adc_channel);
     ADC_Start();
-    isr_DelSig_ClearPending();
+    isr_DMA_DelSig_RAM_ClearPending();
     psoc_adc_clear_isr_sample();
     ADC_StartConvert();
     cal_diag(PSOC_EVT_SERVO_STAGE, stage_index);
@@ -1237,7 +1237,7 @@ uint8 psoc_calibration_service_async(void)
             ADC_Stop();
             CAL_AMUX_ADC_SELECT(stage->adc_channel);
             ADC_Start();
-            isr_DelSig_ClearPending();
+            isr_DMA_DelSig_RAM_ClearPending();
             ADC_StartConvert();
             async_measure_begin(cal_stage_center_dac(stage), CAL_ASYNC_EVAL_INIT,
                                 &stage->avg, stage->settle_samples, 1u, 0u);
@@ -1365,7 +1365,7 @@ uint8 psoc_calibration_service_async(void)
             ADC_Stop();
             CAL_AMUX_ADC_SELECT(stage->adc_channel);
             ADC_Start();
-            isr_DelSig_ClearPending();
+            isr_DMA_DelSig_RAM_ClearPending();
             ADC_StartConvert();
             async_measure_begin(g_psoc_cal_results[g_cal_async.stage_index].final_dac,
                                 CAL_ASYNC_EVAL_VERIFY,
@@ -1429,7 +1429,7 @@ uint8 psoc_calibration_service_async(void)
             ADC_Stop();
             CAL_AMUX_ADC_SELECT(stage->adc_channel);
             ADC_Start();
-            isr_DelSig_ClearPending();
+            isr_DMA_DelSig_RAM_ClearPending();
             ADC_StartConvert();
             async_measure_begin(g_cal_async.realcheck_current_dac,
                                 CAL_ASYNC_EVAL_REALCHECK,

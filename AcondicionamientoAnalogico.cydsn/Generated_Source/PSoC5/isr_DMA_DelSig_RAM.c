@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: isr_DMA.c  
+* File Name: isr_DMA_DelSig_RAM.c  
 * Version 1.71
 *
 *  Description:
@@ -18,15 +18,15 @@
 
 #include <cydevice_trm.h>
 #include <CyLib.h>
-#include <isr_DMA.h>
+#include <isr_DMA_DelSig_RAM.h>
 #include "cyapicallbacks.h"
 
-#if !defined(isr_DMA__REMOVED) /* Check for removal by optimization */
+#if !defined(isr_DMA_DelSig_RAM__REMOVED) /* Check for removal by optimization */
 
 /*******************************************************************************
 *  Place your includes, defines and code here 
 ********************************************************************************/
-/* `#START isr_DMA_intc` */
+/* `#START isr_DMA_DelSig_RAM_intc` */
 
 /* `#END` */
 
@@ -42,7 +42,7 @@ CY_ISR_PROTO(IntDefaultHandler);
 
 
 /*******************************************************************************
-* Function Name: isr_DMA_Start
+* Function Name: isr_DMA_DelSig_RAM_Start
 ********************************************************************************
 *
 * Summary:
@@ -58,24 +58,24 @@ CY_ISR_PROTO(IntDefaultHandler);
 *   None
 *
 *******************************************************************************/
-void isr_DMA_Start(void)
+void isr_DMA_DelSig_RAM_Start(void)
 {
     /* For all we know the interrupt is active. */
-    isr_DMA_Disable();
+    isr_DMA_DelSig_RAM_Disable();
 
-    /* Set the ISR to point to the isr_DMA Interrupt. */
-    isr_DMA_SetVector(&isr_DMA_Interrupt);
+    /* Set the ISR to point to the isr_DMA_DelSig_RAM Interrupt. */
+    isr_DMA_DelSig_RAM_SetVector(&isr_DMA_DelSig_RAM_Interrupt);
 
     /* Set the priority. */
-    isr_DMA_SetPriority((uint8)isr_DMA_INTC_PRIOR_NUMBER);
+    isr_DMA_DelSig_RAM_SetPriority((uint8)isr_DMA_DelSig_RAM_INTC_PRIOR_NUMBER);
 
     /* Enable it. */
-    isr_DMA_Enable();
+    isr_DMA_DelSig_RAM_Enable();
 }
 
 
 /*******************************************************************************
-* Function Name: isr_DMA_StartEx
+* Function Name: isr_DMA_DelSig_RAM_StartEx
 ********************************************************************************
 *
 * Summary:
@@ -101,24 +101,24 @@ void isr_DMA_Start(void)
 *   None
 *
 *******************************************************************************/
-void isr_DMA_StartEx(cyisraddress address)
+void isr_DMA_DelSig_RAM_StartEx(cyisraddress address)
 {
     /* For all we know the interrupt is active. */
-    isr_DMA_Disable();
+    isr_DMA_DelSig_RAM_Disable();
 
-    /* Set the ISR to point to the isr_DMA Interrupt. */
-    isr_DMA_SetVector(address);
+    /* Set the ISR to point to the isr_DMA_DelSig_RAM Interrupt. */
+    isr_DMA_DelSig_RAM_SetVector(address);
 
     /* Set the priority. */
-    isr_DMA_SetPriority((uint8)isr_DMA_INTC_PRIOR_NUMBER);
+    isr_DMA_DelSig_RAM_SetPriority((uint8)isr_DMA_DelSig_RAM_INTC_PRIOR_NUMBER);
 
     /* Enable it. */
-    isr_DMA_Enable();
+    isr_DMA_DelSig_RAM_Enable();
 }
 
 
 /*******************************************************************************
-* Function Name: isr_DMA_Stop
+* Function Name: isr_DMA_DelSig_RAM_Stop
 ********************************************************************************
 *
 * Summary:
@@ -131,22 +131,22 @@ void isr_DMA_StartEx(cyisraddress address)
 *   None
 *
 *******************************************************************************/
-void isr_DMA_Stop(void)
+void isr_DMA_DelSig_RAM_Stop(void)
 {
     /* Disable this interrupt. */
-    isr_DMA_Disable();
+    isr_DMA_DelSig_RAM_Disable();
 
     /* Set the ISR to point to the passive one. */
-    isr_DMA_SetVector(&IntDefaultHandler);
+    isr_DMA_DelSig_RAM_SetVector(&IntDefaultHandler);
 }
 
 
 /*******************************************************************************
-* Function Name: isr_DMA_Interrupt
+* Function Name: isr_DMA_DelSig_RAM_Interrupt
 ********************************************************************************
 *
 * Summary:
-*   The default Interrupt Service Routine for isr_DMA.
+*   The default Interrupt Service Routine for isr_DMA_DelSig_RAM.
 *
 *   Add custom code between the coments to keep the next version of this file
 *   from over writting your code.
@@ -157,27 +157,27 @@ void isr_DMA_Stop(void)
 *   None
 *
 *******************************************************************************/
-CY_ISR(isr_DMA_Interrupt)
+CY_ISR(isr_DMA_DelSig_RAM_Interrupt)
 {
-    #ifdef isr_DMA_INTERRUPT_INTERRUPT_CALLBACK
-        isr_DMA_Interrupt_InterruptCallback();
-    #endif /* isr_DMA_INTERRUPT_INTERRUPT_CALLBACK */ 
+    #ifdef isr_DMA_DelSig_RAM_INTERRUPT_INTERRUPT_CALLBACK
+        isr_DMA_DelSig_RAM_Interrupt_InterruptCallback();
+    #endif /* isr_DMA_DelSig_RAM_INTERRUPT_INTERRUPT_CALLBACK */ 
 
     /*  Place your Interrupt code here. */
-    /* `#START isr_DMA_Interrupt` */
+    /* `#START isr_DMA_DelSig_RAM_Interrupt` */
 
     /* `#END` */
 }
 
 
 /*******************************************************************************
-* Function Name: isr_DMA_SetVector
+* Function Name: isr_DMA_DelSig_RAM_SetVector
 ********************************************************************************
 *
 * Summary:
-*   Change the ISR vector for the Interrupt. Note calling isr_DMA_Start
+*   Change the ISR vector for the Interrupt. Note calling isr_DMA_DelSig_RAM_Start
 *   will override any effect this method would have had. To set the vector 
-*   before the component has been started use isr_DMA_StartEx instead.
+*   before the component has been started use isr_DMA_DelSig_RAM_StartEx instead.
 * 
 *   When defining ISR functions, the CY_ISR and CY_ISR_PROTO macros should be 
 *   used to provide consistent definition across compilers:
@@ -197,18 +197,18 @@ CY_ISR(isr_DMA_Interrupt)
 *   None
 *
 *******************************************************************************/
-void isr_DMA_SetVector(cyisraddress address)
+void isr_DMA_DelSig_RAM_SetVector(cyisraddress address)
 {
     cyisraddress * ramVectorTable;
 
     ramVectorTable = (cyisraddress *) *CYINT_VECT_TABLE;
 
-    ramVectorTable[CYINT_IRQ_BASE + (uint32)isr_DMA__INTC_NUMBER] = address;
+    ramVectorTable[CYINT_IRQ_BASE + (uint32)isr_DMA_DelSig_RAM__INTC_NUMBER] = address;
 }
 
 
 /*******************************************************************************
-* Function Name: isr_DMA_GetVector
+* Function Name: isr_DMA_DelSig_RAM_GetVector
 ********************************************************************************
 *
 * Summary:
@@ -221,26 +221,26 @@ void isr_DMA_SetVector(cyisraddress address)
 *   Address of the ISR in the interrupt vector table.
 *
 *******************************************************************************/
-cyisraddress isr_DMA_GetVector(void)
+cyisraddress isr_DMA_DelSig_RAM_GetVector(void)
 {
     cyisraddress * ramVectorTable;
 
     ramVectorTable = (cyisraddress *) *CYINT_VECT_TABLE;
 
-    return ramVectorTable[CYINT_IRQ_BASE + (uint32)isr_DMA__INTC_NUMBER];
+    return ramVectorTable[CYINT_IRQ_BASE + (uint32)isr_DMA_DelSig_RAM__INTC_NUMBER];
 }
 
 
 /*******************************************************************************
-* Function Name: isr_DMA_SetPriority
+* Function Name: isr_DMA_DelSig_RAM_SetPriority
 ********************************************************************************
 *
 * Summary:
 *   Sets the Priority of the Interrupt. 
 *
-*   Note calling isr_DMA_Start or isr_DMA_StartEx will 
+*   Note calling isr_DMA_DelSig_RAM_Start or isr_DMA_DelSig_RAM_StartEx will 
 *   override any effect this API would have had. This API should only be called
-*   after isr_DMA_Start or isr_DMA_StartEx has been called. 
+*   after isr_DMA_DelSig_RAM_Start or isr_DMA_DelSig_RAM_StartEx has been called. 
 *   To set the initial priority for the component, use the Design-Wide Resources
 *   Interrupt Editor.
 *
@@ -255,14 +255,14 @@ cyisraddress isr_DMA_GetVector(void)
 *   None
 *
 *******************************************************************************/
-void isr_DMA_SetPriority(uint8 priority)
+void isr_DMA_DelSig_RAM_SetPriority(uint8 priority)
 {
-    *isr_DMA_INTC_PRIOR = priority << 5;
+    *isr_DMA_DelSig_RAM_INTC_PRIOR = priority << 5;
 }
 
 
 /*******************************************************************************
-* Function Name: isr_DMA_GetPriority
+* Function Name: isr_DMA_DelSig_RAM_GetPriority
 ********************************************************************************
 *
 * Summary:
@@ -277,19 +277,19 @@ void isr_DMA_SetPriority(uint8 priority)
 *    PSoC 4: Priority is from 0 to 3.
 *
 *******************************************************************************/
-uint8 isr_DMA_GetPriority(void)
+uint8 isr_DMA_DelSig_RAM_GetPriority(void)
 {
     uint8 priority;
 
 
-    priority = *isr_DMA_INTC_PRIOR >> 5;
+    priority = *isr_DMA_DelSig_RAM_INTC_PRIOR >> 5;
 
     return priority;
 }
 
 
 /*******************************************************************************
-* Function Name: isr_DMA_Enable
+* Function Name: isr_DMA_DelSig_RAM_Enable
 ********************************************************************************
 *
 * Summary:
@@ -304,15 +304,15 @@ uint8 isr_DMA_GetPriority(void)
 *   None
 *
 *******************************************************************************/
-void isr_DMA_Enable(void)
+void isr_DMA_DelSig_RAM_Enable(void)
 {
     /* Enable the general interrupt. */
-    *isr_DMA_INTC_SET_EN = isr_DMA__INTC_MASK;
+    *isr_DMA_DelSig_RAM_INTC_SET_EN = isr_DMA_DelSig_RAM__INTC_MASK;
 }
 
 
 /*******************************************************************************
-* Function Name: isr_DMA_GetState
+* Function Name: isr_DMA_DelSig_RAM_GetState
 ********************************************************************************
 *
 * Summary:
@@ -325,15 +325,15 @@ void isr_DMA_Enable(void)
 *   1 if enabled, 0 if disabled.
 *
 *******************************************************************************/
-uint8 isr_DMA_GetState(void)
+uint8 isr_DMA_DelSig_RAM_GetState(void)
 {
     /* Get the state of the general interrupt. */
-    return ((*isr_DMA_INTC_SET_EN & (uint32)isr_DMA__INTC_MASK) != 0u) ? 1u:0u;
+    return ((*isr_DMA_DelSig_RAM_INTC_SET_EN & (uint32)isr_DMA_DelSig_RAM__INTC_MASK) != 0u) ? 1u:0u;
 }
 
 
 /*******************************************************************************
-* Function Name: isr_DMA_Disable
+* Function Name: isr_DMA_DelSig_RAM_Disable
 ********************************************************************************
 *
 * Summary:
@@ -346,15 +346,15 @@ uint8 isr_DMA_GetState(void)
 *   None
 *
 *******************************************************************************/
-void isr_DMA_Disable(void)
+void isr_DMA_DelSig_RAM_Disable(void)
 {
     /* Disable the general interrupt. */
-    *isr_DMA_INTC_CLR_EN = isr_DMA__INTC_MASK;
+    *isr_DMA_DelSig_RAM_INTC_CLR_EN = isr_DMA_DelSig_RAM__INTC_MASK;
 }
 
 
 /*******************************************************************************
-* Function Name: isr_DMA_SetPending
+* Function Name: isr_DMA_DelSig_RAM_SetPending
 ********************************************************************************
 *
 * Summary:
@@ -373,14 +373,14 @@ void isr_DMA_Disable(void)
 *   interrupts).
 *
 *******************************************************************************/
-void isr_DMA_SetPending(void)
+void isr_DMA_DelSig_RAM_SetPending(void)
 {
-    *isr_DMA_INTC_SET_PD = isr_DMA__INTC_MASK;
+    *isr_DMA_DelSig_RAM_INTC_SET_PD = isr_DMA_DelSig_RAM__INTC_MASK;
 }
 
 
 /*******************************************************************************
-* Function Name: isr_DMA_ClearPending
+* Function Name: isr_DMA_DelSig_RAM_ClearPending
 ********************************************************************************
 *
 * Summary:
@@ -398,9 +398,9 @@ void isr_DMA_SetPending(void)
 *   None
 *
 *******************************************************************************/
-void isr_DMA_ClearPending(void)
+void isr_DMA_DelSig_RAM_ClearPending(void)
 {
-    *isr_DMA_INTC_CLR_PD = isr_DMA__INTC_MASK;
+    *isr_DMA_DelSig_RAM_INTC_CLR_PD = isr_DMA_DelSig_RAM__INTC_MASK;
 }
 
 #endif /* End check for removal by optimization */

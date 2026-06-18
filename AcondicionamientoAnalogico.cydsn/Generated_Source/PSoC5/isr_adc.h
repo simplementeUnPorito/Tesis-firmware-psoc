@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: isr_adc.h
+* File Name: isr_ADC.h
 * Version 1.71
 *
 *  Description:
@@ -12,59 +12,59 @@
 * disclaimers, and limitations in the end user license agreement accompanying 
 * the software package with which this file was provided.
 *******************************************************************************/
-#if !defined(CY_ISR_isr_adc_H)
-#define CY_ISR_isr_adc_H
+#if !defined(CY_ISR_isr_ADC_H)
+#define CY_ISR_isr_ADC_H
 
 
 #include <cytypes.h>
 #include <cyfitter.h>
 
 /* Interrupt Controller API. */
-void isr_adc_Start(void);
-void isr_adc_StartEx(cyisraddress address);
-void isr_adc_Stop(void);
+void isr_ADC_Start(void);
+void isr_ADC_StartEx(cyisraddress address);
+void isr_ADC_Stop(void);
 
-CY_ISR_PROTO(isr_adc_Interrupt);
+CY_ISR_PROTO(isr_ADC_Interrupt);
 
-void isr_adc_SetVector(cyisraddress address);
-cyisraddress isr_adc_GetVector(void);
+void isr_ADC_SetVector(cyisraddress address);
+cyisraddress isr_ADC_GetVector(void);
 
-void isr_adc_SetPriority(uint8 priority);
-uint8 isr_adc_GetPriority(void);
+void isr_ADC_SetPriority(uint8 priority);
+uint8 isr_ADC_GetPriority(void);
 
-void isr_adc_Enable(void);
-uint8 isr_adc_GetState(void);
-void isr_adc_Disable(void);
+void isr_ADC_Enable(void);
+uint8 isr_ADC_GetState(void);
+void isr_ADC_Disable(void);
 
-void isr_adc_SetPending(void);
-void isr_adc_ClearPending(void);
+void isr_ADC_SetPending(void);
+void isr_ADC_ClearPending(void);
 
 
 /* Interrupt Controller Constants */
 
-/* Address of the INTC.VECT[x] register that contains the Address of the isr_adc ISR. */
-#define isr_adc_INTC_VECTOR            ((reg32 *) isr_adc__INTC_VECT)
+/* Address of the INTC.VECT[x] register that contains the Address of the isr_ADC ISR. */
+#define isr_ADC_INTC_VECTOR            ((reg32 *) isr_ADC__INTC_VECT)
 
-/* Address of the isr_adc ISR priority. */
-#define isr_adc_INTC_PRIOR             ((reg8 *) isr_adc__INTC_PRIOR_REG)
+/* Address of the isr_ADC ISR priority. */
+#define isr_ADC_INTC_PRIOR             ((reg8 *) isr_ADC__INTC_PRIOR_REG)
 
-/* Priority of the isr_adc interrupt. */
-#define isr_adc_INTC_PRIOR_NUMBER      isr_adc__INTC_PRIOR_NUM
+/* Priority of the isr_ADC interrupt. */
+#define isr_ADC_INTC_PRIOR_NUMBER      isr_ADC__INTC_PRIOR_NUM
 
-/* Address of the INTC.SET_EN[x] byte to bit enable isr_adc interrupt. */
-#define isr_adc_INTC_SET_EN            ((reg32 *) isr_adc__INTC_SET_EN_REG)
+/* Address of the INTC.SET_EN[x] byte to bit enable isr_ADC interrupt. */
+#define isr_ADC_INTC_SET_EN            ((reg32 *) isr_ADC__INTC_SET_EN_REG)
 
-/* Address of the INTC.CLR_EN[x] register to bit clear the isr_adc interrupt. */
-#define isr_adc_INTC_CLR_EN            ((reg32 *) isr_adc__INTC_CLR_EN_REG)
+/* Address of the INTC.CLR_EN[x] register to bit clear the isr_ADC interrupt. */
+#define isr_ADC_INTC_CLR_EN            ((reg32 *) isr_ADC__INTC_CLR_EN_REG)
 
-/* Address of the INTC.SET_PD[x] register to set the isr_adc interrupt state to pending. */
-#define isr_adc_INTC_SET_PD            ((reg32 *) isr_adc__INTC_SET_PD_REG)
+/* Address of the INTC.SET_PD[x] register to set the isr_ADC interrupt state to pending. */
+#define isr_ADC_INTC_SET_PD            ((reg32 *) isr_ADC__INTC_SET_PD_REG)
 
-/* Address of the INTC.CLR_PD[x] register to clear the isr_adc interrupt. */
-#define isr_adc_INTC_CLR_PD            ((reg32 *) isr_adc__INTC_CLR_PD_REG)
+/* Address of the INTC.CLR_PD[x] register to clear the isr_ADC interrupt. */
+#define isr_ADC_INTC_CLR_PD            ((reg32 *) isr_ADC__INTC_CLR_PD_REG)
 
 
-#endif /* CY_ISR_isr_adc_H */
+#endif /* CY_ISR_isr_ADC_H */
 
 
 /* [] END OF FILE */
