@@ -49,3 +49,39 @@ void psoc_adc_select_capture_config(void)
     ADC_Start();
     ADC_StopConvert();
 }
+
+static volatile int32 g_psoc_adc_isr_window_sum   = 0;
+static volatile uint8 g_psoc_adc_isr_window_n      = 0u;
+static volatile uint8 g_psoc_adc_isr_window_ready  = 0u;
+
+void psoc_adc_clear_isr_window(void)
+{
+    uint8 saved = CyEnterCriticalSection();
+    g_psoc_adc_isr_window_ready = 0u;
+    CyExitCriticalSection(saved);
+}
+
+void psoc_adc_note_isr_window(int32 sum, uint8 n)
+{
+    g_psoc_adc_isr_window_sum = sum;
+    g_psoc_adc_isr_window_n = n;
+    g_psoc_adc_isr_window_ready = 1u;
+}
+
+uint8 psoc_adc_take_isr_window(int32 *out_sum, uint8 *out_n)
+{
+    uint8 ok = 0u;
+    uint8 saved;
+    if (out_sum == (int32 *)0 || out_n == (uint8 *)0) {
+        return 0u;
+    }
+    saved = CyEnterCriticalSection();
+    if (g_psoc_adc_isr_window_ready) {
+        *out_sum = g_psoc_adc_isr_window_sum;
+        *out_n = g_psoc_adc_isr_window_n;
+        g_psoc_adc_isr_window_ready = 0u;
+        ok = 1u;
+    }
+    CyExitCriticalSection(saved);
+    return ok;
+}

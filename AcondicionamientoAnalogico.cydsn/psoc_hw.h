@@ -79,6 +79,7 @@
 #define PSOC_EVT_STATUS_REQ       0x3Bu
 #define PSOC_EVT_BUTTON           0x3Cu
 #define PSOC_EVT_BUTTON_IGNORED   0x3Du
+#define PSOC_EVT_CAPTURE_CLAMPED  0x3Eu  /* value=lotes pedidos saturado a 8 bit; el equipo recortó a PSOC_CAPTURE_MAX_BATCHES */
 
 #define PSOC_CMD_STATUS         0xA5u
 #define PSOC_CMD_PGA            0xA6u

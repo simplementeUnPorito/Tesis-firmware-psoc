@@ -68,11 +68,9 @@
 #endif
 
 /* Tamaño del lote HW (canales DMA_*_RAM_Lote) para promediado por DMA.
- * Hoy ningún consumidor lo usa todavía (la ruta queda en Single); el canal
- * ya está armado e inicializado para cuando se conecte el promediado. */
-#ifndef DMA_LOTE_SAMPLES
-#define DMA_LOTE_SAMPLES   30u
-#endif
+ * El valor real vive en psoc_adc.h (PSOC_ADC_LOTE_SAMPLES) porque
+ * calibration.c también lo necesita para cruzarlo contra CAL_AVG_N_GEO_*. */
+#define DMA_LOTE_SAMPLES   PSOC_ADC_LOTE_SAMPLES
 
 #define PING_PERIOD_MS     700u
 #define PING_OFF_MS        100u
@@ -92,8 +90,8 @@
 #define PSOC_DIAG_ENABLE      1
 #endif
 
-#ifndef PSOC_DEBUG_LED
-#define PSOC_DEBUG_LED        1
+#ifndef PSOC_RAMP_DEBUG_ENABLE
+#define PSOC_RAMP_DEBUG_ENABLE 1
 #endif
 
 #ifndef PSOC_EARLY_UART_TEST
@@ -115,10 +113,18 @@ static volatile int32  g_adc_raw          = 0;
 static volatile uint8  g_dma_raw_buf[3]   = {0u, 0u, 0u};
 static volatile uint8  g_dma_filt_buf[3]  = {0u, 0u, 0u};
 
-/* Buffers del canal Lote (mux HW) — reservados para promediado por DMA;
- * la ruta hoy siempre selecciona Single, así que quedan sin tocar. */
+/* Buffers del canal Lote (mux HW) — usados por calibración (ver dma_route_select). */
 static volatile uint8  g_dma_raw_lote_buf[DMA_LOTE_SAMPLES * 3u];
 static volatile uint8  g_dma_filt_lote_buf[DMA_LOTE_SAMPLES * 3u];
+
+/* Espejo software de qué sub-modo está seleccionado en el canal raw —
+ * actualizado solo dentro de dma_route_select(); le permite a la ISR
+ * compartida saber cómo interpretar lo que llegó sin señal de HW extra. */
+static volatile uint8  g_raw_route_lote   = 0u;
+
+/* Handle del TD inicial de DMA_DelSig_RAM_Lote, guardado en dma_adc_init()
+ * para poder re-armarlo limpio en cada entrada a calibración. */
+static uint8 g_td_raw_lote = 0u;
 
 /* 0 = enviar crudo (default); 1 = enviar filtrado por FIR hardware */
 static volatile uint8  g_stream_mode      = 0u;
@@ -270,10 +276,20 @@ static void psoc_enter_sampling(uint8 debugMode)
     ADC_StopConvert();
     timer_stop_quiet();
     saved = CyEnterCriticalSection();
+#if PSOC_RAMP_DEBUG_ENABLE
     g_debug_psoc = debugMode ? 1u : 0u;
+#else
+    (void)debugMode;
+    g_debug_psoc = 0u;
+#endif
     capture_reset_locked();
     g_state = PSOC_SAMPLING;
     CyExitCriticalSection(saved);
+    if (g_n_batches > PSOC_CAPTURE_MAX_BATCHES) {
+        /* Pedido real recortado al cap físico — avisar en vez de truncar en
+         * silencio (la web puede así informar la duración real soportada). */
+        uart_send_diag(PSOC_EVT_CAPTURE_CLAMPED, diag_u16_sat(g_n_batches));
+    }
     uart_send_diag(PSOC_EVT_SAMPLING_START, diag_u16_sat(target));
     ADC_StartConvert();
 }
@@ -285,9 +301,28 @@ static int32 dma_buf_to_i24(const volatile uint8 *buf)
     return (u & 0x00800000UL) ? (int32)(u | 0xFF000000UL) : (int32)u;
 }
 
-/* ISR: muestra RAW del ADC (DMA_DelSig_RAM_Single depositó 3 bytes en g_dma_raw_buf) */
+/* ISR compartida del canal raw (Single + Lote, OR'd por HW en un solo vector).
+ * g_raw_route_lote (espejo de dma_route_select) dice cuál llegó. */
 CY_ISR(isr_DMA_DelSig_RAM_Handler)
 {
+    if (g_raw_route_lote)
+    {
+        /* Lote: DMA_DelSig_RAM_Lote depositó DMA_LOTE_SAMPLES muestras en
+         * g_dma_raw_lote_buf. psoc_adc_counts_right_aligned debe aplicarse a
+         * CADA muestra antes de sumar (no una vez al final) — sumar primero
+         * y dividir después trunca distinto, rompiendo la equivalencia con
+         * el camino Single muestra-a-muestra que esto reemplaza. */
+        int32 sum = 0;
+        uint8 k;
+        for (k = 0u; k < DMA_LOTE_SAMPLES; k++)
+        {
+            const volatile uint8 *s = &g_dma_raw_lote_buf[(uint16)k * 3u];
+            sum += psoc_adc_counts_right_aligned(dma_buf_to_i24(s));
+        }
+        psoc_adc_note_isr_window(sum, (uint8)DMA_LOTE_SAMPLES);
+        return;
+    }
+
     g_adc_raw = psoc_adc_counts_right_aligned(dma_buf_to_i24(g_dma_raw_buf));
     psoc_adc_note_isr_sample(g_adc_raw);   /* mantiene ruta calibración activa */
 
@@ -298,7 +333,11 @@ CY_ISR(isr_DMA_DelSig_RAM_Handler)
         g_batch_fill < BATCH_SAMPLES)
     {
         uint16 pos = (uint16)(g_batch_fill * SAMPLE_BYTES);
+#if PSOC_RAMP_DEBUG_ENABLE
         int32 val = g_debug_psoc ? (int32)(g_dbg_cnt++ & 0x00FFFFFFu) : g_adc_raw;
+#else
+        int32 val = g_adc_raw;
+#endif
         g_capture_raw[g_batches_captured][pos]      = (uint8)( val        & 0xFFu);
         g_capture_raw[g_batches_captured][pos + 1u] = (uint8)((val >>  8u) & 0xFFu);
         g_capture_raw[g_batches_captured][pos + 2u] = (uint8)((val >> 16u) & 0xFFu);
@@ -453,7 +492,21 @@ static void dma_route_select(uint8 use_filter, uint8 raw_lote, uint8 filt_lote)
     if (use_filter) { reg |= 0x02u; }   /* control_1 */
     if (filt_lote)  { reg |= 0x01u; }   /* control_0 */
     if (raw_lote)   { reg |= 0x04u; }   /* control_2 */
+    g_raw_route_lote = raw_lote ? 1u : 0u;
     Reg_Select_Write(reg);
+}
+
+/* Re-arma DMA_DelSig_RAM_Lote a un estado limpio (offset cero) antes de
+ * seleccionarlo. Si el canal se deselecciona a mitad de lote, su cuenta
+ * interna (burstcount_remain) queda parcialmente avanzada — CyDmaChSetInitialTd
+ * no resetea esa cuenta viva por sí solo (ver CyDmac.c), así que hace falta
+ * un ciclo disable → re-set TD inicial → re-enable. Solo debe llamarse
+ * mientras el canal está deseleccionado (sin DRQs entrantes). */
+static void dma_raw_lote_rearm(void)
+{
+    CyDmaChDisable(DMA_DelSig_RAM_Lote_DmaHandle);
+    CyDmaChSetInitialTd(DMA_DelSig_RAM_Lote_DmaHandle, g_td_raw_lote);
+    CyDmaChEnable(DMA_DelSig_RAM_Lote_DmaHandle, 1u);
 }
 
 static void PGAgain_Set(uint8 code)
@@ -502,7 +555,8 @@ static uint8 psoc_start_calibration_if_idle(uint8 send_ack)
     g_batches_captured = 0u;
     g_capture_done = 0u;
     psoc_calibration_servo_abort();
-    dma_route_select(0u, 0u, 0u);  /* fuerza raw+Single: calibración necesita ADC crudo */
+    dma_raw_lote_rearm();          /* arranque limpio del canal Lote antes de seleccionarlo */
+    dma_route_select(0u, 1u, 0u);  /* fuerza raw+Lote: calibración consume ventanas HW */
     uart_send_diag(PSOC_EVT_CAL_START, 0u);
     if (!psoc_calibration_start_async()) {
         uart_send_diag(PSOC_EVT_CAL_DONE, 0u);
@@ -685,6 +739,7 @@ static void uart_service(void)
                         led_toggle();
                         break;
                     case 0xB3u:
+#if PSOC_RAMP_DEBUG_ENABLE
                         g_debug_psoc = (rx_p1 == 0u) ? 0u : 1u;
                         uart_send_diag(PSOC_EVT_DEBUG_MODE, g_debug_psoc);
                         if (g_debug_psoc) {
@@ -699,6 +754,10 @@ static void uart_service(void)
                             g_capture_done = 0u;
                             g_state        = PSOC_IDLE;
                         }
+#else
+                        (void)rx_p1;
+                        uart_send_diag(PSOC_EVT_DEBUG_MODE, 0u);
+#endif
                         break;
                     case PSOC_CMD_CALIBRATE:
                         (void)psoc_start_calibration_if_idle(1u);
@@ -949,6 +1008,7 @@ static void dma_adc_init(void)
         HI16((uint32)ADC_DEC_SAMP_PTR),
         HI16((uint32)(void *)g_dma_raw_lote_buf));
     td = CyDmaTdAllocate();
+    g_td_raw_lote = td;
     CyDmaTdSetConfiguration(td, (uint16)(3u * DMA_LOTE_SAMPLES), td,
         DMA_DelSig_RAM_Lote__TD_TERMOUT_EN | TD_INC_DST_ADR);
     CyDmaTdSetAddress(td,

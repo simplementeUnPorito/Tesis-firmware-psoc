@@ -2,6 +2,17 @@
 #include "calibration_tables.h"
 #include "psoc_adc.h"
 
+/* El lote HW (PSOC_ADC_LOTE_SAMPLES, psoc_adc.h) debe equivaler exactamente
+ * a una ventana de calibración GEO (CAL_AVG_N_GEO_*) — async_measure_service
+ * trata cada lote como una ventana ya sumada. Si alguna vez divergen, mejor
+ * fallar el build que misconvergir en silencio. */
+#if (PSOC_ADC_LOTE_SAMPLES != CAL_AVG_N_GEO_PGA) || \
+    (PSOC_ADC_LOTE_SAMPLES != CAL_AVG_N_GEO_BP) || \
+    (PSOC_ADC_LOTE_SAMPLES != CAL_AVG_N_GEO_ADDER) || \
+    (PSOC_ADC_LOTE_SAMPLES != CAL_AVG_N_GEO_LP)
+#error "PSOC_ADC_LOTE_SAMPLES (psoc_adc.h) debe ser igual a CAL_AVG_N_GEO_* (calibration_tables_geo_*.h)"
+#endif
+
 #ifndef CAL_AMUX_ADC_START
 #define CAL_AMUX_ADC_START() AMux_ADC_Start()
 #endif
@@ -868,7 +879,11 @@ static void async_measure_begin(uint8 dac, PsocCalAsyncState after_measure,
     g_cal_async.acc = 0L;
     g_cal_async.window_sum = 0L;
     g_cal_async.avg_count = 0u;
-    g_cal_async.discard_count = discard_samples;
+    /* discard_samples llega en unidades de muestra cruda; el lote HW entrega
+     * ventanas completas, así que se convierte a lotes-a-descartar con
+     * redondeo hacia arriba (nunca menos descarte que antes). */
+    g_cal_async.discard_count = (uint16)((discard_samples + (PSOC_ADC_LOTE_SAMPLES - 1u)) /
+                                          PSOC_ADC_LOTE_SAMPLES);
     g_cal_async.total_samples = 0u;
     g_cal_async.window_pos = 0u;
     g_cal_async.window_filled_count = 0u;
@@ -883,7 +898,7 @@ static void async_measure_begin(uint8 dac, PsocCalAsyncState after_measure,
     if (write_dac) {
         stage->write(dac);
     }
-    psoc_adc_clear_isr_sample();
+    psoc_adc_clear_isr_window();
     g_cal_async.state = CAL_ASYNC_MEASURE;
 }
 
@@ -894,14 +909,15 @@ static void async_measure_begin(uint8 dac, PsocCalAsyncState after_measure,
  * consecutivas, con el buffer ya lleno. */
 static uint8 async_measure_service(void)
 {
-    int32 sample;
+    int32 win_sum;
+    uint8 win_n;
     int32 sliding_avg;
     const PsocCalAvgCfg *cfg = g_cal_async.avg_cfg;
     uint8 avg_n = cal_avg_cfg_avg_n(cfg);
     uint8 window_count = cal_avg_cfg_window_count(cfg);
     uint16 max_samples = cal_avg_cfg_max_samples(cfg);
 
-    if (!psoc_adc_take_isr_sample(&sample)) {
+    if (!psoc_adc_take_isr_window(&win_sum, &win_n)) {
         g_cal_async.empty_polls++;
         if (g_cal_async.empty_polls >= CAL_ASYNC_EMPTY_POLL_LIMIT) {
             g_cal_async.measured = 0x7FFFL;
@@ -919,8 +935,13 @@ static uint8 async_measure_service(void)
         return 0u;
     }
 
-    g_cal_async.acc += sample;
-    g_cal_async.avg_count++;
+    /* win_n solo puede valer PSOC_ADC_LOTE_SAMPLES (garantizado por el
+     * #error de arriba == avg_n en todo build posible); se ignora a
+     * propósito en vez de ramificar de forma defensiva sin salida sensata. */
+    (void)win_n;
+    g_cal_async.acc = win_sum;
+    g_cal_async.avg_count = avg_n;
+
     if (g_cal_async.avg_count < avg_n) {
         return 0u;
     }
