@@ -116,6 +116,19 @@
 #define CAL_REALCHECK_AVG_SETTLE_TOL_GEO_LP     10L
 #define CAL_REALCHECK_AVG_STABLE_STREAK_GEO_LP  3u
 
+/* ===== Controlador PI de calibracion (unico camino activo, GEO incluido —
+ * ver bloque "Controlador PI de calibracion" en calibration_tables.h para el
+ * detalle de la ley de control). Sin datos de banco todavia: mismos
+ * Kp/Ki de partida que HAMMER y lsb_counts estimado asumiendo ganancia ~1x
+ * entre VDAC_ref_LP y el punto de medicion (AMux_ADC=3, tambien el canal de
+ * captura) — ajustar con osciloscopio. */
+#define CAL_PI_KP_NUM_GEO_LP        1L
+#define CAL_PI_KP_DIV_GEO_LP        2000L
+#define CAL_PI_KI_NUM_GEO_LP        1L
+#define CAL_PI_KI_DIV_GEO_LP        16000L
+#define CAL_PI_LSB_COUNTS_GEO_LP    839L
+#define CAL_PI_MAX_SAMPLES_GEO_LP   6000u
+
 /* ===== Servo PI (mantenimiento en IDLE, CAL_SERVO_ENABLE_DEFAULT=0) =====
  * control = err*KP_NUM + integral*KI_NUM/KI_DIV; el signo decide el siguiente
  * LSB. Reubicado aca para ajustarlo sin tocar calibration_tables.h. */

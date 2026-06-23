@@ -1,6 +1,9 @@
 #include "calibration.h"
 #include "calibration_tables.h"
 #include "psoc_adc.h"
+#include "filter_coeffs.h"
+#include "FIR_adquisition.h"
+#include "FIR_calibration.h"
 
 /* El lote HW (PSOC_ADC_LOTE_SAMPLES, psoc_adc.h) debe equivaler exactamente
  * a una ventana de calibración GEO (CAL_AVG_N_GEO_*) — async_measure_service
@@ -13,12 +16,71 @@
 #error "PSOC_ADC_LOTE_SAMPLES (psoc_adc.h) debe ser igual a CAL_AVG_N_GEO_* (calibration_tables_geo_*.h)"
 #endif
 
-#ifndef CAL_AMUX_ADC_START
-#define CAL_AMUX_ADC_START() AMux_ADC_Start()
+/* Canal AMux_ADC del capacitor de filtrado (100nF a Vss, pin AMuxCapacitor en
+ * TopDesign). AMux_ADC esta configurado en "All Modes" (AMux_ADC_ATMOSTONE=0,
+ * ver AMux_ADC.h), es decir que el HARDWARE no impide tener varios canales
+ * conectados a la vez -- la exclusion mutua entre canales de SEÑAL (0..3) la
+ * tiene que garantizar el software. psoc_amux_select_exclusive() es el unico
+ * punto de entrada que toca AMux_ADC_Connect/Disconnect para que esa garantia
+ * viva en un solo lugar: nunca conecta un canal nuevo sin desconectar antes el
+ * anterior, asi que dos canales 0..3 (señal real) jamas quedan en paralelo
+ * (cortocircuito). El canal 4 (capacitor) se trackea aparte y se puede dejar
+ * conectado en paralelo a cualquier canal de señal a propósito -- durante la
+ * medición de una etapa de calibración ayuda a filtrar ruido chico; durante
+ * captura/idle se desconecta para no cargar la señal en vivo con capacitancia
+ * extra. */
+#ifndef CAL_AMUX_CAP_CHANNEL
+#define CAL_AMUX_CAP_CHANNEL 4u
 #endif
 
+static uint8 g_amux_active_channel = AMux_ADC_NULL_CHANNEL; /* uno de 0..3, o NULL */
+static uint8 g_amux_cap_connected  = 0u;
+
+static void psoc_amux_select_exclusive(uint8 channel, uint8 with_cap)
+{
+    if (g_amux_active_channel != AMux_ADC_NULL_CHANNEL &&
+        g_amux_active_channel != channel) {
+        AMux_ADC_Disconnect(g_amux_active_channel);
+        g_amux_active_channel = AMux_ADC_NULL_CHANNEL;
+    }
+    if (g_amux_active_channel != channel) {
+        AMux_ADC_Connect(channel);
+        g_amux_active_channel = channel;
+    }
+
+    if (with_cap) {
+        if (!g_amux_cap_connected) {
+            AMux_ADC_Connect(CAL_AMUX_CAP_CHANNEL);
+            g_amux_cap_connected = 1u;
+        }
+    } else if (g_amux_cap_connected) {
+        AMux_ADC_Disconnect(CAL_AMUX_CAP_CHANNEL);
+        g_amux_cap_connected = 0u;
+    }
+}
+
+static void psoc_amux_start(void)
+{
+    AMux_ADC_Start();   /* desconecta TODO (0..4), estado inicial conocido */
+    g_amux_active_channel = AMux_ADC_NULL_CHANNEL;
+    g_amux_cap_connected = 0u;
+}
+
+#ifndef CAL_AMUX_ADC_START
+#define CAL_AMUX_ADC_START() psoc_amux_start()
+#endif
+
+/* Selección de canal para operación normal/idle (canal de captura): sin
+ * capacitor, exclusiva contra cualquier otro canal de señal. */
 #ifndef CAL_AMUX_ADC_SELECT
-#define CAL_AMUX_ADC_SELECT(channel) AMux_ADC_Select(channel)
+#define CAL_AMUX_ADC_SELECT(channel) psoc_amux_select_exclusive((channel), 0u)
+#endif
+
+/* Selección de canal para MEDIR una etapa durante calibración: agrega el
+ * capacitor de filtrado (canal 4) en paralelo al canal de la etapa, pedido
+ * por el usuario para atenuar ruido chico durante la medición. */
+#ifndef CAL_AMUX_ADC_SELECT_STAGE
+#define CAL_AMUX_ADC_SELECT_STAGE(channel) psoc_amux_select_exclusive((channel), 1u)
 #endif
 
 static PsocCalDiagHook g_cal_diag_hook = (PsocCalDiagHook)0;
@@ -60,6 +122,8 @@ static void cal_diag_i32(uint8 event, int32 value)
     cal_diag(event, (uint8)(u & 0xFFu));
 }
 
+#if 0 /* biseccion legacy -- unico consumidor era async_measure_service/
+       * async_finish_stage, comentados mas abajo. */
 static void cal_diag_point(uint8 dac, int32 measured)
 {
     cal_diag(PSOC_EVT_CAL_STAGE_DAC, dac);
@@ -81,12 +145,79 @@ static void cal_diag_measure_point(uint8 dac, int32 measured, uint8 realcheck)
         cal_diag_point(dac, measured);
     }
 }
+#endif /* #if 0 -- biseccion legacy */
 
 static int32 abs_counts(int32 value)
 {
     return (value < 0) ? -value : value;
 }
 
+#ifndef CAL_DIAG_SWEEP_ENABLE
+#define CAL_DIAG_SWEEP_ENABLE 1u
+#endif
+
+#ifndef CAL_DIAG_SWEEP_SETTLE_MS
+#define CAL_DIAG_SWEEP_SETTLE_MS 30u
+#endif
+
+static int32 cal_adc_read_direct_counts(void)
+{
+    int32 sample;
+
+    ADC_StopConvert();
+    ADC_StartConvert();
+    (void)ADC_IsEndConversion(ADC_WAIT_FOR_RESULT);
+    sample = ADC_GetResult32();
+    ADC_StopConvert();
+
+    return psoc_adc_counts_right_aligned(sample);
+}
+
+static int32 cal_adc_read_direct_avg_counts(uint8 sample_count)
+{
+    uint8 i;
+    uint8 count = (sample_count == 0u) ? 1u : sample_count;
+    int32 acc = 0L;
+
+    for (i = 0u; i < count; i++) {
+        acc += cal_adc_read_direct_counts();
+    }
+
+    return acc / (int32)count;
+}
+
+static int32 cal_pi_compare_counts(int32 measured)
+{
+#if PSOC_HW_CLASS == PSOC_HW_HAMMER
+    return abs_counts(measured);
+#else
+    return measured;
+#endif
+}
+
+#if CAL_DIAG_SWEEP_ENABLE
+static void cal_diag_sweep_stage(const PsocCalStage *stage)
+{
+    static const uint8 sweep_dac[3] = { 0u, 128u, 255u };
+    uint8 i;
+
+    for (i = 0u; i < 3u; i++) {
+        stage->write(sweep_dac[i]);
+        CyDelay(CAL_DIAG_SWEEP_SETTLE_MS);
+        cal_diag(PSOC_EVT_CAL_SWEEP_DAC, sweep_dac[i]);
+        cal_diag_i32(PSOC_EVT_CAL_SWEEP_MEAS32, cal_adc_read_direct_counts());
+    }
+}
+#endif
+
+/* ============================================================
+ * BISECCION (legacy, comentada a pedido del usuario): GEO y HAMMER calibran
+ * ahora exclusivamente vía el controlador PI (cal_pi_*, mas abajo). Todo lo
+ * que sigue marcado "#if 0" es la biseccion vieja — se conserva como
+ * referencia, no se borró, pero no compila. Ver calibration_tables.h,
+ * bloque "Controlador PI de calibracion", para la ley de control activa.
+ * ============================================================ */
+#if 0
 /* Reduce las cuentas crudas del ADC a una escala comparable con los codigos
  * del VDAC8. El ADC ve un span simplificado de 0..5V (signed +-2.5V alrededor
  * de VDDA/2), mientras el VDAC usa 0..4.080V; por eso al shift de 18->8 bits
@@ -124,6 +255,7 @@ static uint8 cal_stage_saturated(const PsocCalStage *stage, int32 measured)
     }
     return (abs_counts(cal_scale_counts(measured)) >= cal_scale_counts(stage->sat_counts)) ? 1u : 0u;
 }
+#endif /* #if 0 -- biseccion legacy */
 
 static uint8 cal_stage_min_dac(const PsocCalStage *stage)
 {
@@ -152,6 +284,7 @@ static uint8 cal_stage_center_dac(const PsocCalStage *stage)
     return cal_stage_clamp_dac(stage, stage->dac_center);
 }
 
+#if 0 /* biseccion legacy -- ver nota mas arriba */
 static uint8 cal_stage_probe_dac(const PsocCalStage *stage)
 {
     uint8 center = cal_stage_center_dac(stage);
@@ -178,6 +311,7 @@ static uint8 cal_stage_probe_dac(const PsocCalStage *stage)
 
     return (center < hi) ? hi : lo;
 }
+#endif /* #if 0 -- biseccion legacy */
 
 PsocCalResult g_psoc_cal_results[PSOC_CAL_MAX_STAGES];
 uint8 g_psoc_cal_result_count = 0u;
@@ -192,6 +326,58 @@ uint8 g_psoc_cal_result_count = 0u;
 
 /* Periodo de telemetria de progreso (ticks de 10 ms => ~500 ms). */
 #define CAL_PROGRESS_PERIOD_TICKS 50UL
+
+/* Muestras del PI que se envian al ESP durante calibracion. No puede ser cada
+ * muestra a 3 kHz: cada valor int32 viaja como 4 eventos UART. */
+#ifndef CAL_PI_TELEM_PERIOD
+#define CAL_PI_TELEM_PERIOD 16u
+#endif
+
+#ifndef CAL_PI_MAX_DAC_STEP
+#define CAL_PI_MAX_DAC_STEP 1u
+#endif
+
+#ifndef CAL_PI_DIRECT_EMA_SHIFT
+#define CAL_PI_DIRECT_EMA_SHIFT 3u
+#endif
+
+#ifndef CAL_PI_FINAL_VERIFY_SAMPLES
+#define CAL_PI_FINAL_VERIFY_SAMPLES 16u
+#endif
+
+#ifndef CAL_PI_FINAL_VERIFY_SETTLE_MS
+#define CAL_PI_FINAL_VERIFY_SETTLE_MS 30u
+#endif
+
+#ifndef CAL_PI_FINAL_REFINE_RADIUS
+#define CAL_PI_FINAL_REFINE_RADIUS 16u
+#endif
+
+#ifndef CAL_PI_FINAL_REFINE_SAMPLES
+#define CAL_PI_FINAL_REFINE_SAMPLES 4u
+#endif
+
+#ifndef CAL_PI_FINAL_REFINE_SETTLE_MS
+#define CAL_PI_FINAL_REFINE_SETTLE_MS 5u
+#endif
+
+#ifndef CAL_PI_HAMMER_PASS_COUNT
+#define CAL_PI_HAMMER_PASS_COUNT 3u
+#endif
+
+#if PSOC_HW_CLASS == PSOC_HW_HAMMER
+#define CAL_PI_PASS_COUNT CAL_PI_HAMMER_PASS_COUNT
+#else
+#define CAL_PI_PASS_COUNT 1u
+#endif
+
+#ifndef CAL_DIAG_SWEEP_ENABLE
+#define CAL_DIAG_SWEEP_ENABLE 1u
+#endif
+
+#ifndef CAL_DIAG_SWEEP_SETTLE_MS
+#define CAL_DIAG_SWEEP_SETTLE_MS 30u
+#endif
 
 typedef enum {
     CAL_ASYNC_IDLE = 0u,
@@ -216,6 +402,7 @@ typedef struct {
     uint8 done;
     uint8 ok;
     uint8 stage_index;
+    uint8 pass_index;
     uint8 dac;
     uint8 lo;
     uint8 hi;
@@ -266,6 +453,7 @@ typedef struct {
 
 static PsocCalAsync g_cal_async = { CAL_ASYNC_IDLE };
 
+#if 0 /* biseccion legacy -- ver nota junto a cal_stage_saturated mas arriba */
 static void cal_async_reset_stage_memory(void)
 {
     uint8 i;
@@ -410,7 +598,10 @@ static uint8 cal_async_record_measurement(const PsocCalStage *stage)
     }
     return seen;
 }
+#endif /* #if 0 -- biseccion legacy */
 
+#if 0 /* servo lento legacy -- comentado a pedido del usuario, ver
+       * stubs no-op de psoc_calibration_servo_* mas abajo */
 typedef enum {
     CAL_SERVO_IDLE = 0u,
     CAL_SERVO_MEASURE
@@ -464,12 +655,15 @@ static const PsocCalServoTune g_cal_servo_tune[PSOC_CAL_STAGE_COUNT] = {
     { CAL_SERVO_KP_NUM_GEO_ADDER, CAL_SERVO_KI_NUM_GEO_ADDER, CAL_SERVO_KI_DIV_GEO_ADDER, CAL_SERVO_DEADBAND_GEO_ADDER, CAL_SERVO_FINE_STEP_GEO_ADDER, CAL_SERVO_RECOVERY_STEP_GEO_ADDER },
     { CAL_SERVO_KP_NUM_GEO_LP,    CAL_SERVO_KI_NUM_GEO_LP,    CAL_SERVO_KI_DIV_GEO_LP,    CAL_SERVO_DEADBAND_GEO_LP,    CAL_SERVO_FINE_STEP_GEO_LP,    CAL_SERVO_RECOVERY_STEP_GEO_LP },
 #else
-    { CAL_SERVO_KP_NUM_HAMMER_IN,  CAL_SERVO_KI_NUM_HAMMER_IN,  CAL_SERVO_KI_DIV_HAMMER_IN,  CAL_SERVO_DEADBAND_HAMMER_IN,  CAL_SERVO_FINE_STEP_HAMMER_IN,  CAL_SERVO_RECOVERY_STEP_HAMMER_IN },
     { CAL_SERVO_KP_NUM_HAMMER_PGA, CAL_SERVO_KI_NUM_HAMMER_PGA, CAL_SERVO_KI_DIV_HAMMER_PGA, CAL_SERVO_DEADBAND_HAMMER_PGA, CAL_SERVO_FINE_STEP_HAMMER_PGA, CAL_SERVO_RECOVERY_STEP_HAMMER_PGA },
     { CAL_SERVO_KP_NUM_HAMMER_LP,  CAL_SERVO_KI_NUM_HAMMER_LP,  CAL_SERVO_KI_DIV_HAMMER_LP,  CAL_SERVO_DEADBAND_HAMMER_LP,  CAL_SERVO_FINE_STEP_HAMMER_LP,  CAL_SERVO_RECOVERY_STEP_HAMMER_LP },
 #endif
 };
+#endif /* #if 0 -- servo lento legacy */
 
+/* Compartido con cal_pi_run_service (anti-windup del PI de calibracion) a
+ * pesar del nombre "servo" -- no se movio/renombro para no aumentar el
+ * diff, pero NO es parte del servo lento comentado arriba. */
 static int32 cal_servo_clip_integral(int32 value)
 {
     if (value > CAL_SERVO_INTEGRAL_LIMIT) { return CAL_SERVO_INTEGRAL_LIMIT; }
@@ -477,6 +671,7 @@ static int32 cal_servo_clip_integral(int32 value)
     return value;
 }
 
+#if 0 /* servo lento legacy -- ver nota junto a CAL_SERVO_IDLE mas arriba */
 static uint16 cal_servo_settle_samples(uint8 stage_index)
 {
 #if PSOC_HW_CLASS == PSOC_HW_GEO
@@ -492,12 +687,12 @@ static uint16 cal_servo_settle_samples(uint8 stage_index)
     }
 #else
     switch (stage_index) {
-        case 0u: return CAL_SERVO_SETTLE_SAMPLES_HAMMER_IN;
-        case 1u: return CAL_SERVO_SETTLE_SAMPLES_HAMMER_PGA;
+        case 0u: return CAL_SERVO_SETTLE_SAMPLES_HAMMER_PGA;
         default: return CAL_SERVO_SETTLE_SAMPLES_HAMMER_LP;
     }
 #endif
 }
+#endif /* #if 0 -- servo lento legacy */
 
 static uint8 cal_stage_current_dac(uint8 stage_index)
 {
@@ -520,6 +715,11 @@ static void cal_stage_write_result(uint8 stage_index, uint8 dac)
     }
 }
 
+uint8 psoc_calibration_stage_count(void)
+{
+    return PSOC_CAL_STAGE_COUNT;
+}
+
 void psoc_calibration_seed_dac(const uint8 *dac_values, uint8 count)
 {
     uint8 i;
@@ -528,6 +728,44 @@ void psoc_calibration_seed_dac(const uint8 *dac_values, uint8 count)
     }
 }
 
+void psoc_calibration_report_adc_snapshot(void)
+{
+    uint8 i;
+
+    cal_diag(PSOC_EVT_BOOT, PSOC_HW_CLASS);
+
+    for (i = 0u; i < PSOC_CAL_STAGE_COUNT; i++) {
+        const PsocCalStage *stage = &g_psoc_cal_stages[i];
+        uint8 saved_dac = cal_stage_current_dac(i);
+
+        ADC_Stop();
+        CAL_AMUX_ADC_SELECT(stage->adc_channel);
+        ADC_Start();
+
+        stage->write(saved_dac);
+        CyDelay(CAL_DIAG_SWEEP_SETTLE_MS);
+        cal_diag(PSOC_EVT_ADC_SNAPSHOT_BEGIN, i);
+        cal_diag_i32(PSOC_EVT_CAL_STAGE_TARGET32, stage->target_counts);
+        cal_diag(PSOC_EVT_CAL_STAGE_DAC, saved_dac);
+        cal_diag_i32(PSOC_EVT_ADC_RAW32, cal_adc_read_direct_counts());
+
+#if CAL_DIAG_SWEEP_ENABLE
+        cal_diag_sweep_stage(stage);
+        stage->write(saved_dac);
+        CyDelay(CAL_DIAG_SWEEP_SETTLE_MS);
+        cal_diag(PSOC_EVT_CAL_STAGE_DAC, saved_dac);
+        cal_diag_i32(PSOC_EVT_ADC_RAW32, cal_adc_read_direct_counts());
+#endif
+    }
+
+    psoc_calibration_restore_capture_path();
+}
+
+#if 0 /* servo lento legacy -- ver nota junto a CAL_SERVO_IDLE mas arriba.
+       * psoc_calibration_servo_enable/enabled/abort/service (API publica,
+       * llamada desde main.c) tienen stubs no-op mas abajo; sus cuerpos
+       * reales (que usaban estas funciones) tambien quedaron comentados,
+       * ver el segundo bloque "#if 0 -- servo lento legacy". */
 static uint8 cal_servo_apply_measurement(uint8 stage_index, uint8 dac, int32 measured)
 {
     const PsocCalStage *stage = &g_psoc_cal_stages[stage_index];
@@ -651,7 +889,7 @@ static void cal_servo_measure_begin(uint8 stage_index)
     g_cal_servo.empty_polls = 0UL;
 
     ADC_Stop();
-    CAL_AMUX_ADC_SELECT(stage->adc_channel);
+    CAL_AMUX_ADC_SELECT_STAGE(stage->adc_channel);
     ADC_Start();
     isr_DMA_DelSig_RAM_ClearPending();
     psoc_adc_clear_isr_sample();
@@ -730,6 +968,7 @@ static uint8 cal_servo_measure_service(void)
 
     return 0u;
 }
+#endif /* #if 0 -- servo lento legacy */
 
 void psoc_calibration_start_references(void)
 {
@@ -749,7 +988,6 @@ void psoc_calibration_start_references(void)
     VDAC_Ref_Adder_Start();
     VDAC_ref_LP_Start();
 #else
-    HAMMER_VDAC_IN_START();
     VDAC_PGA_Start();
     VDAC_LP_Start();
 #endif
@@ -791,6 +1029,9 @@ void psoc_calibration_reset_references(void)
     psoc_calibration_restore_capture_path();
 }
 
+#if 0 /* servo lento legacy -- comentado a pedido del usuario (calibracion
+       * pasa a ser PI-only, ver bloque "Controlador PI de calibracion" mas
+       * abajo). Stubs no-op de la API publica justo despues de este bloque. */
 void psoc_calibration_servo_enable(uint8 enable)
 {
     g_cal_servo.enabled = enable ? 1u : 0u;
@@ -832,7 +1073,31 @@ uint8 psoc_calibration_servo_service(void)
 
     return cal_servo_measure_service();
 }
+#endif /* #if 0 -- servo lento legacy */
 
+/* Stubs no-op: el servo lento de mantenimiento esta comentado (arriba) a
+ * pedido del usuario -- calibracion es 100% PI ahora. Se mantiene la firma
+ * publica porque main.c los llama incondicionalmente. */
+void psoc_calibration_servo_enable(uint8 enable)
+{
+    (void)enable;
+}
+
+uint8 psoc_calibration_servo_enabled(void)
+{
+    return 0u;
+}
+
+void psoc_calibration_servo_abort(void)
+{
+}
+
+uint8 psoc_calibration_servo_service(void)
+{
+    return 0u;
+}
+
+#if 0 /* biseccion legacy -- ver nota junto a cal_stage_saturated mas arriba */
 static uint8 cal_avg_cfg_avg_n(const PsocCalAvgCfg *cfg)
 {
     return (cfg->avg_n == 0u) ? 1u : cfg->avg_n;
@@ -1052,11 +1317,19 @@ static void async_finish_stage(uint8 ok)
     g_cal_async.stage_index++;
     g_cal_async.state = CAL_ASYNC_STAGE_BEGIN;
 }
+#endif /* #if 0 -- biseccion legacy */
 
+/* Compartido con cal_pi_finish_stage -- cierra la corrida de calibracion
+ * (restaura AMux/captura, re-habilita isr_SyncIn) sin importar que
+ * controlador la corrio. */
 static void cal_async_complete(void)
 {
     ADC_Stop();
     psoc_calibration_restore_capture_path();
+    /* Restaura el FIR de adquisicion -- cal_pi_start() cargo el de
+     * calibracion al empezar esta corrida; fuera de una calibracion el
+     * Filter de hardware debe volver a tener el diseño de adquisicion. */
+    (void)psoc_filter_load_fir_coefficients(g_fir_adquisition_coeffs_q23, FILTER_FIR_NTAPS);
 #if defined(SYNC_IN_INTSTAT)
     (void)SYNC_IN_ClearInterrupt();
 #endif
@@ -1067,6 +1340,7 @@ static void cal_async_complete(void)
     g_cal_async.state = CAL_ASYNC_DONE;
 }
 
+#if 0 /* biseccion legacy -- ver nota junto a cal_stage_saturated mas arriba */
 static uint8 cal_async_realcheck_slope_increasing(void)
 {
     const PsocCalStage *stage = &g_psoc_cal_stages[g_cal_async.stage_index];
@@ -1143,12 +1417,15 @@ static void cal_async_plan_realcheck_nudge(void)
                         stage->realcheck.nudge_discard_samples,
                         1u, 1u);
 }
+#endif /* #if 0 -- biseccion legacy */
 
 /* Aborta la calibracion por timeout (CAL_WATCHDOG_TICKS sin terminar).
- * Las etapas ya finalizadas (indices < stage_index durante la busqueda)
- * conservan su mejor valor encontrado; la etapa en curso y las que faltan
- * se fuerzan al centro nominal de cada etapa. Durante la
- * verificacion (todas las etapas ya calibradas) no se toca ningun DAC. */
+ * Compartido con el PI (psoc_calibration_service_async la llama antes de
+ * ramificar). Las etapas ya finalizadas (indices < stage_index) conservan su
+ * mejor valor encontrado; la etapa en curso y las que faltan se fuerzan al
+ * centro nominal de cada etapa. La condicion preserve_results es reliquia de
+ * la biseccion (estados de verify/realcheck que el PI nunca setea) -- queda
+ * inerte pero no rompe nada, no afecta el comportamiento. */
 static void cal_async_abort_watchdog(void)
 {
     uint8 i;
@@ -1174,6 +1451,367 @@ static void cal_async_abort_watchdog(void)
     cal_async_complete();
 }
 
+/* ============================================================
+ * Controlador PI de calibracion: UNICO camino activo, GEO y HAMMER por igual
+ * (la biseccion vieja quedo comentada con #if 0 mas arriba) — ver el bloque
+ * "Controlador PI de calibracion" en calibration_tables.h para la ley de
+ * control completa. Para diagnostico y robustez en banco usa la lectura
+ * directa del ADC crudo (igual que el comando ADC snapshot): el camino
+ * DMA/DFB/Filter queda disponible para adquisicion, pero no se usa como
+ * fuente de calibracion porque en HAMMER con el capacitor de AMux conectado
+ * puede quedar saturado/congelado y divergir respecto de la lectura directa.
+ * Reutiliza g_cal_async.busy/done/ok/stage_index/start_ticks (watchdog) y
+ * cal_async_complete/cal_async_abort_watchdog tal cual: para el resto del
+ * firmware (EEPROM, diagnostico UART, ESP/web) esto es indistinguible de la
+ * biseccion que reemplaza.
+ * ============================================================ */
+
+typedef enum {
+    CAL_PI_STAGE_BEGIN = 0u,
+    CAL_PI_RUN
+} PsocCalPiState;
+
+typedef struct {
+    int32 kp_num;
+    int32 kp_div;
+    int32 ki_num;
+    int32 ki_div;
+    int32 lsb_counts;   /* cuentas ADC por 1 LSB de DAC -- detector de lock, ver calibration_tables.h */
+    uint16 max_samples;
+} PsocCalPiCfg;
+
+typedef struct {
+    PsocCalPiState state;
+    int32 integral;
+    int32 last_fir_output;
+    int32 lock_buf[CAL_PI_LOCK_N];
+    uint16 samples_taken;
+    uint16 discard_samples; /* asentamiento de la etapa antes de cerrar el lazo */
+    uint8 lock_idx;
+    uint8 lock_count;
+    uint8 dac_current;
+    uint8 ema_valid;
+    uint32 empty_polls;
+} PsocCalPi;
+
+static PsocCalPi g_cal_pi;
+
+#if PSOC_HW_CLASS == PSOC_HW_GEO
+static const PsocCalPiCfg g_cal_pi_cfg[PSOC_CAL_STAGE_COUNT] = {
+    { CAL_PI_KP_NUM_GEO_PGA,   CAL_PI_KP_DIV_GEO_PGA,   CAL_PI_KI_NUM_GEO_PGA,   CAL_PI_KI_DIV_GEO_PGA,   CAL_PI_LSB_COUNTS_GEO_PGA,   CAL_PI_MAX_SAMPLES_GEO_PGA },
+#if defined(VDAC_ref_BP_DEFAULT_DATA) || defined(CY_DVDAC_VDAC_ref_BP_H)
+    { CAL_PI_KP_NUM_GEO_BP,    CAL_PI_KP_DIV_GEO_BP,    CAL_PI_KI_NUM_GEO_BP,    CAL_PI_KI_DIV_GEO_BP,    CAL_PI_LSB_COUNTS_GEO_BP,    CAL_PI_MAX_SAMPLES_GEO_BP },
+#endif
+    { CAL_PI_KP_NUM_GEO_ADDER, CAL_PI_KP_DIV_GEO_ADDER, CAL_PI_KI_NUM_GEO_ADDER, CAL_PI_KI_DIV_GEO_ADDER, CAL_PI_LSB_COUNTS_GEO_ADDER, CAL_PI_MAX_SAMPLES_GEO_ADDER },
+    { CAL_PI_KP_NUM_GEO_LP,    CAL_PI_KP_DIV_GEO_LP,    CAL_PI_KI_NUM_GEO_LP,    CAL_PI_KI_DIV_GEO_LP,    CAL_PI_LSB_COUNTS_GEO_LP,    CAL_PI_MAX_SAMPLES_GEO_LP },
+};
+#else
+static const PsocCalPiCfg g_cal_pi_cfg[PSOC_CAL_STAGE_COUNT] = {
+    { CAL_PI_KP_NUM_HAMMER_PGA, CAL_PI_KP_DIV_HAMMER_PGA, CAL_PI_KI_NUM_HAMMER_PGA, CAL_PI_KI_DIV_HAMMER_PGA, CAL_PI_LSB_COUNTS_HAMMER_PGA, CAL_PI_MAX_SAMPLES_HAMMER_PGA },
+    { CAL_PI_KP_NUM_HAMMER_LP,  CAL_PI_KP_DIV_HAMMER_LP,  CAL_PI_KI_NUM_HAMMER_LP,  CAL_PI_KI_DIV_HAMMER_LP,  CAL_PI_LSB_COUNTS_HAMMER_LP,  CAL_PI_MAX_SAMPLES_HAMMER_LP },
+};
+#endif
+
+static uint8 cal_pi_refine_final_dac(const PsocCalStage *stage, uint8 seed_dac,
+                                     int32 *out_measured)
+{
+    uint8 stage_lo = cal_stage_min_dac(stage);
+    uint8 stage_hi = cal_stage_max_dac(stage);
+    uint8 radius = (uint8)CAL_PI_FINAL_REFINE_RADIUS;
+    uint8 lo = (seed_dac > radius) ? (uint8)(seed_dac - radius) : 0u;
+    uint16 hi16 = (uint16)seed_dac + (uint16)radius;
+    uint8 hi = (hi16 > 255u) ? 255u : (uint8)hi16;
+    uint8 dac;
+    uint8 best_dac = seed_dac;
+    int32 best_measured = 0L;
+    int32 best_abs_error = 0x7FFFFFFFL;
+
+    if (lo < stage_lo) { lo = stage_lo; }
+    if (hi > stage_hi) { hi = stage_hi; }
+
+    for (dac = lo; ; dac++) {
+        int32 measured;
+        int32 control;
+        int32 error;
+        int32 abs_error;
+
+        stage->write(dac);
+        CyDelay(CAL_PI_FINAL_REFINE_SETTLE_MS);
+        measured = cal_adc_read_direct_avg_counts(CAL_PI_FINAL_REFINE_SAMPLES);
+        control = cal_pi_compare_counts(measured);
+        error = stage->target_counts - control;
+        abs_error = abs_counts(error);
+
+        if (abs_error < best_abs_error) {
+            best_abs_error = abs_error;
+            best_measured = measured;
+            best_dac = dac;
+        }
+
+        if (dac >= hi) {
+            break;
+        }
+    }
+
+    stage->write(best_dac);
+    CyDelay(CAL_PI_FINAL_VERIFY_SETTLE_MS);
+    best_measured = cal_adc_read_direct_avg_counts(CAL_PI_FINAL_VERIFY_SAMPLES);
+    if (out_measured != (int32 *)0) {
+        *out_measured = best_measured;
+    }
+    return best_dac;
+}
+
+static uint8 cal_pi_finish_stage(uint8 ok)
+{
+    const PsocCalStage *stage = &g_psoc_cal_stages[g_cal_async.stage_index];
+    const PsocCalPiCfg *cfg = &g_cal_pi_cfg[g_cal_async.stage_index];
+    PsocCalResult *result = &g_psoc_cal_results[g_cal_async.stage_index];
+    int32 verify_measured;
+    int32 verify_control;
+    int32 verify_error;
+    uint8 verify_ok;
+    uint8 final_pass;
+
+    g_cal_pi.dac_current =
+        cal_pi_refine_final_dac(stage, g_cal_pi.dac_current, &verify_measured);
+    verify_control = cal_pi_compare_counts(verify_measured);
+    verify_error = stage->target_counts - verify_control;
+    verify_ok = (abs_counts(verify_error) <= stage->tolerance_counts) ? 1u : 0u;
+
+    if (ok && !verify_ok && g_cal_pi.samples_taken < cfg->max_samples) {
+        g_cal_pi.lock_idx = 0u;
+        g_cal_pi.lock_count = 0u;
+        g_cal_pi.integral = 0L;
+        g_cal_pi.last_fir_output = verify_measured;
+        return 0u;
+    }
+
+    ok = verify_ok;
+    final_pass = ((uint8)(g_cal_async.pass_index + 1u) >= (uint8)CAL_PI_PASS_COUNT) ? 1u : 0u;
+
+    result->final_dac = g_cal_pi.dac_current;
+    result->final_measured = verify_measured;
+    result->ok = ok;
+    g_cal_pi.last_fir_output = verify_measured;
+    if (!ok && final_pass) {
+        g_cal_async.ok = 0u;
+    }
+
+    cal_diag(PSOC_EVT_CAL_STAGE_DAC, result->final_dac);
+    cal_diag_i16(PSOC_EVT_CAL_STAGE_MEAS, result->final_measured);
+    cal_diag_i32(PSOC_EVT_CAL_STAGE_MEAS32, result->final_measured);
+    cal_diag(PSOC_EVT_CAL_STAGE_OK, result->ok);
+
+    g_cal_async.stage_index++;
+    if (g_cal_async.stage_index >= PSOC_CAL_STAGE_COUNT) {
+        if (!final_pass) {
+            g_cal_async.pass_index++;
+            g_cal_async.stage_index = 0u;
+            g_cal_pi.state = CAL_PI_STAGE_BEGIN;
+            return 0u;
+        }
+        cal_async_complete();
+        return 1u;
+    }
+    g_cal_pi.state = CAL_PI_STAGE_BEGIN;
+    return 0u;
+}
+
+static void cal_pi_stage_begin(void)
+{
+    const PsocCalStage *stage = &g_psoc_cal_stages[g_cal_async.stage_index];
+
+    cal_diag(PSOC_EVT_CAL_STAGE_BEGIN, g_cal_async.stage_index);
+    cal_diag_i32(PSOC_EVT_CAL_STAGE_TARGET32, stage->target_counts);
+
+    g_cal_pi.integral = 0L;
+    g_cal_pi.samples_taken = 0u;
+    g_cal_pi.lock_idx = 0u;
+    g_cal_pi.lock_count = 0u;
+    g_cal_pi.last_fir_output = 0L;
+    g_cal_pi.ema_valid = 0u;
+    g_cal_pi.empty_polls = 0UL;
+    g_cal_pi.dac_current = cal_stage_current_dac(g_cal_async.stage_index);
+    stage->write(g_cal_pi.dac_current);
+
+    /* Descarte tras cambiar AMux/DAC: solo asentamiento analogico. */
+    g_cal_pi.discard_samples = stage->settle_samples;
+
+    ADC_Stop();
+    CAL_AMUX_ADC_SELECT(stage->adc_channel);
+    ADC_Start();
+
+#if CAL_DIAG_SWEEP_ENABLE
+    cal_diag_sweep_stage(stage);
+#endif
+
+    stage->write(g_cal_pi.dac_current);
+    ADC_StopConvert();
+
+    g_cal_pi.state = CAL_PI_RUN;
+}
+
+static uint8 cal_pi_run_service(void)
+{
+    const PsocCalStage *stage = &g_psoc_cal_stages[g_cal_async.stage_index];
+    const PsocCalPiCfg *cfg = &g_cal_pi_cfg[g_cal_async.stage_index];
+    int32 sample;
+    int32 control_sample;
+    int32 error;
+    int32 effort;
+    uint16 sample_index;
+    uint16 limited_dac;
+    uint8 dac_sample;
+    uint8 dac_lo;
+    uint8 dac_hi;
+    uint8 dac_desired;
+    uint8 dac_target;
+    uint8 can_integrate;
+    uint8 max_step;
+    uint8 i;
+
+    sample = cal_adc_read_direct_counts();
+    g_cal_pi.empty_polls = 0UL;
+
+    if (g_cal_pi.discard_samples > 0u) {
+        g_cal_pi.discard_samples--;
+        return 0u;
+    }
+
+    /* ADC crudo directo, suavizado en firmware para no decidir lock/ok con
+     * una muestra instantanea ruidosa. */
+    if (!g_cal_pi.ema_valid) {
+        g_cal_pi.last_fir_output = sample;
+        g_cal_pi.ema_valid = 1u;
+    } else {
+#if (CAL_PI_DIRECT_EMA_SHIFT == 0u)
+        g_cal_pi.last_fir_output = sample;
+#else
+        int32 delta = sample - g_cal_pi.last_fir_output;
+        int32 half = (int32)1L << (CAL_PI_DIRECT_EMA_SHIFT - 1u);
+        if (delta >= 0L) {
+            g_cal_pi.last_fir_output += (delta + half) >> CAL_PI_DIRECT_EMA_SHIFT;
+        } else {
+            g_cal_pi.last_fir_output -= ((-delta) + half) >> CAL_PI_DIRECT_EMA_SHIFT;
+        }
+#endif
+    }
+    control_sample = cal_pi_compare_counts(g_cal_pi.last_fir_output);
+    error = stage->target_counts - control_sample;
+    dac_sample = g_cal_pi.dac_current;
+
+    /* stage->direction: sentido VDAC->medida asumido (ver comentario junto a
+     * CAL_DIRECTION_HAMMER_PGA/CAL_DIRECTION_GEO_PGA en calibration_tables.h).
+     * La accion es incremental sobre el DAC actual: si el error ya quedo
+     * cerca de cero, el lazo conserva el punto encontrado en vez de volver al
+     * feedforward/centro nominal de la etapa. */
+    effort = (int32)g_cal_pi.dac_current
+           + (int32)stage->direction *
+             ( (error * cfg->kp_num) / ((cfg->kp_div == 0L) ? 1L : cfg->kp_div)
+             + (g_cal_pi.integral * cfg->ki_num) / ((cfg->ki_div == 0L) ? 1L : cfg->ki_div) );
+
+    dac_lo = cal_stage_min_dac(stage);
+    dac_hi = cal_stage_max_dac(stage);
+    can_integrate = 0u;
+
+    if (effort < (int32)dac_lo) {
+        dac_desired = dac_lo;
+    } else if (effort > (int32)dac_hi) {
+        dac_desired = dac_hi;
+    } else {
+        dac_desired = (uint8)effort;
+        can_integrate = 1u;
+    }
+
+    max_step = (CAL_PI_MAX_DAC_STEP == 0u) ? 1u : (uint8)CAL_PI_MAX_DAC_STEP;
+    if (dac_desired > g_cal_pi.dac_current) {
+        limited_dac = (uint16)g_cal_pi.dac_current + (uint16)max_step;
+        dac_target = ((uint16)dac_desired < limited_dac) ? dac_desired : (uint8)limited_dac;
+    } else if (dac_desired < g_cal_pi.dac_current) {
+        limited_dac = ((uint16)g_cal_pi.dac_current > (uint16)max_step)
+            ? ((uint16)g_cal_pi.dac_current - (uint16)max_step)
+            : 0u;
+        dac_target = ((uint16)dac_desired > limited_dac) ? dac_desired : (uint8)limited_dac;
+    } else {
+        dac_target = dac_desired;
+    }
+
+    /* anti-windup: solo integra si no hubo saturacion ni rate-limit. */
+    if (can_integrate && dac_target == dac_desired) {
+        g_cal_pi.integral = cal_servo_clip_integral(g_cal_pi.integral + error);
+    }
+
+    sample_index = (uint16)(g_cal_pi.samples_taken + 1u);
+    g_cal_pi.samples_taken = sample_index;
+    if (sample_index == 1u || (sample_index % CAL_PI_TELEM_PERIOD) == 0u) {
+        cal_diag(PSOC_EVT_CAL_STAGE_DAC, dac_sample);
+        cal_diag_i32(PSOC_EVT_CAL_STAGE_MEAS32, g_cal_pi.last_fir_output);
+    }
+
+    g_cal_pi.dac_current = dac_target;
+    stage->write(g_cal_pi.dac_current);
+
+    /* Detector de lock (puerto de detect_lock(err,lsb,N,reset), ver
+     * comentario junto a CAL_PI_LOCK_N en calibration_tables.h): ventana
+     * deslizante de fir_output: lockea cuando su span (max-min) cae dentro
+     * de ~1.1 LSB de DAC expresado en counts ADC. Lockear cierra la etapa
+     * de una — no hace falta des-lock porque la cascada nunca se queda
+     * dando vueltas en ese estado. */
+    g_cal_pi.lock_buf[g_cal_pi.lock_idx] = control_sample;
+    g_cal_pi.lock_idx++;
+    if (g_cal_pi.lock_idx >= CAL_PI_LOCK_N) {
+        g_cal_pi.lock_idx = 0u;
+    }
+    if (g_cal_pi.lock_count < CAL_PI_LOCK_N) {
+        g_cal_pi.lock_count++;
+    }
+
+    if (g_cal_pi.lock_count >= CAL_PI_LOCK_N) {
+        int32 span_lo = g_cal_pi.lock_buf[0];
+        int32 span_hi = g_cal_pi.lock_buf[0];
+        int32 one_lsb_counts = (cfg->lsb_counts <= 0L) ? 1L : cfg->lsb_counts;
+
+        for (i = 1u; i < CAL_PI_LOCK_N; i++) {
+            if (g_cal_pi.lock_buf[i] < span_lo) { span_lo = g_cal_pi.lock_buf[i]; }
+            if (g_cal_pi.lock_buf[i] > span_hi) { span_hi = g_cal_pi.lock_buf[i]; }
+        }
+
+        if ((span_hi - span_lo) <= (one_lsb_counts + one_lsb_counts / 10L) &&
+            abs_counts(error) <= stage->tolerance_counts) {
+            return cal_pi_finish_stage(1u);
+        }
+    }
+
+    if (g_cal_pi.samples_taken >= cfg->max_samples) {
+        return cal_pi_finish_stage((abs_counts(error) <= stage->tolerance_counts) ? 1u : 0u);
+    }
+
+    return 0u;
+}
+
+static void cal_pi_start(void)
+{
+    /* Carga el FIR pensado para calibracion (suavizado, distinto del de
+     * adquisicion) en el Filter de hardware -- se restaura el de
+     * adquisicion en cal_async_complete() al cerrar la corrida. */
+    (void)psoc_filter_load_fir_coefficients(g_fir_calibration_coeffs_q23, FILTER_FIR_NTAPS);
+    g_cal_pi.state = CAL_PI_STAGE_BEGIN;
+}
+
+static uint8 cal_pi_service(void)
+{
+    switch (g_cal_pi.state) {
+        case CAL_PI_STAGE_BEGIN:
+            cal_pi_stage_begin();
+            return 0u;
+        case CAL_PI_RUN:
+            return cal_pi_run_service();
+        default:
+            return 0u;
+    }
+}
+
 uint8 psoc_calibration_start_async(void)
 {
     uint8 i;
@@ -1192,13 +1830,14 @@ uint8 psoc_calibration_start_async(void)
     g_cal_async.done = 0u;
     g_cal_async.ok = 1u;
     g_cal_async.stage_index = 0u;
-    g_cal_async.state = CAL_ASYNC_STAGE_BEGIN;
+    g_cal_async.pass_index = 0u;
     g_cal_async.start_ticks = psoc_now_ticks();
     g_cal_async.last_progress_ticks = g_cal_async.start_ticks;
     for (i = 0u; i < PSOC_CAL_MAX_STAGES; i++) {
         g_cal_async.slope_known[i] = 0u;
         g_cal_async.slope_increasing[i] = 0u;
     }
+    cal_pi_start();   /* unico camino de calibracion, GEO y HAMMER por igual */
     return 1u;
 }
 
@@ -1209,26 +1848,26 @@ uint8 psoc_calibration_async_busy(void)
 
 uint8 psoc_calibration_async_result_ok(void)
 {
-#if PSOC_HW_CLASS == PSOC_HW_GEO
-    /* En GEO el criterio de uso para captura es la salida final (GEO_LP).
-     * Las etapas intermedias se reportan igual como diagnostico, pero si la
-     * cascada termina dentro de rango operativo no queremos marcar la
-     * calibracion completa como fallida en el ESP/web solo por tolerancias
-     * finas de verify/realcheck. */
+    return g_cal_async.ok;
+}
+
+#if 0 /* biseccion legacy -- el chequeo de rango operativo de GEO_LP que
+       * hacia esta funcion (cal_measured_out_of_range) quedo sin uso junto
+       * con la biseccion; psoc_calibration_async_result_ok() de arriba ya
+       * no lo necesita. */
+static uint8 psoc_calibration_async_result_ok_geo_legacy(void)
+{
     if (g_psoc_cal_result_count >= PSOC_CAL_STAGE_COUNT) {
         return cal_measured_out_of_range(
             g_psoc_cal_results[PSOC_CAL_STAGE_COUNT - 1u].final_measured
         ) ? 0u : 1u;
     }
-#endif
     return g_cal_async.ok;
 }
+#endif /* #if 0 -- biseccion legacy */
 
 uint8 psoc_calibration_service_async(void)
 {
-    const PsocCalStage *stage;
-    int32 abs_error;
-
     if (!g_cal_async.busy) {
         return 0u;
     }
@@ -1245,6 +1884,18 @@ uint8 psoc_calibration_service_async(void)
         }
     }
 
+    return cal_pi_service();   /* unico camino de calibracion */
+}
+
+#if 0 /* biseccion legacy -- ver nota junto a cal_stage_saturated mas arriba.
+       * Este era el cuerpo real de psoc_calibration_service_async() para
+       * GEO antes de unificar todo en el PI. */
+static uint8 psoc_calibration_service_async_geo_legacy(void)
+{
+    {
+    const PsocCalStage *stage;
+    int32 abs_error;
+
     switch (g_cal_async.state) {
         case CAL_ASYNC_STAGE_BEGIN:
             if (g_cal_async.stage_index >= PSOC_CAL_STAGE_COUNT) {
@@ -1256,7 +1907,7 @@ uint8 psoc_calibration_service_async(void)
             cal_async_reset_stage_memory();
             cal_diag(PSOC_EVT_CAL_STAGE_BEGIN, g_cal_async.stage_index);
             ADC_Stop();
-            CAL_AMUX_ADC_SELECT(stage->adc_channel);
+            CAL_AMUX_ADC_SELECT_STAGE(stage->adc_channel);
             ADC_Start();
             isr_DMA_DelSig_RAM_ClearPending();
             ADC_StartConvert();
@@ -1384,7 +2035,7 @@ uint8 psoc_calibration_service_async(void)
             stage = &g_psoc_cal_stages[g_cal_async.stage_index];
             cal_diag(PSOC_EVT_CAL_VERIFY_BEGIN, g_cal_async.stage_index);
             ADC_Stop();
-            CAL_AMUX_ADC_SELECT(stage->adc_channel);
+            CAL_AMUX_ADC_SELECT_STAGE(stage->adc_channel);
             ADC_Start();
             isr_DMA_DelSig_RAM_ClearPending();
             ADC_StartConvert();
@@ -1448,7 +2099,7 @@ uint8 psoc_calibration_service_async(void)
             stage->write(g_cal_async.realcheck_current_dac);
             cal_diag(PSOC_EVT_CAL_REALCHECK_BEGIN, g_cal_async.stage_index);
             ADC_Stop();
-            CAL_AMUX_ADC_SELECT(stage->adc_channel);
+            CAL_AMUX_ADC_SELECT_STAGE(stage->adc_channel);
             ADC_Start();
             isr_DMA_DelSig_RAM_ClearPending();
             ADC_StartConvert();
@@ -1502,6 +2153,8 @@ uint8 psoc_calibration_service_async(void)
         default:
             break;
     }
+    }
 
     return 0u;
 }
+#endif /* #if 0 -- biseccion legacy */

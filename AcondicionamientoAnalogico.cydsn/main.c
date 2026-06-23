@@ -11,9 +11,10 @@
 *    UART, ADC, AMux_ADC, VDAC_ref_*, PGAgain, OPAref, PGAp,
 *    PGAn, LPF_1, LPF_2, OPAbp, OPAadder, OPAlp, Timer, LED, isr_*.
 *
-*  HAMMER — componentes TopDesign:
-*    UART, ADC, AMux_ADC, VDAC_ref_IN, VDAC_PGA, VDAC_LP,
-*    PGA, Opa_ref_IN, Opa_ref_PGA, Opa_LP, LPF_ADC, LPF_ref, Timer, LED.
+*  HAMMER — componentes TopDesign (simplificado en "Precambios", ya sin
+*  etapa de referencia de entrada separada):
+*    UART, ADC, AMux_ADC, VDAC_PGA, VDAC_LP,
+*    PGA, Opa_ref_PGA, Opa_LP, LPF_ADC, Timer, LED.
 * ─────────────────────────────────────────────────────────────────────────────
 *
 * Cadena: MATLAB → maestro → esclavo (ESP-NOW) → PSoC (UART).
@@ -43,17 +44,19 @@
 #include "calibration.h"
 #include "psoc_nv.h"
 #include "LED.h"
-#include "DMA_DelSig_RAM_Single_dma.h"
-#include "DMA_DelSig_RAM_Lote_dma.h"
-#include "DMA_Filter_RAM_Single_dma.h"
-#include "DMA_Filter_RAM_Lote_dma.h"
+#include "DMA_DelSig_RAM_dma.h"
+#include "DMA_Filter_RAM_dma.h"
 #include "DMA_DelSig_Filter_dma.h"
 #include "Filter.h"
 #include "Filter_PVT.h"
 #include "Reg_Select.h"
+#include "filter_coeffs.h"
+#include "FIR_adquisition.h"
+#include "psoc_debug.h"
 /* -------------------------------------------------------------------------- */
 #define LEGACY_VDAC_SHADOW_INIT 0x9Cu
-#define FILTER_FIR_NTAPS   128u
+/* FILTER_FIR_NTAPS vive en filter_coeffs.h (unica fuente de verdad,
+ * compartida con calibration.c). */
 #define FILTER_GROUP_DELAY ((FILTER_FIR_NTAPS - 1u) / 2u)   /* 63 muestras */
 #define TIMER_TICK_MS      10u
 #define TIMEOUT_COUNTS     240000u    /* 10 ms @ 24 MHz — tick de sistema */
@@ -66,11 +69,6 @@
 #ifndef PSOC_CAPTURE_MAX_BATCHES
 #define PSOC_CAPTURE_MAX_BATCHES 512u
 #endif
-
-/* Tamaño del lote HW (canales DMA_*_RAM_Lote) para promediado por DMA.
- * El valor real vive en psoc_adc.h (PSOC_ADC_LOTE_SAMPLES) porque
- * calibration.c también lo necesita para cruzarlo contra CAL_AVG_N_GEO_*. */
-#define DMA_LOTE_SAMPLES   PSOC_ADC_LOTE_SAMPLES
 
 #define PING_PERIOD_MS     700u
 #define PING_OFF_MS        100u
@@ -112,19 +110,6 @@ static volatile int32  g_adc_raw          = 0;
 /* Buffers destino DMA — 3 bytes LE (24 bits signed) por muestra */
 static volatile uint8  g_dma_raw_buf[3]   = {0u, 0u, 0u};
 static volatile uint8  g_dma_filt_buf[3]  = {0u, 0u, 0u};
-
-/* Buffers del canal Lote (mux HW) — usados por calibración (ver dma_route_select). */
-static volatile uint8  g_dma_raw_lote_buf[DMA_LOTE_SAMPLES * 3u];
-static volatile uint8  g_dma_filt_lote_buf[DMA_LOTE_SAMPLES * 3u];
-
-/* Espejo software de qué sub-modo está seleccionado en el canal raw —
- * actualizado solo dentro de dma_route_select(); le permite a la ISR
- * compartida saber cómo interpretar lo que llegó sin señal de HW extra. */
-static volatile uint8  g_raw_route_lote   = 0u;
-
-/* Handle del TD inicial de DMA_DelSig_RAM_Lote, guardado en dma_adc_init()
- * para poder re-armarlo limpio en cada entrada a calibración. */
-static uint8 g_td_raw_lote = 0u;
 
 /* 0 = enviar crudo (default); 1 = enviar filtrado por FIR hardware */
 static volatile uint8  g_stream_mode      = 0u;
@@ -211,6 +196,7 @@ static void uart_send_diag(uint8 event, uint8 value)
     frame[4] = state;
     frame[5] = (uint8)(PSOC_CMD_DIAG_EVT ^ event ^ value ^ state);
     UART_PutArray(frame, (uint8)sizeof(frame));
+    psoc_debug_print_evt(event, value, state);
 #else
     (void)event;
     (void)value;
@@ -301,28 +287,8 @@ static int32 dma_buf_to_i24(const volatile uint8 *buf)
     return (u & 0x00800000UL) ? (int32)(u | 0xFF000000UL) : (int32)u;
 }
 
-/* ISR compartida del canal raw (Single + Lote, OR'd por HW en un solo vector).
- * g_raw_route_lote (espejo de dma_route_select) dice cuál llegó. */
 CY_ISR(isr_DMA_DelSig_RAM_Handler)
 {
-    if (g_raw_route_lote)
-    {
-        /* Lote: DMA_DelSig_RAM_Lote depositó DMA_LOTE_SAMPLES muestras en
-         * g_dma_raw_lote_buf. psoc_adc_counts_right_aligned debe aplicarse a
-         * CADA muestra antes de sumar (no una vez al final) — sumar primero
-         * y dividir después trunca distinto, rompiendo la equivalencia con
-         * el camino Single muestra-a-muestra que esto reemplaza. */
-        int32 sum = 0;
-        uint8 k;
-        for (k = 0u; k < DMA_LOTE_SAMPLES; k++)
-        {
-            const volatile uint8 *s = &g_dma_raw_lote_buf[(uint16)k * 3u];
-            sum += psoc_adc_counts_right_aligned(dma_buf_to_i24(s));
-        }
-        psoc_adc_note_isr_window(sum, (uint8)DMA_LOTE_SAMPLES);
-        return;
-    }
-
     g_adc_raw = psoc_adc_counts_right_aligned(dma_buf_to_i24(g_dma_raw_buf));
     psoc_adc_note_isr_sample(g_adc_raw);   /* mantiene ruta calibración activa */
 
@@ -353,15 +319,22 @@ CY_ISR(isr_DMA_DelSig_RAM_Handler)
     }
 }
 
-/* ISR: muestra FILTRADA (DMA_Filter_RAM_Single depositó 3 bytes en g_dma_filt_buf) */
+/* ISR: muestra FILTRADA (DMA_Filter_RAM depositó 3 bytes en g_dma_filt_buf,
+ * uno por salida nueva del Filter de hardware — Canal A). Sirve a DOS
+ * consumidores independientes:
+ *  - calibration.c (cal_pi_run_service), vía psoc_adc_note_isr_filtered_sample,
+ *    SIEMPRE, sin importar g_stream_mode/g_fir_discard (la calibración tiene
+ *    su propio descarte de asentamiento/retardo de grupo, ver cal_pi_stage_begin).
+ *  - el stream filtrado hacia el ESP/web (captura en g_capture_raw), gateado
+ *    por g_stream_mode/g_fir_discard como antes. */
 CY_ISR(isr_DMA_Filter_RAM_Handler)
 {
-    int32 filt;
+    int32 filt = dma_buf_to_i24(g_dma_filt_buf);
+
+    psoc_adc_note_isr_filtered_sample(filt);
 
     if (g_fir_discard > 0u) { g_fir_discard--; return; }  /* descarte retardo grupo FIR */
     if (g_stream_mode == 0u) { return; }                   /* modo RAW: no capturar filtrado */
-
-    filt = dma_buf_to_i24(g_dma_filt_buf);
 
     if (g_state == PSOC_SAMPLING && g_capture_done == 0u &&
         g_batches_captured < capture_target_batches() &&
@@ -482,31 +455,13 @@ static uint8 ticks_due(uint32 now, uint32 due)
     return ((int32)(now - due) >= 0) ? 1u : 0u;
 }
 
-/* Selecciona, vía Reg_Select, qué resultado final usan los DMA *_RAM y si cada
- * camino corre en Single (1 muestra/disparo) o Lote (DMA_LOTE_SAMPLES/disparo).
- * La exclusión Single/Lote y raw/Filter la imponen las compuertas del TopDesign;
- * acá solo se escribe el bit pattern que las gobierna (control_0/1/2). */
-static void dma_route_select(uint8 use_filter, uint8 raw_lote, uint8 filt_lote)
+/* Selecciona, vía Reg_Select (control_0), si el canal raw del ADC va directo
+ * a RAM (use_filter=0, captura cruda) o hacia el Canal A del Filter de
+ * hardware (use_filter=1). La exclusión la imponen las compuertas del
+ * TopDesign (DMA_DelSig_RAM vs DMA_DelSig_Filter); acá solo se escribe el bit. */
+void dma_route_select(uint8 use_filter)
 {
-    uint8 reg = 0u;
-    if (use_filter) { reg |= 0x02u; }   /* control_1 */
-    if (filt_lote)  { reg |= 0x01u; }   /* control_0 */
-    if (raw_lote)   { reg |= 0x04u; }   /* control_2 */
-    g_raw_route_lote = raw_lote ? 1u : 0u;
-    Reg_Select_Write(reg);
-}
-
-/* Re-arma DMA_DelSig_RAM_Lote a un estado limpio (offset cero) antes de
- * seleccionarlo. Si el canal se deselecciona a mitad de lote, su cuenta
- * interna (burstcount_remain) queda parcialmente avanzada — CyDmaChSetInitialTd
- * no resetea esa cuenta viva por sí solo (ver CyDmac.c), así que hace falta
- * un ciclo disable → re-set TD inicial → re-enable. Solo debe llamarse
- * mientras el canal está deseleccionado (sin DRQs entrantes). */
-static void dma_raw_lote_rearm(void)
-{
-    CyDmaChDisable(DMA_DelSig_RAM_Lote_DmaHandle);
-    CyDmaChSetInitialTd(DMA_DelSig_RAM_Lote_DmaHandle, g_td_raw_lote);
-    CyDmaChEnable(DMA_DelSig_RAM_Lote_DmaHandle, 1u);
+    Reg_Select_Write(use_filter ? 0x01u : 0x00u);
 }
 
 static void PGAgain_Set(uint8 code)
@@ -555,8 +510,9 @@ static uint8 psoc_start_calibration_if_idle(uint8 send_ack)
     g_batches_captured = 0u;
     g_capture_done = 0u;
     psoc_calibration_servo_abort();
-    dma_raw_lote_rearm();          /* arranque limpio del canal Lote antes de seleccionarlo */
-    dma_route_select(0u, 1u, 0u);  /* fuerza raw+Lote: calibración consume ventanas HW */
+    /* La ruta del DMA (raw vs Filter) y el AMux los gobierna cal_pi_stage_begin
+     * (calibration.c) por etapa -- no hace falta forzar nada aca. */
+    uart_send_diag(PSOC_EVT_BOOT, PSOC_HW_CLASS);
     uart_send_diag(PSOC_EVT_CAL_START, 0u);
     if (!psoc_calibration_start_async()) {
         uart_send_diag(PSOC_EVT_CAL_DONE, 0u);
@@ -568,6 +524,20 @@ static uint8 psoc_start_calibration_if_idle(uint8 send_ack)
     g_cal_ack_pending = send_ack ? 1u : 0u;
     g_state = PSOC_CALIBRATING;
     return 1u;
+}
+
+static void psoc_report_adc_snapshot_if_idle(void)
+{
+    if (g_state != PSOC_IDLE) {
+        uart_send_diag(PSOC_EVT_CAL_BUSY, g_state);
+        uart_send_cfg_ack(PSOC_CMD_ADC_SNAPSHOT, 0u);
+        return;
+    }
+
+    psoc_calibration_servo_abort();
+    psoc_calibration_report_adc_snapshot();
+    dma_route_select(g_stream_mode);
+    uart_send_cfg_ack(PSOC_CMD_ADC_SNAPSHOT, 1u);
 }
 
 static uint8 service_button_calibration(void)
@@ -635,6 +605,7 @@ static void uart_service(void)
                     case 0xA5u: case 0xA6u: case 0xA9u: case 0xAAu:
                     case 0xB1u: case 0xB3u: case 0xB4u: case PSOC_CMD_CALIBRATE:
                     case PSOC_CMD_SAVE_EEPROM: case PSOC_CMD_SELECT_STREAM:
+                    case PSOC_CMD_ADC_SNAPSHOT:
                     case PSOC_CMD_PONG:
                         rx_cmd = rx; rx_state = 2u; break;
                     case 0xA3u:
@@ -690,6 +661,10 @@ static void uart_service(void)
                             uart_send_diag(PSOC_EVT_CAL_BUSY, g_state);
                             uart_send_cfg_ack(PSOC_CMD_CALIBRATE, 0u);
                             break;
+                        case PSOC_CMD_ADC_SNAPSHOT:
+                            uart_send_diag(PSOC_EVT_CAL_BUSY, g_state);
+                            uart_send_cfg_ack(PSOC_CMD_ADC_SNAPSHOT, 0u);
+                            break;
                         case 0xA6u: case 0xA9u: case 0xAAu:
                         case 0xB1u: case 0xB3u: case 0xB4u:
                             uart_send_diag(PSOC_EVT_CAL_BUSY, rx_cmd);
@@ -706,6 +681,7 @@ static void uart_service(void)
                 {
                     case PSOC_CMD_PONG: break;
                     case 0xA5u:
+                        uart_send_diag(PSOC_EVT_BOOT, PSOC_HW_CLASS);
                         uart_send_diag(PSOC_EVT_STATUS_REQ, 0u);
                         uart_send_ping();
                         uart_send_fs_report();
@@ -764,15 +740,21 @@ static void uart_service(void)
                         led_toggle();
                         break;
                     case PSOC_CMD_SAVE_EEPROM:
-                        /* Guardar los DAC de calibración actuales en EEPROM */
+                        /* Guardar los DAC de calibración actuales en EEPROM.
+                         * El gate es vs PSOC_CAL_STAGE_COUNT (2 en HAMMER, no
+                         * el tope fijo PSOC_NV_CAL_STAGES=4 del layout EEPROM
+                         * — con ese tope fijo HAMMER nunca guardaba nada). */
                         {
                             uint8 dac_snap[PSOC_NV_CAL_STAGES];
                             uint8 ok_snap = 0u;
                             uint8 k;
+                            for (k = 0u; k < PSOC_NV_CAL_STAGES; k++) {
+                                dac_snap[k] = 0u;
+                            }
                             for (k = 0u; k < PSOC_NV_CAL_STAGES && k < g_psoc_cal_result_count; k++) {
                                 dac_snap[k] = g_psoc_cal_results[k].final_dac;
                             }
-                            if (g_psoc_cal_result_count >= PSOC_NV_CAL_STAGES) {
+                            if (g_psoc_cal_result_count >= psoc_calibration_stage_count()) {
                                 ok_snap = psoc_nv_save(dac_snap, PSOC_NV_CAL_STAGES);
                             }
                             uart_send_cfg_ack(PSOC_CMD_SAVE_EEPROM, ok_snap);
@@ -782,11 +764,15 @@ static void uart_service(void)
                     case PSOC_CMD_SELECT_STREAM:
                         /* rx_p1: 0=crudo, 1=filtrado FIR */
                         g_stream_mode = (rx_p1 != 0u) ? 1u : 0u;
-                        dma_route_select(g_stream_mode, 0u, 0u);
+                        dma_route_select(g_stream_mode);
                         if (g_stream_mode != 0u) {
                             g_fir_discard = 0u;  /* reset — se recarga en próximo SyncIn */
                         }
                         uart_send_cfg_ack(PSOC_CMD_SELECT_STREAM, g_stream_mode);
+                        led_toggle();
+                        break;
+                    case PSOC_CMD_ADC_SNAPSHOT:
+                        psoc_report_adc_snapshot_if_idle();
                         led_toggle();
                         break;
                     default: break;
@@ -806,7 +792,7 @@ static void service_runtime(void)
             uint8 ok = psoc_calibration_async_result_ok();
             g_state = PSOC_IDLE;
             timer_start_runtime();
-            dma_route_select(g_stream_mode, 0u, 0u);  /* restaura ruta previa a la calibración */
+            dma_route_select(g_stream_mode);  /* restaura ruta previa a la calibración */
             uart_send_diag(PSOC_EVT_CAL_DONE, ok);
             if (g_cal_ack_pending) {
                 g_cal_ack_pending = 0u;
@@ -978,44 +964,32 @@ static void tx1_gpio_write(uint8 value)
 }
 #endif
 
-/* Inicializa los cinco canales DMA del mux Single/Lote:
- *   DMA_DelSig_RAM_Single/Lote   ADC → RAM
- *   DMA_Filter_RAM_Single/Lote   Filter → RAM
- *   DMA_DelSig_Filter            ADC → Filter (siempre activo, sin ISR)
+/* Inicializa los tres canales DMA (TopDesign consolidado, sin Single/Lote):
+ *   DMA_DelSig_RAM    ADC → RAM (g_dma_raw_buf), activo cuando control_0=0
+ *   DMA_Filter_RAM    Filter (HOLDA, Canal A) → RAM (g_dma_filt_buf)
+ *   DMA_DelSig_Filter ADC → Filter_STAGEA (siempre activo, sin ISR), activo
+ *                     cuando control_0=1
  * Todos los TD son circulares (nextTd == mismo TD): cada canal recicla solo.
- * Los cinco quedan habilitados aunque solo uno por par esté "vivo" — cuál
- * recibe el trigger real lo decide la lógica combinacional gobernada por
- * Reg_Select, no el software. */
+ * Cuál de DMA_DelSig_RAM/DMA_DelSig_Filter recibe el trigger real lo decide
+ * la logica combinacional del TopDesign gobernada por Reg_Select
+ * (control_0), no el software -- ver dma_route_select(). DMA_Filter_RAM solo
+ * produce datos cuando el Filter esta siendo alimentado (control_0=1). */
 static void dma_adc_init(void)
 {
     uint8 td;
 
-    /* ── Raw Single: ADC DelSig → g_dma_raw_buf (3 bytes/disparo) ────────── */
-    DMA_DelSig_RAM_Single_DmaInitialize(3u, 1u,
+    /* ── Raw: ADC DelSig → g_dma_raw_buf (3 bytes/disparo) ───────────────── */
+    DMA_DelSig_RAM_DmaInitialize(3u, 1u,
         HI16((uint32)ADC_DEC_SAMP_PTR),
         HI16((uint32)(void *)g_dma_raw_buf));
     td = CyDmaTdAllocate();
     CyDmaTdSetConfiguration(td, 3u, td,
-        DMA_DelSig_RAM_Single__TD_TERMOUT_EN | TD_INC_DST_ADR);
+        DMA_DelSig_RAM__TD_TERMOUT_EN | TD_INC_DST_ADR);
     CyDmaTdSetAddress(td,
         LO16((uint32)ADC_DEC_SAMP_PTR),
         LO16((uint32)(void *)g_dma_raw_buf));
-    CyDmaChSetInitialTd(DMA_DelSig_RAM_Single_DmaHandle, td);
-    CyDmaChEnable(DMA_DelSig_RAM_Single_DmaHandle, 1u);
-
-    /* ── Raw Lote: ADC DelSig → g_dma_raw_lote_buf (lote de DMA_LOTE_SAMPLES) ── */
-    DMA_DelSig_RAM_Lote_DmaInitialize(3u, 1u,
-        HI16((uint32)ADC_DEC_SAMP_PTR),
-        HI16((uint32)(void *)g_dma_raw_lote_buf));
-    td = CyDmaTdAllocate();
-    g_td_raw_lote = td;
-    CyDmaTdSetConfiguration(td, (uint16)(3u * DMA_LOTE_SAMPLES), td,
-        DMA_DelSig_RAM_Lote__TD_TERMOUT_EN | TD_INC_DST_ADR);
-    CyDmaTdSetAddress(td,
-        LO16((uint32)ADC_DEC_SAMP_PTR),
-        LO16((uint32)(void *)g_dma_raw_lote_buf));
-    CyDmaChSetInitialTd(DMA_DelSig_RAM_Lote_DmaHandle, td);
-    CyDmaChEnable(DMA_DelSig_RAM_Lote_DmaHandle, 1u);
+    CyDmaChSetInitialTd(DMA_DelSig_RAM_DmaHandle, td);
+    CyDmaChEnable(DMA_DelSig_RAM_DmaHandle, 1u);
 
     /* ── Filter input: ADC DelSig → Filter_STAGEA (siempre activo, sin ISR) ── */
     DMA_DelSig_Filter_DmaInitialize(3u, 1u,
@@ -1030,34 +1004,21 @@ static void dma_adc_init(void)
     CyDmaChSetInitialTd(DMA_DelSig_Filter_DmaHandle, td);
     CyDmaChEnable(DMA_DelSig_Filter_DmaHandle, 1u);
 
-    /* ── Filter Single: Filter_HOLDA → g_dma_filt_buf (3 bytes/disparo) ──── */
-    DMA_Filter_RAM_Single_DmaInitialize(3u, 1u,
+    /* ── Filter output: Filter_HOLDA → g_dma_filt_buf (3 bytes/disparo) ──── */
+    DMA_Filter_RAM_DmaInitialize(3u, 1u,
         HI16((uint32)Filter_HOLDA_PTR),
         HI16((uint32)(void *)g_dma_filt_buf));
     td = CyDmaTdAllocate();
     CyDmaTdSetConfiguration(td, 3u, td,
-        DMA_Filter_RAM_Single__TD_TERMOUT_EN | TD_INC_SRC_ADR | TD_INC_DST_ADR);
+        DMA_Filter_RAM__TD_TERMOUT_EN | TD_INC_SRC_ADR | TD_INC_DST_ADR);
     CyDmaTdSetAddress(td,
         LO16((uint32)Filter_HOLDA_PTR),
         LO16((uint32)(void *)g_dma_filt_buf));
-    CyDmaChSetInitialTd(DMA_Filter_RAM_Single_DmaHandle, td);
-    CyDmaChEnable(DMA_Filter_RAM_Single_DmaHandle, 1u);
+    CyDmaChSetInitialTd(DMA_Filter_RAM_DmaHandle, td);
+    CyDmaChEnable(DMA_Filter_RAM_DmaHandle, 1u);
 
-    /* ── Filter Lote: Filter_HOLDA → g_dma_filt_lote_buf ─────────────────── */
-    DMA_Filter_RAM_Lote_DmaInitialize(3u, 1u,
-        HI16((uint32)Filter_HOLDA_PTR),
-        HI16((uint32)(void *)g_dma_filt_lote_buf));
-    td = CyDmaTdAllocate();
-    CyDmaTdSetConfiguration(td, (uint16)(3u * DMA_LOTE_SAMPLES), td,
-        DMA_Filter_RAM_Lote__TD_TERMOUT_EN | TD_INC_SRC_ADR | TD_INC_DST_ADR);
-    CyDmaTdSetAddress(td,
-        LO16((uint32)Filter_HOLDA_PTR),
-        LO16((uint32)(void *)g_dma_filt_lote_buf));
-    CyDmaChSetInitialTd(DMA_Filter_RAM_Lote_DmaHandle, td);
-    CyDmaChEnable(DMA_Filter_RAM_Lote_DmaHandle, 1u);
-
-    /* Ruta por defecto: raw + Single — igual al comportamiento previo al mux. */
-    dma_route_select(0u, 0u, 0u);
+    /* Ruta por defecto: raw (control_0=0) — igual al comportamiento previo al mux. */
+    dma_route_select(0u);
 }
 
 int main(void)
@@ -1094,6 +1055,10 @@ int main(void)
 #endif
 
     UART_Start();
+    psoc_debug_start();
+    psoc_debug_print("\r\n[PC] boot\r\n");
+    psoc_debug_print_u32("[PC] PSOC_HW_CLASS=", PSOC_HW_CLASS);
+    psoc_debug_print_u32("[PC] PSOC_CAL_STAGE_COUNT=", psoc_calibration_stage_count());
     psoc_calibration_set_diag_hook(uart_send_diag);
 
 #if PSOC_EARLY_UART_TEST
@@ -1122,6 +1087,10 @@ int main(void)
     }
 
     Filter_Start();
+    /* Activa el FIR de adquisicion (FIR_adquisition.h) -- calibration.c
+     * carga el de calibracion (FIR_calibration.h) solo durante una corrida
+     * y restaura este al terminar (ver cal_pi_start/cal_async_complete). */
+    (void)psoc_filter_load_fir_coefficients(g_fir_adquisition_coeffs_q23, FILTER_FIR_NTAPS);
     dma_adc_init();
 
     psoc_prepare_capture_path();

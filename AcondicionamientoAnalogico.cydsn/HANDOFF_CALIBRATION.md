@@ -2445,3 +2445,275 @@ Importante para la proxima sesion / si se flashea el PSoC nuevo:
   `PSOC_AUTO_CAL_ON_READY=0` en el ESP (boot-cal queda 100% del lado PSoC), o
   dejarlo en 1 como red de seguridad aceptando una posible doble corrida la
   primera vez.
+
+### 14.19 Sesion 2026-06-19: la biseccion de HAMMER se reemplaza por un PI con FIR, feedforward e histeresis; descubrimiento de que AnalogHammer ya tiene solo 2 etapas
+
+Pedido del usuario: reemplazar la calibracion activa de AnalogHammer (biseccion)
+por un controlador PI, con un FIR de N muestras para suavizar la medida, un
+termino feedforward `K*Vobjetivo` para arrancar cerca del punto correcto (sin
+necesitar biseccion), e histeresis sobre el esfuerzo de control para evitar el
+chattering de 1 LSB documentado en §11-§14.12. Contexto historico relevante: un
+PID clasico ya se probo y se removio en §0-§12 por "overfitting" al ruido y
+limit-cycling — el FIR/feedforward/histeresis de este diseño atacan
+puntualmente esas tres fallas, no es una repeticion ciega.
+
+**Alcance**: solo `PSOC_HW_CLASS == PSOC_HW_HAMMER`. GEO sigue con la
+biseccion existente, sin tocar, incluido el `cal_servo_*` dormido (el usuario
+ya habia decidido preservarlo como punto de partida para una futura migracion
+de GEO a PI).
+
+**Hallazgo importante, no anticipado**: el commit `990f49f9` ("Precambios",
+de esta misma sesion) ya habia simplificado el esquematico de AnalogHammer —
+`VDAC_ref_IN`/`Opa_ref_IN`/`Vref`/`LPF_ref` desaparecieron de
+`codegentemp/generated_files.txt`. AnalogHammer pasó de 3 etapas
+(IN/PGA/LP) a **2 etapas (PGA/LP)**, consistente con el `AMux_ADC` de 2
+canales (0=LPo, 1=LP) que muestra el esquematico actual. Nadie habia hecho un
+build completo desde ese commit hasta esta sesion, así que el `#error
+"AnalogHammer requiere VDAC_ref_IN"` (ya existente, no introducido ahora)
+nunca habia disparado. Se redujo `g_psoc_cal_stages[]`/`g_cal_servo_tune[]`/
+`g_cal_pi_cfg[]` (HAMMER) a 2 entradas, `CAL_ADC_CAPTURE_CHANNEL` HAMMER
+1u→ya no 2u, y se removieron los call-sites de `VDAC_ref_IN`/`Opa_ref_IN`/
+`HAMMER_VDAC_IN_*` en `calibration.c`/`calibration_tables.h`/`psoc_hw.c`.
+
+**Diseño del controlador** (`calibration.c`, bloque `#if PSOC_HW_CLASS ==
+PSOC_HW_HAMMER` justo antes de `psoc_calibration_start_async`):
+
+```
+error  = target_counts - fir_output
+effort = Kff*target/div + direction*(Kp*error/div + Ki*integral/div)
+dac    = clamp(effort); se escribe solo si |dac-dac_actual| >= histeresis
+```
+
+- `direction` (nuevo, `CAL_DIRECTION_HAMMER_PGA/LP` en `calibration_tables.h`,
+  hoy `+1` para ambas, sin verificar en hardware) se aplica solo a la
+  realimentacion (Kp/Ki), nunca al feedforward — el feedforward es el sesgo a
+  mitad de escala (Kff_div elegido para que de ~dac_center) y es independiente
+  del sentido del lazo; negarlo lo manda al riel equivocado. Si una etapa
+  diverge en vez de converger en hardware real, este es el primer sospechoso
+  a cambiar a `-1`.
+- Anti-windup: el integrador solo acumula cuando `effort` no quedo clampeado
+  contra el riel.
+- FIR: Q15, acumulacion en `int64` (una muestra de ~18 bit por un coeficiente
+  Q15 ya excede `int32`), `N = PSOC_ADC_LOTE_SAMPLES` (64, reusa el
+  buffer/DMA TD de Lote de la sesion anterior sin tocar nada de DMA).
+  Default boxcar (ganancia unitaria, equivalente al promediado viejo) para
+  que la primera puesta en marcha valide solo el PI/feedforward/histeresis,
+  no ademas un FIR sin probar.
+- Secuencia por etapa: Lote (prellena el FIR de un solo golpe, con descarte
+  de `stage->settle_samples` lotes de asentamiento tras el cambio de
+  AMux/DAC — mismos 600/900 muestras que ya usaba la biseccion) → Single
+  (una muestra nueva por disparo, recalcula FIR/error/PI/histeresis cada
+  vez). Reusa `dma_route_select`/`dma_raw_lote_rearm` (ahora exportadas
+  desde `main.c` via `psoc_hw.h`, antes `static`).
+- Nuevo trio `psoc_adc_clear/note/take_isr_block` en `psoc_adc.h/.c`: el ISR
+  de Lote en HAMMER entrega las 64 muestras individuales (para prellenar el
+  FIR), no la suma que usa GEO — mismo flag `g_raw_route_lote`, rama
+  diferente por `#if PSOC_HW_CLASS` dentro de `isr_DMA_DelSig_RAM_Handler`
+  (`main.c`), GEO queda byte-a-byte igual.
+- Bug encontrado y corregido en revision (no en esta implementacion sino
+  preexistente, pero recien relevante ahora que HAMMER es el target real):
+  el gate de `PSOC_CMD_SAVE_EEPROM` en `main.c` comparaba
+  `g_psoc_cal_result_count >= PSOC_NV_CAL_STAGES` (4, fijo) — con HAMMER en 2
+  etapas esto nunca guardaba nada en EEPROM. Se agrego
+  `psoc_calibration_stage_count()` (accessor en `calibration.h/.c`, porque
+  `main.c` no incluye `calibration_tables.h` donde vive
+  `PSOC_CAL_STAGE_COUNT`) y el gate ahora compara contra eso.
+
+**Pendiente de verificar en hardware real** (nada de esto bloquea el build,
+son variables de ajuste, no bugs conocidos):
+- Polaridad real de `CAL_DIRECTION_HAMMER_PGA/LP` (hoy ambas `+1`, sin
+  verificar contra el esquematico real — a diferencia de la biseccion, este
+  PI no tiene un paso de probe que la autocorrija).
+- Ganancias `CAL_PI_KP/KI/KFF_*_HAMMER_PGA/LP` (`calibration_tables.h`) son
+  puntos de partida razonables, no valores medidos en hardware.
+- El build de GEO no se re-ejecuto (no hay forma de generar ese hardware sin
+  cambiar el esquematico) — la separacion `#if PSOC_HW_CLASS` se revisó a
+  mano y deja el cuerpo GEO sin tocar, pero es inferencia, no test.
+
+**Hallazgo separado, sin accion**: `Generated_Source/PSoC5/` tiene muchos más
+huerfanos historicos de los que se limpiaron hoy (familias `Vref_*`,
+`ADC_DelSig*`, `VDAC_n/_p/_out`, `WaveDAC8_*`, etc. — docenas de archivos).
+Solo se removieron los que efectivamente rompian este build
+(`Vref`/`LPF_ref`/`Opa_ref_IN`/`VDAC_ref_IN` por la simplificacion de
+AnalogHammer, mas `VDAC_pga`/`VDACpga` por colision de mayusculas/minusculas
+en NTFS con el `VDAC_PGA` vivo — este ultimo caso casi borra el `VDAC_PGA.*`
+vivo por ser el mismo archivo físico bajo dos nombres con distinta
+capitalización; se restauro desde `codegentemp/` antes de continuar). Una
+limpieza tipo "Task 1" de la sesion anterior, pero para este lote nuevo de
+huerfanos, queda pendiente si se quiere recuperar mas Flash/prolijidad — no
+es necesaria para que el proyecto compile hoy.
+
+Build final: Flash 23080/262144 (8.8%), SRAM 50664/65536 (77.3%).
+
+### 14.20 Mismo dia: criterio de convergencia portado desde una simulación Simulink de referencia
+
+El usuario señaló `src/matlab/Simulaciones Controladores/Desacople/Subsystem_grt_rtw`
+(código generado de un modelo "PID/Subsystem" — PID Controller estándar de
+Simulink con anti-windup "clamping", más un `MATLAB Function1` que implementa
+exactamente `detect_lock(err,lsb,N,reset)` y un `MATLAB Function` que congela
+la salida (`fcn(u,u_a,lock)`) mientras está lockeado) como mejor referencia
+posible para el lazo de calibración. Se leyó `Subsystem.c/.h/_data.c`
+completos (no solo las dos funciones pegadas por el usuario) para entender
+la arquitectura real: FIR Hamming 31 taps (cutoff casi-DC, `fir1(30,0.1/1500,...)`),
+feedforward `Gain=0.6/Kinversa*Vref`, PID con anti-windup direccional
+(bloquea el integrador solo si está saturado Y el incremento empeoraría la
+saturación — el método "clamping" de la librería estándar de Simulink), y el
+lock-detect con `N=32`, `lock_threshold=1.1·LSB`, `unlock_threshold=2.2·LSB`.
+
+**Decisión de alcance** (validada con advisor antes de tocar código): de los
+4 mecanismos, solo el detector de lock es portable de forma directa y segura
+a esta sesión:
+- El **freeze-al-lockear + histéresis de des-lock** son comportamiento de
+  *servo continuo* (lockea, congela, puede des-lockear si deriva) — en esta
+  cascada secuencial, lockear ya dispara `cal_pi_finish_stage` y se avanza de
+  etapa, así que nunca se permanece lockeado el tiempo suficiente para que el
+  freeze o el des-lock lleguen a ejecutar. Esa lógica es la que correspondería
+  a una futura resurrección de `cal_servo_*` (el servo de mantenimiento
+  dormido), no a esta calibración de una sola pasada.
+- El **anti-windup direccional** (Simulink) es más sofisticado que el actual
+  ("congelar el integrador si está saturado, sin importar la dirección") pero
+  es el punto de mayor riesgo de signo de todo el puerto (más aún sumado al
+  multiplicador `direction` que Simulink no tiene — ahí el signo va metido en
+  `Kinversa`). El anti-windup actual es correcto, solo conservador al
+  recuperarse de un riel — se deja como está; portarlo queda como mejora
+  aparte, verificada por separado, si hace falta.
+- El **FIR Hamming** (cutoff casi-DC) no se portó — el boxcar actual sigue
+  siendo la elección correcta para la primera puesta en marcha (mismo
+  razonamiento de §14.19: validar solo lo nuevo, no además un FIR sin probar).
+  El cutoff `0.1/1500` además probablemente sea un artefacto de la
+  simulación, no un valor pensado para este hardware.
+
+**Lo que sí se portó** — `cal_pi_run_service()` (`calibration.c`): el criterio
+de "etapa convergida" pasa de `stable_count>=stable_streak` (muestra a
+muestra, contra `tolerance_counts`) a una ventana deslizante de
+`CAL_PI_LOCK_N=32` muestras de `fir_output`: lockea cuando
+`max(ventana)-min(ventana) <= ~1.1` veces "1 LSB de DAC expresado en counts
+ADC". Ese "1 LSB en counts" se calcula reusando `cfg->kff_div` (ya es
+`target_counts/dac_center`, la misma conversión que usa el feedforward) en
+vez de inventar una constante nueva o reusar `tolerance_counts` (que es un
+objetivo de exactitud, no un piso de resolución — usarlo ahí habría sido el
+bug más probable de este puerto). Al lockear, se llama
+`cal_pi_finish_stage(1u)` directo (sin congelar salida ni esperar des-lock,
+por el punto anterior). Se eliminaron `stable_count`/`stable_streak`
+(`PsocCalPi`/`PsocCalPiCfg`) y `hysteresis_codes` (la escritura al DAC ahora
+es incondicional cada muestra, igual que el modelo de referencia cuando no
+está lockeado — el detector de lock es el único guardián contra el
+chattering de 1 LSB, ya no además un umbral de histéresis en la escritura).
+
+**Pendiente de confirmar en hardware**: si `kff_div` resulta ser una mala
+aproximación de "counts ADC por LSB de DAC" en algún punto de operación real
+(la derivación asume la relación target_counts/dac_center es razonablemente
+lineal cerca del centro), el lock puede no disparar nunca o disparar
+demasiado fácil — es lo primero a mirar si una etapa se va a `max_samples`
+sin lockear, o si lockea sospechosamente rápido.
+
+Build verificado: Flash 23144/262144 (8.8%), SRAM 50792/65536 (77.5%).
+
+### 14.21 Sesión 2026-06-23: TopDesign a 3 DMA, PI único (GEO+HAMMER), Filter de hardware reemplaza el FIR por software, loader de coeficientes — **sin compilar/programar todavía**
+
+A pedido explícito del usuario (repetido dos veces): la biseccion vieja
+(estado `CAL_ASYNC_*` de GEO) y el servo lento de mantenimiento (`cal_servo_*`)
+quedaron **comentados con `#if 0` (no borrados)** en `calibration.c` — la
+calibración hoy es 100% `cal_pi_*`, para GEO y HAMMER por igual. Esto
+reemplaza/extiende lo de §14.19-14.20 (que era solo HAMMER).
+
+**Disparador**: el usuario redujo el TopDesign de 5 DMA (con split Single/Lote
+para DelSig_RAM y Filter_RAM) a 3 DMA (`DMA_Filter_RAM`, `DMA_DelSig_RAM`,
+`DMA_DelSig_Filter` — confirmado por captura de pantalla y luego por
+`codegentemp/generated_files.txt` tras que el usuario corriera "Generate
+Application"). Reg_Select quedó en 1 solo bit útil (`control_0`): 0=raw
+(ADC→`DMA_DelSig_RAM`), 1=filtrado (ADC→`Filter_STAGEA` vía
+`DMA_DelSig_Filter`, salida del Filter→RAM vía `DMA_Filter_RAM`).
+
+**Cambios principales**:
+1. **`main.c`**: `dma_adc_init()` reescrito para los 3 canales nuevos
+   (`DMA_DelSig_RAM_DmaHandle`/`DMA_Filter_RAM_DmaHandle`, sin los `_Single`/
+   `_Lote`). `dma_route_select()` pasó de 3 parámetros (bits control_0/1/2) a
+   1 solo (`uint8 use_filter`, escribe `Reg_Select_Write(0x01u)`/`0x00u`).
+   Se borró `dma_raw_lote_rearm()` y todo el estado de Lote
+   (`g_dma_raw_lote_buf`, `g_dma_filt_lote_buf`, `g_raw_route_lote`,
+   `g_td_raw_lote`). `isr_DMA_Filter_RAM_Handler` ahora llama
+   `psoc_adc_note_isr_filtered_sample()` SIEMPRE (antes de los
+   early-return de `g_fir_discard`/`g_stream_mode`, que solo gatean la
+   captura hacia el stream de la web) — calibración y el stream filtrado
+   son consumidores independientes de la misma ISR.
+2. **`calibration.c` — `cal_pi_*` unificado**: ya no hay FIR por software
+   (`g_cal_pi_fir_coeffs_hammer_boxcar`/`cal_pi_fir_output`/`fir_buf`
+   eliminados) ni prellenado por "lote" (`CAL_PI_PREFILL` eliminado,
+   `cal_pi_run_service` ahora descarta `stage->settle_samples +
+   FILTER_FIR_NTAPS` muestras FILTRADAS antes de confiar en `fir_output`).
+   `fir_output` es directo `psoc_adc_take_isr_filtered_sample()`. **Bug real
+   encontrado y corregido por el advisor en esta misma sesión**: el Filter de
+   hardware lee de `ADC_DEC_SAMP_PTR` SIN el `psoc_adc_counts_right_aligned()`
+   (÷`ADC_CFG1_DEC_DIV`=32) que sí recibía la muestra cruda — como el FIR es
+   lineal, su salida queda escalada ×32 contra `target_counts`/
+   `tolerance_counts`. Se aplica `psoc_adc_counts_right_aligned()` a la
+   muestra filtrada en `cal_pi_run_service` antes de usarla.
+3. **Ley de control rediseñada** (no solo "extendida a GEO"): el feedforward
+   viejo `Kff*target_counts/div` daba **0** para GEO (`target_counts=0`,
+   reposo diferencial) — colapsaba el feedforward por completo. Ahora
+   `effort = dac_center + direction*(Kp*error + Ki*integral)`, usando
+   `stage->dac_center` (ya existía en `PsocCalStage`) en vez de un Kff
+   derivado de target/center. El detector de lock usaba el mismo `kff_div`
+   como proxy de "1 LSB de DAC en counts ADC" (ver §14.20) — al desacoplar
+   el feedforward de `target_counts` hizo falta una constante física propia,
+   `CAL_PI_LSB_COUNTS_*` (nueva, una por etapa).
+4. **GEO ahora tiene tabla PI** (`g_cal_pi_cfg`, condicional
+   `#if PSOC_HW_CLASS==GEO` con 4 entradas vs. 2 de HAMMER) — nuevas
+   constantes `CAL_PI_KP/KI_NUM/DIV_GEO_*` y `CAL_PI_LSB_COUNTS_GEO_*` en
+   cada `calibration_tables_geo_*.h` (mismos Kp=1/2000, Ki=1/16000 que
+   HAMMER como punto de partida arbitrario, `lsb_counts=839` estimado
+   asumiendo ganancia ~1x VDAC→ADC — **ninguno validado en hardware, GEO
+   nunca corrió con PI antes de esta sesión**, a diferencia de HAMMER que ya
+   tenía corridas reales con bisección para comparar).
+5. **Loader de coeficientes del Filter** (`filter_coeffs.h/.c`, nuevos):
+   `psoc_filter_load_fir_coefficients(coeffs_q23, ntaps)` — adapta el
+   snippet de referencia de Cypress que pegó el usuario, con un bug real
+   corregido (el snippet apaga el run bit y nunca lo vuelve a prender; acá
+   se guarda el estado previo y se restaura). `FILTER_FIR_NTAPS=128`
+   (sin cambiar el customizer del componente Filter en TopDesign — decisión
+   explícita del usuario, "para evitar complicarnos"), con `#error` de
+   compilación si alguna vez se desincroniza de `Filter_FIR_A_SIZE/4`.
+6. **Dos juegos de coeficientes** (a pedido del usuario, para poder ajustar
+   cada uso por separado): `FIR_adquisition.h/.c` (el stream filtrado hacia
+   la web, cargado una vez al boot) y `FIR_calibration.h/.c` (el FIR que ve
+   el PI, cargado por `cal_pi_start()` al empezar una corrida y restaurado a
+   adquisición por `cal_async_complete()` al terminar). Ambos arrancan con
+   el mismo default (copia exacta del diseño de 128 taps ya horneado en el
+   componente, extraído byte a byte de `Filter_Coefficients.c` — carga
+   verificable como no-op) — el usuario edita los valores de cada uno por
+   separado cuando tenga el diseño real.
+7. **AMux_ADC**: nuevo `psoc_amux_select_exclusive()` (calibration.c) es el
+   único punto que toca `AMux_ADC_Connect/Disconnect` — garantiza que nunca
+   hay dos canales de señal (0-3) conectados a la vez (el componente está en
+   modo "All Modes", `AMux_ADC_ATMOSTONE=0`, así que el hardware NO lo
+   garantiza solo). El canal 4 (capacitor de 100nF, `AMuxCapacitor`) se
+   conecta EN PARALELO al canal de la etapa solo durante la medición de una
+   etapa de calibración (`CAL_AMUX_ADC_SELECT_STAGE`, los 4 sitios de
+   bisección que quedaron comentados + servo + PI) — nunca durante captura
+   normal/idle (`CAL_AMUX_ADC_SELECT`, sin capacitor).
+8. **`.cyprj`**: se registraron `filter_coeffs.c/h`, `FIR_adquisition.c/h`,
+   `FIR_calibration.c/h` en las secciones Source/Header Files (si no, PSoC
+   Creator no los compila aunque existan en disco).
+
+**Verificación de consistencia hecha sin poder compilar** (no hay path CLI
+para este `.cydsn`, ver advertencia de siempre): balance de `#if`/`#endif`
+verificado con script, las 14 funciones públicas de `calibration.h`
+confirmadas vivas exactamente una vez cada una, y barrido de "toda función
+`static` viva tiene al menos un llamador vivo" sin huérfanos — pero esto NO
+sustituye compilar en PSoC Creator.
+
+**Pendiente / próximos pasos**:
+1. **Compilar y programar** — ningún cambio de esta sesión se probó en
+   hardware ni se compiló siquiera.
+2. **GEO con PI es diseño nuevo, no un retune**: Kp/Ki/`lsb_counts` de las 4
+   etapas GEO son estimaciones de banco sin validar — esperar que no
+   converja bien al primer intento, no es necesariamente un bug.
+3. Confirmar que el bit que escribe `dma_route_select()` (`control_0`,
+   0x01) es efectivamente el que gobierna el AND/NOT del Reg_Select en el
+   TopDesign regenerado (la captura de pantalla lo sugiere fuerte, pero no
+   se verificó contra el `.cysch` real).
+4. Si se quiere que la bisección de GEO vuelva a ser una opción (no
+   reemplazo total), está todo el código intacto bajo `#if 0` en
+   `calibration.c` — reactivarla es revertir esos `#if 0`/`#endif`, no
+   reescribir nada.

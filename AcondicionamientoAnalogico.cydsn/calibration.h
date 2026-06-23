@@ -90,6 +90,14 @@ void psoc_calibration_reset_references(void);
  * Llamar después de psoc_calibration_start_references() para arrancar
  * desde los valores guardados en EEPROM en vez de los defaults. */
 void psoc_calibration_seed_dac(const uint8 *dac_values, uint8 count);
+void psoc_calibration_report_adc_snapshot(void);
+
+/* Etapas reales de la cascada activa (2 en HAMMER, 3-4 en GEO segun
+ * VDAC_ref_BP). main.c no incluye calibration_tables.h (donde vive
+ * PSOC_CAL_STAGE_COUNT), así que lo necesita vía este accessor — p.ej. para
+ * el gate de PSOC_CMD_SAVE_EEPROM contra el conteo real de etapas, no contra
+ * el tope fijo PSOC_NV_CAL_STAGES del layout EEPROM. */
+uint8 psoc_calibration_stage_count(void);
 
 uint8 psoc_calibration_start_async(void);
 uint8 psoc_calibration_service_async(void);

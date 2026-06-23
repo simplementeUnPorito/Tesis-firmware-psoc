@@ -107,6 +107,19 @@
 #define CAL_REALCHECK_AVG_SETTLE_TOL_GEO_PGA     10L
 #define CAL_REALCHECK_AVG_STABLE_STREAK_GEO_PGA  3u
 
+/* ===== Controlador PI de calibracion (unico camino activo, GEO incluido —
+ * ver bloque "Controlador PI de calibracion" en calibration_tables.h para el
+ * detalle de la ley de control). Sin datos de banco todavia: mismos
+ * Kp/Ki de partida que HAMMER y lsb_counts estimado asumiendo ganancia ~1x
+ * entre VDAC_ref_PGA y el punto de medicion (AMux_ADC=0) — ajustar con
+ * osciloscopio, la ganancia real de PGA probablemente lo cambie bastante. */
+#define CAL_PI_KP_NUM_GEO_PGA        1L
+#define CAL_PI_KP_DIV_GEO_PGA        2000L
+#define CAL_PI_KI_NUM_GEO_PGA        1L
+#define CAL_PI_KI_DIV_GEO_PGA        16000L
+#define CAL_PI_LSB_COUNTS_GEO_PGA    839L
+#define CAL_PI_MAX_SAMPLES_GEO_PGA   6000u
+
 /* ===== Servo PI (mantenimiento en IDLE, CAL_SERVO_ENABLE_DEFAULT=0) =====
  * control = err*KP_NUM + integral*KI_NUM/KI_DIV; el signo decide el siguiente
  * LSB. Reubicado aca para ajustarlo sin tocar calibration_tables.h. */

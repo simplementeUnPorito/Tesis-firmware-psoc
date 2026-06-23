@@ -50,9 +50,7 @@ void psoc_hw_start_analog(uint8 pga_code, uint8 pgavdac_code)
     OPAlp_Start();
 #else
     Opa_ref_1V_Start();
-    LPF_ref_Start();
     LPF_ADC_Start();
-    Opa_ref_IN_Start();
     Opa_ref_PGA_Start();
     PGA_Start();
     psoc_hw_set_pga(pga_code);

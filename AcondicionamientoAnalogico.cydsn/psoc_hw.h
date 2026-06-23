@@ -65,6 +65,12 @@
 #define PSOC_EVT_CAL_REALCHECK_MEAS32 0x27u /* 4 bytes MSB-first, igual patron que CAL_STAGE_MEAS32 */
 #define PSOC_EVT_CAL_REALCHECK_NUDGE 0x28u /* value=nudge aplicado, signed 8-bit (0xFF=-1,0x01=+1,0x00=revertido/sin cambio) */
 #define PSOC_EVT_CAL_REALCHECK_OK    0x29u /* value=1 si la etapa quedo dentro de tol_counts, 0 si no */
+#define PSOC_EVT_CAL_STAGE_TARGET32 0x2Au /* 4 bytes MSB-first: target_counts de la etapa activa */
+#define PSOC_EVT_CAL_SWEEP_DAC      0x2Bu /* value=dac evaluado en sweep diagnostico */
+#define PSOC_EVT_CAL_SWEEP_MEAS32   0x2Cu /* 4 bytes MSB-first: ADC directo para sweep diagnostico */
+#define PSOC_EVT_ADC_SNAPSHOT_BEGIN 0x2Du /* value=stage_index, inicio snapshot ADC manual */
+#define PSOC_EVT_ADC_RAW32          0x2Eu /* 4 bytes MSB-first: ADC directo del canal/VDAC actual */
+#define PSOC_EVT_ADC_FILT32         0x2Fu /* 4 bytes MSB-first: salida Filter/DFB, reservado para diagnostico */
 #define PSOC_EVT_RX_CMD           0x30u
 #define PSOC_EVT_SETN             0x31u
 #define PSOC_EVT_ARMED            0x32u
@@ -92,6 +98,7 @@
 #define PSOC_CMD_CALIBRATE      0xB5u
 #define PSOC_CMD_SAVE_EEPROM    0xB6u  /* Guardar config calibración en EEPROM */
 #define PSOC_CMD_SELECT_STREAM  0xB7u  /* Param: 0=crudo, 1=filtrado FIR */
+#define PSOC_CMD_ADC_SNAPSHOT   0xB8u  /* Reporte diagnostico de ADC por etapa */
 
 void psoc_hw_start_analog(uint8 pga_code, uint8 pgavdac_code);
 void psoc_hw_set_pga(uint8 code);
@@ -100,5 +107,11 @@ void psoc_hw_set_pgavdac(uint8 code);
 /* Contador de ticks de 10 ms (g_timer_ticks de main.c), usado por
  * calibration.c para el watchdog y la telemetria periodica de progreso. */
 uint32 psoc_now_ticks(void);
+
+/* Selecciona, vía Reg_Select (main.c), si el canal raw del ADC se enruta
+ * directo a RAM (use_filter=0, captura cruda) o hacia el Canal A del Filter
+ * de hardware (use_filter=1, usado por el PI de calibración para leer la
+ * salida ya filtrada vía DMA_Filter_RAM — ver calibration.c). */
+void dma_route_select(uint8 use_filter);
 
 #endif

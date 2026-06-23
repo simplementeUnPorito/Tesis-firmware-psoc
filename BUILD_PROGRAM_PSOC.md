@@ -6,9 +6,15 @@ This note records the working command-line flow for
 ## Hardware
 
 - KitProg USB-UART/Programmer: `COM6`
-- PPCLI port name observed on this machine: `KitProg/1D1F17F002152400`
-- PPCLI port name observed on 2026-06-14 after `GetPorts`:
-  `"KitProg (CMSIS-DAP/248355)"`
+- PPCLI port name observed after changing the PSoC programming/debug mode on
+  2026-06-23: `KitProg (CMSIS-DAP/248355)`
+- Older PPCLI port name observed before that mode change:
+  `KitProg/1D1F17F002152400`
+- Do not assume the name. Always run `GetPorts` first and paste the exact
+  returned string into `OpenPort`.
+- With the current programming/debug mode, the extra PSoC `PC` UART debug path
+  is not expected to work. Validate runtime behavior through the ESP on COM8
+  and the ESP<->PSoC UART, not through the old PC debug UART on COM6.
 - Active PSoC Creator project:
   `C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn`
 
@@ -18,8 +24,8 @@ Run from PowerShell:
 
 ```powershell
 & "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\bin\cyprjmgr.exe" `
-  -wrk "C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\DiferencialToSingleEnded_ESP-000.cywrk" `
-  -build `
+  -wrk "C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\AcondicionamientoAnalogico.cywrk" `
+  -rebuild `
   -prj AcondicionamientoAnalogico `
   -c Debug
 ```
@@ -63,27 +69,70 @@ KitProg/1D1F17F002152400
 
 ## Program
 
-This reuses the generated PPCLI example script and patches the first two
-lines for this board and hex file.
+The Cypress example script programs all 1024 PSoC5 flash rows. That works in
+principle, but on 2026-06-23 it failed late in empty flash
+(`Failed to send packet (batch) in SWD mode` around array `0x03`, row `192`).
+Program only the flash rows covered by the current hex after `PSoC3_EraseAll`.
+
+Current tested build on 2026-06-23:
+
+- Project: `AcondicionamientoAnalogico`
+- Flash used: `26214/262144 bytes`
+- Rows to program/verify: `0..102`
+
+Earlier notes in this file that mentioned `0..92` or `0..100` were for smaller
+hex files. Recalculate after every rebuild. A quick rule from the PSoC Creator
+flash-used byte count is:
 
 ```powershell
-$example = "C:\Github\Tesis\src\psoc\PPCLI_example_scripts\PSoC3_5_PPCLI\example_script.cli"
-$out = Join-Path $env:TEMP "psoc_program_acondicionamiento.cli"
-$hex = "C:/Github/Tesis/src/psoc/AcondicionamientoAnalogico.cydsn/CortexM3/ARM_GCC_541/Debug/AcondicionamientoAnalogico.hex"
+$lastRow = [int][Math]::Ceiling($flashUsedBytes / 256.0) - 1
+```
 
-$lines = Get-Content -LiteralPath $example
-$lines[0] = 'OpenPort "KitProg (CMSIS-DAP/248355)" "C:\Program Files (x86)\Cypress\Programmer\"'
-$lines[1] = "HEX_ReadFile `"$hex`""
-if ($lines[-1].Trim().ToLowerInvariant() -ne "quit") { $lines += "quit" }
-Set-Content -LiteralPath $out -Value $lines -Encoding ASCII
+For example, `26214` bytes gives `102`. If the build size changes, update
+`$lastRow` below before programming.
+
+```powershell
+$ErrorActionPreference = "Stop"
+$programmer = "C:\Program Files (x86)\Cypress\Programmer"
+$pp = Join-Path $programmer "ppcli.exe"
+$out = Join-Path $env:TEMP "psoc_program_acondicionamiento.cli"
+$log = Join-Path $env:TEMP "psoc_program_acondicionamiento.log"
+$hex = "C:/Github/Tesis/src/psoc/AcondicionamientoAnalogico.cydsn/CortexM3/ARM_GCC_541/Debug/AcondicionamientoAnalogico.hex"
+$port = "KitProg (CMSIS-DAP/248355)"   # replace with exact GetPorts result.
+$lastRow = 102                         # current 2026-06-23 build: 26214 bytes
+
+$cmds = New-Object System.Collections.Generic.List[string]
+$cmds.Add("OpenPort `"$port`" `"$programmer\`"")
+$cmds.Add("SetAcquireMode Reset")
+$cmds.Add("SetProtocol 8")              # SWD
+$cmds.Add("SetProtocolConnector 1")
+$cmds.Add("SetProtocolClock 192")       # FREQ_01_5, slower/stable SWD
+$cmds.Add("HEX_ReadFile `"$hex`"")
+$cmds.Add("DAP_Acquire")
+$cmds.Add("PSoC3_GetJtagID")
+$cmds.Add("PSoC3_EraseAll")
+
+for ($row = 0; $row -le $lastRow; $row++) {
+    $cmds.Add(("PSoC3_ProgramRowFromHex 0x00 {0} 0x01" -f $row))
+    $cmds.Add(("PSoC3_VerifyRowFromHex 0x00 {0} 0x01" -f $row))
+}
+
+$cmds.Add("PSoC3_ProtectAll")
+$cmds.Add("PSoC3_VerifyProtect")
+$cmds.Add("DAP_ReleaseChip")
+$cmds.Add("ClosePort")
+$cmds.Add("quit")
+Set-Content -LiteralPath $out -Value $cmds -Encoding ASCII
 
 $runfile = $out -replace "\\", "/"
-Push-Location "C:\Program Files (x86)\Cypress\Programmer"
+Push-Location $programmer
 try {
-    & .\ppcli.exe "--runfile $runfile"
+    & $pp "--runfile $runfile" | Tee-Object -FilePath $log
 } finally {
     Pop-Location
 }
+
+Select-String -LiteralPath $log -Pattern "returned 800|failed|failure|Can not open port|Port not opened"
 ```
 
 Successful programming ends with:
@@ -96,6 +145,22 @@ ClosePort
 quit
 ```
 
+Successful 2026-06-23 run with the script above:
+
+```text
+PSoC3_ProgramRowFromHex 0x00 102 0x01 -> 0 OK
+PSoC3_VerifyRowFromHex 0x00 102 0x01 -> 0 OK
+PSoC3_ProtectAll -> 0 OK
+PSoC3_VerifyProtect -> 0 OK
+DAP_ReleaseChip -> 0 OK
+ClosePort -> 0 OK
+```
+
+If `OpenPort` fails with `Can not open port ... It is not connected`, run
+`GetPorts` again. After the 2026-06-23 programming-mode change the working
+name is `KitProg (CMSIS-DAP/248355)`, while older notes may still mention
+`KitProg/1D1F17F002152400`.
+
 ## Reset Target
 
 If needed after programming:
@@ -103,7 +168,7 @@ If needed after programming:
 ```powershell
 $script = Join-Path $env:TEMP "psoc_reset_target.cli"
 @(
-'OpenPort KitProg/1D1F17F002152400 "C:\Program Files (x86)\Cypress\Programmer\"',
+'OpenPort "KitProg (CMSIS-DAP/248355)" "C:\Program Files (x86)\Cypress\Programmer\"',
 'SetProtocol 8',
 'SetProtocolClock 152',
 'SetProtocolConnector 1',
