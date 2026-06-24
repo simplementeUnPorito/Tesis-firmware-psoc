@@ -1,12 +1,41 @@
 #include "psoc_hw.h"
 
+static uint8 g_psoc_hw_pga_code = PSOC_PGA_DEFAULT_CODE;
+
+static uint16 psoc_hw_pga_code_to_gain_x1000(uint8 code)
+{
+    switch (code) {
+        case 0u: return 1000u;
+        case 1u: return 2000u;
+        case 2u: return 4000u;
+        case 3u: return 8000u;
+        case 4u: return 16000u;
+        case 5u: return 24000u;
+        case 6u: return 32000u;
+        case 7u: return 48000u;
+        case 8u: return 50000u;
+        default: return 1000u;
+    }
+}
+
 void psoc_hw_set_pga(uint8 code)
 {
+    g_psoc_hw_pga_code = code;
 #if PSOC_HW_CLASS == PSOC_HW_GEO
     PGAgain_SetGain(code);
 #else
     PGA_SetGain(code);
 #endif
+}
+
+uint8 psoc_hw_get_pga_code(void)
+{
+    return g_psoc_hw_pga_code;
+}
+
+uint16 psoc_hw_pga_gain_x1000(void)
+{
+    return psoc_hw_pga_code_to_gain_x1000(g_psoc_hw_pga_code);
 }
 
 void psoc_hw_set_pgavdac(uint8 code)

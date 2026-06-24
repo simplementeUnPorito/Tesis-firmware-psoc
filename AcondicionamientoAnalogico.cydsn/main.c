@@ -104,6 +104,10 @@
 #define PSOC_TX1_GPIO_TEST     0
 #endif
 
+#ifndef PSOC_BUTTON_CAL_ENABLE
+#define PSOC_BUTTON_CAL_ENABLE 0
+#endif
+
 /* -------------------------------------------------------------------------- */
 static volatile int32  g_adc_raw          = 0;
 
@@ -134,7 +138,9 @@ static volatile uint16 g_batches_sent = 0u;
 static volatile uint8  g_debug_psoc   = 0u;
 static          uint32 g_dbg_cnt      = 0u;
 static volatile uint8  g_cal_ack_pending = 0u;
+#if PSOC_BUTTON_CAL_ENABLE
 static volatile uint8  g_cal_button_pressed = 0u;
+#endif
 
 static volatile uint8  rx_state       = 0u;
 static volatile uint8  rx_cmd         = 0u;
@@ -410,7 +416,9 @@ CY_ISR(isr_SyncIn)
 CY_ISR(isr_Button_Handler)
 {
     isr_Button_ClearPending();
+#if PSOC_BUTTON_CAL_ENABLE
     g_cal_button_pressed = 1u;
+#endif
 }
 
 /* -------------------------------------------------------------------------- */
@@ -542,6 +550,9 @@ static void psoc_report_adc_snapshot_if_idle(void)
 
 static uint8 service_button_calibration(void)
 {
+#if !PSOC_BUTTON_CAL_ENABLE
+    return 0u;
+#else
     if (!g_cal_button_pressed) {
         return 0u;
     }
@@ -554,6 +565,7 @@ static uint8 service_button_calibration(void)
         uart_send_diag(PSOC_EVT_BUTTON_IGNORED, g_state);
     }
     return 1u;
+#endif
 }
 
 static void uart_send_capture_batch(uint16 batchIndex)
@@ -984,7 +996,7 @@ static void dma_adc_init(void)
         HI16((uint32)(void *)g_dma_raw_buf));
     td = CyDmaTdAllocate();
     CyDmaTdSetConfiguration(td, 3u, td,
-        DMA_DelSig_RAM__TD_TERMOUT_EN | TD_INC_DST_ADR);
+        DMA_DelSig_RAM__TD_TERMOUT_EN | TD_INC_SRC_ADR | TD_INC_DST_ADR);
     CyDmaTdSetAddress(td,
         LO16((uint32)ADC_DEC_SAMP_PTR),
         LO16((uint32)(void *)g_dma_raw_buf));
@@ -997,7 +1009,7 @@ static void dma_adc_init(void)
         HI16((uint32)Filter_STAGEA_PTR));
     td = CyDmaTdAllocate();
     CyDmaTdSetConfiguration(td, 3u, td,
-        DMA_DelSig_Filter__TD_TERMOUT_EN | TD_INC_DST_ADR);
+        DMA_DelSig_Filter__TD_TERMOUT_EN | TD_INC_SRC_ADR | TD_INC_DST_ADR);
     CyDmaTdSetAddress(td,
         LO16((uint32)ADC_DEC_SAMP_PTR),
         LO16((uint32)Filter_STAGEA_PTR));
@@ -1101,8 +1113,10 @@ int main(void)
     isr_Timer_StartEx(isr_Timer);
     isr_SyncIn_StartEx(isr_SyncIn);
     Clock_1_Start();
+#if PSOC_BUTTON_CAL_ENABLE
     isr_Button_ClearPending();
     isr_Button_StartEx(isr_Button_Handler);
+#endif
 
     Timer_Stop();
     Timer_WritePeriod(TIMEOUT_COUNTS);

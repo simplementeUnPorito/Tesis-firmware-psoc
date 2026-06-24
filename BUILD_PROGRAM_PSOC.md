@@ -3,6 +3,38 @@
 This note records the working command-line flow for
 `AcondicionamientoAnalogico.cydsn`.
 
+## Quick Current Flow (2026-06-24)
+
+- Active project: `AcondicionamientoAnalogico`.
+- Current KitProg/PPCLI name: `KitProg (CMSIS-DAP/248355)`.
+- Current runtime validation path: ESP on `COM8`. The PSoC PC UART on `COM6`
+  is not expected to work in the current programming mode.
+- Current tested PSoC build: flash `25878` bytes, SRAM `49664` bytes.
+- Current rows to program: `0..101`.
+- Current successful program log:
+  `C:\Users\elias\AppData\Local\Temp\psoc_program_acondicionamiento_codex_pi_rate_m128.log`.
+
+Build:
+
+```powershell
+& "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\bin\cyprjmgr.exe" `
+  -wrk "C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn\AcondicionamientoAnalogico.cywrk" `
+  -build `
+  -c Debug
+```
+
+Program row count:
+
+```powershell
+$lastRow = [int][Math]::Ceiling($flashUsedBytes / 256.0) - 1
+```
+
+For the current `25878` byte build:
+
+```powershell
+$lastRow = 101
+```
+
 ## Hardware
 
 - KitProg USB-UART/Programmer: `COM6`
@@ -74,11 +106,11 @@ principle, but on 2026-06-23 it failed late in empty flash
 (`Failed to send packet (batch) in SWD mode` around array `0x03`, row `192`).
 Program only the flash rows covered by the current hex after `PSoC3_EraseAll`.
 
-Current tested build on 2026-06-23:
+Current tested build on 2026-06-24:
 
 - Project: `AcondicionamientoAnalogico`
-- Flash used: `26214/262144 bytes`
-- Rows to program/verify: `0..102`
+- Flash used: `25878/262144 bytes`
+- Rows to program/verify: `0..101`
 
 Earlier notes in this file that mentioned `0..92` or `0..100` were for smaller
 hex files. Recalculate after every rebuild. A quick rule from the PSoC Creator
@@ -88,7 +120,7 @@ flash-used byte count is:
 $lastRow = [int][Math]::Ceiling($flashUsedBytes / 256.0) - 1
 ```
 
-For example, `26214` bytes gives `102`. If the build size changes, update
+For example, `25878` bytes gives `101`. If the build size changes, update
 `$lastRow` below before programming.
 
 ```powershell
@@ -99,7 +131,7 @@ $out = Join-Path $env:TEMP "psoc_program_acondicionamiento.cli"
 $log = Join-Path $env:TEMP "psoc_program_acondicionamiento.log"
 $hex = "C:/Github/Tesis/src/psoc/AcondicionamientoAnalogico.cydsn/CortexM3/ARM_GCC_541/Debug/AcondicionamientoAnalogico.hex"
 $port = "KitProg (CMSIS-DAP/248355)"   # replace with exact GetPorts result.
-$lastRow = 102                         # current 2026-06-23 build: 26214 bytes
+$lastRow = 101                         # current 2026-06-24 build: 25878 bytes
 
 $cmds = New-Object System.Collections.Generic.List[string]
 $cmds.Add("OpenPort `"$port`" `"$programmer\`"")
@@ -117,8 +149,8 @@ for ($row = 0; $row -le $lastRow; $row++) {
     $cmds.Add(("PSoC3_VerifyRowFromHex 0x00 {0} 0x01" -f $row))
 }
 
-$cmds.Add("PSoC3_ProtectAll")
-$cmds.Add("PSoC3_VerifyProtect")
+$cmds.Add("PSoC3_ProtectAll 0x00")
+$cmds.Add("PSoC3_VerifyProtect 0x00")
 $cmds.Add("DAP_ReleaseChip")
 $cmds.Add("ClosePort")
 $cmds.Add("quit")

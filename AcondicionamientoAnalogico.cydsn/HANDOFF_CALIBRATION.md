@@ -2717,3 +2717,166 @@ sustituye compilar en PSoC Creator.
    reemplazo total), está todo el código intacto bajo `#if 0` en
    `calibration.c` — reactivarla es revertir esos `#if 0`/`#endif`, no
    reescribir nada.
+
+### 14.22 Sesión 2026-06-23 (continuación, sesión codex intermedia incluida): el PI vuelve a leer del Filter de hardware (no EMA en software), y parametrización 100% individual por etapa en archivos nuevos
+
+**Contexto al reanudar**: entre §14.21 y esta sesión, otra sesión (codex) compiló,
+programó y *validó en hardware* el diseño de §14.21 (commit `7c15b72f`,
+"Calibración medio utilizable"). En el proceso encontró que la ruta de
+medición original de §14.21 (ADC → Filter de hardware → DMA_Filter_RAM, con el
+capacitor de AMux conectado durante calibración) daba lecturas congeladas o
+saturadas en banco con HAMMER. Esa sesión la reemplazó por lectura directa de
+ADC (`ADC_StopConvert/StartConvert/GetResult32`, sin DMA ni Filter) con
+suavizado EMA en software (`CAL_PI_DIRECT_EMA_SHIFT`), y quitó el capacitor de
+AMux del `stage_begin` del PI (`CAL_AMUX_ADC_SELECT`, no `_STAGE`). Con eso
+logró una calibración HAMMER end-to-end real: `HAMMER_PGA dac=65 raw_mV=971
+target_mV=1024`, `HAMMER_LP dac=57 raw_mV=1059 target_mV=1024` (ver
+`TEST_LOG_2026-06-23.md`). Primera respuesta a la pregunta del usuario "¿se
+usa PI o se sigue promediando?": la *decisión* de control (el `effort`/paso de
+DAC) seguía siendo PI genuino (P+I con anti-windup y rate-limit); lo que se
+promediaba (EMA) era solo la *medición* de entrada al lazo, no la ley de
+control.
+
+**Pedido del usuario en esta sesión**: que el PI vuelva a sacar el DC con el
+FIR de hardware (cargado desde `FIR_calibration.h`) en vez de promediar/EMA en
+software — y que **cada etapa tenga sus propios parámetros** (target, no solo
+HAMMER compartiendo `CAL_TARGET_HAMMER_MV` entre PGA/LP), con un "adelanto"
+(feedforward) que sea un valor **independiente** elegido a mano en mV (no
+necesariamente la mitad exacta del target), en archivos `.h` separados por
+etapa, con **todo en mV/muestras/fracciones documentadas** — nada de literales
+hex de código VDAC ni "promedios" ocultos.
+
+**Cambios de esta sesión**:
+
+1. **Vuelve la lectura por Filter de hardware** (`calibration.c`,
+   `cal_pi_stage_begin`/`cal_pi_run_service`): se restaura
+   `dma_route_select(1u)` + `psoc_adc_clear_isr_filtered_sample()` +
+   `isr_DMA_Filter_RAM_ClearPending()` + `ADC_StartConvert()` (modo continuo)
+   al entrar a una etapa, y `cal_pi_run_service` vuelve a leer con
+   `psoc_adc_take_isr_filtered_sample()` en vez de `cal_adc_read_direct_counts()`.
+   Se quitó el EMA de software por completo (campo `ema_valid` y constante
+   `CAL_PI_DIRECT_EMA_SHIFT` eliminados) — el "promedio" ahora es 100% el FIR
+   de hardware (`FIR_calibration.h`, ya se cargaba desde `cal_pi_start()`, pero
+   antes era código muerto porque nada leía su salida). El descarte tras
+   cambiar de etapa ahora suma el retardo de grupo del FIR:
+   `discard_samples = settle_samples + FILTER_FIR_NTAPS`.
+   **A propósito NO se reactivó el capacitor de AMux** durante el PI
+   (`CAL_AMUX_ADC_SELECT`, sin capacitor, se deja igual que dejó la sesión
+   codex) — el capacitor fue el sospechoso original de la saturación; volver
+   a usar el Filter sin el capacitor es la prueba que falta para saber si el
+   problema era el capacitor, el Filter, o la combinación de ambos. **Riesgo
+   conocido, sin validar en hardware todavía**: si vuelve a saturarse/congelarse,
+   sigue siendo candidato el Filter en sí (no solo el capacitor) — revisar
+   primero `FIR_calibration.h` (¿es realmente un pasabajos/DC-extractor, o
+   sigue siendo una copia del FIR de adquisición?).
+
+2. **Parametrización 100% individual por etapa, organizada en archivos
+   nuevos** (pedido explícito: "multiples .h" por clase de hardware, todo en
+   mV/muestras, nunca hex, con instrucciones de carga para Kp/Ki en
+   comentarios):
+   - `calibration_tables_hammer_pga.h` / `calibration_tables_hammer_lp.h`
+     (nuevos): mismo patrón que los 4 `calibration_tables_geo_*.h` ya
+     existentes — cada uno 100% autocontenido con `CAL_TARGET_*_MV` (objetivo
+     real, antes compartido como `CAL_TARGET_HAMMER_MV` entre PGA y LP, ahora
+     independiente por etapa), `CAL_ADELANTO_*_MV` (candidato inicial en mV,
+     elegido a mano, **no** forzado a la mitad del target — antes
+     `CAL_DAC_FEEDFORWARD_HAMMER` SÍ forzaba esa mitad), `CAL_DAC_MAX_CHANGE_*`,
+     `CAL_TOL_COUNTS_*`, `CAL_PI_KP/KI_NUM_DIV_*`, `CAL_PI_LSB_COUNTS_*`,
+     `CAL_PI_MAX_SAMPLES_*`, `CAL_SETTLE_SAMPLES_*` (en número de muestras,
+     no ms, a pedido explícito), más los campos legado de bisección/servo
+     (compilan pero no se usan, PI es el único camino activo).
+   - Los 4 `calibration_tables_geo_*.h` existentes ganaron el mismo patrón:
+     `CAL_TARGET_GEO_*_MV` (default 0V, reposo diferencial) y
+     `CAL_ADELANTO_GEO_*_MV` (default 2496mV = el histórico `0x9Cu`) en vez de
+     `CAL_TARGET_COUNTS_GEO_* = 0L` y `CAL_DAC_CENTER_GEO_* = 0x9Cu` (hex)
+     literales — las constantes `_COUNTS`/`_CENTER` se derivan solas por
+     multiplicación/división, nunca se calculan a mano.
+   - **Cómo cargar Kp/Ki**: son fracciones enteras `NUM/DIV` (no hay punto
+     flotante en este lazo) — se agregó un comentario guía en cada archivo
+     con la fórmula (`NUM = round(Kp_decimal * DIV)`) y el valor decimal de
+     cada constante actual en un comentario al lado (ej. `1000L /* Kp =
+     1/1000 = 0.001 */`).
+   - `calibration_tables.h` quedó como agregador: ya no define nada
+     HAMMER-específico inline, solo `#include` de los 6 archivos por etapa
+     (4 GEO + 2 HAMMER) y lo verdaderamente global/compartido (avg/realcheck
+     de la bisección vieja, `CAL_PI_LOCK_N`, `CAL_OPERATING_RANGE_COUNTS`).
+
+3. **Verificación**: `arm-none-eabi-gcc -fsyntax-only -Wall` limpio en
+   `calibration.c`/`main.c`, y rebuild completo vía `cyprjmgr.exe -rebuild`
+   exitoso (Flash 26342/262144 = 10.0%, SRAM 76.0%, "Rebuild Succeeded" a las
+   19:48 del 23/06). **No probado en hardware todavía** — el punto 1 de
+   arriba (capacitor/Filter) es la incógnita principal a resolver con el
+   osciloscopio/ESP antes de confiar en una nueva corrida de `cal`.
+
+**Pendiente (al cierre de §14.22, ver §14.23 para lo que cambió después)**:
+1. ~~Probar en hardware: ¿el Filter sin capacitor da lecturas estables?~~ —
+   ver §14.23: el usuario pidió reconectar el capacitor a propósito, así que
+   esta pregunta ya no aplica tal cual quedó planteada.
+2. Los nuevos `CAL_ADELANTO_*_MV` quedaron en valores placeholder
+   (512mV para HAMMER, 2496mV para GEO, igual que antes) — el usuario dijo
+   "luego calibro yo", son punto de partida de banco, no medidos.
+3. ~~Confirmar que `g_fir_calibration_coeffs_q23` es un filtro pensado para
+   extraer DC~~ -- **superado por §14.23**: el usuario reemplazó esto por su
+   propio diseño (formato nativo, ver abajo).
+
+### 14.23 Mismo día: formato nativo de coeficientes (el usuario pega el array del customizer de Filter tal cual), bug real encontrado en `FIR_adquisition.c`, y el capacitor de AMux generalizado y reconectado a pedido
+
+**El usuario reemplazó `FIR_calibration.c`** por un array `const uint8 CYCODE
+g_fir_calibration_coeffs_q23[Filter_FIR_A_SIZE]` -- el mismo formato exacto
+que genera el customizer del componente Filter en PSoC Creator (4 bytes por
+tap, little-endian, comentario `/* Tap(N), valor_decimal */`), en vez de el
+`int32[FILTER_FIR_NTAPS]` que yo había definido. Motivo (mensaje del
+usuario): "no me pongas en binario me voy a matar" -- quiere poder pegar
+directamente lo que la GUI de PSoC Creator genera, sin convertir nada a mano.
+
+**Cambios para que esto funcione**:
+- `psoc_filter_load_fir_coefficients()` (`filter_coeffs.h/.c`) cambió de
+  firma: ahora toma `const uint8 *coeffs_bytes` (el layout nativo de 4
+  bytes/tap) en vez de `const int32 *coeffs_q23`. La implementación se
+  simplificó a un `memcpy(Filter_DB_RAM, coeffs_bytes, ntaps*4u)` directo --
+  el mismo patrón que usa `Filter_Init()` (Cypress) con `Filter_data_b`, ya
+  no hace falta convertir tap por tap.
+- `FIR_calibration.h` / `FIR_adquisition.h`: el extern pasó a
+  `const uint8 CYCODE [...][Filter_FIR_A_SIZE]` (incluyen `Filter.h` para la
+  macro y el calificador `CYCODE`).
+
+**Bug real encontrado en el proceso**: al comparar el array que pegó el
+usuario contra `Generated_Source/PSoC5/Filter_Coefficients.c`
+(`Filter_ChannelAFirCoefficients`, el default realmente horneado en el
+componente), resultaron ser BYTE-IDÉNTICOS (mismo pasabajos simétrico de 128
+taps, pico en Tap 63/64 ≈0.01456). Pero `FIR_adquisition.c` -- que mi sesión
+anterior describía como "copia exacta del diseño ya horneado" -- tenía
+valores completamente distintos (forma de pasabanda con signos alternados,
+ej. `2772, 3311, 3307, 2704, 1518, -146, ...`), es decir que esa extracción
+de una sesión previa estaba MAL: nunca fue una copia real del default, y cada
+boot estuvo cargando un FIR equivocado en el camino de adquisición/stream
+(no en calibración). Corregido: `FIR_adquisition.c` ahora es una copia
+byte-exacta verificada de `Filter_ChannelAFirCoefficients`, en el mismo
+formato nativo.
+
+**AMux: capacitor generalizado y reconectado durante calibración** (pedido
+del usuario, verbatim: "el capacitor que esta en el mux SIEMPRE esta en el
+ultimo pin del mux... pone que se cortocircuite cuando se calibre"):
+- `CAL_AMUX_CAP_CHANNEL` (`calibration.c`) dejó de ser un literal `4u` fijo
+  (válido solo para GEO) y pasó a `(AMux_ADC_CHANNELS - 1u)` -- la macro
+  generada por PSoC Creator desde el TopDesign activo, así que apunta solo al
+  último canal real sin importar cuántos tenga cada variante (verificado:
+  con el HAMMER activo hoy, `AMux_ADC_CHANNELS=3`, o sea capacitor en el
+  canal 2, no en "3" como el usuario supuso de memoria -- la macro generada
+  es la fuente de verdad, no el conteo a mano).
+- `cal_pi_stage_begin` volvió a usar `CAL_AMUX_ADC_SELECT_STAGE` (con
+  capacitor) en vez de `CAL_AMUX_ADC_SELECT` (sin capacitor) -- esto
+  **reintroduce exactamente el mecanismo que la sesión codex había
+  desactivado por sospecha de saturación** (§14.22), ahora a pedido explícito
+  e informado del usuario. Sin validar en hardware todavía.
+
+**Verificación**: rebuild completo vía `cyprjmgr.exe -rebuild` exitoso (Flash
+24502/262144 = 9.3%, SRAM 76.0%, "Rebuild Succeeded" a las 20:00 del 23/06).
+
+**Pendiente**:
+1. Probar en hardware la combinación Filter-de-hardware + capacitor
+   reconectado -- es exactamente la combinación que nunca se probó: ni en
+   §14.21 (Filter sin probar) ni en la sesión codex (capacitor ya estaba
+   sacado cuando se probó). Si vuelve a saturarse/congelarse, ahora hay dos
+   sospechosos en danza (capacitor, Filter) en vez de uno.
+2. `CAL_ADELANTO_*_MV` sigue siendo placeholder de banco, no medido.

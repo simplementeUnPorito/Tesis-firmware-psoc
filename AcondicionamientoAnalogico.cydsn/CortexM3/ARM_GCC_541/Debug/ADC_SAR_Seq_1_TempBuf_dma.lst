@@ -1,0 +1,1853 @@
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 2
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"ADC_SAR_Seq_1_TempBuf_dma.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.section	.gnu.lto_.profile.fae8e3b9,"",%progbits
+  19 0000 789C6361 		.ascii	"x\234ca`d`a`\000\222\266\342\000\000\373\000_"
+  19      60646061 
+  19      600092B6 
+  19      E20000FB 
+  19      005F
+  20              		.text
+  21              		.section	.gnu.lto_.icf.fae8e3b9,"",%progbits
+  22 0000 789C6361 		.ascii	"x\234ca`d\000\001a\006\004`f\230ys[!c\367\234\266\033"
+  22      60640001 
+  22      61060460 
+  22      66987973 
+  22      5B2163F7 
+  23 0017 AC4C3757 		.ascii	"\254L7W\377\232\316\311\000\000Tz\010`"
+  23      FF9ACEC9 
+  23      0000547A 
+  23      0860
+  24              		.text
+  25              		.section	.gnu.lto_.jmpfuncs.fae8e3b9,"",%progbits
+  26 0000 789C6361 		.ascii	"x\234ca`d\000\201V\006\004`b`a\004\002~\020\301\002"
+  26      60640081 
+  26      56060460 
+  26      62606104 
+  26      027E10C1 
+  27 0015 E433FE65 		.ascii	"\3443\376eb<\372\377\373\001\376/L\255\314\014\214L"
+  27      623CFAFF 
+  27      FB01FE2F 
+  27      4CADCC0C 
+  27      8C4C
+  28 0027 8CCB1965 		.ascii	"\214\313\031e\030\030\330@*+\231\300$3\220\344\001)"
+  28      1818D840 
+  28      2A2B99C0 
+  28      243390E4 
+  28      0129
+  29 0039 BBD8B261 		.ascii	"\273\330\262a\0163D\031\013\343\012\2202\246J\260\221"
+  29      0E334419 
+  29      0BE30A90 
+  29      32A64AB0 
+  29      91
+  30 004a 95206B18 		.ascii	"\225 k\030!B \205\353\337\354\374\311\013Q\310\300\270"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 2
+
+
+  30      21422085 
+  30      EBDFECFC 
+  30      C90B51C8 
+  30      C0B8
+  31 005c 122C0AA1 		.ascii	"\022,\012\241\230\300\210\201\001\000l\277\027\243"
+  31      98C08881 
+  31      01006CBF 
+  31      17A3
+  32              		.text
+  33              		.section	.gnu.lto_.inline.fae8e3b9,"",%progbits
+  34 0000 789C6361 		.ascii	"x\234ca`d\000\001\177\006\004`b`\020\325gd`\3428`\307"
+  34      60640001 
+  34      7F060460 
+  34      626010D5 
+  34      676460E2 
+  35 0017 C0B6409E 		.ascii	"\300\266@\236\011$\306\314\003\024\237\340\307\300\302"
+  35      0924C6CC 
+  35      03149FE0 
+  35      C7C0C2
+  36 0026 0B644FF0 		.ascii	"\013dO\360\003Av\001\006\0066\006\020\013\254\207\215"
+  36      03417601 
+  36      06063606 
+  36      100BAC87 
+  36      8D
+  37 0037 0FA885E9 		.ascii	"\017\250\205\351\002?\\\013\0237\003\003#P\022\000\264"
+  37      023F5C0B 
+  37      13370303 
+  37      23501200 
+  37      B4
+  38 0048 960A8E   		.ascii	"\226\012\216"
+  39              		.text
+  40              		.section	.gnu.lto_.pureconst.fae8e3b9,"",%progbits
+  41 0000 789C6361 		.ascii	"x\234ca`d`e```b\220`\222\000\000\000\347\000?"
+  41      60646065 
+  41      60606062 
+  41      90609200 
+  41      0000E700 
+  42              		.text
+  43              		.section	.gnu.lto_ADC_SAR_Seq_1_TempBuf_DmaInitialize.fae8e3b9,"",%progbits
+  44 0000 789C9592 		.ascii	"x\234\225\222ML\023A\024\307\347\315\224n\331\226\302"
+  44      4D4C1341 
+  44      14C7E7CD 
+  44      946ED996 
+  44      C2
+  45 0011 CD831CBC 		.ascii	"\315\203\034\274!\027\203!\032\257\245$^\233Vo\230J"
+  45      21178321 
+  45      1AAFA524 
+  45      5E9B566F 
+  45      984A
+  46 0023 E87A03CA 		.ascii	"\350z\003\312\266=w\240T%\361 \011\037\232\210D\015"
+  46      B63D77A0 
+  46      5425F120 
+  46      091F9A88 
+  46      440D
+  47 0035 011529F8 		.ascii	"\001\025)\370]T,~'\022\011\002'=\030\017\304\220&\024"
+  47      5D542C7E 
+  47      27120902 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 3
+
+
+  47      273D180F 
+  47      C4902614 
+  48 0049 52209AE0 		.ascii	"R \232\340\372\336\264\242\011\\\272\311fw\336\276\377"
+  48      FADEB4A2 
+  48      095CBAC9 
+  48      6677DEBE 
+  48      FF
+  49 005a FFFF7BB3 		.ascii	"\377\377{\263cc\300\350\232\020\214\205\361y\020o\020"
+  49      6363C0E8 
+  49      9A108C85 
+  49      F179106F 
+  49      10
+  50 006b 0CF8E54F 		.ascii	"\014\370\345O\214u:8\000\275H\007\2608\2078l\362\035"
+  50      8C753A38 
+  50      00BD4807 
+  50      B0388738 
+  50      6CF21D
+  51 007e 0E1FB73F 		.ascii	"\016\037\267?\\\322kG\245\354\222\337F6N\014\216e \211"
+  51      5CD26B47 
+  51      A5EC92DF 
+  51      46364E0C 
+  51      8E652089 
+  52 0092 728B33A8 		.ascii	"r\2133\250\257\206\272j\262\030\205Z\354\\\032\237\357"
+  52      AF86BA6A 
+  52      B218855A 
+  52      EC5C1A9F 
+  52      EF
+  53 00a3 718BE3C0 		.ascii	"q\213\343\300\360\375z\337\\^\324\214\220J.\236\221"
+  53      F0FD7ADF 
+  53      5C5ED48C 
+  53      904A2E9E 
+  53      91
+  54 00b4 02253006 		.ascii	"\002%0\006\342\237\212<\3406\324`\357\332\342\315\003"
+  54      E29F8A3C 
+  54      E036D460 
+  54      EFDAE2CD 
+  54      03
+  55 00c5 C2A364BD 		.ascii	"\302\243d\275\303\357W\313\212\262\301wNYG\272;{tw\225"
+  55      C3EF57CB 
+  55      8AB2C177 
+  55      4E5947BA 
+  55      3B7B7477 
+  56 00da EEADB59D 		.ascii	"\356\255\265\235\251\314\363\244\000 \320\317\271\271"
+  56      A9CCF3A4 
+  56      0020D0CF 
+  56      B9B9
+  57 00e8 21272D39 		.ascii	"!'-9T\3412{\353\306\222K\370\224m\327\316\306\214\273"
+  57      54E1327B 
+  57      EBC6924B 
+  57      F8946DD7 
+  57      CEC68CBB 
+  58 00fc 68BB79DE 		.ascii	"h\273y\336%}I!`\242`{\017\252a\034\310\030\243R\312"
+  58      257D4921 
+  58      60A2607B 
+  58      0FAA611C 
+  58      C818A352 
+  59 0111 78FAD7CA 		.ascii	"x\372\327\312\232[\234U\322\276\327i\353/\321\362\205"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 4
+
+
+  59      9A5B9C55 
+  59      D2BED769 
+  59      EB2FD1F2 
+  59      85
+  60 0122 A274721F 		.ascii	"\242tr\037\351\024\324P\377\367\251\337\375\025\366"
+  60      E914D450 
+  60      FFF7A9DF 
+  60      FD15F6
+  61 0131 6E89D721 		.ascii	"n\211\327!\332$\244\275\017v\332\366\224?#-+!3\375\332"
+  61      DA24A4BD 
+  61      0F76DAF6 
+  61      943F232D 
+  61      2B2133FD 
+  62 0146 EC57AD02 		.ascii	"\354W\255\002\251q|\033\3200v\264\260i@\361\016 '\235"
+  62      A9717C1B 
+  62      D03076B4 
+  62      B06940F1 
+  62      0E20279D 
+  63 015a 0A2E352C 		.ascii	"\012.5,\313\241\011\375\226u\316\351)V\240+\237[Y('"
+  63      CBA109FD 
+  63      9675CEE9 
+  63      2956A02B 
+  63      9F5B5928 
+  64 016f 5F0C1C48 		.ascii	"_\014\034H\276\232\327h\3542\305\233Ng\277h\361\035"
+  64      BE9AD768 
+  64      EC32C59B 
+  64      4E67BF68 
+  64      F11D
+  65 0181 7951CA2A 		.ascii	"yQ\312*\254\365\220\003\226W\347\226\337\350\3030\324"
+  65      ACF59003 
+  65      9657E796 
+  65      DFE8C330 
+  65      D4
+  66 0192 29559DC1 		.ascii	")U\235\301C\374\277\017\220\235\301#\030\006\354X\350"
+  66      43FCBF0F 
+  66      909DC123 
+  66      1806EC58 
+  66      E8
+  67 01a3 9EBC26C8 		.ascii	"\236\274&\310\307\0066x\214_~\300Uye\3530\305\3545\266"
+  67      C7063678 
+  67      8C5F7EC0 
+  67      557965EB 
+  67      30C5EC35 
+  68 01b8 5B1C6782 		.ascii	"[\034g\202'\020g\324\234\020\"!\224\014;S\331\364\317"
+  68      271067D4 
+  68      9C102221 
+  68      940C3B53 
+  68      D9F4CF
+  69 01cb 8A821383 		.ascii	"\212\202\023\203\247\270Gx'\205\306\020|\2407\017d\230"
+  69      A7B84778 
+  69      2785C610 
+  69      7CA0370F 
+  69      6498
+  70 01dd 10F61258 		.ascii	"\020\366\022X\323\273\254\323\310\212`\366\375\241\034"
+  70      D3BBACD3 
+  70      C88A60F6 
+  70      FDA11C
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 5
+
+
+  71 01ec 166E1183 		.ascii	"\026n\021\203g\010\205\001\011\241%\204#)\312U\360\302"
+  71      67088501 
+  71      09A12584 
+  71      2329CA55 
+  71      F0C2
+  72 01fe 6631582F 		.ascii	"f1X/!\370\371n\360\213Bp\331\376\301\272\305\351X\316"
+  72      21F8F96E 
+  72      F08B4270 
+  72      D9FEC1BA 
+  72      C5E958CE 
+  73 0212 A860FDFF 		.ascii	"\250`\375\377\243i\003\016/i|\247\242X\337\232\025\005"
+  73      A369030E 
+  73      2F697CA7 
+  73      A258DF9A 
+  73      1505
+  74 0224 0C570918 		.ascii	"\014W\011\030\231]\214Y\302XE\317\202\007S\307\003\350"
+  74      995D8C59 
+  74      C25845CF 
+  74      820753C7 
+  74      03E8
+  75 0236 58E0E0F5 		.ascii	"X\340\340\365'\2156\303l\216\032\241`\240=f\266\030"
+  75      278D36C3 
+  75      6C8E1AA1 
+  75      60A03D66 
+  75      B618
+  76 0248 4DBE40BB 		.ascii	"M\276@\273\367X\223\247\321\033\014x\374\301\200\321"
+  76      F75893A7 
+  76      D11B0C78 
+  76      FCC180D1 
+  77 0258 113C1A3C 		.ascii	"\021<\032<e\264\206\033b\347\202\241\326\346#-Lo\210"
+  77      65B4861B 
+  77      62E782A1 
+  77      D6E6232D 
+  77      4C6F88
+  78 026b 9991A8B7 		.ascii	"\231\221\250\267=\326\026u\373\215\016#\022\365\031"
+  78      3DD61675 
+  78      FB8D0E23 
+  78      12F519
+  79 027a A6AA559E 		.ascii	"\246\252U\236\016\207\0153`\266xB!\323\210D\252\324"
+  79      0E870D33 
+  79      60B67842 
+  79      21D38844 
+  79      AAD4
+  80 028c BA113B8A 		.ascii	"\272\021;\212\205?G\206b\321"
+  80      853F4786 
+  80      62D1
+  81              		.text
+  82              		.section	.gnu.lto_ADC_SAR_Seq_1_TempBuf_DmaRelease.fae8e3b9,"",%progbits
+  83 0000 789C654E 		.ascii	"x\234eN=K\003A\024|\263{&\341@\260\327\3026\215\020"
+  83      3D4B0341 
+  83      147CB37B 
+  83      26E140B0 
+  83      D7C2368D 
+  84 0015 243F2046 		.ascii	"$? F\020\254\344\3162p\204\344\354b4\230\3726\211\207"
+  84      10ACE4CE 
+  84      327084E4 
+  84      EC623498 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 6
+
+
+  84      FA368987 
+  85 0029 DAD9984E 		.ascii	"\332\331\230N\322\231D\005\021\033\257;\203\245\037"
+  85      D2994405 
+  85      111BAF3B 
+  85      83A51F
+  86 0038 95958D58 		.ascii	"\225\225\215X\004\011\026\011h\031\317\267g\351\300"
+  86      04091609 
+  86      6819CFB7 
+  86      67E9C0
+  87 0047 F29679F3 		.ascii	"\362\226y\363f\306 \220F\202G\226\347<?H\2028~\"j\244"
+  87      66C62090 
+  87      46824796 
+  87      E73C3F48 
+  87      82387E22 
+  88 005d 04A03F2A 		.ascii	"\004\240?*\005\362\004<|\213\251\300\340`\030\210tW"
+  88      05F2043C 
+  88      7C8BA9C0 
+  88      E0601888 
+  88      7457
+  89 006f 31DEFCB3 		.ascii	"1\336\374\263\214\352\205\360%Q$b'B\027ib\331\373\365"
+  89      8CEA85F0 
+  89      25512462 
+  89      27421769 
+  89      62D9FBF5 
+  90 0083 CFC96C62 		.ascii	"\317\311lb_\313\026\377\226\350A\347\320\225\025\252"
+  90      5FCB16FF 
+  90      96E841E7 
+  90      D09515AA 
+  91 0093 286AA9F0 		.ascii	"(j\251\360\306\274\2735\015A\276dz\314\022\0356\021"
+  91      C6BCBB35 
+  91      0D41BE64 
+  91      7ACC121D 
+  91      3611
+  92 00a5 424F3944 		.ascii	"BO9D\263=y\264\364QK\352\334\266?xN~\011_\012h\377 "
+  92      B33D79B4 
+  92      F4514BEA 
+  92      DCB63F78 
+  92      4E7E095F 
+  93 00bd F87C4D7A 		.ascii	"\370|MzSu\250\324\034sG\\A\323\243\207\227{\263\203"
+  93      5375A8D4 
+  93      1C73475C 
+  93      41D3A387 
+  93      977BB383 
+  94 00d1 D3868A79 		.ascii	"\323\206\212y\211s\356\335\307\002\307_\240\003\372"
+  94      8973EEDD 
+  94      C702C75F 
+  94      A003FA
+  95 00e0 80A12DFF 		.ascii	"\200\241-\377;\030\021\373\022.\341\021\347\371r\206"
+  95      3B1811FB 
+  95      122EE111 
+  95      E7F97286 
+  96 00f0 466886C1 		.ascii	"Fh\206\301z\254\326\030\363\236\213q\315\3455w\333\255"
+  96      7AACD618 
+  96      F39E8B71 
+  96      CDE53577 
+  96      DBAD
+  97 0102 15F7DCB2 		.ascii	"\025\367\334\262cW\353\265\222[\330\260\253\371l!\267"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 7
+
+
+  97      6357EBB5 
+  97      925BD8B0 
+  97      ABF96C21 
+  97      B7
+  98 0113 9A77EC9C 		.ascii	"\232w\354\234\345\330\356\256\223q6\335\312\316J}\313"
+  98      E5D8EEAE 
+  98      937136DD 
+  98      CACE4A7D 
+  98      CB
+  99 0124 29578A4B 		.ascii	")W\212K%\372\005\217Sm\346"
+  99      25FA058F 
+  99      536DE6
+ 100              		.text
+ 101              		.section	.gnu.lto_.symbol_nodes.fae8e3b9,"",%progbits
+ 102 0000 789C558C 		.ascii	"x\234U\214\261\015\2000\014\004\317q\222\001\230\000"
+ 102      B10D8030 
+ 102      0C04CF71 
+ 102      92019800 
+ 103 0010 26759028 		.ascii	"&u\220()\230\207:53\300\"\010'\025\371\346t\377\322"
+ 103      2998873A 
+ 103      3533C022 
+ 103      082715F9 
+ 103      E674FFD2 
+ 104 0024 47841D4F 		.ascii	"G\204\035O\020\203\343\002\307Y\026H\260Nm\010&\303"
+ 104      1083E302 
+ 104      C7591648 
+ 104      B04E6D08 
+ 104      26C3
+ 105 0036 20C9422F 		.ascii	" \311B/\240\224\331=\232\016\256\026\007\317\226\376"
+ 105      A094D93D 
+ 105      9A0EAE16 
+ 105      07CF96FE 
+ 106 0046 AE7E5DEF 		.ascii	"\256~]\357W\224\310\3664*\2651\344\336\363\001\314\364"
+ 106      5794C8F6 
+ 106      342AB531 
+ 106      E4DEF301 
+ 106      CCF4
+ 107 0058 1F26     		.ascii	"\037&"
+ 108              		.text
+ 109              		.section	.gnu.lto_.refs.fae8e3b9,"",%progbits
+ 110 0000 789C0DC7 		.ascii	"x\234\015\307I\021\000 \000\000!\326c,`\377\254\312"
+ 110      49110020 
+ 110      000021D6 
+ 110      632C60FF 
+ 110      ACCA
+ 111 0012 8F25174B 		.ascii	"\217%\027K\245\251\255\323\370\365\000\003\311\0008"
+ 111      A5A9ADD3 
+ 111      F8F50003 
+ 111      C90038
+ 112              		.text
+ 113              		.section	.gnu.lto_.decls.fae8e3b9,"",%progbits
+ 114 0000 789C8D54 		.ascii	"x\234\215TkL\024W\024\2363\263]\226\345e\214ii\262\211"
+ 114      6B4C1457 
+ 114      149E33B3 
+ 114      5D96E565 
+ 114      8C6969B2 
+ 115 0015 D446E117 		.ascii	"\324F\341\027\226\2306\375\325\204.U\373\003c\304\222"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 8
+
+
+ 115      969836FD 
+ 115      D5842E55 
+ 115      FB0363C4 
+ 115      92
+ 116 0026 3631210B 		.ascii	"61!\013;\326Mp\261\354\222\224\376\232\012T\321\332"
+ 116      3BD64D70 
+ 116      B1EC9294 
+ 116      FE9A0A54 
+ 116      D1DA
+ 117 0038 6A63B050 		.ascii	"jc\260P-\210\255\202\362\206*(\330\245*/EPD\336\202"
+ 117      2D88AD82 
+ 117      F2862A28 
+ 117      D8A52A2F 
+ 117      455044DE 
+ 118 004d 2C28A490 		.ascii	",(\244\220B\301Xj)=\3671;\273\306m{\263g\347\336s\277"
+ 118      42C1586A 
+ 118      293DF731 
+ 118      3BBBC66D 
+ 118      7BB367E7 
+ 119 0064 73BEF39D 		.ascii	"s\276\363\235{gt\002\010dL\005\010B<Ngp\276\202C\302"
+ 119      7B677402 
+ 119      08644C05 
+ 119      08423C4E 
+ 119      6770BE82 
+ 120 007a 67221AD9 		.ascii	"g\"\032\3315\011l\350\321\232\320\\h\035h\335h\003h"
+ 120      35096CE8 
+ 120      D19AD05C 
+ 120      681D68DD 
+ 120      680368
+ 121 008d 231C3726 		.ascii	"#\0347&\370\016\202\015F\273\204\266\032m\015Z%\317"
+ 121      F80E820D 
+ 121      46BB84B6 
+ 121      1A6D0D5A 
+ 121      25CF
+ 122 009f F7106D1C 		.ascii	"\367\020m\034\255\037\315\215\326\2056\201\326\316c"
+ 122      AD1FCD8D 
+ 122      D6853681 
+ 122      D6CE63
+ 123 00ae 753C7E80 		.ascii	"u<~\200\363t\370\341p\361\272\022\275\362\022\276I\264"
+ 123      F374F8E1 
+ 123      70F1BA12 
+ 123      BDF212BE 
+ 123      49B4
+ 124 00c0 618E1139 		.ascii	"a\216\0219\316_\235\313\"\254\024\326}m\030\202\001"
+ 124      CE5F9DCB 
+ 124      22AC14D6 
+ 124      7D6D1882 
+ 124      01
+ 125 00d1 9004DE10 		.ascii	"\220\004\336\020\001\200\375\0035\201\031]\342D\024"
+ 125      0180FD03 
+ 125      3581195D 
+ 125      E24414
+ 126 00e0 D8447579 		.ascii	"\330Duy\206\300!\242:\325\222\321\037\217\207\025u\320"
+ 126      86C021A2 
+ 126      3AD592D1 
+ 126      1F8F8715 
+ 126      75D0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 9
+
+
+ 127 00f2 245A76E0 		.ascii	"$Zv\340Al\315\203\005\036\004\242F\000l\251Fx\345{\256"
+ 127      416CCD83 
+ 127      051E04A2 
+ 127      46006CA9 
+ 127      4678E57B 
+ 128 0107 22B56695 		.ascii	"\"\265f\225\206\266\203\212\376\376\213\234\033 \211"
+ 128      86B6838A 
+ 128      FEFE8B9C 
+ 128      1B2089
+ 129 0116 40E6A34B 		.ascii	"@\346\243K%\233\243\313\024\034G\025E\334\246u\346\307"
+ 129      259BA3CB 
+ 129      141C4715 
+ 129      45DCA675 
+ 129      E6C7
+ 130 0128 3F9FCD49 		.ascii	"?\237\315I\213\"l0b\315\022:*g\032\226B\230\203\354"
+ 130      8B226C30 
+ 130      62CD123A 
+ 130      2A671A96 
+ 130      429883EC 
+ 131 013c 979C6EA9 		.ascii	"\227\234n\2515J\033\351\374\306\312SW\030n\2556\202"
+ 131      354A1BE9 
+ 131      FCC6CA53 
+ 131      57186EAD 
+ 131      3682
+ 132 014e 88CBBB73 		.ascii	"\210\313\273s\267N\005\341r\215\021V-\213\342\311\343"
+ 132      B74E05E1 
+ 132      728D1156 
+ 132      2D8BE2C9 
+ 132      E3
+ 133 015f CDE57A30 		.ascii	"\315\345z0F\035T\224\375\212\222\245\030KB\005\250\000"
+ 133      461D5494 
+ 133      FD8A92A5 
+ 133      184B4205 
+ 133      A800
+ 134 0171 13948349 		.ascii	"\023\224\203I\200*\210\")K!Z\200\013\350<\217\316\263"
+ 134      802A8822 
+ 134      294B215A 
+ 134      800BE83C 
+ 134      8FCEB3
+ 135 0184 A49EB191 		.ascii	"\244\236\261\221\351w\032\024e\025T\202\021\312@\242"
+ 135      E9771A14 
+ 135      65155482 
+ 135      11CA40A2 
+ 136 0194 1014B3C1 		.ascii	"\020\024\263\301\310\012\314\353Y\\\002\035\212\242"
+ 136      C80ACCEB 
+ 136      595C021D 
+ 136      8AA2
+ 137 01a2 80641DF1 		.ascii	"\200d\035\361\025\377\266p\314\340\361U\003uV\346L\224"
+ 137      15FFB670 
+ 137      CCE0F155 
+ 137      037556E6 
+ 137      4C94
+ 138 01b4 1AB01C13 		.ascii	"\032\260\034\023*\001/!&&$\377\230\373\357 \351C2\027"
+ 138      2A012F21 
+ 138      262624FF 
+ 138      98FBEF20 
+ 138      E9433217 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 10
+
+
+ 139 01c8 7BDC17A6 		.ascii	"{\334\027\246u\020e\244\005\270j\326*\"\\\302D?i\354"
+ 139      751065A4 
+ 139      05B86AD6 
+ 139      2A225CC2 
+ 139      443F69EC 
+ 140 01dc 26C24E95 		.ascii	"&\302N\225\314\025+\372p\0016\231\340\015\224q\021e"
+ 140      CC152BFA 
+ 140      70013699 
+ 140      E00D9471 
+ 140      1165
+ 141 01ee 98B88C3A 		.ascii	"\230\270\214:\224Q\21320\271{\340\330B\020-\210\344"
+ 141      94518B32 
+ 141      30B97BE0 
+ 141      D842102D 
+ 141      88E4
+ 142 0200 A96105F5 		.ascii	"\251a\005\365\315\327\344\205y\234\365\314y'\273\352"
+ 142      CDD7E485 
+ 142      799CF5CC 
+ 142      7927BBEA 
+ 143 0210 A4C47AA8 		.ascii	"\244\304z\250\303\345|g\201;\224\3650\202\010\373|j"
+ 143      C3E57C67 
+ 143      813B94F5 
+ 143      308208FB 
+ 143      7C6A
+ 144 0222 36303C8F 		.ascii	"60<\217\236S\226\022\241\243\221W\220\3472\362\010\320"
+ 144      9E539612 
+ 144      A1A39157 
+ 144      90E732F2 
+ 144      08D0
+ 145 0234 08E1F8DF 		.ascii	"\010\341\370\337\000:\326\232\221\305)q]\221RT\245\214"
+ 145      003AD69A 
+ 145      91C52971 
+ 145      5D915254 
+ 145      A58C
+ 146 0246 2DB758E7 		.ascii	"-\267X\347k\024%\027\003u\004\006%\232\226\022r\353"
+ 146      6B142517 
+ 146      03750406 
+ 146      259A9612 
+ 146      72EB
+ 147 0258 05380743 		.ascii	"\0058\007CxC\232`\035F\026\034\231<\030*}\003\2643\313"
+ 147      78439A60 
+ 147      1D46161C 
+ 147      993C182A 
+ 147      7D03B433 
+ 148 026d EDDF1588 		.ascii	"\355\337\025\210\336\244\211/{q\376L9\2239eUO\356\\"
+ 148      DEA4892F 
+ 148      7B71FE4C 
+ 148      39933965 
+ 148      554FEE5C 
+ 149 0281 08E37455 		.ascii	"\010\343tU\037\222\362\025W6\206\211\004\005W5\312\253"
+ 149      1F92F215 
+ 149      57368689 
+ 149      04055735 
+ 149      CAAB
+ 150 0293 DE942E4A 		.ascii	"\336\224.J\331\226\177\276V'\3252\312\311\023\205\277"
+ 150      D9967FBE 
+ 150      5627D532 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 11
+
+
+ 150      CAC91385 
+ 150      BF
+ 151 02a4 EA3DAD61 		.ascii	"\352=\255a\207\372G\343\251A\321\343\373\205\265k\244"
+ 151      87FA47E3 
+ 151      A941D1E3 
+ 151      FB85B56B 
+ 151      A4
+ 152 02b5 ADF40269 		.ascii	"\255\364\002iW\244\221\276Ra^\347\032\311\316\265\367"
+ 152      57A491BE 
+ 152      52615EE7 
+ 152      1AC9CEB5 
+ 152      F7
+ 153 02c6 62CE4C90 		.ascii	"b\316L\220t\215\346\025\313O\177Y\351\271\203(fu\033"
+ 153      748DE615 
+ 153      CB4F7F59 
+ 153      E9B98328 
+ 153      66751B
+ 154 02d9 DE41550B 		.ascii	"\336AU\013\264\341\341E\362\303\273\201\316\353\332"
+ 154      B4E1E145 
+ 154      F2C3BB81 
+ 154      CEEBDA
+ 155 02e8 1D9CDD59 		.ascii	"\035\234\335Y}\200\350hE\352\026MG$\277\2043\367\036"
+ 155      7D80E868 
+ 155      45EA164D 
+ 155      4724BF84 
+ 155      33F71E
+ 156 02fb 2806EF16 		.ascii	"(\006\357\026\265\372\234K;\355\3215\365\\\352\007\217"
+ 156      B5FA9C4B 
+ 156      3BEDD135 
+ 156      F55CEA07 
+ 156      8F
+ 157 030c E4918319 		.ascii	"\344\221\203\031\303\314\015_E\027\324(\331\201\004"
+ 157      C3CC0D5F 
+ 157      4517D428 
+ 157      D98104
+ 158 031b 03CD5AE6 		.ascii	"\003\315Z\346f\332!\234t\320\356<\232|2\020 \315\262"
+ 158      66DA219C 
+ 158      74D0EE3C 
+ 158      9A7C3210 
+ 158      20CDB2
+ 159 032e EEFCF795 		.ascii	"\356\374\367\225\277\305\272\343{\355:\231\363f\353"
+ 159      BFC5BAE3 
+ 159      7BED3A99 
+ 159      F366EB
+ 160 033d 70B9E4BF 		.ascii	"p\271\344\277\326.Z\353m\265\326\375}\365\227u\254V"
+ 160      D62E5AEB 
+ 160      6DB5D6FD 
+ 160      7DF59775 
+ 160      AC56
+ 161 034f D76519EB 		.ascii	"\327e\031\353\304}\270\251\325yS\255\263\233\326Y\372"
+ 161      C47DB8A9 
+ 161      D57953AD 
+ 161      B39BD659 
+ 161      FA
+ 162 0360 787A3644 		.ascii	"xz6D: \376\317S\274\313J\312\315Z(2z\234=\314\3316X"
+ 162      3A20FECF 
+ 162      53BCCB4A 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 12
+
+
+ 162      CACD5A28 
+ 162      327A9C3D 
+ 163 0378 F64C43DE 		.ascii	"\366LC\336c\316\316\362\343\361\036_/\363\015\267\345"
+ 163      63CECEF2 
+ 163      E3F11E5F 
+ 163      2FF30DB7 
+ 163      E5
+ 164 0389 5ED1A2EF 		.ascii	"^\321\242\357\363\267\375\\A\375\277\250\354\247*\373"
+ 164      F3B7FD5C 
+ 164      41FDBFA8 
+ 164      ECA72AFB 
+ 165 0399 5495678E 		.ascii	"T\225g\216~{4\214\253\274OT\342>\334\321T\336QU\016"
+ 165      7E7B348C 
+ 165      ABBC4F54 
+ 165      E23EDCD1 
+ 165      54DE5155 
+ 166 03ae 5095ADD5 		.ascii	"P\225\255\325\335\263AR\241\177\225\317nWU\210\376\331"
+ 166      DDB34152 
+ 166      A17F95CF 
+ 166      6E575588 
+ 166      FED9
+ 167 03c0 8729FB90 		.ascii	"\207)\373\220\312\376{\373\302\343\000\316^G\330q\037"
+ 167      CAFE7BFB 
+ 167      C2E300CE 
+ 167      5E47D871 
+ 167      1F
+ 168 03d1 0635F641 		.ascii	"\0065\366A\225}\204\262\217\036\036?\253_d\237$\372"
+ 168      957D84B2 
+ 168      8F1E1E3F 
+ 168      AB5F649F 
+ 168      24FA
+ 169 03e3 256B7CFA 		.ascii	"%k|\372Co\240T\301\312i\3529\321\034\272\376\214RTL"
+ 169      436FA054 
+ 169      C1CA69EA 
+ 169      39D11CBA 
+ 169      FE8C5254 
+ 170 03f8 DEFACDF3 		.ascii	"\336\372\315\363\025\212\"Q\350(K\310\277T\002]? \327"
+ 170      158A2251 
+ 170      E8284BC8 
+ 170      BF54025D 
+ 170      3F20D7
+ 171 040b 7E0CD663 		.ascii	"~\014\326c\334\341{\177\305\006\037\322\336\213\347"
+ 171      DCE17B7F 
+ 171      C5061FD2 
+ 171      DE8BE7
+ 172 041a 3E2D0F21 		.ascii	">-\017!\230\226\200O\004\037,\036\352\014\361A\223\206"
+ 172      9896804F 
+ 172      041F2C1E 
+ 172      EA0CF141 
+ 172      9386
+ 173 042c 69E8718E 		.ascii	"i\350q\216\036\247\350\353O\372\257\352}\320]>h7G\273"
+ 173      1EA7E8EB 
+ 173      4FFAAFEA 
+ 173      7DD05D3E 
+ 173      683747BB 
+ 174 0440 297A29FB 		.ascii	")z)\373\320\264/\272\335\007=\301\321\023\024\375\250"
+ 174      D0B42FBA 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 13
+
+
+ 174      DD073DC1 
+ 174      D11314FD 
+ 174      A8
+ 175 0451 FDEEB2C1 		.ascii	"\375\356\262\301\007=\354\203\236\344h\362|=6\316\234"
+ 175      073DEC83 
+ 175      9EE468F2 
+ 175      7C3D36CE 
+ 175      9C
+ 176 0462 9410BB23 		.ascii	"\224\020\273#)A\376$)&i\247\274w\337\273\031\273\223"
+ 176      2941FE24 
+ 176      292669A7 
+ 176      BC77DFBB 
+ 176      19BB93
+ 177 0475 E2F65ADE 		.ascii	"\342\366Z\336\267\333\2346K\252\3553\331\260e\333\007"
+ 177      B7DB9C36 
+ 177      4BAAED33 
+ 177      D9B065DB 
+ 177      07
+ 178 0486 11E69818 		.ascii	"\021\346\230\030A\237a\263;c\336zm\213l\227\323-N\331"
+ 178      419F61B3 
+ 178      3B63DE7A 
+ 178      6D8B6C97 
+ 178      D32D4ED9 
+ 179 049a 9A949096 		.ascii	"\232\224\220\226\221\236\"\357\332\236\220f~scJ\246"
+ 179      919E22EF 
+ 179      DA9E9066 
+ 179      7E73634A 
+ 179      A6
+ 180 04ab 33739FEC 		.ascii	"3s\237\354\210\336#\274D\200ooz1n\327\213)\255{-\321"
+ 180      88DE23BC 
+ 180      44806F6F 
+ 180      7A316ED7 
+ 180      8B29AD7B 
+ 181 04c1 294284DF 		.ascii	")B\204\337zv\310\251\262\305!\207\2313qa\336\263=\335"
+ 181      7A76C8A9 
+ 181      B2C52187 
+ 181      99337161 
+ 181      DEB33DDD 
+ 182 04d5 96966E73 		.ascii	"\226\226nsf\032R2\035N\2133\303\021\341\247*\363Gq\361"
+ 182      661A5232 
+ 182      1D4E8B33 
+ 182      C311E1A7 
+ 182      2AF34771 
+ 183 04ea B1E6E8AD 		.ascii	"\261\346\350\255\302\253<2Av\276\367\251S\266[ek\254"
+ 183      C2AB3C32 
+ 183      4176BEF7 
+ 183      A953B65B 
+ 183      656BAC
+ 184 04fd D59A2E3B 		.ascii	"\325\232.;\034\257h;\3464\373n\333\307\031\230\307\226"
+ 184      1CAF683B 
+ 184      E634FB6E 
+ 184      DBC71998 
+ 184      C796
+ 185 050f 660FE5FE 		.ascii	"f\017\345\3768\233\303\222\234*\257\365[\333V\213\335"
+ 185      389BC392 
+ 185      9C2AAFF5 
+ 185      5BDB568B 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 14
+
+
+ 185      DD
+ 186 0520 9A2AFF03 		.ascii	"\232*\377\003M\271\304\301"
+ 186      4DB9C4C1 
+ 187              		.text
+ 188              		.section	.gnu.lto_.symtab.fae8e3b9,"",%progbits
+ 189 0000 4144435F 		.ascii	"ADC_SAR_Seq_1_TempBuf_DmaInitialize\000"
+ 189      5341525F 
+ 189      5365715F 
+ 189      315F5465 
+ 189      6D704275 
+ 190 0024 00       		.ascii	"\000"
+ 191 0025 00       		.ascii	"\000"
+ 192 0026 00       		.ascii	"\000"
+ 193 0027 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 193      00000000 
+ 194 002f BD000000 		.ascii	"\275\000\000\000"
+ 195 0033 4144435F 		.ascii	"ADC_SAR_Seq_1_TempBuf_DmaHandle\000"
+ 195      5341525F 
+ 195      5365715F 
+ 195      315F5465 
+ 195      6D704275 
+ 196 0053 00       		.ascii	"\000"
+ 197 0054 00       		.ascii	"\000"
+ 198 0055 00       		.ascii	"\000"
+ 199 0056 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 199      00000000 
+ 200 005e E0000000 		.ascii	"\340\000\000\000"
+ 201 0062 4144435F 		.ascii	"ADC_SAR_Seq_1_TempBuf_DmaRelease\000"
+ 201      5341525F 
+ 201      5365715F 
+ 201      315F5465 
+ 201      6D704275 
+ 202 0083 00       		.ascii	"\000"
+ 203 0084 00       		.ascii	"\000"
+ 204 0085 00       		.ascii	"\000"
+ 205 0086 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 205      00000000 
+ 206 008e C0000000 		.ascii	"\300\000\000\000"
+ 207 0092 4379446D 		.ascii	"CyDmaChPriority\000"
+ 207      61436850 
+ 207      72696F72 
+ 207      69747900 
+ 208 00a2 00       		.ascii	"\000"
+ 209 00a3 02       		.ascii	"\002"
+ 210 00a4 00       		.ascii	"\000"
+ 211 00a5 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 211      00000000 
+ 212 00ad CA000000 		.ascii	"\312\000\000\000"
+ 213 00b1 4379446D 		.ascii	"CyDmaChSetExtendedAddress\000"
+ 213      61436853 
+ 213      65744578 
+ 213      74656E64 
+ 213      65644164 
+ 214 00cb 00       		.ascii	"\000"
+ 215 00cc 02       		.ascii	"\002"
+ 216 00cd 00       		.ascii	"\000"
+ 217 00ce 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 15
+
+
+ 217      00000000 
+ 218 00d6 D0000000 		.ascii	"\320\000\000\000"
+ 219 00da 4379446D 		.ascii	"CyDmaChSetConfiguration\000"
+ 219      61436853 
+ 219      6574436F 
+ 219      6E666967 
+ 219      75726174 
+ 220 00f2 00       		.ascii	"\000"
+ 221 00f3 02       		.ascii	"\002"
+ 222 00f4 00       		.ascii	"\000"
+ 223 00f5 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 223      00000000 
+ 224 00fd D9000000 		.ascii	"\331\000\000\000"
+ 225 0101 4379446D 		.ascii	"CyDmaChDisable\000"
+ 225      61436844 
+ 225      69736162 
+ 225      6C6500
+ 226 0110 00       		.ascii	"\000"
+ 227 0111 02       		.ascii	"\002"
+ 228 0112 00       		.ascii	"\000"
+ 229 0113 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 229      00000000 
+ 230 011b DD000000 		.ascii	"\335\000\000\000"
+ 231              		.text
+ 232              		.section	.gnu.lto_.opts,"",%progbits
+ 233 0000 272D666D 		.ascii	"'-fmath-errno' '-fsigned-zeros' '-ftrapping-math' '"
+ 233      6174682D 
+ 233      6572726E 
+ 233      6F272027 
+ 233      2D667369 
+ 234 0033 2D666E6F 		.ascii	"-fno-trapv' '-fno-openmp' '-fno-openacc' '-mcpu=cor"
+ 234      2D747261 
+ 234      70762720 
+ 234      272D666E 
+ 234      6F2D6F70 
+ 235 0066 7465782D 		.ascii	"tex-m3' '-mthumb' '-g' '-O3' '-ffunction-sections' "
+ 235      6D332720 
+ 235      272D6D74 
+ 235      68756D62 
+ 235      2720272D 
+ 236 0099 272D6666 		.ascii	"'-ffat-lto-objects' '-finline-functions' '-flto'\000"
+ 236      61742D6C 
+ 236      746F2D6F 
+ 236      626A6563 
+ 236      74732720 
+ 237              		.text
+ 238              		.cfi_sections	.debug_frame
+ 239              		.section	.text.ADC_SAR_Seq_1_TempBuf_DmaInitialize,"ax",%progbits
+ 240              		.align	2
+ 241              		.global	ADC_SAR_Seq_1_TempBuf_DmaInitialize
+ 242              		.thumb
+ 243              		.thumb_func
+ 244              		.type	ADC_SAR_Seq_1_TempBuf_DmaInitialize, %function
+ 245              	ADC_SAR_Seq_1_TempBuf_DmaInitialize:
+ 246              	.LFB0:
+ 247              		.file 1 "Generated_Source\\PSoC5\\ADC_SAR_Seq_1_TempBuf_dma.c"
+   1:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** /***************************************************************************
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 16
+
+
+   2:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * File Name: ADC_SAR_Seq_1_TempBuf_dma.c  
+   3:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * Version 1.70
+   4:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *
+   5:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *  Description:
+   6:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *   Provides an API for the DMAC component. The API includes functions
+   7:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *   for the DMA controller, DMA channels and Transfer Descriptors.
+   8:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *
+   9:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *
+  10:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *   Note:
+  11:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *     This module requires the developer to finish or fill in the auto
+  12:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *     generated funcions and setup the dma channel and TD's.
+  13:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *
+  14:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** ********************************************************************************
+  15:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * Copyright 2008-2010, Cypress Semiconductor Corporation.  All rights reserved.
+  16:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * You may use this file only in accordance with the license, terms, conditions, 
+  17:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * disclaimers, and limitations in the end user license agreement accompanying 
+  18:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * the software package with which this file was provided.
+  19:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** ********************************************************************************/
+  20:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** #include <CYLIB.H>
+  21:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** #include <CYDMAC.H>
+  22:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** #include <ADC_SAR_Seq_1_TempBuf_dma.H>
+  23:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** 
+  24:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** 
+  25:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** 
+  26:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** /****************************************************************************
+  27:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * 
+  28:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * The following defines are available in Cyfitter.h
+  29:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * 
+  30:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * 
+  31:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * 
+  32:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * ADC_SAR_Seq_1_TempBuf__DRQ_CTL_REG
+  33:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * 
+  34:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * 
+  35:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * ADC_SAR_Seq_1_TempBuf__DRQ_NUMBER
+  36:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * 
+  37:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * Number of TD's used by this channel.
+  38:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * ADC_SAR_Seq_1_TempBuf__NUMBEROF_TDS
+  39:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * 
+  40:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * Priority of this channel.
+  41:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * ADC_SAR_Seq_1_TempBuf__PRIORITY
+  42:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * 
+  43:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * True if ADC_SAR_Seq_1_TempBuf_TERMIN_SEL is used.
+  44:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * ADC_SAR_Seq_1_TempBuf__TERMIN_EN
+  45:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * 
+  46:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * TERMIN interrupt line to signal terminate.
+  47:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * ADC_SAR_Seq_1_TempBuf__TERMIN_SEL
+  48:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * 
+  49:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * 
+  50:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * True if ADC_SAR_Seq_1_TempBuf_TERMOUT0_SEL is used.
+  51:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * ADC_SAR_Seq_1_TempBuf__TERMOUT0_EN
+  52:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * 
+  53:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * 
+  54:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * TERMOUT0 interrupt line to signal completion.
+  55:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * ADC_SAR_Seq_1_TempBuf__TERMOUT0_SEL
+  56:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * 
+  57:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * 
+  58:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * True if ADC_SAR_Seq_1_TempBuf_TERMOUT1_SEL is used.
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 17
+
+
+  59:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * ADC_SAR_Seq_1_TempBuf__TERMOUT1_EN
+  60:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * 
+  61:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * 
+  62:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * TERMOUT1 interrupt line to signal completion.
+  63:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * ADC_SAR_Seq_1_TempBuf__TERMOUT1_SEL
+  64:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * 
+  65:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** ****************************************************************************/
+  66:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** 
+  67:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** 
+  68:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** /* Zero based index of ADC_SAR_Seq_1_TempBuf dma channel */
+  69:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** uint8 ADC_SAR_Seq_1_TempBuf_DmaHandle = DMA_INVALID_CHANNEL;
+  70:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** 
+  71:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** /*********************************************************************
+  72:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * Function Name: uint8 ADC_SAR_Seq_1_TempBuf_DmaInitalize
+  73:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** **********************************************************************
+  74:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * Summary:
+  75:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *   Allocates and initialises a channel of the DMAC to be used by the
+  76:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *   caller.
+  77:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *
+  78:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * Parameters:
+  79:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *   BurstCount.
+  80:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *       
+  81:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *       
+  82:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *   ReqestPerBurst.
+  83:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *       
+  84:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *       
+  85:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *   UpperSrcAddress.
+  86:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *       
+  87:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *       
+  88:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *   UpperDestAddress.
+  89:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *       
+  90:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *
+  91:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * Return:
+  92:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *   The channel that can be used by the caller for DMA activity.
+  93:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *   DMA_INVALID_CHANNEL (0xFF) if there are no channels left. 
+  94:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *
+  95:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *
+  96:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *******************************************************************/
+  97:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** uint8 ADC_SAR_Seq_1_TempBuf_DmaInitialize(uint8 BurstCount, uint8 ReqestPerBurst, uint16 UpperSrcAd
+  98:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** {
+ 248              		.loc 1 98 0
+ 249              		.cfi_startproc
+ 250              		@ args = 0, pretend = 0, frame = 0
+ 251              		@ frame_needed = 0, uses_anonymous_args = 0
+ 252              	.LVL0:
+ 253 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 254              		.cfi_def_cfa_offset 24
+ 255              		.cfi_offset 4, -24
+ 256              		.cfi_offset 5, -20
+ 257              		.cfi_offset 6, -16
+ 258              		.cfi_offset 7, -12
+ 259              		.cfi_offset 8, -8
+ 260              		.cfi_offset 14, -4
+ 261 0004 1746     		mov	r7, r2
+ 262 0006 9846     		mov	r8, r3
+ 263 0008 82B0     		sub	sp, sp, #8
+ 264              		.cfi_def_cfa_offset 32
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 18
+
+
+  99:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** 
+ 100:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c ****     /* Allocate a DMA channel. */
+ 101:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c ****     ADC_SAR_Seq_1_TempBuf_DmaHandle = (uint8)ADC_SAR_Seq_1_TempBuf__DRQ_NUMBER;
+ 265              		.loc 1 101 0
+ 266 000a 0C4C     		ldr	r4, .L3
+ 267 000c 0425     		movs	r5, #4
+ 102:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** 
+ 103:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c ****     /* Configure the channel. */
+ 104:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c ****     (void)CyDmaChSetConfiguration(ADC_SAR_Seq_1_TempBuf_DmaHandle,
+ 268              		.loc 1 104 0
+ 269 000e 0026     		movs	r6, #0
+ 270 0010 2B46     		mov	r3, r5
+ 271              	.LVL1:
+ 272 0012 0A46     		mov	r2, r1
+ 273              	.LVL2:
+ 274 0014 0196     		str	r6, [sp, #4]
+ 275 0016 0146     		mov	r1, r0
+ 276              	.LVL3:
+ 277 0018 0096     		str	r6, [sp]
+ 278 001a 2846     		mov	r0, r5
+ 279              	.LVL4:
+ 101:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** 
+ 280              		.loc 1 101 0
+ 281 001c 2570     		strb	r5, [r4]
+ 282              		.loc 1 104 0
+ 283 001e FFF7FEFF 		bl	CyDmaChSetConfiguration
+ 284              	.LVL5:
+ 105:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c ****                                   BurstCount,
+ 106:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c ****                                   ReqestPerBurst,
+ 107:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c ****                                   (uint8)ADC_SAR_Seq_1_TempBuf__TERMOUT0_SEL,
+ 108:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c ****                                   (uint8)ADC_SAR_Seq_1_TempBuf__TERMOUT1_SEL,
+ 109:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c ****                                   (uint8)ADC_SAR_Seq_1_TempBuf__TERMIN_SEL);
+ 110:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** 
+ 111:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c ****     /* Set the extended address for the transfers */
+ 112:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c ****     (void)CyDmaChSetExtendedAddress(ADC_SAR_Seq_1_TempBuf_DmaHandle, UpperSrcAddress, UpperDestAddr
+ 285              		.loc 1 112 0
+ 286 0022 4246     		mov	r2, r8
+ 287 0024 3946     		mov	r1, r7
+ 288 0026 2078     		ldrb	r0, [r4]	@ zero_extendqisi2
+ 289 0028 FFF7FEFF 		bl	CyDmaChSetExtendedAddress
+ 290              	.LVL6:
+ 113:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** 
+ 114:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c ****     /* Set the priority for this channel */
+ 115:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c ****     (void)CyDmaChPriority(ADC_SAR_Seq_1_TempBuf_DmaHandle, (uint8)ADC_SAR_Seq_1_TempBuf__PRIORITY);
+ 291              		.loc 1 115 0
+ 292 002c 2078     		ldrb	r0, [r4]	@ zero_extendqisi2
+ 293 002e 0221     		movs	r1, #2
+ 294 0030 FFF7FEFF 		bl	CyDmaChPriority
+ 295              	.LVL7:
+ 116:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c ****     
+ 117:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c ****     return ADC_SAR_Seq_1_TempBuf_DmaHandle;
+ 118:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** }
+ 296              		.loc 1 118 0
+ 297 0034 2078     		ldrb	r0, [r4]	@ zero_extendqisi2
+ 298 0036 02B0     		add	sp, sp, #8
+ 299              		.cfi_def_cfa_offset 24
+ 300              		@ sp needed
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 19
+
+
+ 301 0038 BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 302              	.L4:
+ 303              		.align	2
+ 304              	.L3:
+ 305 003c 00000000 		.word	.LANCHOR0
+ 306              		.cfi_endproc
+ 307              	.LFE0:
+ 308              		.size	ADC_SAR_Seq_1_TempBuf_DmaInitialize, .-ADC_SAR_Seq_1_TempBuf_DmaInitialize
+ 309              		.section	.text.ADC_SAR_Seq_1_TempBuf_DmaRelease,"ax",%progbits
+ 310              		.align	2
+ 311              		.global	ADC_SAR_Seq_1_TempBuf_DmaRelease
+ 312              		.thumb
+ 313              		.thumb_func
+ 314              		.type	ADC_SAR_Seq_1_TempBuf_DmaRelease, %function
+ 315              	ADC_SAR_Seq_1_TempBuf_DmaRelease:
+ 316              	.LFB1:
+ 119:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** 
+ 120:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** /*********************************************************************
+ 121:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * Function Name: void ADC_SAR_Seq_1_TempBuf_DmaRelease
+ 122:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** **********************************************************************
+ 123:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * Summary:
+ 124:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *   Frees the channel associated with ADC_SAR_Seq_1_TempBuf.
+ 125:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *
+ 126:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *
+ 127:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * Parameters:
+ 128:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *   void.
+ 129:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *
+ 130:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *
+ 131:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *
+ 132:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** * Return:
+ 133:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *   void.
+ 134:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *
+ 135:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** *******************************************************************/
+ 136:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** void ADC_SAR_Seq_1_TempBuf_DmaRelease(void) 
+ 137:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c **** {
+ 317              		.loc 1 137 0
+ 318              		.cfi_startproc
+ 319              		@ args = 0, pretend = 0, frame = 0
+ 320              		@ frame_needed = 0, uses_anonymous_args = 0
+ 321              		@ link register save eliminated.
+ 138:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c ****     /* Disable the channel */
+ 139:Generated_Source\PSoC5/ADC_SAR_Seq_1_TempBuf_dma.c ****     (void)CyDmaChDisable(ADC_SAR_Seq_1_TempBuf_DmaHandle);
+ 322              		.loc 1 139 0
+ 323 0000 014B     		ldr	r3, .L6
+ 324 0002 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 325 0004 FFF7FEBF 		b	CyDmaChDisable
+ 326              	.LVL8:
+ 327              	.L7:
+ 328              		.align	2
+ 329              	.L6:
+ 330 0008 00000000 		.word	.LANCHOR0
+ 331              		.cfi_endproc
+ 332              	.LFE1:
+ 333              		.size	ADC_SAR_Seq_1_TempBuf_DmaRelease, .-ADC_SAR_Seq_1_TempBuf_DmaRelease
+ 334              		.global	ADC_SAR_Seq_1_TempBuf_DmaHandle
+ 335              		.data
+ 336              		.set	.LANCHOR0,. + 0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 20
+
+
+ 337              		.type	ADC_SAR_Seq_1_TempBuf_DmaHandle, %object
+ 338              		.size	ADC_SAR_Seq_1_TempBuf_DmaHandle, 1
+ 339              	ADC_SAR_Seq_1_TempBuf_DmaHandle:
+ 340 0000 FF       		.byte	-1
+ 341              		.text
+ 342              	.Letext0:
+ 343              		.file 2 "Generated_Source\\PSoC5/cytypes.h"
+ 344              		.file 3 "Generated_Source\\PSoC5/CYDMAC.H"
+ 345              		.section	.debug_info,"",%progbits
+ 346              	.Ldebug_info0:
+ 347 0000 A6010000 		.4byte	0x1a6
+ 348 0004 0400     		.2byte	0x4
+ 349 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 350 000a 04       		.byte	0x4
+ 351 000b 01       		.uleb128 0x1
+ 352 000c 94000000 		.4byte	.LASF24
+ 353 0010 0C       		.byte	0xc
+ 354 0011 42000000 		.4byte	.LASF25
+ 355 0015 4D010000 		.4byte	.LASF26
+ 356 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 357 001d 00000000 		.4byte	0
+ 358 0021 00000000 		.4byte	.Ldebug_line0
+ 359 0025 02       		.uleb128 0x2
+ 360 0026 04       		.byte	0x4
+ 361 0027 05       		.byte	0x5
+ 362 0028 696E7400 		.ascii	"int\000"
+ 363 002c 03       		.uleb128 0x3
+ 364 002d 04       		.byte	0x4
+ 365 002e 07       		.byte	0x7
+ 366 002f 9B010000 		.4byte	.LASF0
+ 367 0033 03       		.uleb128 0x3
+ 368 0034 08       		.byte	0x8
+ 369 0035 05       		.byte	0x5
+ 370 0036 FD010000 		.4byte	.LASF1
+ 371 003a 03       		.uleb128 0x3
+ 372 003b 08       		.byte	0x8
+ 373 003c 04       		.byte	0x4
+ 374 003d 7E020000 		.4byte	.LASF2
+ 375 0041 03       		.uleb128 0x3
+ 376 0042 01       		.byte	0x1
+ 377 0043 06       		.byte	0x6
+ 378 0044 8A020000 		.4byte	.LASF3
+ 379 0048 03       		.uleb128 0x3
+ 380 0049 01       		.byte	0x1
+ 381 004a 08       		.byte	0x8
+ 382 004b 7B000000 		.4byte	.LASF4
+ 383 004f 03       		.uleb128 0x3
+ 384 0050 02       		.byte	0x2
+ 385 0051 05       		.byte	0x5
+ 386 0052 6B020000 		.4byte	.LASF5
+ 387 0056 03       		.uleb128 0x3
+ 388 0057 02       		.byte	0x2
+ 389 0058 07       		.byte	0x7
+ 390 0059 2F000000 		.4byte	.LASF6
+ 391 005d 03       		.uleb128 0x3
+ 392 005e 04       		.byte	0x4
+ 393 005f 05       		.byte	0x5
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 21
+
+
+ 394 0060 75020000 		.4byte	.LASF7
+ 395 0064 03       		.uleb128 0x3
+ 396 0065 04       		.byte	0x4
+ 397 0066 07       		.byte	0x7
+ 398 0067 3B010000 		.4byte	.LASF8
+ 399 006b 03       		.uleb128 0x3
+ 400 006c 08       		.byte	0x8
+ 401 006d 07       		.byte	0x7
+ 402 006e CC010000 		.4byte	.LASF9
+ 403 0072 03       		.uleb128 0x3
+ 404 0073 04       		.byte	0x4
+ 405 0074 07       		.byte	0x7
+ 406 0075 F4010000 		.4byte	.LASF10
+ 407 0079 03       		.uleb128 0x3
+ 408 007a 01       		.byte	0x1
+ 409 007b 08       		.byte	0x8
+ 410 007c 25020000 		.4byte	.LASF11
+ 411 0080 04       		.uleb128 0x4
+ 412 0081 87010000 		.4byte	.LASF12
+ 413 0085 02       		.byte	0x2
+ 414 0086 E901     		.2byte	0x1e9
+ 415 0088 48000000 		.4byte	0x48
+ 416 008c 04       		.uleb128 0x4
+ 417 008d 94010000 		.4byte	.LASF13
+ 418 0091 02       		.byte	0x2
+ 419 0092 EA01     		.2byte	0x1ea
+ 420 0094 56000000 		.4byte	0x56
+ 421 0098 03       		.uleb128 0x3
+ 422 0099 04       		.byte	0x4
+ 423 009a 04       		.byte	0x4
+ 424 009b 75000000 		.4byte	.LASF14
+ 425 009f 03       		.uleb128 0x3
+ 426 00a0 08       		.byte	0x8
+ 427 00a1 04       		.byte	0x4
+ 428 00a2 8D010000 		.4byte	.LASF15
+ 429 00a6 05       		.uleb128 0x5
+ 430 00a7 A8010000 		.4byte	.LASF27
+ 431 00ab 01       		.byte	0x1
+ 432 00ac 61       		.byte	0x61
+ 433 00ad 80000000 		.4byte	0x80
+ 434 00b1 00000000 		.4byte	.LFB0
+ 435 00b5 40000000 		.4byte	.LFE0-.LFB0
+ 436 00b9 01       		.uleb128 0x1
+ 437 00ba 9C       		.byte	0x9c
+ 438 00bb 4D010000 		.4byte	0x14d
+ 439 00bf 06       		.uleb128 0x6
+ 440 00c0 89000000 		.4byte	.LASF16
+ 441 00c4 01       		.byte	0x1
+ 442 00c5 61       		.byte	0x61
+ 443 00c6 80000000 		.4byte	0x80
+ 444 00ca 00000000 		.4byte	.LLST0
+ 445 00ce 06       		.uleb128 0x6
+ 446 00cf 20000000 		.4byte	.LASF17
+ 447 00d3 01       		.byte	0x1
+ 448 00d4 61       		.byte	0x61
+ 449 00d5 80000000 		.4byte	0x80
+ 450 00d9 21000000 		.4byte	.LLST1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 22
+
+
+ 451 00dd 06       		.uleb128 0x6
+ 452 00de 00000000 		.4byte	.LASF18
+ 453 00e2 01       		.byte	0x1
+ 454 00e3 61       		.byte	0x61
+ 455 00e4 8C000000 		.4byte	0x8c
+ 456 00e8 42000000 		.4byte	.LLST2
+ 457 00ec 06       		.uleb128 0x6
+ 458 00ed E3010000 		.4byte	.LASF19
+ 459 00f1 01       		.byte	0x1
+ 460 00f2 61       		.byte	0x61
+ 461 00f3 8C000000 		.4byte	0x8c
+ 462 00f7 63000000 		.4byte	.LLST3
+ 463 00fb 07       		.uleb128 0x7
+ 464 00fc 22000000 		.4byte	.LVL5
+ 465 0100 7D010000 		.4byte	0x17d
+ 466 0104 23010000 		.4byte	0x123
+ 467 0108 08       		.uleb128 0x8
+ 468 0109 01       		.uleb128 0x1
+ 469 010a 50       		.byte	0x50
+ 470 010b 02       		.uleb128 0x2
+ 471 010c 75       		.byte	0x75
+ 472 010d 00       		.sleb128 0
+ 473 010e 08       		.uleb128 0x8
+ 474 010f 01       		.uleb128 0x1
+ 475 0110 53       		.byte	0x53
+ 476 0111 02       		.uleb128 0x2
+ 477 0112 75       		.byte	0x75
+ 478 0113 00       		.sleb128 0
+ 479 0114 08       		.uleb128 0x8
+ 480 0115 02       		.uleb128 0x2
+ 481 0116 7D       		.byte	0x7d
+ 482 0117 00       		.sleb128 0
+ 483 0118 02       		.uleb128 0x2
+ 484 0119 76       		.byte	0x76
+ 485 011a 00       		.sleb128 0
+ 486 011b 08       		.uleb128 0x8
+ 487 011c 02       		.uleb128 0x2
+ 488 011d 7D       		.byte	0x7d
+ 489 011e 04       		.sleb128 4
+ 490 011f 02       		.uleb128 0x2
+ 491 0120 76       		.byte	0x76
+ 492 0121 00       		.sleb128 0
+ 493 0122 00       		.byte	0
+ 494 0123 07       		.uleb128 0x7
+ 495 0124 2C000000 		.4byte	.LVL6
+ 496 0128 88010000 		.4byte	0x188
+ 497 012c 3D010000 		.4byte	0x13d
+ 498 0130 08       		.uleb128 0x8
+ 499 0131 01       		.uleb128 0x1
+ 500 0132 51       		.byte	0x51
+ 501 0133 02       		.uleb128 0x2
+ 502 0134 77       		.byte	0x77
+ 503 0135 00       		.sleb128 0
+ 504 0136 08       		.uleb128 0x8
+ 505 0137 01       		.uleb128 0x1
+ 506 0138 52       		.byte	0x52
+ 507 0139 02       		.uleb128 0x2
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 23
+
+
+ 508 013a 78       		.byte	0x78
+ 509 013b 00       		.sleb128 0
+ 510 013c 00       		.byte	0
+ 511 013d 09       		.uleb128 0x9
+ 512 013e 34000000 		.4byte	.LVL7
+ 513 0142 93010000 		.4byte	0x193
+ 514 0146 08       		.uleb128 0x8
+ 515 0147 01       		.uleb128 0x1
+ 516 0148 51       		.byte	0x51
+ 517 0149 01       		.uleb128 0x1
+ 518 014a 32       		.byte	0x32
+ 519 014b 00       		.byte	0
+ 520 014c 00       		.byte	0
+ 521 014d 0A       		.uleb128 0xa
+ 522 014e 2A020000 		.4byte	.LASF28
+ 523 0152 01       		.byte	0x1
+ 524 0153 88       		.byte	0x88
+ 525 0154 00000000 		.4byte	.LFB1
+ 526 0158 0C000000 		.4byte	.LFE1-.LFB1
+ 527 015c 01       		.uleb128 0x1
+ 528 015d 9C       		.byte	0x9c
+ 529 015e 6C010000 		.4byte	0x16c
+ 530 0162 0B       		.uleb128 0xb
+ 531 0163 08000000 		.4byte	.LVL8
+ 532 0167 9E010000 		.4byte	0x19e
+ 533 016b 00       		.byte	0
+ 534 016c 0C       		.uleb128 0xc
+ 535 016d 4B020000 		.4byte	.LASF29
+ 536 0171 01       		.byte	0x1
+ 537 0172 45       		.byte	0x45
+ 538 0173 80000000 		.4byte	0x80
+ 539 0177 05       		.uleb128 0x5
+ 540 0178 03       		.byte	0x3
+ 541 0179 00000000 		.4byte	ADC_SAR_Seq_1_TempBuf_DmaHandle
+ 542 017d 0D       		.uleb128 0xd
+ 543 017e A5020000 		.4byte	.LASF20
+ 544 0182 A5020000 		.4byte	.LASF20
+ 545 0186 03       		.byte	0x3
+ 546 0187 33       		.byte	0x33
+ 547 0188 0D       		.uleb128 0xd
+ 548 0189 0B020000 		.4byte	.LASF21
+ 549 018d 0B020000 		.4byte	.LASF21
+ 550 0191 03       		.byte	0x3
+ 551 0192 2D       		.byte	0x2d
+ 552 0193 0D       		.uleb128 0xd
+ 553 0194 10000000 		.4byte	.LASF22
+ 554 0198 10000000 		.4byte	.LASF22
+ 555 019c 03       		.byte	0x3
+ 556 019d 2C       		.byte	0x2c
+ 557 019e 0D       		.uleb128 0xd
+ 558 019f 96020000 		.4byte	.LASF23
+ 559 01a3 96020000 		.4byte	.LASF23
+ 560 01a7 03       		.byte	0x3
+ 561 01a8 2A       		.byte	0x2a
+ 562 01a9 00       		.byte	0
+ 563              		.section	.debug_abbrev,"",%progbits
+ 564              	.Ldebug_abbrev0:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 24
+
+
+ 565 0000 01       		.uleb128 0x1
+ 566 0001 11       		.uleb128 0x11
+ 567 0002 01       		.byte	0x1
+ 568 0003 25       		.uleb128 0x25
+ 569 0004 0E       		.uleb128 0xe
+ 570 0005 13       		.uleb128 0x13
+ 571 0006 0B       		.uleb128 0xb
+ 572 0007 03       		.uleb128 0x3
+ 573 0008 0E       		.uleb128 0xe
+ 574 0009 1B       		.uleb128 0x1b
+ 575 000a 0E       		.uleb128 0xe
+ 576 000b 55       		.uleb128 0x55
+ 577 000c 17       		.uleb128 0x17
+ 578 000d 11       		.uleb128 0x11
+ 579 000e 01       		.uleb128 0x1
+ 580 000f 10       		.uleb128 0x10
+ 581 0010 17       		.uleb128 0x17
+ 582 0011 00       		.byte	0
+ 583 0012 00       		.byte	0
+ 584 0013 02       		.uleb128 0x2
+ 585 0014 24       		.uleb128 0x24
+ 586 0015 00       		.byte	0
+ 587 0016 0B       		.uleb128 0xb
+ 588 0017 0B       		.uleb128 0xb
+ 589 0018 3E       		.uleb128 0x3e
+ 590 0019 0B       		.uleb128 0xb
+ 591 001a 03       		.uleb128 0x3
+ 592 001b 08       		.uleb128 0x8
+ 593 001c 00       		.byte	0
+ 594 001d 00       		.byte	0
+ 595 001e 03       		.uleb128 0x3
+ 596 001f 24       		.uleb128 0x24
+ 597 0020 00       		.byte	0
+ 598 0021 0B       		.uleb128 0xb
+ 599 0022 0B       		.uleb128 0xb
+ 600 0023 3E       		.uleb128 0x3e
+ 601 0024 0B       		.uleb128 0xb
+ 602 0025 03       		.uleb128 0x3
+ 603 0026 0E       		.uleb128 0xe
+ 604 0027 00       		.byte	0
+ 605 0028 00       		.byte	0
+ 606 0029 04       		.uleb128 0x4
+ 607 002a 16       		.uleb128 0x16
+ 608 002b 00       		.byte	0
+ 609 002c 03       		.uleb128 0x3
+ 610 002d 0E       		.uleb128 0xe
+ 611 002e 3A       		.uleb128 0x3a
+ 612 002f 0B       		.uleb128 0xb
+ 613 0030 3B       		.uleb128 0x3b
+ 614 0031 05       		.uleb128 0x5
+ 615 0032 49       		.uleb128 0x49
+ 616 0033 13       		.uleb128 0x13
+ 617 0034 00       		.byte	0
+ 618 0035 00       		.byte	0
+ 619 0036 05       		.uleb128 0x5
+ 620 0037 2E       		.uleb128 0x2e
+ 621 0038 01       		.byte	0x1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 25
+
+
+ 622 0039 3F       		.uleb128 0x3f
+ 623 003a 19       		.uleb128 0x19
+ 624 003b 03       		.uleb128 0x3
+ 625 003c 0E       		.uleb128 0xe
+ 626 003d 3A       		.uleb128 0x3a
+ 627 003e 0B       		.uleb128 0xb
+ 628 003f 3B       		.uleb128 0x3b
+ 629 0040 0B       		.uleb128 0xb
+ 630 0041 27       		.uleb128 0x27
+ 631 0042 19       		.uleb128 0x19
+ 632 0043 49       		.uleb128 0x49
+ 633 0044 13       		.uleb128 0x13
+ 634 0045 11       		.uleb128 0x11
+ 635 0046 01       		.uleb128 0x1
+ 636 0047 12       		.uleb128 0x12
+ 637 0048 06       		.uleb128 0x6
+ 638 0049 40       		.uleb128 0x40
+ 639 004a 18       		.uleb128 0x18
+ 640 004b 9742     		.uleb128 0x2117
+ 641 004d 19       		.uleb128 0x19
+ 642 004e 01       		.uleb128 0x1
+ 643 004f 13       		.uleb128 0x13
+ 644 0050 00       		.byte	0
+ 645 0051 00       		.byte	0
+ 646 0052 06       		.uleb128 0x6
+ 647 0053 05       		.uleb128 0x5
+ 648 0054 00       		.byte	0
+ 649 0055 03       		.uleb128 0x3
+ 650 0056 0E       		.uleb128 0xe
+ 651 0057 3A       		.uleb128 0x3a
+ 652 0058 0B       		.uleb128 0xb
+ 653 0059 3B       		.uleb128 0x3b
+ 654 005a 0B       		.uleb128 0xb
+ 655 005b 49       		.uleb128 0x49
+ 656 005c 13       		.uleb128 0x13
+ 657 005d 02       		.uleb128 0x2
+ 658 005e 17       		.uleb128 0x17
+ 659 005f 00       		.byte	0
+ 660 0060 00       		.byte	0
+ 661 0061 07       		.uleb128 0x7
+ 662 0062 898201   		.uleb128 0x4109
+ 663 0065 01       		.byte	0x1
+ 664 0066 11       		.uleb128 0x11
+ 665 0067 01       		.uleb128 0x1
+ 666 0068 31       		.uleb128 0x31
+ 667 0069 13       		.uleb128 0x13
+ 668 006a 01       		.uleb128 0x1
+ 669 006b 13       		.uleb128 0x13
+ 670 006c 00       		.byte	0
+ 671 006d 00       		.byte	0
+ 672 006e 08       		.uleb128 0x8
+ 673 006f 8A8201   		.uleb128 0x410a
+ 674 0072 00       		.byte	0
+ 675 0073 02       		.uleb128 0x2
+ 676 0074 18       		.uleb128 0x18
+ 677 0075 9142     		.uleb128 0x2111
+ 678 0077 18       		.uleb128 0x18
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 26
+
+
+ 679 0078 00       		.byte	0
+ 680 0079 00       		.byte	0
+ 681 007a 09       		.uleb128 0x9
+ 682 007b 898201   		.uleb128 0x4109
+ 683 007e 01       		.byte	0x1
+ 684 007f 11       		.uleb128 0x11
+ 685 0080 01       		.uleb128 0x1
+ 686 0081 31       		.uleb128 0x31
+ 687 0082 13       		.uleb128 0x13
+ 688 0083 00       		.byte	0
+ 689 0084 00       		.byte	0
+ 690 0085 0A       		.uleb128 0xa
+ 691 0086 2E       		.uleb128 0x2e
+ 692 0087 01       		.byte	0x1
+ 693 0088 3F       		.uleb128 0x3f
+ 694 0089 19       		.uleb128 0x19
+ 695 008a 03       		.uleb128 0x3
+ 696 008b 0E       		.uleb128 0xe
+ 697 008c 3A       		.uleb128 0x3a
+ 698 008d 0B       		.uleb128 0xb
+ 699 008e 3B       		.uleb128 0x3b
+ 700 008f 0B       		.uleb128 0xb
+ 701 0090 27       		.uleb128 0x27
+ 702 0091 19       		.uleb128 0x19
+ 703 0092 11       		.uleb128 0x11
+ 704 0093 01       		.uleb128 0x1
+ 705 0094 12       		.uleb128 0x12
+ 706 0095 06       		.uleb128 0x6
+ 707 0096 40       		.uleb128 0x40
+ 708 0097 18       		.uleb128 0x18
+ 709 0098 9742     		.uleb128 0x2117
+ 710 009a 19       		.uleb128 0x19
+ 711 009b 01       		.uleb128 0x1
+ 712 009c 13       		.uleb128 0x13
+ 713 009d 00       		.byte	0
+ 714 009e 00       		.byte	0
+ 715 009f 0B       		.uleb128 0xb
+ 716 00a0 898201   		.uleb128 0x4109
+ 717 00a3 00       		.byte	0
+ 718 00a4 11       		.uleb128 0x11
+ 719 00a5 01       		.uleb128 0x1
+ 720 00a6 9542     		.uleb128 0x2115
+ 721 00a8 19       		.uleb128 0x19
+ 722 00a9 31       		.uleb128 0x31
+ 723 00aa 13       		.uleb128 0x13
+ 724 00ab 00       		.byte	0
+ 725 00ac 00       		.byte	0
+ 726 00ad 0C       		.uleb128 0xc
+ 727 00ae 34       		.uleb128 0x34
+ 728 00af 00       		.byte	0
+ 729 00b0 03       		.uleb128 0x3
+ 730 00b1 0E       		.uleb128 0xe
+ 731 00b2 3A       		.uleb128 0x3a
+ 732 00b3 0B       		.uleb128 0xb
+ 733 00b4 3B       		.uleb128 0x3b
+ 734 00b5 0B       		.uleb128 0xb
+ 735 00b6 49       		.uleb128 0x49
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 27
+
+
+ 736 00b7 13       		.uleb128 0x13
+ 737 00b8 3F       		.uleb128 0x3f
+ 738 00b9 19       		.uleb128 0x19
+ 739 00ba 02       		.uleb128 0x2
+ 740 00bb 18       		.uleb128 0x18
+ 741 00bc 00       		.byte	0
+ 742 00bd 00       		.byte	0
+ 743 00be 0D       		.uleb128 0xd
+ 744 00bf 2E       		.uleb128 0x2e
+ 745 00c0 00       		.byte	0
+ 746 00c1 3F       		.uleb128 0x3f
+ 747 00c2 19       		.uleb128 0x19
+ 748 00c3 3C       		.uleb128 0x3c
+ 749 00c4 19       		.uleb128 0x19
+ 750 00c5 6E       		.uleb128 0x6e
+ 751 00c6 0E       		.uleb128 0xe
+ 752 00c7 03       		.uleb128 0x3
+ 753 00c8 0E       		.uleb128 0xe
+ 754 00c9 3A       		.uleb128 0x3a
+ 755 00ca 0B       		.uleb128 0xb
+ 756 00cb 3B       		.uleb128 0x3b
+ 757 00cc 0B       		.uleb128 0xb
+ 758 00cd 00       		.byte	0
+ 759 00ce 00       		.byte	0
+ 760 00cf 00       		.byte	0
+ 761              		.section	.debug_loc,"",%progbits
+ 762              	.Ldebug_loc0:
+ 763              	.LLST0:
+ 764 0000 00000000 		.4byte	.LVL0
+ 765 0004 1C000000 		.4byte	.LVL4
+ 766 0008 0100     		.2byte	0x1
+ 767 000a 50       		.byte	0x50
+ 768 000b 1C000000 		.4byte	.LVL4
+ 769 000f 40000000 		.4byte	.LFE0
+ 770 0013 0400     		.2byte	0x4
+ 771 0015 F3       		.byte	0xf3
+ 772 0016 01       		.uleb128 0x1
+ 773 0017 50       		.byte	0x50
+ 774 0018 9F       		.byte	0x9f
+ 775 0019 00000000 		.4byte	0
+ 776 001d 00000000 		.4byte	0
+ 777              	.LLST1:
+ 778 0021 00000000 		.4byte	.LVL0
+ 779 0025 18000000 		.4byte	.LVL3
+ 780 0029 0100     		.2byte	0x1
+ 781 002b 51       		.byte	0x51
+ 782 002c 18000000 		.4byte	.LVL3
+ 783 0030 40000000 		.4byte	.LFE0
+ 784 0034 0400     		.2byte	0x4
+ 785 0036 F3       		.byte	0xf3
+ 786 0037 01       		.uleb128 0x1
+ 787 0038 51       		.byte	0x51
+ 788 0039 9F       		.byte	0x9f
+ 789 003a 00000000 		.4byte	0
+ 790 003e 00000000 		.4byte	0
+ 791              	.LLST2:
+ 792 0042 00000000 		.4byte	.LVL0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 28
+
+
+ 793 0046 14000000 		.4byte	.LVL2
+ 794 004a 0100     		.2byte	0x1
+ 795 004c 52       		.byte	0x52
+ 796 004d 14000000 		.4byte	.LVL2
+ 797 0051 40000000 		.4byte	.LFE0
+ 798 0055 0400     		.2byte	0x4
+ 799 0057 F3       		.byte	0xf3
+ 800 0058 01       		.uleb128 0x1
+ 801 0059 52       		.byte	0x52
+ 802 005a 9F       		.byte	0x9f
+ 803 005b 00000000 		.4byte	0
+ 804 005f 00000000 		.4byte	0
+ 805              	.LLST3:
+ 806 0063 00000000 		.4byte	.LVL0
+ 807 0067 12000000 		.4byte	.LVL1
+ 808 006b 0100     		.2byte	0x1
+ 809 006d 53       		.byte	0x53
+ 810 006e 12000000 		.4byte	.LVL1
+ 811 0072 40000000 		.4byte	.LFE0
+ 812 0076 0400     		.2byte	0x4
+ 813 0078 F3       		.byte	0xf3
+ 814 0079 01       		.uleb128 0x1
+ 815 007a 53       		.byte	0x53
+ 816 007b 9F       		.byte	0x9f
+ 817 007c 00000000 		.4byte	0
+ 818 0080 00000000 		.4byte	0
+ 819              		.section	.debug_aranges,"",%progbits
+ 820 0000 24000000 		.4byte	0x24
+ 821 0004 0200     		.2byte	0x2
+ 822 0006 00000000 		.4byte	.Ldebug_info0
+ 823 000a 04       		.byte	0x4
+ 824 000b 00       		.byte	0
+ 825 000c 0000     		.2byte	0
+ 826 000e 0000     		.2byte	0
+ 827 0010 00000000 		.4byte	.LFB0
+ 828 0014 40000000 		.4byte	.LFE0-.LFB0
+ 829 0018 00000000 		.4byte	.LFB1
+ 830 001c 0C000000 		.4byte	.LFE1-.LFB1
+ 831 0020 00000000 		.4byte	0
+ 832 0024 00000000 		.4byte	0
+ 833              		.section	.debug_ranges,"",%progbits
+ 834              	.Ldebug_ranges0:
+ 835 0000 00000000 		.4byte	.LFB0
+ 836 0004 40000000 		.4byte	.LFE0
+ 837 0008 00000000 		.4byte	.LFB1
+ 838 000c 0C000000 		.4byte	.LFE1
+ 839 0010 00000000 		.4byte	0
+ 840 0014 00000000 		.4byte	0
+ 841              		.section	.debug_line,"",%progbits
+ 842              	.Ldebug_line0:
+ 843 0000 90000000 		.section	.debug_str,"MS",%progbits,1
+ 843      02006200 
+ 843      00000201 
+ 843      FB0E0D00 
+ 843      01010101 
+ 844              	.LASF18:
+ 845 0000 55707065 		.ascii	"UpperSrcAddress\000"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 29
+
+
+ 845      72537263 
+ 845      41646472 
+ 845      65737300 
+ 846              	.LASF22:
+ 847 0010 4379446D 		.ascii	"CyDmaChPriority\000"
+ 847      61436850 
+ 847      72696F72 
+ 847      69747900 
+ 848              	.LASF17:
+ 849 0020 52657165 		.ascii	"ReqestPerBurst\000"
+ 849      73745065 
+ 849      72427572 
+ 849      737400
+ 850              	.LASF6:
+ 851 002f 73686F72 		.ascii	"short unsigned int\000"
+ 851      7420756E 
+ 851      7369676E 
+ 851      65642069 
+ 851      6E7400
+ 852              	.LASF25:
+ 853 0042 47656E65 		.ascii	"Generated_Source\\PSoC5\\ADC_SAR_Seq_1_TempBuf_dma."
+ 853      72617465 
+ 853      645F536F 
+ 853      75726365 
+ 853      5C50536F 
+ 854 0073 6300     		.ascii	"c\000"
+ 855              	.LASF14:
+ 856 0075 666C6F61 		.ascii	"float\000"
+ 856      7400
+ 857              	.LASF4:
+ 858 007b 756E7369 		.ascii	"unsigned char\000"
+ 858      676E6564 
+ 858      20636861 
+ 858      7200
+ 859              	.LASF16:
+ 860 0089 42757273 		.ascii	"BurstCount\000"
+ 860      74436F75 
+ 860      6E7400
+ 861              	.LASF24:
+ 862 0094 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 862      43313120 
+ 862      352E342E 
+ 862      31203230 
+ 862      31363036 
+ 863 00c7 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"
+ 863      20726576 
+ 863      6973696F 
+ 863      6E203233 
+ 863      37373135 
+ 864 00fa 33202D66 		.ascii	"3 -ffunction-sections -ffat-lto-objects -finline-fu"
+ 864      66756E63 
+ 864      74696F6E 
+ 864      2D736563 
+ 864      74696F6E 
+ 865 012d 6E637469 		.ascii	"nctions -flto\000"
+ 865      6F6E7320 
+ 865      2D666C74 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 30
+
+
+ 865      6F00
+ 866              	.LASF8:
+ 867 013b 6C6F6E67 		.ascii	"long unsigned int\000"
+ 867      20756E73 
+ 867      69676E65 
+ 867      6420696E 
+ 867      7400
+ 868              	.LASF26:
+ 869 014d 433A5C47 		.ascii	"C:\\Github\\Tesis\\src\\psoc\\AcondicionamientoAnal"
+ 869      69746875 
+ 869      625C5465 
+ 869      7369735C 
+ 869      7372635C 
+ 870 017b 6F676963 		.ascii	"ogico.cydsn\000"
+ 870      6F2E6379 
+ 870      64736E00 
+ 871              	.LASF12:
+ 872 0187 75696E74 		.ascii	"uint8\000"
+ 872      3800
+ 873              	.LASF15:
+ 874 018d 646F7562 		.ascii	"double\000"
+ 874      6C6500
+ 875              	.LASF13:
+ 876 0194 75696E74 		.ascii	"uint16\000"
+ 876      313600
+ 877              	.LASF0:
+ 878 019b 756E7369 		.ascii	"unsigned int\000"
+ 878      676E6564 
+ 878      20696E74 
+ 878      00
+ 879              	.LASF27:
+ 880 01a8 4144435F 		.ascii	"ADC_SAR_Seq_1_TempBuf_DmaInitialize\000"
+ 880      5341525F 
+ 880      5365715F 
+ 880      315F5465 
+ 880      6D704275 
+ 881              	.LASF9:
+ 882 01cc 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 882      206C6F6E 
+ 882      6720756E 
+ 882      7369676E 
+ 882      65642069 
+ 883              	.LASF19:
+ 884 01e3 55707065 		.ascii	"UpperDestAddress\000"
+ 884      72446573 
+ 884      74416464 
+ 884      72657373 
+ 884      00
+ 885              	.LASF10:
+ 886 01f4 73697A65 		.ascii	"sizetype\000"
+ 886      74797065 
+ 886      00
+ 887              	.LASF1:
+ 888 01fd 6C6F6E67 		.ascii	"long long int\000"
+ 888      206C6F6E 
+ 888      6720696E 
+ 888      7400
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cchJ0lxi.s 			page 31
+
+
+ 889              	.LASF21:
+ 890 020b 4379446D 		.ascii	"CyDmaChSetExtendedAddress\000"
+ 890      61436853 
+ 890      65744578 
+ 890      74656E64 
+ 890      65644164 
+ 891              	.LASF11:
+ 892 0225 63686172 		.ascii	"char\000"
+ 892      00
+ 893              	.LASF28:
+ 894 022a 4144435F 		.ascii	"ADC_SAR_Seq_1_TempBuf_DmaRelease\000"
+ 894      5341525F 
+ 894      5365715F 
+ 894      315F5465 
+ 894      6D704275 
+ 895              	.LASF29:
+ 896 024b 4144435F 		.ascii	"ADC_SAR_Seq_1_TempBuf_DmaHandle\000"
+ 896      5341525F 
+ 896      5365715F 
+ 896      315F5465 
+ 896      6D704275 
+ 897              	.LASF5:
+ 898 026b 73686F72 		.ascii	"short int\000"
+ 898      7420696E 
+ 898      7400
+ 899              	.LASF7:
+ 900 0275 6C6F6E67 		.ascii	"long int\000"
+ 900      20696E74 
+ 900      00
+ 901              	.LASF2:
+ 902 027e 6C6F6E67 		.ascii	"long double\000"
+ 902      20646F75 
+ 902      626C6500 
+ 903              	.LASF3:
+ 904 028a 7369676E 		.ascii	"signed char\000"
+ 904      65642063 
+ 904      68617200 
+ 905              	.LASF23:
+ 906 0296 4379446D 		.ascii	"CyDmaChDisable\000"
+ 906      61436844 
+ 906      69736162 
+ 906      6C6500
+ 907              	.LASF20:
+ 908 02a5 4379446D 		.ascii	"CyDmaChSetConfiguration\000"
+ 908      61436853 
+ 908      6574436F 
+ 908      6E666967 
+ 908      75726174 
+ 909              		.comm	__gnu_lto_v1,1,1
+ 910              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

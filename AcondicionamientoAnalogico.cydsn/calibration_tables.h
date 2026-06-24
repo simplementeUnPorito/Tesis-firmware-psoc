@@ -56,24 +56,53 @@
 #define CAL_TARGET_1V5_COUNTS 78644L
 #endif
 
-/* HAMMER mide single-ended (no diferencial como GEO): el ADC no tiene un
- * "0V de reposo" natural, así que el target tiene que ser el punto de
- * referencia real del front-end -- 1.024V, el mismo valor que Opa_ref_1V
- * genera en el esquemático de AnalogHammer (Vref=1.024V -> ref1V). Definido
- * en mV y multiplicado contra CAL_TARGET_1V_COUNTS (counts por volt) en vez
- * de un literal de counts, para que sea trazable/ajustable sin tener que
- * recalcular a mano. */
-#ifndef CAL_TARGET_HAMMER_MV
-#define CAL_TARGET_HAMMER_MV 1024L
+/* Escalas fisicas usadas por el PI activo. El ADC se compara en el mismo
+ * dominio que el VDAC: ADC 0..5V, 18 bits; VDAC8 0..4.080V, 8 bits. */
+#ifndef CAL_ADC_SPAN_MV
+#define CAL_ADC_SPAN_MV 5000L
 #endif
 
-#ifndef CAL_TARGET_HAMMER_PGA_COUNTS
-#define CAL_TARGET_HAMMER_PGA_COUNTS (CAL_TARGET_HAMMER_MV * CAL_TARGET_1V_COUNTS / 1000L)
+#ifndef CAL_ADC_FULL_SCALE_COUNTS
+#define CAL_ADC_FULL_SCALE_COUNTS 262144L
 #endif
 
-#ifndef CAL_TARGET_HAMMER_LP_COUNTS
-#define CAL_TARGET_HAMMER_LP_COUNTS CAL_TARGET_HAMMER_PGA_COUNTS
+#ifndef CAL_VDAC_SPAN_MV
+#define CAL_VDAC_SPAN_MV 4080L
 #endif
+
+#ifndef CAL_VDAC_CODE_MAX
+#define CAL_VDAC_CODE_MAX 255L
+#endif
+
+#ifndef CAL_VDAC8_MV_PER_LSB
+#define CAL_VDAC8_MV_PER_LSB 16L
+#endif
+
+#ifndef CAL_PI_DEADBAND_MARGIN_NUM
+#define CAL_PI_DEADBAND_MARGIN_NUM 6L
+#endif
+
+#ifndef CAL_PI_DEADBAND_MARGIN_DEN
+#define CAL_PI_DEADBAND_MARGIN_DEN 5L
+#endif
+
+#ifndef CAL_PI_DEADBAND_MIN_DAC_CODES
+#define CAL_PI_DEADBAND_MIN_DAC_CODES 1L
+#endif
+
+#ifndef CAL_PI_MAX_DAC_STEP_PER_SAMPLE
+#define CAL_PI_MAX_DAC_STEP_PER_SAMPLE 1u
+#endif
+
+/* Parametros POR ETAPA HAMMER (target, adelanto/rango de busqueda, PI,
+ * asentamiento) viven en headers independientes, uno por VDAC -- mismo
+ * patron que los headers GEO de mas abajo:
+ *   - calibration_tables_hammer_pga.h
+ *   - calibration_tables_hammer_lp.h
+ * Incluidos aca arriba (no junto a los de GEO) porque el bloque HAMMER de
+ * abajo en este archivo todavia los referencia para armar g_psoc_cal_stages. */
+#include "calibration_tables_hammer_pga.h"
+#include "calibration_tables_hammer_lp.h"
 
 /* Rango operativo absoluto: ADC_CFG1_COUNTS_PER_VOLT=52429 (ver HANDOFF
  * §4/§13), entonces 0.5V =~ 26214 counts. Se conserva como alarma de salud:
@@ -120,28 +149,10 @@
  * etapas aunque una quede fuera de tolerancia. */
 #define CAL_FAIL_FAST_ON_STAGE_FAIL 0u
 
-/* Feedforward de HAMMER ("el adelanto"): NO usa CAL_DAC_CENTER (0x9C, pensado
- * para el "centro de rango" generico/GEO). Como HAMMER calibra contra
- * CAL_TARGET_HAMMER_MV (single-ended, ver arriba), el punto de partida mas
- * cercano a donde converge es la mitad del codigo VDAC8 que representaria
- * ese target -- arranca el PI a medio camino en vez de en el extremo, sin
- * pretender ser el valor final (eso lo terminan de cerrar Kp/Ki). Todo
- * derivado por multiplicacion/division desde CAL_TARGET_HAMMER_MV y
- * CAL_VDAC8_MV_PER_LSB, sin literales sueltos -- ej. con target=1024mV:
- * 1024/16=64=0x40 (codigo equivalente al target), /2=32=0x20 (punto de
- * partida). */
-#ifndef CAL_VDAC8_MV_PER_LSB
-#define CAL_VDAC8_MV_PER_LSB 16L   /* VDAC8 1x: 4.08V/256 codigos ~= 16mV/LSB */
-#endif
-
-#define CAL_DAC_TARGET_EQUIV_HAMMER ((uint8)(CAL_TARGET_HAMMER_MV / CAL_VDAC8_MV_PER_LSB))
-#define CAL_DAC_FEEDFORWARD_HAMMER  ((uint8)(CAL_DAC_TARGET_EQUIV_HAMMER / 2u))
-
-#define CAL_DAC_CENTER_HAMMER_PGA CAL_DAC_FEEDFORWARD_HAMMER
-#define CAL_DAC_CENTER_HAMMER_LP  CAL_DAC_FEEDFORWARD_HAMMER
-
-#define CAL_DAC_MAX_CHANGE_HAMMER_PGA CAL_DAC_MAX_CHANGE_HAMMER
-#define CAL_DAC_MAX_CHANGE_HAMMER_LP  CAL_DAC_MAX_CHANGE_HAMMER
+/* El adelanto (feedforward) y el rango de busqueda de HAMMER ya NO viven
+ * aca -- son individuales por etapa, ver CAL_ADELANTO_HAMMER_PGA_MV /
+ * CAL_DAC_CENTER_HAMMER_PGA / CAL_DAC_MAX_CHANGE_HAMMER_PGA (y su _LP) en
+ * calibration_tables_hammer_pga.h / _lp.h, incluidos mas arriba. */
 
 #define CAL_BEST_CANDIDATE_COUNT 4u
 #define CAL_VISIT_HISTORY_COUNT  8u
@@ -189,17 +200,12 @@
  * El ruido observado por ESP ronda decenas de mV, asi que 250 counts (~5 mV)
  * hacia fallar etapas ya centradas. 6000 counts son ~114 mV con
  * CAL_TARGET_1V_COUNTS=52429 counts/V. */
-#define CAL_TOL_COUNTS 6000L
-#define CAL_DEADBAND_COUNTS CAL_TOL_COUNTS
-#define CAL_PROBE_STEP 32u
-
-#define CAL_SETTLE_SAMPLES_HAMMER_PGA  600u
-#define CAL_SETTLE_SAMPLES_HAMMER_LP   900u
-
-#define CAL_VERIFY_SETTLE_SAMPLES_HAMMER_PGA  900u
-#define CAL_VERIFY_SETTLE_SAMPLES_HAMMER_LP  1200u
-
-#define CAL_SAT_COUNTS_HAMMER 120000L
+/* CAL_TOL_COUNTS/DEADBAND/PROBE_STEP/SETTLE_SAMPLES/SAT_COUNTS por etapa HAMMER
+ * (antes globales aca) ya viven en calibration_tables_hammer_pga.h / _lp.h,
+ * incluidos mas arriba -- CAL_TOL_COUNTS_HAMMER_PGA, CAL_TOL_COUNTS_HAMMER_LP,
+ * etc. Lo que queda aca es la configuracion de promediado/realcheck de la
+ * biseccion vieja (compartida, sin uso por el PI -- ver #if 0 en
+ * calibration.c). */
 
 #define CAL_AVG_N_HAMMER              32u
 #define CAL_AVG_WINDOW_COUNT_HAMMER    8u   /* piso 256 muestras */
@@ -209,7 +215,7 @@
 #define CAL_VERIFY_AVG_MAX_SAMPLES_HAMMER 1024u
 
 #define CAL_REALCHECK_ENABLE_HAMMER              0u
-#define CAL_REALCHECK_TOL_COUNTS_HAMMER          CAL_TOL_COUNTS
+#define CAL_REALCHECK_TOL_COUNTS_HAMMER          6000L
 #define CAL_REALCHECK_NUDGE_STEP_HAMMER          1u
 #define CAL_REALCHECK_MAX_NUDGES_HAMMER          0u
 #define CAL_REALCHECK_DISCARD_SAMPLES_HAMMER     0u
@@ -224,80 +230,46 @@
       CAL_REALCHECK_DISCARD_SAMPLES_HAMMER, CAL_REALCHECK_NUDGE_DISCARD_SAMPLES_HAMMER, \
       { CAL_AVG_N_HAMMER, CAL_AVG_WINDOW_COUNT_HAMMER, CAL_AVG_MAX_SAMPLES_HAMMER, CAL_AVG_SETTLE_TOL_HAMMER, CAL_AVG_STABLE_STREAK_HAMMER } }
 
-#define CAL_SERVO_SETTLE_SAMPLES_HAMMER_PGA  600u
-#define CAL_SERVO_SETTLE_SAMPLES_HAMMER_LP   900u
-
-#define CAL_SERVO_KP_NUM_HAMMER_PGA       1L
-#define CAL_SERVO_KI_NUM_HAMMER_PGA       1L
-#define CAL_SERVO_KI_DIV_HAMMER_PGA       8L
-#define CAL_SERVO_DEADBAND_HAMMER_PGA     CAL_SERVO_DEADBAND_COUNTS
-#define CAL_SERVO_FINE_STEP_HAMMER_PGA    CAL_SERVO_FINE_STEP
-#define CAL_SERVO_RECOVERY_STEP_HAMMER_PGA CAL_SERVO_RECOVERY_STEP
-
-#define CAL_SERVO_KP_NUM_HAMMER_LP       1L
-#define CAL_SERVO_KI_NUM_HAMMER_LP       1L
-#define CAL_SERVO_KI_DIV_HAMMER_LP       8L
-#define CAL_SERVO_DEADBAND_HAMMER_LP     CAL_SERVO_DEADBAND_COUNTS
-#define CAL_SERVO_FINE_STEP_HAMMER_LP    CAL_SERVO_FINE_STEP
-#define CAL_SERVO_RECOVERY_STEP_HAMMER_LP CAL_SERVO_RECOVERY_STEP
+/* CAL_SERVO_*_HAMMER_PGA/_LP (servo lento, legado sin uso) y CAL_PI_KP/KI/
+ * LSB_COUNTS/MAX_SAMPLES_HAMMER_PGA/_LP (ganancias del PI activo) ya viven
+ * en calibration_tables_hammer_pga.h / _lp.h, incluidos mas arriba. */
 
 /* ============================================================
- * Controlador PI de calibracion: UNICO camino de calibracion, tanto para
- * HAMMER como para GEO (la biseccion vieja y el servo lento, en
- * calibration.c — quedaron comentados con #if 0, a pedido explícito del
- * usuario; no se borraron, siguen ahí como referencia).
- * Ley de control por muestra (a 3kHz, sobre la salida del Filter de
- * hardware — DFB, Canal A — entregada vía DMA_Filter_RAM; ya NO hay FIR por
- * software ni prellenado por "lote", ver cal_pi_run_service en calibration.c):
- *   error  = target_counts - fir_output
- *   effort = dac_center + direction*(Kp*error/div + Ki*integral/div)
+ * Controlador PI de calibracion: UNICO algoritmo activo, GEO y HAMMER por
+ * igual. Usa el FIR de hardware como unica fuente de suavizado (nunca
+ * promediado de software). La biseccion vieja y el servo lento
+ * (calibration.c, CAL_ALGO_BISECTION_ENABLE) quedaron comentados a pedido
+ * del usuario, no se borraron.
+ *
+ * Ley de control por muestra (a 3kHz, sobre fir_output = salida del Filter
+ * de hardware vía DMA_Filter_RAM, ver cal_pi_run_service en calibration.c):
+ *   error_counts = target_counts - fir_output
+ *   error_dac    = error_counts reescalado a ADC 18b 0..5V vs DAC 8b 0..4.080V
+ *   effort       = adelanto + direction*(P(error_dac/gain) + I(error_dac/gain))
+ *   integral    += error_dac (solo fuera de deadband y sin saturacion)
  *   dac    = clamp(effort), se escribe siempre
- * Antes el feedforward usaba target_counts/dac_center (Kff) — funcionaba
- * para HAMMER porque target_counts≠0, pero GEO calibra a target_counts=0
- * (reposo diferencial), lo que anulaba el feedforward por completo. Ahora el
- * feedforward es directamente dac_center (ya existe por etapa en
- * PsocCalStage, calibration.h) — para HAMMER da el mismo resultado que antes
- * (CAL_DAC_CENTER_HAMMER_* = CAL_DAC_CENTER), y para GEO por fin tiene
- * sentido.
- * Convergencia por detector de "lock" (puerto a C de detect_lock(err,lsb,N,
- * reset) del modelo de referencia en
- * src/matlab/Simulaciones Controladores/Desacople): ventana deslizante de
- * CAL_PI_LOCK_N muestras de fir_output, lockea cuando su span (max-min) cae
- * dentro de ~1.1 LSB de DAC expresado en counts ADC. Antes ese "1 LSB en
- * counts" se obtenía gratis de kff_div (target/center); al independizar el
- * feedforward de target_counts hace falta una constante propia,
- * CAL_PI_LSB_COUNTS_* — cuentas ADC equivalentes a 1 código de VDAC8, una
- * cifra FÍSICA (depende de la ganancia analógica entre el VDAC y el punto
- * de medición de cada etapa), no derivable de target/center. Los valores de
- * abajo son estimaciones de banco (52429 counts/V * 16mV/LSB ≈ 839,
- * asumiendo ganancia ~1x entre VDAC y ADC — en GEO cada etapa tiene una
- * ganancia distinta, así que esto es un piso de partida, no un valor
- * medido), igual de no-validadas que Kp/Ki — ajustar todo con el
- * osciloscopio.
- * A diferencia del modelo de referencia (un servo continuo que lockea,
- * congela la salida y puede des-lockear) acá lockear cierra la etapa de
- * una — no hace falta congelar salida ni histeresis de des-lock porque la
- * cascada nunca se queda dando vueltas en el estado lockeado.
+ * dac_center hace de feedforward/adelanto: el PI solo compensa el residuo.
+ *
+ * Deadband = ceil(ganancia_absoluta * CAL_PI_DEADBAND_MARGIN_NUM /
+ * CAL_PI_DEADBAND_MARGIN_DEN) codigos DAC, con minimo
+ * CAL_PI_DEADBAND_MIN_DAC_CODES. Para HAMMER_PGA la ganancia es dinamica:
+ * abs(PGA_GAIN - 1) porque el VDAC entra por el terminal negativo. El lock
+ * cierra la etapa si durante lock_samples (= M) el error queda en la misma
+ * celda cuantizada; bucket 0 significa "dentro de deadband".
+ *
+ * Superficie de ajuste por etapa, a proposito limitada a esto (y nada mas):
+ * Kp (num/div), Ki (num/div), ganancia_x1000 y samples para lock. Sin
+ * tolerancia aparte, sin lsb_counts aparte, sin paso de refine/verify
+ * promediado al cerrar la etapa.
  * ============================================================ */
-#define CAL_PI_LOCK_N   32u   /* ventana del detector de lock — mismo N que el modelo de referencia */
+#define CAL_PI_LOCK_N_MAX 128u   /* capacidad del buffer; lock_samples (por etapa) puede ser <= esto */
 
-/* Kp=0.001, Ki=0.0003 -- mismos valores que PIDController_P/I del modelo de
- * referencia Simulink (Subsystem_data.c, src/matlab/Simulaciones
- * Controladores/Desacople), a pedido del usuario ("pone uno chico como el
- * que te mostré"). Punto de partida para banco, no validado en hardware. */
-#define CAL_PI_KP_NUM_HAMMER_PGA   1L
-#define CAL_PI_KP_DIV_HAMMER_PGA   1000L
-#define CAL_PI_KI_NUM_HAMMER_PGA   3L
-#define CAL_PI_KI_DIV_HAMMER_PGA   10000L
-#define CAL_PI_LSB_COUNTS_HAMMER_PGA     6000L   /* observado por ADC directo: 1 LSB efectivo cerca del target es del orden de 0.1V */
-#define CAL_PI_MAX_SAMPLES_HAMMER_PGA     6000u
+#ifndef CAL_PI_TIMEOUT_SAMPLES
+#define CAL_PI_TIMEOUT_SAMPLES 20000u   /* tope de seguridad GLOBAL, no por etapa: si nunca lockea, se rinde */
+#endif
 
-#define CAL_PI_KP_NUM_HAMMER_LP   1L
-#define CAL_PI_KP_DIV_HAMMER_LP   1000L
-#define CAL_PI_KI_NUM_HAMMER_LP   3L
-#define CAL_PI_KI_DIV_HAMMER_LP   10000L
-#define CAL_PI_LSB_COUNTS_HAMMER_LP      6000L   /* observado por ADC directo: umbral de lock compatible con ruido de banco */
-#define CAL_PI_MAX_SAMPLES_HAMMER_LP      6000u
+/* Kp/Ki/gain/lock_samples por etapa HAMMER ya viven en
+ * calibration_tables_hammer_pga.h / _lp.h. */
 
 /* ============================================================
  * Headers por VDAC (etapas GEO). Incluidos siempre (son #define puros, sin
@@ -417,17 +389,13 @@ static const PsocCalStage g_psoc_cal_stages[] = {
 static void cal_vdac_hammer_pga(uint8 value) { VDAC_PGA_SetValue(value); }
 static void cal_vdac_hammer_lp(uint8 value)  { VDAC_LP_SetValue(value); }
 
-/* Sentido VDAC->medida asumido (DAC sube => medida sube). El PI nuevo
- * (cal_pi_run_service, calibration.c) usa esto directo, sin probe de
- * pendiente como hacia la biseccion — si en hardware real una etapa diverge
- * en vez de converger (el DAC se va al riel sin acercarse a target_counts),
- * el primer sospechoso es esta constante: cambiarla a -1 invierte el lazo. */
-#define CAL_DIRECTION_HAMMER_PGA (-1)
-#define CAL_DIRECTION_HAMMER_LP  (1)
+/* CAL_DIRECTION_HAMMER_PGA/_LP ya viven en calibration_tables_hammer_pga.h /
+ * _lp.h (sentido VDAC->medida; si una etapa diverge en vez de converger, ese
+ * es el primer sospechoso -- invertir el signo ahi). */
 
 static const PsocCalStage g_psoc_cal_stages[] = {
-    { "HAMMER_PGA", 0u, CAL_TARGET_HAMMER_PGA_COUNTS, CAL_DIRECTION_HAMMER_PGA, CAL_DAC_CENTER_HAMMER_PGA, CAL_DAC_MAX_CHANGE_HAMMER_PGA, CAL_PROBE_STEP, CAL_MAX_ITER, CAL_TOL_COUNTS, CAL_DEADBAND_COUNTS, CAL_SAT_COUNTS_HAMMER, CAL_SETTLE_SAMPLES_HAMMER_PGA, CAL_VERIFY_SETTLE_SAMPLES_HAMMER_PGA, CAL_HAMMER_AVG_CFG, CAL_HAMMER_VERIFY_AVG_CFG, CAL_HAMMER_REALCHECK_CFG, cal_vdac_hammer_pga },
-    { "HAMMER_LP",  1u, CAL_TARGET_HAMMER_LP_COUNTS,  CAL_DIRECTION_HAMMER_LP,  CAL_DAC_CENTER_HAMMER_LP,  CAL_DAC_MAX_CHANGE_HAMMER_LP,  CAL_PROBE_STEP, CAL_MAX_ITER, CAL_TOL_COUNTS, CAL_DEADBAND_COUNTS, CAL_SAT_COUNTS_HAMMER, CAL_SETTLE_SAMPLES_HAMMER_LP,  CAL_VERIFY_SETTLE_SAMPLES_HAMMER_LP,  CAL_HAMMER_AVG_CFG, CAL_HAMMER_VERIFY_AVG_CFG, CAL_HAMMER_REALCHECK_CFG, cal_vdac_hammer_lp },
+    { "HAMMER_PGA", 0u, CAL_TARGET_HAMMER_PGA_COUNTS, CAL_DIRECTION_HAMMER_PGA, CAL_DAC_CENTER_HAMMER_PGA, CAL_DAC_MAX_CHANGE_HAMMER_PGA, CAL_PROBE_STEP_HAMMER_PGA, CAL_MAX_ITER_HAMMER_PGA, CAL_TOL_COUNTS_HAMMER_PGA, CAL_DEADBAND_COUNTS_HAMMER_PGA, CAL_SAT_COUNTS_HAMMER_PGA, CAL_SETTLE_SAMPLES_HAMMER_PGA, CAL_VERIFY_SETTLE_SAMPLES_HAMMER_PGA, CAL_HAMMER_AVG_CFG, CAL_HAMMER_VERIFY_AVG_CFG, CAL_HAMMER_REALCHECK_CFG, cal_vdac_hammer_pga },
+    { "HAMMER_LP",  1u, CAL_TARGET_HAMMER_LP_COUNTS,  CAL_DIRECTION_HAMMER_LP,  CAL_DAC_CENTER_HAMMER_LP,  CAL_DAC_MAX_CHANGE_HAMMER_LP,  CAL_PROBE_STEP_HAMMER_LP,  CAL_MAX_ITER_HAMMER_LP,  CAL_TOL_COUNTS_HAMMER_LP,  CAL_DEADBAND_COUNTS_HAMMER_LP,  CAL_SAT_COUNTS_HAMMER_LP,  CAL_SETTLE_SAMPLES_HAMMER_LP,  CAL_VERIFY_SETTLE_SAMPLES_HAMMER_LP,  CAL_HAMMER_AVG_CFG, CAL_HAMMER_VERIFY_AVG_CFG, CAL_HAMMER_REALCHECK_CFG, cal_vdac_hammer_lp },
 };
 
 #define PSOC_CAL_STAGE_COUNT ((uint8)(sizeof(g_psoc_cal_stages) / sizeof(g_psoc_cal_stages[0])))

@@ -103,6 +103,8 @@
 void psoc_hw_start_analog(uint8 pga_code, uint8 pgavdac_code);
 void psoc_hw_set_pga(uint8 code);
 void psoc_hw_set_pgavdac(uint8 code);
+uint8 psoc_hw_get_pga_code(void);
+uint16 psoc_hw_pga_gain_x1000(void);
 
 /* Contador de ticks de 10 ms (g_timer_ticks de main.c), usado por
  * calibration.c para el watchdog y la telemetria periodica de progreso. */

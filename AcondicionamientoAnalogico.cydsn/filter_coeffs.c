@@ -13,12 +13,11 @@
 #error "FILTER_FIR_NTAPS (filter_coeffs.h) debe ser igual a Filter_FIR_A_SIZE/4 (Filter.h, generado desde el customizer del componente Filter)"
 #endif
 
-uint8 psoc_filter_load_fir_coefficients(const int32 *coeffs_q23, uint16 ntaps)
+uint8 psoc_filter_load_fir_coefficients(const uint8 *coeffs_bytes, uint16 ntaps)
 {
-    uint16 i;
     uint8 wasRunning;
 
-    if (coeffs_q23 == (const int32 *)0 || ntaps != FILTER_FIR_NTAPS) {
+    if (coeffs_bytes == (const uint8 *)0 || ntaps != FILTER_FIR_NTAPS) {
         return 0u;
     }
 
@@ -41,14 +40,11 @@ uint8 psoc_filter_load_fir_coefficients(const int32 *coeffs_q23, uint16 ntaps)
     (void)memcpy(Filter_DA_RAM, Filter_data_a, Filter_DA_RAM_SIZE);
 
     /* Cargar los coeficientes nuevos en Data RAM B (Canal A, offset 0 --
-     * unico canal usado, Canal B esta Disabled en TopDesign). */
-    for (i = 0u; i < ntaps; i++) {
-        uint32 raw = (uint32)coeffs_q23[i] & 0x00FFFFFFUL;
-        ((uint8 *)Filter_DB_RAM)[(i * 4u) + 0u] = (uint8)(raw & 0xFFu);
-        ((uint8 *)Filter_DB_RAM)[(i * 4u) + 1u] = (uint8)((raw >> 8u) & 0xFFu);
-        ((uint8 *)Filter_DB_RAM)[(i * 4u) + 2u] = (uint8)((raw >> 16u) & 0xFFu);
-        ((uint8 *)Filter_DB_RAM)[(i * 4u) + 3u] = 0x00u;
-    }
+     * unico canal usado, Canal B esta Disabled en TopDesign). Mismo memcpy
+     * directo que usa Filter_Init() con Filter_data_b -- coeffs_bytes ya
+     * viene en el layout nativo (ver filter_coeffs.h), no hace falta
+     * convertir nada tap por tap. */
+    (void)memcpy((void *)Filter_DB_RAM, coeffs_bytes, (size_t)ntaps * 4u);
 
     /* Sacar las RAMs del bus */
     Filter_RAM_DIR_REG = Filter_RAM_DIR_DFB;
@@ -61,4 +57,26 @@ uint8 psoc_filter_load_fir_coefficients(const int32 *coeffs_q23, uint16 ntaps)
     }
 
     return 1u;
+}
+
+void psoc_filter_reset_history(void)
+{
+    uint8 wasRunning;
+
+    Filter_PM_ACT_CFG_REG |= Filter_PM_ACT_MSK;
+
+    wasRunning = Filter_CR_REG & Filter_RUN_MASK;
+    Filter_CR_REG &= (uint8)~Filter_RUN_MASK;
+
+    Filter_RAM_EN_REG = Filter_RAM_DIR_BUS;
+    Filter_RAM_DIR_REG = Filter_RAM_DIR_BUS;
+
+    (void)memcpy(Filter_DA_RAM, Filter_data_a, Filter_DA_RAM_SIZE);
+
+    Filter_RAM_DIR_REG = Filter_RAM_DIR_DFB;
+    Filter_SR_REG = 0xF8u;
+
+    if (wasRunning) {
+        Filter_CR_REG |= Filter_RUN_MASK;
+    }
 }

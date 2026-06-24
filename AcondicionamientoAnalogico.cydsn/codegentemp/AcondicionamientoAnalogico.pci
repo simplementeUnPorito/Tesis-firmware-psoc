@@ -1,5 +1,5 @@
 # AcondicionamientoAnalogico
-# 2026-06-23 21:23:23Z
+# 2026-06-24 18:35:09Z
 
 # IO_0@[IOP=(1)][IoId=(0)] is reserved: SWDDebugEnabled
 dont_use_io iocell 1 0
@@ -14,8 +14,6 @@ set_io "SYNC_IN(0)" iocell 12 2
 set_io "LED(0)" iocell 2 1
 set_io "Rx_1(0)" iocell 1 5
 set_io "Button(0)" iocell 2 2
-set_io "Tx_2(0)" iocell 12 7
-set_io "Rx_2(0)" iocell 12 6
 set_io "AMux_Capacitor(0)" iocell 0 4
 set_io "ref1V(0)" iocell 3 6
 set_io "LPo(0)" iocell 0 0
@@ -31,4 +29,5 @@ set_location "\LPF_ADC:cy_psoc3_lpf_1\" lpfcell -1 -1 1
 set_location "\ADC:DSM\" dsmodcell -1 -1 0
 set_location "\PGA:SC\" sccell -1 -1 1
 set_location "\VDAC_PGA:viDAC8\" vidaccell -1 -1 1
+set_location "\ADC_SAR_Seq_1:SAR:ADC_SAR\" sarcell -1 -1 0
 set_io "Dedicated_Output" iocell 3 7

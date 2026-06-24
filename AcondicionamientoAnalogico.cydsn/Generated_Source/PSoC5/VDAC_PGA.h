@@ -90,7 +90,7 @@ void VDAC_PGA_Wakeup(void)          ;
 /* Default Strobe mode */
 #define VDAC_PGA_DEFAULT_STRB     0u
  /* Initial DAC value */
-#define VDAC_PGA_DEFAULT_DATA     64u
+#define VDAC_PGA_DEFAULT_DATA     143u
  /* Default Data Source */
 #define VDAC_PGA_DEFAULT_DATA_SRC 0u
 
