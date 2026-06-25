@@ -29,9 +29,10 @@
 #endif
 #define CAL_TARGET_HAMMER_PGA_COUNTS (CAL_TARGET_HAMMER_PGA_MV * CAL_TARGET_1V_COUNTS / 1000L)
 
-/* Signo del lazo VDAC->medida; si la etapa diverge en vez de converger,
- * este es el primer sospechoso (invertir el signo). */
-#define CAL_DIRECTION_HAMMER_PGA (-1)
+/* La ganancia VDAC->medida del PGA se calcula en runtime como
+ * 1 - GainDirecta, con signo fisico incluido. Direction queda +1 para no
+ * duplicar el signo del inversor. */
+#define CAL_DIRECTION_HAMMER_PGA 1
 
 /* Candidato INICIAL en mV (no el target) donde arranca el PI -- hace de
  * feedforward fijo (dac_center). Hardcodear lo que la prueba en banco diga
@@ -45,19 +46,19 @@
 #define CAL_DAC_MAX_CHANGE_HAMMER_PGA 255u
 
 /* La deadband de HAMMER_PGA se calcula con ganancia dinamica:
- * abs(PGA_GAIN - 1) porque el VDAC entra por el terminal negativo. */
+ * abs(1 - GainDirecta) porque el VDAC entra por el terminal negativo. */
 #define CAL_PI_GAIN_HAMMER_PGA_X1000 0L
 
-/* Kp/Ki trabajan sobre error reescalado a codigos DAC y el controlador divide
- * por la ganancia efectiva de la etapa. */
+/* Kp=1e-3, Ki=300e-6 sobre error reescalado a codigos DAC; el controlador
+ * divide por la ganancia efectiva firmada de la etapa. */
 #define CAL_PI_KP_NUM_HAMMER_PGA 1L
-#define CAL_PI_KP_DIV_HAMMER_PGA 64L
-#define CAL_PI_KI_NUM_HAMMER_PGA 1L
-#define CAL_PI_KI_DIV_HAMMER_PGA 2048L
+#define CAL_PI_KP_DIV_HAMMER_PGA 1000L
+#define CAL_PI_KI_NUM_HAMMER_PGA 3L
+#define CAL_PI_KI_DIV_HAMMER_PGA 10000L
 
 /* M muestras consecutivas dentro de la misma celda de error cuantizado. */
 #ifndef CAL_PI_LOCK_SAMPLES_HAMMER_PGA
-#define CAL_PI_LOCK_SAMPLES_HAMMER_PGA 128u
+#define CAL_PI_LOCK_SAMPLES_HAMMER_PGA 512u
 #endif
 
 /* El PI no descarta muestras; el FIR de calibracion entrega la medicion DC. */

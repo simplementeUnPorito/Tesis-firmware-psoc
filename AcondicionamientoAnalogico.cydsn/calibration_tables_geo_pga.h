@@ -47,23 +47,22 @@
 /* Semiancho de busqueda alrededor del adelanto, en codigos VDAC8. */
 #define CAL_DAC_MAX_CHANGE_GEO_PGA 64u
 
-/* Ganancia absoluta VDAC->medida. La deadband PI se deriva como
- * gain * 1 LSB_VDAC * margen, todo en codigos DAC. */
+/* Ganancia VDAC->medida dinamica: en calibration.c stage 0 usa
+ * 1 - GainDirecta, con signo fisico incluido, igual que HAMMER_PGA. */
 #ifndef CAL_PI_GAIN_GEO_PGA_X1000
-#define CAL_PI_GAIN_GEO_PGA_X1000 1000L
+#define CAL_PI_GAIN_GEO_PGA_X1000 0L
 #endif
 
-/* Kp/Ki trabajan sobre error reescalado a codigos DAC; el controlador divide
- * por CAL_PI_GAIN_GEO_PGA_X1000. */
+/* Kp=1e-3, Ki=300e-6 sobre error reescalado a codigos DAC. */
 #define CAL_PI_KP_NUM_GEO_PGA 1L
-#define CAL_PI_KP_DIV_GEO_PGA 32L
-#define CAL_PI_KI_NUM_GEO_PGA 1L
-#define CAL_PI_KI_DIV_GEO_PGA 8192L
+#define CAL_PI_KP_DIV_GEO_PGA 1000L
+#define CAL_PI_KI_NUM_GEO_PGA 3L
+#define CAL_PI_KI_DIV_GEO_PGA 10000L
 
 /* N de la ventana del detector de lock -- ver banner de calibration_tables.h
  * (mismo concepto que el N=128 del modelo de referencia). */
 #ifndef CAL_PI_LOCK_SAMPLES_GEO_PGA
-#define CAL_PI_LOCK_SAMPLES_GEO_PGA 128u
+#define CAL_PI_LOCK_SAMPLES_GEO_PGA 512u
 #endif
 
 /* Asentamiento tras cambiar DAC/AMux: tiempo simulado 220ms, convertido a

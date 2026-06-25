@@ -252,8 +252,8 @@
  *
  * Deadband = ceil(ganancia_absoluta * CAL_PI_DEADBAND_MARGIN_NUM /
  * CAL_PI_DEADBAND_MARGIN_DEN) codigos DAC, con minimo
- * CAL_PI_DEADBAND_MIN_DAC_CODES. Para HAMMER_PGA la ganancia es dinamica:
- * abs(PGA_GAIN - 1) porque el VDAC entra por el terminal negativo. El lock
+ * CAL_PI_DEADBAND_MIN_DAC_CODES. Para ambos PGA la ganancia es dinamica:
+ * abs(1 - GainDirecta) porque el VDAC entra por el terminal negativo. El lock
  * cierra la etapa si durante lock_samples (= M) el error queda en la misma
  * celda cuantizada; bucket 0 significa "dentro de deadband".
  *
@@ -262,7 +262,7 @@
  * tolerancia aparte, sin lsb_counts aparte, sin paso de refine/verify
  * promediado al cerrar la etapa.
  * ============================================================ */
-#define CAL_PI_LOCK_N_MAX 128u   /* capacidad del buffer; lock_samples (por etapa) puede ser <= esto */
+#define CAL_PI_LOCK_N_MAX 512u   /* lock_samples (por etapa) puede ser <= esto */
 
 #ifndef CAL_PI_TIMEOUT_SAMPLES
 #define CAL_PI_TIMEOUT_SAMPLES 20000u   /* tope de seguridad GLOBAL, no por etapa: si nunca lockea, se rinde */

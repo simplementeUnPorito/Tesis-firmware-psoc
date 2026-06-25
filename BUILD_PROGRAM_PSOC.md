@@ -3,16 +3,21 @@
 This note records the working command-line flow for
 `AcondicionamientoAnalogico.cydsn`.
 
-## Quick Current Flow (2026-06-24)
+## Quick Current Flow (2026-06-25)
 
 - Active project: `AcondicionamientoAnalogico`.
 - Current KitProg/PPCLI name: `KitProg (CMSIS-DAP/248355)`.
 - Current runtime validation path: ESP on `COM8`. The PSoC PC UART on `COM6`
   is not expected to work in the current programming mode.
-- Current tested PSoC build: flash `25878` bytes, SRAM `49664` bytes.
-- Current rows to program: `0..101`.
+- Current tested PSoC build: flash `26454` bytes, SRAM `49672` bytes.
+- Current rows to program: `0..103`.
 - Current successful program log:
-  `C:\Users\elias\AppData\Local\Temp\psoc_program_acondicionamiento_codex_pi_rate_m128.log`.
+  `C:\Users\elias\AppData\Local\Temp\psoc_program_acondicionamiento_lp3500_20260625_135714.log`.
+- Current successful runtime validation log:
+  `C:\Users\elias\AppData\Local\Temp\esp_psoc_cal_adc_lp3500_20260625_135753.log`.
+- Current HAMMER calibration targets: `HAMMER_PGA=1024 mV`,
+  `HAMMER_LP=3500 mV`; final validated values through ESP were PGA
+  about `0.99-1.00 V` and LP about `3.58 V`.
 
 Build:
 
@@ -29,10 +34,10 @@ Program row count:
 $lastRow = [int][Math]::Ceiling($flashUsedBytes / 256.0) - 1
 ```
 
-For the current `25878` byte build:
+For the current `26454` byte build:
 
 ```powershell
-$lastRow = 101
+$lastRow = 103
 ```
 
 ## Hardware
@@ -106,11 +111,11 @@ principle, but on 2026-06-23 it failed late in empty flash
 (`Failed to send packet (batch) in SWD mode` around array `0x03`, row `192`).
 Program only the flash rows covered by the current hex after `PSoC3_EraseAll`.
 
-Current tested build on 2026-06-24:
+Current tested build on 2026-06-25:
 
 - Project: `AcondicionamientoAnalogico`
-- Flash used: `25878/262144 bytes`
-- Rows to program/verify: `0..101`
+- Flash used: `26454/262144 bytes`
+- Rows to program/verify: `0..103`
 
 Earlier notes in this file that mentioned `0..92` or `0..100` were for smaller
 hex files. Recalculate after every rebuild. A quick rule from the PSoC Creator
@@ -120,7 +125,7 @@ flash-used byte count is:
 $lastRow = [int][Math]::Ceiling($flashUsedBytes / 256.0) - 1
 ```
 
-For example, `25878` bytes gives `101`. If the build size changes, update
+For example, `26454` bytes gives `103`. If the build size changes, update
 `$lastRow` below before programming.
 
 ```powershell
@@ -131,7 +136,7 @@ $out = Join-Path $env:TEMP "psoc_program_acondicionamiento.cli"
 $log = Join-Path $env:TEMP "psoc_program_acondicionamiento.log"
 $hex = "C:/Github/Tesis/src/psoc/AcondicionamientoAnalogico.cydsn/CortexM3/ARM_GCC_541/Debug/AcondicionamientoAnalogico.hex"
 $port = "KitProg (CMSIS-DAP/248355)"   # replace with exact GetPorts result.
-$lastRow = 101                         # current 2026-06-24 build: 25878 bytes
+$lastRow = 103                         # current 2026-06-25 build: 26454 bytes
 
 $cmds = New-Object System.Collections.Generic.List[string]
 $cmds.Add("OpenPort `"$port`" `"$programmer\`"")

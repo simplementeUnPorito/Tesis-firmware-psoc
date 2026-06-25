@@ -105,7 +105,7 @@
 #endif
 
 #ifndef PSOC_BUTTON_CAL_ENABLE
-#define PSOC_BUTTON_CAL_ENABLE 0
+#define PSOC_BUTTON_CAL_ENABLE 1
 #endif
 
 /* -------------------------------------------------------------------------- */
@@ -543,9 +543,9 @@ static void psoc_report_adc_snapshot_if_idle(void)
     }
 
     psoc_calibration_servo_abort();
+    uart_send_cfg_ack(PSOC_CMD_ADC_SNAPSHOT, 1u);
     psoc_calibration_report_adc_snapshot();
     dma_route_select(g_stream_mode);
-    uart_send_cfg_ack(PSOC_CMD_ADC_SNAPSHOT, 1u);
 }
 
 static uint8 service_button_calibration(void)
@@ -1088,6 +1088,9 @@ int main(void)
     EEPROM_Start();
 
     psoc_hw_start_analog(g_pga_code, g_pgavdac_code);
+    /* Arranca todos los VDAC de calibracion en su adelanto/feedforward de
+     * tabla. Si EEPROM tiene una calibracion valida, se pisa justo abajo con
+     * esos valores guardados para ahorrar aun mas tiempo. */
     psoc_calibration_start_references();
 
     /* Cargar config guardada en EEPROM (si CRC válido) para converger más rápido */

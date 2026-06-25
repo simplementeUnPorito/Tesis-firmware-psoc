@@ -13,32 +13,33 @@
  * ============================================================ */
 
 #ifndef CAL_TARGET_HAMMER_LP_MV
-#define CAL_TARGET_HAMMER_LP_MV 2800L
+#define CAL_TARGET_HAMMER_LP_MV 3500L  /* LP debe quedar en la zona alta: 3.5-4.0V */
 #endif
 #define CAL_TARGET_HAMMER_LP_COUNTS (CAL_TARGET_HAMMER_LP_MV * CAL_TARGET_1V_COUNTS / 1000L)
 
 #define CAL_DIRECTION_HAMMER_LP (1)
 
 #ifndef CAL_ADELANTO_HAMMER_LP_MV
-#define CAL_ADELANTO_HAMMER_LP_MV 912L  /* 57 codigos VDAC8 * 16mV */
+#define CAL_ADELANTO_HAMMER_LP_MV 1280L  /* 80 codigos VDAC8 * 16mV */
 #endif
 #define CAL_DAC_CENTER_HAMMER_LP ((uint8)(CAL_ADELANTO_HAMMER_LP_MV / CAL_VDAC8_MV_PER_LSB))
 
 #define CAL_DAC_MAX_CHANGE_HAMMER_LP 255u
 
-/* Ganancia absoluta fija VDAC->medida para la etapa LP. Sobrescribir desde
- * tabla/frontend cuando se tenga la ganancia de hardware medida. */
+/* Ganancia fija VDAC->medida para la etapa LP. El MFB usa el VDAC de
+ * referencia por la entrada no inversora, asi que el signo fisico es positivo
+ * y la ganancia medida de banco es exactamente +6. */
 #ifndef CAL_PI_GAIN_HAMMER_LP_X1000
-#define CAL_PI_GAIN_HAMMER_LP_X1000 1000L
+#define CAL_PI_GAIN_HAMMER_LP_X1000 6000L
 #endif
 
 #define CAL_PI_KP_NUM_HAMMER_LP 1L
-#define CAL_PI_KP_DIV_HAMMER_LP 64L
+#define CAL_PI_KP_DIV_HAMMER_LP 10000L
 #define CAL_PI_KI_NUM_HAMMER_LP 1L
-#define CAL_PI_KI_DIV_HAMMER_LP 2048L
+#define CAL_PI_KI_DIV_HAMMER_LP 2000L
 
 #ifndef CAL_PI_LOCK_SAMPLES_HAMMER_LP
-#define CAL_PI_LOCK_SAMPLES_HAMMER_LP 128u
+#define CAL_PI_LOCK_SAMPLES_HAMMER_LP 512u
 #endif
 
 #define CAL_SETTLE_SAMPLES_HAMMER_LP 0u

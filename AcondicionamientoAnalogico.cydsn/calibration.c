@@ -63,7 +63,7 @@
 #endif
 
 #ifndef CAL_AMUX_CAP_CHANNEL
-#define CAL_AMUX_CAP_CHANNEL ((uint8)CAL_AMUX_SIGNAL_CHANNEL_COUNT)
+#define CAL_AMUX_CAP_CHANNEL ((uint8)(AMux_ADC_CHANNELS - 1u))
 #endif
 
 static uint8 g_amux_active_channel = AMux_ADC_NULL_CHANNEL; /* uno de 0..3, o NULL */
@@ -99,6 +99,14 @@ static void psoc_amux_start(void)
     g_amux_cap_connected = 0u;
 }
 
+static void psoc_amux_disconnect_capacitor(void)
+{
+#if CAL_AMUX_HAS_CAP_CHANNEL
+    AMux_ADC_Disconnect(CAL_AMUX_CAP_CHANNEL);
+#endif
+    g_amux_cap_connected = 0u;
+}
+
 #ifndef CAL_AMUX_ADC_START
 #define CAL_AMUX_ADC_START() psoc_amux_start()
 #endif
@@ -110,8 +118,8 @@ static void psoc_amux_start(void)
 #endif
 
 /* Selección de canal para MEDIR una etapa durante calibración: agrega el
- * capacitor de filtrado (canal 4) en paralelo al canal de la etapa, pedido
- * por el usuario para atenuar ruido chico durante la medición. */
+ * capacitor de filtrado (AMux_ADC_CHANNELS-1) en paralelo al canal de la
+ * etapa, pedido por el usuario para atenuar ruido chico durante la medición. */
 #ifndef CAL_AMUX_ADC_SELECT_STAGE
 #define CAL_AMUX_ADC_SELECT_STAGE(channel) psoc_amux_select_exclusive((channel), 1u)
 #endif
@@ -882,6 +890,10 @@ static void cal_servo_measure_begin(uint8 stage_index)
 
     ADC_Stop();
     CAL_AMUX_ADC_SELECT_STAGE(stage->adc_channel);
+    cal_diag(PSOC_EVT_CAL_AMUX_IN, stage->adc_channel);
+#if CAL_AMUX_HAS_CAP_CHANNEL
+    cal_diag(PSOC_EVT_CAL_AMUX_CAP, CAL_AMUX_CAP_CHANNEL);
+#endif
     ADC_Start();
     isr_DMA_DelSig_RAM_ClearPending();
     psoc_adc_clear_isr_sample();
@@ -1317,6 +1329,7 @@ static void async_finish_stage(uint8 ok)
 static void cal_async_complete(void)
 {
     ADC_Stop();
+    psoc_amux_disconnect_capacitor();
     psoc_calibration_restore_capture_path();
     /* Restaura el FIR de adquisicion -- cal_pi_start() cargo el de
      * calibracion al empezar esta corrida; fuera de una calibracion el
@@ -1534,21 +1547,11 @@ static int32 cal_counts_error_to_dac_scale(int32 error_counts)
 
 static int32 cal_pi_stage_gain_x1000(uint8 stage_index)
 {
-#if PSOC_HW_CLASS == PSOC_HW_HAMMER
     if (stage_index == 0u) {
-        uint16 pga_gain = psoc_hw_pga_gain_x1000();
-        return (pga_gain > 1000u) ? (int32)pga_gain - 1000L : 0L;
+        int32 pga_gain = (int32)psoc_hw_pga_gain_x1000();
+        return 1000L - pga_gain;
     }
-#else
-    (void)stage_index;
-#endif
     return g_cal_pi_cfg[stage_index].gain_x1000;
-}
-
-static int32 cal_pi_control_gain_x1000(uint8 stage_index)
-{
-    int32 gain = cal_pi_stage_gain_x1000(stage_index);
-    return (gain <= 0L) ? 1000L : gain;
 }
 
 static int32 cal_pi_deadband_dac_codes(uint8 stage_index)
@@ -1587,14 +1590,38 @@ static int32 cal_pi_error_bucket(int32 error_dac, int32 deadband_dac)
 
 static int32 cal_pi_gain_scaled_term(int32 value, int32 num, int32 div, int32 gain_x1000)
 {
+    int32 sign = 1L;
+
     if (div == 0L) {
         div = 1L;
     }
-    if (gain_x1000 <= 0L) {
+    if (gain_x1000 < 0L) {
+        sign = -1L;
+        gain_x1000 = -gain_x1000;
+    }
+    if (gain_x1000 == 0L) {
         gain_x1000 = 1000L;
     }
-    return cal_round_div_i64((int64)value * (int64)num * 1000LL,
-                             (int64)div * (int64)gain_x1000);
+    return sign * cal_round_div_i64((int64)value * (int64)num * 1000LL,
+                                    (int64)div * (int64)gain_x1000);
+}
+
+static int8 cal_pi_effort_delta_sign(int32 control_error, int8 direction, int32 gain_x1000)
+{
+    int8 sign;
+
+    if (control_error == 0L || direction == 0 || gain_x1000 == 0L) {
+        return 0;
+    }
+
+    sign = (control_error > 0L) ? 1 : -1;
+    if (direction < 0) {
+        sign = (int8)-sign;
+    }
+    if (gain_x1000 < 0L) {
+        sign = (int8)-sign;
+    }
+    return sign;
 }
 
 /* Cierra la etapa con lo que el lazo ya tiene -- sin promediar, sin barrer
@@ -1637,9 +1664,16 @@ static uint8 cal_pi_finish_stage(uint8 ok)
 static void cal_pi_stage_begin(void)
 {
     const PsocCalStage *stage = &g_psoc_cal_stages[g_cal_async.stage_index];
+    int32 stage_gain_x1000;
+    int32 deadband_dac;
 
     cal_diag(PSOC_EVT_CAL_STAGE_BEGIN, g_cal_async.stage_index);
     cal_diag_i32(PSOC_EVT_CAL_STAGE_TARGET32, stage->target_counts);
+    stage_gain_x1000 = cal_pi_stage_gain_x1000(g_cal_async.stage_index);
+    deadband_dac = cal_pi_deadband_dac_codes(g_cal_async.stage_index);
+    cal_diag_i32(PSOC_EVT_CAL_PI_GAIN32, stage_gain_x1000);
+    cal_diag(PSOC_EVT_CAL_PI_DEADBAND,
+             (deadband_dac > 255L) ? 255u : (uint8)deadband_dac);
 
     g_cal_pi.integral = 0L;
     g_cal_pi.samples_taken = 0u;
@@ -1685,7 +1719,6 @@ static uint8 cal_pi_run_service(void)
     int32 p_term;
     int32 i_term;
     int32 stage_gain_x1000;
-    int32 gain_x1000;
     int32 deadband_dac;
     int32 error_bucket;
     int32 dac_max_step_up;
@@ -1698,6 +1731,7 @@ static uint8 cal_pi_run_service(void)
     uint8 dac_target;
     uint8 dac_step;
     uint8 can_integrate;
+    int8 effort_delta_sign;
 
     if (!psoc_adc_take_isr_filtered_sample(&sample)) {
         g_cal_pi.empty_polls++;
@@ -1723,8 +1757,8 @@ static uint8 cal_pi_run_service(void)
     error_dac = cal_counts_error_to_dac_scale(error_counts);
     stage_gain_x1000 = cal_pi_stage_gain_x1000(g_cal_async.stage_index);
     deadband_dac = cal_pi_deadband_dac_codes(g_cal_async.stage_index);
-    gain_x1000 = cal_pi_control_gain_x1000(g_cal_async.stage_index);
     control_error = (abs_counts(error_dac) <= deadband_dac) ? 0L : error_dac;
+    error_bucket = cal_pi_error_bucket(error_dac, deadband_dac);
     dac_sample = g_cal_pi.dac_current;
 
     dac_lo = cal_stage_min_dac(stage);
@@ -1732,26 +1766,30 @@ static uint8 cal_pi_run_service(void)
     can_integrate = 0u;
 
     if (stage_gain_x1000 == 0L) {
-        /* HAMMER_PGA con PGA_GAIN=1 implica ganancia efectiva VDAC->medida 0
-         * (PGA_GAIN-1). No hay autoridad fisica para corregir, asi que no se
-         * debe perseguir el error hasta saturar el DAC. */
+        /* PGA con ganancia directa 1 implica ganancia efectiva VDAC->medida 0
+         * (1 - GainDirecta). No hay autoridad fisica para corregir, asi que
+         * no se debe perseguir el error hasta saturar el DAC. */
         effort = (int32)dac_sample;
     } else if (control_error == 0L) {
         g_cal_pi.integral = 0L;
         effort = (int32)dac_sample;
     } else {
         /* PI posicional en escala DAC: error_counts -> error_dac antes de
-         * entrar al PI; P/I se dividen por la ganancia absoluta de la etapa
-         * para que una etapa de ganancia alta no sobre-corrija. */
-        p_term = cal_pi_gain_scaled_term(control_error, cfg->kp_num, cfg->kp_div, gain_x1000);
-        i_term = cal_pi_gain_scaled_term(g_cal_pi.integral, cfg->ki_num, cfg->ki_div, gain_x1000);
+         * entrar al PI; P/I se dividen por la ganancia fisica VDAC->medida.
+         * En los PGA esa ganancia es firmada y dinamica: 1 - GainDirecta. */
+        p_term = cal_pi_gain_scaled_term(control_error, cfg->kp_num, cfg->kp_div, stage_gain_x1000);
+        i_term = cal_pi_gain_scaled_term(g_cal_pi.integral, cfg->ki_num, cfg->ki_div, stage_gain_x1000);
         effort = (int32)stage->dac_center + (int32)stage->direction * (p_term + i_term);
     }
 
+    effort_delta_sign = cal_pi_effort_delta_sign(control_error, stage->direction, stage_gain_x1000);
+
     if (effort < (int32)dac_lo) {
         dac_target = dac_lo;
+        can_integrate = (effort_delta_sign > 0) ? 1u : 0u;
     } else if (effort > (int32)dac_hi) {
         dac_target = dac_hi;
+        can_integrate = (effort_delta_sign < 0) ? 1u : 0u;
     } else {
         dac_target = (uint8)effort;
         can_integrate = 1u;
@@ -1775,23 +1813,12 @@ static uint8 cal_pi_run_service(void)
         g_cal_pi.integral = cal_servo_clip_integral(g_cal_pi.integral + control_error);
     }
 
-    sample_index = (uint16)(g_cal_pi.samples_taken + 1u);
-    g_cal_pi.samples_taken = sample_index;
-    if (sample_index == 1u || (sample_index % CAL_PI_TELEM_PERIOD) == 0u) {
-        cal_diag(PSOC_EVT_CAL_STAGE_DAC, dac_sample);
-        cal_diag_i32(PSOC_EVT_CAL_STAGE_MEAS32, g_cal_pi.last_fir_output);
-    }
-
-    g_cal_pi.dac_current = dac_target;
-    stage->write(g_cal_pi.dac_current);
-
     /* Lock por M muestras: si el error queda en la misma celda cuantizada
      * (bucket 0 = dentro de deadband) no hay informacion nueva para seguir
      * corrigiendo con un VDAC de 8 bits, asi que se cierra la etapa. */
     lock_n = (cfg->lock_samples == 0u || cfg->lock_samples > CAL_PI_LOCK_N_MAX)
         ? CAL_PI_LOCK_N_MAX : cfg->lock_samples;
 
-    error_bucket = cal_pi_error_bucket(error_dac, deadband_dac);
     if (!g_cal_pi.have_last_error ||
         error_bucket != g_cal_pi.last_error_bucket) {
         g_cal_pi.stable_count = 1u;
@@ -1802,6 +1829,20 @@ static uint8 cal_pi_run_service(void)
     g_cal_pi.last_error_dac = error_dac;
     g_cal_pi.last_error_bucket = error_bucket;
     g_cal_pi.last_dac_target = dac_target;
+
+    sample_index = (uint16)(g_cal_pi.samples_taken + 1u);
+    g_cal_pi.samples_taken = sample_index;
+    if (sample_index == 1u || (sample_index % CAL_PI_TELEM_PERIOD) == 0u) {
+        cal_diag(PSOC_EVT_CAL_STAGE_DAC, dac_sample);
+        cal_diag_i32(PSOC_EVT_CAL_STAGE_MEAS32, g_cal_pi.last_fir_output);
+        cal_diag_i32(PSOC_EVT_CAL_PI_ERROR32, error_dac);
+        cal_diag_i32(PSOC_EVT_CAL_PI_BUCKET32, error_bucket);
+        cal_diag(PSOC_EVT_CAL_PI_STABLE,
+                 (g_cal_pi.stable_count > 255u) ? 255u : (uint8)g_cal_pi.stable_count);
+    }
+
+    g_cal_pi.dac_current = dac_target;
+    stage->write(g_cal_pi.dac_current);
 
     if (g_cal_pi.stable_count >= lock_n) {
         return cal_pi_finish_stage((error_bucket == 0L) ? 1u : 0u);

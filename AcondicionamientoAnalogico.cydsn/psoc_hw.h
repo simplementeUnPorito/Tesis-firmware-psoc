@@ -86,6 +86,12 @@
 #define PSOC_EVT_BUTTON           0x3Cu
 #define PSOC_EVT_BUTTON_IGNORED   0x3Du
 #define PSOC_EVT_CAPTURE_CLAMPED  0x3Eu  /* value=lotes pedidos saturado a 8 bit; el equipo recortó a PSOC_CAPTURE_MAX_BATCHES */
+#define PSOC_EVT_CAL_PI_GAIN32    0x3Fu  /* 4 bytes MSB-first: ganancia fisica VDAC->medida, x1000, con signo */
+#define PSOC_EVT_CAL_PI_DEADBAND  0x40u  /* value=deadband en codigos DAC (saturado a 255 para telemetria) */
+#define PSOC_EVT_CAL_PI_ERROR32   0x41u  /* 4 bytes MSB-first: error reescalado a codigos DAC */
+#define PSOC_EVT_CAL_PI_BUCKET32  0x42u  /* 4 bytes MSB-first: celda cuantizada de error */
+#define PSOC_EVT_CAL_PI_STABLE    0x43u  /* value=muestras consecutivas en la misma celda (saturado a 255) */
+#define PSOC_EVT_CAL_AMUX_CAP     0x44u  /* value=canal AMux_ADC del capacitor conectado durante calibracion */
 
 #define PSOC_CMD_STATUS         0xA5u
 #define PSOC_CMD_PGA            0xA6u

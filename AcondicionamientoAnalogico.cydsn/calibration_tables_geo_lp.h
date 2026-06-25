@@ -37,16 +37,16 @@
 #define CAL_DAC_MAX_CHANGE_GEO_LP 64u
 
 #ifndef CAL_PI_GAIN_GEO_LP_X1000
-#define CAL_PI_GAIN_GEO_LP_X1000 1000L
+#define CAL_PI_GAIN_GEO_LP_X1000 6000L
 #endif
 
 #define CAL_PI_KP_NUM_GEO_LP 1L
-#define CAL_PI_KP_DIV_GEO_LP 32L
+#define CAL_PI_KP_DIV_GEO_LP 10000L
 #define CAL_PI_KI_NUM_GEO_LP 1L
-#define CAL_PI_KI_DIV_GEO_LP 8192L
+#define CAL_PI_KI_DIV_GEO_LP 2000L
 
 #ifndef CAL_PI_LOCK_SAMPLES_GEO_LP
-#define CAL_PI_LOCK_SAMPLES_GEO_LP 128u
+#define CAL_PI_LOCK_SAMPLES_GEO_LP 512u
 #endif
 
 /* Asentamiento: tiempo simulado 6ms, convertido a muestras. */
