@@ -94,6 +94,10 @@
 #define CAL_PI_MAX_DAC_STEP_PER_SAMPLE 1u
 #endif
 
+#ifndef CAL_PI_INTEGRAL_LIMIT
+#define CAL_PI_INTEGRAL_LIMIT 8000000L
+#endif
+
 /* Parametros POR ETAPA HAMMER (target, adelanto/rango de busqueda, PI,
  * asentamiento) viven en headers independientes, uno por VDAC -- mismo
  * patron que los headers GEO de mas abajo:
@@ -260,12 +264,18 @@
  * Superficie de ajuste por etapa, a proposito limitada a esto (y nada mas):
  * Kp (num/div), Ki (num/div), ganancia_x1000 y samples para lock. Sin
  * tolerancia aparte, sin lsb_counts aparte, sin paso de refine/verify
- * promediado al cerrar la etapa.
+ * promediado al cerrar la etapa. CAL_PI_INTEGRAL_LIMIT es propio de esta
+ * corrida PI: debe permitir que el termino integral use todo el rango VDAC,
+ * sin quedar limitado por el servo lento de IDLE.
  * ============================================================ */
 #define CAL_PI_LOCK_N_MAX 512u   /* lock_samples (por etapa) puede ser <= esto */
 
 #ifndef CAL_PI_TIMEOUT_SAMPLES
-#define CAL_PI_TIMEOUT_SAMPLES 20000u   /* tope de seguridad GLOBAL, no por etapa: si nunca lockea, se rinde */
+#define CAL_PI_TIMEOUT_SAMPLES 30000u   /* ~10 s/etapa a 3 kHz; se prioriza que el FIR lento asiente */
+#endif
+
+#ifndef CAL_PI_FIR_SETTLE_SAMPLES
+#define CAL_PI_FIR_SETTLE_SAMPLES 512u  /* arranque del FIR tras cambiar AMux/resetear historia */
 #endif
 
 /* Kp/Ki/gain/lock_samples por etapa HAMMER ya viven en

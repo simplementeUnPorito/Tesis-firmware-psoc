@@ -20,6 +20,8 @@
 #endif
 #define CAL_TARGET_COUNTS_GEO_BP (CAL_TARGET_GEO_BP_MV * CAL_TARGET_1V_COUNTS / 1000L)
 
+/* La etapa entra por positivo: VDAC_ref_BP aumenta la medicion con ganancia
+ * fisica +1 respecto al nodo diferencial que se calibra. */
 #define CAL_DIRECTION_GEO_BP 1
 
 #ifndef CAL_VDAC8_MV_PER_LSB
@@ -27,29 +29,30 @@
 #endif
 
 #ifndef CAL_ADELANTO_GEO_BP_MV
-#define CAL_ADELANTO_GEO_BP_MV 2496L
+#define CAL_ADELANTO_GEO_BP_MV 1504L
 #endif
 #ifndef CAL_DAC_CENTER_GEO_BP
 #define CAL_DAC_CENTER_GEO_BP ((uint8)(CAL_ADELANTO_GEO_BP_MV / CAL_VDAC8_MV_PER_LSB))
 #endif
 
-#define CAL_DAC_MAX_CHANGE_GEO_BP 64u
+/* Copiado del perfil LP probado: adelanto como arranque, rango completo. */
+#define CAL_DAC_MAX_CHANGE_GEO_BP 255u
 
 #ifndef CAL_PI_GAIN_GEO_BP_X1000
 #define CAL_PI_GAIN_GEO_BP_X1000 1000L
 #endif
 
 #define CAL_PI_KP_NUM_GEO_BP 1L
-#define CAL_PI_KP_DIV_GEO_BP 32L
+#define CAL_PI_KP_DIV_GEO_BP 10000L
 #define CAL_PI_KI_NUM_GEO_BP 1L
-#define CAL_PI_KI_DIV_GEO_BP 8192L
+#define CAL_PI_KI_DIV_GEO_BP 2000L
 
 #ifndef CAL_PI_LOCK_SAMPLES_GEO_BP
-#define CAL_PI_LOCK_SAMPLES_GEO_BP 128u
+#define CAL_PI_LOCK_SAMPLES_GEO_BP 512u
 #endif
 
-/* Asentamiento: tiempo simulado 100us, convertido a muestras. */
-#define CAL_SETTLE_SAMPLES_GEO_BP CAL_SETTLE_SAMPLES_FROM_US(100u)
+/* El PI no descarta muestras; el FIR de calibracion entrega la medicion DC. */
+#define CAL_SETTLE_SAMPLES_GEO_BP 0u
 
 /* ============================================================
  * BISECCION (legado, desactivado -- CAL_ALGO_BISECTION_ENABLE=0). El PI NO

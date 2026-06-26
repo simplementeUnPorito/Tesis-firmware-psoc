@@ -28,13 +28,13 @@
 #endif
 
 #ifndef CAL_ADELANTO_GEO_LP_MV
-#define CAL_ADELANTO_GEO_LP_MV 2040L
+#define CAL_ADELANTO_GEO_LP_MV 1504L
 #endif
 #define CAL_DAC_CENTER_GEO_LP ((uint8)(CAL_ADELANTO_GEO_LP_MV / CAL_VDAC8_MV_PER_LSB))
 
-/* Esta es la etapa con saltos sub-LSB mas grandes (16mV/LSB del VDAC sobre
- * la ultima ganancia de la cascada). */
-#define CAL_DAC_MAX_CHANGE_GEO_LP 64u
+/* Misma ventana que HAMMER_LP: adelanto como punto de arranque, rango completo
+ * para no limitar el PI antes de que la placa GEO quede afinada. */
+#define CAL_DAC_MAX_CHANGE_GEO_LP 255u
 
 #ifndef CAL_PI_GAIN_GEO_LP_X1000
 #define CAL_PI_GAIN_GEO_LP_X1000 6000L
@@ -49,8 +49,8 @@
 #define CAL_PI_LOCK_SAMPLES_GEO_LP 512u
 #endif
 
-/* Asentamiento: tiempo simulado 6ms, convertido a muestras. */
-#define CAL_SETTLE_SAMPLES_GEO_LP CAL_SETTLE_SAMPLES_FROM_MS(6u)
+/* El PI no descarta muestras; el FIR de calibracion entrega la medicion DC. */
+#define CAL_SETTLE_SAMPLES_GEO_LP 0u
 
 /* ============================================================
  * BISECCION (legado, desactivado -- CAL_ALGO_BISECTION_ENABLE=0). El PI NO

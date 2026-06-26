@@ -27,27 +27,28 @@
 #endif
 
 #ifndef CAL_ADELANTO_GEO_ADDER_MV
-#define CAL_ADELANTO_GEO_ADDER_MV 2496L
+#define CAL_ADELANTO_GEO_ADDER_MV 1504L
 #endif
 #define CAL_DAC_CENTER_GEO_ADDER ((uint8)(CAL_ADELANTO_GEO_ADDER_MV / CAL_VDAC8_MV_PER_LSB))
 
-#define CAL_DAC_MAX_CHANGE_GEO_ADDER 64u
+/* Copiado del perfil LP probado: adelanto como arranque, rango completo. */
+#define CAL_DAC_MAX_CHANGE_GEO_ADDER 255u
 
 #ifndef CAL_PI_GAIN_GEO_ADDER_X1000
-#define CAL_PI_GAIN_GEO_ADDER_X1000 1000L
+#define CAL_PI_GAIN_GEO_ADDER_X1000 3000L
 #endif
 
 #define CAL_PI_KP_NUM_GEO_ADDER 1L
-#define CAL_PI_KP_DIV_GEO_ADDER 32L
+#define CAL_PI_KP_DIV_GEO_ADDER 10000L
 #define CAL_PI_KI_NUM_GEO_ADDER 1L
-#define CAL_PI_KI_DIV_GEO_ADDER 8192L
+#define CAL_PI_KI_DIV_GEO_ADDER 2000L
 
 #ifndef CAL_PI_LOCK_SAMPLES_GEO_ADDER
-#define CAL_PI_LOCK_SAMPLES_GEO_ADDER 128u
+#define CAL_PI_LOCK_SAMPLES_GEO_ADDER 512u
 #endif
 
-/* Asentamiento: tiempo simulado 200us, convertido a muestras. */
-#define CAL_SETTLE_SAMPLES_GEO_ADDER CAL_SETTLE_SAMPLES_FROM_US(200u)
+/* El PI no descarta muestras; el FIR de calibracion entrega la medicion DC. */
+#define CAL_SETTLE_SAMPLES_GEO_ADDER 0u
 
 /* ============================================================
  * BISECCION (legado, desactivado -- CAL_ALGO_BISECTION_ENABLE=0). El PI NO

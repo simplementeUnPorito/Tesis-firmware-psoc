@@ -3,6 +3,72 @@
 This note records the working command-line flow for
 `AcondicionamientoAnalogico.cydsn`.
 
+## Quick Current Flow (2026-06-26)
+
+- Active project: `AcondicionamientoAnalogico`.
+- Current KitProg/PPCLI name observed on this PC:
+  `KitProg (CMSIS-DAP/236111)`.
+- ESP runtime/log bridge: `COM8`.
+- The PSoC PC UART on `COM6` is not expected to work while the board is in the
+  current programming mode. Runtime validation must go through the ESP.
+- Current tested PSoC build: flash `27398` bytes, SRAM `49680` bytes.
+- Rows programmed successfully today: `0..109`.
+- Current successful program log:
+  `C:\Users\elias\AppData\Local\Temp\psoc_program_acondicionamiento_stable2_20260626_192601.log`.
+- Last full ESP calibration/ADC log captured by Codex:
+  `C:\Users\elias\AppData\Local\Temp\esp_psoc_geo_stable_20260626_192308.log`.
+  That log was taken immediately before the final "no early rail abort" tweak;
+  after the final program the board was confirmed functional from the bench.
+
+Build:
+
+```powershell
+Push-Location "C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn"
+try {
+  & "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\bin\cyprjmgr.exe" `
+    -wrk "AcondicionamientoAnalogico.cywrk" `
+    -build
+} finally {
+  Pop-Location
+}
+```
+
+Known-good terminal programming command, using PPCLI stdin:
+
+```powershell
+$timestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
+$log = Join-Path $env:TEMP "psoc_program_acondicionamiento_$timestamp.log"
+$hex = 'C:/Github/Tesis/src/psoc/AcondicionamientoAnalogico.cydsn/CortexM3/ARM_GCC_541/Debug/AcondicionamientoAnalogico.hex'
+$port = 'KitProg (CMSIS-DAP/236111)'
+$programmer = 'C:\Program Files (x86)\Cypress\Programmer\'
+$lastRow = 109
+
+$cmds = New-Object System.Collections.Generic.List[string]
+$cmds.Add(('OpenPort "{0}" "{1}"' -f $port, $programmer))
+$cmds.Add('SetAcquireMode Reset')
+$cmds.Add('SetProtocol 8')
+$cmds.Add('SetProtocolConnector 1')
+$cmds.Add('SetProtocolClock 192')
+$cmds.Add(('HEX_ReadFile "{0}"' -f $hex))
+$cmds.Add('DAP_Acquire')
+$cmds.Add('PSoC3_GetJtagID')
+$cmds.Add('PSoC3_EraseAll')
+0..$lastRow | ForEach-Object { $cmds.Add(('PSoC3_ProgramRowFromHex 0x00 {0} 0x01' -f $_)) }
+0..$lastRow | ForEach-Object { $cmds.Add(('PSoC3_VerifyRowFromHex 0x00 {0} 0x01' -f $_)) }
+$cmds.Add('PSoC3_ProtectAll')
+$cmds.Add('PSoC3_VerifyProtect')
+$cmds.Add('DAP_ReleaseChip')
+$cmds.Add('ClosePort')
+$cmds.Add('quit')
+
+$inputText = ($cmds -join [Environment]::NewLine) + [Environment]::NewLine
+$inputText | & 'C:\Program Files (x86)\Cypress\Programmer\PPCLI.exe' |
+  Tee-Object -FilePath $log
+```
+
+Successful programming ends with `0 OK` for every programmed/verified row and
+final `DAP_ReleaseChip`, `ClosePort`, and `quit`.
+
 ## Quick Current Flow (2026-06-25)
 
 - Active project: `AcondicionamientoAnalogico`.

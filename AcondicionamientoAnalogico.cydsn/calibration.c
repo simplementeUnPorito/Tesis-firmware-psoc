@@ -66,6 +66,10 @@
 #define CAL_AMUX_CAP_CHANNEL ((uint8)(AMux_ADC_CHANNELS - 1u))
 #endif
 
+#ifndef CAL_AMUX_CAP_CLEANUP_MS
+#define CAL_AMUX_CAP_CLEANUP_MS 2u
+#endif
+
 static uint8 g_amux_active_channel = AMux_ADC_NULL_CHANNEL; /* uno de 0..3, o NULL */
 static uint8 g_amux_cap_connected  = 0u;
 
@@ -105,6 +109,21 @@ static void psoc_amux_disconnect_capacitor(void)
     AMux_ADC_Disconnect(CAL_AMUX_CAP_CHANNEL);
 #endif
     g_amux_cap_connected = 0u;
+}
+
+static void psoc_amux_capacitor_cleanup(void)
+{
+#if CAL_AMUX_HAS_CAP_CHANNEL
+    if (g_amux_active_channel != AMux_ADC_NULL_CHANNEL) {
+        AMux_ADC_Disconnect(g_amux_active_channel);
+        g_amux_active_channel = AMux_ADC_NULL_CHANNEL;
+    }
+    if (!g_amux_cap_connected) {
+        AMux_ADC_Connect(CAL_AMUX_CAP_CHANNEL);
+        g_amux_cap_connected = 1u;
+    }
+    CyDelay(CAL_AMUX_CAP_CLEANUP_MS);
+#endif
 }
 
 #ifndef CAL_AMUX_ADC_START
@@ -194,20 +213,35 @@ static int32 abs_counts(int32 value)
 }
 
 #ifndef CAL_DIAG_SWEEP_ENABLE
-#define CAL_DIAG_SWEEP_ENABLE 1u
+#define CAL_DIAG_SWEEP_ENABLE 0u
 #endif
 
 #ifndef CAL_DIAG_SWEEP_SETTLE_MS
 #define CAL_DIAG_SWEEP_SETTLE_MS 30u
 #endif
 
+#ifndef CAL_ADC_DIRECT_WAIT_POLLS
+#define CAL_ADC_DIRECT_WAIT_POLLS 60000u
+#endif
+
 static int32 cal_adc_read_direct_counts(void)
 {
     int32 sample;
+    uint16 guard;
+    uint8 ready = 0u;
 
     ADC_StopConvert();
     ADC_StartConvert();
-    (void)ADC_IsEndConversion(ADC_WAIT_FOR_RESULT);
+    for (guard = 0u; guard < (uint16)CAL_ADC_DIRECT_WAIT_POLLS; guard++) {
+        if (ADC_IsEndConversion(ADC_RETURN_STATUS)) {
+            ready = 1u;
+            break;
+        }
+    }
+    if (!ready) {
+        ADC_StopConvert();
+        return 0L;
+    }
     sample = ADC_GetResult32();
     ADC_StopConvert();
 
@@ -358,7 +392,7 @@ uint8 g_psoc_cal_result_count = 0u;
 /* Muestras del PI que se envian al ESP durante calibracion. No puede ser cada
  * muestra a 3 kHz: cada valor int32 viaja como 4 eventos UART. */
 #ifndef CAL_PI_TELEM_PERIOD
-#define CAL_PI_TELEM_PERIOD 16u
+#define CAL_PI_TELEM_PERIOD 256u
 #endif
 
 #ifndef CAL_PI_HAMMER_PASS_COUNT
@@ -372,7 +406,7 @@ uint8 g_psoc_cal_result_count = 0u;
 #endif
 
 #ifndef CAL_DIAG_SWEEP_ENABLE
-#define CAL_DIAG_SWEEP_ENABLE 1u
+#define CAL_DIAG_SWEEP_ENABLE 0u
 #endif
 
 #ifndef CAL_DIAG_SWEEP_SETTLE_MS
@@ -1329,6 +1363,7 @@ static void async_finish_stage(uint8 ok)
 static void cal_async_complete(void)
 {
     ADC_Stop();
+    psoc_amux_capacitor_cleanup();
     psoc_amux_disconnect_capacitor();
     psoc_calibration_restore_capture_path();
     /* Restaura el FIR de adquisicion -- cal_pi_start() cargo el de
@@ -1480,6 +1515,7 @@ static void cal_async_abort_watchdog(void)
 
 typedef enum {
     CAL_PI_STAGE_BEGIN = 0u,
+    CAL_PI_SETTLE,
     CAL_PI_RUN
 } PsocCalPiState;
 
@@ -1500,6 +1536,7 @@ typedef struct {
     int32 last_error_bucket;
     uint16 samples_taken;
     uint16 stable_count;
+    uint16 settle_remaining;
     uint8 have_last_error;
     uint8 last_dac_target;
     uint8 dac_current;
@@ -1521,6 +1558,13 @@ static int32 cal_round_div_i64(int64 num, int64 den)
         return (num - half) / den;
     }
     return (num + half) / den;
+}
+
+static int32 cal_pi_clip_integral(int32 value)
+{
+    if (value > CAL_PI_INTEGRAL_LIMIT) { return CAL_PI_INTEGRAL_LIMIT; }
+    if (value < -CAL_PI_INTEGRAL_LIMIT) { return -CAL_PI_INTEGRAL_LIMIT; }
+    return value;
 }
 
 #if PSOC_HW_CLASS == PSOC_HW_GEO
@@ -1588,6 +1632,11 @@ static int32 cal_pi_error_bucket(int32 error_dac, int32 deadband_dac)
     return (error_dac < 0L) ? -bucket : bucket;
 }
 
+static uint8 cal_pi_measurement_valid(int32 measured)
+{
+    return (abs_counts(measured) <= CAL_ADC_FULL_SCALE_COUNTS) ? 1u : 0u;
+}
+
 static int32 cal_pi_gain_scaled_term(int32 value, int32 num, int32 div, int32 gain_x1000)
 {
     int32 sign = 1L;
@@ -1630,10 +1679,18 @@ static int8 cal_pi_effort_delta_sign(int32 control_error, int8 direction, int32 
  * por timeout. */
 static uint8 cal_pi_finish_stage(uint8 ok)
 {
+    const PsocCalStage *stage = &g_psoc_cal_stages[g_cal_async.stage_index];
     PsocCalResult *result = &g_psoc_cal_results[g_cal_async.stage_index];
     uint8 final_pass;
+    uint8 final_dac = g_cal_pi.dac_current;
 
-    result->final_dac = g_cal_pi.dac_current;
+    if (!ok && (final_dac == cal_stage_min_dac(stage) ||
+                final_dac == cal_stage_max_dac(stage))) {
+        final_dac = cal_stage_center_dac(stage);
+        stage->write(final_dac);
+    }
+
+    result->final_dac = final_dac;
     result->final_measured = g_cal_pi.last_fir_output;
     result->ok = ok;
     final_pass = ((uint8)(g_cal_async.pass_index + 1u) >= (uint8)CAL_PI_PASS_COUNT) ? 1u : 0u;
@@ -1684,11 +1741,16 @@ static void cal_pi_stage_begin(void)
     g_cal_pi.last_dac_target = 0u;
     g_cal_pi.last_fir_output = 0L;
     g_cal_pi.empty_polls = 0UL;
+    g_cal_pi.settle_remaining = (uint16)CAL_PI_FIR_SETTLE_SAMPLES;
     g_cal_pi.dac_current = cal_stage_center_dac(stage);
     stage->write(g_cal_pi.dac_current);
 
     ADC_Stop();
     CAL_AMUX_ADC_SELECT_STAGE(stage->adc_channel);
+    cal_diag(PSOC_EVT_CAL_AMUX_IN, stage->adc_channel);
+#if CAL_AMUX_HAS_CAP_CHANNEL
+    cal_diag(PSOC_EVT_CAL_AMUX_CAP, CAL_AMUX_CAP_CHANNEL);
+#endif
     ADC_Start();
 
     stage->write(g_cal_pi.dac_current);
@@ -1703,7 +1765,39 @@ static void cal_pi_stage_begin(void)
     isr_DMA_Filter_RAM_ClearPending();
     ADC_StartConvert();
 
-    g_cal_pi.state = CAL_PI_RUN;
+    g_cal_pi.state = (g_cal_pi.settle_remaining == 0u) ? CAL_PI_RUN : CAL_PI_SETTLE;
+}
+
+static uint8 cal_pi_settle_service(void)
+{
+    int32 sample;
+
+    if (!psoc_adc_take_isr_filtered_sample(&sample)) {
+        g_cal_pi.empty_polls++;
+        if (g_cal_pi.empty_polls >= CAL_ASYNC_EMPTY_POLL_LIMIT) {
+            return cal_pi_finish_stage(0u);
+        }
+        return 0u;
+    }
+
+    g_cal_pi.empty_polls = 0UL;
+    g_cal_pi.last_fir_output = psoc_adc_counts_right_aligned(sample);
+
+    if (g_cal_pi.settle_remaining > 0u) {
+        g_cal_pi.settle_remaining--;
+    }
+    if (g_cal_pi.settle_remaining == 0u) {
+        g_cal_pi.integral = 0L;
+        g_cal_pi.samples_taken = 0u;
+        g_cal_pi.stable_count = 0u;
+        g_cal_pi.have_last_error = 0u;
+        g_cal_pi.last_error_dac = 0L;
+        g_cal_pi.last_error_bucket = 0L;
+        g_cal_pi.empty_polls = 0UL;
+        g_cal_pi.state = CAL_PI_RUN;
+    }
+
+    return 0u;
 }
 
 static uint8 cal_pi_run_service(void)
@@ -1731,6 +1825,7 @@ static uint8 cal_pi_run_service(void)
     uint8 dac_target;
     uint8 dac_step;
     uint8 can_integrate;
+    uint8 dac_changed;
     int8 effort_delta_sign;
 
     if (!psoc_adc_take_isr_filtered_sample(&sample)) {
@@ -1806,21 +1901,24 @@ static uint8 cal_pi_run_service(void)
     } else if ((int32)dac_target < dac_max_step_down) {
         dac_target = (dac_max_step_down < 0L) ? 0u : (uint8)dac_max_step_down;
     }
+    dac_changed = (dac_target != dac_sample) ? 1u : 0u;
 
     /* anti-windup tipo clamping y zona muerta: dentro de deadband no se
      * acumula error para no perseguir pasos imposibles del VDAC. */
     if (can_integrate && stage_gain_x1000 != 0L && control_error != 0L) {
-        g_cal_pi.integral = cal_servo_clip_integral(g_cal_pi.integral + control_error);
+        g_cal_pi.integral = cal_pi_clip_integral(g_cal_pi.integral + control_error);
     }
 
-    /* Lock por M muestras: si el error queda en la misma celda cuantizada
-     * (bucket 0 = dentro de deadband) no hay informacion nueva para seguir
-     * corrigiendo con un VDAC de 8 bits, asi que se cierra la etapa. */
+    /* Lock por M muestras: dentro de deadband cierra OK. Fuera de deadband,
+     * mantener el mismo bucket no alcanza para cerrar mientras la integral
+     * todavia puede acumular el siguiente LSB de DAC. Un cambio efectivo de
+     * DAC reinicia el contador de estabilidad. */
     lock_n = (cfg->lock_samples == 0u || cfg->lock_samples > CAL_PI_LOCK_N_MAX)
         ? CAL_PI_LOCK_N_MAX : cfg->lock_samples;
 
     if (!g_cal_pi.have_last_error ||
-        error_bucket != g_cal_pi.last_error_bucket) {
+        error_bucket != g_cal_pi.last_error_bucket ||
+        dac_changed) {
         g_cal_pi.stable_count = 1u;
     } else if (g_cal_pi.stable_count < 65535u) {
         g_cal_pi.stable_count++;
@@ -1845,11 +1943,17 @@ static uint8 cal_pi_run_service(void)
     stage->write(g_cal_pi.dac_current);
 
     if (g_cal_pi.stable_count >= lock_n) {
-        return cal_pi_finish_stage((error_bucket == 0L) ? 1u : 0u);
+        if (error_bucket == 0L && cal_pi_measurement_valid(g_cal_pi.last_fir_output)) {
+            return cal_pi_finish_stage(1u);
+        }
+        if (stage_gain_x1000 == 0L) {
+            return cal_pi_finish_stage(0u);
+        }
     }
 
     if (g_cal_pi.samples_taken >= CAL_PI_TIMEOUT_SAMPLES) {
-        return cal_pi_finish_stage((error_bucket == 0L) ? 1u : 0u);
+        return cal_pi_finish_stage((error_bucket == 0L &&
+                                    cal_pi_measurement_valid(g_cal_pi.last_fir_output)) ? 1u : 0u);
     }
 
     return 0u;
@@ -1870,6 +1974,8 @@ static uint8 cal_pi_service(void)
         case CAL_PI_STAGE_BEGIN:
             cal_pi_stage_begin();
             return 0u;
+        case CAL_PI_SETTLE:
+            return cal_pi_settle_service();
         case CAL_PI_RUN:
             return cal_pi_run_service();
         default:
@@ -1901,6 +2007,13 @@ uint8 psoc_calibration_start_async(void)
     for (i = 0u; i < PSOC_CAL_MAX_STAGES; i++) {
         g_cal_async.slope_known[i] = 0u;
         g_cal_async.slope_increasing[i] = 0u;
+    }
+    for (i = 0u; i < PSOC_CAL_STAGE_COUNT; i++) {
+        uint8 center = cal_stage_center_dac(&g_psoc_cal_stages[i]);
+        g_psoc_cal_stages[i].write(center);
+        g_psoc_cal_results[i].final_dac = center;
+        g_psoc_cal_results[i].final_measured = 0L;
+        g_psoc_cal_results[i].ok = 0u;
     }
     cal_pi_start();   /* unico camino de calibracion, GEO y HAMMER por igual */
     return 1u;

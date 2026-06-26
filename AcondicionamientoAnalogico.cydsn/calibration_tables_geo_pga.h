@@ -28,24 +28,26 @@
 #endif
 #define CAL_TARGET_COUNTS_GEO_PGA (CAL_TARGET_GEO_PGA_MV * CAL_TARGET_1V_COUNTS / 1000L)
 
-/* direction=1: sentido inicial esperado (sube el codigo VDAC -> sube la
- * medida). Si la etapa diverge en vez de converger, este es el primer
- * sospechoso -- invertir el signo. */
-#define CAL_DIRECTION_GEO_PGA 1
+/* La ganancia fisica VDAC->PGA es la misma que HAMMER (1 - GainDirecta),
+ * pero la polaridad diferencial del ADC GEO queda invertida respecto de ese
+ * nodo: el controlador debe aplicar direction=-1 para que el error tienda a
+ * 0 en cuentas diferenciales. */
+#define CAL_DIRECTION_GEO_PGA (-1)
 
 #ifndef CAL_VDAC8_MV_PER_LSB
 #define CAL_VDAC8_MV_PER_LSB 16L   /* VDAC8 1x: 4.08V/256 codigos ~= 16mV/LSB */
 #endif
 
 /* Candidato INICIAL en mV donde arranca el PI (feedforward/dac_center) --
- * el valor historico es 2496mV (=0x9C codigos VDAC8, "centro de rango"). */
+ * el valor de arranque se deja comun a las etapas GEO: ~1.5V. */
 #ifndef CAL_ADELANTO_GEO_PGA_MV
-#define CAL_ADELANTO_GEO_PGA_MV 2496L
+#define CAL_ADELANTO_GEO_PGA_MV 1504L
 #endif
 #define CAL_DAC_CENTER_GEO_PGA ((uint8)(CAL_ADELANTO_GEO_PGA_MV / CAL_VDAC8_MV_PER_LSB))
 
-/* Semiancho de busqueda alrededor del adelanto, en codigos VDAC8. */
-#define CAL_DAC_MAX_CHANGE_GEO_PGA 64u
+/* Misma ventana que HAMMER_PGA: el PI arranca en adelanto, pero puede usar
+ * todo el VDAC si el offset de la placa GEO lo exige. */
+#define CAL_DAC_MAX_CHANGE_GEO_PGA 255u
 
 /* Ganancia VDAC->medida dinamica: en calibration.c stage 0 usa
  * 1 - GainDirecta, con signo fisico incluido, igual que HAMMER_PGA. */
@@ -65,9 +67,8 @@
 #define CAL_PI_LOCK_SAMPLES_GEO_PGA 512u
 #endif
 
-/* Asentamiento tras cambiar DAC/AMux: tiempo simulado 220ms, convertido a
- * muestras con ADC_DEFAULT_SRATE y CAL_SETTLE_FACTOR/DEN. */
-#define CAL_SETTLE_SAMPLES_GEO_PGA CAL_SETTLE_SAMPLES_FROM_MS(220u)
+/* El PI no descarta muestras; el FIR de calibracion entrega la medicion DC. */
+#define CAL_SETTLE_SAMPLES_GEO_PGA 0u
 
 /* ============================================================
  * BISECCION (legado, desactivado -- CAL_ALGO_BISECTION_ENABLE=0). El PI NO

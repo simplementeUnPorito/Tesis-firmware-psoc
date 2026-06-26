@@ -58,6 +58,10 @@
 /* FILTER_FIR_NTAPS vive en filter_coeffs.h (unica fuente de verdad,
  * compartida con calibration.c). */
 #define FILTER_GROUP_DELAY ((FILTER_FIR_NTAPS - 1u) / 2u)   /* 63 muestras */
+
+#ifndef PSOC_LOAD_NV_CAL_ON_BOOT
+#define PSOC_LOAD_NV_CAL_ON_BOOT 0u
+#endif
 #define TIMER_TICK_MS      10u
 #define TIMEOUT_COUNTS     240000u    /* 10 ms @ 24 MHz — tick de sistema */
 
@@ -1093,13 +1097,18 @@ int main(void)
      * esos valores guardados para ahorrar aun mas tiempo. */
     psoc_calibration_start_references();
 
-    /* Cargar config guardada en EEPROM (si CRC válido) para converger más rápido */
+    /* Por defecto el arranque queda en adelanto limpio. La EEPROM puede
+     * reactivarse cuando la calibracion GEO ya este cerrando bien en todas
+     * las etapas; durante puesta a punto evita resucitar DACs guardados en
+     * riel de corridas fallidas. */
+#if PSOC_LOAD_NV_CAL_ON_BOOT
     {
         uint8 nv_dac[PSOC_NV_CAL_STAGES];
         if (psoc_nv_load(nv_dac, PSOC_NV_CAL_STAGES)) {
             psoc_calibration_seed_dac(nv_dac, PSOC_NV_CAL_STAGES);
         }
     }
+#endif
 
     Filter_Start();
     /* Activa el FIR de adquisicion (FIR_adquisition.h) -- calibration.c
