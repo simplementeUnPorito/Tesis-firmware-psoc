@@ -11,14 +11,29 @@ This note records the working command-line flow for
 - ESP runtime/log bridge: `COM8`.
 - The PSoC PC UART on `COM6` is not expected to work while the board is in the
   current programming mode. Runtime validation must go through the ESP.
-- Current tested PSoC build: flash `27398` bytes, SRAM `49680` bytes.
+- Current tested PSoC build: flash `27902` bytes, SRAM `49304` bytes.
 - Rows programmed successfully today: `0..109`.
 - Current successful program log:
-  `C:\Users\elias\AppData\Local\Temp\psoc_program_acondicionamiento_stable2_20260626_192601.log`.
+  `C:\Users\elias\AppData\Local\Temp\psoc_program_acondicionamiento_codex_20260626_204435.log`.
 - Last full ESP calibration/ADC log captured by Codex:
-  `C:\Users\elias\AppData\Local\Temp\esp_psoc_geo_stable_20260626_192308.log`.
-  That log was taken immediately before the final "no early rail abort" tweak;
-  after the final program the board was confirmed functional from the bench.
+  short post-program COM8 listen at `2026-06-26 20:45` (not saved to a file):
+  ESP S1 booted, detected PSoC, and received calibration telemetry. The user
+  confirmed BP/LP calibration was hardware-solder related and now works.
+
+Latest software fixes in this build:
+
+- Hardware FIR stream samples are right-aligned before sending to the ESP,
+  matching the raw ADC path. This fixes the impossible `-20 V` web display
+  when `FIR hardware` is enabled.
+- `PSOC_CMD_SELECT_STREAM=1` explicitly reloads `FIR_adquisition.h` and resets
+  Filter history before routing ADC through the DFB, so the calibration FIR
+  cannot leak into normal acquisition.
+- `FIR_adquisition.h` and `FIR_calibration.h` now hold the editable coefficient
+  byte macros; the `.c` files only instantiate the arrays.
+- The 2026-06-26 web filesystem on the ESP master adds an `Envolvente`
+  checkbox for Hilbert-envelope viewing.
+- ESP slave1 firmware on COM8 was updated so `Titular LED` blinks immediately
+  and supports broadcast `node_id=0`.
 
 Build:
 

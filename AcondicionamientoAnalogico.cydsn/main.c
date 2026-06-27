@@ -339,7 +339,7 @@ CY_ISR(isr_DMA_DelSig_RAM_Handler)
  *    por g_stream_mode/g_fir_discard como antes. */
 CY_ISR(isr_DMA_Filter_RAM_Handler)
 {
-    int32 filt = dma_buf_to_i24(g_dma_filt_buf);
+    int32 filt = psoc_adc_counts_right_aligned(dma_buf_to_i24(g_dma_filt_buf));
 
     psoc_adc_note_isr_filtered_sample(filt);
 
@@ -780,6 +780,13 @@ static void uart_service(void)
                     case PSOC_CMD_SELECT_STREAM:
                         /* rx_p1: 0=crudo, 1=filtrado FIR */
                         g_stream_mode = (rx_p1 != 0u) ? 1u : 0u;
+                        if (g_stream_mode != 0u) {
+                            (void)psoc_filter_load_fir_coefficients(g_fir_adquisition_coeffs_q23,
+                                                                     FILTER_FIR_NTAPS);
+                            psoc_filter_reset_history();
+                            psoc_adc_clear_isr_filtered_sample();
+                            isr_DMA_Filter_RAM_ClearPending();
+                        }
                         dma_route_select(g_stream_mode);
                         if (g_stream_mode != 0u) {
                             g_fir_discard = 0u;  /* reset — se recarga en próximo SyncIn */
