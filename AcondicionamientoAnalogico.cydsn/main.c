@@ -165,6 +165,8 @@ static const uint8 g_ping_frame[4] = {
     0xABu, PSOC_CMD_PING, 0x00u, PSOC_CMD_PING
 };
 
+#define PSOC_REPORTED_SRATE_HZ 2929u
+
 static void uart_send_ping(void)
 {
     UART_PutArray(g_ping_frame, (uint8)sizeof(g_ping_frame));
@@ -183,8 +185,8 @@ static void uart_send_cfg_ack(uint8 cmd, uint8 val)
 
 static void uart_send_fs_report(void)
 {
-    uint8 fs_lo = (uint8)((uint16)ADC_DEFAULT_SRATE & 0xFFu);
-    uint8 fs_hi = (uint8)(((uint16)ADC_DEFAULT_SRATE >> 8u) & 0xFFu);
+    uint8 fs_lo = (uint8)((uint16)PSOC_REPORTED_SRATE_HZ & 0xFFu);
+    uint8 fs_hi = (uint8)(((uint16)PSOC_REPORTED_SRATE_HZ >> 8u) & 0xFFu);
     uint8 frame[5u];
     frame[0] = 0xABu;
     frame[1] = PSOC_CMD_FS_REPORT;
