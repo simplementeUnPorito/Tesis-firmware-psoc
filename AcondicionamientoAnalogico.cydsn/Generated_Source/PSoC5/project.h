@@ -23,6 +23,7 @@
 #include "SYNC_IN.h"
 #include "LED_aliases.h"
 #include "LED.h"
+#include "timer_clock.h"
 #include "Timer.h"
 #include "isr_Timer.h"
 #include "isr_SyncIn.h"

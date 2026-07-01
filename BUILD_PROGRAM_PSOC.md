@@ -3,6 +3,19 @@
 This note records the working command-line flow for
 `AcondicionamientoAnalogico.cydsn`.
 
+## Quick Current Flow (2026-06-30)
+
+- Active project: `AcondicionamientoAnalogico`.
+- KitProg port: `KitProg (CMSIS-DAP/236111)`.
+- PSoC build: flash `28206` bytes, SRAM `49304` bytes.
+- Rows programmed: `0..110` (all `0 OK`).
+- Change in this build: PSoC LED fix — removed `g_comm_countdown = COMM_WINDOW_TICKS`
+  from `uart_send_batch()` and `uart_service()` RX handler. LED now stays solid ON
+  during normal operation; blinks only in `wait_for_esp()` before ESP connects.
+- Program log: `C:\Users\elias\AppData\Local\Temp\psoc_program_acondicionamiento_20260630_220603.log`
+- Counter_1 build fix: user resolved TopDesign schematic Counter_1 connection
+  errors that blocked `-rebuild` command.
+
 ## Quick Current Flow (2026-06-26)
 
 - Active project: `AcondicionamientoAnalogico`.

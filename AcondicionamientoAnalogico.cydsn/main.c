@@ -63,7 +63,7 @@
 #define PSOC_LOAD_NV_CAL_ON_BOOT 0u
 #endif
 #define TIMER_TICK_MS      10u
-#define TIMEOUT_COUNTS     240000u    /* 10 ms @ 24 MHz — tick de sistema */
+#define TIMEOUT_COUNTS     1000u    /* 10 ms @ 100 kHz — tick de sistema */
 
 #define BATCH_SAMPLES      30u
 #define FRAME_BYTES        (4u + BATCH_SAMPLES * 3u + 1u)   /* 95 */
@@ -601,7 +601,6 @@ static void uart_send_capture_batch(uint16 batchIndex)
 
     g_seq++;
     UART_PutArray(frame, FRAME_BYTES);
-    g_comm_countdown = COMM_WINDOW_TICKS;
 }
 
 static void uart_service(void)
@@ -663,7 +662,6 @@ static void uart_service(void)
                 if (rx_cmd != PSOC_CMD_PONG) {
                     uart_send_diag(PSOC_EVT_RX_CMD, rx_cmd);
                 }
-                g_comm_countdown = COMM_WINDOW_TICKS;
 
                 if (g_state == PSOC_CALIBRATING) {
                     switch (rx_cmd)
