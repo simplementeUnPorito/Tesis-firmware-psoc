@@ -105,6 +105,7 @@
 #define PSOC_CMD_SAVE_EEPROM    0xB6u  /* Guardar config calibración en EEPROM */
 #define PSOC_CMD_SELECT_STREAM  0xB7u  /* Param: 0=crudo, 1=filtrado FIR */
 #define PSOC_CMD_ADC_SNAPSHOT   0xB8u  /* Reporte diagnostico de ADC por etapa */
+#define PSOC_CMD_BLINK_LED      0xB9u  /* Titilar LED de identificación del nodo */
 
 void psoc_hw_start_analog(uint8 pga_code, uint8 pgavdac_code);
 void psoc_hw_set_pga(uint8 code);

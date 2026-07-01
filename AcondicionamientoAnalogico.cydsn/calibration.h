@@ -34,6 +34,7 @@ void psoc_calibration_set_diag_hook(PsocCalDiagHook hook);
 void psoc_calibration_start_references(void);
 void psoc_calibration_restore_capture_path(void);
 void psoc_calibration_reset_references(void);
+void psoc_calibration_seed_default_dac(void);
 
 /* Aplica dac_values[count] como punto de inicio de calibración:
  * escribe cada DAC al hardware y puebla g_psoc_cal_results.
@@ -49,6 +50,8 @@ void psoc_calibration_report_adc_snapshot(void);
  * el tope fijo PSOC_NV_CAL_STAGES del layout EEPROM. */
 uint8 psoc_calibration_stage_count(void);
 
+/* Retorna: 0=no arranco, 1=calibracion completa en curso,
+ * 2=verificacion previa OK; no hizo falta mover DACs. */
 uint8 psoc_calibration_start_async(void);
 uint8 psoc_calibration_service_async(void);
 uint8 psoc_calibration_async_busy(void);

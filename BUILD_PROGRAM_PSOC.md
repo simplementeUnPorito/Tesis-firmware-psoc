@@ -3,6 +3,55 @@
 This note records the working command-line flow for
 `AcondicionamientoAnalogico.cydsn`.
 
+## Titilar LED — ahora es el LED del PSoC (2026-07-01)
+
+- "Titilar LED" (web) ahora titila el LED del **PSoC**, no el del ESP (el ESP no
+  tiene LED útil). Camino: web → maestro → ESP-NOW `CMD_BLINK_LED` → esclavo
+  `psoc.blinkLed()` → UART `PSOC_CMD_BLINK_LED=0xB9` → el PSoC carga
+  `g_comm_countdown` y `service_comm_led` titila con el Timer (no bloqueante),
+  ~8 s, y vuelve al reposo (encendido fijo). Reutiliza el mecanismo que quedó
+  inactivo tras el fix del 2026-06-30.
+- Archivos tocados (solo `.c/.h`): PSoC `psoc_hw.h` (+`0xB9`), `main.c` (switch
+  RX + dispatch + `IDENTIFY_BLINK_TICKS`, `COMM_BLINK_MS 50→200`); ESP slave
+  `psoc_uart.{h,cpp}` (`blinkLed()`), `main.cpp` (reenvío + quitado GPIO2 +
+  comando USB `blink`).
+- Build: flash `31086` bytes, SRAM `49312`. Rows a programar: `0..121`
+  (`ceil(31086/256)-1 = 121`). Verificado end-to-end desde la web (S2/COM12).
+
+## Quick Current Flow (2026-07-01)
+
+- Active project: `AcondicionamientoAnalogico`.
+- KitProg port previously observed: `KitProg (CMSIS-DAP/236111)`. Run
+  `GetPorts` before programming if the programmer was replugged.
+- PSoC build: flash `31054` bytes, SRAM `49312` bytes.
+- Rows to program from this build: `0..121`
+  (`ceil(31054/256)-1 = 121`).
+- Change in this build:
+  - EEPROM calibration slots are now per PGA gain code `0..8`.
+  - On boot and when PGA gain changes, the PSoC loads the latest valid EEPROM
+    slot for that gain. If that slot does not exist, it explicitly restores the
+    nominal DAC feed-forward values.
+  - A calibration request first verifies the currently seeded DACs. If all
+    stages are still inside the PI deadband/tolerance, calibration returns OK
+    without moving the DACs. If any stage is out of tolerance, the PI
+    calibration runs from those seeded values.
+  - Calibration search starts from the seeded EEPROM/RAM DAC instead of always
+    returning to the table center; the PI loop uses that seed as its base DAC.
+  - EEPROM save refuses to overwrite if the latest real calibration did not
+    finish with every stage `ok=1`.
+- Build command used successfully:
+
+```powershell
+Push-Location "C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn"
+try {
+  & "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\bin\cyprjmgr.exe" `
+    -wrk "AcondicionamientoAnalogico.cywrk" `
+    -build
+} finally {
+  Pop-Location
+}
+```
+
 ## Quick Current Flow (2026-06-30)
 
 - Active project: `AcondicionamientoAnalogico`.

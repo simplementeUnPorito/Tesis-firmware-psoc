@@ -740,6 +740,20 @@ void psoc_calibration_reset_references(void)
     psoc_calibration_restore_capture_path();
 }
 
+void psoc_calibration_seed_default_dac(void)
+{
+    uint8 i;
+
+    for (i = 0u; i < PSOC_CAL_STAGE_COUNT; i++) {
+        uint8 center = cal_stage_center_dac(&g_psoc_cal_stages[i]);
+        g_psoc_cal_stages[i].write(center);
+        g_psoc_cal_results[i].final_dac = center;
+        g_psoc_cal_results[i].final_measured = 0L;
+        g_psoc_cal_results[i].ok = 1u;
+    }
+    g_psoc_cal_result_count = PSOC_CAL_STAGE_COUNT;
+}
+
 #if CAL_ALGO_SERVO_ENABLE /* servo lento legacy -- comentado a pedido del usuario (calibracion
        * pasa a ser PI-only, ver bloque "Controlador PI de calibracion" mas
        * abajo). Stubs no-op de la API publica justo despues de este bloque. */
@@ -906,6 +920,7 @@ typedef struct {
     uint8 refine_ok;
     uint8 have_last_error;
     uint8 last_dac_target;
+    uint8 base_dac;
     uint8 dac_current;
     uint32 empty_polls;
 } PsocCalPi;
@@ -1002,6 +1017,72 @@ static int32 cal_pi_error_bucket(int32 error_dac, int32 deadband_dac)
 static uint8 cal_pi_measurement_valid(int32 measured)
 {
     return (abs_counts(measured) <= CAL_ADC_FULL_SCALE_COUNTS) ? 1u : 0u;
+}
+
+static uint8 cal_stage_measure_current(uint8 stage_index, uint8 dac, int32 *measured)
+{
+    const PsocCalStage *stage = &g_psoc_cal_stages[stage_index];
+
+    ADC_Stop();
+    CAL_AMUX_ADC_SELECT(stage->adc_channel);
+    ADC_Start();
+    stage->write(dac);
+    CyDelay(CAL_DIAG_SWEEP_SETTLE_MS);
+    if (measured != (int32 *)0) {
+        *measured = cal_adc_read_direct_counts();
+    }
+    return 1u;
+}
+
+static uint8 cal_stage_value_in_tolerance(uint8 stage_index, int32 measured)
+{
+    const PsocCalStage *stage = &g_psoc_cal_stages[stage_index];
+    int32 control_sample = cal_pi_compare_counts(measured);
+    int32 error_counts = stage->target_counts - control_sample;
+    int32 error_dac = cal_counts_error_to_dac_scale(error_counts);
+    int32 deadband_dac = cal_pi_deadband_dac_codes(stage_index);
+
+    return (abs_counts(error_dac) <= deadband_dac &&
+            cal_pi_measurement_valid(measured)) ? 1u : 0u;
+}
+
+static uint8 cal_verify_seeded_values(void)
+{
+    uint8 i;
+    uint8 all_ok = 1u;
+
+    cal_diag(PSOC_EVT_BOOT, PSOC_HW_CLASS);
+    g_psoc_cal_result_count = PSOC_CAL_STAGE_COUNT;
+
+    for (i = 0u; i < PSOC_CAL_STAGE_COUNT; i++) {
+        const PsocCalStage *stage = &g_psoc_cal_stages[i];
+        PsocCalResult *result = &g_psoc_cal_results[i];
+        uint8 dac = cal_stage_current_dac(i);
+        int32 measured = 0L;
+        uint8 ok;
+
+        cal_diag(PSOC_EVT_CAL_STAGE_BEGIN, i);
+        cal_diag_i32(PSOC_EVT_CAL_STAGE_TARGET32, stage->target_counts);
+
+        (void)cal_stage_measure_current(i, dac, &measured);
+        ok = cal_stage_value_in_tolerance(i, measured);
+
+        result->final_dac = dac;
+        result->final_measured = measured;
+        result->ok = ok;
+
+        cal_diag(PSOC_EVT_CAL_STAGE_DAC, result->final_dac);
+        cal_diag_i16(PSOC_EVT_CAL_STAGE_MEAS, result->final_measured);
+        cal_diag_i32(PSOC_EVT_CAL_STAGE_MEAS32, result->final_measured);
+        cal_diag(PSOC_EVT_CAL_STAGE_OK, result->ok);
+
+        if (!ok) {
+            all_ok = 0u;
+        }
+    }
+
+    psoc_calibration_restore_capture_path();
+    return all_ok;
 }
 
 static int32 cal_pi_abs_error_counts(const PsocCalStage *stage, int32 measured)
@@ -1170,7 +1251,8 @@ static void cal_pi_stage_begin(void)
     g_cal_pi.refine_base_dac = 0u;
     g_cal_pi.refine_trial_dac = 0u;
     g_cal_pi.refine_ok = 0u;
-    g_cal_pi.dac_current = cal_stage_center_dac(stage);
+    g_cal_pi.base_dac = cal_stage_current_dac(g_cal_async.stage_index);
+    g_cal_pi.dac_current = g_cal_pi.base_dac;
     stage->write(g_cal_pi.dac_current);
 
     ADC_Stop();
@@ -1342,7 +1424,7 @@ static uint8 cal_pi_run_service(void)
          * En los PGA esa ganancia es firmada y dinamica: 1 - GainDirecta. */
         p_term = cal_pi_gain_scaled_term(control_error, cfg->kp_num, cfg->kp_div, stage_gain_x1000);
         i_term = cal_pi_gain_scaled_term(g_cal_pi.integral, cfg->ki_num, cfg->ki_div, stage_gain_x1000);
-        effort = (int32)stage->dac_center + (int32)stage->direction * (p_term + i_term);
+        effort = (int32)g_cal_pi.base_dac + (int32)stage->direction * (p_term + i_term);
     }
 
     effort_delta_sign = cal_pi_effort_delta_sign(control_error, stage->direction, stage_gain_x1000);
@@ -1456,6 +1538,8 @@ static uint8 cal_pi_service(void)
 uint8 psoc_calibration_start_async(void)
 {
     uint8 i;
+    uint8 verify_ok;
+    uint8 seed_dac[PSOC_CAL_MAX_STAGES];
 
     if (g_cal_async.busy) {
         return 0u;
@@ -1466,6 +1550,18 @@ uint8 psoc_calibration_start_async(void)
     psoc_adc_select_capture_config();
     ADC_Stop();
 
+    for (i = 0u; i < PSOC_CAL_STAGE_COUNT; i++) {
+        seed_dac[i] = cal_stage_current_dac(i);
+    }
+
+    verify_ok = cal_verify_seeded_values();
+    if (verify_ok) {
+        g_cal_async.busy = 0u;
+        g_cal_async.done = 1u;
+        g_cal_async.ok = 1u;
+        return 2u;
+    }
+
     g_psoc_cal_result_count = PSOC_CAL_STAGE_COUNT;
     g_cal_async.busy = 1u;
     g_cal_async.done = 0u;
@@ -1475,9 +1571,8 @@ uint8 psoc_calibration_start_async(void)
     g_cal_async.start_ticks = psoc_now_ticks();
     g_cal_async.last_progress_ticks = g_cal_async.start_ticks;
     for (i = 0u; i < PSOC_CAL_STAGE_COUNT; i++) {
-        uint8 center = cal_stage_center_dac(&g_psoc_cal_stages[i]);
-        g_psoc_cal_stages[i].write(center);
-        g_psoc_cal_results[i].final_dac = center;
+        g_psoc_cal_stages[i].write(seed_dac[i]);
+        g_psoc_cal_results[i].final_dac = seed_dac[i];
         g_psoc_cal_results[i].final_measured = 0L;
         g_psoc_cal_results[i].ok = 0u;
     }

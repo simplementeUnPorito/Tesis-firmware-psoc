@@ -60,7 +60,7 @@
 #define FILTER_GROUP_DELAY ((FILTER_FIR_NTAPS - 1u) / 2u)   /* 63 muestras */
 
 #ifndef PSOC_LOAD_NV_CAL_ON_BOOT
-#define PSOC_LOAD_NV_CAL_ON_BOOT 0u
+#define PSOC_LOAD_NV_CAL_ON_BOOT 1u
 #endif
 #define TIMER_TICK_MS      10u
 #define TIMEOUT_COUNTS     1000u    /* 10 ms @ 100 kHz — tick de sistema */
@@ -78,7 +78,7 @@
 #define PING_OFF_MS        100u
 #define IDLE_PING_MS       1000u
 #define COMM_WINDOW_MS     500u
-#define COMM_BLINK_MS       50u
+#define COMM_BLINK_MS      200u  /* medio-período del parpadeo del LED (~2.5 Hz, visible) */
 
 #define MS_TO_TICKS(ms)       (((ms) + TIMER_TICK_MS - 1u) / TIMER_TICK_MS)
 #define PING_PERIOD_TICKS     MS_TO_TICKS(PING_PERIOD_MS)
@@ -87,6 +87,13 @@
 #define COMM_WINDOW_TICKS     MS_TO_TICKS(COMM_WINDOW_MS)
 #define COMM_BLINK_TICKS      MS_TO_TICKS(COMM_BLINK_MS)
 #define CONNECT_BLINK_TICKS   MS_TO_TICKS(80u)
+
+/* Titilar LED (identificación de nodo): parpadeo NO bloqueante servido por
+ * service_comm_led sobre el tick del Timer (ILO 100 kHz → 10 ms). Al recibir
+ * PSOC_CMD_BLINK_LED se carga g_comm_countdown con esta ventana; el LED titila
+ * y luego vuelve a su reposo (encendido fijo). No usa delays ni bloquea. */
+#define IDENTIFY_BLINK_WINDOW_MS  8000u
+#define IDENTIFY_BLINK_TICKS      MS_TO_TICKS(IDENTIFY_BLINK_WINDOW_MS)
 
 #ifndef PSOC_DIAG_ENABLE
 #define PSOC_DIAG_ENABLE      1
@@ -155,6 +162,8 @@ static volatile uint32 g_timer_ticks  = 0u;
 
 static          uint8  g_esp_connected  = 0u;
 static          uint32 g_comm_countdown = 0u;
+static          uint8  g_nv_ready       = 0u;
+static          uint8  g_last_calibration_ok = 0u;
 
 static volatile uint8 g_rx_watch_ticks = 0u;
 #define RX_WATCHDOG_TICKS  1u
@@ -478,11 +487,36 @@ void dma_route_select(uint8 use_filter)
     Reg_Select_Write(use_filter ? 0x01u : 0x00u);
 }
 
+static uint8 psoc_seed_calibration_from_nv(uint8 reset_defaults_if_missing)
+{
+    uint8 nv_dac[PSOC_NV_CAL_STAGES];
+    uint8 stage_count = psoc_calibration_stage_count();
+
+    if (!g_nv_ready || stage_count == 0u || stage_count > PSOC_NV_CAL_STAGES) {
+        return 0u;
+    }
+
+    if (psoc_nv_load_for_gain(g_pga_code, nv_dac, stage_count)) {
+        psoc_calibration_seed_dac(nv_dac, stage_count);
+        return 1u;
+    }
+
+    if (reset_defaults_if_missing) {
+        psoc_calibration_seed_default_dac();
+    }
+    return 0u;
+}
+
 static void PGAgain_Set(uint8 code)
 {
     if (code <= 8u) {
+        uint8 changed = (g_pga_code != code) ? 1u : 0u;
         g_pga_code = code;
         psoc_hw_set_pga(code);
+        if (changed) {
+            g_last_calibration_ok = 0u;
+            (void)psoc_seed_calibration_from_nv(1u);
+        }
     }
 }
 
@@ -513,6 +547,8 @@ static void psoc_start_now(void)
 
 static uint8 psoc_start_calibration_if_idle(uint8 send_ack)
 {
+    uint8 cal_start;
+
     if (g_state != PSOC_IDLE) {
         uart_send_diag(PSOC_EVT_CAL_BUSY, g_state);
         if (send_ack) {
@@ -523,12 +559,24 @@ static uint8 psoc_start_calibration_if_idle(uint8 send_ack)
     g_batches_sent = 0u;
     g_batches_captured = 0u;
     g_capture_done = 0u;
+    g_last_calibration_ok = 0u;
     psoc_calibration_servo_abort();
     /* La ruta del DMA (raw vs Filter) y el AMux los gobierna cal_pi_stage_begin
      * (calibration.c) por etapa -- no hace falta forzar nada aca. */
     uart_send_diag(PSOC_EVT_BOOT, PSOC_HW_CLASS);
     uart_send_diag(PSOC_EVT_CAL_START, 0u);
-    if (!psoc_calibration_start_async()) {
+    cal_start = psoc_calibration_start_async();
+    if (cal_start == 2u) {
+        g_last_calibration_ok = 1u;
+        timer_start_runtime();
+        dma_route_select(g_stream_mode);
+        uart_send_diag(PSOC_EVT_CAL_DONE, 1u);
+        if (send_ack) {
+            uart_send_cfg_ack(PSOC_CMD_CALIBRATE, 1u);
+        }
+        return 1u;
+    }
+    if (!cal_start) {
         uart_send_diag(PSOC_EVT_CAL_DONE, 0u);
         if (send_ack) {
             uart_send_cfg_ack(PSOC_CMD_CALIBRATE, 0u);
@@ -623,6 +671,7 @@ static void uart_service(void)
                     case 0xB1u: case 0xB3u: case 0xB4u: case PSOC_CMD_CALIBRATE:
                     case PSOC_CMD_SAVE_EEPROM: case PSOC_CMD_SELECT_STREAM:
                     case PSOC_CMD_ADC_SNAPSHOT:
+                    case PSOC_CMD_BLINK_LED:
                     case PSOC_CMD_PONG:
                         rx_cmd = rx; rx_state = 2u; break;
                     case 0xA3u:
@@ -759,19 +808,31 @@ static void uart_service(void)
                         /* Guardar los DAC de calibración actuales en EEPROM.
                          * El gate es vs PSOC_CAL_STAGE_COUNT (2 en HAMMER, no
                          * el tope fijo PSOC_NV_CAL_STAGES=4 del layout EEPROM
-                         * — con ese tope fijo HAMMER nunca guardaba nada). */
+                         * — con ese tope fijo HAMMER nunca guardaba nada).
+                         * No se pisa el slot si alguna etapa quedó ok=0. */
                         {
                             uint8 dac_snap[PSOC_NV_CAL_STAGES];
                             uint8 ok_snap = 0u;
+                            uint8 stage_count = psoc_calibration_stage_count();
                             uint8 k;
                             for (k = 0u; k < PSOC_NV_CAL_STAGES; k++) {
                                 dac_snap[k] = 0u;
                             }
-                            for (k = 0u; k < PSOC_NV_CAL_STAGES && k < g_psoc_cal_result_count; k++) {
+                            for (k = 0u; k < PSOC_NV_CAL_STAGES && k < stage_count; k++) {
                                 dac_snap[k] = g_psoc_cal_results[k].final_dac;
                             }
-                            if (g_psoc_cal_result_count >= psoc_calibration_stage_count()) {
-                                ok_snap = psoc_nv_save(dac_snap, PSOC_NV_CAL_STAGES);
+                            if (g_last_calibration_ok &&
+                                g_psoc_cal_result_count >= stage_count) {
+                                ok_snap = 1u;
+                                for (k = 0u; k < stage_count; k++) {
+                                    if (!g_psoc_cal_results[k].ok) {
+                                        ok_snap = 0u;
+                                        break;
+                                    }
+                                }
+                                if (ok_snap) {
+                                    ok_snap = psoc_nv_save_for_gain(g_pga_code, dac_snap, stage_count);
+                                }
                             }
                             uart_send_cfg_ack(PSOC_CMD_SAVE_EEPROM, ok_snap);
                         }
@@ -798,6 +859,14 @@ static void uart_service(void)
                         psoc_report_adc_snapshot_if_idle();
                         led_toggle();
                         break;
+                    case PSOC_CMD_BLINK_LED:
+                        /* Titilar LED para identificar el nodo. No bloqueante:
+                         * service_comm_led hace el toggle sobre el tick del Timer
+                         * mientras g_comm_countdown > 0, y luego el LED vuelve a
+                         * su reposo (encendido fijo). El diag PSOC_EVT_RX_CMD ya
+                         * emitido más arriba confirma la recepción por el sniffer. */
+                        g_comm_countdown = IDENTIFY_BLINK_TICKS;
+                        break;
                     default: break;
                 }
                 break;
@@ -814,6 +883,7 @@ static void service_runtime(void)
         if (psoc_calibration_service_async()) {
             uint8 ok = psoc_calibration_async_result_ok();
             g_state = PSOC_IDLE;
+            g_last_calibration_ok = ok ? 1u : 0u;
             timer_start_runtime();
             dma_route_select(g_stream_mode);  /* restaura ruta previa a la calibración */
             uart_send_diag(PSOC_EVT_CAL_DONE, ok);
@@ -1097,6 +1167,7 @@ int main(void)
     uart_send_diag(PSOC_EVT_BOOT, PSOC_HW_CLASS);
 
     EEPROM_Start();
+    g_nv_ready = 1u;
 
     psoc_hw_start_analog(g_pga_code, g_pgavdac_code);
     /* Arranca todos los VDAC de calibracion en su adelanto/feedforward de
@@ -1104,17 +1175,10 @@ int main(void)
      * esos valores guardados para ahorrar aun mas tiempo. */
     psoc_calibration_start_references();
 
-    /* Por defecto el arranque queda en adelanto limpio. La EEPROM puede
-     * reactivarse cuando la calibracion GEO ya este cerrando bien en todas
-     * las etapas; durante puesta a punto evita resucitar DACs guardados en
-     * riel de corridas fallidas. */
+    /* Siempre arranca con el ultimo slot EEPROM de la ganancia actual.
+     * Si no hay slot valido, deja explicitamente los adelantos nominales. */
 #if PSOC_LOAD_NV_CAL_ON_BOOT
-    {
-        uint8 nv_dac[PSOC_NV_CAL_STAGES];
-        if (psoc_nv_load(nv_dac, PSOC_NV_CAL_STAGES)) {
-            psoc_calibration_seed_dac(nv_dac, PSOC_NV_CAL_STAGES);
-        }
-    }
+    (void)psoc_seed_calibration_from_nv(1u);
 #endif
 
     Filter_Start();
