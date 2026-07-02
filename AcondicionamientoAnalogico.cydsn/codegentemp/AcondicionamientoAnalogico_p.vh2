@@ -1,5 +1,5 @@
 -- Project:   AcondicionamientoAnalogico
--- Generated: 07/02/2026 00:15:11
+-- Generated: 07/02/2026 00:53:22
 -- PSoC Creator  4.4
 
 ENTITY AcondicionamientoAnalogico IS
@@ -2224,7 +2224,7 @@ BEGIN
 
     daf:macrocell
         GENERIC MAP(
-            eqn_main => "(!main_0 * main_1 * !main_2 * !main_3 * main_4 * main_6) + (!main_0 * main_1 * !main_2 * main_3 * !main_4 * main_6) + (!main_3 * main_4 * !main_5 * main_6) + (main_3 * !main_4 * !main_5 * main_6)",
+            eqn_main => "(!main_0 * !main_1 * main_2 * !main_3 * main_4 * main_6) + (!main_0 * !main_1 * main_2 * main_3 * !main_4 * main_6) + (!main_0 * main_1 * !main_2 * !main_3 * main_4 * main_6) + (!main_0 * main_1 * !main_2 * main_3 * !main_4 * main_6) + (!main_3 * main_4 * !main_5 * main_6) + (main_3 * !main_4 * !main_5 * main_6)",
             regmode => 0,
             clken_mode => 1)
         PORT MAP(
@@ -2239,7 +2239,7 @@ BEGIN
 
     dfr:macrocell
         GENERIC MAP(
-            eqn_main => "(main_0 * !main_1 * main_2 * !main_3 * !main_4 * main_5) + (main_0 * !main_1 * main_2 * !main_3 * main_4 * !main_5) + (main_0 * !main_4 * main_5 * !main_6) + (main_0 * main_4 * !main_5 * !main_6)",
+            eqn_main => "(main_0 * !main_1 * !main_2 * main_3 * !main_4 * main_5) + (main_0 * !main_1 * !main_2 * main_3 * main_4 * !main_5) + (main_0 * !main_1 * main_2 * !main_3 * !main_4 * main_5) + (main_0 * !main_1 * main_2 * !main_3 * main_4 * !main_5) + (main_0 * !main_4 * main_5 * !main_6) + (main_0 * main_4 * !main_5 * !main_6)",
             regmode => 0,
             clken_mode => 1)
         PORT MAP(

@@ -2,7 +2,7 @@
 --	Conversion of AcondicionamientoAnalogico.v to vh2:
 --
 --	Cypress Semiconductor - WARP Version 6.3 IR 41
---	Thu Jul 02 00:15:09 2026
+--	Thu Jul 02 00:53:20 2026
 --
 
 USE cypress.cypress.all;
@@ -616,6 +616,7 @@ SIGNAL \superMaquina:sample_count_reg_0\ : bit;
 SIGNAL \superMaquina:batch_will_finish_capture\ : bit;
 ATTRIBUTE soft of \superMaquina:batch_will_finish_capture\:SIGNAL IS '1';
 SIGNAL \superMaquina:cmp_vv_vv_MODGEN_6\ : bit;
+SIGNAL \superMaquina:filter_feed_active\ : bit;
 SIGNAL EOC : bit;
 SIGNAL \superMaquina:irq_reg\ : bit;
 SIGNAL \superMaquina:error_state_reg\ : bit;
@@ -1309,12 +1310,16 @@ dar <= ((not Net_6662_2 and not Net_6662_0 and not Net_5694_0 and Net_6662_1 and
 	OR (not Net_5672_6 and Net_5694_1 and EOC));
 
 daf <= ((not Net_6662_2 and not Net_6662_0 and not Net_5694_0 and Net_6662_1 and Net_5694_1 and EOC)
+	OR (not Net_6662_2 and not Net_6662_1 and not Net_5694_0 and Net_6662_0 and Net_5694_1 and EOC)
 	OR (not Net_6662_2 and not Net_6662_0 and not Net_5694_1 and Net_6662_1 and Net_5694_0 and EOC)
+	OR (not Net_6662_2 and not Net_6662_1 and not Net_5694_1 and Net_6662_0 and Net_5694_0 and EOC)
 	OR (not Net_5694_0 and not Net_5672_6 and Net_5694_1 and EOC)
 	OR (not Net_5694_1 and not Net_5672_6 and Net_5694_0 and EOC));
 
 dfr <= ((not Net_6662_2 and not Net_6662_0 and not Net_5694_0 and drf and Net_6662_1 and Net_5694_1)
+	OR (not Net_6662_2 and not Net_6662_1 and not Net_5694_0 and drf and Net_6662_0 and Net_5694_1)
 	OR (not Net_6662_2 and not Net_6662_0 and not Net_5694_1 and drf and Net_6662_1 and Net_5694_0)
+	OR (not Net_6662_2 and not Net_6662_1 and not Net_5694_1 and drf and Net_6662_0 and Net_5694_0)
 	OR (not Net_5694_0 and not Net_5672_6 and drf and Net_5694_1)
 	OR (not Net_5694_1 and not Net_5672_6 and drf and Net_5694_0));
 

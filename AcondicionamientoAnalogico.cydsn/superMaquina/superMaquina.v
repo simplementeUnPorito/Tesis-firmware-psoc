@@ -60,6 +60,9 @@ wire [1:0] sample_source = cfg[1:0];
 wire cfg_irq_batch_en    = cfg[2];
 wire cfg_irq_sync_en     = cfg[3];
 wire cfg_irq_error_en    = cfg[4];
+/* cfg[5..7] libres. Ojo: un contador de descarte FIR en hardware NO entra en
+ * los 24 UDB de este diseno (E2071); el descarte del retardo de grupo lo hace
+ * el ARM (g_fir_discard en main.c) con el objetivo de lotes extendido. */
 
 wire source_raw      = (sample_source == SRC_RAW) || (sample_source == SRC_DEBUG);
 wire source_filter   = (sample_source == SRC_FILTER);
@@ -107,15 +110,25 @@ wire button_irq_event = button_pos_rise && (state_reg == ST_IDLE);
 wire sample_will_close_batch = (sample_count_reg == 5'd0);
 wire batch_will_finish_capture = (batch_count_reg == batch_limit_reg);
 
+/* En ST_ARMED el FIR sigue alimentado (historia caliente): asi las primeras
+ * salidas filtradas tras el sync son validas y el ARM solo descarta el
+ * retardo de grupo (63) para alinear con la ruta raw. Sin IRQ ni conteo en
+ * ARMED: eso solo ocurre en ST_SAMPLING. */
+wire filter_feed_active = ctrl_engine_en && capture_filter_path &&
+                          ((state_reg == ST_SAMPLING) || (state_reg == ST_ARMED));
+
 assign drq_adc_ram       = ctrl_engine_en ? (sampling_active && capture_raw_dma && eoc_adc) :
                                             (bypass_raw_dma && eoc_adc);
-assign drq_adc_to_filter = ctrl_engine_en ? (sampling_active && capture_filter_path && eoc_adc) :
+assign drq_adc_to_filter = ctrl_engine_en ? (filter_feed_active && eoc_adc) :
                                             (bypass_filter_path && eoc_adc);
-assign drq_filter_ram    = ctrl_engine_en ? (sampling_active && capture_filter_path && dma_req_filter) :
+assign drq_filter_ram    = ctrl_engine_en ? (filter_feed_active && dma_req_filter) :
                                             (bypass_filter_path && dma_req_filter);
 
 assign irq               = irq_reg;
 assign error             = {3'b000, error_state_reg, error_stop_reg, 3'b000};
+/* Nota: exponer batch_count_reg en state[7:3] NO entra en los 24 UDB de este
+ * diseno (el fitter falla con E2071); si se necesita progreso de lotes en el
+ * ARM hay que liberar PLD antes. */
 assign state             = {5'b00000, state_reg};
 assign status            = {
     button_seen_reg,

@@ -92,6 +92,7 @@
 #define PSOC_EVT_CAL_PI_BUCKET32  0x42u  /* 4 bytes MSB-first: celda cuantizada de error */
 #define PSOC_EVT_CAL_PI_STABLE    0x43u  /* value=muestras consecutivas en la misma celda (saturado a 255) */
 #define PSOC_EVT_CAL_AMUX_CAP     0x44u  /* value=canal AMux_ADC del capacitor conectado durante calibracion */
+#define PSOC_EVT_CAPTURE_WATCHDOG 0x45u  /* value=state de superMaquina al vencer el watchdog de captura (Timer_2) */
 
 #define PSOC_CMD_STATUS         0xA5u
 #define PSOC_CMD_PGA            0xA6u
@@ -114,7 +115,9 @@ uint8 psoc_hw_get_pga_code(void);
 uint16 psoc_hw_pga_gain_x1000(void);
 
 /* Compatibilidad para el servo legacy de calibracion. La calibracion activa
- * usa Timer_3 y los helpers de abajo, no un tick periodico de sistema. */
+ * usa Timer_1 (modo CAL_TICK, nunca concurrente con los pings) y los helpers
+ * de abajo, no un tick periodico de sistema. Timer_3 quedo sin uso y puede
+ * eliminarse del TopDesign. */
 uint32 psoc_now_ticks(void);
 
 void psoc_cal_timer_start(uint32 progress_ms, uint32 watchdog_ms);

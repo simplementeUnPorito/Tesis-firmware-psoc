@@ -62,7 +62,10 @@
 /* -------------------------------------------------------------------------- */
 #define LEGACY_VDAC_SHADOW_INIT 0x9Cu
 /* FILTER_FIR_NTAPS vive en filter_coeffs.h (unica fuente de verdad,
- * compartida con calibration.c). */
+ * compartida con calibration.c). El descarte del retardo de grupo (63
+ * muestras) lo hace superMaquina en hardware (FIR_DISCARD_SAMPLES en
+ * superMaquina.v, habilitado por cfg[5]); si cambia el numero de taps hay
+ * que actualizar AMBOS lados. */
 #define FILTER_GROUP_DELAY ((FILTER_FIR_NTAPS - 1u) / 2u)   /* 63 muestras */
 
 #ifndef PSOC_LOAD_NV_CAL_ON_BOOT
@@ -119,20 +122,28 @@
 #endif
 
 /* -------------------------------------------------------------------------- */
-static volatile int32  g_adc_raw          = 0;
-
 /* Buffers destino DMA — 3 bytes LE (24 bits signed) por muestra */
 static volatile uint8  g_dma_raw_buf[3]   = {0u, 0u, 0u};
 static volatile uint8  g_dma_filt_buf[3]  = {0u, 0u, 0u};
 
 /* 0 = enviar crudo (default); 1 = enviar filtrado por FIR hardware */
 static volatile uint8  g_stream_mode      = 0u;
-/* Muestras filtradas a descartar tras SyncIn (compensa retardo de grupo FIR) */
-static volatile uint16 g_fir_discard      = 0u;
 
-static volatile uint8  g_capture_raw[PSOC_CAPTURE_MAX_BATCHES][CAPTURE_BATCH_BYTES];
-static volatile uint16 g_batch_fill       = 0u;
-static volatile uint8  g_batch_ready      = 0u;
+/* Buffer plano de captura: N lotes x 30 muestras x 3 bytes. El hot path de la
+ * ISR solo copia 3 bytes al puntero de escritura; el alineado de counts se
+ * difiere al volcado UART (uart_send_capture_batch). */
+static volatile uint8  g_capture_raw[(uint32)PSOC_CAPTURE_MAX_BATCHES * CAPTURE_BATCH_BYTES];
+static volatile uint8 * volatile g_capture_wr  = g_capture_raw;
+static volatile uint8 * volatile g_capture_end = g_capture_raw;
+/* 1 = las muestras guardadas necesitan alineado (division DEC_DIV) al volcar;
+ * 0 = rampa debug u otros datos sinteticos que van tal cual. */
+static volatile uint8  g_capture_align    = 1u;
+/* Muestras filtradas a descartar al entrar a SAMPLING desde ARMED: compensa
+ * el retardo de grupo del FIR (superMaquina mantiene el filtro alimentado
+ * durante ARMED, asi que las primeras 63 salidas corresponden a señal previa
+ * al sync). El objetivo de lotes del hardware se extiende para que no falten
+ * muestras al final (ver psoc_arm). */
+static volatile uint16 g_fir_discard      = 0u;
 static          uint16 g_seq              = 0u;
 static volatile uint16 g_batches_captured = 0u;
 static volatile uint8  g_capture_done     = 0u;
@@ -162,14 +173,23 @@ static          uint8  g_esp_connected  = 0u;
 static          uint8  g_nv_ready       = 0u;
 static          uint8  g_last_calibration_ok = 0u;
 
+/* Mapa de timers fixed (3 en uso; Timer_3 quedo LIBRE y puede eliminarse del
+ * TopDesign — ver docs/psoc_supermaquina_handoff.md):
+ *   Timer   : watchdog del parser UART RX (concurrente con todo lo demas).
+ *   Timer_1 : ping boot/idle + tick de calibracion (nunca concurrentes:
+ *             la calibracion detiene los pings antes de arrancar).
+ *   Timer_2 : LED/esperas cortas + watchdog de captura (nunca concurrentes:
+ *             la ventana de captura apaga LED/esperas). */
 #define TIMER1_MODE_NONE       0u
 #define TIMER1_MODE_BOOT_PING  1u
 #define TIMER1_MODE_IDLE_PING  2u
+#define TIMER1_MODE_CAL_TICK   3u
 
 #define TIMER2_MODE_NONE          0u
 #define TIMER2_MODE_BOOT_LED_OFF  1u
 #define TIMER2_MODE_WAIT          2u
 #define TIMER2_MODE_COMM_BLINK    3u
+#define TIMER2_MODE_CAPTURE_WD    4u
 
 static volatile uint32 g_timer1_remaining_counts = 0u;
 static volatile uint8  g_timer1_mode             = TIMER1_MODE_NONE;
@@ -184,13 +204,16 @@ static volatile uint8  g_timer2_wait_done        = 0u;
 static volatile uint8  g_comm_blink_due          = 0u;
 static volatile uint16 g_comm_blinks_remaining   = 0u;
 static volatile uint8  g_comm_led_active         = 0u;
+static volatile uint8  g_capture_wd_due          = 0u;
 
-static volatile uint32 g_timer3_remaining_counts = 0u;
 static volatile uint8  g_cal_timer_active        = 0u;
 static volatile uint8  g_cal_progress_due        = 0u;
 static volatile uint8  g_cal_watchdog_due        = 0u;
 static volatile uint32 g_cal_progress_period_ms  = 0u;
 static volatile uint32 g_cal_watchdog_remaining_ms = 0u;
+
+/* Margen extra del watchdog de captura sobre la duracion nominal esperada. */
+#define CAPTURE_WD_MARGIN_MS  1500u
 
 /* superMaquina control/status map. */
 #define CE_CTRL_ARM          0x01u
@@ -210,6 +233,8 @@ static volatile uint32 g_cal_watchdog_remaining_ms = 0u;
 #define CE_CFG_IRQ_BATCH_EN  0x04u
 #define CE_CFG_IRQ_SYNC_EN   0x08u
 #define CE_CFG_IRQ_ERROR_EN  0x10u
+/* cfg[5..7] libres. Un contador de descarte FIR en Verilog no entro en los
+ * 24 UDB (E2071): el descarte lo hace el ARM (g_fir_discard). */
 
 #define CE_STATUS_IDLE       0x01u
 #define CE_STATUS_ARMED      0x02u
@@ -224,10 +249,6 @@ static volatile uint32 g_cal_watchdog_remaining_ms = 0u;
 
 #ifndef PSOC_SUPERMAQUINA_OWNS_SYNC_IRQ
 #define PSOC_SUPERMAQUINA_OWNS_SYNC_IRQ 1u
-#endif
-
-#ifndef PSOC_SUPERMAQUINA_FILTER_DISCARD
-#define PSOC_SUPERMAQUINA_FILTER_DISCARD 0u
 #endif
 
 #define CE_STATE_IDLE        0u
@@ -374,10 +395,12 @@ static void capture_engine_clear_flags(void)
     capture_engine_refresh_status();
 }
 
-static void capture_engine_configure_target(void)
+/* Carga el objetivo de lotes en superMaquina. hw_target puede exceder los
+ * lotes realmente almacenados (captura filtrada armada: +3 lotes para cubrir
+ * las 63 muestras de retardo de grupo que el ARM descarta al arrancar). */
+static void capture_engine_configure_target(uint16 hw_target)
 {
-    uint16 target = capture_target_batches();
-    uint16 limit = (uint16)(target - 1u);
+    uint16 limit = (uint16)(hw_target - 1u);
     uint8 saved_cfg = g_ce_cfg_level;
 
     cfg_Write((uint8)(limit & 0xFFu));
@@ -495,43 +518,16 @@ static void timer2_stop_quiet(void)
     CyExitCriticalSection(saved);
 }
 
-static void timer3_start_next_chunk(void)
-{
-    uint16 chunk = timer_take_chunk(&g_timer3_remaining_counts);
-    if (chunk == 0u) { return; }
-    Timer_3_Stop();
-    Timer_3_WritePeriod(chunk);
-    Timer_3_WriteCounter(chunk);
-    (void)Timer_3_ReadStatusRegister();
-    isr_Timer_3_ClearPending();
-    Timer_3_Start();
-}
-
-static void timer3_arm_ms_noirq(uint32 ms)
-{
-    Timer_3_Stop();
-    g_timer3_remaining_counts = timer_ms_to_counts(ms);
-    timer3_start_next_chunk();
-}
-
-static void timer3_stop_quiet(void)
-{
-    Timer_3_Stop();
-    (void)Timer_3_ReadStatusRegister();
-    isr_Timer_3_ClearPending();
-    g_timer3_remaining_counts = 0u;
-}
-
+/* Timer_3 ya no se usa: su rol (tick de calibracion) vive en Timer_1. El
+ * componente puede eliminarse del TopDesign junto con isr_Timer_3. */
 static void fixed_timers_init(void)
 {
     Timer_Init();   Timer_initVar = 1u;   Timer_Stop();   (void)Timer_ReadStatusRegister();
     Timer_1_Init(); Timer_1_initVar = 1u; Timer_1_Stop(); (void)Timer_1_ReadStatusRegister();
     Timer_2_Init(); Timer_2_initVar = 1u; Timer_2_Stop(); (void)Timer_2_ReadStatusRegister();
-    Timer_3_Init(); Timer_3_initVar = 1u; Timer_3_Stop(); (void)Timer_3_ReadStatusRegister();
     isr_Timer_ClearPending();
     isr_Timer_1_ClearPending();
     isr_Timer_2_ClearPending();
-    isr_Timer_3_ClearPending();
 }
 
 static void rx_watchdog_start(void)
@@ -583,6 +579,32 @@ static void comm_led_stop(void)
     g_comm_blinks_remaining = 0u;
 }
 
+/* ── Watchdog de captura (Timer_2, libre durante la ventana silenciosa) ──
+ * Si superMaquina nunca llega a DONE (p.ej. ADC detenido, DMA sin disparos),
+ * el equipo antes quedaba mudo para siempre. Ahora el ARM se despierta al
+ * vencer la duracion nominal + margen y aborta con diagnostico. */
+static uint32 capture_expected_ms(uint16 batches)
+{
+    /* 30 muestras/lote a ~2929 S/s ≈ 10.25 ms por lote. */
+    return ((uint32)batches * (uint32)BATCH_SAMPLES * 1000u) /
+           (uint32)PSOC_REPORTED_SRATE_HZ;
+}
+
+static void capture_watchdog_arm(void)
+{
+    uint32 ms = capture_expected_ms(capture_target_batches());
+    g_capture_wd_due = 0u;
+    timer2_arm_ms(ms + (ms >> 1u) + CAPTURE_WD_MARGIN_MS, TIMER2_MODE_CAPTURE_WD);
+}
+
+static void capture_watchdog_stop(void)
+{
+    if (g_timer2_mode == TIMER2_MODE_CAPTURE_WD) {
+        timer2_stop_quiet();
+    }
+    g_capture_wd_due = 0u;
+}
+
 static void runtime_timers_stop_for_quiet_window(void)
 {
     rx_watchdog_stop();
@@ -590,6 +612,8 @@ static void runtime_timers_stop_for_quiet_window(void)
     comm_led_stop();
 }
 
+/* Tick de calibracion sobre Timer_1: progreso periodico + watchdog global.
+ * Nunca concurre con los pings (los callers detienen idle/boot ping antes). */
 void psoc_cal_timer_start(uint32 progress_ms, uint32 watchdog_ms)
 {
     uint8 saved = CyEnterCriticalSection();
@@ -600,7 +624,10 @@ void psoc_cal_timer_start(uint32 progress_ms, uint32 watchdog_ms)
     g_cal_progress_period_ms = progress_ms;
     g_cal_watchdog_remaining_ms = watchdog_ms;
     g_cal_timer_active = 1u;
-    timer3_arm_ms_noirq(progress_ms);
+    g_idle_ping_due = 0u;
+    g_idle_ping_armed = 0u;
+    g_boot_ping_due = 0u;
+    timer1_arm_ms(progress_ms, TIMER1_MODE_CAL_TICK);
     CyExitCriticalSection(saved);
 }
 
@@ -612,7 +639,9 @@ void psoc_cal_timer_stop(void)
     g_cal_watchdog_due = 0u;
     g_cal_progress_period_ms = 0u;
     g_cal_watchdog_remaining_ms = 0u;
-    timer3_stop_quiet();
+    if (g_timer1_mode == TIMER1_MODE_CAL_TICK) {
+        timer1_stop_quiet();
+    }
     CyExitCriticalSection(saved);
 }
 
@@ -636,20 +665,135 @@ uint8 psoc_cal_timer_take_watchdog_due(void)
     return due;
 }
 
-static void capture_reset_locked(void)
+static void capture_reset_locked(uint16 stored_batches)
 {
-    g_batch_fill       = 0u;
-    g_batch_ready      = 0u;
     g_batches_sent     = 0u;
     g_batches_captured = 0u;
     g_capture_done     = 0u;
+    g_capture_wd_due   = 0u;
     g_dbg_cnt          = 0u;
     g_seq              = 0u;
+    g_fir_discard      = 0u;
+    g_capture_wr       = g_capture_raw;
+    g_capture_end      = g_capture_raw + ((uint32)stored_batches * CAPTURE_BATCH_BYTES);
+}
+
+/* Reconstruye int32 signed a partir de 3 bytes LE (24 bits, extensión de signo) */
+static int32 dma_buf_to_i24(const volatile uint8 *buf)
+{
+    uint32 u = (uint32)buf[0] | ((uint32)buf[1] << 8u) | ((uint32)buf[2] << 16u);
+    return (u & 0x00800000UL) ? (int32)(u | 0xFF000000UL) : (int32)u;
+}
+
+/* ── Handlers de muestra de superMaquina ─────────────────────────────────────
+ * El IRQ único de superMaquina llega una vez por muestra aceptada. Para no
+ * decidir el modo en cada interrupción, el trabajo por muestra se resuelve
+ * con un puntero a función que se fija al cambiar de modo:
+ *   captura raw/filtrada : copiar 3 bytes crudos al puntero de escritura
+ *                          (el alineado se difiere al volcado UART).
+ *   captura debug        : rampa sintética paceada por el ADC real.
+ *   bypass calibración   : alinear y publicar la muestra para calibration.c.
+ *   armed-wait           : primer IRQ tras el sync — bookkeeping de la
+ *                          transición ARMED→SAMPLING y cambio al handler de
+ *                          captura elegido al armar.
+ */
+typedef void (*sm_sample_handler_t)(void);
+
+static void sm_sample_noop(void)
+{
+}
+
+static void sm_sample_capture_raw(void)
+{
+    volatile uint8 *dst = g_capture_wr;
+    if (dst >= g_capture_end) { return; }
+    dst[0] = g_dma_raw_buf[0];
+    dst[1] = g_dma_raw_buf[1];
+    dst[2] = g_dma_raw_buf[2];
+    dst += SAMPLE_BYTES;
+    g_capture_wr = dst;
+    if (dst >= g_capture_end) { g_capture_done = 1u; }
+}
+
+static void sm_sample_capture_filt(void)
+{
+    volatile uint8 *dst;
+    if (g_fir_discard != 0u) {
+        /* Salidas del FIR previas al sync (retardo de grupo): descartar. */
+        g_fir_discard--;
+        return;
+    }
+    dst = g_capture_wr;
+    if (dst >= g_capture_end) { return; }
+    dst[0] = g_dma_filt_buf[0];
+    dst[1] = g_dma_filt_buf[1];
+    dst[2] = g_dma_filt_buf[2];
+    dst += SAMPLE_BYTES;
+    g_capture_wr = dst;
+    /* El objetivo del hardware puede estar extendido (+3 lotes): el fin real
+     * lo marca el llenado del buffer, no el DONE de superMaquina. */
+    if (dst >= g_capture_end) { g_capture_done = 1u; }
+}
+
+#if PSOC_RAMP_DEBUG_ENABLE
+static void sm_sample_capture_debug(void)
+{
+    volatile uint8 *dst = g_capture_wr;
+    uint32 val;
+    if (dst >= g_capture_end) { return; }
+    val = g_dbg_cnt++ & 0x00FFFFFFu;
+    dst[0] = (uint8)( val         & 0xFFu);
+    dst[1] = (uint8)((val >>  8u) & 0xFFu);
+    dst[2] = (uint8)((val >> 16u) & 0xFFu);
+    dst += SAMPLE_BYTES;
+    g_capture_wr = dst;
+    if (dst >= g_capture_end) { g_capture_done = 1u; }
+}
+#endif
+
+static void sm_sample_cal_raw(void)
+{
+    psoc_adc_note_isr_sample(
+        psoc_adc_counts_right_aligned(dma_buf_to_i24(g_dma_raw_buf)));
+}
+
+static void sm_sample_cal_filt(void)
+{
+    psoc_adc_note_isr_filtered_sample(
+        psoc_adc_counts_right_aligned(dma_buf_to_i24(g_dma_filt_buf)));
+}
+
+static volatile sm_sample_handler_t g_sm_sample_handler = sm_sample_noop;
+/* Handler de captura elegido al armar; sm_sample_armed_wait lo instala al
+ * detectar la transición ARMED→SAMPLING. */
+static volatile sm_sample_handler_t g_sm_capture_handler = sm_sample_noop;
+
+static sm_sample_handler_t capture_handler_for_source(uint8 source)
+{
+#if PSOC_RAMP_DEBUG_ENABLE
+    if (source == CE_CFG_SRC_DEBUG) { return sm_sample_capture_debug; }
+#endif
+    if (source == CE_CFG_SRC_FILTER || source == CE_CFG_SRC_COMBINED) {
+        return sm_sample_capture_filt;
+    }
+    return sm_sample_capture_raw;
+}
+
+static void sm_sample_armed_wait(void)
+{
+    /* Primer IRQ tras el sync (IRQ_SYNC_EN): superMaquina ya está muestreando.
+     * No hay muestra que copiar todavía; solo bookkeeping de la ventana. */
+    runtime_timers_stop_for_quiet_window();
+    capture_watchdog_arm();
+    g_state = PSOC_SAMPLING;
+    g_sm_sample_handler = g_sm_capture_handler;
+    uart_send_diag(PSOC_EVT_SYNC_RISE, CE_STATE_SAMPLING);
 }
 
 static void psoc_enter_sampling(uint8 debugMode)
 {
     uint8 saved;
+    uint8 source;
     uint16 target = capture_target_batches();
     ADC_StopConvert();
     runtime_timers_stop_for_quiet_window();
@@ -660,13 +804,24 @@ static void psoc_enter_sampling(uint8 debugMode)
     (void)debugMode;
     g_debug_psoc = 0u;
 #endif
-    capture_reset_locked();
+    capture_reset_locked(target);
     g_state = PSOC_SAMPLING;
     CyExitCriticalSection(saved);
-    capture_engine_configure_target();
-    capture_engine_set_source(capture_engine_source_from_stream(g_stream_mode));
+    source = capture_engine_source_from_stream(g_stream_mode);
+#if PSOC_RAMP_DEBUG_ENABLE
+    g_capture_align = (source == CE_CFG_SRC_DEBUG) ? 0u : 1u;
+#else
+    g_capture_align = 1u;
+#endif
+    capture_engine_configure_target(target);
+    /* start-now: el FIR viene alimentado en bypass, historia caliente — sin
+     * descarte de retardo de grupo. */
+    capture_engine_set_source(source);
+    g_sm_capture_handler = capture_handler_for_source(source);
+    g_sm_sample_handler = g_sm_capture_handler;
     capture_engine_set_enabled(1u, 0u);
     capture_engine_clear_flags();
+    capture_watchdog_arm();
     capture_engine_pulse(CE_CTRL_START_NOW);
     if (g_n_batches > PSOC_CAPTURE_MAX_BATCHES) {
         /* Pedido real recortado al cap físico — avisar en vez de truncar en
@@ -677,105 +832,16 @@ static void psoc_enter_sampling(uint8 debugMode)
     ADC_StartConvert();
 }
 
-/* Reconstruye int32 signed a partir de 3 bytes LE (24 bits, extensión de signo) */
-static int32 dma_buf_to_i24(const volatile uint8 *buf)
-{
-    uint32 u = (uint32)buf[0] | ((uint32)buf[1] << 8u) | ((uint32)buf[2] << 16u);
-    return (u & 0x00800000UL) ? (int32)(u | 0xFF000000UL) : (int32)u;
-}
-
-static void capture_service_raw_dma_sample(void)
-{
-    g_adc_raw = psoc_adc_counts_right_aligned(dma_buf_to_i24(g_dma_raw_buf));
-    psoc_adc_note_isr_sample(g_adc_raw);   /* mantiene ruta calibración activa */
-
-#if PSOC_RAMP_DEBUG_ENABLE
-    if (g_stream_mode != 0u && g_debug_psoc == 0u) { return; }  /* modo FIR: el filtro captura */
-#else
-    if (g_stream_mode != 0u) { return; }                         /* modo FIR: el filtro captura */
-#endif
-
-    if (g_state == PSOC_SAMPLING && g_capture_done == 0u &&
-        g_batches_captured < capture_target_batches() &&
-        g_batch_fill < BATCH_SAMPLES)
-    {
-        uint16 pos = (uint16)(g_batch_fill * SAMPLE_BYTES);
-#if PSOC_RAMP_DEBUG_ENABLE
-        int32 val = g_debug_psoc ? (int32)(g_dbg_cnt++ & 0x00FFFFFFu) : g_adc_raw;
-#else
-        int32 val = g_adc_raw;
-#endif
-        g_capture_raw[g_batches_captured][pos]      = (uint8)( val        & 0xFFu);
-        g_capture_raw[g_batches_captured][pos + 1u] = (uint8)((val >>  8u) & 0xFFu);
-        g_capture_raw[g_batches_captured][pos + 2u] = (uint8)((val >> 16u) & 0xFFu);
-        g_batch_fill++;
-        if (g_batch_fill >= BATCH_SAMPLES)
-        {
-            g_batch_fill = 0u;
-            g_batches_captured++;
-            if (g_batches_captured >= capture_target_batches()) {
-                g_capture_done = 1u;
-            }
-        }
-    }
-}
-
+/* Fallbacks legacy (solo compilados con PSOC_SUPERMAQUINA_OWNS_DMA_IRQ=0,
+ * TopDesign viejo con ISRs de DMA separadas): despachan al mismo handler. */
 CY_ISR(isr_DMA_DelSig_RAM_Handler)
 {
-    capture_service_raw_dma_sample();
-}
-
-/* ISR: muestra FILTRADA (DMA_Filter_RAM depositó 3 bytes en g_dma_filt_buf,
- * uno por salida nueva del Filter de hardware — Canal A). Sirve a DOS
- * consumidores independientes:
- *  - calibration.c (cal_pi_run_service), vía psoc_adc_note_isr_filtered_sample,
- *    SIEMPRE, sin importar g_stream_mode/g_fir_discard (la calibración tiene
- *    su propio descarte de asentamiento/retardo de grupo, ver cal_pi_stage_begin).
- *  - el stream filtrado hacia el ESP/web (captura en g_capture_raw), gateado
- *    por g_stream_mode/g_fir_discard como antes. */
-static void capture_service_filter_dma_sample(void)
-{
-    int32 filt = psoc_adc_counts_right_aligned(dma_buf_to_i24(g_dma_filt_buf));
-
-    psoc_adc_note_isr_filtered_sample(filt);
-
-    if (g_fir_discard > 0u) { g_fir_discard--; return; }  /* descarte retardo grupo FIR */
-    if (g_stream_mode == 0u) { return; }                   /* modo RAW: no capturar filtrado */
-
-    if (g_state == PSOC_SAMPLING && g_capture_done == 0u &&
-        g_batches_captured < capture_target_batches() &&
-        g_batch_fill < BATCH_SAMPLES)
-    {
-        uint16 pos = (uint16)(g_batch_fill * SAMPLE_BYTES);
-        g_capture_raw[g_batches_captured][pos]      = (uint8)( filt        & 0xFFu);
-        g_capture_raw[g_batches_captured][pos + 1u] = (uint8)((filt >>  8u) & 0xFFu);
-        g_capture_raw[g_batches_captured][pos + 2u] = (uint8)((filt >> 16u) & 0xFFu);
-        g_batch_fill++;
-        if (g_batch_fill >= BATCH_SAMPLES)
-        {
-            g_batch_fill = 0u;
-            g_batches_captured++;
-            if (g_batches_captured >= capture_target_batches()) {
-                g_capture_done = 1u;
-            }
-        }
-    }
-}
-
-static void capture_service_selected_dma_sample(void)
-{
-    uint8 source = (uint8)(g_ce_cfg_level & CE_CFG_SRC_MASK);
-
-    if (source == CE_CFG_SRC_FILTER || source == CE_CFG_SRC_COMBINED) {
-        capture_service_filter_dma_sample();
-    } else {
-        capture_service_raw_dma_sample();
-    }
+    g_sm_sample_handler();
 }
 
 CY_ISR(isr_DMA_Filter_RAM_Handler)
 {
-    capture_service_filter_dma_sample();
+    g_sm_sample_handler();
 }
 
 CY_ISR(isr_Timer)
@@ -798,11 +864,29 @@ CY_ISR(isr_Timer_1)
 
     if (g_timer1_mode == TIMER1_MODE_BOOT_PING) {
         g_boot_ping_due = 1u;
+        g_timer1_mode = TIMER1_MODE_NONE;
     } else if (g_timer1_mode == TIMER1_MODE_IDLE_PING) {
         g_idle_ping_due = 1u;
         g_idle_ping_armed = 0u;
+        g_timer1_mode = TIMER1_MODE_NONE;
+    } else if (g_timer1_mode == TIMER1_MODE_CAL_TICK) {
+        g_timer1_mode = TIMER1_MODE_NONE;
+        if (g_cal_timer_active) {
+            g_cal_progress_due = 1u;
+            if (g_cal_watchdog_remaining_ms <= g_cal_progress_period_ms) {
+                g_cal_watchdog_remaining_ms = 0u;
+                g_cal_watchdog_due = 1u;
+                g_cal_timer_active = 0u;
+            } else {
+                g_cal_watchdog_remaining_ms -= g_cal_progress_period_ms;
+                g_timer1_mode = TIMER1_MODE_CAL_TICK;
+                g_timer1_remaining_counts = timer_ms_to_counts(g_cal_progress_period_ms);
+                timer1_start_next_chunk();
+            }
+        }
+    } else {
+        g_timer1_mode = TIMER1_MODE_NONE;
     }
-    g_timer1_mode = TIMER1_MODE_NONE;
 }
 
 CY_ISR(isr_Timer_2)
@@ -820,30 +904,10 @@ CY_ISR(isr_Timer_2)
         g_timer2_wait_done = 1u;
     } else if (g_timer2_mode == TIMER2_MODE_COMM_BLINK) {
         g_comm_blink_due = 1u;
+    } else if (g_timer2_mode == TIMER2_MODE_CAPTURE_WD) {
+        g_capture_wd_due = 1u;
     }
     g_timer2_mode = TIMER2_MODE_NONE;
-}
-
-CY_ISR(isr_Timer_3)
-{
-    (void)Timer_3_ReadStatusRegister();
-    Timer_3_Stop();
-    if (g_timer3_remaining_counts != 0u) {
-        timer3_start_next_chunk();
-        return;
-    }
-
-    if (g_cal_timer_active) {
-        g_cal_progress_due = 1u;
-        if (g_cal_watchdog_remaining_ms <= g_cal_progress_period_ms) {
-            g_cal_watchdog_remaining_ms = 0u;
-            g_cal_watchdog_due = 1u;
-            g_cal_timer_active = 0u;
-        } else {
-            g_cal_watchdog_remaining_ms -= g_cal_progress_period_ms;
-            timer3_arm_ms_noirq(g_cal_progress_period_ms);
-        }
-    }
 }
 
 CY_ISR(isr_SyncIn)
@@ -857,9 +921,6 @@ CY_ISR(isr_SyncIn)
         uart_send_diag(PSOC_EVT_SYNC_RISE, g_state);
         if (g_state == PSOC_ARMED)
         {
-            if (g_stream_mode != 0u) {
-                g_fir_discard = FILTER_GROUP_DELAY;  /* compensar retardo grupo FIR */
-            }
             psoc_enter_sampling(g_debug_psoc);
         }
     }
@@ -867,70 +928,66 @@ CY_ISR(isr_SyncIn)
     {
         uart_send_diag(PSOC_EVT_SYNC_FALL, g_state);
         ADC_StopConvert();
+        capture_watchdog_stop();
         idle_ping_schedule();
         saved = CyEnterCriticalSection();
-        g_batch_fill       = 0u;
-        g_batch_ready      = 0u;
-        g_batches_sent     = 0u;
-        g_batches_captured = 0u;
-        g_capture_done     = 0u;
-        g_state            = PSOC_IDLE;
+        capture_reset_locked(capture_target_batches());
+        g_state = PSOC_IDLE;
         CyExitCriticalSection(saved);
     }
 }
 
+/* IRQ único de superMaquina. Fast path: una sola lectura de status y el
+ * handler de muestra vigente; el resto (fin de captura, error, botón) va por
+ * el camino lento, que ocurre a lo sumo unas pocas veces por captura. */
 CY_ISR(isr_SuperMaquina_Handler)
 {
-    uint8 fw_state_at_entry = g_state;
+    uint8 st = status_Read();
 
-    capture_engine_refresh_status();
+    if ((st & (CE_STATUS_DONE | CE_STATUS_ERROR | CE_STATUS_BUTTON)) == 0u)
+    {
+        g_sm_sample_handler();
+        return;
+    }
+
+    g_ce_status = st;
 
 #if PSOC_BUTTON_CAL_ENABLE
-    if ((g_ce_status & CE_STATUS_BUTTON) != 0u)
+    if ((st & CE_STATUS_BUTTON) != 0u)
     {
         g_cal_button_pressed = 1u;
         capture_engine_clear_flags();
-    }
-#endif
-
-    if ((g_ce_status & CE_STATUS_ERROR) == 0u)
-    {
-        if (fw_state_at_entry == PSOC_SAMPLING ||
-            ((g_ce_status & CE_STATUS_IDLE) != 0u && fw_state_at_entry != PSOC_ARMED))
+        if ((st & (CE_STATUS_DONE | CE_STATUS_ERROR)) == 0u)
         {
-            capture_service_selected_dma_sample();
+            /* El botón puede coincidir con una muestra de bypass (calibración
+             * en curso): no perderla. */
+            g_sm_sample_handler();
+            return;
         }
     }
-
-    if ((g_ce_status & CE_STATUS_SAMPLING) != 0u && fw_state_at_entry == PSOC_ARMED)
-    {
-        runtime_timers_stop_for_quiet_window();
-        if (g_stream_mode != 0u) {
-#if PSOC_SUPERMAQUINA_FILTER_DISCARD
-            g_fir_discard = FILTER_GROUP_DELAY;
-#else
-            g_fir_discard = 0u;
 #endif
+
+    if ((st & CE_STATUS_ERROR) != 0u)
+    {
+        g_ce_error = error_Read();
+        g_sm_sample_handler = sm_sample_noop;
+        if (g_state != PSOC_SAMPLING) {
+            g_state = PSOC_SAMPLING;   /* canaliza el cierre por service_runtime */
         }
-        g_state = PSOC_SAMPLING;
-        uart_send_diag(PSOC_EVT_SYNC_RISE, g_ce_state);
+        g_capture_done = 1u;
+        uart_send_diag(PSOC_EVT_CAPTURE_DONE, g_ce_error);
+        return;
     }
 
-    if ((g_ce_status & CE_STATUS_DONE) != 0u)
+    if ((st & CE_STATUS_DONE) != 0u)
     {
+        /* La última muestra del último lote llega junto con DONE. */
+        g_sm_sample_handler();
+        g_sm_sample_handler = sm_sample_noop;
         if (g_state == PSOC_ARMED) {
             g_state = PSOC_SAMPLING;
         }
         g_capture_done = 1u;
-    }
-
-    if ((g_ce_status & CE_STATUS_ERROR) != 0u)
-    {
-        if (g_state != PSOC_SAMPLING) {
-            g_state = PSOC_SAMPLING;
-        }
-        g_capture_done = 1u;
-        uart_send_diag(PSOC_EVT_CAPTURE_DONE, g_ce_error);
     }
 }
 
@@ -942,6 +999,60 @@ CY_ISR(isr_Button_Handler)
 #if PSOC_BUTTON_CAL_ENABLE
     g_cal_button_pressed = 1u;
 #endif
+}
+
+/* ── Trampas de robustez ─────────────────────────────────────────────────────
+ * 1) isr_SyncIn: calibration.c la deshabilita/rehabilita alrededor de una
+ *    corrida (cal_async_complete). Con PSOC_SUPERMAQUINA_OWNS_SYNC_IRQ el
+ *    vector nunca se instalaba, así que ese re-enable dejaba la NVIC apuntando
+ *    a IntDefaultHandler (while(1)): el siguiente flanco de SYNC_IN congelaba
+ *    el equipo. Se instala SIEMPRE un vector seguro.
+ * 2) Cualquier IRQ que siga apuntando a IntDefaultHandler se re-vector a un
+ *    trap que reporta el número de IRQ por UART (EVT 0x7E) y la deshabilita,
+ *    en vez de colgar el firmware.
+ * 3) HardFault (EVT 0x7F) queda en loop parpadeando el LED rápido. */
+static void led_write(uint8 value);
+
+CY_ISR(isr_SyncIn_SafeVector)
+{
+#if defined(SYNC_IN_INTSTAT)
+    (void)SYNC_IN_ClearInterrupt();
+#endif
+}
+
+extern void IntDefaultHandler(void);
+
+CY_ISR(unexpected_irq_trap)
+{
+    uint32 vecactive = CY_GET_REG32((reg32 *)0xE000ED04u) & 0x1FFu;
+    uint8 irq_n = (uint8)((vecactive >= 16u) ? (vecactive - 16u) : 0xFFu);
+    if (irq_n < CY_NUM_INTERRUPTS) {
+        CyIntDisable(irq_n);
+    }
+    uart_send_diag(0x7Eu, irq_n);
+}
+
+CY_ISR(hardfault_trap)
+{
+    uart_send_diag(0x7Fu, 0u);
+    for (;;)
+    {
+        led_write(0u);
+        CyDelay(60u);
+        led_write(1u);
+        CyDelay(60u);
+    }
+}
+
+static void install_irq_traps(void)
+{
+    uint8 i;
+    for (i = 0u; i < CY_NUM_INTERRUPTS; i++) {
+        if (CyIntGetVector(i) == (cyisraddress)IntDefaultHandler) {
+            (void)CyIntSetVector(i, unexpected_irq_trap);
+        }
+    }
+    (void)CyIntSetSysVector(3u, hardfault_trap); /* HardFault */
 }
 
 static void led_write(uint8 value)
@@ -990,10 +1101,13 @@ uint32 psoc_now_ticks(void)
 
 /* Selecciona la ruta en superMaquina. Con ENGINE_ENABLE=0 actúa como bypass
  * para calibración/diagnóstico; con ENGINE_ENABLE=1 decide qué DRQ deja pasar
- * durante captura. */
+ * durante captura. Instala además el handler de muestra de bypass que publica
+ * la muestra alineada para calibration.c. */
 void dma_route_select(uint8 use_filter)
 {
     capture_engine_set_source(capture_engine_source_from_stream(use_filter));
+    g_sm_sample_handler = (use_filter != 0u) ? sm_sample_cal_filt
+                                             : sm_sample_cal_raw;
 }
 
 static uint8 psoc_seed_calibration_from_nv(uint8 reset_defaults_if_missing)
@@ -1037,16 +1151,50 @@ static void PGAvdac_Set(uint8 code)
     }
 }
 
+/* Lotes extra a pedirle a superMaquina en captura filtrada armada, para que
+ * tras descartar las 63 muestras de retardo de grupo el buffer igual reciba
+ * los 30*N puntos pedidos: ceil(63/30) = 3. */
+#define CAPTURE_FILTER_EXTRA_BATCHES \
+    ((uint16)((FILTER_GROUP_DELAY + BATCH_SAMPLES - 1u) / BATCH_SAMPLES))
+
 static void psoc_arm(void)
 {
     uint8 saved;
+    uint8 source;
+    uint16 stored_target = capture_target_batches();
+    uint16 hw_target;
+    uint16 discard = 0u;
+
     psoc_prepare_capture_path();
+    source = capture_engine_source_from_stream(g_stream_mode);
+    hw_target = stored_target;
+    if (source == CE_CFG_SRC_FILTER || source == CE_CFG_SRC_COMBINED) {
+        /* Ruta filtrada armada: superMaquina mantiene el FIR alimentado en
+         * ARMED (historia caliente) y el ARM descarta las primeras 63 salidas
+         * tras el sync; asi la primera muestra almacenada corresponde al
+         * instante del sync, alineada con la ruta raw. El objetivo del
+         * hardware se extiende para cubrir el descarte. */
+        discard = FILTER_GROUP_DELAY;
+        if (stored_target > (uint16)(PSOC_CAPTURE_MAX_BATCHES - CAPTURE_FILTER_EXTRA_BATCHES)) {
+            stored_target = (uint16)(PSOC_CAPTURE_MAX_BATCHES - CAPTURE_FILTER_EXTRA_BATCHES);
+            uart_send_diag(PSOC_EVT_CAPTURE_CLAMPED, diag_u16_sat(capture_target_batches()));
+        }
+        hw_target = (uint16)(stored_target + CAPTURE_FILTER_EXTRA_BATCHES);
+    }
+#if PSOC_RAMP_DEBUG_ENABLE
+    g_capture_align = (source == CE_CFG_SRC_DEBUG) ? 0u : 1u;
+#else
+    g_capture_align = 1u;
+#endif
     saved = CyEnterCriticalSection();
-    capture_reset_locked();
+    capture_reset_locked(stored_target);
+    g_fir_discard = discard;
     g_state = PSOC_ARMED;
     CyExitCriticalSection(saved);
-    capture_engine_configure_target();
-    capture_engine_set_source(capture_engine_source_from_stream(g_stream_mode));
+    capture_engine_configure_target(hw_target);
+    capture_engine_set_source(source);
+    g_sm_capture_handler = capture_handler_for_source(source);
+    g_sm_sample_handler = sm_sample_armed_wait;
     capture_engine_set_enabled(1u, 1u);
     capture_engine_clear_flags();
     capture_engine_pulse(CE_CTRL_ARM);
@@ -1075,11 +1223,14 @@ static uint8 psoc_start_calibration_if_idle(uint8 send_ack)
     g_batches_captured = 0u;
     g_capture_done = 0u;
     g_last_calibration_ok = 0u;
+    uart_send_diag(PSOC_EVT_BOOT, 0xA1u);  /* BREADCRUMB temporal */
     psoc_calibration_servo_abort();
     idle_ping_stop();
     comm_led_stop();
+    uart_send_diag(PSOC_EVT_BOOT, 0xA2u);  /* BREADCRUMB temporal */
     capture_engine_set_enabled(0u, 0u);
     capture_engine_clear_flags();
+    uart_send_diag(PSOC_EVT_BOOT, 0xA3u);  /* BREADCRUMB temporal */
     /* La ruta del DMA (raw vs Filter) y el AMux los gobierna cal_pi_stage_begin
      * (calibration.c) por etapa -- no hace falta forzar nada aca. */
     uart_send_diag(PSOC_EVT_BOOT, PSOC_HW_CLASS);
@@ -1147,8 +1298,8 @@ static void uart_send_capture_batch(uint16 batchIndex)
 {
     uint8  frame[FRAME_BYTES];
     uint8 *p;
+    const volatile uint8 *src;
     uint16 i;
-    uint16 pos;
     uint8  crc = 0u;
 
     frame[0] = 0xABu;
@@ -1156,13 +1307,23 @@ static void uart_send_capture_batch(uint16 batchIndex)
     frame[2] = (uint8)( g_seq        & 0xFFu);
     frame[3] = (uint8)((g_seq >> 8u) & 0xFFu);
 
+    /* La ISR guarda los 3 bytes crudos del DMA sin procesar; el alineado a
+     * counts (division por DEC_DIV) se hace acá, fuera de la ventana crítica
+     * de muestreo. La rampa debug va tal cual (g_capture_align=0). */
+    src = &g_capture_raw[(uint32)batchIndex * CAPTURE_BATCH_BYTES];
     p = &frame[4];
-    for (i = 0u; i < BATCH_SAMPLES; i++, p += 3u)
+    for (i = 0u; i < BATCH_SAMPLES; i++, p += 3u, src += 3u)
     {
-        pos  = (uint16)(i * SAMPLE_BYTES);
-        p[0] = g_capture_raw[batchIndex][pos];
-        p[1] = g_capture_raw[batchIndex][pos + 1u];
-        p[2] = g_capture_raw[batchIndex][pos + 2u];
+        if (g_capture_align) {
+            int32 val = psoc_adc_counts_right_aligned(dma_buf_to_i24(src));
+            p[0] = (uint8)( val         & 0xFFu);
+            p[1] = (uint8)((val >>  8u) & 0xFFu);
+            p[2] = (uint8)((val >> 16u) & 0xFFu);
+        } else {
+            p[0] = src[0];
+            p[1] = src[1];
+            p[2] = src[2];
+        }
     }
 
     for (i = 0u; i < (FRAME_BYTES - 1u); i++) { crc ^= frame[i]; }
@@ -1308,15 +1469,18 @@ static void uart_service(void)
                             psoc_prepare_capture_path();
                             psoc_enter_sampling(1u);
                         } else {
+                            uint8 saved;
                             ADC_StopConvert();
+                            capture_watchdog_stop();
+                            g_sm_sample_handler = sm_sample_noop;
                             capture_engine_set_enabled(0u, 0u);
                             capture_engine_clear_flags();
                             psoc_prepare_capture_path();
                             idle_ping_schedule();
-                            g_batch_fill   = 0u;
-                            g_batch_ready  = 0u;
-                            g_capture_done = 0u;
-                            g_state        = PSOC_IDLE;
+                            saved = CyEnterCriticalSection();
+                            capture_reset_locked(capture_target_batches());
+                            g_state = PSOC_IDLE;
+                            CyExitCriticalSection(saved);
                         }
 #else
                         (void)rx_p1;
@@ -1374,9 +1538,6 @@ static void uart_service(void)
 #endif
                         }
                         dma_route_select(g_stream_mode);
-                        if (g_stream_mode != 0u) {
-                            g_fir_discard = 0u;  /* reset — se recarga en próximo SyncIn */
-                        }
                         uart_send_cfg_ack(PSOC_CMD_SELECT_STREAM, g_stream_mode);
                         led_toggle();
                         break;
@@ -1420,11 +1581,27 @@ static void service_runtime(void)
 
     if (g_state == PSOC_SAMPLING) {
         if (g_capture_done == 0u) {
-            return;   /* Silencio total: sin UART RX/TX, sin LED, sin pings. */
+            if (!g_capture_wd_due) {
+                return;   /* Silencio total: sin UART RX/TX, sin LED, sin pings. */
+            }
+            /* Watchdog: la captura no llegó a DONE en el tiempo esperado
+             * (ADC parado, DMA sin disparos, sync perdido...). Abortar con
+             * diagnóstico en vez de quedar mudo para siempre. */
+            g_capture_wd_due = 0u;
+            g_sm_sample_handler = sm_sample_noop;
+            capture_engine_pulse(CE_CTRL_STOP);
+            uart_send_diag(PSOC_EVT_CAPTURE_WATCHDOG, state_Read());
+            g_capture_done = 1u;
         }
         ADC_StopConvert();
+        capture_watchdog_stop();
+        g_sm_sample_handler = sm_sample_noop;
         capture_engine_set_enabled(0u, 0u);
         capture_engine_clear_flags();
+        /* Lotes completos realmente escritos por la ISR (los parciales de un
+         * aborto se descartan). */
+        g_batches_captured =
+            (uint16)(((uint32)(g_capture_wr - g_capture_raw)) / CAPTURE_BATCH_BYTES);
         idle_ping_schedule();
         uart_send_diag(PSOC_EVT_CAPTURE_DONE, diag_u16_sat(g_batches_captured));
         g_capture_done = 0u;
@@ -1492,6 +1669,13 @@ static void wait_for_esp(void)
         service_runtime();
         if (g_esp_connected) {
             break;
+        }
+
+        /* Self-heal: si una calibración por botón usó Timer_1 (tick de cal)
+         * y terminó, el ping de arranque debe renacer solo. */
+        if (g_state == PSOC_IDLE && g_timer1_mode == TIMER1_MODE_NONE &&
+            !g_boot_ping_due && !g_idle_ping_armed && !g_idle_ping_due) {
+            g_boot_ping_due = 1u;
         }
 
         if (g_boot_ping_due) {
@@ -1722,7 +1906,7 @@ int main(void)
     isr_Timer_StartEx(isr_Timer);
     isr_Timer_1_StartEx(isr_Timer_1);
     isr_Timer_2_StartEx(isr_Timer_2);
-    isr_Timer_3_StartEx(isr_Timer_3);
+    /* isr_Timer_3 ya no se registra: Timer_3 quedó libre (ver mapa arriba). */
 #if !PSOC_SUPERMAQUINA_OWNS_SYNC_IRQ
 #ifdef CY_ISR_isr_SyncIn_H
     isr_SyncIn_StartEx(isr_SyncIn);

@@ -159,31 +159,31 @@ CYPACKED typedef struct
 #define cy_cfg_data_table ((const cy_cfg_addrvalue_t CYFAR *)0x480000A8u)
 
 /* UCFG_BCTL0 Address: CYREG_BCTL0_MDCLK_EN Size (bytes): 16 */
-#define BS_UCFG_BCTL0_VAL ((const uint8 CYFAR *)0x48001120u)
+#define BS_UCFG_BCTL0_VAL ((const uint8 CYFAR *)0x48001110u)
 
 /* IOPINS0_0 Address: CYREG_PRT0_DM0 Size (bytes): 8 */
-#define BS_IOPINS0_0_VAL ((const uint8 CYFAR *)0x48001130u)
+#define BS_IOPINS0_0_VAL ((const uint8 CYFAR *)0x48001120u)
 
 /* IOPINS0_7 Address: CYREG_PRT12_DM0 Size (bytes): 8 */
-#define BS_IOPINS0_7_VAL ((const uint8 CYFAR *)0x48001138u)
+#define BS_IOPINS0_7_VAL ((const uint8 CYFAR *)0x48001128u)
 
 /* IOPINS0_1 Address: CYREG_PRT1_DR Size (bytes): 10 */
-#define BS_IOPINS0_1_VAL ((const uint8 CYFAR *)0x48001140u)
+#define BS_IOPINS0_1_VAL ((const uint8 CYFAR *)0x48001130u)
 
 /* IOPINS0_2 Address: CYREG_PRT2_DR Size (bytes): 10 */
-#define BS_IOPINS0_2_VAL ((const uint8 CYFAR *)0x4800114Cu)
+#define BS_IOPINS0_2_VAL ((const uint8 CYFAR *)0x4800113Cu)
 
 /* IOPINS0_3 Address: CYREG_PRT3_DM0 Size (bytes): 8 */
-#define BS_IOPINS0_3_VAL ((const uint8 CYFAR *)0x48001158u)
+#define BS_IOPINS0_3_VAL ((const uint8 CYFAR *)0x48001148u)
 
 /* CYDEV_CLKDIST_ACFG0_CFG0 Address: CYREG_CLKDIST_ACFG0_CFG0 Size (bytes): 4 */
-#define BS_CYDEV_CLKDIST_ACFG0_CFG0_VAL ((const uint8 CYFAR *)0x48001160u)
+#define BS_CYDEV_CLKDIST_ACFG0_CFG0_VAL ((const uint8 CYFAR *)0x48001150u)
 
 /* PHUB_CFGMEM1 Address: CYREG_PHUB_CFGMEM1_CFG0 Size (bytes): 4 */
-#define BS_PHUB_CFGMEM1_VAL ((const uint8 CYFAR *)0x48001164u)
+#define BS_PHUB_CFGMEM1_VAL ((const uint8 CYFAR *)0x48001154u)
 
 /* PHUB_CFGMEM2 Address: CYREG_PHUB_CFGMEM2_CFG0 Size (bytes): 4 */
-#define BS_PHUB_CFGMEM2_VAL ((const uint8 CYFAR *)0x48001168u)
+#define BS_PHUB_CFGMEM2_VAL ((const uint8 CYFAR *)0x48001158u)
 
 
 /*******************************************************************************
@@ -605,14 +605,20 @@ void cyfitter_cfg(void)
 		CYCONFIGCPY((void CYFAR *)(CYREG_PHUB_CFGMEM1_CFG0), (const void CYFAR *)(BS_PHUB_CFGMEM1_VAL), 4u);
 		CYCONFIGCPY((void CYFAR *)(CYREG_PHUB_CFGMEM2_CFG0), (const void CYFAR *)(BS_PHUB_CFGMEM2_VAL), 4u);
 
-		/* B0_P1_U0_CFG24 Starting address: CYDEV_UCFG_B0_P1_U0_CFG24 */
-		CY_SET_XTND_REG32((void CYFAR *)(CYREG_B0_P1_U0_CFG24), 0x0400C4C4u);
+		/* B0_P0_U0_CFG24 Starting address: CYDEV_UCFG_B0_P0_U0_CFG24 */
+		CY_SET_XTND_REG32((void CYFAR *)(CYREG_B0_P0_U0_CFG24), 0x0000C4C4u);
+
+		/* B0_P0_U1_CFG24 Starting address: CYDEV_UCFG_B0_P0_U1_CFG24 */
+		CY_SET_XTND_REG32((void CYFAR *)(CYREG_B0_P0_U1_CFG24), 0x0400C4C4u);
+
+		/* B0_P1_U1_CFG24 Starting address: CYDEV_UCFG_B0_P1_U1_CFG24 */
+		CY_SET_XTND_REG32((void CYFAR *)(CYREG_B0_P1_U1_CFG24), 0x0000C4C4u);
+
+		/* B0_P2_U0_CFG24 Starting address: CYDEV_UCFG_B0_P2_U0_CFG24 */
+		CY_SET_XTND_REG32((void CYFAR *)(CYREG_B0_P2_U0_CFG24), 0x0000C4C4u);
 
 		/* B0_P2_U1_CFG24 Starting address: CYDEV_UCFG_B0_P2_U1_CFG24 */
 		CY_SET_XTND_REG32((void CYFAR *)(CYREG_B0_P2_U1_CFG24), 0x0400C4C4u);
-
-		/* B0_P3_U0_CFG24 Starting address: CYDEV_UCFG_B0_P3_U0_CFG24 */
-		CY_SET_XTND_REG32((void CYFAR *)(CYREG_B0_P3_U0_CFG24), 0x0000C4C4u);
 
 		/* B0_P3_U1_CFG24 Starting address: CYDEV_UCFG_B0_P3_U1_CFG24 */
 		CY_SET_XTND_REG32((void CYFAR *)(CYREG_B0_P3_U1_CFG24), 0x0400C4C4u);
@@ -620,26 +626,8 @@ void cyfitter_cfg(void)
 		/* B0_P4_U0_CFG24 Starting address: CYDEV_UCFG_B0_P4_U0_CFG24 */
 		CY_SET_XTND_REG32((void CYFAR *)(CYREG_B0_P4_U0_CFG24), 0x0000C4C4u);
 
-		/* B0_P4_U1_CFG24 Starting address: CYDEV_UCFG_B0_P4_U1_CFG24 */
-		CY_SET_XTND_REG32((void CYFAR *)(CYREG_B0_P4_U1_CFG24), 0x0004C4C4u);
-
-		/* B0_P6_U0_CFG24 Starting address: CYDEV_UCFG_B0_P6_U0_CFG24 */
-		CY_SET_XTND_REG32((void CYFAR *)(CYREG_B0_P6_U0_CFG24), 0x0400C4C4u);
-
-		/* B0_P6_U1_CFG24 Starting address: CYDEV_UCFG_B0_P6_U1_CFG24 */
-		CY_SET_XTND_REG32((void CYFAR *)(CYREG_B0_P6_U1_CFG24), 0x0000C4C4u);
-
-		/* B0_P7_U0_CFG24 Starting address: CYDEV_UCFG_B0_P7_U0_CFG24 */
-		CY_SET_XTND_REG32((void CYFAR *)(CYREG_B0_P7_U0_CFG24), 0x0000C4C4u);
-
-		/* B0_P7_U1_CFG24 Starting address: CYDEV_UCFG_B0_P7_U1_CFG24 */
-		CY_SET_XTND_REG32((void CYFAR *)(CYREG_B0_P7_U1_CFG24), 0x0000C4C4u);
-
 		/* B1_P2_U0_CFG24 Starting address: CYDEV_UCFG_B1_P2_U0_CFG24 */
-		CY_SET_XTND_REG32((void CYFAR *)(CYREG_B1_P2_U0_CFG24), 0x0400C4C4u);
-
-		/* B1_P2_U1_CFG24 Starting address: CYDEV_UCFG_B1_P2_U1_CFG24 */
-		CY_SET_XTND_REG32((void CYFAR *)(CYREG_B1_P2_U1_CFG24), 0x0000C4C4u);
+		CY_SET_XTND_REG32((void CYFAR *)(CYREG_B1_P2_U0_CFG24), 0x0000C4C4u);
 
 		/* B1_P3_U0_CFG24 Starting address: CYDEV_UCFG_B1_P3_U0_CFG24 */
 		CY_SET_XTND_REG32((void CYFAR *)(CYREG_B1_P3_U0_CFG24), 0x0000C4C4u);
@@ -647,11 +635,11 @@ void cyfitter_cfg(void)
 		/* B1_P3_U1_CFG24 Starting address: CYDEV_UCFG_B1_P3_U1_CFG24 */
 		CY_SET_XTND_REG32((void CYFAR *)(CYREG_B1_P3_U1_CFG24), 0x0000C4C4u);
 
-		/* B1_P4_U1_CFG24 Starting address: CYDEV_UCFG_B1_P4_U1_CFG24 */
-		CY_SET_XTND_REG32((void CYFAR *)(CYREG_B1_P4_U1_CFG24), 0x0000C4C4u);
+		/* B1_P4_U0_CFG24 Starting address: CYDEV_UCFG_B1_P4_U0_CFG24 */
+		CY_SET_XTND_REG32((void CYFAR *)(CYREG_B1_P4_U0_CFG24), 0x0004C4C4u);
 
-		/* B1_P5_U0_CFG24 Starting address: CYDEV_UCFG_B1_P5_U0_CFG24 */
-		CY_SET_XTND_REG32((void CYFAR *)(CYREG_B1_P5_U0_CFG24), 0x0000C4C4u);
+		/* B1_P5_U1_CFG24 Starting address: CYDEV_UCFG_B1_P5_U1_CFG24 */
+		CY_SET_XTND_REG32((void CYFAR *)(CYREG_B1_P5_U1_CFG24), 0x0404C4C4u);
 
 		/* Enable digital routing */
 		CY_SET_XTND_REG8((void CYFAR *)CYREG_BCTL0_BANK_CTL, CY_GET_XTND_REG8((void CYFAR *)CYREG_BCTL0_BANK_CTL) | 0x02u);
