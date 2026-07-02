@@ -257,14 +257,17 @@ uint8 g_psoc_cal_result_count = 0u;
 
 #define CAL_ASYNC_EMPTY_POLL_LIMIT 2000000UL
 
-/* Watchdog global: ticks de 10 ms. Debe quedar por debajo del timeout del ESP
- * para que CAL_DONE llegue antes de que el slave de por perdida la corrida. */
+/* Watchdog global expresado como ticks legacy de 10 ms para mantener la escala
+ * de configuracion anterior; en runtime lo ejecuta Timer_3 como one-shot. */
 #ifndef CAL_WATCHDOG_TICKS
 #define CAL_WATCHDOG_TICKS 40000UL
 #endif
 
-/* Periodo de telemetria de progreso (ticks de 10 ms => ~500 ms). */
+/* Periodo de telemetria de progreso (ticks legacy de 10 ms => ~500 ms). */
 #define CAL_PROGRESS_PERIOD_TICKS 50UL
+#define CAL_LEGACY_TICK_MS 10UL
+#define CAL_WATCHDOG_MS (CAL_WATCHDOG_TICKS * CAL_LEGACY_TICK_MS)
+#define CAL_PROGRESS_PERIOD_MS (CAL_PROGRESS_PERIOD_TICKS * CAL_LEGACY_TICK_MS)
 
 /* Muestras del PI que se envian al ESP durante calibracion. No puede ser cada
  * muestra a 3 kHz: cada valor int32 viaja como 4 eventos UART. */
@@ -302,8 +305,6 @@ typedef struct {
     uint8 ok;
     uint8 stage_index;
     uint8 pass_index;
-    uint32 start_ticks;
-    uint32 last_progress_ticks;
 } PsocCalAsync;
 
 static PsocCalAsync g_cal_async = { CAL_ASYNC_IDLE };
@@ -602,7 +603,9 @@ static void cal_servo_measure_begin(uint8 stage_index)
     cal_diag(PSOC_EVT_CAL_AMUX_CAP, CAL_AMUX_CAP_CHANNEL);
 #endif
     ADC_Start();
+#ifdef CY_ISR_isr_DMA_DelSig_RAM_H
     isr_DMA_DelSig_RAM_ClearPending();
+#endif
     psoc_adc_clear_isr_sample();
     ADC_StartConvert();
     cal_diag(PSOC_EVT_SERVO_STAGE, stage_index);
@@ -827,6 +830,7 @@ uint8 psoc_calibration_servo_service(void)
  * controlador la corrio. */
 static void cal_async_complete(void)
 {
+    psoc_cal_timer_stop();
     ADC_Stop();
     psoc_amux_capacitor_cleanup();
     psoc_amux_disconnect_capacitor();
@@ -838,8 +842,10 @@ static void cal_async_complete(void)
 #if defined(SYNC_IN_INTSTAT)
     (void)SYNC_IN_ClearInterrupt();
 #endif
+#ifdef CY_ISR_isr_SyncIn_H
     isr_SyncIn_ClearPending();
     isr_SyncIn_Enable();
+#endif
     g_cal_async.busy = 0u;
     g_cal_async.done = 1u;
     g_cal_async.state = CAL_ASYNC_DONE;
@@ -879,7 +885,7 @@ static void cal_async_abort_watchdog(void)
  * celda de error cuantizado). target_mv y adelanto_mv son aparte (planteo del
  * problema, no ganancias del algoritmo).
  *
- * Reutiliza g_cal_async.busy/done/ok/stage_index/start_ticks (watchdog) y
+ * Reutiliza g_cal_async.busy/done/ok/stage_index y los flags de Timer_3
  * cal_async_complete/cal_async_abort_watchdog tal cual: para el resto del
  * firmware (EEPROM, diagnostico UART, ESP/web) mantiene la misma API externa.
  * ============================================================ */
@@ -1272,7 +1278,9 @@ static void cal_pi_stage_begin(void)
     dma_route_select(1u);
     psoc_filter_reset_history();
     psoc_adc_clear_isr_filtered_sample();
+#ifdef CY_ISR_isr_DMA_Filter_RAM_H
     isr_DMA_Filter_RAM_ClearPending();
+#endif
     ADC_StartConvert();
 
     g_cal_pi.state = (g_cal_pi.settle_remaining == 0u) ? CAL_PI_RUN : CAL_PI_SETTLE;
@@ -1545,7 +1553,9 @@ uint8 psoc_calibration_start_async(void)
         return 0u;
     }
 
+#ifdef CY_ISR_isr_SyncIn_H
     isr_SyncIn_Disable();
+#endif
     ADC_Stop();
     psoc_adc_select_capture_config();
     ADC_Stop();
@@ -1568,8 +1578,7 @@ uint8 psoc_calibration_start_async(void)
     g_cal_async.ok = 1u;
     g_cal_async.stage_index = 0u;
     g_cal_async.pass_index = 0u;
-    g_cal_async.start_ticks = psoc_now_ticks();
-    g_cal_async.last_progress_ticks = g_cal_async.start_ticks;
+    psoc_cal_timer_start(CAL_PROGRESS_PERIOD_MS, CAL_WATCHDOG_MS);
     for (i = 0u; i < PSOC_CAL_STAGE_COUNT; i++) {
         g_psoc_cal_stages[i].write(seed_dac[i]);
         g_psoc_cal_results[i].final_dac = seed_dac[i];
@@ -1596,16 +1605,12 @@ uint8 psoc_calibration_service_async(void)
         return 0u;
     }
 
-    {
-        uint32 now = psoc_now_ticks();
-        if ((now - g_cal_async.start_ticks) >= CAL_WATCHDOG_TICKS) {
-            cal_async_abort_watchdog();
-            return 1u;
-        }
-        if ((now - g_cal_async.last_progress_ticks) >= CAL_PROGRESS_PERIOD_TICKS) {
-            g_cal_async.last_progress_ticks = now;
-            cal_diag(PSOC_EVT_CAL_PROGRESS, g_cal_async.stage_index);
-        }
+    if (psoc_cal_timer_take_watchdog_due()) {
+        cal_async_abort_watchdog();
+        return 1u;
+    }
+    if (psoc_cal_timer_take_progress_due()) {
+        cal_diag(PSOC_EVT_CAL_PROGRESS, g_cal_async.stage_index);
     }
 
     return cal_pi_service();   /* unico camino de calibracion */

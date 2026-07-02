@@ -2,10 +2,10 @@
 
 Flujo actual para `AcondicionamientoAnalogico.cydsn` en Windows con PSoC Creator 4.4.
 
-## Estado del build actual (2026-07-01)
+## Estado del build actual (2026-07-02)
 
-- Flash: **31086 bytes** → filas a programar: **0..121**  
-  (`ceil(31086/256) - 1 = 121`)
+- Flash: **37510 bytes** -> filas a programar: **0..146**  
+  (`ceil(37510/256) - 1 = 146`)
 - SRAM: 49312 bytes
 - KitProg observado: `KitProg (CMSIS-DAP/236111)` — **siempre correr `GetPorts` antes de programar** porque el nombre puede variar.
 
@@ -44,6 +44,9 @@ try { & .\ppcli.exe "--runfile $($script -replace '\\','/')" }
 finally { Pop-Location }
 ```
 
+Evitar `ppcli.exe GetPorts` directo: entra en modo interactivo y puede quedar
+esperando prompt. Usar siempre runfile con `quit`.
+
 ## Programar (PPCLI)
 
 ```powershell
@@ -51,15 +54,15 @@ $timestamp  = Get-Date -Format 'yyyyMMdd_HHmmss'
 $log        = Join-Path $env:TEMP "psoc_program_acondicionamiento_$timestamp.log"
 $hex        = 'C:/Github/Tesis/src/psoc/AcondicionamientoAnalogico.cydsn/CortexM3/ARM_GCC_541/Debug/AcondicionamientoAnalogico.hex'
 $port       = 'KitProg (CMSIS-DAP/236111)'   # reemplazar con resultado exacto de GetPorts
-$programmer = 'C:\Program Files (x86)\Cypress\Programmer\'
-$lastRow    = 121                             # actualizar según el build actual
+$programmer = 'C:/Program Files (x86)/Cypress/Programmer/'
+$lastRow    = 146                             # actualizar según el build actual
 
 $cmds = New-Object System.Collections.Generic.List[string]
 $cmds.Add(('OpenPort "{0}" "{1}"' -f $port, $programmer))
 $cmds.Add('SetAcquireMode Reset')
 $cmds.Add('SetProtocol 8')
 $cmds.Add('SetProtocolConnector 1')
-$cmds.Add('SetProtocolClock 192')
+$cmds.Add('SetProtocolClock 152')
 $cmds.Add(('HEX_ReadFile "{0}"' -f $hex))
 $cmds.Add('DAP_Acquire')
 $cmds.Add('PSoC3_GetJtagID')
@@ -74,9 +77,11 @@ $cmds.Add('DAP_ReleaseChip')
 $cmds.Add('ClosePort')
 $cmds.Add('quit')
 
-$inputText = ($cmds -join [Environment]::NewLine) + [Environment]::NewLine
-$inputText | & 'C:\Program Files (x86)\Cypress\Programmer\PPCLI.exe' |
-  Tee-Object -FilePath $log
+$script = Join-Path $env:TEMP "psoc_program_acondicionamiento_$timestamp.cli"
+$cmds | Set-Content -LiteralPath $script -Encoding ASCII
+Push-Location "C:\Program Files (x86)\Cypress\Programmer"
+try { & .\ppcli.exe "--runfile $($script -replace '\\','/')" | Tee-Object -FilePath $log }
+finally { Pop-Location }
 ```
 
 El programado exitoso termina con `0 OK` en cada fila y después:
@@ -111,7 +116,7 @@ finally { Pop-Location }
 
 "Titilar LED" en la UI web titila el **LED del PSoC** (no del ESP).
 Cadena: web → maestro → ESP-NOW `CMD_BLINK_LED` → esclavo → UART `0xB9` → PSoC.
-El PSoC parpadea ~8 s a 2.5 Hz (no bloqueante, servido por Timer ILO 100 kHz)
+El PSoC parpadea ~8 s a 2.5 Hz (no bloqueante, servido por `Timer_2` fixed ILO 100 kHz)
 y vuelve a encendido fijo.
 
 ## Wiring UART PSoC ↔ ESP esclavo

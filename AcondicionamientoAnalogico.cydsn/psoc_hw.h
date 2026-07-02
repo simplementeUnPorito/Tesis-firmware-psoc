@@ -113,14 +113,18 @@ void psoc_hw_set_pgavdac(uint8 code);
 uint8 psoc_hw_get_pga_code(void);
 uint16 psoc_hw_pga_gain_x1000(void);
 
-/* Contador de ticks de 10 ms (g_timer_ticks de main.c), usado por
- * calibration.c para el watchdog y la telemetria periodica de progreso. */
+/* Compatibilidad para el servo legacy de calibracion. La calibracion activa
+ * usa Timer_3 y los helpers de abajo, no un tick periodico de sistema. */
 uint32 psoc_now_ticks(void);
 
-/* Selecciona, vía Reg_Select (main.c), si el canal raw del ADC se enruta
- * directo a RAM (use_filter=0, captura cruda) o hacia el Canal A del Filter
- * de hardware (use_filter=1, usado por el PI de calibración para leer la
- * salida ya filtrada vía DMA_Filter_RAM — ver calibration.c). */
+void psoc_cal_timer_start(uint32 progress_ms, uint32 watchdog_ms);
+void psoc_cal_timer_stop(void);
+uint8 psoc_cal_timer_take_progress_due(void);
+uint8 psoc_cal_timer_take_watchdog_due(void);
+
+/* Selecciona la ruta de DMA que deja pasar superMaquina: raw directo a RAM
+ * (use_filter=0) o ADC->Filter + Filter->RAM (use_filter=1). Con la maquina
+ * deshabilitada actua como bypass para calibracion/diagnostico. */
 void dma_route_select(uint8 use_filter);
 
 #endif

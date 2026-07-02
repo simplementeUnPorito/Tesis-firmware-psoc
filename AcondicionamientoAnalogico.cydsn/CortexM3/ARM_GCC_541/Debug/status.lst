@@ -1,0 +1,1867 @@
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 2
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"status.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.section	.gnu.lto_.profile.20d45ecb,"",%progbits
+  19 0000 789C6361 		.ascii	"x\234ca`d`a`\000\222\366b\000\000\376\000`"
+  19      60646061 
+  19      600092F6 
+  19      620000FE 
+  19      0060
+  20              		.text
+  21              		.section	.gnu.lto_.icf.20d45ecb,"",%progbits
+  22 0000 789C6361 		.ascii	"x\234ca`d\000\001\005\006\004`ex\377\342\367\013\036"
+  22      60640001 
+  22      05060460 
+  22      6578FFE2 
+  22      F70B1E
+  23 0013 C68F0B2E 		.ascii	"\306\217\013.\316\340b\332t~\342\031>\346{\023\177\314"
+  23      CEE062DA 
+  23      747EE219 
+  23      3EE67B13 
+  23      7FCC
+  24 0025 E1646959 		.ascii	"\341diYp\350\033\033\003\000\023\323\017\331"
+  24      70E81B1B 
+  24      030013D3 
+  24      0FD9
+  25              		.text
+  26              		.section	.gnu.lto_.jmpfuncs.20d45ecb,"",%progbits
+  27 0000 789C6361 		.ascii	"x\234ca`d\000\001Y\006\004`\005b\240(\023\210\315\004"
+  27      60640001 
+  27      59060460 
+  27      0562A028 
+  27      1388CD04 
+  28 0014 A5991919 		.ascii	"\245\231\031\031\031\353Y\200\014\000\011\230\000\270"
+  28      19EB5980 
+  28      0C000998 
+  28      00B8
+  29              		.text
+  30              		.section	.gnu.lto_.inline.20d45ecb,"",%progbits
+  31 0000 789C6361 		.ascii	"x\234ca`d\000\201J\006\004`e``afd`b\272\300\317\300"
+  31      60640081 
+  31      4A060460 
+  31      65606061 
+  31      66646062 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 2
+
+
+  32 0018 B6409E09 		.ascii	"\266@\236\011$\306\310\300%\015\024b\373\240\007\027"
+  32      24C6C8C0 
+  32      250D1462 
+  32      FBA00717 
+  33 0028 62E2060A 		.ascii	"b\342\006\012O\360\003Q\014L\370\245\2311\015d\301\024"
+  33      4FF00351 
+  33      0C4CF8A5 
+  33      99310D64 
+  33      C114
+  34 003a 620000F7 		.ascii	"b\000\000\367[\013\274"
+  34      5B0BBC
+  35              		.text
+  36              		.section	.gnu.lto_.pureconst.20d45ecb,"",%progbits
+  37 0000 789C6361 		.ascii	"x\234ca`d\340f```e\220b\224b\222b\226b\221\002\000\003"
+  37      6064E066 
+  37      60606065 
+  37      90629462 
+  37      92629662 
+  38 0018 FE00A2   		.ascii	"\376\000\242"
+  39              		.text
+  40              		.section	.gnu.lto_status_Read.20d45ecb,"",%progbits
+  41 0000 789C6361 		.ascii	"x\234ca`d\000\201\033@\254\004\304\322@\314\310\314"
+  41      60640081 
+  41      1B40AC04 
+  41      C4D240CC 
+  41      C8CC
+  42 0012 C0C834E1 		.ascii	"\300\3104\341\034\003C#\007\023##\210\321\300\301\310"
+  42      1C034323 
+  42      07132323 
+  42      88D1C0C1 
+  42      C8
+  43 0023 50CFC458 		.ascii	"P\317\304X\317\370\225\351/\023\343\351\357'z\2704\227"
+  43      CFF895E9 
+  43      2F13E3E9 
+  43      EF277AB8 
+  43      3497
+  44 0035 37343435 		.ascii	"7445<Xz\231y\372\212\003\214\255\314\014\014\377\231"
+  44      3C587A99 
+  44      79FA8A03 
+  44      8CADCC0C 
+  44      0CFF99
+  45 0048 18188D65 		.ascii	"\030\030\215e\030\015d@F,g\324d\000*}\264\361\337T^"
+  45      180D6440 
+  45      462C67D4 
+  45      64002A7D 
+  45      B4F1DF54 
+  46 005d B6960620 		.ascii	"\266\226\006 P\000)\000\312\254`d\003Y\271>\350@\303"
+  46      50002900 
+  46      CAAC6064 
+  46      0359B93E 
+  46      E840C3
+  47 0070 FFFFCD0D 		.ascii	"\377\377\315\015\007\346\262>dbfb\000\231\300\360\001"
+  47      07E6B23E 
+  47      64626662 
+  47      0099C0F0 
+  47      01
+  48 0081 A80264DF 		.ascii	"\250\002d\337G&&\020\315\374\214\361\320\257\256\177"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 3
+
+
+  48      47262610 
+  48      CDFC8CF1 
+  48      D0AFAE7F 
+  49 0091 4798419A 		.ascii	"G\230A\232\232\231AvOk=t\236\375\013S+3##\310\374u\033"
+  49      9A994176 
+  49      4F6B3D74 
+  49      9EFD0B53 
+  49      2B332323 
+  50 00a9 1A777042 		.ascii	"\032wpB\270oN46\260\000\205&5\336Y\313<\237qnc\013\320"
+  50      B86F4E34 
+  50      36B00085 
+  50      2635DE59 
+  50      CB3C9F71 
+  51 00c1 554C8CAB 		.ascii	"UL\214\253\030e\030W2\002\335\304\270\232q>#\303+F&"
+  51      18651857 
+  51      3202DDC4 
+  51      B89A713E 
+  51      23C32B46 
+  52 00d6 A8610C60 		.ascii	"\250a\014`\373\030A\366\000\331\012\356\251y\251E\211"
+  52      FB1841F6 
+  52      00D90AEE 
+  52      A979A945 
+  52      89
+  53 00e7 25A929F1 		.ascii	"%\251)\361\301\371\245E\311\2511\001\301\371\316\246"
+  53      C1F9A545 
+  53      C9A93101 
+  53      C1F9CEA6 
+  54 00f7 31C52589 		.ascii	"1\305%\211%\245\305z\311\014\000\001\362Wg"
+  54      25A5C57A 
+  54      C90C0001 
+  54      F25767
+  55              		.text
+  56              		.section	.gnu.lto_status_InterruptEnable.20d45ecb,"",%progbits
+  57 0000 789C7D90 		.ascii	"x\234}\220\273K\003A\020\306\347\333\315]\202\242\330"
+  57      BB4B0341 
+  57      10C6E7DB 
+  57      CD5D82A2 
+  57      D8
+  58 0011 58992220 		.ascii	"X\231\" \0266\242\210\177\201\205\255\2306 \242WX\370"
+  58      1636A288 
+  58      7F8185AD 
+  58      983620A2 
+  58      5758F8
+  59 0024 205EEA6C 		.ascii	" ^\352lL\016ET\004Q\033\037\205\210\357G:\323\035iD"
+  59      4C0E4554 
+  59      04511B1F 
+  59      8588EF47 
+  59      3AD31D69 
+  60 0039 10054B45 		.ascii	"\020\005KE\220\024\"\"!\212\342\003\3429{W\012\016\354"
+  60      90142222 
+  60      218AE203 
+  60      E2397B57 
+  60      0A0EEC
+  61 004c CDDEF0CD 		.ascii	"\315\336\360\315o\346\333\020\201t\334p\352\340\334"
+  61      6FE6DB10 
+  61      8174DC70 
+  61      EAE0DC
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 4
+
+
+  62 005b C4079220 		.ascii	"\304\007\222 \026.\2112\021\001\350\213\212\200\322"
+  62      162E8932 
+  62      1101E88B 
+  62      8A80D2
+  63 006a 0269BC8B 		.ascii	"\002i\274\213\252@q\352\241 Z\267\025\307\375\326\272"
+  63      AA4071EA 
+  63      A1205AB7 
+  63      15C7FDD6 
+  63      BA
+  64 007b 543B2E1C 		.ascii	"T;.\034I\344\011\237D\330F+\261l\361\365\356\324\224"
+  64      49E4099F 
+  64      44D8462B 
+  64      B16CF1F5 
+  64      EED494
+  65 008e CDD0F79B 		.ascii	"\315\320\367\233\243\205\\M\313\246R\223\312\375\030"
+  65      A3855C4D 
+  65      CBA65293 
+  65      CAFD18
+  66 009d 59516E26 		.ascii	"YQn&\346H`\007\222\273\320\031E{\324\357ei)\377\263"
+  66      E6486007 
+  66      92BBD019 
+  66      457BD4EF 
+  66      656929FF 
+  67 00b2 5467E634 		.ascii	"Tg\3464=\206]\264\004\\\354\301\344\025\241+\307}\256"
+  67      3D865DB4 
+  67      045CECC1 
+  67      E415A12B 
+  67      C77DAE
+  68 00c5 F2BCAC72 		.ascii	"\362\274\254r\337\215\252\214\360\262\\\013\221#\205"
+  68      DF8DAA8C 
+  68      F0B25C0B 
+  68      912385
+  69 00d4 A13F4415 		.ascii	"\241?D\025>z\353\027!t\226\217\310\272_yhDVJ\036Q(<"
+  69      3E7AEB17 
+  69      2174968F 
+  69      C8BA5F79 
+  69      6844564A 
+  70 00ec DF86D355 		.ascii	"\337\206\323U5\255T\203#y\005M\336G\232\333CT\202\360"
+  70      35AD5483 
+  70      2379054D 
+  70      DE479ADB 
+  70      435482F0 
+  71 0100 873194D5 		.ascii	"\2071\224\325\364\200\342\367L\371,\034t\207\270{\331"
+  71      F480E2F7 
+  71      4CF92C1C 
+  71      7487B87B 
+  71      D9
+  72 0111 295E85DF 		.ascii	")^\205\337\204#\015\337\332\354i\351\266>\370]=\317"
+  72      84230DDF 
+  72      DAEC69E9 
+  72      B63EF85D 
+  72      3DCF
+  73 0123 28AD2897 		.ascii	"(\255(\227\347\347j6\260\226\311\361\303\2308D\024\007"
+  73      E7E76A36 
+  73      B096C9F1 
+  73      C3983844 
+  73      1407
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 5
+
+
+  74 0135 608338C2 		.ascii	"`\2038\302\006\230\230\3754\003\234\021\020\257+\027"
+  74      069898FD 
+  74      34039C11 
+  74      10AF2B17 
+  75 0145 6BB51A21 		.ascii	"k\265\032!\320\200cV\362\320e\177\337\377`'\014c\004"
+  75      D0806356 
+  75      F2D0657F 
+  75      DFFF6027 
+  75      0C6304
+  76 0158 3D22E756 		.ascii	"=\"\347V\033\265\232\376x\013{\374\006\204<{c3\216\214"
+  76      1BB59AFE 
+  76      780B7BFC 
+  76      06843C7B 
+  76      63338E8C 
+  77 016c D013265D 		.ascii	"\320\023&]\317\360\325:*\354\235\337\210E\261\036k\324"
+  77      CFF0D53A 
+  77      2AEC9DDF 
+  77      8845B11E 
+  77      6BD4
+  78 017e 4A0ED8D6 		.ascii	"J\016\330\326P\177|,\225\034\264\022\275\361\261\356"
+  78      507F7C2C 
+  78      951CB412 
+  78      BDF1B1EE 
+  79 018e AEC4843D 		.ascii	"\256\304\204=`\247&\332\006\251~x\324\266\222\311\324"
+  79      60A726DA 
+  79      06A97E78 
+  79      D4B692C9 
+  79      D4
+  80 019f B81DE792 		.ascii	"\270\035\347\222\365\013\226\317\257\004"
+  80      F50B96CF 
+  80      AF04
+  81              		.text
+  82              		.section	.gnu.lto_status_InterruptDisable.20d45ecb,"",%progbits
+  83 0000 789C7D90 		.ascii	"x\234}\220\317+DQ\024\307\317\367\336\2317\323\024Y"
+  83      CF2B4451 
+  83      14C7CFF7 
+  83      DE9937D3 
+  83      1459
+  84 0012 D998C594 		.ascii	"\331\230\305\224,lD\362\027(\2662[%\361\0266h\274)\273"
+  84      2C6C44F2 
+  84      1728B632 
+  84      5B25F116 
+  84      3668BC29 
+  85 0027 B963E621 		.ascii	"\271c\346!!%\243D\212\205\337\277vf\367\314B\261`!)"
+  85      2125A344 
+  85      8A85DFBF 
+  85      7666F7CC 
+  85      42B16021 
+  86 003c 83348B49 		.ascii	"\2034\213I\222_\261\021\306\271\357-\225S\367\235\373"
+  86      925FB111 
+  86      C6B9EF2D 
+  86      9553F79D 
+  86      FB
+  87 004d 4EDFF339 		.ascii	"N\337\3639\347{}\004\322q\313\251\201s\025\037H\202"
+  87      E77B7D04 
+  87      D271CBA9 
+  87      8173151F 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 6
+
+
+  87      4882
+  88 005f 983E254A 		.ascii	"\230>%J\006\005\240/*\010J\010$\360!\276\005r\243\305"
+  88      0605A02F 
+  88      2A084A08 
+  88      24F021BE 
+  88      0572A3C5 
+  89 0073 ACA85D55 		.ascii	"\254\250]U\034w\366C\275Zs`K\242\222pI\204U\324\022"
+  89      1C77F643 
+  89      BD5A7360 
+  89      4BA29270 
+  89      498455D4 
+  90 0088 CB66DE6E 		.ascii	"\313f\336n\016\014Y\015}\277\332\231N\207jV\224\032"
+  90      0E0C590D 
+  90      7DBFDA99 
+  90      4E876A56 
+  90      941A
+  91 009a 56CEC551 		.ascii	"V\316\305Q\331\234r\222\021[\002k\220\334\206\3060\352"
+  91      D99C7292 
+  91      115B026B 
+  91      90DC86C6 
+  91      30EA
+  92 00ac C36E336B 		.ascii	"\303n3k\013\373?\263eFZ\343#XG\215\007\306\006\014\336"
+  92      0BFB3FB3 
+  92      65465AE3 
+  92      2358478D 
+  92      07C6060C 
+  93 00c1 11BAB2DB 		.ascii	"\021\272\262\333\356\250R)\245\234s\343\360\332\010"
+  93      EEA85229 
+  93      A59C73E3 
+  93      F0DA08
+  94 00d0 F2BA5CF4 		.ascii	"\362\272\\\364\221-\205_\177\210^\370\350\275_\205\320"
+  94      912D855F 
+  94      7F885EF8 
+  94      E8BD5F85 
+  94      D0
+  95 00e1 59DE23E5 		.ascii	"Y\336#\345\\\216TjFJJ\236\221\315>\346\003\211o5\246"
+  95      5C8E546A 
+  95      464A4A9E 
+  95      91CD3EE6 
+  95      03896F35 
+  96 00f6 54852D79 		.ascii	"T\205-y\007\215\336D\202\333}T\200p\2471\224\325TD\356"
+  96      078DDE44 
+  96      82DB7D54 
+  96      8070A731 
+  96      94D55444 
+  97 010b 73BC383F 		.ascii	"s\2748?\344u\373\270;c\347\316\002\357\302\226~\327"
+  97      E475FBB8 
+  97      3B63E7CE 
+  97      02EFC296 
+  97      7ED7
+  98 011d DCC44121 		.ascii	"\334\304A!_\356\375.\034'\225V<=MM\206\226\260\230L"
+  98      5FEEFD2E 
+  98      1C279556 
+  98      3C3D4D4D 
+  98      8696B098 
+  99 0132 F3D318D8 		.ascii	"\363\323\030\330F\030[`\207\330\301\022\230\230\372"
+  99      46185B60 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 7
+
+
+  99      87D8C112 
+  99      9898FA
+ 100 0141 323C9CDF 		.ascii	"2<\234\337#.\237,\346B\032a\340\031\330e)O\315@k\376"
+ 100      232E9F2C 
+ 100      E6421A61 
+ 100      E019D865 
+ 100      294FCD40 
+ 101 0157 A3ED318D 		.ascii	"\243\3551\215\031t\217\264\223?r\267\246?\356\002%~"
+ 101      19748FB4 
+ 101      933F72B7 
+ 101      A63FEE02 
+ 101      257E
+ 102 0169 05C23EBB 		.ascii	"\005\302>\273c;\266\014\322\003\206\235\233\026W\255"
+ 102      633BB60C 
+ 102      D203869D 
+ 102      9B1657AD 
+ 103 0179 E385DDF3 		.ascii	"\343\205\335\363+\261(\322j\366\231\261.\313\354\351"
+ 103      2BB128D2 
+ 103      6AF699B1 
+ 103      2ECBECE9 
+ 104 0189 8CF6C763 		.ascii	"\214\366\307c\335fG[\264\277\271\251c\320\352\262\342"
+ 104      DD66475B 
+ 104      B4BFB9A9 
+ 104      63D0EAB2 
+ 104      E2
+ 105 019a 8375DD54 		.ascii	"\203u\335T\336\333g\231\261X|\300\212r\311\374\005~"
+ 105      DEDB6799 
+ 105      B1587CC0 
+ 105      8A72C9FC 
+ 105      057E
+ 106 01ac 3CB162   		.ascii	"<\261b"
+ 107              		.text
+ 108              		.section	.gnu.lto_status_WriteMask.20d45ecb,"",%progbits
+ 109 0000 789C254F 		.ascii	"x\234%O;K\003A\020\236o\367\310\035H\032[\257\010X\204"
+ 109      3B4B0341 
+ 109      109E6FF7 
+ 109      C81D481A 
+ 109      5BAF0858 
+ 110 0015 3412107F 		.ascii	"4\022\020\177\201EZ1m@B\274J4\220G\235\275$\247\010"
+ 110      81455A31 
+ 110      6D4042BC 
+ 110      4A349047 
+ 110      9DBD24A7 
+ 111 002a 16822822 		.ascii	"\026\202(\"H*M|\021\257T\233\363\012AA\375\013\"\232"
+ 111      482A4D7C 
+ 111      11AF549B 
+ 111      F30A4141 
+ 111      FD0B229A 
+ 112 003e C22244D4 		.ascii	"\302\"D\324J\3149\233\014,\337\3140\337c\015\002\351"
+ 112      4ACC399B 
+ 112      0C2CDFCC 
+ 112      30DF630D 
+ 112      02E9
+ 113 0050 9A644832 		.ascii	"\232dH2N\361\203$\210\355'\"\327\022\200n\224\005\252"
+ 113      4EF18324 
+ 113      88ED2722 
+ 113      D712806E 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 8
+
+
+ 113      9405AA
+ 114 0063 09D4F023 		.ascii	"\011\324\360#\376\004\302\215\336\225H\265\025\327\313"
+ 114      FE04C28D 
+ 114      DE9548B5 
+ 114      15D7CB
+ 115 0072 FB575A75 		.ascii	"\373WZu\002x\222(\022#%B\033)\276\212\216/7-9\015\342"
+ 115      02789228 
+ 115      12232542 
+ 115      1B29BE8A 
+ 115      8E2F372D 
+ 116 0089 7E7FFDED 		.ascii	"~\177\375\355.\236<R\252\256\324oNIO\002\035Hf`\326"
+ 116      2E9E3C52 
+ 116      AAAED46F 
+ 116      4E494F02 
+ 116      1D486660 
+ 117 009e 46DA265E 		.ascii	"F\332&^\020N\220\324\307\257\376p7\036kj\371\304X\024"
+ 117      104E90D4 
+ 117      C7AFFE70 
+ 117      371E6B6A 
+ 117      F9C45814 
+ 118 00b2 A788E998 		.ascii	"\247\210\351\230\335\305@EQC\005\276y{m\032\034NSh\300"
+ 118      DDC54045 
+ 118      514305BE 
+ 118      797B6D1A 
+ 118      1C4E5368 
+ 119 00c7 373AE5A7 		.ascii	"7:\345\247\020\032e\017\341\201\337wMMc\275=/|6\277"
+ 119      101A650F 
+ 119      E181DF77 
+ 119      4D4D63BD 
+ 119      3D2F7C36 
+ 120 00dc 8527C528 		.ascii	"\205'\305(\313\343N8\024\343q\353\336U\006\257:\335"
+ 120      CBE34E38 
+ 120      14E371EB 
+ 120      DE5506AF 
+ 120      3ADD
+ 121 00ee FE8368E1 		.ascii	"\376\203h\341\320m\272JMxR\342\0346\316`\263\365\005"
+ 121      D06DBA4A 
+ 121      4D7852E2 
+ 121      1C36CE60 
+ 121      B3F505
+ 122 0101 5A684841 		.ascii	"ZhHA\037\250\0077\031-9\372\344\200\305\330\213\235"
+ 122      1FA80737 
+ 122      192D39FA 
+ 122      E480C5D8 
+ 122      8B9D
+ 123 0113 131967CD 		.ascii	"\023\031g\315)\345+\316\362R\266X-\025\234\334B\266"
+ 123      29E52BCE 
+ 123      F252B658 
+ 123      2D159CDC 
+ 123      42B6
+ 124 0125 383F972B 		.ascii	"8?\227+W\362\225jy\246@\306j\276\274\362\017\226|m\223"
+ 124      57F2956A 
+ 124      79A640C6 
+ 124      6ABEBCF2 
+ 124      0F967C6D 
+ 125              		.text
+ 126              		.section	.gnu.lto_status_ReadMask.20d45ecb,"",%progbits
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 9
+
+
+ 127 0000 789C6361 		.ascii	"x\234ca`d\000\201\233@\254\004\304\322@\314\310\314"
+ 127      60640081 
+ 127      9B40AC04 
+ 127      C4D240CC 
+ 127      C8CC
+ 128 0012 C0C834E1 		.ascii	"\300\3104\341\034\003C#\007\023##\210\321\300\301\310"
+ 128      1C034323 
+ 128      07132323 
+ 128      88D1C0C1 
+ 128      C8
+ 129 0023 50CFC458 		.ascii	"P\317\304X\317\370\225\351/\023\343\351\357'z\2704\227"
+ 129      CFF895E9 
+ 129      2F13E3E9 
+ 129      EF277AB8 
+ 129      3497
+ 130 0035 37343435 		.ascii	"7445<8\372\337b\372\212\003\214\255\314\014\014\377"
+ 130      3C38FADF 
+ 130      62FA8A03 
+ 130      8CADCC0C 
+ 130      0CFF
+ 131 0047 9918188D 		.ascii	"\231\030\030\215e\030\015d@F,g\324d\000*}\264\361\337"
+ 131      65180D64 
+ 131      40462C67 
+ 131      D464002A 
+ 131      7DB4F1DF 
+ 132 005b 545EB696 		.ascii	"T^\266\226\006 P\000)\000\312\254`d\003Y\271>\350@\303"
+ 132      06205000 
+ 132      2900CAAC 
+ 132      60640359 
+ 132      B93EE840 
+ 133 0070 FFFFCD0D 		.ascii	"\377\377\315\015\007\376\263\037\234\304\305\314\304"
+ 133      07FEB31F 
+ 133      9CC4C5CC 
+ 133      C4
+ 134 007d 003282E1 		.ascii	"\0002\202\341\003P\011\310\302\217LL \232\371\031\343"
+ 134      035009C8 
+ 134      C28F4C4C 
+ 134      209AF919 
+ 134      E3
+ 135 008e A15F5DC7 		.ascii	"\241_]\307VX\200t53\203,\237\326z\350<\373\027\246V"
+ 135      56588074 
+ 135      3533832C 
+ 135      9FD67AE8 
+ 135      3CFB17A6 
+ 136 00a3 66464690 		.ascii	"fFF\220\005g'\037\372\307\004\341\366\234ll`\001\012"
+ 136      0567271F 
+ 136      FAC704E1 
+ 136      F69C6C6C 
+ 136      60010A
+ 137 00b6 AD58FFEE 		.ascii	"\255X\377\356\024\323|\306\271\215-@g11\256b\224a\\"
+ 137      14D37CC6 
+ 137      B98D2D40 
+ 137      673131AE 
+ 137      6294615C 
+ 138 00ca C9087414 		.ascii	"\311\010t\024\343j\306\371\214\014\257\030\231\240\206"
+ 138      E36AC6F9 
+ 138      8C0CAF18 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 10
+
+
+ 138      99A086
+ 139 00d9 3180ED63 		.ascii	"1\200\355c\004\331\003d+\270\247\346\245\026%\226\244"
+ 139      04D90364 
+ 139      2BB8A7E6 
+ 139      A5162596 
+ 139      A4
+ 140 00ea A6C407E7 		.ascii	"\246\304\007\347\227\026%\247\306\004\004\347;\233\306"
+ 140      971625A7 
+ 140      C60404E7 
+ 140      3B9BC6
+ 141 00f9 14972496 		.ascii	"\024\227$\226\224\026\353%3\000\000T\335Y="
+ 141      9416EB25 
+ 141      33000054 
+ 141      DD593D
+ 142              		.text
+ 143              		.section	.gnu.lto_.symbol_nodes.20d45ecb,"",%progbits
+ 144 0000 789C55C8 		.ascii	"x\234U\310\261\021\204@\014CQ\311\336\335:\240Rm\011"
+ 144      B1118440 
+ 144      0C4351C9 
+ 144      DEDD3AA0 
+ 144      526D09
+ 145 0013 97D10055 		.ascii	"\227\321\000U\020\023S\0034\302`\340\002\254D\363_\001"
+ 145      10135303 
+ 145      34C260E0 
+ 145      02AC44F3 
+ 145      5F01
+ 146 0025 31216610 		.ascii	"1!f\020\360\333p\337\322\307\000\212\031L\226\301\345"
+ 146      F0DB70DF 
+ 146      D2C7008A 
+ 146      194C96C1 
+ 146      E5
+ 147 0036 198A4A02 		.ascii	"\031\212J\0026\325\007\200\336\207\350\252\366mg\303"
+ 147      36D50780 
+ 147      DE87E8AA 
+ 147      F66D67C3 
+ 148 0046 BC9F7456 		.ascii	"\274\237tV\254G\274\375\333\336\306\005\023\340#\326"
+ 148      AC47BCFD 
+ 148      DBDEC605 
+ 148      13E023D6 
+ 149              		.text
+ 150              		.section	.gnu.lto_.refs.20d45ecb,"",%progbits
+ 151 0000 789C6361 		.ascii	"x\234ca`\004B \000\000\0009\000\007"
+ 151      60044220 
+ 151      00000039 
+ 151      0007
+ 152              		.text
+ 153              		.section	.gnu.lto_.decls.20d45ecb,"",%progbits
+ 154 0000 789C9D53 		.ascii	"x\234\235S]L\024W\024\276gfX`@%\306\"\017\233\226\372"
+ 154      5D4C1457 
+ 154      14BE6766 
+ 154      58604025 
+ 154      C6220F9B 
+ 155 0016 C4132969 		.ascii	"\304\023)i\232\020\037\032\223\2555&\3324%\332\027\023"
+ 155      9A101F1A 
+ 155      93AD3526 
+ 155      DA3425DA 
+ 155      1713
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 11
+
+
+ 156 0028 BBAC13BB 		.ascii	"\273\254\023\273\321,dw\210\345\355*4J5\0101h\220Z\251"
+ 156      D12C6477 
+ 156      88E5ED2A 
+ 156      344A3508 
+ 156      3168905A 
+ 157 003d 34157195 		.ascii	"4\025q\225]\027\\`YY\024X4\321`L\332\030I Y\177B\264"
+ 157      5D175C60 
+ 157      59591458 
+ 157      34D1604C 
+ 157      DA184920 
+ 158 0055 893FF4C1 		.ascii	"\211?\364\301\320u=\367\316\035gv\013\246\351\315\236"
+ 158      D0753DF7 
+ 158      CE1D6776 
+ 158      0BA6E9CD 
+ 158      9E
+ 159 0066 D97BEEFD 		.ascii	"\331{\356\375\276\357|\347\336\031\205\000acc\036!\200"
+ 159      BEEF7CE7 
+ 159      DE198500 
+ 159      6163631E 
+ 159      2180
+ 160 0078 531D2383 		.ascii	"S\035#\203\303\201k;\2115\3621\256`\014bD1b\030q\214"
+ 160      C3816B3B 
+ 160      8935F231 
+ 160      AE600C62 
+ 160      44316218 
+ 161 008e 318C71F2 		.ascii	"1\214q\362\357\301\2602F\010c\012cB\254\203\330\313"
+ 161      EFC1B032 
+ 161      4608630A 
+ 161      6342AC83 
+ 161      D8CB
+ 162 00a0 1D4CB750 		.ascii	"\035L\267P\324d\034'F\022#l\343Oc\214\010\274,8\343"
+ 162      D4641C27 
+ 162      4612236C 
+ 162      E34F638C 
+ 162      08BC2C38 
+ 163 00b5 C243EE88 		.ascii	"\302C\356\210\376\017\275\350{\364X\277\212M/\267\247"
+ 163      FE0FBDE8 
+ 163      7BF458BF 
+ 163      8A4D2FB7 
+ 163      A7
+ 164 00c6 D8329CF8 		.ascii	"\3302\234\370{\316 \276\014>-A\346\354\300\361\202\007"
+ 164      7BCE20BE 
+ 164      0C3E2D41 
+ 164      E6ECC0F1 
+ 164      8207
+ 165 00d8 701F6422 		.ascii	"p\037d\".\206\337\012{\002\017b\004Oq\"\021cb.\275\033"
+ 165      2E86DF0A 
+ 165      7B020F62 
+ 165      044F7122 
+ 165      1163622E 
+ 166 00ee 44402473 		.ascii	"D@$sj\211\361\237\340C\306\034\\\304R\007A2r\323\267"
+ 166      6A89F19F 
+ 166      E043C61C 
+ 166      5CC45207 
+ 166      413272D3 
+ 167 0103 20816415 		.ascii	" \201d\025\000#5\0316\275\034G\246g\263\014\221\314"
+ 167      00233519 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 12
+
+
+ 167      36BD1C47 
+ 167      A667B30C 
+ 167      91CC
+ 168 0115 A62387EF 		.ascii	"\246#\207\357\215\026\312\022\260\371\334\353\336/+"
+ 168      8D16CA12 
+ 168      B0F9DCEB 
+ 168      DE2F2B
+ 169 0124 8314471B 		.ascii	"\203\024G\033\245\322\207\326\311\334m\016\375,/J\260"
+ 169      A5D287D6 
+ 169      C9DC6D0E 
+ 169      FD2C2F4A 
+ 169      B0
+ 170 0135 560505D3 		.ascii	"V\005\005\323\027\267O\247Vc\272N\205rL\373\177|x\241"
+ 170      17B74FA7 
+ 170      5663BA4E 
+ 170      85724CFB 
+ 170      7F7C78A1 
+ 171 0149 0053A70A 		.ascii	"\000S\247\012\031`\371\263\341\327\253\214\234\221;"
+ 171      1960F9B3 
+ 171      E1D7AB8C 
+ 171      9C913B
+ 172 0158 DB536F8A 		.ascii	"\333So\212\344\365l.\335K]\\P\240B\375\235\025\231_"
+ 172      E4F56C2E 
+ 172      DD4B5D5C 
+ 172      50A042FD 
+ 172      9D15995F 
+ 173 016c 7AF8F930 		.ascii	"z\370\3710\245%\020\002\025.\203\014\027\240\2229t\252"
+ 173      A5251002 
+ 173      152E830C 
+ 173      17A09239 
+ 173      74AA
+ 174 017e F83C42E9 		.ascii	"\370<B\351!\372\374\034u\224\021\370\324\011\2378\011"
+ 174      21FAFC1C 
+ 174      759411F8 
+ 174      D4099F38 
+ 174      09
+ 175 018f F44305D3 		.ascii	"\364C\005\323d(\270\004N\010\202\223\351\317\034\235"
+ 175      6428B804 
+ 175      4E088293 
+ 175      E9CF1C9D 
+ 176 019f 6C5A5376 		.ascii	"lZSv\222\333n\242\345\012\227\273\210\373}\270O \014"
+ 176      92DB6EA2 
+ 176      E50A97BB 
+ 176      88FB7DB8 
+ 176      4F200C
+ 177 01b2 65F8AC55 		.ascii	"e\370\254U\214Nn\305\243\247\2127t\323\356\020\235\317"
+ 177      8C4E6EC5 
+ 177      A3A78A37 
+ 177      74D3EE10 
+ 177      9DCF
+ 178 01c4 0C6EECA4 		.ascii	"\014n\354\244\211f\344I\014\005\275\226\205^\366\016"
+ 178      8966E449 
+ 178      0C05BD96 
+ 178      855EF60E 
+ 179 01d4 10380F0F 		.ascii	"\0208\017\017\360\274\256\300\006d\276\354y\031\311"
+ 179      F0BCAEC0 
+ 179      0664BEEC 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 13
+
+
+ 179      7919C9
+ 180 01e3 97BFE32D 		.ascii	"\227\277\343-\245ov\235\226\354%w\226\332*\016dU\354"
+ 180      A56F769D 
+ 180      96EC2577 
+ 180      96DA2A0E 
+ 180      6455EC
+ 181 01f6 48879345 		.ascii	"H\207\223EF\305\304\253\373\305\264\355 \245\233\030"
+ 181      46C5C4AB 
+ 181      FBC5B4ED 
+ 181      20A59B18 
+ 182 0206 062256BD 		.ascii	"\006\"V\275\210\275\336 \257\367d\340\317!\220\017\360"
+ 182      88BDDE20 
+ 182      AFF764E0 
+ 182      CF21900F 
+ 182      F0
+ 183 0217 7AAD3DB1 		.ascii	"z\255=\261;\253\204\306\314\224]\343\252\245q\325\256"
+ 183      3BAB84C6 
+ 183      CC945DE3 
+ 183      AAA571D5 
+ 183      AE
+ 184 0228 11E51A73 		.ascii	"\021\345\032s\217i\270P>\016\\\344\321\251\263O\035"
+ 184      8F69B850 
+ 184      3E0E5CE4 
+ 184      D1A9B34F 
+ 184      1D
+ 185 0239 0A5E3C3F 		.ascii	"\012^<? \264\207k\301\221\331g\216\025\033\031\341\215"
+ 185      20B4876B 
+ 185      C191D967 
+ 185      8E151B19 
+ 185      E18D
+ 186 024b 0C83E8A4 		.ascii	"\014\203\350\244k\266\265)O\270\370%i\272@\020\014Y"
+ 186      6BB6B529 
+ 186      4FB8F825 
+ 186      69BA4010 
+ 186      0C59
+ 187 025d 2E86EC2E 		.ascii	".\206\354.b\334E\270\357\357\264$w\033.\350\223\177"
+ 187      62DC45B8 
+ 187      EFEFB424 
+ 187      771B2EE8 
+ 187      937F
+ 188 026f 16552192 		.ascii	"\026U!\222N\312Y\0270j\311\214\332e\342\\fl\341\326"
+ 188      4ECA5917 
+ 188      306AC98C 
+ 188      DA65E25C 
+ 188      666CE1D6 
+ 189 0283 79590E19 		.ascii	"yY\016\0312\251\236\256c\354T\347)\355>\323\2122\327"
+ 189      32A99EAE 
+ 189      63EC54E7 
+ 189      29ED3ED3 
+ 189      8A32D7
+ 190 0296 15EEE49A 		.ascii	"\025\356\344\232%q\215K\340d\214\323\203\2613K\005\362"
+ 190      25718D4B 
+ 190      E0648CD3 
+ 190      83B1334B 
+ 190      05F2
+ 191 02a8 6383DEFB 		.ascii	"c\203\336\373\333\211s\016\203\236XJ\032t\346 a\321"
+ 191      DB89730E 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 14
+
+
+ 191      839E584A 
+ 191      1A74E620 
+ 191      61D1
+ 192 02ba 13267D9C 		.ascii	"\023&}\234\323\027\233_\375\341P\361\255l\372oo\345"
+ 192      D3179B5F 
+ 192      FDE150F1 
+ 192      AD6CFA6F 
+ 192      6FE5
+ 193 02cc ED855F33 		.ascii	"\355\205_3\371r\232\227\223\"\035\235\035\371\240V,"
+ 193      F9729A97 
+ 193      93221D9D 
+ 193      1DF9A056 
+ 193      2C
+ 194 02dd 439F5C86 		.ascii	"C\237\\\206.\276\216\340\216\366\026v4\023x]7,c\327"
+ 194      2EBE8EE0 
+ 194      8EF61676 
+ 194      3413785D 
+ 194      372C63D7 
+ 195 02f1 4135EE63 		.ascii	"A5\356c`\346\257\376\274\342\237\330\207\202\227\267"
+ 195      60E6AFFE 
+ 195      BCE29FD8 
+ 195      878297B7 
+ 196 0301 767A3547 		.ascii	"vz5GZ\3277\005\305\274\001\374G\364\345\211\226>)\013"
+ 196      5AD73705 
+ 196      C5BC01FC 
+ 196      47F4E589 
+ 196      963E290B 
+ 197 0315 CD1AB6D0 		.ascii	"\315\032\266\320I\201Nr\364\334lK\252(\013=\222\205"
+ 197      49814E72 
+ 197      F4DC6C4B 
+ 197      AA280B3D 
+ 197      9285
+ 198 0327 9E1668F6 		.ascii	"\236\026h\366_\024\320\335zC`\3677\232{O\301\226\257"
+ 198      5F14D0DD 
+ 198      7A4360F7 
+ 198      379A7B4F 
+ 198      C196AF
+ 199 033a 7694BBAA 		.ascii	"v\224\273\252\252H^\203\327\247W\177\274E\363i~\267"
+ 199      AA485E83 
+ 199      D7A7577F 
+ 199      BC45F369 
+ 199      7EB7
+ 200 034c AEEDD95D 		.ascii	"\256\355\331]S\327\340\367h\273\276\256\251s}\266\313"
+ 200      53D7E0F7 
+ 200      68BBBEAE 
+ 200      A9737DB6 
+ 200      CB
+ 201 035d D3A837D6 		.ascii	"\323\2507\326k\201\312\357I\371\012\010C\263\322CJ\205"
+ 201      6B81CAEF 
+ 201      49F90A08 
+ 201      43B3D243 
+ 201      4A85
+ 202 036f FA569FAE 		.ascii	"\372V\237\256\371\375\015\365\372f\237\273v\277\266"
+ 202      F9FD0DF5 
+ 202      FA669FBB 
+ 202      76BFB6
+ 203 037e 3E77F90B 		.ascii	">w\371\013o\200\255\227\210\365o\375^]\333\356\016\354"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 15
+
+
+ 203      6F80AD97 
+ 203      88F56FFD 
+ 203      5E5DDBEE 
+ 203      0EEC
+ 204 0390 5B6373C7 		.ascii	"[cs\307\362\017\\\215\233\177\360\352.\334\367z\334"
+ 204      F20F5C8D 
+ 204      9B7FF0EA 
+ 204      2EDCF77A 
+ 204      DC
+ 205 03a1 FB6B348F 		.ascii	"\373k4\217\356\255\363}\264\202\015W\3436o-\332,E\026"
+ 205      EEADF37D 
+ 205      B4820D57 
+ 205      E3366F2D 
+ 205      DA2C4516 
+ 206 03b5 AB944353 		.ascii	"\253\224CS\374\332\336\352\267\252\274\351="
+ 206      FCDADEEA 
+ 206      B7AABCE9 
+ 206      3D
+ 207              		.text
+ 208              		.section	.gnu.lto_.symtab.20d45ecb,"",%progbits
+ 209 0000 73746174 		.ascii	"status_Read\000"
+ 209      75735F52 
+ 209      65616400 
+ 210 000c 00       		.ascii	"\000"
+ 211 000d 00       		.ascii	"\000"
+ 212 000e 00       		.ascii	"\000"
+ 213 000f 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 213      00000000 
+ 214 0017 B2000000 		.ascii	"\262\000\000\000"
+ 215 001b 73746174 		.ascii	"status_InterruptEnable\000"
+ 215      75735F49 
+ 215      6E746572 
+ 215      72757074 
+ 215      456E6162 
+ 216 0032 00       		.ascii	"\000"
+ 217 0033 00       		.ascii	"\000"
+ 218 0034 00       		.ascii	"\000"
+ 219 0035 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 219      00000000 
+ 220 003d B5000000 		.ascii	"\265\000\000\000"
+ 221 0041 73746174 		.ascii	"status_InterruptDisable\000"
+ 221      75735F49 
+ 221      6E746572 
+ 221      72757074 
+ 221      44697361 
+ 222 0059 00       		.ascii	"\000"
+ 223 005a 00       		.ascii	"\000"
+ 224 005b 00       		.ascii	"\000"
+ 225 005c 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 225      00000000 
+ 226 0064 B7000000 		.ascii	"\267\000\000\000"
+ 227 0068 73746174 		.ascii	"status_WriteMask\000"
+ 227      75735F57 
+ 227      72697465 
+ 227      4D61736B 
+ 227      00
+ 228 0079 00       		.ascii	"\000"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 16
+
+
+ 229 007a 00       		.ascii	"\000"
+ 230 007b 00       		.ascii	"\000"
+ 231 007c 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 231      00000000 
+ 232 0084 BB000000 		.ascii	"\273\000\000\000"
+ 233 0088 73746174 		.ascii	"status_ReadMask\000"
+ 233      75735F52 
+ 233      6561644D 
+ 233      61736B00 
+ 234 0098 00       		.ascii	"\000"
+ 235 0099 00       		.ascii	"\000"
+ 236 009a 00       		.ascii	"\000"
+ 237 009b 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 237      00000000 
+ 238 00a3 BD000000 		.ascii	"\275\000\000\000"
+ 239 00a7 43794578 		.ascii	"CyExitCriticalSection\000"
+ 239      69744372 
+ 239      69746963 
+ 239      616C5365 
+ 239      6374696F 
+ 240 00bd 00       		.ascii	"\000"
+ 241 00be 02       		.ascii	"\002"
+ 242 00bf 00       		.ascii	"\000"
+ 243 00c0 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 243      00000000 
+ 244 00c8 BF000000 		.ascii	"\277\000\000\000"
+ 245 00cc 4379456E 		.ascii	"CyEnterCriticalSection\000"
+ 245      74657243 
+ 245      72697469 
+ 245      63616C53 
+ 245      65637469 
+ 246 00e3 00       		.ascii	"\000"
+ 247 00e4 02       		.ascii	"\002"
+ 248 00e5 00       		.ascii	"\000"
+ 249 00e6 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 249      00000000 
+ 250 00ee C1000000 		.ascii	"\301\000\000\000"
+ 251              		.text
+ 252              		.section	.gnu.lto_.opts,"",%progbits
+ 253 0000 272D666D 		.ascii	"'-fmath-errno' '-fsigned-zeros' '-ftrapping-math' '"
+ 253      6174682D 
+ 253      6572726E 
+ 253      6F272027 
+ 253      2D667369 
+ 254 0033 2D666E6F 		.ascii	"-fno-trapv' '-fno-openmp' '-fno-openacc' '-mcpu=cor"
+ 254      2D747261 
+ 254      70762720 
+ 254      272D666E 
+ 254      6F2D6F70 
+ 255 0066 7465782D 		.ascii	"tex-m3' '-mthumb' '-g' '-O3' '-ffunction-sections' "
+ 255      6D332720 
+ 255      272D6D74 
+ 255      68756D62 
+ 255      2720272D 
+ 256 0099 272D6666 		.ascii	"'-ffat-lto-objects' '-finline-functions' '-flto'\000"
+ 256      61742D6C 
+ 256      746F2D6F 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 17
+
+
+ 256      626A6563 
+ 256      74732720 
+ 257              		.text
+ 258              		.cfi_sections	.debug_frame
+ 259              		.section	.text.status_Read,"ax",%progbits
+ 260              		.align	2
+ 261              		.global	status_Read
+ 262              		.thumb
+ 263              		.thumb_func
+ 264              		.type	status_Read, %function
+ 265              	status_Read:
+ 266              	.LFB0:
+ 267              		.file 1 "Generated_Source\\PSoC5\\status.c"
+   1:Generated_Source\PSoC5/status.c **** /*******************************************************************************
+   2:Generated_Source\PSoC5/status.c **** * File Name: status.c  
+   3:Generated_Source\PSoC5/status.c **** * Version 1.90
+   4:Generated_Source\PSoC5/status.c **** *
+   5:Generated_Source\PSoC5/status.c **** * Description:
+   6:Generated_Source\PSoC5/status.c **** *  This file contains API to enable firmware to read the value of a Status 
+   7:Generated_Source\PSoC5/status.c **** *  Register.
+   8:Generated_Source\PSoC5/status.c **** *
+   9:Generated_Source\PSoC5/status.c **** * Note:
+  10:Generated_Source\PSoC5/status.c **** *
+  11:Generated_Source\PSoC5/status.c **** ********************************************************************************
+  12:Generated_Source\PSoC5/status.c **** * Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+  13:Generated_Source\PSoC5/status.c **** * You may use this file only in accordance with the license, terms, conditions, 
+  14:Generated_Source\PSoC5/status.c **** * disclaimers, and limitations in the end user license agreement accompanying 
+  15:Generated_Source\PSoC5/status.c **** * the software package with which this file was provided.
+  16:Generated_Source\PSoC5/status.c **** *******************************************************************************/
+  17:Generated_Source\PSoC5/status.c **** 
+  18:Generated_Source\PSoC5/status.c **** #include "status.h"
+  19:Generated_Source\PSoC5/status.c **** 
+  20:Generated_Source\PSoC5/status.c **** #if !defined(status_sts_sts_reg__REMOVED) /* Check for removal by optimization */
+  21:Generated_Source\PSoC5/status.c **** 
+  22:Generated_Source\PSoC5/status.c **** 
+  23:Generated_Source\PSoC5/status.c **** /*******************************************************************************
+  24:Generated_Source\PSoC5/status.c **** * Function Name: status_Read
+  25:Generated_Source\PSoC5/status.c **** ********************************************************************************
+  26:Generated_Source\PSoC5/status.c **** *
+  27:Generated_Source\PSoC5/status.c **** * Summary:
+  28:Generated_Source\PSoC5/status.c **** *  Reads the current value assigned to the Status Register.
+  29:Generated_Source\PSoC5/status.c **** *
+  30:Generated_Source\PSoC5/status.c **** * Parameters:
+  31:Generated_Source\PSoC5/status.c **** *  None.
+  32:Generated_Source\PSoC5/status.c **** *
+  33:Generated_Source\PSoC5/status.c **** * Return:
+  34:Generated_Source\PSoC5/status.c **** *  The current value in the Status Register.
+  35:Generated_Source\PSoC5/status.c **** *
+  36:Generated_Source\PSoC5/status.c **** *******************************************************************************/
+  37:Generated_Source\PSoC5/status.c **** uint8 status_Read(void) 
+  38:Generated_Source\PSoC5/status.c **** { 
+ 268              		.loc 1 38 0
+ 269              		.cfi_startproc
+ 270              		@ args = 0, pretend = 0, frame = 0
+ 271              		@ frame_needed = 0, uses_anonymous_args = 0
+ 272              		@ link register save eliminated.
+  39:Generated_Source\PSoC5/status.c ****     return status_Status;
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 18
+
+
+ 273              		.loc 1 39 0
+ 274 0000 014B     		ldr	r3, .L2
+ 275 0002 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+  40:Generated_Source\PSoC5/status.c **** }
+ 276              		.loc 1 40 0
+ 277 0004 7047     		bx	lr
+ 278              	.L3:
+ 279 0006 00BF     		.align	2
+ 280              	.L2:
+ 281 0008 6C640040 		.word	1073767532
+ 282              		.cfi_endproc
+ 283              	.LFE0:
+ 284              		.size	status_Read, .-status_Read
+ 285              		.section	.text.status_InterruptEnable,"ax",%progbits
+ 286              		.align	2
+ 287              		.global	status_InterruptEnable
+ 288              		.thumb
+ 289              		.thumb_func
+ 290              		.type	status_InterruptEnable, %function
+ 291              	status_InterruptEnable:
+ 292              	.LFB1:
+  41:Generated_Source\PSoC5/status.c **** 
+  42:Generated_Source\PSoC5/status.c **** 
+  43:Generated_Source\PSoC5/status.c **** /*******************************************************************************
+  44:Generated_Source\PSoC5/status.c **** * Function Name: status_InterruptEnable
+  45:Generated_Source\PSoC5/status.c **** ********************************************************************************
+  46:Generated_Source\PSoC5/status.c **** *
+  47:Generated_Source\PSoC5/status.c **** * Summary:
+  48:Generated_Source\PSoC5/status.c **** *  Enables the Status Register interrupt.
+  49:Generated_Source\PSoC5/status.c **** *
+  50:Generated_Source\PSoC5/status.c **** * Parameters:
+  51:Generated_Source\PSoC5/status.c **** *  None.
+  52:Generated_Source\PSoC5/status.c **** *
+  53:Generated_Source\PSoC5/status.c **** * Return:
+  54:Generated_Source\PSoC5/status.c **** *  None.
+  55:Generated_Source\PSoC5/status.c **** *
+  56:Generated_Source\PSoC5/status.c **** *******************************************************************************/
+  57:Generated_Source\PSoC5/status.c **** void status_InterruptEnable(void) 
+  58:Generated_Source\PSoC5/status.c **** {
+ 293              		.loc 1 58 0
+ 294              		.cfi_startproc
+ 295              		@ args = 0, pretend = 0, frame = 0
+ 296              		@ frame_needed = 0, uses_anonymous_args = 0
+ 297 0000 08B5     		push	{r3, lr}
+ 298              		.cfi_def_cfa_offset 8
+ 299              		.cfi_offset 3, -8
+ 300              		.cfi_offset 14, -4
+  59:Generated_Source\PSoC5/status.c ****     uint8 interruptState;
+  60:Generated_Source\PSoC5/status.c ****     interruptState = CyEnterCriticalSection();
+ 301              		.loc 1 60 0
+ 302 0002 FFF7FEFF 		bl	CyEnterCriticalSection
+ 303              	.LVL0:
+  61:Generated_Source\PSoC5/status.c ****     status_Status_Aux_Ctrl |= status_STATUS_INTR_ENBL;
+ 304              		.loc 1 61 0
+ 305 0006 044A     		ldr	r2, .L6
+ 306 0008 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 307 000a 43F01003 		orr	r3, r3, #16
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 19
+
+
+ 308 000e 1370     		strb	r3, [r2]
+  62:Generated_Source\PSoC5/status.c ****     CyExitCriticalSection(interruptState);
+  63:Generated_Source\PSoC5/status.c **** }
+ 309              		.loc 1 63 0
+ 310 0010 BDE80840 		pop	{r3, lr}
+ 311              		.cfi_restore 14
+ 312              		.cfi_restore 3
+ 313              		.cfi_def_cfa_offset 0
+  62:Generated_Source\PSoC5/status.c ****     CyExitCriticalSection(interruptState);
+ 314              		.loc 1 62 0
+ 315 0014 FFF7FEBF 		b	CyExitCriticalSection
+ 316              	.LVL1:
+ 317              	.L7:
+ 318              		.align	2
+ 319              	.L6:
+ 320 0018 9C640040 		.word	1073767580
+ 321              		.cfi_endproc
+ 322              	.LFE1:
+ 323              		.size	status_InterruptEnable, .-status_InterruptEnable
+ 324              		.section	.text.status_InterruptDisable,"ax",%progbits
+ 325              		.align	2
+ 326              		.global	status_InterruptDisable
+ 327              		.thumb
+ 328              		.thumb_func
+ 329              		.type	status_InterruptDisable, %function
+ 330              	status_InterruptDisable:
+ 331              	.LFB2:
+  64:Generated_Source\PSoC5/status.c **** 
+  65:Generated_Source\PSoC5/status.c **** 
+  66:Generated_Source\PSoC5/status.c **** /*******************************************************************************
+  67:Generated_Source\PSoC5/status.c **** * Function Name: status_InterruptDisable
+  68:Generated_Source\PSoC5/status.c **** ********************************************************************************
+  69:Generated_Source\PSoC5/status.c **** *
+  70:Generated_Source\PSoC5/status.c **** * Summary:
+  71:Generated_Source\PSoC5/status.c **** *  Disables the Status Register interrupt.
+  72:Generated_Source\PSoC5/status.c **** *
+  73:Generated_Source\PSoC5/status.c **** * Parameters:
+  74:Generated_Source\PSoC5/status.c **** *  None.
+  75:Generated_Source\PSoC5/status.c **** *
+  76:Generated_Source\PSoC5/status.c **** * Return:
+  77:Generated_Source\PSoC5/status.c **** *  None.
+  78:Generated_Source\PSoC5/status.c **** *
+  79:Generated_Source\PSoC5/status.c **** *******************************************************************************/
+  80:Generated_Source\PSoC5/status.c **** void status_InterruptDisable(void) 
+  81:Generated_Source\PSoC5/status.c **** {
+ 332              		.loc 1 81 0
+ 333              		.cfi_startproc
+ 334              		@ args = 0, pretend = 0, frame = 0
+ 335              		@ frame_needed = 0, uses_anonymous_args = 0
+ 336 0000 08B5     		push	{r3, lr}
+ 337              		.cfi_def_cfa_offset 8
+ 338              		.cfi_offset 3, -8
+ 339              		.cfi_offset 14, -4
+  82:Generated_Source\PSoC5/status.c ****     uint8 interruptState;
+  83:Generated_Source\PSoC5/status.c ****     interruptState = CyEnterCriticalSection();
+ 340              		.loc 1 83 0
+ 341 0002 FFF7FEFF 		bl	CyEnterCriticalSection
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 20
+
+
+ 342              	.LVL2:
+  84:Generated_Source\PSoC5/status.c ****     status_Status_Aux_Ctrl &= (uint8)(~status_STATUS_INTR_ENBL);
+ 343              		.loc 1 84 0
+ 344 0006 044A     		ldr	r2, .L10
+ 345 0008 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 346 000a 03F0EF03 		and	r3, r3, #239
+ 347 000e 1370     		strb	r3, [r2]
+  85:Generated_Source\PSoC5/status.c ****     CyExitCriticalSection(interruptState);
+  86:Generated_Source\PSoC5/status.c **** }
+ 348              		.loc 1 86 0
+ 349 0010 BDE80840 		pop	{r3, lr}
+ 350              		.cfi_restore 14
+ 351              		.cfi_restore 3
+ 352              		.cfi_def_cfa_offset 0
+  85:Generated_Source\PSoC5/status.c ****     CyExitCriticalSection(interruptState);
+ 353              		.loc 1 85 0
+ 354 0014 FFF7FEBF 		b	CyExitCriticalSection
+ 355              	.LVL3:
+ 356              	.L11:
+ 357              		.align	2
+ 358              	.L10:
+ 359 0018 9C640040 		.word	1073767580
+ 360              		.cfi_endproc
+ 361              	.LFE2:
+ 362              		.size	status_InterruptDisable, .-status_InterruptDisable
+ 363              		.section	.text.status_WriteMask,"ax",%progbits
+ 364              		.align	2
+ 365              		.global	status_WriteMask
+ 366              		.thumb
+ 367              		.thumb_func
+ 368              		.type	status_WriteMask, %function
+ 369              	status_WriteMask:
+ 370              	.LFB3:
+  87:Generated_Source\PSoC5/status.c **** 
+  88:Generated_Source\PSoC5/status.c **** 
+  89:Generated_Source\PSoC5/status.c **** /*******************************************************************************
+  90:Generated_Source\PSoC5/status.c **** * Function Name: status_WriteMask
+  91:Generated_Source\PSoC5/status.c **** ********************************************************************************
+  92:Generated_Source\PSoC5/status.c **** *
+  93:Generated_Source\PSoC5/status.c **** * Summary:
+  94:Generated_Source\PSoC5/status.c **** *  Writes the current mask value assigned to the Status Register.
+  95:Generated_Source\PSoC5/status.c **** *
+  96:Generated_Source\PSoC5/status.c **** * Parameters:
+  97:Generated_Source\PSoC5/status.c **** *  mask:  Value to write into the mask register.
+  98:Generated_Source\PSoC5/status.c **** *
+  99:Generated_Source\PSoC5/status.c **** * Return:
+ 100:Generated_Source\PSoC5/status.c **** *  None.
+ 101:Generated_Source\PSoC5/status.c **** *
+ 102:Generated_Source\PSoC5/status.c **** *******************************************************************************/
+ 103:Generated_Source\PSoC5/status.c **** void status_WriteMask(uint8 mask) 
+ 104:Generated_Source\PSoC5/status.c **** {
+ 371              		.loc 1 104 0
+ 372              		.cfi_startproc
+ 373              		@ args = 0, pretend = 0, frame = 0
+ 374              		@ frame_needed = 0, uses_anonymous_args = 0
+ 375              		@ link register save eliminated.
+ 376              	.LVL4:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 21
+
+
+ 105:Generated_Source\PSoC5/status.c ****     #if(status_INPUTS < 8u)
+ 106:Generated_Source\PSoC5/status.c ****     	mask &= ((uint8)(1u << status_INPUTS) - 1u);
+ 107:Generated_Source\PSoC5/status.c **** 	#endif /* End status_INPUTS < 8u */
+ 108:Generated_Source\PSoC5/status.c ****     status_Status_Mask = mask;
+ 377              		.loc 1 108 0
+ 378 0000 014B     		ldr	r3, .L13
+ 379 0002 1870     		strb	r0, [r3]
+ 380 0004 7047     		bx	lr
+ 381              	.L14:
+ 382 0006 00BF     		.align	2
+ 383              	.L13:
+ 384 0008 8C640040 		.word	1073767564
+ 385              		.cfi_endproc
+ 386              	.LFE3:
+ 387              		.size	status_WriteMask, .-status_WriteMask
+ 388              		.section	.text.status_ReadMask,"ax",%progbits
+ 389              		.align	2
+ 390              		.global	status_ReadMask
+ 391              		.thumb
+ 392              		.thumb_func
+ 393              		.type	status_ReadMask, %function
+ 394              	status_ReadMask:
+ 395              	.LFB4:
+ 109:Generated_Source\PSoC5/status.c **** }
+ 110:Generated_Source\PSoC5/status.c **** 
+ 111:Generated_Source\PSoC5/status.c **** 
+ 112:Generated_Source\PSoC5/status.c **** /*******************************************************************************
+ 113:Generated_Source\PSoC5/status.c **** * Function Name: status_ReadMask
+ 114:Generated_Source\PSoC5/status.c **** ********************************************************************************
+ 115:Generated_Source\PSoC5/status.c **** *
+ 116:Generated_Source\PSoC5/status.c **** * Summary:
+ 117:Generated_Source\PSoC5/status.c **** *  Reads the current interrupt mask assigned to the Status Register.
+ 118:Generated_Source\PSoC5/status.c **** *
+ 119:Generated_Source\PSoC5/status.c **** * Parameters:
+ 120:Generated_Source\PSoC5/status.c **** *  None.
+ 121:Generated_Source\PSoC5/status.c **** *
+ 122:Generated_Source\PSoC5/status.c **** * Return:
+ 123:Generated_Source\PSoC5/status.c **** *  The value of the interrupt mask of the Status Register.
+ 124:Generated_Source\PSoC5/status.c **** *
+ 125:Generated_Source\PSoC5/status.c **** *******************************************************************************/
+ 126:Generated_Source\PSoC5/status.c **** uint8 status_ReadMask(void) 
+ 127:Generated_Source\PSoC5/status.c **** {
+ 396              		.loc 1 127 0
+ 397              		.cfi_startproc
+ 398              		@ args = 0, pretend = 0, frame = 0
+ 399              		@ frame_needed = 0, uses_anonymous_args = 0
+ 400              		@ link register save eliminated.
+ 128:Generated_Source\PSoC5/status.c ****     return status_Status_Mask;
+ 401              		.loc 1 128 0
+ 402 0000 014B     		ldr	r3, .L16
+ 403 0002 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 129:Generated_Source\PSoC5/status.c **** }
+ 404              		.loc 1 129 0
+ 405 0004 7047     		bx	lr
+ 406              	.L17:
+ 407 0006 00BF     		.align	2
+ 408              	.L16:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 22
+
+
+ 409 0008 8C640040 		.word	1073767564
+ 410              		.cfi_endproc
+ 411              	.LFE4:
+ 412              		.size	status_ReadMask, .-status_ReadMask
+ 413              		.text
+ 414              	.Letext0:
+ 415              		.file 2 "Generated_Source\\PSoC5\\cytypes.h"
+ 416              		.file 3 "Generated_Source\\PSoC5\\CyLib.h"
+ 417              		.section	.debug_info,"",%progbits
+ 418              	.Ldebug_info0:
+ 419 0000 79010000 		.4byte	0x179
+ 420 0004 0400     		.2byte	0x4
+ 421 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 422 000a 04       		.byte	0x4
+ 423 000b 01       		.uleb128 0x1
+ 424 000c AD010000 		.4byte	.LASF24
+ 425 0010 0C       		.byte	0xc
+ 426 0011 04010000 		.4byte	.LASF25
+ 427 0015 C5000000 		.4byte	.LASF26
+ 428 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 429 001d 00000000 		.4byte	0
+ 430 0021 00000000 		.4byte	.Ldebug_line0
+ 431 0025 02       		.uleb128 0x2
+ 432 0026 01       		.byte	0x1
+ 433 0027 06       		.byte	0x6
+ 434 0028 58010000 		.4byte	.LASF0
+ 435 002c 02       		.uleb128 0x2
+ 436 002d 01       		.byte	0x1
+ 437 002e 08       		.byte	0x8
+ 438 002f 33000000 		.4byte	.LASF1
+ 439 0033 02       		.uleb128 0x2
+ 440 0034 02       		.byte	0x2
+ 441 0035 05       		.byte	0x5
+ 442 0036 86010000 		.4byte	.LASF2
+ 443 003a 02       		.uleb128 0x2
+ 444 003b 02       		.byte	0x2
+ 445 003c 07       		.byte	0x7
+ 446 003d 45010000 		.4byte	.LASF3
+ 447 0041 02       		.uleb128 0x2
+ 448 0042 04       		.byte	0x4
+ 449 0043 05       		.byte	0x5
+ 450 0044 29010000 		.4byte	.LASF4
+ 451 0048 02       		.uleb128 0x2
+ 452 0049 04       		.byte	0x4
+ 453 004a 07       		.byte	0x7
+ 454 004b 96000000 		.4byte	.LASF5
+ 455 004f 02       		.uleb128 0x2
+ 456 0050 08       		.byte	0x8
+ 457 0051 05       		.byte	0x5
+ 458 0052 00000000 		.4byte	.LASF6
+ 459 0056 02       		.uleb128 0x2
+ 460 0057 08       		.byte	0x8
+ 461 0058 07       		.byte	0x7
+ 462 0059 A8000000 		.4byte	.LASF7
+ 463 005d 03       		.uleb128 0x3
+ 464 005e 04       		.byte	0x4
+ 465 005f 05       		.byte	0x5
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 23
+
+
+ 466 0060 696E7400 		.ascii	"int\000"
+ 467 0064 02       		.uleb128 0x2
+ 468 0065 04       		.byte	0x4
+ 469 0066 07       		.byte	0x7
+ 470 0067 26000000 		.4byte	.LASF8
+ 471 006b 04       		.uleb128 0x4
+ 472 006c 90000000 		.4byte	.LASF12
+ 473 0070 02       		.byte	0x2
+ 474 0071 E901     		.2byte	0x1e9
+ 475 0073 2C000000 		.4byte	0x2c
+ 476 0077 02       		.uleb128 0x2
+ 477 0078 04       		.byte	0x4
+ 478 0079 04       		.byte	0x4
+ 479 007a BF000000 		.4byte	.LASF9
+ 480 007e 02       		.uleb128 0x2
+ 481 007f 08       		.byte	0x8
+ 482 0080 04       		.byte	0x4
+ 483 0081 32010000 		.4byte	.LASF10
+ 484 0085 02       		.uleb128 0x2
+ 485 0086 01       		.byte	0x1
+ 486 0087 08       		.byte	0x8
+ 487 0088 24010000 		.4byte	.LASF11
+ 488 008c 04       		.uleb128 0x4
+ 489 008d 90010000 		.4byte	.LASF13
+ 490 0091 02       		.byte	0x2
+ 491 0092 9302     		.2byte	0x293
+ 492 0094 98000000 		.4byte	0x98
+ 493 0098 05       		.uleb128 0x5
+ 494 0099 6B000000 		.4byte	0x6b
+ 495 009d 02       		.uleb128 0x2
+ 496 009e 08       		.byte	0x8
+ 497 009f 04       		.byte	0x4
+ 498 00a0 7A010000 		.4byte	.LASF14
+ 499 00a4 02       		.uleb128 0x2
+ 500 00a5 04       		.byte	0x4
+ 501 00a6 07       		.byte	0x7
+ 502 00a7 95010000 		.4byte	.LASF15
+ 503 00ab 06       		.uleb128 0x6
+ 504 00ac 39010000 		.4byte	.LASF20
+ 505 00b0 01       		.byte	0x1
+ 506 00b1 25       		.byte	0x25
+ 507 00b2 6B000000 		.4byte	0x6b
+ 508 00b6 00000000 		.4byte	.LFB0
+ 509 00ba 0C000000 		.4byte	.LFE0-.LFB0
+ 510 00be 01       		.uleb128 0x1
+ 511 00bf 9C       		.byte	0x9c
+ 512 00c0 07       		.uleb128 0x7
+ 513 00c1 41000000 		.4byte	.LASF16
+ 514 00c5 01       		.byte	0x1
+ 515 00c6 39       		.byte	0x39
+ 516 00c7 00000000 		.4byte	.LFB1
+ 517 00cb 1C000000 		.4byte	.LFE1-.LFB1
+ 518 00cf 01       		.uleb128 0x1
+ 519 00d0 9C       		.byte	0x9c
+ 520 00d1 F7000000 		.4byte	0xf7
+ 521 00d5 08       		.uleb128 0x8
+ 522 00d6 9E010000 		.4byte	.LASF18
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 24
+
+
+ 523 00da 01       		.byte	0x1
+ 524 00db 3B       		.byte	0x3b
+ 525 00dc 6B000000 		.4byte	0x6b
+ 526 00e0 00000000 		.4byte	.LLST0
+ 527 00e4 09       		.uleb128 0x9
+ 528 00e5 06000000 		.4byte	.LVL0
+ 529 00e9 66010000 		.4byte	0x166
+ 530 00ed 0A       		.uleb128 0xa
+ 531 00ee 18000000 		.4byte	.LVL1
+ 532 00f2 71010000 		.4byte	0x171
+ 533 00f6 00       		.byte	0
+ 534 00f7 07       		.uleb128 0x7
+ 535 00f8 0E000000 		.4byte	.LASF17
+ 536 00fc 01       		.byte	0x1
+ 537 00fd 50       		.byte	0x50
+ 538 00fe 00000000 		.4byte	.LFB2
+ 539 0102 1C000000 		.4byte	.LFE2-.LFB2
+ 540 0106 01       		.uleb128 0x1
+ 541 0107 9C       		.byte	0x9c
+ 542 0108 2E010000 		.4byte	0x12e
+ 543 010c 08       		.uleb128 0x8
+ 544 010d 9E010000 		.4byte	.LASF18
+ 545 0111 01       		.byte	0x1
+ 546 0112 52       		.byte	0x52
+ 547 0113 6B000000 		.4byte	0x6b
+ 548 0117 13000000 		.4byte	.LLST1
+ 549 011b 09       		.uleb128 0x9
+ 550 011c 06000000 		.4byte	.LVL2
+ 551 0120 66010000 		.4byte	0x166
+ 552 0124 0A       		.uleb128 0xa
+ 553 0125 18000000 		.4byte	.LVL3
+ 554 0129 71010000 		.4byte	0x171
+ 555 012d 00       		.byte	0
+ 556 012e 07       		.uleb128 0x7
+ 557 012f 58000000 		.4byte	.LASF19
+ 558 0133 01       		.byte	0x1
+ 559 0134 67       		.byte	0x67
+ 560 0135 00000000 		.4byte	.LFB3
+ 561 0139 0C000000 		.4byte	.LFE3-.LFB3
+ 562 013d 01       		.uleb128 0x1
+ 563 013e 9C       		.byte	0x9c
+ 564 013f 51010000 		.4byte	0x151
+ 565 0143 0B       		.uleb128 0xb
+ 566 0144 FF000000 		.4byte	.LASF27
+ 567 0148 01       		.byte	0x1
+ 568 0149 67       		.byte	0x67
+ 569 014a 6B000000 		.4byte	0x6b
+ 570 014e 01       		.uleb128 0x1
+ 571 014f 50       		.byte	0x50
+ 572 0150 00       		.byte	0
+ 573 0151 06       		.uleb128 0x6
+ 574 0152 80000000 		.4byte	.LASF21
+ 575 0156 01       		.byte	0x1
+ 576 0157 7E       		.byte	0x7e
+ 577 0158 6B000000 		.4byte	0x6b
+ 578 015c 00000000 		.4byte	.LFB4
+ 579 0160 0C000000 		.4byte	.LFE4-.LFB4
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 25
+
+
+ 580 0164 01       		.uleb128 0x1
+ 581 0165 9C       		.byte	0x9c
+ 582 0166 0C       		.uleb128 0xc
+ 583 0167 69000000 		.4byte	.LASF22
+ 584 016b 69000000 		.4byte	.LASF22
+ 585 016f 03       		.byte	0x3
+ 586 0170 7D       		.byte	0x7d
+ 587 0171 0C       		.uleb128 0xc
+ 588 0172 64010000 		.4byte	.LASF23
+ 589 0176 64010000 		.4byte	.LASF23
+ 590 017a 03       		.byte	0x3
+ 591 017b 7E       		.byte	0x7e
+ 592 017c 00       		.byte	0
+ 593              		.section	.debug_abbrev,"",%progbits
+ 594              	.Ldebug_abbrev0:
+ 595 0000 01       		.uleb128 0x1
+ 596 0001 11       		.uleb128 0x11
+ 597 0002 01       		.byte	0x1
+ 598 0003 25       		.uleb128 0x25
+ 599 0004 0E       		.uleb128 0xe
+ 600 0005 13       		.uleb128 0x13
+ 601 0006 0B       		.uleb128 0xb
+ 602 0007 03       		.uleb128 0x3
+ 603 0008 0E       		.uleb128 0xe
+ 604 0009 1B       		.uleb128 0x1b
+ 605 000a 0E       		.uleb128 0xe
+ 606 000b 55       		.uleb128 0x55
+ 607 000c 17       		.uleb128 0x17
+ 608 000d 11       		.uleb128 0x11
+ 609 000e 01       		.uleb128 0x1
+ 610 000f 10       		.uleb128 0x10
+ 611 0010 17       		.uleb128 0x17
+ 612 0011 00       		.byte	0
+ 613 0012 00       		.byte	0
+ 614 0013 02       		.uleb128 0x2
+ 615 0014 24       		.uleb128 0x24
+ 616 0015 00       		.byte	0
+ 617 0016 0B       		.uleb128 0xb
+ 618 0017 0B       		.uleb128 0xb
+ 619 0018 3E       		.uleb128 0x3e
+ 620 0019 0B       		.uleb128 0xb
+ 621 001a 03       		.uleb128 0x3
+ 622 001b 0E       		.uleb128 0xe
+ 623 001c 00       		.byte	0
+ 624 001d 00       		.byte	0
+ 625 001e 03       		.uleb128 0x3
+ 626 001f 24       		.uleb128 0x24
+ 627 0020 00       		.byte	0
+ 628 0021 0B       		.uleb128 0xb
+ 629 0022 0B       		.uleb128 0xb
+ 630 0023 3E       		.uleb128 0x3e
+ 631 0024 0B       		.uleb128 0xb
+ 632 0025 03       		.uleb128 0x3
+ 633 0026 08       		.uleb128 0x8
+ 634 0027 00       		.byte	0
+ 635 0028 00       		.byte	0
+ 636 0029 04       		.uleb128 0x4
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 26
+
+
+ 637 002a 16       		.uleb128 0x16
+ 638 002b 00       		.byte	0
+ 639 002c 03       		.uleb128 0x3
+ 640 002d 0E       		.uleb128 0xe
+ 641 002e 3A       		.uleb128 0x3a
+ 642 002f 0B       		.uleb128 0xb
+ 643 0030 3B       		.uleb128 0x3b
+ 644 0031 05       		.uleb128 0x5
+ 645 0032 49       		.uleb128 0x49
+ 646 0033 13       		.uleb128 0x13
+ 647 0034 00       		.byte	0
+ 648 0035 00       		.byte	0
+ 649 0036 05       		.uleb128 0x5
+ 650 0037 35       		.uleb128 0x35
+ 651 0038 00       		.byte	0
+ 652 0039 49       		.uleb128 0x49
+ 653 003a 13       		.uleb128 0x13
+ 654 003b 00       		.byte	0
+ 655 003c 00       		.byte	0
+ 656 003d 06       		.uleb128 0x6
+ 657 003e 2E       		.uleb128 0x2e
+ 658 003f 00       		.byte	0
+ 659 0040 3F       		.uleb128 0x3f
+ 660 0041 19       		.uleb128 0x19
+ 661 0042 03       		.uleb128 0x3
+ 662 0043 0E       		.uleb128 0xe
+ 663 0044 3A       		.uleb128 0x3a
+ 664 0045 0B       		.uleb128 0xb
+ 665 0046 3B       		.uleb128 0x3b
+ 666 0047 0B       		.uleb128 0xb
+ 667 0048 27       		.uleb128 0x27
+ 668 0049 19       		.uleb128 0x19
+ 669 004a 49       		.uleb128 0x49
+ 670 004b 13       		.uleb128 0x13
+ 671 004c 11       		.uleb128 0x11
+ 672 004d 01       		.uleb128 0x1
+ 673 004e 12       		.uleb128 0x12
+ 674 004f 06       		.uleb128 0x6
+ 675 0050 40       		.uleb128 0x40
+ 676 0051 18       		.uleb128 0x18
+ 677 0052 9742     		.uleb128 0x2117
+ 678 0054 19       		.uleb128 0x19
+ 679 0055 00       		.byte	0
+ 680 0056 00       		.byte	0
+ 681 0057 07       		.uleb128 0x7
+ 682 0058 2E       		.uleb128 0x2e
+ 683 0059 01       		.byte	0x1
+ 684 005a 3F       		.uleb128 0x3f
+ 685 005b 19       		.uleb128 0x19
+ 686 005c 03       		.uleb128 0x3
+ 687 005d 0E       		.uleb128 0xe
+ 688 005e 3A       		.uleb128 0x3a
+ 689 005f 0B       		.uleb128 0xb
+ 690 0060 3B       		.uleb128 0x3b
+ 691 0061 0B       		.uleb128 0xb
+ 692 0062 27       		.uleb128 0x27
+ 693 0063 19       		.uleb128 0x19
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 27
+
+
+ 694 0064 11       		.uleb128 0x11
+ 695 0065 01       		.uleb128 0x1
+ 696 0066 12       		.uleb128 0x12
+ 697 0067 06       		.uleb128 0x6
+ 698 0068 40       		.uleb128 0x40
+ 699 0069 18       		.uleb128 0x18
+ 700 006a 9742     		.uleb128 0x2117
+ 701 006c 19       		.uleb128 0x19
+ 702 006d 01       		.uleb128 0x1
+ 703 006e 13       		.uleb128 0x13
+ 704 006f 00       		.byte	0
+ 705 0070 00       		.byte	0
+ 706 0071 08       		.uleb128 0x8
+ 707 0072 34       		.uleb128 0x34
+ 708 0073 00       		.byte	0
+ 709 0074 03       		.uleb128 0x3
+ 710 0075 0E       		.uleb128 0xe
+ 711 0076 3A       		.uleb128 0x3a
+ 712 0077 0B       		.uleb128 0xb
+ 713 0078 3B       		.uleb128 0x3b
+ 714 0079 0B       		.uleb128 0xb
+ 715 007a 49       		.uleb128 0x49
+ 716 007b 13       		.uleb128 0x13
+ 717 007c 02       		.uleb128 0x2
+ 718 007d 17       		.uleb128 0x17
+ 719 007e 00       		.byte	0
+ 720 007f 00       		.byte	0
+ 721 0080 09       		.uleb128 0x9
+ 722 0081 898201   		.uleb128 0x4109
+ 723 0084 00       		.byte	0
+ 724 0085 11       		.uleb128 0x11
+ 725 0086 01       		.uleb128 0x1
+ 726 0087 31       		.uleb128 0x31
+ 727 0088 13       		.uleb128 0x13
+ 728 0089 00       		.byte	0
+ 729 008a 00       		.byte	0
+ 730 008b 0A       		.uleb128 0xa
+ 731 008c 898201   		.uleb128 0x4109
+ 732 008f 00       		.byte	0
+ 733 0090 11       		.uleb128 0x11
+ 734 0091 01       		.uleb128 0x1
+ 735 0092 9542     		.uleb128 0x2115
+ 736 0094 19       		.uleb128 0x19
+ 737 0095 31       		.uleb128 0x31
+ 738 0096 13       		.uleb128 0x13
+ 739 0097 00       		.byte	0
+ 740 0098 00       		.byte	0
+ 741 0099 0B       		.uleb128 0xb
+ 742 009a 05       		.uleb128 0x5
+ 743 009b 00       		.byte	0
+ 744 009c 03       		.uleb128 0x3
+ 745 009d 0E       		.uleb128 0xe
+ 746 009e 3A       		.uleb128 0x3a
+ 747 009f 0B       		.uleb128 0xb
+ 748 00a0 3B       		.uleb128 0x3b
+ 749 00a1 0B       		.uleb128 0xb
+ 750 00a2 49       		.uleb128 0x49
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 28
+
+
+ 751 00a3 13       		.uleb128 0x13
+ 752 00a4 02       		.uleb128 0x2
+ 753 00a5 18       		.uleb128 0x18
+ 754 00a6 00       		.byte	0
+ 755 00a7 00       		.byte	0
+ 756 00a8 0C       		.uleb128 0xc
+ 757 00a9 2E       		.uleb128 0x2e
+ 758 00aa 00       		.byte	0
+ 759 00ab 3F       		.uleb128 0x3f
+ 760 00ac 19       		.uleb128 0x19
+ 761 00ad 3C       		.uleb128 0x3c
+ 762 00ae 19       		.uleb128 0x19
+ 763 00af 6E       		.uleb128 0x6e
+ 764 00b0 0E       		.uleb128 0xe
+ 765 00b1 03       		.uleb128 0x3
+ 766 00b2 0E       		.uleb128 0xe
+ 767 00b3 3A       		.uleb128 0x3a
+ 768 00b4 0B       		.uleb128 0xb
+ 769 00b5 3B       		.uleb128 0x3b
+ 770 00b6 0B       		.uleb128 0xb
+ 771 00b7 00       		.byte	0
+ 772 00b8 00       		.byte	0
+ 773 00b9 00       		.byte	0
+ 774              		.section	.debug_loc,"",%progbits
+ 775              	.Ldebug_loc0:
+ 776              	.LLST0:
+ 777 0000 06000000 		.4byte	.LVL0
+ 778 0004 17000000 		.4byte	.LVL1-1
+ 779 0008 0100     		.2byte	0x1
+ 780 000a 50       		.byte	0x50
+ 781 000b 00000000 		.4byte	0
+ 782 000f 00000000 		.4byte	0
+ 783              	.LLST1:
+ 784 0013 06000000 		.4byte	.LVL2
+ 785 0017 17000000 		.4byte	.LVL3-1
+ 786 001b 0100     		.2byte	0x1
+ 787 001d 50       		.byte	0x50
+ 788 001e 00000000 		.4byte	0
+ 789 0022 00000000 		.4byte	0
+ 790              		.section	.debug_aranges,"",%progbits
+ 791 0000 3C000000 		.4byte	0x3c
+ 792 0004 0200     		.2byte	0x2
+ 793 0006 00000000 		.4byte	.Ldebug_info0
+ 794 000a 04       		.byte	0x4
+ 795 000b 00       		.byte	0
+ 796 000c 0000     		.2byte	0
+ 797 000e 0000     		.2byte	0
+ 798 0010 00000000 		.4byte	.LFB0
+ 799 0014 0C000000 		.4byte	.LFE0-.LFB0
+ 800 0018 00000000 		.4byte	.LFB1
+ 801 001c 1C000000 		.4byte	.LFE1-.LFB1
+ 802 0020 00000000 		.4byte	.LFB2
+ 803 0024 1C000000 		.4byte	.LFE2-.LFB2
+ 804 0028 00000000 		.4byte	.LFB3
+ 805 002c 0C000000 		.4byte	.LFE3-.LFB3
+ 806 0030 00000000 		.4byte	.LFB4
+ 807 0034 0C000000 		.4byte	.LFE4-.LFB4
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 29
+
+
+ 808 0038 00000000 		.4byte	0
+ 809 003c 00000000 		.4byte	0
+ 810              		.section	.debug_ranges,"",%progbits
+ 811              	.Ldebug_ranges0:
+ 812 0000 00000000 		.4byte	.LFB0
+ 813 0004 0C000000 		.4byte	.LFE0
+ 814 0008 00000000 		.4byte	.LFB1
+ 815 000c 1C000000 		.4byte	.LFE1
+ 816 0010 00000000 		.4byte	.LFB2
+ 817 0014 1C000000 		.4byte	.LFE2
+ 818 0018 00000000 		.4byte	.LFB3
+ 819 001c 0C000000 		.4byte	.LFE3
+ 820 0020 00000000 		.4byte	.LFB4
+ 821 0024 0C000000 		.4byte	.LFE4
+ 822 0028 00000000 		.4byte	0
+ 823 002c 00000000 		.4byte	0
+ 824              		.section	.debug_line,"",%progbits
+ 825              	.Ldebug_line0:
+ 826 0000 AF000000 		.section	.debug_str,"MS",%progbits,1
+ 826      02004E00 
+ 826      00000201 
+ 826      FB0E0D00 
+ 826      01010101 
+ 827              	.LASF6:
+ 828 0000 6C6F6E67 		.ascii	"long long int\000"
+ 828      206C6F6E 
+ 828      6720696E 
+ 828      7400
+ 829              	.LASF17:
+ 830 000e 73746174 		.ascii	"status_InterruptDisable\000"
+ 830      75735F49 
+ 830      6E746572 
+ 830      72757074 
+ 830      44697361 
+ 831              	.LASF8:
+ 832 0026 756E7369 		.ascii	"unsigned int\000"
+ 832      676E6564 
+ 832      20696E74 
+ 832      00
+ 833              	.LASF1:
+ 834 0033 756E7369 		.ascii	"unsigned char\000"
+ 834      676E6564 
+ 834      20636861 
+ 834      7200
+ 835              	.LASF16:
+ 836 0041 73746174 		.ascii	"status_InterruptEnable\000"
+ 836      75735F49 
+ 836      6E746572 
+ 836      72757074 
+ 836      456E6162 
+ 837              	.LASF19:
+ 838 0058 73746174 		.ascii	"status_WriteMask\000"
+ 838      75735F57 
+ 838      72697465 
+ 838      4D61736B 
+ 838      00
+ 839              	.LASF22:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 30
+
+
+ 840 0069 4379456E 		.ascii	"CyEnterCriticalSection\000"
+ 840      74657243 
+ 840      72697469 
+ 840      63616C53 
+ 840      65637469 
+ 841              	.LASF21:
+ 842 0080 73746174 		.ascii	"status_ReadMask\000"
+ 842      75735F52 
+ 842      6561644D 
+ 842      61736B00 
+ 843              	.LASF12:
+ 844 0090 75696E74 		.ascii	"uint8\000"
+ 844      3800
+ 845              	.LASF5:
+ 846 0096 6C6F6E67 		.ascii	"long unsigned int\000"
+ 846      20756E73 
+ 846      69676E65 
+ 846      6420696E 
+ 846      7400
+ 847              	.LASF7:
+ 848 00a8 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 848      206C6F6E 
+ 848      6720756E 
+ 848      7369676E 
+ 848      65642069 
+ 849              	.LASF9:
+ 850 00bf 666C6F61 		.ascii	"float\000"
+ 850      7400
+ 851              	.LASF26:
+ 852 00c5 433A5C47 		.ascii	"C:\\Github\\Tesis\\src\\psoc\\AcondicionamientoAnal"
+ 852      69746875 
+ 852      625C5465 
+ 852      7369735C 
+ 852      7372635C 
+ 853 00f3 6F676963 		.ascii	"ogico.cydsn\000"
+ 853      6F2E6379 
+ 853      64736E00 
+ 854              	.LASF27:
+ 855 00ff 6D61736B 		.ascii	"mask\000"
+ 855      00
+ 856              	.LASF25:
+ 857 0104 47656E65 		.ascii	"Generated_Source\\PSoC5\\status.c\000"
+ 857      72617465 
+ 857      645F536F 
+ 857      75726365 
+ 857      5C50536F 
+ 858              	.LASF11:
+ 859 0124 63686172 		.ascii	"char\000"
+ 859      00
+ 860              	.LASF4:
+ 861 0129 6C6F6E67 		.ascii	"long int\000"
+ 861      20696E74 
+ 861      00
+ 862              	.LASF10:
+ 863 0132 646F7562 		.ascii	"double\000"
+ 863      6C6500
+ 864              	.LASF20:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 31
+
+
+ 865 0139 73746174 		.ascii	"status_Read\000"
+ 865      75735F52 
+ 865      65616400 
+ 866              	.LASF3:
+ 867 0145 73686F72 		.ascii	"short unsigned int\000"
+ 867      7420756E 
+ 867      7369676E 
+ 867      65642069 
+ 867      6E7400
+ 868              	.LASF0:
+ 869 0158 7369676E 		.ascii	"signed char\000"
+ 869      65642063 
+ 869      68617200 
+ 870              	.LASF23:
+ 871 0164 43794578 		.ascii	"CyExitCriticalSection\000"
+ 871      69744372 
+ 871      69746963 
+ 871      616C5365 
+ 871      6374696F 
+ 872              	.LASF14:
+ 873 017a 6C6F6E67 		.ascii	"long double\000"
+ 873      20646F75 
+ 873      626C6500 
+ 874              	.LASF2:
+ 875 0186 73686F72 		.ascii	"short int\000"
+ 875      7420696E 
+ 875      7400
+ 876              	.LASF13:
+ 877 0190 72656738 		.ascii	"reg8\000"
+ 877      00
+ 878              	.LASF15:
+ 879 0195 73697A65 		.ascii	"sizetype\000"
+ 879      74797065 
+ 879      00
+ 880              	.LASF18:
+ 881 019e 696E7465 		.ascii	"interruptState\000"
+ 881      72727570 
+ 881      74537461 
+ 881      746500
+ 882              	.LASF24:
+ 883 01ad 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 883      43313120 
+ 883      352E342E 
+ 883      31203230 
+ 883      31363036 
+ 884 01e0 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"
+ 884      20726576 
+ 884      6973696F 
+ 884      6E203233 
+ 884      37373135 
+ 885 0213 33202D66 		.ascii	"3 -ffunction-sections -ffat-lto-objects -finline-fu"
+ 885      66756E63 
+ 885      74696F6E 
+ 885      2D736563 
+ 885      74696F6E 
+ 886 0246 6E637469 		.ascii	"nctions -flto\000"
+ 886      6F6E7320 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc0GlnDN.s 			page 32
+
+
+ 886      2D666C74 
+ 886      6F00
+ 887              		.comm	__gnu_lto_v1,1,1
+ 888              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

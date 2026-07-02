@@ -1,0 +1,1706 @@
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 2
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"Timer_3_PM.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.section	.gnu.lto_.profile.20d44bc1,"",%progbits
+  19 0000 789C6361 		.ascii	"x\234ca`d`a`\000\222\252\374\000\000\303\000?"
+  19      60646061 
+  19      600092AA 
+  19      FC0000C3 
+  19      003F
+  20              		.text
+  21              		.section	.gnu.lto_.icf.20d44bc1,"",%progbits
+  22 0000 789C6361 		.ascii	"x\234ca`d\000\001\005\006\004`eX?\363A\013\023#\230"
+  22      60640001 
+  22      05060460 
+  22      65583FF3 
+  22      410B1323 
+  23 0015 647A7871 		.ascii	"dzxq\315-V\346I\333\027\337ef\371\265xV\027+\003\000"
+  23      CD2D56E6 
+  23      49DB17DF 
+  23      6566F9B5 
+  23      7856172B 
+  24 002b F03C0E60 		.ascii	"\360<\016`"
+  25              		.text
+  26              		.section	.gnu.lto_.jmpfuncs.20d44bc1,"",%progbits
+  27 0000 789C6361 		.ascii	"x\234ca`d\000\001\001\006\004`\001b\240(\023\224\311"
+  27      60640001 
+  27      01060460 
+  27      0162A028 
+  27      1394C9
+  28 0013 00000308 		.ascii	"\000\000\003\010\000!"
+  28      0021
+  29              		.text
+  30              		.section	.gnu.lto_.inline.20d44bc1,"",%progbits
+  31 0000 789C6361 		.ascii	"x\234ca`d\000\2010\006\004`a``fbd`\0022\331\026\310"
+  31      60640081 
+  31      30060460 
+  31      61606066 
+  31      62646002 
+  32 0018 8328A022 		.ascii	"\203(\240\"t\021&\006.A\240\010\317\004?\204\".\260"
+  32      74112606 
+  32      2E41A008 
+  32      CF043F84 
+  32      222EB0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 2
+
+
+  33 002b 667676A0 		.ascii	"fvv\2408\333\007=Tq\006\000\366\220\005\346"
+  33      38DB073D 
+  33      54710600 
+  33      F69005E6 
+  34              		.text
+  35              		.section	.gnu.lto_.pureconst.20d44bc1,"",%progbits
+  36 0000 789C6361 		.ascii	"x\234ca`d\340d```a\0002\230\244X$\000\001y\000L"
+  36      6064E064 
+  36      60606061 
+  36      003298A4 
+  36      58240001 
+  37              		.text
+  38              		.section	.gnu.lto_Timer_3_SaveConfig.20d44bc1,"",%progbits
+  39 0000 789C6361 		.ascii	"x\234ca`d\000\201j V\003bi fdf`d\232p\216\201\241\221"
+  39      60640081 
+  39      6A205603 
+  39      62692066 
+  39      64666064 
+  40 001a 83899111 		.ascii	"\203\211\221\021\304h\340`d\250gb\254g\374\312\364\227"
+  40      C468E060 
+  40      64A86762 
+  40      AC67FCCA 
+  40      F497
+  41 002c 89F150FB 		.ascii	"\211\361P\373\263\235L\232\313\033\200\340\301\323i"
+  41      B39D4C9A 
+  41      CB1B80E0 
+  41      C1D369
+  42 003b CC0D2B0E 		.ascii	"\314\015+\0160\266230\374g\002\233\304\300\270\234Q"
+  42      30B63233 
+  42      30FC6702 
+  42      9BC4C0B8 
+  42      9C51
+  43 004d 9301A8EC 		.ascii	"\223\001\250\354\321\306\177Sy\331Z@\312\024 \222\214"
+  43      D1C67F53 
+  43      79D95A40 
+  43      CA142092 
+  43      8C
+  44 005e 2B18D940 		.ascii	"+\030\331@\326\255\017:\320\360\377\177s\303\201\235"
+  44      D6AD0F3A 
+  44      D0F0FF7F 
+  44      73C3819D 
+  45 006e AC0F9981 		.ascii	"\254\017\231\201\022\037\200\030d\315G&&\020\315\374"
+  45      121F8018 
+  45      64CD4726 
+  45      2610CDFC 
+  46 007e 8A9109A4 		.ascii	"\212\221\011\244\024l\332\007&F\220\030P\205\212{j^"
+  46      146CDA07 
+  46      26469018 
+  46      50858A7B 
+  46      6A5E
+  47 0090 6A516249 		.ascii	"jQbIjJ|p~iQrjL@p\276\263iLHfnjQ\274q|\200\257^2\003"
+  47      6A4A7C70 
+  47      7E695172 
+  47      6A4C4070 
+  47      BEB3694C 
+  48 00b1 005FBC39 		.ascii	"\000_\2749\240"
+  48      A0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 3
+
+
+  49              		.text
+  50              		.section	.gnu.lto_Timer_3_RestoreConfig.20d44bc1,"",%progbits
+  51 0000 789C6361 		.ascii	"x\234ca`d\000\201\032 V\003bi fdf`d\232p\216\201\241"
+  51      60640081 
+  51      1A205603 
+  51      62692066 
+  51      64666064 
+  52 0019 91838991 		.ascii	"\221\203\211\221\021\304h\340`d\250gb\254g\374\312\364"
+  52      11C468E0 
+  52      6064A867 
+  52      62AC67FC 
+  52      CAF4
+  53 002b 9789F150 		.ascii	"\227\211\361P\373\263\235L\232\313\033\200\340\301\322"
+  53      FBB39D4C 
+  53      9ACB1B80 
+  53      E0C1D2
+  54 003a E7060D2B 		.ascii	"\347\006\015+\0160\266230\374g\002\233\304\300\270\234"
+  54      0E30B632 
+  54      3330FC67 
+  54      029BC4C0 
+  54      B89C
+  55 004c 519301A8 		.ascii	"Q\223\001\250\354\321\306\177Sy\331Z@\312\024 \222\214"
+  55      ECD1C67F 
+  55      5379D95A 
+  55      40CA1420 
+  55      928C
+  56 005e 2B18D940 		.ascii	"+\030\331@\326\255\017:\320\360\377\177s\303\201\275"
+  56      D6AD0F3A 
+  56      D0F0FF7F 
+  56      73C381BD 
+  57 006e 6C07BFB1 		.ascii	"l\007\277\261\001e>\0001\310\236\217LL \232\371\025"
+  57      01653E00 
+  57      31C89E8F 
+  57      4C4C209A 
+  57      F915
+  58 0080 2313482D 		.ascii	"#\023H-\330\270\017L\214 1\240\012\025\367\324\274\324"
+  58      D8B80F4C 
+  58      8C2031A0 
+  58      0A15F7D4 
+  58      BCD4
+  59 0092 A2C492D4 		.ascii	"\242\304\222\324\224\370\340\374\322\242\344\324\230"
+  59      94F8E0FC 
+  59      D2A2E4D4 
+  59      98
+  60 009f 80E07C67 		.ascii	"\200\340|g\323\230\220\314\334\324\242x\343\370\000"
+  60      D39890CC 
+  60      DCD4A278 
+  60      E3F800
+  61 00ae 5FBD6406 		.ascii	"_\275d\006\000\354c:\275"
+  61      00EC633A 
+  61      BD
+  62              		.text
+  63              		.section	.gnu.lto_Timer_3_Sleep.20d44bc1,"",%progbits
+  64 0000 789C8D91 		.ascii	"x\234\215\221\301k\023Q\020\306\347{ow\263D\003\376"
+  64      C16B1351 
+  64      10C6E77B 
+  64      6F77B344 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 4
+
+
+  64      03FE
+  65 0012 01A57810 		.ascii	"\001\245x\020\241\027#\210W/\202\202 \024\353\261\020"
+  65      A1172388 
+  65      572F8282 
+  65      2014EBB1 
+  65      10
+  66 0023 B4EEC183 		.ascii	"\264\356\301\203-\004\305c^\272Y\333z\220\242X\274\330"
+  66      2D04C563 
+  66      5EBA59DB 
+  66      7A90A258 
+  66      BCD8
+  67 0035 5E84546D 		.ascii	"^\204TmM\242\255\032\350a\215\205^\212\"\326S/\325C"
+  67      4DA2AD1A 
+  67      E8618D85 
+  67      5E8A22D6 
+  67      532FD543 
+  68 0049 9092430A 		.ascii	"\220\222C\012\025i1Ygv\265\012\202t`\367\355\316\373"
+  68      15693159 
+  68      6776B50A 
+  68      827460F7 
+  68      EDCEFB
+  69 005c DEFCBE37 		.ascii	"\336\374\2767c\021H\342\262\":\312\353)~\340\020\324"
+  69      631148E2 
+  69      B2223ACA 
+  69      EB297EE0 
+  69      10D4
+  70 006e E43BA2A2 		.ascii	"\344;\242\242\253\224^\352%\223\266\326\262d\016j\330"
+  70      AB945EEA 
+  70      2593B6D6 
+  70      B2640E6A 
+  70      D8
+  71 007f 49DAFAFD 		.ascii	"I\332\372\375a\003\362a\\PAi\313F\001\337TG\2411\326"
+  71      6103F261 
+  71      5C504169 
+  71      CB4601DF 
+  71      5447A131 
+  72 0094 ACABBEB2 		.ascii	"\254\253\276\262\341\330\010v\217\233\331\020\201&\212"
+  72      E1D80876 
+  72      8F9BD910 
+  72      81268A
+  73 00a3 540C2394 		.ascii	"T\014#\224\321G,\373R\353\336\3178%\221\035N61\013G"
+  73      D1472CFB 
+  73      52EBDECF 
+  73      3825911D 
+  73      4E36310B 
+  74 00b8 1C552E84 		.ascii	"\034U.\204&\212|\023~L\275\271\233v\025\005\032\226"
+  74      268A7C13 
+  74      7E4CBDB9 
+  74      9B761505 
+  74      1A96
+  75 00ca BC88DAAC 		.ascii	"\274\210\332\254\023\350\226R\262\352&\032\273\267\233"
+  75      13E89652 
+  75      B2EA261A 
+  75      BBB79B
+  76 00d9 D30F2067 		.ascii	"\323\017 g}mq\335\251\240\361>\265\255\002\255 \230"
+  76      7D6D71DD 
+  76      A9A0F13E 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 5
+
+
+  76      B5AD02AD 
+  76      2098
+  77 00eb F1B956C7 		.ascii	"\361\271V\307J~\037M\027\215(v\312o723xX,\2611\215'"
+  77      4A7E1F4D 
+  77      178D2876 
+  77      CA6F3732 
+  77      3378582C 
+  78 0103 E8C163F4 		.ascii	"\350\301c\3640\377)f@M\370?\316\220\257URnay\345\226"
+  78      30FF2966 
+  78      404DF83F 
+  78      CE90AF55 
+  78      526E6179 
+  79 0119 2BE7C131 		.ascii	"+\347\3011\307\262\317(\255\373\303\011O\256[i\325w"
+  79      C7B2CF28 
+  79      ADFBC309 
+  79      4FAE5B69 
+  79      D577
+  80 012b 32898030 		.ascii	"2\211\2000/uH\374iZ\352e{\243\333\355\357\037\016\210"
+  80      2F7548FC 
+  80      695AEA65 
+  80      7BA3DBED 
+  80      EF1F0E88 
+  81 013f FA6F6B56 		.ascii	"\372okVl\255^o\255\247\012\0353n\314!\316Mp\223$\275"
+  81      6CAD5E6F 
+  81      ADA70A1D 
+  81      336ECC21 
+  81      CE4D7093 
+  82 0155 B9FA6939 		.ascii	"\271\372i9-\366L\234\267Q\341\316>\223\302\274y\347"
+  82      2DF64C9C 
+  82      B751E1CE 
+  82      3E93C2BC 
+  82      79E7
+  83 0167 7575C2CD 		.ascii	"uu\302\315\316K\327\314\315@;\250\262\347n\334Z\324"
+  83      CE4BD7CC 
+  83      CD403BA8 
+  83      B2E76EDC 
+  83      5AD4
+  84 0179 9065C5E2 		.ascii	"\220e\305\342\330j--\020\207\015?\217\375l)\213\326"
+  84      D86A2D2D 
+  84      10870D3F 
+  84      8FFD6C29 
+  84      8BD6
+  85 018b B2B19B6A 		.ascii	"\262\261\233jw\317\315~\361/\376\207_\370\203_\214\361"
+  85      77CFCD7E 
+  85      F12FFE87 
+  85      5FF8835F 
+  85      8CF1
+  86 019d 7B77E451 		.ascii	"{w\344Q\342\345/\274\035\017\353+\3740ZQ\202\377\367"
+  86      E2E52FBC 
+  86      1D0FEB2B 
+  86      FC305A51 
+  86      82FFF7
+  87 01b0 FAA988E7 		.ascii	"\372\251\210\347Ex\205\002O\332\245M\214\206\367\316"
+  87      45788502 
+  87      4FDAA54D 
+  87      8C86F7CE 
+  88 01c0 C5528936 		.ascii	"\305R\2116or\011\006\0359\353\015{\371K\327\275+\271"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 6
+
+
+  88      6F720906 
+  88      1D39EB0D 
+  88      7BF94BD7 
+  88      BD2BB9
+  89 01d3 81911BF9 		.ascii	"\201\221\033\371!o\260\177`\344\364\311\301\213W\257"
+  89      216FB07F 
+  89      60E4F4C9 
+  89      C18B57AF 
+  90 01e3 79F9DC89 		.ascii	"y\371\334\211\\\377\371cC\364\023Sv\346V"
+  90      5CFFF963 
+  90      43F41353 
+  90      76E656
+  91              		.text
+  92              		.section	.gnu.lto_Timer_3_Wakeup.20d44bc1,"",%progbits
+  93 0000 789C654F 		.ascii	"x\234eO=HBQ\030\375\276{\237\372\220\302\206\306\206"
+  93      3D484251 
+  93      18FDBE7B 
+  93      9FFA90C2 
+  93      86C686
+  94 0013 86081C4A 		.ascii	"\206\010\034J\242Z[\032\202 \220\254M\220\26074\244"
+  94      A25A5B1A 
+  94      822090AC 
+  94      4D90B037 
+  94      34A4
+  95 0025 2035BFAB 		.ascii	" 5\277\253\317W\271DKm!\264h\331\237\320\220M/1\003"
+  95      CF57B944 
+  95      4B6D21B4 
+  95      68D99FD0 
+  95      904D2F31 
+  96 003a 899A5A8A 		.ascii	"\211\232Z\212\350g\220\220\006\203\032\032\364\365\335"
+  96      E8679090 
+  96      06831A1A 
+  96      F4F5DD
+  97 0049 E7D0D081 		.ascii	"\347\320\320\201\313w9\367\234{\316\247\000\202\304"
+  97      CB7739F7 
+  97      9C7BCEA7 
+  97      0082C4
+  98 0058 3C8D419A 		.ascii	"<\215A\232ct\320\005\310\266n\001\222*c\274\352\003"
+  98      6374D005 
+  98      C8B66E01 
+  98      922A63BC 
+  98      EA03
+  99 006a E1556A13 		.ascii	"\341Uj\023 \2728*\035ZA\224\027\241\"\350\214+\250\343"
+  99      20BA382A 
+  99      1D5A4194 
+  99      17A122E8 
+  99      8C2BA8E3 
+ 100 007e 376B312C 		.ascii	"7k1,\257\327K\314\237\023\204\227\253\302\210\310[h"
+ 100      AFD74BCC 
+ 100      9F138497 
+ 100      ABC288C8 
+ 100      5B68
+ 101 0090 72009B39 		.ascii	"r\000\2339\021\2009\364\003\311\336\212\355\355nwZ\312"
+ 101      118039F4 
+ 101      03C9DE8A 
+ 101      EDED6E77 
+ 101      5ACA
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 7
+
+
+ 102 00a2 FA3B8F98 		.ascii	"\372;\217\230G\267\354q2k\011\3336\204\365\354\275l"
+ 102      47B7EC71 
+ 102      326B09DB 
+ 102      3684F5EC 
+ 102      BD6C
+ 103 00b4 7B5D1C4C 		.ascii	"{]\034LNt\223$2\356\22319y\035S\027\305\247=\217t\031"
+ 103      4E749324 
+ 103      32EE9331 
+ 103      39791D53 
+ 103      17C5A73D 
+ 104 00cb 9CD38F3B 		.ascii	"\234\323\217;f\371\316\363\305L\316P\006\224J\037\217"
+ 104      66F9CEF3 
+ 104      C54CCE50 
+ 104      06944A1F 
+ 104      8F
+ 105 00dc 1EBD2536 		.ascii	"\036\275%6\204\350!.C\035$\335\270\271\257x\263\270"
+ 105      84E8212E 
+ 105      431D24DD 
+ 105      B8B9AF78 
+ 105      B3B8
+ 106 00ee 9B140ECF 		.ascii	"\233\024\016\317\361\200\212\357c\237\363\270y~\232"
+ 106      F1808AEF 
+ 106      639FF3B8 
+ 106      797E9A
+ 107 00fd 51034326 		.ascii	"Q\003C&mS\300,\266\235\316x\210\001x\305\364\203\021"
+ 107      6D53C02C 
+ 107      B69DCE78 
+ 107      880178C5 
+ 107      F48311
+ 108 0110 FB0B3BAB 		.ascii	"\373\013;\253\\\257\2512\014\011G\322\016\262\033\207"
+ 108      5CAFA932 
+ 108      0C0947D2 
+ 108      0EB21B87 
+ 109 0120 AA8FBFA3 		.ascii	"\252\217\277\243a\375\324z\245\370\177\021\227M\365"
+ 109      61FDD47A 
+ 109      A5F87F11 
+ 109      974DF5
+ 110 012f 008F51A7 		.ascii	"\000\217Q\247\275\334\216Iq\026j`\312\262\247\035\223"
+ 110      BDDC8E49 
+ 110      71166A60 
+ 110      CAB2A71D 
+ 110      93
+ 111 0140 44936444 		.ascii	"D\223dDS\203\201)-\246%\026V\264\305H(\276\232\210j"
+ 111      53838129 
+ 111      2DA62516 
+ 111      56B4C548 
+ 111      28BE9A88 
+ 112 0155 E160283E 		.ascii	"\341`(>9\036\236[Z\326\022\221\321Hpf8\012\277\362\231"
+ 112      391E9E5B 
+ 112      5AD61291 
+ 112      D1487066 
+ 112      380ABFF2 
+ 113 016a 86C1     		.ascii	"\206\301"
+ 114              		.text
+ 115              		.section	.gnu.lto_.symbol_nodes.20d44bc1,"",%progbits
+ 116 0000 789C558A 		.ascii	"x\234U\212\271\015\2000\020\004\347\036\273\000b\002"
+ 116      B90D8030 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 8
+
+
+ 116      1004E71E 
+ 116      BB006202 
+ 117 0010 28149D4B 		.ascii	"(\024\235K\240\036DHL\017H\324\2018\021\341MV3\273\216"
+ 117      A01E4448 
+ 117      4C0F48D4 
+ 117      813811E1 
+ 117      4D5633BB 
+ 118 0025 B0905109 		.ascii	"\260\220Q\011XO\310\332\332\234BCza\241\235(\320\006"
+ 118      584FC8DA 
+ 118      DA9C4243 
+ 118      7A61A19D 
+ 118      28D006
+ 119 0038 30F5B06E 		.ascii	"0\365\260n\220\022\376\211<\264)\271F\371\263i\341\270"
+ 119      9012FE89 
+ 119      3CB429B9 
+ 119      46F9B369 
+ 119      E1B8
+ 120 004a 1E31AFDC 		.ascii	"\0361\257\334\373\310\013\200\236\032\230"
+ 120      FBC80B80 
+ 120      9E1A98
+ 121              		.text
+ 122              		.section	.gnu.lto_.refs.20d44bc1,"",%progbits
+ 123 0000 789C05C1 		.ascii	"x\234\005\301\261\001\000\000\010\303\240\304\326\325"
+ 123      B1010000 
+ 123      08C3A0C4 
+ 123      D6D5
+ 124 000e FFCF158A 		.ascii	"\377\317\025\212\0340cj\326\022y\002r\0002"
+ 124      1C30636A 
+ 124      D6127902 
+ 124      720032
+ 125              		.text
+ 126              		.section	.gnu.lto_.decls.20d44bc1,"",%progbits
+ 127 0000 789C8D94 		.ascii	"x\234\215\224\177L[U\024\307\357y\357A\341Q:\003\233"
+ 127      7F4C5B55 
+ 127      14C7EF79 
+ 127      EF41E151 
+ 127      3A039B
+ 128 0013 E18FFE81 		.ascii	"\341\217\376\201\013K\372\2178\266\230\354O\023\342"
+ 128      0B4BFA8F 
+ 128      38B698EC 
+ 128      4F13E2
+ 129 0022 E63F9AC5 		.ascii	"\346?\232\305\272\031\223\031,\365\211dH\273\256]\262"
+ 129      BA199319 
+ 129      2CF58964 
+ 129      48BBAE5D 
+ 129      B2
+ 130 0033 FF6E191B 		.ascii	"\377n\031\033\313L\034\230L\326j6\204\250L`-\243\035"
+ 130      CB4C1C98 
+ 130      4CD66A36 
+ 130      84A84C60 
+ 130      2DA31D
+ 131 0046 1B0C56D9 		.ascii	"\033\014V\331/~\024\235\361\327\\\227XS\314\202\231"
+ 131      2F7E149D 
+ 131      F1D75C97 
+ 131      5853CC82 
+ 131      99
+ 132 0057 09864144 		.ascii	"\011\206AD\250\365\334\373\336\353+K7\275\341<\356y"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 9
+
+
+ 132      A8F5DCFB 
+ 132      DEEB2B4B 
+ 132      37BDE13C 
+ 132      EE79
+ 133 0069 EF7C3FE7 		.ascii	"\357|?\347\334s\357\255D\200\2601V@\310&\234nE\313\340"
+ 133      DC73EFAD 
+ 133      4480B031 
+ 133      5640C826 
+ 133      9C6E45CB 
+ 134 007e 4097EC25 		.ascii	"@\227\354%\306(D\033@\013\241\015\242\015\241E\321\206"
+ 134      C628441B 
+ 134      400BA10D 
+ 134      A20DA145 
+ 134      D186
+ 135 0090 D118E106 		.ascii	"\321\030\341\006Y?\006\264\367:\003\264w\217\216P\236"
+ 135      593F06B4 
+ 135      F73A03B4 
+ 135      778F8E50 
+ 135      9E
+ 136 00a1 B8509E38 		.ascii	"\270P\2368\226\263X\213\263\242M\243M\242\315\240]G"
+ 136      96B3588B 
+ 136      B3A24DA3 
+ 136      4DA2CDA0 
+ 136      5D47
+ 137 00b3 1B478BA3 		.ascii	"\033G\213\243\365k\214\253h\202\246\213>\246F\266\006"
+ 137      F56B8CAB 
+ 137      6882A68B 
+ 137      3EA646B6 
+ 137      06
+ 138 00c4 530EF3BF 		.ascii	"S\016\363\277XCOXoZ\200\314\331\310\311\242\004\374"
+ 138      58434F58 
+ 138      6F5A80CC 
+ 138      D9C8C9A2 
+ 138      04FC
+ 139 00d6 0C22D19A 		.ascii	"\014\"\321\232J\000\324'p#\252q\027'\002Q'\372\253\354"
+ 139      4A00D427 
+ 139      7023AA71 
+ 139      17270251 
+ 139      27FAABEC 
+ 140 00ea 205A88A0 		.ascii	" Z\210\240O\015\030\377\323\364\220\321\007\207\030"
+ 140      4F0D18FF 
+ 140      D3F490D1 
+ 140      078718
+ 141 00f9 74D044AA 		.ascii	"t\320D\252\257\367U\023\201`$\000\325\325\0259\274G"
+ 141      AFF75513 
+ 141      81602400 
+ 141      D5D51539 
+ 141      BC47
+ 142 010b 2AD26BD6 		.ascii	"*\322k\326\323\360v\360E\217\004SK\026Q\0006\377e\245"
+ 142      D3F076F0 
+ 142      458F0453 
+ 142      4B165100 
+ 142      36FF65A5 
+ 143 011f 7767753F 		.ascii	"wgu?\305\321N\251\360\254\321\231o[\303\237\210\017"
+ 143      C5D14EA9 
+ 143      F0ACD199 
+ 143      6F5BC39F 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 10
+
+
+ 143      880F
+ 144 0131 05289341 		.ascii	"\005(\223AB\367\317\331`\312\202\356F\031*\321MO}\034"
+ 144      42F7CFD9 
+ 144      60CA82EE 
+ 144      46192AD1 
+ 144      4D4F7D1C 
+ 145 0145 142A3EE2 		.ascii	"\024*>\342\272#\264R\202\275OC\037X\341K\300M\201~\250"
+ 145      BA23B452 
+ 145      82BD4F43 
+ 145      1F58E14B 
+ 145      C04D817E 
+ 146 015a C067BDA4 		.ascii	"\300g\275\244\222\202\357\323D\311\346.\272\020\246"
+ 146      9282EFD3 
+ 146      44C9E62E 
+ 146      BA10A6
+ 147 0169 C9F4836D 		.ascii	"\311\364\203m\001\032k\245\324/\260(\350\005\021\316"
+ 147      011A6BA5 
+ 147      D42FB028 
+ 147      E80511CE 
+ 148 0179 41352BB2 		.ascii	"A5+\262\227\355\001\201/ \201\365\016\300fT\306\023"
+ 148      97ED0181 
+ 148      2F2081F5 
+ 148      0EC06654 
+ 148      C613
+ 149 018b DD748358 		.ascii	"\335t\203X\313\013M\314\335\231\222TJl\344\246\231\266"
+ 149      CB0B4DCC 
+ 149      DD999254 
+ 149      4A6CE4A6 
+ 149      99B6
+ 150 019d FB69D70B 		.ascii	"\373i\327\013\234q\336`\234\317e\2048c\271o\354\257"
+ 150      9C71DE60 
+ 150      9CCF6584 
+ 150      3863B96F 
+ 150      ECAF
+ 151 01af 52F10DCE 		.ascii	"R\361\015\316X\214\037\037e\225t!\343\366-\316\240*"
+ 151      588C1F1F 
+ 151      65957421 
+ 151      E3F62DCE 
+ 151      A02A
+ 152 01c1 236C30C2 		.ascii	"#l0\302\271\214A\316\370&\032i+\021\0338\343\344\370"
+ 152      B98C41CE 
+ 152      F8261A69 
+ 152      2B111B38 
+ 152      E3E4F8
+ 153 01d4 D9298BC6 		.ascii	"\331)\213\306\2707\235\313\270`0.\3442\2068\303\337"
+ 153      B8379DCB 
+ 153      B860302E 
+ 153      E4328638 
+ 153      C3DF
+ 154 01e6 7766B658 		.ascii	"wf\266X<\304\031Kk\313q\266\226$\245\311\316\3517;z"
+ 154      3CC4194B 
+ 154      6BCB71B6 
+ 154      9624A5C9 
+ 154      CEE9373B 
+ 155 01fb 8EC5DA81 		.ascii	"\216\305\332\201\267\015\"\006$\302!8\211r@ \371k\246"
+ 155      B70D2206 
+ 155      24C22138 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 11
+
+
+ 155      89724020 
+ 155      F96BA6
+ 156 020e 54FC0C38 		.ascii	"T\374\0148\341\367\371\273\023\305*!6|B\014\320\011"
+ 156      E1F7F9BB 
+ 156      13C52A21 
+ 156      367C420C 
+ 156      D009
+ 157 0220 89CB2F1A 		.ascii	"\211\313/\032\362\213\272|\230\3133\247\357\314\230"
+ 157      F28BBA7C 
+ 157      98CB33A7 
+ 157      EFCC98
+ 158 022f C4882A5F 		.ascii	"\304\210*_\211\374pz\203xMuBG\347\316\025\341\326Ze"
+ 158      89FC707A 
+ 158      83784D75 
+ 158      4247E7CE 
+ 158      15E1D65A 
+ 159 0244 C800F31F 		.ascii	"\310\000\363\037\\^)U}\3669\320\221\372\247D\374\236"
+ 159      5C5E2955 
+ 159      7DF639D0 
+ 159      91FAA744 
+ 159      FC9E
+ 160 0256 C70ADFA5 		.ascii	"\307\012\337\245\372\346%\260\311\237\263\235O.}\335"
+ 160      FAE625B0 
+ 160      C99FB39D 
+ 160      4F2E7DDD 
+ 161 0266 D4D986C7 		.ascii	"\324\331\206\307\006\306A\206+Fj\253\214\317\343\224"
+ 161      06C64186 
+ 161      2B466AAB 
+ 161      8CCFE394 
+ 162 0276 B6D0856E 		.ascii	"\266\320\205nZXA`\273\025\266Z\011\214\201\215QY\024"
+ 162      5A584160 
+ 162      BB15B65A 
+ 162      098C818D 
+ 162      515914
+ 163 0289 8CE26919 		.ascii	"\214\342i\031\301\323\222\026\304\277\243W\356\231\240"
+ 163      C1D39216 
+ 163      C4BFA357 
+ 163      EE99A0
+ 164 0298 AADCD6CD 		.ascii	"\252\334\326\315$\330\221\235\203\251\2434\374\026\307"
+ 164      24D8919D 
+ 164      83A9A334 
+ 164      FC16C7
+ 165 02a7 5E466C0C 		.ascii	"^Fl\014\312u\304s\354|\325\260\233\337\301JXh\241\024"
+ 165      CA75C473 
+ 165      EC7CD5B0 
+ 165      9BDFC14A 
+ 165      5868A114 
+ 166 02bb 0EE80908 		.ascii	"\016\350\011\010\217D<|\205\231\256B\025o\000\2575\326"
+ 166      8F443C7C 
+ 166      8599AE42 
+ 166      156F00AF 
+ 166      35D6
+ 167 02cd 89678616 		.ascii	"\211g\206\026\261\000\242\225\251\035\364\017\372WW"
+ 167      B100A295 
+ 167      A91DF40F 
+ 167      FA5757
+ 168 02dc 05714D5D 		.ascii	"\005qM]\337\334\332\362\274\011l\345\252\346\247c\300"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 12
+
+
+ 168      DFDCDAF2 
+ 168      BC096CE5 
+ 168      AAE6A763 
+ 168      C0
+ 169 02ed 34D7113A 		.ascii	"4\327\021:a\254\216!\362\246\207k\2305_\005\230e\364"
+ 169      61AC8E21 
+ 169      F2A6876B 
+ 169      98355F05 
+ 169      9865F4
+ 170 0300 EE9936CB 		.ascii	"\356\2316\313\226\036Jq\317\322\221\306\305\026\372"
+ 170      961E4A71 
+ 170      CFD291C6 
+ 170      C516FA
+ 171 030f 12E75E52 		.ascii	"\022\347^R\271\331\005\\\342\277D7`\013j\036\266.\376"
+ 171      B9D9055C 
+ 171      E2BF4437 
+ 171      600B6A1E 
+ 171      B62EFE
+ 172 0322 5828631F 		.ascii	"X(c\037\217\374\257>\302\354\374\247\031\223\330\301"
+ 172      8FFCAF3E 
+ 172      C2ECFCA7 
+ 172      1993D8C1 
+ 173 0332 2FB63074 		.ascii	"/\2660t*p\312\004\262-\217|*\217\\\337\320=\301\017"
+ 173      2A70CA04 
+ 173      B22D8F7C 
+ 173      2A8F5CDF 
+ 173      D03DC10F 
+ 174 0346 FDB41226 		.ascii	"\375\264\022&\261\363\267\214%\337\004Y]F\344\366\037"
+ 174      B1F3B78C 
+ 174      25DF0459 
+ 174      5D46E4F6 
+ 174      1F
+ 175 0357 A102F309 		.ascii	"\241\002\363\011\266Ox\357\313&-<\322\270\371\323`\346"
+ 175      B64F78EF 
+ 175      CB262D3C 
+ 175      D2B8F9D3 
+ 175      60E6
+ 176 0369 670EFF63 		.ascii	"g\016\377c\364\375\265\036\277\264.\232-\331\210\236"
+ 176      F4FDB51E 
+ 176      BFB42E9A 
+ 176      2DD9889E 
+ 177 0379 D1A26778 		.ascii	"\321\242gx\364\352o\241\373\346u\321\354D\033\321q0"
+ 177      F4EA6FA1 
+ 177      FBE675D1 
+ 177      EC441BD1 
+ 177      7130
+ 178 038b EBF5E094 		.ascii	"\353\365\340\224\224\275\326\370\236\342\251\333^gw"
+ 178      94BDD6F8 
+ 178      9EE2A9DB 
+ 178      5E6777
+ 179 039a 1C526A5D 		.ascii	"\034Rj]\315\35746\024\355zeOemM\015\251\332\2454+\036"
+ 179      CDEF3436 
+ 179      14ED7A65 
+ 179      4F656D4D 
+ 179      0DA9DAA5 
+ 180 03b1 875779BB 		.ascii	"\207Wy\273\316\356\362y\234\312\276\335vW\355\363\373"
+ 180      CEEEF279 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 13
+
+
+ 180      9CCABEDD 
+ 180      7657EDF3 
+ 180      FB
+ 181 03c2 74C9EE97 		.ascii	"t\311\356\227\253\235d\223\356\275\252\034\364\272<"
+ 181      AB9D6493 
+ 181      EEBDAA1C 
+ 181      F4BA3C
+ 182 03d1 1AA3348B 		.ascii	"\032\2434\213mR\024\267E\367^w\354W|ns\366\243\327\345"
+ 182      6D5214B7 
+ 182      45F75E77 
+ 182      EC577C6E 
+ 182      73F6A3D7 
+ 183 03e6 7EE6C949 		.ascii	"~\346\311I\252\337%Y\365\213\315\216\372&%\353\326;"
+ 183      AADF2559 
+ 183      F58BCD8E 
+ 183      FA2625EB 
+ 183      D63B
+ 184 03f8 9CFB7DEE 		.ascii	"\234\373}\356\247\270\253~\262{\221S\340kl\366\356x"
+ 184      A7B8AB7E 
+ 184      B27B9153 
+ 184      E06B6CF6 
+ 184      EE78
+ 185 040a 1CD679D8 		.ascii	"\034\326y\330{\330\255\034D\354\306\365\034\273\327"
+ 185      7BD8AD1C 
+ 185      44ECC6F5 
+ 185      1CBBD7
+ 186 0419 E3737A25 		.ascii	"\343sz%\217\322\260\343_\301e\020\342"
+ 186      8FD2B0E3 
+ 186      5FC16510 
+ 186      E2
+ 187              		.text
+ 188              		.section	.gnu.lto_.symtab.20d44bc1,"",%progbits
+ 189 0000 54696D65 		.ascii	"Timer_3_SaveConfig\000"
+ 189      725F335F 
+ 189      53617665 
+ 189      436F6E66 
+ 189      696700
+ 190 0013 00       		.ascii	"\000"
+ 191 0014 00       		.ascii	"\000"
+ 192 0015 00       		.ascii	"\000"
+ 193 0016 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 193      00000000 
+ 194 001e AD000000 		.ascii	"\255\000\000\000"
+ 195 0022 54696D65 		.ascii	"Timer_3_RestoreConfig\000"
+ 195      725F335F 
+ 195      52657374 
+ 195      6F726543 
+ 195      6F6E6669 
+ 196 0038 00       		.ascii	"\000"
+ 197 0039 00       		.ascii	"\000"
+ 198 003a 00       		.ascii	"\000"
+ 199 003b 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 199      00000000 
+ 200 0043 AF000000 		.ascii	"\257\000\000\000"
+ 201 0047 54696D65 		.ascii	"Timer_3_Sleep\000"
+ 201      725F335F 
+ 201      536C6565 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 14
+
+
+ 201      7000
+ 202 0055 00       		.ascii	"\000"
+ 203 0056 00       		.ascii	"\000"
+ 204 0057 00       		.ascii	"\000"
+ 205 0058 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 205      00000000 
+ 206 0060 B1000000 		.ascii	"\261\000\000\000"
+ 207 0064 54696D65 		.ascii	"Timer_3_Wakeup\000"
+ 207      725F335F 
+ 207      57616B65 
+ 207      757000
+ 208 0073 00       		.ascii	"\000"
+ 209 0074 00       		.ascii	"\000"
+ 210 0075 00       		.ascii	"\000"
+ 211 0076 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 211      00000000 
+ 212 007e B3000000 		.ascii	"\263\000\000\000"
+ 213 0082 54696D65 		.ascii	"Timer_3_Stop\000"
+ 213      725F335F 
+ 213      53746F70 
+ 213      00
+ 214 008f 00       		.ascii	"\000"
+ 215 0090 02       		.ascii	"\002"
+ 216 0091 00       		.ascii	"\000"
+ 217 0092 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 217      00000000 
+ 218 009a B5000000 		.ascii	"\265\000\000\000"
+ 219 009e 54696D65 		.ascii	"Timer_3_Enable\000"
+ 219      725F335F 
+ 219      456E6162 
+ 219      6C6500
+ 220 00ad 00       		.ascii	"\000"
+ 221 00ae 02       		.ascii	"\002"
+ 222 00af 00       		.ascii	"\000"
+ 223 00b0 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 223      00000000 
+ 224 00b8 B7000000 		.ascii	"\267\000\000\000"
+ 225              		.text
+ 226              		.section	.gnu.lto_.opts,"",%progbits
+ 227 0000 272D666D 		.ascii	"'-fmath-errno' '-fsigned-zeros' '-ftrapping-math' '"
+ 227      6174682D 
+ 227      6572726E 
+ 227      6F272027 
+ 227      2D667369 
+ 228 0033 2D666E6F 		.ascii	"-fno-trapv' '-fno-openmp' '-fno-openacc' '-mcpu=cor"
+ 228      2D747261 
+ 228      70762720 
+ 228      272D666E 
+ 228      6F2D6F70 
+ 229 0066 7465782D 		.ascii	"tex-m3' '-mthumb' '-g' '-O3' '-ffunction-sections' "
+ 229      6D332720 
+ 229      272D6D74 
+ 229      68756D62 
+ 229      2720272D 
+ 230 0099 272D6666 		.ascii	"'-ffat-lto-objects' '-finline-functions' '-flto'\000"
+ 230      61742D6C 
+ 230      746F2D6F 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 15
+
+
+ 230      626A6563 
+ 230      74732720 
+ 231              		.text
+ 232              		.cfi_sections	.debug_frame
+ 233              		.section	.text.Timer_3_SaveConfig,"ax",%progbits
+ 234              		.align	2
+ 235              		.global	Timer_3_SaveConfig
+ 236              		.thumb
+ 237              		.thumb_func
+ 238              		.type	Timer_3_SaveConfig, %function
+ 239              	Timer_3_SaveConfig:
+ 240              	.LFB5:
+ 241              		.cfi_startproc
+ 242              		@ args = 0, pretend = 0, frame = 0
+ 243              		@ frame_needed = 0, uses_anonymous_args = 0
+ 244              		@ link register save eliminated.
+ 245 0000 7047     		bx	lr
+ 246              		.cfi_endproc
+ 247              	.LFE5:
+ 248              		.size	Timer_3_SaveConfig, .-Timer_3_SaveConfig
+ 249 0002 00BF     		.section	.text.Timer_3_RestoreConfig,"ax",%progbits
+ 250              		.align	2
+ 251              		.global	Timer_3_RestoreConfig
+ 252              		.thumb
+ 253              		.thumb_func
+ 254              		.type	Timer_3_RestoreConfig, %function
+ 255              	Timer_3_RestoreConfig:
+ 256              	.LFB1:
+ 257              		.file 1 "Generated_Source\\PSoC5\\Timer_3_PM.c"
+   1:Generated_Source\PSoC5/Timer_3_PM.c **** /*******************************************************************************
+   2:Generated_Source\PSoC5/Timer_3_PM.c **** * File Name: Timer_3_PM.c
+   3:Generated_Source\PSoC5/Timer_3_PM.c **** * Version 2.80
+   4:Generated_Source\PSoC5/Timer_3_PM.c **** *
+   5:Generated_Source\PSoC5/Timer_3_PM.c **** *  Description:
+   6:Generated_Source\PSoC5/Timer_3_PM.c **** *     This file provides the power management source code to API for the
+   7:Generated_Source\PSoC5/Timer_3_PM.c **** *     Timer.
+   8:Generated_Source\PSoC5/Timer_3_PM.c **** *
+   9:Generated_Source\PSoC5/Timer_3_PM.c **** *   Note:
+  10:Generated_Source\PSoC5/Timer_3_PM.c **** *     None
+  11:Generated_Source\PSoC5/Timer_3_PM.c **** *
+  12:Generated_Source\PSoC5/Timer_3_PM.c **** *******************************************************************************
+  13:Generated_Source\PSoC5/Timer_3_PM.c **** * Copyright 2008-2017, Cypress Semiconductor Corporation.  All rights reserved.
+  14:Generated_Source\PSoC5/Timer_3_PM.c **** * You may use this file only in accordance with the license, terms, conditions,
+  15:Generated_Source\PSoC5/Timer_3_PM.c **** * disclaimers, and limitations in the end user license agreement accompanying
+  16:Generated_Source\PSoC5/Timer_3_PM.c **** * the software package with which this file was provided.
+  17:Generated_Source\PSoC5/Timer_3_PM.c **** ********************************************************************************/
+  18:Generated_Source\PSoC5/Timer_3_PM.c **** 
+  19:Generated_Source\PSoC5/Timer_3_PM.c **** #include "Timer_3.h"
+  20:Generated_Source\PSoC5/Timer_3_PM.c **** 
+  21:Generated_Source\PSoC5/Timer_3_PM.c **** static Timer_3_backupStruct Timer_3_backup;
+  22:Generated_Source\PSoC5/Timer_3_PM.c **** 
+  23:Generated_Source\PSoC5/Timer_3_PM.c **** 
+  24:Generated_Source\PSoC5/Timer_3_PM.c **** /*******************************************************************************
+  25:Generated_Source\PSoC5/Timer_3_PM.c **** * Function Name: Timer_3_SaveConfig
+  26:Generated_Source\PSoC5/Timer_3_PM.c **** ********************************************************************************
+  27:Generated_Source\PSoC5/Timer_3_PM.c **** *
+  28:Generated_Source\PSoC5/Timer_3_PM.c **** * Summary:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 16
+
+
+  29:Generated_Source\PSoC5/Timer_3_PM.c **** *     Save the current user configuration
+  30:Generated_Source\PSoC5/Timer_3_PM.c **** *
+  31:Generated_Source\PSoC5/Timer_3_PM.c **** * Parameters:
+  32:Generated_Source\PSoC5/Timer_3_PM.c **** *  void
+  33:Generated_Source\PSoC5/Timer_3_PM.c **** *
+  34:Generated_Source\PSoC5/Timer_3_PM.c **** * Return:
+  35:Generated_Source\PSoC5/Timer_3_PM.c **** *  void
+  36:Generated_Source\PSoC5/Timer_3_PM.c **** *
+  37:Generated_Source\PSoC5/Timer_3_PM.c **** * Global variables:
+  38:Generated_Source\PSoC5/Timer_3_PM.c **** *  Timer_3_backup:  Variables of this global structure are modified to
+  39:Generated_Source\PSoC5/Timer_3_PM.c **** *  store the values of non retention configuration registers when Sleep() API is
+  40:Generated_Source\PSoC5/Timer_3_PM.c **** *  called.
+  41:Generated_Source\PSoC5/Timer_3_PM.c **** *
+  42:Generated_Source\PSoC5/Timer_3_PM.c **** *******************************************************************************/
+  43:Generated_Source\PSoC5/Timer_3_PM.c **** void Timer_3_SaveConfig(void) 
+  44:Generated_Source\PSoC5/Timer_3_PM.c **** {
+  45:Generated_Source\PSoC5/Timer_3_PM.c ****     #if (!Timer_3_UsingFixedFunction)
+  46:Generated_Source\PSoC5/Timer_3_PM.c ****         Timer_3_backup.TimerUdb = Timer_3_ReadCounter();
+  47:Generated_Source\PSoC5/Timer_3_PM.c ****         Timer_3_backup.InterruptMaskValue = Timer_3_STATUS_MASK;
+  48:Generated_Source\PSoC5/Timer_3_PM.c ****         #if (Timer_3_UsingHWCaptureCounter)
+  49:Generated_Source\PSoC5/Timer_3_PM.c ****             Timer_3_backup.TimerCaptureCounter = Timer_3_ReadCaptureCount();
+  50:Generated_Source\PSoC5/Timer_3_PM.c ****         #endif /* Back Up capture counter register  */
+  51:Generated_Source\PSoC5/Timer_3_PM.c **** 
+  52:Generated_Source\PSoC5/Timer_3_PM.c ****         #if(!Timer_3_UDB_CONTROL_REG_REMOVED)
+  53:Generated_Source\PSoC5/Timer_3_PM.c ****             Timer_3_backup.TimerControlRegister = Timer_3_ReadControlRegister();
+  54:Generated_Source\PSoC5/Timer_3_PM.c ****         #endif /* Backup the enable state of the Timer component */
+  55:Generated_Source\PSoC5/Timer_3_PM.c ****     #endif /* Backup non retention registers in UDB implementation. All fixed function registers ar
+  56:Generated_Source\PSoC5/Timer_3_PM.c **** }
+  57:Generated_Source\PSoC5/Timer_3_PM.c **** 
+  58:Generated_Source\PSoC5/Timer_3_PM.c **** 
+  59:Generated_Source\PSoC5/Timer_3_PM.c **** /*******************************************************************************
+  60:Generated_Source\PSoC5/Timer_3_PM.c **** * Function Name: Timer_3_RestoreConfig
+  61:Generated_Source\PSoC5/Timer_3_PM.c **** ********************************************************************************
+  62:Generated_Source\PSoC5/Timer_3_PM.c **** *
+  63:Generated_Source\PSoC5/Timer_3_PM.c **** * Summary:
+  64:Generated_Source\PSoC5/Timer_3_PM.c **** *  Restores the current user configuration.
+  65:Generated_Source\PSoC5/Timer_3_PM.c **** *
+  66:Generated_Source\PSoC5/Timer_3_PM.c **** * Parameters:
+  67:Generated_Source\PSoC5/Timer_3_PM.c **** *  void
+  68:Generated_Source\PSoC5/Timer_3_PM.c **** *
+  69:Generated_Source\PSoC5/Timer_3_PM.c **** * Return:
+  70:Generated_Source\PSoC5/Timer_3_PM.c **** *  void
+  71:Generated_Source\PSoC5/Timer_3_PM.c **** *
+  72:Generated_Source\PSoC5/Timer_3_PM.c **** * Global variables:
+  73:Generated_Source\PSoC5/Timer_3_PM.c **** *  Timer_3_backup:  Variables of this global structure are used to
+  74:Generated_Source\PSoC5/Timer_3_PM.c **** *  restore the values of non retention registers on wakeup from sleep mode.
+  75:Generated_Source\PSoC5/Timer_3_PM.c **** *
+  76:Generated_Source\PSoC5/Timer_3_PM.c **** *******************************************************************************/
+  77:Generated_Source\PSoC5/Timer_3_PM.c **** void Timer_3_RestoreConfig(void) 
+  78:Generated_Source\PSoC5/Timer_3_PM.c **** {   
+ 258              		.loc 1 78 0
+ 259              		.cfi_startproc
+ 260              		@ args = 0, pretend = 0, frame = 0
+ 261              		@ frame_needed = 0, uses_anonymous_args = 0
+ 262              		@ link register save eliminated.
+ 263 0000 7047     		bx	lr
+ 264              		.cfi_endproc
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 17
+
+
+ 265              	.LFE1:
+ 266              		.size	Timer_3_RestoreConfig, .-Timer_3_RestoreConfig
+ 267 0002 00BF     		.section	.text.Timer_3_Sleep,"ax",%progbits
+ 268              		.align	2
+ 269              		.global	Timer_3_Sleep
+ 270              		.thumb
+ 271              		.thumb_func
+ 272              		.type	Timer_3_Sleep, %function
+ 273              	Timer_3_Sleep:
+ 274              	.LFB2:
+  79:Generated_Source\PSoC5/Timer_3_PM.c ****     #if (!Timer_3_UsingFixedFunction)
+  80:Generated_Source\PSoC5/Timer_3_PM.c **** 
+  81:Generated_Source\PSoC5/Timer_3_PM.c ****         Timer_3_WriteCounter(Timer_3_backup.TimerUdb);
+  82:Generated_Source\PSoC5/Timer_3_PM.c ****         Timer_3_STATUS_MASK =Timer_3_backup.InterruptMaskValue;
+  83:Generated_Source\PSoC5/Timer_3_PM.c ****         #if (Timer_3_UsingHWCaptureCounter)
+  84:Generated_Source\PSoC5/Timer_3_PM.c ****             Timer_3_SetCaptureCount(Timer_3_backup.TimerCaptureCounter);
+  85:Generated_Source\PSoC5/Timer_3_PM.c ****         #endif /* Restore Capture counter register*/
+  86:Generated_Source\PSoC5/Timer_3_PM.c **** 
+  87:Generated_Source\PSoC5/Timer_3_PM.c ****         #if(!Timer_3_UDB_CONTROL_REG_REMOVED)
+  88:Generated_Source\PSoC5/Timer_3_PM.c ****             Timer_3_WriteControlRegister(Timer_3_backup.TimerControlRegister);
+  89:Generated_Source\PSoC5/Timer_3_PM.c ****         #endif /* Restore the enable state of the Timer component */
+  90:Generated_Source\PSoC5/Timer_3_PM.c ****     #endif /* Restore non retention registers in the UDB implementation only */
+  91:Generated_Source\PSoC5/Timer_3_PM.c **** }
+  92:Generated_Source\PSoC5/Timer_3_PM.c **** 
+  93:Generated_Source\PSoC5/Timer_3_PM.c **** 
+  94:Generated_Source\PSoC5/Timer_3_PM.c **** /*******************************************************************************
+  95:Generated_Source\PSoC5/Timer_3_PM.c **** * Function Name: Timer_3_Sleep
+  96:Generated_Source\PSoC5/Timer_3_PM.c **** ********************************************************************************
+  97:Generated_Source\PSoC5/Timer_3_PM.c **** *
+  98:Generated_Source\PSoC5/Timer_3_PM.c **** * Summary:
+  99:Generated_Source\PSoC5/Timer_3_PM.c **** *     Stop and Save the user configuration
+ 100:Generated_Source\PSoC5/Timer_3_PM.c **** *
+ 101:Generated_Source\PSoC5/Timer_3_PM.c **** * Parameters:
+ 102:Generated_Source\PSoC5/Timer_3_PM.c **** *  void
+ 103:Generated_Source\PSoC5/Timer_3_PM.c **** *
+ 104:Generated_Source\PSoC5/Timer_3_PM.c **** * Return:
+ 105:Generated_Source\PSoC5/Timer_3_PM.c **** *  void
+ 106:Generated_Source\PSoC5/Timer_3_PM.c **** *
+ 107:Generated_Source\PSoC5/Timer_3_PM.c **** * Global variables:
+ 108:Generated_Source\PSoC5/Timer_3_PM.c **** *  Timer_3_backup.TimerEnableState:  Is modified depending on the
+ 109:Generated_Source\PSoC5/Timer_3_PM.c **** *  enable state of the block before entering sleep mode.
+ 110:Generated_Source\PSoC5/Timer_3_PM.c **** *
+ 111:Generated_Source\PSoC5/Timer_3_PM.c **** *******************************************************************************/
+ 112:Generated_Source\PSoC5/Timer_3_PM.c **** void Timer_3_Sleep(void) 
+ 113:Generated_Source\PSoC5/Timer_3_PM.c **** {
+ 275              		.loc 1 113 0
+ 276              		.cfi_startproc
+ 277              		@ args = 0, pretend = 0, frame = 0
+ 278              		@ frame_needed = 0, uses_anonymous_args = 0
+ 279              		@ link register save eliminated.
+ 114:Generated_Source\PSoC5/Timer_3_PM.c ****     #if(!Timer_3_UDB_CONTROL_REG_REMOVED)
+ 115:Generated_Source\PSoC5/Timer_3_PM.c ****         /* Save Counter's enable state */
+ 116:Generated_Source\PSoC5/Timer_3_PM.c ****         if(Timer_3_CTRL_ENABLE == (Timer_3_CONTROL & Timer_3_CTRL_ENABLE))
+ 280              		.loc 1 116 0
+ 281 0000 034B     		ldr	r3, .L4
+ 282 0002 044A     		ldr	r2, .L4+4
+ 283 0004 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 18
+
+
+ 284 0006 03F00103 		and	r3, r3, #1
+ 285 000a 1370     		strb	r3, [r2]
+ 117:Generated_Source\PSoC5/Timer_3_PM.c ****         {
+ 118:Generated_Source\PSoC5/Timer_3_PM.c ****             /* Timer is enabled */
+ 119:Generated_Source\PSoC5/Timer_3_PM.c ****             Timer_3_backup.TimerEnableState = 1u;
+ 120:Generated_Source\PSoC5/Timer_3_PM.c ****         }
+ 121:Generated_Source\PSoC5/Timer_3_PM.c ****         else
+ 122:Generated_Source\PSoC5/Timer_3_PM.c ****         {
+ 123:Generated_Source\PSoC5/Timer_3_PM.c ****             /* Timer is disabled */
+ 124:Generated_Source\PSoC5/Timer_3_PM.c ****             Timer_3_backup.TimerEnableState = 0u;
+ 125:Generated_Source\PSoC5/Timer_3_PM.c ****         }
+ 126:Generated_Source\PSoC5/Timer_3_PM.c ****     #endif /* Back up enable state from the Timer control register */
+ 127:Generated_Source\PSoC5/Timer_3_PM.c ****     Timer_3_Stop();
+ 286              		.loc 1 127 0
+ 287 000c FFF7FEBF 		b	Timer_3_Stop
+ 288              	.LVL0:
+ 289              	.L5:
+ 290              		.align	2
+ 291              	.L4:
+ 292 0010 244F0040 		.word	1073762084
+ 293 0014 00000000 		.word	.LANCHOR0
+ 294              		.cfi_endproc
+ 295              	.LFE2:
+ 296              		.size	Timer_3_Sleep, .-Timer_3_Sleep
+ 297              		.section	.text.Timer_3_Wakeup,"ax",%progbits
+ 298              		.align	2
+ 299              		.global	Timer_3_Wakeup
+ 300              		.thumb
+ 301              		.thumb_func
+ 302              		.type	Timer_3_Wakeup, %function
+ 303              	Timer_3_Wakeup:
+ 304              	.LFB3:
+ 128:Generated_Source\PSoC5/Timer_3_PM.c ****     Timer_3_SaveConfig();
+ 129:Generated_Source\PSoC5/Timer_3_PM.c **** }
+ 130:Generated_Source\PSoC5/Timer_3_PM.c **** 
+ 131:Generated_Source\PSoC5/Timer_3_PM.c **** 
+ 132:Generated_Source\PSoC5/Timer_3_PM.c **** /*******************************************************************************
+ 133:Generated_Source\PSoC5/Timer_3_PM.c **** * Function Name: Timer_3_Wakeup
+ 134:Generated_Source\PSoC5/Timer_3_PM.c **** ********************************************************************************
+ 135:Generated_Source\PSoC5/Timer_3_PM.c **** *
+ 136:Generated_Source\PSoC5/Timer_3_PM.c **** * Summary:
+ 137:Generated_Source\PSoC5/Timer_3_PM.c **** *  Restores and enables the user configuration
+ 138:Generated_Source\PSoC5/Timer_3_PM.c **** *
+ 139:Generated_Source\PSoC5/Timer_3_PM.c **** * Parameters:
+ 140:Generated_Source\PSoC5/Timer_3_PM.c **** *  void
+ 141:Generated_Source\PSoC5/Timer_3_PM.c **** *
+ 142:Generated_Source\PSoC5/Timer_3_PM.c **** * Return:
+ 143:Generated_Source\PSoC5/Timer_3_PM.c **** *  void
+ 144:Generated_Source\PSoC5/Timer_3_PM.c **** *
+ 145:Generated_Source\PSoC5/Timer_3_PM.c **** * Global variables:
+ 146:Generated_Source\PSoC5/Timer_3_PM.c **** *  Timer_3_backup.enableState:  Is used to restore the enable state of
+ 147:Generated_Source\PSoC5/Timer_3_PM.c **** *  block on wakeup from sleep mode.
+ 148:Generated_Source\PSoC5/Timer_3_PM.c **** *
+ 149:Generated_Source\PSoC5/Timer_3_PM.c **** *******************************************************************************/
+ 150:Generated_Source\PSoC5/Timer_3_PM.c **** void Timer_3_Wakeup(void) 
+ 151:Generated_Source\PSoC5/Timer_3_PM.c **** {
+ 305              		.loc 1 151 0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 19
+
+
+ 306              		.cfi_startproc
+ 307              		@ args = 0, pretend = 0, frame = 0
+ 308              		@ frame_needed = 0, uses_anonymous_args = 0
+ 309              		@ link register save eliminated.
+ 152:Generated_Source\PSoC5/Timer_3_PM.c ****     Timer_3_RestoreConfig();
+ 153:Generated_Source\PSoC5/Timer_3_PM.c ****     #if(!Timer_3_UDB_CONTROL_REG_REMOVED)
+ 154:Generated_Source\PSoC5/Timer_3_PM.c ****         if(Timer_3_backup.TimerEnableState == 1u)
+ 310              		.loc 1 154 0
+ 311 0000 034B     		ldr	r3, .L10
+ 312 0002 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 313 0004 012B     		cmp	r3, #1
+ 314 0006 00D0     		beq	.L9
+ 315 0008 7047     		bx	lr
+ 316              	.L9:
+ 155:Generated_Source\PSoC5/Timer_3_PM.c ****         {     /* Enable Timer's operation */
+ 156:Generated_Source\PSoC5/Timer_3_PM.c ****                 Timer_3_Enable();
+ 317              		.loc 1 156 0
+ 318 000a FFF7FEBF 		b	Timer_3_Enable
+ 319              	.LVL1:
+ 320              	.L11:
+ 321 000e 00BF     		.align	2
+ 322              	.L10:
+ 323 0010 00000000 		.word	.LANCHOR0
+ 324              		.cfi_endproc
+ 325              	.LFE3:
+ 326              		.size	Timer_3_Wakeup, .-Timer_3_Wakeup
+ 327              		.bss
+ 328              		.align	2
+ 329              		.set	.LANCHOR0,. + 0
+ 330              		.type	Timer_3_backup, %object
+ 331              		.size	Timer_3_backup, 1
+ 332              	Timer_3_backup:
+ 333 0000 00       		.space	1
+ 334              		.text
+ 335              	.Letext0:
+ 336              		.file 2 "Generated_Source\\PSoC5\\cytypes.h"
+ 337              		.file 3 "Generated_Source\\PSoC5\\Timer_3.h"
+ 338              		.section	.debug_info,"",%progbits
+ 339              	.Ldebug_info0:
+ 340 0000 4C010000 		.4byte	0x14c
+ 341 0004 0400     		.2byte	0x4
+ 342 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 343 000a 04       		.byte	0x4
+ 344 000b 01       		.uleb128 0x1
+ 345 000c AB010000 		.4byte	.LASF23
+ 346 0010 0C       		.byte	0xc
+ 347 0011 29000000 		.4byte	.LASF24
+ 348 0015 9E000000 		.4byte	.LASF25
+ 349 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 350 001d 00000000 		.4byte	0
+ 351 0021 00000000 		.4byte	.Ldebug_line0
+ 352 0025 02       		.uleb128 0x2
+ 353 0026 01       		.byte	0x1
+ 354 0027 06       		.byte	0x6
+ 355 0028 5F010000 		.4byte	.LASF0
+ 356 002c 02       		.uleb128 0x2
+ 357 002d 01       		.byte	0x1
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 20
+
+
+ 358 002e 08       		.byte	0x8
+ 359 002f 0E000000 		.4byte	.LASF1
+ 360 0033 02       		.uleb128 0x2
+ 361 0034 02       		.byte	0x2
+ 362 0035 05       		.byte	0x5
+ 363 0036 86010000 		.4byte	.LASF2
+ 364 003a 02       		.uleb128 0x2
+ 365 003b 02       		.byte	0x2
+ 366 003c 07       		.byte	0x7
+ 367 003d 4C010000 		.4byte	.LASF3
+ 368 0041 02       		.uleb128 0x2
+ 369 0042 04       		.byte	0x4
+ 370 0043 05       		.byte	0x5
+ 371 0044 2A010000 		.4byte	.LASF4
+ 372 0048 02       		.uleb128 0x2
+ 373 0049 04       		.byte	0x4
+ 374 004a 07       		.byte	0x7
+ 375 004b 33010000 		.4byte	.LASF5
+ 376 004f 02       		.uleb128 0x2
+ 377 0050 08       		.byte	0x8
+ 378 0051 05       		.byte	0x5
+ 379 0052 00000000 		.4byte	.LASF6
+ 380 0056 02       		.uleb128 0x2
+ 381 0057 08       		.byte	0x8
+ 382 0058 07       		.byte	0x7
+ 383 0059 E9000000 		.4byte	.LASF7
+ 384 005d 03       		.uleb128 0x3
+ 385 005e 04       		.byte	0x4
+ 386 005f 05       		.byte	0x5
+ 387 0060 696E7400 		.ascii	"int\000"
+ 388 0064 02       		.uleb128 0x2
+ 389 0065 04       		.byte	0x4
+ 390 0066 07       		.byte	0x7
+ 391 0067 1C000000 		.4byte	.LASF8
+ 392 006b 04       		.uleb128 0x4
+ 393 006c 5B000000 		.4byte	.LASF12
+ 394 0070 02       		.byte	0x2
+ 395 0071 E901     		.2byte	0x1e9
+ 396 0073 2C000000 		.4byte	0x2c
+ 397 0077 02       		.uleb128 0x2
+ 398 0078 04       		.byte	0x4
+ 399 0079 04       		.byte	0x4
+ 400 007a 89000000 		.4byte	.LASF9
+ 401 007e 02       		.uleb128 0x2
+ 402 007f 08       		.byte	0x8
+ 403 0080 04       		.byte	0x4
+ 404 0081 45010000 		.4byte	.LASF10
+ 405 0085 02       		.uleb128 0x2
+ 406 0086 01       		.byte	0x1
+ 407 0087 08       		.byte	0x8
+ 408 0088 16010000 		.4byte	.LASF11
+ 409 008c 04       		.uleb128 0x4
+ 410 008d 90010000 		.4byte	.LASF13
+ 411 0091 02       		.byte	0x2
+ 412 0092 9302     		.2byte	0x293
+ 413 0094 98000000 		.4byte	0x98
+ 414 0098 05       		.uleb128 0x5
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 21
+
+
+ 415 0099 6B000000 		.4byte	0x6b
+ 416 009d 02       		.uleb128 0x2
+ 417 009e 08       		.byte	0x8
+ 418 009f 04       		.byte	0x4
+ 419 00a0 7A010000 		.4byte	.LASF14
+ 420 00a4 02       		.uleb128 0x2
+ 421 00a5 04       		.byte	0x4
+ 422 00a6 07       		.byte	0x7
+ 423 00a7 A2010000 		.4byte	.LASF15
+ 424 00ab 06       		.uleb128 0x6
+ 425 00ac 01       		.byte	0x1
+ 426 00ad 03       		.byte	0x3
+ 427 00ae 43       		.byte	0x43
+ 428 00af C0000000 		.4byte	0xc0
+ 429 00b3 07       		.uleb128 0x7
+ 430 00b4 D8000000 		.4byte	.LASF26
+ 431 00b8 03       		.byte	0x3
+ 432 00b9 45       		.byte	0x45
+ 433 00ba 6B000000 		.4byte	0x6b
+ 434 00be 00       		.byte	0
+ 435 00bf 00       		.byte	0
+ 436 00c0 08       		.uleb128 0x8
+ 437 00c1 74000000 		.4byte	.LASF16
+ 438 00c5 03       		.byte	0x3
+ 439 00c6 53       		.byte	0x53
+ 440 00c7 AB000000 		.4byte	0xab
+ 441 00cb 09       		.uleb128 0x9
+ 442 00cc 61000000 		.4byte	.LASF17
+ 443 00d0 01       		.byte	0x1
+ 444 00d1 2B       		.byte	0x2b
+ 445 00d2 01       		.byte	0x1
+ 446 00d3 09       		.uleb128 0x9
+ 447 00d4 00010000 		.4byte	.LASF18
+ 448 00d8 01       		.byte	0x1
+ 449 00d9 4D       		.byte	0x4d
+ 450 00da 01       		.byte	0x1
+ 451 00db 0A       		.uleb128 0xa
+ 452 00dc D3000000 		.4byte	0xd3
+ 453 00e0 00000000 		.4byte	.LFB1
+ 454 00e4 02000000 		.4byte	.LFE1-.LFB1
+ 455 00e8 01       		.uleb128 0x1
+ 456 00e9 9C       		.byte	0x9c
+ 457 00ea 0B       		.uleb128 0xb
+ 458 00eb 4D000000 		.4byte	.LASF19
+ 459 00ef 01       		.byte	0x1
+ 460 00f0 70       		.byte	0x70
+ 461 00f1 00000000 		.4byte	.LFB2
+ 462 00f5 18000000 		.4byte	.LFE2-.LFB2
+ 463 00f9 01       		.uleb128 0x1
+ 464 00fa 9C       		.byte	0x9c
+ 465 00fb 09010000 		.4byte	0x109
+ 466 00ff 0C       		.uleb128 0xc
+ 467 0100 10000000 		.4byte	.LVL0
+ 468 0104 39010000 		.4byte	0x139
+ 469 0108 00       		.byte	0
+ 470 0109 0B       		.uleb128 0xb
+ 471 010a 1B010000 		.4byte	.LASF20
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 22
+
+
+ 472 010e 01       		.byte	0x1
+ 473 010f 96       		.byte	0x96
+ 474 0110 00000000 		.4byte	.LFB3
+ 475 0114 14000000 		.4byte	.LFE3-.LFB3
+ 476 0118 01       		.uleb128 0x1
+ 477 0119 9C       		.byte	0x9c
+ 478 011a 28010000 		.4byte	0x128
+ 479 011e 0C       		.uleb128 0xc
+ 480 011f 0E000000 		.4byte	.LVL1
+ 481 0123 44010000 		.4byte	0x144
+ 482 0127 00       		.byte	0
+ 483 0128 0D       		.uleb128 0xd
+ 484 0129 8F000000 		.4byte	.LASF27
+ 485 012d 01       		.byte	0x1
+ 486 012e 15       		.byte	0x15
+ 487 012f C0000000 		.4byte	0xc0
+ 488 0133 05       		.uleb128 0x5
+ 489 0134 03       		.byte	0x3
+ 490 0135 00000000 		.4byte	Timer_3_backup
+ 491 0139 0E       		.uleb128 0xe
+ 492 013a 95010000 		.4byte	.LASF21
+ 493 013e 95010000 		.4byte	.LASF21
+ 494 0142 03       		.byte	0x3
+ 495 0143 5B       		.byte	0x5b
+ 496 0144 0E       		.uleb128 0xe
+ 497 0145 6B010000 		.4byte	.LASF22
+ 498 0149 6B010000 		.4byte	.LASF22
+ 499 014d 03       		.byte	0x3
+ 500 014e 8B       		.byte	0x8b
+ 501 014f 00       		.byte	0
+ 502              		.section	.debug_abbrev,"",%progbits
+ 503              	.Ldebug_abbrev0:
+ 504 0000 01       		.uleb128 0x1
+ 505 0001 11       		.uleb128 0x11
+ 506 0002 01       		.byte	0x1
+ 507 0003 25       		.uleb128 0x25
+ 508 0004 0E       		.uleb128 0xe
+ 509 0005 13       		.uleb128 0x13
+ 510 0006 0B       		.uleb128 0xb
+ 511 0007 03       		.uleb128 0x3
+ 512 0008 0E       		.uleb128 0xe
+ 513 0009 1B       		.uleb128 0x1b
+ 514 000a 0E       		.uleb128 0xe
+ 515 000b 55       		.uleb128 0x55
+ 516 000c 17       		.uleb128 0x17
+ 517 000d 11       		.uleb128 0x11
+ 518 000e 01       		.uleb128 0x1
+ 519 000f 10       		.uleb128 0x10
+ 520 0010 17       		.uleb128 0x17
+ 521 0011 00       		.byte	0
+ 522 0012 00       		.byte	0
+ 523 0013 02       		.uleb128 0x2
+ 524 0014 24       		.uleb128 0x24
+ 525 0015 00       		.byte	0
+ 526 0016 0B       		.uleb128 0xb
+ 527 0017 0B       		.uleb128 0xb
+ 528 0018 3E       		.uleb128 0x3e
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 23
+
+
+ 529 0019 0B       		.uleb128 0xb
+ 530 001a 03       		.uleb128 0x3
+ 531 001b 0E       		.uleb128 0xe
+ 532 001c 00       		.byte	0
+ 533 001d 00       		.byte	0
+ 534 001e 03       		.uleb128 0x3
+ 535 001f 24       		.uleb128 0x24
+ 536 0020 00       		.byte	0
+ 537 0021 0B       		.uleb128 0xb
+ 538 0022 0B       		.uleb128 0xb
+ 539 0023 3E       		.uleb128 0x3e
+ 540 0024 0B       		.uleb128 0xb
+ 541 0025 03       		.uleb128 0x3
+ 542 0026 08       		.uleb128 0x8
+ 543 0027 00       		.byte	0
+ 544 0028 00       		.byte	0
+ 545 0029 04       		.uleb128 0x4
+ 546 002a 16       		.uleb128 0x16
+ 547 002b 00       		.byte	0
+ 548 002c 03       		.uleb128 0x3
+ 549 002d 0E       		.uleb128 0xe
+ 550 002e 3A       		.uleb128 0x3a
+ 551 002f 0B       		.uleb128 0xb
+ 552 0030 3B       		.uleb128 0x3b
+ 553 0031 05       		.uleb128 0x5
+ 554 0032 49       		.uleb128 0x49
+ 555 0033 13       		.uleb128 0x13
+ 556 0034 00       		.byte	0
+ 557 0035 00       		.byte	0
+ 558 0036 05       		.uleb128 0x5
+ 559 0037 35       		.uleb128 0x35
+ 560 0038 00       		.byte	0
+ 561 0039 49       		.uleb128 0x49
+ 562 003a 13       		.uleb128 0x13
+ 563 003b 00       		.byte	0
+ 564 003c 00       		.byte	0
+ 565 003d 06       		.uleb128 0x6
+ 566 003e 13       		.uleb128 0x13
+ 567 003f 01       		.byte	0x1
+ 568 0040 0B       		.uleb128 0xb
+ 569 0041 0B       		.uleb128 0xb
+ 570 0042 3A       		.uleb128 0x3a
+ 571 0043 0B       		.uleb128 0xb
+ 572 0044 3B       		.uleb128 0x3b
+ 573 0045 0B       		.uleb128 0xb
+ 574 0046 01       		.uleb128 0x1
+ 575 0047 13       		.uleb128 0x13
+ 576 0048 00       		.byte	0
+ 577 0049 00       		.byte	0
+ 578 004a 07       		.uleb128 0x7
+ 579 004b 0D       		.uleb128 0xd
+ 580 004c 00       		.byte	0
+ 581 004d 03       		.uleb128 0x3
+ 582 004e 0E       		.uleb128 0xe
+ 583 004f 3A       		.uleb128 0x3a
+ 584 0050 0B       		.uleb128 0xb
+ 585 0051 3B       		.uleb128 0x3b
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 24
+
+
+ 586 0052 0B       		.uleb128 0xb
+ 587 0053 49       		.uleb128 0x49
+ 588 0054 13       		.uleb128 0x13
+ 589 0055 38       		.uleb128 0x38
+ 590 0056 0B       		.uleb128 0xb
+ 591 0057 00       		.byte	0
+ 592 0058 00       		.byte	0
+ 593 0059 08       		.uleb128 0x8
+ 594 005a 16       		.uleb128 0x16
+ 595 005b 00       		.byte	0
+ 596 005c 03       		.uleb128 0x3
+ 597 005d 0E       		.uleb128 0xe
+ 598 005e 3A       		.uleb128 0x3a
+ 599 005f 0B       		.uleb128 0xb
+ 600 0060 3B       		.uleb128 0x3b
+ 601 0061 0B       		.uleb128 0xb
+ 602 0062 49       		.uleb128 0x49
+ 603 0063 13       		.uleb128 0x13
+ 604 0064 00       		.byte	0
+ 605 0065 00       		.byte	0
+ 606 0066 09       		.uleb128 0x9
+ 607 0067 2E       		.uleb128 0x2e
+ 608 0068 00       		.byte	0
+ 609 0069 3F       		.uleb128 0x3f
+ 610 006a 19       		.uleb128 0x19
+ 611 006b 03       		.uleb128 0x3
+ 612 006c 0E       		.uleb128 0xe
+ 613 006d 3A       		.uleb128 0x3a
+ 614 006e 0B       		.uleb128 0xb
+ 615 006f 3B       		.uleb128 0x3b
+ 616 0070 0B       		.uleb128 0xb
+ 617 0071 27       		.uleb128 0x27
+ 618 0072 19       		.uleb128 0x19
+ 619 0073 20       		.uleb128 0x20
+ 620 0074 0B       		.uleb128 0xb
+ 621 0075 00       		.byte	0
+ 622 0076 00       		.byte	0
+ 623 0077 0A       		.uleb128 0xa
+ 624 0078 2E       		.uleb128 0x2e
+ 625 0079 00       		.byte	0
+ 626 007a 31       		.uleb128 0x31
+ 627 007b 13       		.uleb128 0x13
+ 628 007c 11       		.uleb128 0x11
+ 629 007d 01       		.uleb128 0x1
+ 630 007e 12       		.uleb128 0x12
+ 631 007f 06       		.uleb128 0x6
+ 632 0080 40       		.uleb128 0x40
+ 633 0081 18       		.uleb128 0x18
+ 634 0082 9742     		.uleb128 0x2117
+ 635 0084 19       		.uleb128 0x19
+ 636 0085 00       		.byte	0
+ 637 0086 00       		.byte	0
+ 638 0087 0B       		.uleb128 0xb
+ 639 0088 2E       		.uleb128 0x2e
+ 640 0089 01       		.byte	0x1
+ 641 008a 3F       		.uleb128 0x3f
+ 642 008b 19       		.uleb128 0x19
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 25
+
+
+ 643 008c 03       		.uleb128 0x3
+ 644 008d 0E       		.uleb128 0xe
+ 645 008e 3A       		.uleb128 0x3a
+ 646 008f 0B       		.uleb128 0xb
+ 647 0090 3B       		.uleb128 0x3b
+ 648 0091 0B       		.uleb128 0xb
+ 649 0092 27       		.uleb128 0x27
+ 650 0093 19       		.uleb128 0x19
+ 651 0094 11       		.uleb128 0x11
+ 652 0095 01       		.uleb128 0x1
+ 653 0096 12       		.uleb128 0x12
+ 654 0097 06       		.uleb128 0x6
+ 655 0098 40       		.uleb128 0x40
+ 656 0099 18       		.uleb128 0x18
+ 657 009a 9742     		.uleb128 0x2117
+ 658 009c 19       		.uleb128 0x19
+ 659 009d 01       		.uleb128 0x1
+ 660 009e 13       		.uleb128 0x13
+ 661 009f 00       		.byte	0
+ 662 00a0 00       		.byte	0
+ 663 00a1 0C       		.uleb128 0xc
+ 664 00a2 898201   		.uleb128 0x4109
+ 665 00a5 00       		.byte	0
+ 666 00a6 11       		.uleb128 0x11
+ 667 00a7 01       		.uleb128 0x1
+ 668 00a8 9542     		.uleb128 0x2115
+ 669 00aa 19       		.uleb128 0x19
+ 670 00ab 31       		.uleb128 0x31
+ 671 00ac 13       		.uleb128 0x13
+ 672 00ad 00       		.byte	0
+ 673 00ae 00       		.byte	0
+ 674 00af 0D       		.uleb128 0xd
+ 675 00b0 34       		.uleb128 0x34
+ 676 00b1 00       		.byte	0
+ 677 00b2 03       		.uleb128 0x3
+ 678 00b3 0E       		.uleb128 0xe
+ 679 00b4 3A       		.uleb128 0x3a
+ 680 00b5 0B       		.uleb128 0xb
+ 681 00b6 3B       		.uleb128 0x3b
+ 682 00b7 0B       		.uleb128 0xb
+ 683 00b8 49       		.uleb128 0x49
+ 684 00b9 13       		.uleb128 0x13
+ 685 00ba 02       		.uleb128 0x2
+ 686 00bb 18       		.uleb128 0x18
+ 687 00bc 00       		.byte	0
+ 688 00bd 00       		.byte	0
+ 689 00be 0E       		.uleb128 0xe
+ 690 00bf 2E       		.uleb128 0x2e
+ 691 00c0 00       		.byte	0
+ 692 00c1 3F       		.uleb128 0x3f
+ 693 00c2 19       		.uleb128 0x19
+ 694 00c3 3C       		.uleb128 0x3c
+ 695 00c4 19       		.uleb128 0x19
+ 696 00c5 6E       		.uleb128 0x6e
+ 697 00c6 0E       		.uleb128 0xe
+ 698 00c7 03       		.uleb128 0x3
+ 699 00c8 0E       		.uleb128 0xe
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 26
+
+
+ 700 00c9 3A       		.uleb128 0x3a
+ 701 00ca 0B       		.uleb128 0xb
+ 702 00cb 3B       		.uleb128 0x3b
+ 703 00cc 0B       		.uleb128 0xb
+ 704 00cd 00       		.byte	0
+ 705 00ce 00       		.byte	0
+ 706 00cf 00       		.byte	0
+ 707              		.section	.debug_aranges,"",%progbits
+ 708 0000 2C000000 		.4byte	0x2c
+ 709 0004 0200     		.2byte	0x2
+ 710 0006 00000000 		.4byte	.Ldebug_info0
+ 711 000a 04       		.byte	0x4
+ 712 000b 00       		.byte	0
+ 713 000c 0000     		.2byte	0
+ 714 000e 0000     		.2byte	0
+ 715 0010 00000000 		.4byte	.LFB1
+ 716 0014 02000000 		.4byte	.LFE1-.LFB1
+ 717 0018 00000000 		.4byte	.LFB2
+ 718 001c 18000000 		.4byte	.LFE2-.LFB2
+ 719 0020 00000000 		.4byte	.LFB3
+ 720 0024 14000000 		.4byte	.LFE3-.LFB3
+ 721 0028 00000000 		.4byte	0
+ 722 002c 00000000 		.4byte	0
+ 723              		.section	.debug_ranges,"",%progbits
+ 724              	.Ldebug_ranges0:
+ 725 0000 00000000 		.4byte	.LFB1
+ 726 0004 02000000 		.4byte	.LFE1
+ 727 0008 00000000 		.4byte	.LFB2
+ 728 000c 18000000 		.4byte	.LFE2
+ 729 0010 00000000 		.4byte	.LFB3
+ 730 0014 14000000 		.4byte	.LFE3
+ 731 0018 00000000 		.4byte	0
+ 732 001c 00000000 		.4byte	0
+ 733              		.section	.debug_line,"",%progbits
+ 734              	.Ldebug_line0:
+ 735 0000 90000000 		.section	.debug_str,"MS",%progbits,1
+ 735      02005400 
+ 735      00000201 
+ 735      FB0E0D00 
+ 735      01010101 
+ 736              	.LASF6:
+ 737 0000 6C6F6E67 		.ascii	"long long int\000"
+ 737      206C6F6E 
+ 737      6720696E 
+ 737      7400
+ 738              	.LASF1:
+ 739 000e 756E7369 		.ascii	"unsigned char\000"
+ 739      676E6564 
+ 739      20636861 
+ 739      7200
+ 740              	.LASF8:
+ 741 001c 756E7369 		.ascii	"unsigned int\000"
+ 741      676E6564 
+ 741      20696E74 
+ 741      00
+ 742              	.LASF24:
+ 743 0029 47656E65 		.ascii	"Generated_Source\\PSoC5\\Timer_3_PM.c\000"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 27
+
+
+ 743      72617465 
+ 743      645F536F 
+ 743      75726365 
+ 743      5C50536F 
+ 744              	.LASF19:
+ 745 004d 54696D65 		.ascii	"Timer_3_Sleep\000"
+ 745      725F335F 
+ 745      536C6565 
+ 745      7000
+ 746              	.LASF12:
+ 747 005b 75696E74 		.ascii	"uint8\000"
+ 747      3800
+ 748              	.LASF17:
+ 749 0061 54696D65 		.ascii	"Timer_3_SaveConfig\000"
+ 749      725F335F 
+ 749      53617665 
+ 749      436F6E66 
+ 749      696700
+ 750              	.LASF16:
+ 751 0074 54696D65 		.ascii	"Timer_3_backupStruct\000"
+ 751      725F335F 
+ 751      6261636B 
+ 751      75705374 
+ 751      72756374 
+ 752              	.LASF9:
+ 753 0089 666C6F61 		.ascii	"float\000"
+ 753      7400
+ 754              	.LASF27:
+ 755 008f 54696D65 		.ascii	"Timer_3_backup\000"
+ 755      725F335F 
+ 755      6261636B 
+ 755      757000
+ 756              	.LASF25:
+ 757 009e 433A5C47 		.ascii	"C:\\Github\\Tesis\\src\\psoc\\AcondicionamientoAnal"
+ 757      69746875 
+ 757      625C5465 
+ 757      7369735C 
+ 757      7372635C 
+ 758 00cc 6F676963 		.ascii	"ogico.cydsn\000"
+ 758      6F2E6379 
+ 758      64736E00 
+ 759              	.LASF26:
+ 760 00d8 54696D65 		.ascii	"TimerEnableState\000"
+ 760      72456E61 
+ 760      626C6553 
+ 760      74617465 
+ 760      00
+ 761              	.LASF7:
+ 762 00e9 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 762      206C6F6E 
+ 762      6720756E 
+ 762      7369676E 
+ 762      65642069 
+ 763              	.LASF18:
+ 764 0100 54696D65 		.ascii	"Timer_3_RestoreConfig\000"
+ 764      725F335F 
+ 764      52657374 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 28
+
+
+ 764      6F726543 
+ 764      6F6E6669 
+ 765              	.LASF11:
+ 766 0116 63686172 		.ascii	"char\000"
+ 766      00
+ 767              	.LASF20:
+ 768 011b 54696D65 		.ascii	"Timer_3_Wakeup\000"
+ 768      725F335F 
+ 768      57616B65 
+ 768      757000
+ 769              	.LASF4:
+ 770 012a 6C6F6E67 		.ascii	"long int\000"
+ 770      20696E74 
+ 770      00
+ 771              	.LASF5:
+ 772 0133 6C6F6E67 		.ascii	"long unsigned int\000"
+ 772      20756E73 
+ 772      69676E65 
+ 772      6420696E 
+ 772      7400
+ 773              	.LASF10:
+ 774 0145 646F7562 		.ascii	"double\000"
+ 774      6C6500
+ 775              	.LASF3:
+ 776 014c 73686F72 		.ascii	"short unsigned int\000"
+ 776      7420756E 
+ 776      7369676E 
+ 776      65642069 
+ 776      6E7400
+ 777              	.LASF0:
+ 778 015f 7369676E 		.ascii	"signed char\000"
+ 778      65642063 
+ 778      68617200 
+ 779              	.LASF22:
+ 780 016b 54696D65 		.ascii	"Timer_3_Enable\000"
+ 780      725F335F 
+ 780      456E6162 
+ 780      6C6500
+ 781              	.LASF14:
+ 782 017a 6C6F6E67 		.ascii	"long double\000"
+ 782      20646F75 
+ 782      626C6500 
+ 783              	.LASF2:
+ 784 0186 73686F72 		.ascii	"short int\000"
+ 784      7420696E 
+ 784      7400
+ 785              	.LASF13:
+ 786 0190 72656738 		.ascii	"reg8\000"
+ 786      00
+ 787              	.LASF21:
+ 788 0195 54696D65 		.ascii	"Timer_3_Stop\000"
+ 788      725F335F 
+ 788      53746F70 
+ 788      00
+ 789              	.LASF15:
+ 790 01a2 73697A65 		.ascii	"sizetype\000"
+ 790      74797065 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cczf1J3f.s 			page 29
+
+
+ 790      00
+ 791              	.LASF23:
+ 792 01ab 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 792      43313120 
+ 792      352E342E 
+ 792      31203230 
+ 792      31363036 
+ 793 01de 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"
+ 793      20726576 
+ 793      6973696F 
+ 793      6E203233 
+ 793      37373135 
+ 794 0211 33202D66 		.ascii	"3 -ffunction-sections -ffat-lto-objects -finline-fu"
+ 794      66756E63 
+ 794      74696F6E 
+ 794      2D736563 
+ 794      74696F6E 
+ 795 0244 6E637469 		.ascii	"nctions -flto\000"
+ 795      6F6E7320 
+ 795      2D666C74 
+ 795      6F00
+ 796              		.comm	__gnu_lto_v1,1,1
+ 797              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

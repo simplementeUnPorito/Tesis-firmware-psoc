@@ -49,7 +49,13 @@
 #include "DMA_DelSig_Filter_dma.h"
 #include "Filter.h"
 #include "Filter_PVT.h"
-#include "Reg_Select.h"
+#include "ctrl.h"
+#include "cfg.h"
+#include "reset.h"
+#include "status.h"
+#include "error.h"
+#include "state.h"
+#include "isr_SuperMaquina.h"
 #include "filter_coeffs.h"
 #include "FIR_adquisition.h"
 #include "psoc_debug.h"
@@ -62,8 +68,10 @@
 #ifndef PSOC_LOAD_NV_CAL_ON_BOOT
 #define PSOC_LOAD_NV_CAL_ON_BOOT 1u
 #endif
-#define TIMER_TICK_MS      10u
-#define TIMEOUT_COUNTS     1000u    /* 10 ms @ 100 kHz — tick de sistema */
+#define TIMER_ILO_COUNTS_PER_MS 100u     /* Timers fixed @ 100 kHz. */
+#define TIMER_MAX_COUNTS        60000UL  /* margen bajo 0xFFFF para rearmar FF one-shot */
+#define UART_RX_TIMEOUT_MS      10u
+#define TIMEOUT_COUNTS          (UART_RX_TIMEOUT_MS * TIMER_ILO_COUNTS_PER_MS)
 
 #define BATCH_SAMPLES      30u
 #define FRAME_BYTES        (4u + BATCH_SAMPLES * 3u + 1u)   /* 95 */
@@ -77,23 +85,14 @@
 #define PING_PERIOD_MS     700u
 #define PING_OFF_MS        100u
 #define IDLE_PING_MS       1000u
-#define COMM_WINDOW_MS     500u
 #define COMM_BLINK_MS      200u  /* medio-período del parpadeo del LED (~2.5 Hz, visible) */
-
-#define MS_TO_TICKS(ms)       (((ms) + TIMER_TICK_MS - 1u) / TIMER_TICK_MS)
-#define PING_PERIOD_TICKS     MS_TO_TICKS(PING_PERIOD_MS)
-#define PING_OFF_TICKS        MS_TO_TICKS(PING_OFF_MS)
-#define IDLE_PING_TICKS       MS_TO_TICKS(IDLE_PING_MS)
-#define COMM_WINDOW_TICKS     MS_TO_TICKS(COMM_WINDOW_MS)
-#define COMM_BLINK_TICKS      MS_TO_TICKS(COMM_BLINK_MS)
-#define CONNECT_BLINK_TICKS   MS_TO_TICKS(80u)
+#define CONNECT_BLINK_MS   80u
 
 /* Titilar LED (identificación de nodo): parpadeo NO bloqueante servido por
- * service_comm_led sobre el tick del Timer (ILO 100 kHz → 10 ms). Al recibir
- * PSOC_CMD_BLINK_LED se carga g_comm_countdown con esta ventana; el LED titila
- * y luego vuelve a su reposo (encendido fijo). No usa delays ni bloquea. */
+ * Timer_2. Al recibir PSOC_CMD_BLINK_LED se arma una cadena de one-shots; el
+ * LED titila y luego vuelve a su reposo (encendido fijo). */
 #define IDENTIFY_BLINK_WINDOW_MS  8000u
-#define IDENTIFY_BLINK_TICKS      MS_TO_TICKS(IDENTIFY_BLINK_WINDOW_MS)
+#define IDENTIFY_BLINK_TOGGLES    ((IDENTIFY_BLINK_WINDOW_MS + COMM_BLINK_MS - 1u) / COMM_BLINK_MS)
 
 #ifndef PSOC_DIAG_ENABLE
 #define PSOC_DIAG_ENABLE      1
@@ -158,15 +157,90 @@ static volatile uint8  rx_cmd         = 0u;
 static volatile uint8  rx_p1          = 0u;
 static volatile uint8  rx_p2          = 0u;
 static volatile uint8  watchdog_rx    = 0u;
-static volatile uint32 g_timer_ticks  = 0u;
 
 static          uint8  g_esp_connected  = 0u;
-static          uint32 g_comm_countdown = 0u;
 static          uint8  g_nv_ready       = 0u;
 static          uint8  g_last_calibration_ok = 0u;
 
-static volatile uint8 g_rx_watch_ticks = 0u;
-#define RX_WATCHDOG_TICKS  1u
+#define TIMER1_MODE_NONE       0u
+#define TIMER1_MODE_BOOT_PING  1u
+#define TIMER1_MODE_IDLE_PING  2u
+
+#define TIMER2_MODE_NONE          0u
+#define TIMER2_MODE_BOOT_LED_OFF  1u
+#define TIMER2_MODE_WAIT          2u
+#define TIMER2_MODE_COMM_BLINK    3u
+
+static volatile uint32 g_timer1_remaining_counts = 0u;
+static volatile uint8  g_timer1_mode             = TIMER1_MODE_NONE;
+static volatile uint8  g_boot_ping_due           = 0u;
+static volatile uint8  g_idle_ping_due           = 0u;
+static volatile uint8  g_idle_ping_armed         = 0u;
+
+static volatile uint32 g_timer2_remaining_counts = 0u;
+static volatile uint8  g_timer2_mode             = TIMER2_MODE_NONE;
+static volatile uint8  g_boot_led_off_due        = 0u;
+static volatile uint8  g_timer2_wait_done        = 0u;
+static volatile uint8  g_comm_blink_due          = 0u;
+static volatile uint16 g_comm_blinks_remaining   = 0u;
+static volatile uint8  g_comm_led_active         = 0u;
+
+static volatile uint32 g_timer3_remaining_counts = 0u;
+static volatile uint8  g_cal_timer_active        = 0u;
+static volatile uint8  g_cal_progress_due        = 0u;
+static volatile uint8  g_cal_watchdog_due        = 0u;
+static volatile uint32 g_cal_progress_period_ms  = 0u;
+static volatile uint32 g_cal_watchdog_remaining_ms = 0u;
+
+/* superMaquina control/status map. */
+#define CE_CTRL_ARM          0x01u
+#define CE_CTRL_START_NOW    0x02u
+#define CE_CTRL_STOP         0x04u
+#define CE_CTRL_CLEAR_FLAGS  0x08u
+#define CE_CTRL_USE_SYNC     0x10u
+#define CE_CTRL_LOAD_BATCH_LO 0x20u
+#define CE_CTRL_ENGINE_EN    0x40u
+#define CE_CTRL_LOAD_BATCH_HI 0x80u
+
+#define CE_CFG_SRC_MASK      0x03u
+#define CE_CFG_SRC_RAW       0x00u
+#define CE_CFG_SRC_FILTER    0x01u
+#define CE_CFG_SRC_COMBINED  0x02u
+#define CE_CFG_SRC_DEBUG     0x03u
+#define CE_CFG_IRQ_BATCH_EN  0x04u
+#define CE_CFG_IRQ_SYNC_EN   0x08u
+#define CE_CFG_IRQ_ERROR_EN  0x10u
+
+#define CE_STATUS_IDLE       0x01u
+#define CE_STATUS_ARMED      0x02u
+#define CE_STATUS_SAMPLING   0x04u
+#define CE_STATUS_DONE       0x08u
+#define CE_STATUS_ERROR      0x10u
+#define CE_STATUS_BUTTON     0x80u
+
+#ifndef PSOC_SUPERMAQUINA_OWNS_DMA_IRQ
+#define PSOC_SUPERMAQUINA_OWNS_DMA_IRQ 1u
+#endif
+
+#ifndef PSOC_SUPERMAQUINA_OWNS_SYNC_IRQ
+#define PSOC_SUPERMAQUINA_OWNS_SYNC_IRQ 1u
+#endif
+
+#ifndef PSOC_SUPERMAQUINA_FILTER_DISCARD
+#define PSOC_SUPERMAQUINA_FILTER_DISCARD 0u
+#endif
+
+#define CE_STATE_IDLE        0u
+#define CE_STATE_ARMED       1u
+#define CE_STATE_SAMPLING    2u
+#define CE_STATE_DONE        3u
+#define CE_STATE_ERROR       4u
+
+static          uint8 g_ce_ctrl_level = 0u;
+static          uint8 g_ce_cfg_level  = (CE_CFG_SRC_RAW | CE_CFG_IRQ_SYNC_EN | CE_CFG_IRQ_ERROR_EN);
+static volatile uint8 g_ce_status     = CE_STATUS_IDLE;
+static volatile uint8 g_ce_error      = 0u;
+static volatile uint8 g_ce_state      = CE_STATE_IDLE;
 
 /* -------------------------------------------------------------------------- */
 
@@ -243,6 +317,86 @@ static uint8 capture_dump_pending(void)
     return (g_batches_sent < g_batches_captured) ? 1u : 0u;
 }
 
+static void capture_engine_refresh_status(void)
+{
+    g_ce_status = status_Read();
+    g_ce_error  = error_Read();
+    g_ce_state  = state_Read();
+}
+
+static void capture_engine_write_ctrl(void)
+{
+    ctrl_Write(g_ce_ctrl_level);
+}
+
+static void capture_engine_pulse(uint8 pulse)
+{
+    ctrl_Write((uint8)(g_ce_ctrl_level | pulse));
+    ctrl_Write(g_ce_ctrl_level);
+}
+
+static void capture_engine_set_source(uint8 source)
+{
+    g_ce_cfg_level = (uint8)((g_ce_cfg_level & (uint8)~CE_CFG_SRC_MASK) |
+                             (source & CE_CFG_SRC_MASK) |
+                             CE_CFG_IRQ_SYNC_EN |
+                             CE_CFG_IRQ_ERROR_EN);
+    cfg_Write(g_ce_cfg_level);
+}
+
+static void capture_engine_set_enabled(uint8 enabled, uint8 use_sync)
+{
+    if (enabled) {
+        g_ce_ctrl_level |= CE_CTRL_ENGINE_EN;
+    } else {
+        g_ce_ctrl_level &= (uint8)~CE_CTRL_ENGINE_EN;
+    }
+
+    if (use_sync) {
+        g_ce_ctrl_level |= CE_CTRL_USE_SYNC;
+    } else {
+        g_ce_ctrl_level &= (uint8)~CE_CTRL_USE_SYNC;
+    }
+
+    capture_engine_write_ctrl();
+}
+
+static void capture_engine_reset_hw(void)
+{
+    reset_Write(1u);
+    reset_Write(0u);
+    capture_engine_refresh_status();
+}
+
+static void capture_engine_clear_flags(void)
+{
+    capture_engine_pulse(CE_CTRL_CLEAR_FLAGS);
+    capture_engine_refresh_status();
+}
+
+static void capture_engine_configure_target(void)
+{
+    uint16 target = capture_target_batches();
+    uint16 limit = (uint16)(target - 1u);
+    uint8 saved_cfg = g_ce_cfg_level;
+
+    cfg_Write((uint8)(limit & 0xFFu));
+    capture_engine_pulse(CE_CTRL_LOAD_BATCH_LO);
+    cfg_Write((uint8)((limit >> 8u) & 0x01u));
+    capture_engine_pulse(CE_CTRL_LOAD_BATCH_HI);
+    cfg_Write(saved_cfg);
+}
+
+static uint8 capture_engine_source_from_stream(uint8 use_filter)
+{
+#if PSOC_RAMP_DEBUG_ENABLE
+    if (g_debug_psoc) {
+        return CE_CFG_SRC_DEBUG;
+    }
+#endif
+    return (use_filter != 0u) ? CE_CFG_SRC_FILTER : CE_CFG_SRC_RAW;
+}
+
 static void psoc_prepare_capture_path(void)
 {
     psoc_calibration_servo_abort();
@@ -251,18 +405,235 @@ static void psoc_prepare_capture_path(void)
     psoc_calibration_restore_capture_path();
 }
 
-static void timer_start_runtime(void)
+static uint32 timer_ms_to_counts(uint32 ms)
 {
-    Timer_Stop();
-    Timer_WritePeriod(TIMEOUT_COUNTS);
-    Timer_Start();
+    uint32 counts = ms * (uint32)TIMER_ILO_COUNTS_PER_MS;
+    return (counts == 0u) ? 1u : counts;
 }
 
-static void timer_stop_quiet(void)
+static uint16 timer_take_chunk(volatile uint32 *remaining_counts)
 {
-    Timer_Stop();
-    Timer_ReadStatusRegister();
+    uint32 remaining = *remaining_counts;
+    uint16 chunk;
+
+    if (remaining == 0u) {
+        return 0u;
+    }
+    if (remaining > TIMER_MAX_COUNTS) {
+        chunk = (uint16)TIMER_MAX_COUNTS;
+        *remaining_counts = remaining - TIMER_MAX_COUNTS;
+    } else {
+        chunk = (uint16)remaining;
+        *remaining_counts = 0u;
+    }
+    return chunk;
+}
+
+static void timer1_start_next_chunk(void)
+{
+    uint16 chunk = timer_take_chunk(&g_timer1_remaining_counts);
+    if (chunk == 0u) { return; }
+    Timer_1_Stop();
+    Timer_1_WritePeriod(chunk);
+    Timer_1_WriteCounter(chunk);
+    (void)Timer_1_ReadStatusRegister();
+    isr_Timer_1_ClearPending();
+    Timer_1_Start();
+}
+
+static void timer1_arm_ms(uint32 ms, uint8 mode)
+{
+    uint8 saved = CyEnterCriticalSection();
+    Timer_1_Stop();
+    g_timer1_mode = mode;
+    g_timer1_remaining_counts = timer_ms_to_counts(ms);
+    timer1_start_next_chunk();
+    CyExitCriticalSection(saved);
+}
+
+static void timer1_stop_quiet(void)
+{
+    uint8 saved = CyEnterCriticalSection();
+    Timer_1_Stop();
+    (void)Timer_1_ReadStatusRegister();
+    isr_Timer_1_ClearPending();
+    g_timer1_remaining_counts = 0u;
+    g_timer1_mode = TIMER1_MODE_NONE;
+    CyExitCriticalSection(saved);
+}
+
+static void timer2_start_next_chunk(void)
+{
+    uint16 chunk = timer_take_chunk(&g_timer2_remaining_counts);
+    if (chunk == 0u) { return; }
+    Timer_2_Stop();
+    Timer_2_WritePeriod(chunk);
+    Timer_2_WriteCounter(chunk);
+    (void)Timer_2_ReadStatusRegister();
+    isr_Timer_2_ClearPending();
+    Timer_2_Start();
+}
+
+static void timer2_arm_ms(uint32 ms, uint8 mode)
+{
+    uint8 saved = CyEnterCriticalSection();
+    Timer_2_Stop();
+    g_timer2_mode = mode;
+    g_timer2_remaining_counts = timer_ms_to_counts(ms);
+    timer2_start_next_chunk();
+    CyExitCriticalSection(saved);
+}
+
+static void timer2_stop_quiet(void)
+{
+    uint8 saved = CyEnterCriticalSection();
+    Timer_2_Stop();
+    (void)Timer_2_ReadStatusRegister();
+    isr_Timer_2_ClearPending();
+    g_timer2_remaining_counts = 0u;
+    g_timer2_mode = TIMER2_MODE_NONE;
+    CyExitCriticalSection(saved);
+}
+
+static void timer3_start_next_chunk(void)
+{
+    uint16 chunk = timer_take_chunk(&g_timer3_remaining_counts);
+    if (chunk == 0u) { return; }
+    Timer_3_Stop();
+    Timer_3_WritePeriod(chunk);
+    Timer_3_WriteCounter(chunk);
+    (void)Timer_3_ReadStatusRegister();
+    isr_Timer_3_ClearPending();
+    Timer_3_Start();
+}
+
+static void timer3_arm_ms_noirq(uint32 ms)
+{
+    Timer_3_Stop();
+    g_timer3_remaining_counts = timer_ms_to_counts(ms);
+    timer3_start_next_chunk();
+}
+
+static void timer3_stop_quiet(void)
+{
+    Timer_3_Stop();
+    (void)Timer_3_ReadStatusRegister();
+    isr_Timer_3_ClearPending();
+    g_timer3_remaining_counts = 0u;
+}
+
+static void fixed_timers_init(void)
+{
+    Timer_Init();   Timer_initVar = 1u;   Timer_Stop();   (void)Timer_ReadStatusRegister();
+    Timer_1_Init(); Timer_1_initVar = 1u; Timer_1_Stop(); (void)Timer_1_ReadStatusRegister();
+    Timer_2_Init(); Timer_2_initVar = 1u; Timer_2_Stop(); (void)Timer_2_ReadStatusRegister();
+    Timer_3_Init(); Timer_3_initVar = 1u; Timer_3_Stop(); (void)Timer_3_ReadStatusRegister();
     isr_Timer_ClearPending();
+    isr_Timer_1_ClearPending();
+    isr_Timer_2_ClearPending();
+    isr_Timer_3_ClearPending();
+}
+
+static void rx_watchdog_start(void)
+{
+    uint8 saved = CyEnterCriticalSection();
+    watchdog_rx = 0u;
+    Timer_Stop();
+    Timer_WritePeriod((uint16)TIMEOUT_COUNTS);
+    Timer_WriteCounter((uint16)TIMEOUT_COUNTS);
+    (void)Timer_ReadStatusRegister();
+    isr_Timer_ClearPending();
+    Timer_Start();
+    CyExitCriticalSection(saved);
+}
+
+static void rx_watchdog_stop(void)
+{
+    uint8 saved = CyEnterCriticalSection();
+    Timer_Stop();
+    (void)Timer_ReadStatusRegister();
+    isr_Timer_ClearPending();
+    watchdog_rx = 0u;
+    CyExitCriticalSection(saved);
+}
+
+static void idle_ping_schedule(void)
+{
+    g_idle_ping_due = 0u;
+    g_idle_ping_armed = 1u;
+    timer1_arm_ms(IDLE_PING_MS, TIMER1_MODE_IDLE_PING);
+}
+
+static void idle_ping_stop(void)
+{
+    if (g_timer1_mode == TIMER1_MODE_IDLE_PING) {
+        timer1_stop_quiet();
+    }
+    g_idle_ping_due = 0u;
+    g_idle_ping_armed = 0u;
+}
+
+static void comm_led_stop(void)
+{
+    if (g_timer2_mode == TIMER2_MODE_COMM_BLINK) {
+        timer2_stop_quiet();
+    }
+    g_comm_led_active = 0u;
+    g_comm_blink_due = 0u;
+    g_comm_blinks_remaining = 0u;
+}
+
+static void runtime_timers_stop_for_quiet_window(void)
+{
+    rx_watchdog_stop();
+    idle_ping_stop();
+    comm_led_stop();
+}
+
+void psoc_cal_timer_start(uint32 progress_ms, uint32 watchdog_ms)
+{
+    uint8 saved = CyEnterCriticalSection();
+    if (progress_ms == 0u) { progress_ms = 1u; }
+    if (watchdog_ms == 0u) { watchdog_ms = progress_ms; }
+    g_cal_progress_due = 0u;
+    g_cal_watchdog_due = 0u;
+    g_cal_progress_period_ms = progress_ms;
+    g_cal_watchdog_remaining_ms = watchdog_ms;
+    g_cal_timer_active = 1u;
+    timer3_arm_ms_noirq(progress_ms);
+    CyExitCriticalSection(saved);
+}
+
+void psoc_cal_timer_stop(void)
+{
+    uint8 saved = CyEnterCriticalSection();
+    g_cal_timer_active = 0u;
+    g_cal_progress_due = 0u;
+    g_cal_watchdog_due = 0u;
+    g_cal_progress_period_ms = 0u;
+    g_cal_watchdog_remaining_ms = 0u;
+    timer3_stop_quiet();
+    CyExitCriticalSection(saved);
+}
+
+uint8 psoc_cal_timer_take_progress_due(void)
+{
+    uint8 due;
+    uint8 saved = CyEnterCriticalSection();
+    due = g_cal_progress_due;
+    g_cal_progress_due = 0u;
+    CyExitCriticalSection(saved);
+    return due;
+}
+
+uint8 psoc_cal_timer_take_watchdog_due(void)
+{
+    uint8 due;
+    uint8 saved = CyEnterCriticalSection();
+    due = g_cal_watchdog_due;
+    g_cal_watchdog_due = 0u;
+    CyExitCriticalSection(saved);
+    return due;
 }
 
 static void capture_reset_locked(void)
@@ -281,7 +652,7 @@ static void psoc_enter_sampling(uint8 debugMode)
     uint8 saved;
     uint16 target = capture_target_batches();
     ADC_StopConvert();
-    timer_stop_quiet();
+    runtime_timers_stop_for_quiet_window();
     saved = CyEnterCriticalSection();
 #if PSOC_RAMP_DEBUG_ENABLE
     g_debug_psoc = debugMode ? 1u : 0u;
@@ -292,6 +663,11 @@ static void psoc_enter_sampling(uint8 debugMode)
     capture_reset_locked();
     g_state = PSOC_SAMPLING;
     CyExitCriticalSection(saved);
+    capture_engine_configure_target();
+    capture_engine_set_source(capture_engine_source_from_stream(g_stream_mode));
+    capture_engine_set_enabled(1u, 0u);
+    capture_engine_clear_flags();
+    capture_engine_pulse(CE_CTRL_START_NOW);
     if (g_n_batches > PSOC_CAPTURE_MAX_BATCHES) {
         /* Pedido real recortado al cap físico — avisar en vez de truncar en
          * silencio (la web puede así informar la duración real soportada). */
@@ -308,12 +684,16 @@ static int32 dma_buf_to_i24(const volatile uint8 *buf)
     return (u & 0x00800000UL) ? (int32)(u | 0xFF000000UL) : (int32)u;
 }
 
-CY_ISR(isr_DMA_DelSig_RAM_Handler)
+static void capture_service_raw_dma_sample(void)
 {
     g_adc_raw = psoc_adc_counts_right_aligned(dma_buf_to_i24(g_dma_raw_buf));
     psoc_adc_note_isr_sample(g_adc_raw);   /* mantiene ruta calibración activa */
 
-    if (g_stream_mode != 0u) { return; }   /* modo FIR: el filtro captura */
+#if PSOC_RAMP_DEBUG_ENABLE
+    if (g_stream_mode != 0u && g_debug_psoc == 0u) { return; }  /* modo FIR: el filtro captura */
+#else
+    if (g_stream_mode != 0u) { return; }                         /* modo FIR: el filtro captura */
+#endif
 
     if (g_state == PSOC_SAMPLING && g_capture_done == 0u &&
         g_batches_captured < capture_target_batches() &&
@@ -340,6 +720,11 @@ CY_ISR(isr_DMA_DelSig_RAM_Handler)
     }
 }
 
+CY_ISR(isr_DMA_DelSig_RAM_Handler)
+{
+    capture_service_raw_dma_sample();
+}
+
 /* ISR: muestra FILTRADA (DMA_Filter_RAM depositó 3 bytes en g_dma_filt_buf,
  * uno por salida nueva del Filter de hardware — Canal A). Sirve a DOS
  * consumidores independientes:
@@ -348,7 +733,7 @@ CY_ISR(isr_DMA_DelSig_RAM_Handler)
  *    su propio descarte de asentamiento/retardo de grupo, ver cal_pi_stage_begin).
  *  - el stream filtrado hacia el ESP/web (captura en g_capture_raw), gateado
  *    por g_stream_mode/g_fir_discard como antes. */
-CY_ISR(isr_DMA_Filter_RAM_Handler)
+static void capture_service_filter_dma_sample(void)
 {
     int32 filt = psoc_adc_counts_right_aligned(dma_buf_to_i24(g_dma_filt_buf));
 
@@ -377,22 +762,88 @@ CY_ISR(isr_DMA_Filter_RAM_Handler)
     }
 }
 
+static void capture_service_selected_dma_sample(void)
+{
+    uint8 source = (uint8)(g_ce_cfg_level & CE_CFG_SRC_MASK);
+
+    if (source == CE_CFG_SRC_FILTER || source == CE_CFG_SRC_COMBINED) {
+        capture_service_filter_dma_sample();
+    } else {
+        capture_service_raw_dma_sample();
+    }
+}
+
+CY_ISR(isr_DMA_Filter_RAM_Handler)
+{
+    capture_service_filter_dma_sample();
+}
+
 CY_ISR(isr_Timer)
 {
-    Timer_ReadStatusRegister();
-    g_timer_ticks++;
-    if (rx_state != 0u) {
-        g_rx_watch_ticks++;
-        if (g_rx_watch_ticks >= RX_WATCHDOG_TICKS) {
-            g_rx_watch_ticks = 0u;
-            watchdog_rx = 1u;
-        }
-    } else {
-        g_rx_watch_ticks = 0u;
-    }
+    (void)Timer_ReadStatusRegister();
     Timer_Stop();
-    Timer_WritePeriod(TIMEOUT_COUNTS);
-    Timer_Start();
+    if (rx_state != 0u) {
+        watchdog_rx = 1u;
+    }
+}
+
+CY_ISR(isr_Timer_1)
+{
+    (void)Timer_1_ReadStatusRegister();
+    Timer_1_Stop();
+    if (g_timer1_remaining_counts != 0u) {
+        timer1_start_next_chunk();
+        return;
+    }
+
+    if (g_timer1_mode == TIMER1_MODE_BOOT_PING) {
+        g_boot_ping_due = 1u;
+    } else if (g_timer1_mode == TIMER1_MODE_IDLE_PING) {
+        g_idle_ping_due = 1u;
+        g_idle_ping_armed = 0u;
+    }
+    g_timer1_mode = TIMER1_MODE_NONE;
+}
+
+CY_ISR(isr_Timer_2)
+{
+    (void)Timer_2_ReadStatusRegister();
+    Timer_2_Stop();
+    if (g_timer2_remaining_counts != 0u) {
+        timer2_start_next_chunk();
+        return;
+    }
+
+    if (g_timer2_mode == TIMER2_MODE_BOOT_LED_OFF) {
+        g_boot_led_off_due = 1u;
+    } else if (g_timer2_mode == TIMER2_MODE_WAIT) {
+        g_timer2_wait_done = 1u;
+    } else if (g_timer2_mode == TIMER2_MODE_COMM_BLINK) {
+        g_comm_blink_due = 1u;
+    }
+    g_timer2_mode = TIMER2_MODE_NONE;
+}
+
+CY_ISR(isr_Timer_3)
+{
+    (void)Timer_3_ReadStatusRegister();
+    Timer_3_Stop();
+    if (g_timer3_remaining_counts != 0u) {
+        timer3_start_next_chunk();
+        return;
+    }
+
+    if (g_cal_timer_active) {
+        g_cal_progress_due = 1u;
+        if (g_cal_watchdog_remaining_ms <= g_cal_progress_period_ms) {
+            g_cal_watchdog_remaining_ms = 0u;
+            g_cal_watchdog_due = 1u;
+            g_cal_timer_active = 0u;
+        } else {
+            g_cal_watchdog_remaining_ms -= g_cal_progress_period_ms;
+            timer3_arm_ms_noirq(g_cal_progress_period_ms);
+        }
+    }
 }
 
 CY_ISR(isr_SyncIn)
@@ -416,7 +867,7 @@ CY_ISR(isr_SyncIn)
     {
         uart_send_diag(PSOC_EVT_SYNC_FALL, g_state);
         ADC_StopConvert();
-        timer_start_runtime();
+        idle_ping_schedule();
         saved = CyEnterCriticalSection();
         g_batch_fill       = 0u;
         g_batch_ready      = 0u;
@@ -428,18 +879,70 @@ CY_ISR(isr_SyncIn)
     }
 }
 
+CY_ISR(isr_SuperMaquina_Handler)
+{
+    uint8 fw_state_at_entry = g_state;
+
+    capture_engine_refresh_status();
+
+#if PSOC_BUTTON_CAL_ENABLE
+    if ((g_ce_status & CE_STATUS_BUTTON) != 0u)
+    {
+        g_cal_button_pressed = 1u;
+        capture_engine_clear_flags();
+    }
+#endif
+
+    if ((g_ce_status & CE_STATUS_ERROR) == 0u)
+    {
+        if (fw_state_at_entry == PSOC_SAMPLING ||
+            ((g_ce_status & CE_STATUS_IDLE) != 0u && fw_state_at_entry != PSOC_ARMED))
+        {
+            capture_service_selected_dma_sample();
+        }
+    }
+
+    if ((g_ce_status & CE_STATUS_SAMPLING) != 0u && fw_state_at_entry == PSOC_ARMED)
+    {
+        runtime_timers_stop_for_quiet_window();
+        if (g_stream_mode != 0u) {
+#if PSOC_SUPERMAQUINA_FILTER_DISCARD
+            g_fir_discard = FILTER_GROUP_DELAY;
+#else
+            g_fir_discard = 0u;
+#endif
+        }
+        g_state = PSOC_SAMPLING;
+        uart_send_diag(PSOC_EVT_SYNC_RISE, g_ce_state);
+    }
+
+    if ((g_ce_status & CE_STATUS_DONE) != 0u)
+    {
+        if (g_state == PSOC_ARMED) {
+            g_state = PSOC_SAMPLING;
+        }
+        g_capture_done = 1u;
+    }
+
+    if ((g_ce_status & CE_STATUS_ERROR) != 0u)
+    {
+        if (g_state != PSOC_SAMPLING) {
+            g_state = PSOC_SAMPLING;
+        }
+        g_capture_done = 1u;
+        uart_send_diag(PSOC_EVT_CAPTURE_DONE, g_ce_error);
+    }
+}
+
 CY_ISR(isr_Button_Handler)
 {
+#ifdef CY_ISR_isr_Button_H
     isr_Button_ClearPending();
+#endif
 #if PSOC_BUTTON_CAL_ENABLE
     g_cal_button_pressed = 1u;
 #endif
 }
-
-/* -------------------------------------------------------------------------- */
-
-static void rx_watchdog_start(void) { g_rx_watch_ticks = 0u; watchdog_rx = 0u; }
-static void rx_watchdog_stop(void)  { g_rx_watch_ticks = 0u; watchdog_rx = 0u; }
 
 static void led_write(uint8 value)
 {
@@ -459,32 +962,38 @@ static void led_toggle(void)
 #endif
 }
 
-static uint32 timer_now_ticks(void)
+static void comm_led_start_identify(void)
 {
-    uint32 ticks;
-    uint8 saved = CyEnterCriticalSection();
-    ticks = g_timer_ticks;
-    CyExitCriticalSection(saved);
-    return ticks;
+    g_comm_led_active = 1u;
+    g_comm_blinks_remaining = (uint16)IDENTIFY_BLINK_TOGGLES;
+    g_comm_blink_due = 0u;
+    led_write(1u);
+    timer2_arm_ms(COMM_BLINK_MS, TIMER2_MODE_COMM_BLINK);
+}
+
+static void idle_ping_service(void)
+{
+    if (!g_idle_ping_armed && !g_idle_ping_due) {
+        idle_ping_schedule();
+    }
+    if (g_idle_ping_due) {
+        g_idle_ping_due = 0u;
+        uart_send_ping();
+        idle_ping_schedule();
+    }
 }
 
 uint32 psoc_now_ticks(void)
 {
-    return timer_now_ticks();
+    return 0u; /* Compatibilidad para el servo legacy, hoy compilado apagado. */
 }
 
-static uint8 ticks_due(uint32 now, uint32 due)
-{
-    return ((int32)(now - due) >= 0) ? 1u : 0u;
-}
-
-/* Selecciona, vía Reg_Select (control_0), si el canal raw del ADC va directo
- * a RAM (use_filter=0, captura cruda) o hacia el Canal A del Filter de
- * hardware (use_filter=1). La exclusión la imponen las compuertas del
- * TopDesign (DMA_DelSig_RAM vs DMA_DelSig_Filter); acá solo se escribe el bit. */
+/* Selecciona la ruta en superMaquina. Con ENGINE_ENABLE=0 actúa como bypass
+ * para calibración/diagnóstico; con ENGINE_ENABLE=1 decide qué DRQ deja pasar
+ * durante captura. */
 void dma_route_select(uint8 use_filter)
 {
-    Reg_Select_Write(use_filter ? 0x01u : 0x00u);
+    capture_engine_set_source(capture_engine_source_from_stream(use_filter));
 }
 
 static uint8 psoc_seed_calibration_from_nv(uint8 reset_defaults_if_missing)
@@ -536,6 +1045,12 @@ static void psoc_arm(void)
     capture_reset_locked();
     g_state = PSOC_ARMED;
     CyExitCriticalSection(saved);
+    capture_engine_configure_target();
+    capture_engine_set_source(capture_engine_source_from_stream(g_stream_mode));
+    capture_engine_set_enabled(1u, 1u);
+    capture_engine_clear_flags();
+    capture_engine_pulse(CE_CTRL_ARM);
+    ADC_StartConvert();
     uart_send_diag(PSOC_EVT_ARMED, diag_u16_sat(g_n_batches));
 }
 
@@ -561,6 +1076,10 @@ static uint8 psoc_start_calibration_if_idle(uint8 send_ack)
     g_capture_done = 0u;
     g_last_calibration_ok = 0u;
     psoc_calibration_servo_abort();
+    idle_ping_stop();
+    comm_led_stop();
+    capture_engine_set_enabled(0u, 0u);
+    capture_engine_clear_flags();
     /* La ruta del DMA (raw vs Filter) y el AMux los gobierna cal_pi_stage_begin
      * (calibration.c) por etapa -- no hace falta forzar nada aca. */
     uart_send_diag(PSOC_EVT_BOOT, PSOC_HW_CLASS);
@@ -568,7 +1087,7 @@ static uint8 psoc_start_calibration_if_idle(uint8 send_ack)
     cal_start = psoc_calibration_start_async();
     if (cal_start == 2u) {
         g_last_calibration_ok = 1u;
-        timer_start_runtime();
+        idle_ping_schedule();
         dma_route_select(g_stream_mode);
         uart_send_diag(PSOC_EVT_CAL_DONE, 1u);
         if (send_ack) {
@@ -597,6 +1116,8 @@ static void psoc_report_adc_snapshot_if_idle(void)
     }
 
     psoc_calibration_servo_abort();
+    capture_engine_set_enabled(0u, 0u);
+    capture_engine_clear_flags();
     uart_send_cfg_ack(PSOC_CMD_ADC_SNAPSHOT, 1u);
     psoc_calibration_report_adc_snapshot();
     dma_route_select(g_stream_mode);
@@ -788,8 +1309,10 @@ static void uart_service(void)
                             psoc_enter_sampling(1u);
                         } else {
                             ADC_StopConvert();
+                            capture_engine_set_enabled(0u, 0u);
+                            capture_engine_clear_flags();
                             psoc_prepare_capture_path();
-                            timer_start_runtime();
+                            idle_ping_schedule();
                             g_batch_fill   = 0u;
                             g_batch_ready  = 0u;
                             g_capture_done = 0u;
@@ -846,7 +1369,9 @@ static void uart_service(void)
                                                                      FILTER_FIR_NTAPS);
                             psoc_filter_reset_history();
                             psoc_adc_clear_isr_filtered_sample();
+#ifdef CY_ISR_isr_DMA_Filter_RAM_H
                             isr_DMA_Filter_RAM_ClearPending();
+#endif
                         }
                         dma_route_select(g_stream_mode);
                         if (g_stream_mode != 0u) {
@@ -860,12 +1385,9 @@ static void uart_service(void)
                         led_toggle();
                         break;
                     case PSOC_CMD_BLINK_LED:
-                        /* Titilar LED para identificar el nodo. No bloqueante:
-                         * service_comm_led hace el toggle sobre el tick del Timer
-                         * mientras g_comm_countdown > 0, y luego el LED vuelve a
-                         * su reposo (encendido fijo). El diag PSOC_EVT_RX_CMD ya
-                         * emitido más arriba confirma la recepción por el sniffer. */
-                        g_comm_countdown = IDENTIFY_BLINK_TICKS;
+                        /* Identificacion no bloqueante: Timer_2 encadena
+                         * one-shots y service_comm_led solo consume flags. */
+                        comm_led_start_identify();
                         break;
                     default: break;
                 }
@@ -884,7 +1406,7 @@ static void service_runtime(void)
             uint8 ok = psoc_calibration_async_result_ok();
             g_state = PSOC_IDLE;
             g_last_calibration_ok = ok ? 1u : 0u;
-            timer_start_runtime();
+            idle_ping_schedule();
             dma_route_select(g_stream_mode);  /* restaura ruta previa a la calibración */
             uart_send_diag(PSOC_EVT_CAL_DONE, ok);
             if (g_cal_ack_pending) {
@@ -901,7 +1423,9 @@ static void service_runtime(void)
             return;   /* Silencio total: sin UART RX/TX, sin LED, sin pings. */
         }
         ADC_StopConvert();
-        timer_start_runtime();
+        capture_engine_set_enabled(0u, 0u);
+        capture_engine_clear_flags();
+        idle_ping_schedule();
         uart_send_diag(PSOC_EVT_CAPTURE_DONE, diag_u16_sat(g_batches_captured));
         g_capture_done = 0u;
         g_state = PSOC_IDLE;
@@ -924,77 +1448,70 @@ static void service_runtime(void)
     uart_service();
 }
 
-static void service_comm_led(uint32 now)
+static void service_comm_led(void)
 {
-    static uint32 lastTick   = 0u;
-    static uint32 blinkTicks = 0u;
-    uint32 elapsed;
-
-    if (g_state == PSOC_SAMPLING) {
-        lastTick = now;
+    if (!g_comm_led_active || !g_comm_blink_due) {
         return;
     }
 
-    if (lastTick == 0u) { lastTick = now; return; }
-
-    elapsed = now - lastTick;
-    if (elapsed == 0u) { return; }
-    lastTick = now;
-
-    if (g_comm_countdown > elapsed) {
-        g_comm_countdown -= elapsed;
-    } else {
-        g_comm_countdown = 0u;
+    g_comm_blink_due = 0u;
+    if (g_comm_blinks_remaining > 0u) {
+        g_comm_blinks_remaining--;
+        led_toggle();
     }
 
-    if (g_comm_countdown > 0u) {
-        blinkTicks += elapsed;
-        if (blinkTicks >= COMM_BLINK_TICKS) {
-            blinkTicks = 0u;
-            led_toggle();
-        }
+    if (g_comm_blinks_remaining > 0u) {
+        timer2_arm_ms(COMM_BLINK_MS, TIMER2_MODE_COMM_BLINK);
     } else {
+        g_comm_led_active = 0u;
         led_write(1u);
-        blinkTicks = 0u;
     }
 }
 
-static void wait_ticks(uint32 ticks)
+static void wait_ms_timer2(uint32 ms)
 {
-    uint32 due = timer_now_ticks() + ticks;
-    while (!ticks_due(timer_now_ticks(), due)) {
+    g_timer2_wait_done = 0u;
+    timer2_arm_ms(ms, TIMER2_MODE_WAIT);
+    while (!g_timer2_wait_done) {
         (void)service_button_calibration();
         service_runtime();
     }
+    g_timer2_wait_done = 0u;
+    timer2_stop_quiet();
 }
 
 static void wait_for_esp(void)
 {
-    uint32 nextPing  = timer_now_ticks();
-    uint32 pingStart = nextPing;
-
+    g_boot_ping_due = 1u;
+    g_boot_led_off_due = 0u;
     led_write(1u);
     uart_send_diag(PSOC_EVT_WAIT_ESP, 0u);
     while (!g_esp_connected)
     {
-        uint32 now;
         (void)service_button_calibration();
         service_runtime();
-        now = timer_now_ticks();
-
-        if (ticks_due(now, nextPing)) {
-            uart_send_ping();
-            pingStart = now;
-            nextPing  = now + PING_PERIOD_TICKS;
-            led_write(1u);
+        if (g_esp_connected) {
+            break;
         }
 
-        if ((now - pingStart) >= (PING_PERIOD_TICKS - PING_OFF_TICKS)) {
-            led_write(0u);
-        } else {
+        if (g_boot_ping_due) {
+            g_boot_ping_due = 0u;
+            uart_send_ping();
             led_write(1u);
+            timer1_arm_ms(PING_PERIOD_MS, TIMER1_MODE_BOOT_PING);
+            timer2_arm_ms((uint32)(PING_PERIOD_MS - PING_OFF_MS), TIMER2_MODE_BOOT_LED_OFF);
+        }
+
+        if (g_boot_led_off_due) {
+            g_boot_led_off_due = 0u;
+            led_write(0u);
         }
     }
+    timer1_stop_quiet();
+    timer2_stop_quiet();
+    g_boot_ping_due = 0u;
+    g_boot_led_off_due = 0u;
+    led_write(1u);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1058,15 +1575,14 @@ static void tx1_gpio_write(uint8 value)
 #endif
 
 /* Inicializa los tres canales DMA (TopDesign consolidado, sin Single/Lote):
- *   DMA_DelSig_RAM    ADC → RAM (g_dma_raw_buf), activo cuando control_0=0
+ *   DMA_DelSig_RAM    ADC → RAM (g_dma_raw_buf), activo en ruta raw
  *   DMA_Filter_RAM    Filter (HOLDA, Canal A) → RAM (g_dma_filt_buf)
  *   DMA_DelSig_Filter ADC → Filter_STAGEA (siempre activo, sin ISR), activo
- *                     cuando control_0=1
+ *                     en ruta filtrada
  * Todos los TD son circulares (nextTd == mismo TD): cada canal recicla solo.
- * Cuál de DMA_DelSig_RAM/DMA_DelSig_Filter recibe el trigger real lo decide
- * la logica combinacional del TopDesign gobernada por Reg_Select
- * (control_0), no el software -- ver dma_route_select(). DMA_Filter_RAM solo
- * produce datos cuando el Filter esta siendo alimentado (control_0=1). */
+ * Cual DRQ recibe el trigger real lo decide superMaquina desde cfg/ctrl; el
+ * ARM solo configura la ruta con dma_route_select(). DMA_Filter_RAM solo
+ * produce datos cuando el Filter esta siendo alimentado. */
 static void dma_adc_init(void)
 {
     uint8 td;
@@ -1110,7 +1626,7 @@ static void dma_adc_init(void)
     CyDmaChSetInitialTd(DMA_Filter_RAM_DmaHandle, td);
     CyDmaChEnable(DMA_Filter_RAM_DmaHandle, 1u);
 
-    /* Ruta por defecto: raw (control_0=0) — igual al comportamiento previo al mux. */
+    /* Ruta por defecto: raw, igual al comportamiento previo al mux. */
     dma_route_select(0u);
 }
 
@@ -1187,23 +1703,39 @@ int main(void)
      * y restaura este al terminar (ver cal_pi_start/cal_async_complete). */
     (void)psoc_filter_load_fir_coefficients(g_fir_adquisition_coeffs_q23, FILTER_FIR_NTAPS);
     dma_adc_init();
+    capture_engine_reset_hw();
+    capture_engine_set_enabled(0u, 0u);
+    dma_route_select(0u);
 
     psoc_prepare_capture_path();
     uart_send_diag(PSOC_EVT_ANALOG_READY, 0u);
 
+#if !PSOC_SUPERMAQUINA_OWNS_DMA_IRQ
+#ifdef CY_ISR_isr_DMA_DelSig_RAM_H
     isr_DMA_DelSig_RAM_StartEx(isr_DMA_DelSig_RAM_Handler);
+#endif
+#ifdef CY_ISR_isr_DMA_Filter_RAM_H
     isr_DMA_Filter_RAM_StartEx(isr_DMA_Filter_RAM_Handler);
+#endif
+#endif
+    fixed_timers_init();
     isr_Timer_StartEx(isr_Timer);
+    isr_Timer_1_StartEx(isr_Timer_1);
+    isr_Timer_2_StartEx(isr_Timer_2);
+    isr_Timer_3_StartEx(isr_Timer_3);
+#if !PSOC_SUPERMAQUINA_OWNS_SYNC_IRQ
+#ifdef CY_ISR_isr_SyncIn_H
     isr_SyncIn_StartEx(isr_SyncIn);
+#endif
+#endif
+    isr_SuperMaquina_StartEx(isr_SuperMaquina_Handler);
     Clock_1_Start();
 #if PSOC_BUTTON_CAL_ENABLE
+#ifdef CY_ISR_isr_Button_H
     isr_Button_ClearPending();
     isr_Button_StartEx(isr_Button_Handler);
 #endif
-
-    Timer_Stop();
-    Timer_WritePeriod(TIMEOUT_COUNTS);
-    Timer_Start();
+#endif
 
     /* ── Loop de arranque: busca el ESP sin bloquear UART/ADC ───────────── */
     wait_for_esp();
@@ -1212,47 +1744,32 @@ int main(void)
     /* ── 5 parpadeos rápidos al conectar ─────────────────────────────────── */
     for (i = 0u; i < 5u; i++)
     {
-        led_write(0u); wait_ticks(CONNECT_BLINK_TICKS);
-        led_write(1u); wait_ticks(CONNECT_BLINK_TICKS);
+        led_write(0u); wait_ms_timer2(CONNECT_BLINK_MS);
+        led_write(1u); wait_ms_timer2(CONNECT_BLINK_MS);
     }
+    idle_ping_schedule();
 
     /* ── Loop principal ─────────────────────────────────────────────────── */
     for (;;)
     {
-        static uint32 idlePingDue = 0u;
-        uint32 now;
-
         if (service_button_calibration()) {
             continue;
         }
         service_runtime();
 
         if (g_state == PSOC_SAMPLING || capture_dump_pending()) {
+            idle_ping_stop();
             continue;   /* Sin LED ni pings durante captura y volcado */
         }
-        now = timer_now_ticks();
 
         if (g_state == PSOC_IDLE && !capture_dump_pending()) {
             (void)psoc_calibration_servo_service();
+            idle_ping_service();
+        } else {
+            idle_ping_stop();
         }
 
-        if (g_state == PSOC_IDLE && !capture_dump_pending())
-        {
-            if (idlePingDue == 0u) {
-                idlePingDue = now + IDLE_PING_TICKS;
-            }
-            if (ticks_due(now, idlePingDue))
-            {
-                idlePingDue = now + IDLE_PING_TICKS;
-                uart_send_ping();
-            }
-        }
-        else
-        {
-            idlePingDue = 0u;
-        }
-
-        service_comm_led(now);
+        service_comm_led();
     }
 }
 

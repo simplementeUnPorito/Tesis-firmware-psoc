@@ -2,7 +2,7 @@
 --	Conversion of AcondicionamientoAnalogico.v to vh2:
 --
 --	Cypress Semiconductor - WARP Version 6.3 IR 41
---	Wed Jul 01 13:54:28 2026
+--	Thu Jul 02 00:15:09 2026
 --
 
 USE cypress.cypress.all;
@@ -12,50 +12,31 @@ ATTRIBUTE part_name of top_RTL:TYPE IS "cpsoc3";
 END top_RTL;
 --------------------------------------------------------
 ARCHITECTURE R_T_L OF top_RTL IS
-SIGNAL Net_4929 : bit;
-SIGNAL Net_4922 : bit;
-SIGNAL Net_4843 : bit;
-SIGNAL EOC : bit;
-SIGNAL Net_4905 : bit;
-SIGNAL Net_5031 : bit;
-SIGNAL Net_4892 : bit;
-SIGNAL \Reg_Select:clk\ : bit;
-SIGNAL \Reg_Select:rst\ : bit;
-SIGNAL \Reg_Select:control_out_0\ : bit;
-SIGNAL Net_5028 : bit;
-SIGNAL \Reg_Select:control_out_1\ : bit;
-SIGNAL Net_5029 : bit;
-SIGNAL \Reg_Select:control_out_2\ : bit;
-SIGNAL Net_4932 : bit;
-SIGNAL \Reg_Select:control_out_3\ : bit;
-SIGNAL Net_4933 : bit;
-SIGNAL \Reg_Select:control_out_4\ : bit;
-SIGNAL Net_4934 : bit;
-SIGNAL \Reg_Select:control_out_5\ : bit;
-SIGNAL Net_4935 : bit;
-SIGNAL \Reg_Select:control_out_6\ : bit;
-SIGNAL Net_4936 : bit;
-SIGNAL \Reg_Select:control_out_7\ : bit;
-SIGNAL \Reg_Select:control_7\ : bit;
-SIGNAL \Reg_Select:control_6\ : bit;
-SIGNAL \Reg_Select:control_5\ : bit;
-SIGNAL \Reg_Select:control_4\ : bit;
-SIGNAL \Reg_Select:control_3\ : bit;
-SIGNAL \Reg_Select:control_2\ : bit;
-SIGNAL \Reg_Select:control_1\ : bit;
-SIGNAL \Reg_Select:control_0\ : bit;
-SIGNAL Net_4854 : bit;
+SIGNAL Net_6773 : bit;
+SIGNAL \Timer_2:Net_260\ : bit;
+SIGNAL \Timer_2:Net_266\ : bit;
 SIGNAL zero : bit;
+SIGNAL Net_6775 : bit;
+SIGNAL \Timer_2:Net_51\ : bit;
+SIGNAL \Timer_2:Net_261\ : bit;
+SIGNAL \Timer_2:Net_57\ : bit;
+SIGNAL Net_6779 : bit;
+SIGNAL Net_6780 : bit;
+SIGNAL \Timer_2:Net_102\ : bit;
+SIGNAL dar : bit;
+SIGNAL nda : bit;
+SIGNAL daf : bit;
 SIGNAL Net_4796 : bit;
-SIGNAL Net_4733 : bit;
+SIGNAL dfr : bit;
+SIGNAL ndf : bit;
 SIGNAL \Filter:Net_1\ : bit;
 SIGNAL \Filter:Net_4\ : bit;
 SIGNAL \Filter:Net_5\ : bit;
 SIGNAL \Filter:Net_8\ : bit;
 SIGNAL \Filter:Net_9\ : bit;
+SIGNAL drf : bit;
 SIGNAL Net_4728 : bit;
 SIGNAL Net_4730 : bit;
-SIGNAL Net_4595 : bit;
 SIGNAL Net_4591 : bit;
 SIGNAL one : bit;
 SIGNAL \Debouncer:op_clk\ : bit;
@@ -63,6 +44,7 @@ SIGNAL \Debouncer:DEBOUNCER[0]:d_sync_0\ : bit;
 SIGNAL Net_4589 : bit;
 SIGNAL \Debouncer:DEBOUNCER[0]:d_sync_1\ : bit;
 SIGNAL Net_4592 : bit;
+SIGNAL bp : bit;
 SIGNAL Net_4593 : bit;
 SIGNAL Net_4594 : bit;
 SIGNAL tmpOE__Button_net_0 : bit;
@@ -77,9 +59,9 @@ SIGNAL tmpINTERRUPT_0__LED_net_0 : bit;
 TERMINAL Net_4757 : bit;
 TERMINAL Net_2381 : bit;
 SIGNAL Net_2337 : bit;
-SIGNAL Net_2348 : bit;
 SIGNAL \EdgeDetect:last\ : bit;
 SIGNAL Net_2338 : bit;
+SIGNAL sd : bit;
 SIGNAL Net_2336 : bit;
 SIGNAL tmpOE__SYNC_IN_net_0 : bit;
 SIGNAL tmpIO_0__SYNC_IN_net_0 : bit;
@@ -442,6 +424,536 @@ SIGNAL \Timer:Net_261\ : bit;
 SIGNAL \Timer:Net_57\ : bit;
 SIGNAL Net_2276 : bit;
 SIGNAL \Timer:Net_102\ : bit;
+SIGNAL Net_5570 : bit;
+SIGNAL Net_6619 : bit;
+SIGNAL Net_6621 : bit;
+SIGNAL Net_6623 : bit;
+SIGNAL \state:status_7\ : bit;
+SIGNAL Net_6662_7 : bit;
+SIGNAL \state:status_6\ : bit;
+SIGNAL Net_6662_6 : bit;
+SIGNAL \state:status_5\ : bit;
+SIGNAL Net_6662_5 : bit;
+SIGNAL \state:status_4\ : bit;
+SIGNAL Net_6662_4 : bit;
+SIGNAL \state:status_3\ : bit;
+SIGNAL Net_6662_3 : bit;
+SIGNAL \state:status_2\ : bit;
+SIGNAL Net_6662_2 : bit;
+SIGNAL \state:status_1\ : bit;
+SIGNAL Net_6662_1 : bit;
+SIGNAL \state:status_0\ : bit;
+SIGNAL Net_6662_0 : bit;
+SIGNAL \error:status_7\ : bit;
+SIGNAL Net_6661_7 : bit;
+SIGNAL \error:status_6\ : bit;
+SIGNAL Net_6661_6 : bit;
+SIGNAL \error:status_5\ : bit;
+SIGNAL Net_6661_5 : bit;
+SIGNAL \error:status_4\ : bit;
+SIGNAL Net_6661_4 : bit;
+SIGNAL \error:status_3\ : bit;
+SIGNAL Net_6661_3 : bit;
+SIGNAL \error:status_2\ : bit;
+SIGNAL Net_6661_2 : bit;
+SIGNAL \error:status_1\ : bit;
+SIGNAL Net_6661_1 : bit;
+SIGNAL \error:status_0\ : bit;
+SIGNAL Net_6661_0 : bit;
+SIGNAL \status:status_7\ : bit;
+SIGNAL Net_6660_7 : bit;
+SIGNAL \status:status_6\ : bit;
+SIGNAL Net_6660_6 : bit;
+SIGNAL \status:status_5\ : bit;
+SIGNAL Net_6660_5 : bit;
+SIGNAL \status:status_4\ : bit;
+SIGNAL Net_6660_4 : bit;
+SIGNAL \status:status_3\ : bit;
+SIGNAL Net_6660_3 : bit;
+SIGNAL \status:status_2\ : bit;
+SIGNAL Net_6660_2 : bit;
+SIGNAL \status:status_1\ : bit;
+SIGNAL Net_6660_1 : bit;
+SIGNAL \status:status_0\ : bit;
+SIGNAL Net_6660_0 : bit;
+SIGNAL \reset:clk\ : bit;
+SIGNAL \reset:rst\ : bit;
+SIGNAL Net_5549 : bit;
+SIGNAL \reset:control_out_0\ : bit;
+SIGNAL Net_5718 : bit;
+SIGNAL \reset:control_out_1\ : bit;
+SIGNAL Net_5719 : bit;
+SIGNAL \reset:control_out_2\ : bit;
+SIGNAL Net_5720 : bit;
+SIGNAL \reset:control_out_3\ : bit;
+SIGNAL Net_5721 : bit;
+SIGNAL \reset:control_out_4\ : bit;
+SIGNAL Net_5722 : bit;
+SIGNAL \reset:control_out_5\ : bit;
+SIGNAL Net_5723 : bit;
+SIGNAL \reset:control_out_6\ : bit;
+SIGNAL Net_5724 : bit;
+SIGNAL \reset:control_out_7\ : bit;
+SIGNAL \reset:control_7\ : bit;
+SIGNAL \reset:control_6\ : bit;
+SIGNAL \reset:control_5\ : bit;
+SIGNAL \reset:control_4\ : bit;
+SIGNAL \reset:control_3\ : bit;
+SIGNAL \reset:control_2\ : bit;
+SIGNAL \reset:control_1\ : bit;
+SIGNAL \reset:control_0\ : bit;
+SIGNAL \cfg:clk\ : bit;
+SIGNAL \cfg:rst\ : bit;
+SIGNAL Net_5694_7 : bit;
+SIGNAL \cfg:control_out_7\ : bit;
+SIGNAL Net_5694_6 : bit;
+SIGNAL \cfg:control_out_6\ : bit;
+SIGNAL Net_5694_5 : bit;
+SIGNAL \cfg:control_out_5\ : bit;
+SIGNAL Net_5694_4 : bit;
+SIGNAL \cfg:control_out_4\ : bit;
+SIGNAL Net_5694_3 : bit;
+SIGNAL \cfg:control_out_3\ : bit;
+SIGNAL Net_5694_2 : bit;
+SIGNAL \cfg:control_out_2\ : bit;
+SIGNAL Net_5694_1 : bit;
+SIGNAL \cfg:control_out_1\ : bit;
+SIGNAL Net_5694_0 : bit;
+SIGNAL \cfg:control_out_0\ : bit;
+SIGNAL \cfg:control_7\ : bit;
+SIGNAL \cfg:control_6\ : bit;
+SIGNAL \cfg:control_5\ : bit;
+SIGNAL \cfg:control_4\ : bit;
+SIGNAL \cfg:control_3\ : bit;
+SIGNAL \cfg:control_2\ : bit;
+SIGNAL \cfg:control_1\ : bit;
+SIGNAL \cfg:control_0\ : bit;
+SIGNAL \ctrl:clk\ : bit;
+SIGNAL \ctrl:rst\ : bit;
+SIGNAL Net_5672_7 : bit;
+SIGNAL \ctrl:control_out_7\ : bit;
+SIGNAL Net_5672_6 : bit;
+SIGNAL \ctrl:control_out_6\ : bit;
+SIGNAL Net_5672_5 : bit;
+SIGNAL \ctrl:control_out_5\ : bit;
+SIGNAL Net_5672_4 : bit;
+SIGNAL \ctrl:control_out_4\ : bit;
+SIGNAL Net_5672_3 : bit;
+SIGNAL \ctrl:control_out_3\ : bit;
+SIGNAL Net_5672_2 : bit;
+SIGNAL \ctrl:control_out_2\ : bit;
+SIGNAL Net_5672_1 : bit;
+SIGNAL \ctrl:control_out_1\ : bit;
+SIGNAL Net_5672_0 : bit;
+SIGNAL \ctrl:control_out_0\ : bit;
+SIGNAL \ctrl:control_7\ : bit;
+SIGNAL \ctrl:control_6\ : bit;
+SIGNAL \ctrl:control_5\ : bit;
+SIGNAL \ctrl:control_4\ : bit;
+SIGNAL \ctrl:control_3\ : bit;
+SIGNAL \ctrl:control_2\ : bit;
+SIGNAL \ctrl:control_1\ : bit;
+SIGNAL \ctrl:control_0\ : bit;
+SIGNAL Net_5548 : bit;
+SIGNAL \superMaquina:ctrl_arm\ : bit;
+SIGNAL \superMaquina:ctrl_start_now\ : bit;
+SIGNAL \superMaquina:ctrl_stop\ : bit;
+SIGNAL \superMaquina:ctrl_clear_flags\ : bit;
+SIGNAL \superMaquina:ctrl_use_sync\ : bit;
+SIGNAL \superMaquina:ctrl_load_batch_lo\ : bit;
+SIGNAL \superMaquina:ctrl_engine_en\ : bit;
+SIGNAL \superMaquina:ctrl_load_batch_hi\ : bit;
+SIGNAL \superMaquina:sample_source_1\ : bit;
+SIGNAL \superMaquina:sample_source_0\ : bit;
+SIGNAL \superMaquina:cfg_irq_batch_en\ : bit;
+SIGNAL \superMaquina:cfg_irq_sync_en\ : bit;
+SIGNAL \superMaquina:cfg_irq_error_en\ : bit;
+SIGNAL \superMaquina:source_raw\ : bit;
+SIGNAL \superMaquina:source_filter\ : bit;
+SIGNAL \superMaquina:source_combined\ : bit;
+SIGNAL \superMaquina:capture_raw_dma\ : bit;
+SIGNAL \superMaquina:capture_filter_path\ : bit;
+SIGNAL \superMaquina:bypass_raw_dma\ : bit;
+SIGNAL \superMaquina:bypass_filter_path\ : bit;
+SIGNAL \superMaquina:arm_pulse\ : bit;
+ATTRIBUTE soft of \superMaquina:arm_pulse\:SIGNAL IS '1';
+SIGNAL \superMaquina:ctrl_arm_d\ : bit;
+SIGNAL \superMaquina:start_now_pulse\ : bit;
+ATTRIBUTE soft of \superMaquina:start_now_pulse\:SIGNAL IS '1';
+SIGNAL \superMaquina:ctrl_start_now_d\ : bit;
+SIGNAL \superMaquina:stop_pulse\ : bit;
+ATTRIBUTE soft of \superMaquina:stop_pulse\:SIGNAL IS '1';
+SIGNAL \superMaquina:ctrl_stop_d\ : bit;
+SIGNAL \superMaquina:clear_flags_pulse\ : bit;
+ATTRIBUTE soft of \superMaquina:clear_flags_pulse\:SIGNAL IS '1';
+SIGNAL \superMaquina:ctrl_clear_flags_d\ : bit;
+SIGNAL \superMaquina:load_batch_lo_pulse\ : bit;
+ATTRIBUTE soft of \superMaquina:load_batch_lo_pulse\:SIGNAL IS '1';
+SIGNAL \superMaquina:ctrl_load_batch_lo_d\ : bit;
+SIGNAL \superMaquina:load_batch_hi_pulse\ : bit;
+SIGNAL \superMaquina:ctrl_load_batch_hi_d\ : bit;
+SIGNAL \superMaquina:button_pos_rise\ : bit;
+SIGNAL \superMaquina:button_pos_d\ : bit;
+SIGNAL \superMaquina:sampling_active\ : bit;
+SIGNAL \superMaquina:state_reg_2\ : bit;
+SIGNAL \superMaquina:state_reg_1\ : bit;
+SIGNAL \superMaquina:state_reg_0\ : bit;
+SIGNAL \superMaquina:nrq_dma_adc_rise\ : bit;
+SIGNAL \superMaquina:nrq_dma_adc_d\ : bit;
+SIGNAL \superMaquina:nrq_dma_filter_rise\ : bit;
+SIGNAL \superMaquina:nrq_dma_filter_d\ : bit;
+SIGNAL \superMaquina:sample_done_rise\ : bit;
+ATTRIBUTE soft of \superMaquina:sample_done_rise\:SIGNAL IS '1';
+SIGNAL \superMaquina:sample_irq_event\ : bit;
+SIGNAL \superMaquina:button_irq_event\ : bit;
+SIGNAL \superMaquina:sample_will_close_batch\ : bit;
+ATTRIBUTE soft of \superMaquina:sample_will_close_batch\:SIGNAL IS '1';
+SIGNAL \superMaquina:sample_count_reg_4\ : bit;
+SIGNAL \superMaquina:sample_count_reg_3\ : bit;
+SIGNAL \superMaquina:sample_count_reg_2\ : bit;
+SIGNAL \superMaquina:sample_count_reg_1\ : bit;
+SIGNAL \superMaquina:sample_count_reg_0\ : bit;
+SIGNAL \superMaquina:batch_will_finish_capture\ : bit;
+ATTRIBUTE soft of \superMaquina:batch_will_finish_capture\:SIGNAL IS '1';
+SIGNAL \superMaquina:cmp_vv_vv_MODGEN_6\ : bit;
+SIGNAL EOC : bit;
+SIGNAL \superMaquina:irq_reg\ : bit;
+SIGNAL \superMaquina:error_state_reg\ : bit;
+SIGNAL \superMaquina:error_stop_reg\ : bit;
+SIGNAL \superMaquina:button_seen_reg\ : bit;
+SIGNAL \superMaquina:batch_seen_reg\ : bit;
+SIGNAL \superMaquina:sync_seen_reg\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_7\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_6\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_5\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_4\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_3\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_2\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_1\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_0\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_8\ : bit;
+SIGNAL \superMaquina:sub_vv_vv_MODGEN_8_4\ : bit;
+SIGNAL \superMaquina:sub_vv_vv_MODGEN_8_3\ : bit;
+SIGNAL \superMaquina:sub_vv_vv_MODGEN_8_2\ : bit;
+SIGNAL \superMaquina:sub_vv_vv_MODGEN_8_1\ : bit;
+SIGNAL \superMaquina:sub_vv_vv_MODGEN_8_0\ : bit;
+SIGNAL \superMaquina:batch_count_reg_8\ : bit;
+SIGNAL \superMaquina:add_vv_vv_MODGEN_7_8\ : bit;
+SIGNAL \superMaquina:batch_count_reg_7\ : bit;
+SIGNAL \superMaquina:add_vv_vv_MODGEN_7_7\ : bit;
+SIGNAL \superMaquina:batch_count_reg_6\ : bit;
+SIGNAL \superMaquina:add_vv_vv_MODGEN_7_6\ : bit;
+SIGNAL \superMaquina:batch_count_reg_5\ : bit;
+SIGNAL \superMaquina:add_vv_vv_MODGEN_7_5\ : bit;
+SIGNAL \superMaquina:batch_count_reg_4\ : bit;
+SIGNAL \superMaquina:add_vv_vv_MODGEN_7_4\ : bit;
+SIGNAL \superMaquina:batch_count_reg_3\ : bit;
+SIGNAL \superMaquina:add_vv_vv_MODGEN_7_3\ : bit;
+SIGNAL \superMaquina:batch_count_reg_2\ : bit;
+SIGNAL \superMaquina:add_vv_vv_MODGEN_7_2\ : bit;
+SIGNAL \superMaquina:batch_count_reg_1\ : bit;
+SIGNAL \superMaquina:add_vv_vv_MODGEN_7_1\ : bit;
+SIGNAL \superMaquina:batch_count_reg_0\ : bit;
+SIGNAL \superMaquina:add_vv_vv_MODGEN_7_0\ : bit;
+SIGNAL \superMaquina:ctrl_arm_d\\R\ : bit;
+SIGNAL \superMaquina:ctrl_arm_d\\S\ : bit;
+SIGNAL \superMaquina:ctrl_start_now_d\\R\ : bit;
+SIGNAL \superMaquina:ctrl_start_now_d\\S\ : bit;
+SIGNAL \superMaquina:ctrl_stop_d\\R\ : bit;
+SIGNAL \superMaquina:ctrl_stop_d\\S\ : bit;
+SIGNAL \superMaquina:ctrl_clear_flags_d\\R\ : bit;
+SIGNAL \superMaquina:ctrl_clear_flags_d\\S\ : bit;
+SIGNAL \superMaquina:ctrl_load_batch_lo_d\\R\ : bit;
+SIGNAL \superMaquina:ctrl_load_batch_lo_d\\S\ : bit;
+SIGNAL \superMaquina:ctrl_load_batch_hi_d\\R\ : bit;
+SIGNAL \superMaquina:ctrl_load_batch_hi_d\\S\ : bit;
+SIGNAL \superMaquina:button_pos_d\\R\ : bit;
+SIGNAL \superMaquina:button_pos_d\\S\ : bit;
+SIGNAL \superMaquina:state_reg_2\\R\ : bit;
+SIGNAL \superMaquina:state_reg_2\\S\ : bit;
+SIGNAL \superMaquina:state_reg_1\\R\ : bit;
+SIGNAL \superMaquina:state_reg_1\\S\ : bit;
+SIGNAL \superMaquina:state_reg_0\\R\ : bit;
+SIGNAL \superMaquina:state_reg_0\\S\ : bit;
+SIGNAL \superMaquina:nrq_dma_adc_d\\R\ : bit;
+SIGNAL \superMaquina:nrq_dma_adc_d\\S\ : bit;
+SIGNAL \superMaquina:nrq_dma_filter_d\\R\ : bit;
+SIGNAL \superMaquina:nrq_dma_filter_d\\S\ : bit;
+SIGNAL \superMaquina:sample_count_reg_4\\R\ : bit;
+SIGNAL \superMaquina:sample_count_reg_4\\S\ : bit;
+SIGNAL \superMaquina:sample_count_reg_3\\R\ : bit;
+SIGNAL \superMaquina:sample_count_reg_3\\S\ : bit;
+SIGNAL \superMaquina:sample_count_reg_2\\R\ : bit;
+SIGNAL \superMaquina:sample_count_reg_2\\S\ : bit;
+SIGNAL \superMaquina:sample_count_reg_1\\R\ : bit;
+SIGNAL \superMaquina:sample_count_reg_1\\S\ : bit;
+SIGNAL \superMaquina:sample_count_reg_0\\R\ : bit;
+SIGNAL \superMaquina:sample_count_reg_0\\S\ : bit;
+SIGNAL \superMaquina:irq_reg\\R\ : bit;
+SIGNAL \superMaquina:irq_reg\\S\ : bit;
+SIGNAL \superMaquina:error_state_reg\\R\ : bit;
+SIGNAL \superMaquina:error_state_reg\\S\ : bit;
+SIGNAL \superMaquina:error_stop_reg\\R\ : bit;
+SIGNAL \superMaquina:error_stop_reg\\S\ : bit;
+SIGNAL \superMaquina:button_seen_reg\\R\ : bit;
+SIGNAL \superMaquina:button_seen_reg\\S\ : bit;
+SIGNAL \superMaquina:batch_seen_reg\\R\ : bit;
+SIGNAL \superMaquina:batch_seen_reg\\S\ : bit;
+SIGNAL \superMaquina:sync_seen_reg\\R\ : bit;
+SIGNAL \superMaquina:sync_seen_reg\\S\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_7\\R\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_7\\S\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_6\\R\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_6\\S\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_5\\R\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_5\\S\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_4\\R\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_4\\S\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_3\\R\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_3\\S\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_2\\R\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_2\\S\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_1\\R\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_1\\S\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_0\\R\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_0\\S\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_8\\R\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_8\\S\ : bit;
+SIGNAL \superMaquina:batch_count_reg_8\\R\ : bit;
+SIGNAL \superMaquina:batch_count_reg_8\\S\ : bit;
+SIGNAL \superMaquina:batch_count_reg_7\\R\ : bit;
+SIGNAL \superMaquina:batch_count_reg_7\\S\ : bit;
+SIGNAL \superMaquina:batch_count_reg_6\\R\ : bit;
+SIGNAL \superMaquina:batch_count_reg_6\\S\ : bit;
+SIGNAL \superMaquina:batch_count_reg_5\\R\ : bit;
+SIGNAL \superMaquina:batch_count_reg_5\\S\ : bit;
+SIGNAL \superMaquina:batch_count_reg_4\\R\ : bit;
+SIGNAL \superMaquina:batch_count_reg_4\\S\ : bit;
+SIGNAL \superMaquina:batch_count_reg_3\\R\ : bit;
+SIGNAL \superMaquina:batch_count_reg_3\\S\ : bit;
+SIGNAL \superMaquina:batch_count_reg_2\\R\ : bit;
+SIGNAL \superMaquina:batch_count_reg_2\\S\ : bit;
+SIGNAL \superMaquina:batch_count_reg_1\\R\ : bit;
+SIGNAL \superMaquina:batch_count_reg_1\\S\ : bit;
+SIGNAL \superMaquina:batch_count_reg_0\\R\ : bit;
+SIGNAL \superMaquina:batch_count_reg_0\\S\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:newa_8\ : bit;
+SIGNAL \superMaquina:MODIN5_8\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:newa_7\ : bit;
+SIGNAL \superMaquina:MODIN5_7\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:newa_6\ : bit;
+SIGNAL \superMaquina:MODIN5_6\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:newa_5\ : bit;
+SIGNAL \superMaquina:MODIN5_5\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:newa_4\ : bit;
+SIGNAL \superMaquina:MODIN5_4\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:newa_3\ : bit;
+SIGNAL \superMaquina:MODIN5_3\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:newa_2\ : bit;
+SIGNAL \superMaquina:MODIN5_2\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:newa_1\ : bit;
+SIGNAL \superMaquina:MODIN5_1\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:newa_0\ : bit;
+SIGNAL \superMaquina:MODIN5_0\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:newb_8\ : bit;
+SIGNAL \superMaquina:MODIN6_8\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:newb_7\ : bit;
+SIGNAL \superMaquina:MODIN6_7\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:newb_6\ : bit;
+SIGNAL \superMaquina:MODIN6_6\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:newb_5\ : bit;
+SIGNAL \superMaquina:MODIN6_5\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:newb_4\ : bit;
+SIGNAL \superMaquina:MODIN6_4\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:newb_3\ : bit;
+SIGNAL \superMaquina:MODIN6_3\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:newb_2\ : bit;
+SIGNAL \superMaquina:MODIN6_2\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:newb_1\ : bit;
+SIGNAL \superMaquina:MODIN6_1\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:newb_0\ : bit;
+SIGNAL \superMaquina:MODIN6_0\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:dataa_8\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:dataa_7\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:dataa_6\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:dataa_5\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:dataa_4\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:dataa_3\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:dataa_2\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:dataa_1\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:dataa_0\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:datab_8\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:datab_7\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:datab_6\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:datab_5\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:datab_4\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:datab_3\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:datab_2\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:datab_1\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:datab_0\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:a_8\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:a_7\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:a_6\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:a_5\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:a_4\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:a_3\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:a_2\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:a_1\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:a_0\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:b_8\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:b_7\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:b_6\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:b_5\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:b_4\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:b_3\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:b_2\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:b_1\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:b_0\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:xnor_array_8\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:xnor_array_7\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:xnor_array_6\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:xnor_array_5\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:xnor_array_4\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:xnor_array_3\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:xnor_array_2\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:xnor_array_1\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:xnor_array_0\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:aeqb_0\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:eq_0\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:eq_1\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:eq_2\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:eq_3\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:eq_4\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:eq_5\ : bit;
+ATTRIBUTE soft of \superMaquina:MODULE_6:g1:a0:gx:u0:eq_5\:SIGNAL IS '1';
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:eq_6\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:eq_7\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:eqi_0\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:aeqb_1\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:eq_8\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:eqi_1\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:aeqb_2\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:albi_3\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:agbi_3\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:lt_6\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:gt_6\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:lt_7\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:gt_7\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:lt_8\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:gt_8\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:lti_2\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:gti_2\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:albi_2\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:agbi_2\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:lt_3\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:gt_3\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:lt_4\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:gt_4\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:lt_5\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:gt_5\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:lti_1\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:gti_1\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:albi_1\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:agbi_1\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:lt_0\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:gt_0\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:lt_1\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:gt_1\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:lt_2\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:gt_2\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:lti_0\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:gti_0\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:albi_0\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:gx:u0:agbi_0\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:xeq\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:xneq\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:xlt\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:xlte\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:xgt\ : bit;
+SIGNAL \superMaquina:MODULE_6:g1:a0:xgte\ : bit;
+SIGNAL \superMaquina:MODULE_6:lt\ : bit;
+ATTRIBUTE port_state_att of \superMaquina:MODULE_6:lt\:SIGNAL IS 2;
+SIGNAL \superMaquina:MODULE_6:gt\ : bit;
+ATTRIBUTE port_state_att of \superMaquina:MODULE_6:gt\:SIGNAL IS 2;
+SIGNAL \superMaquina:MODULE_6:gte\ : bit;
+ATTRIBUTE port_state_att of \superMaquina:MODULE_6:gte\:SIGNAL IS 2;
+SIGNAL \superMaquina:MODULE_6:lte\ : bit;
+ATTRIBUTE port_state_att of \superMaquina:MODULE_6:lte\:SIGNAL IS 2;
+SIGNAL \superMaquina:MODULE_6:neq\ : bit;
+ATTRIBUTE port_state_att of \superMaquina:MODULE_6:neq\:SIGNAL IS 2;
+SIGNAL \superMaquina:MODULE_7:g2:a0:a_8\ : bit;
+SIGNAL \superMaquina:MODIN7_8\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:a_7\ : bit;
+SIGNAL \superMaquina:MODIN7_7\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:a_6\ : bit;
+SIGNAL \superMaquina:MODIN7_6\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:a_5\ : bit;
+SIGNAL \superMaquina:MODIN7_5\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:a_4\ : bit;
+SIGNAL \superMaquina:MODIN7_4\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:a_3\ : bit;
+SIGNAL \superMaquina:MODIN7_3\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:a_2\ : bit;
+SIGNAL \superMaquina:MODIN7_2\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:a_1\ : bit;
+SIGNAL \superMaquina:MODIN7_1\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:a_0\ : bit;
+SIGNAL \superMaquina:MODIN7_0\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:b_8\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:b_7\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:b_6\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:b_5\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:b_4\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:b_3\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:b_2\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:b_1\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:b_0\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:s_8\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:s_7\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:s_6\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:s_5\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:s_4\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:s_3\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:s_2\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:s_1\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:s_0\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:g1:z1:s0:g1:u0:b_8\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:g1:z1:s0:g1:u0:c_7\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:g1:z1:s0:g1:u0:c_8\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:g1:z1:s0:g1:u0:c_6\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:g1:z1:s0:g1:u0:c_5\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:g1:z1:s0:g1:u0:c_4\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:g1:z1:s0:g1:u0:c_3\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:g1:z1:s0:g1:u0:c_2\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:g1:z1:s0:g1:u0:c_1\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:g1:z1:s0:g1:u0:c_0\ : bit;
+SIGNAL \superMaquina:MODULE_7:g2:a0:g1:z1:s0:g1:u0:b_0\ : bit;
+SIGNAL \superMaquina:MODULE_8:g2:a0:a_4\ : bit;
+SIGNAL \superMaquina:MODIN8_4\ : bit;
+SIGNAL \superMaquina:MODULE_8:g2:a0:a_3\ : bit;
+SIGNAL \superMaquina:MODIN8_3\ : bit;
+SIGNAL \superMaquina:MODULE_8:g2:a0:a_2\ : bit;
+SIGNAL \superMaquina:MODIN8_2\ : bit;
+SIGNAL \superMaquina:MODULE_8:g2:a0:a_1\ : bit;
+SIGNAL \superMaquina:MODIN8_1\ : bit;
+SIGNAL \superMaquina:MODULE_8:g2:a0:a_0\ : bit;
+SIGNAL \superMaquina:MODIN8_0\ : bit;
+SIGNAL \superMaquina:MODULE_8:g2:a0:b_4\ : bit;
+SIGNAL \superMaquina:MODULE_8:g2:a0:b_3\ : bit;
+SIGNAL \superMaquina:MODULE_8:g2:a0:b_2\ : bit;
+SIGNAL \superMaquina:MODULE_8:g2:a0:b_1\ : bit;
+SIGNAL \superMaquina:MODULE_8:g2:a0:b_0\ : bit;
+SIGNAL \superMaquina:MODULE_8:g2:a0:d_4\ : bit;
+SIGNAL \superMaquina:MODULE_8:g2:a0:d_3\ : bit;
+SIGNAL \superMaquina:MODULE_8:g2:a0:d_2\ : bit;
+SIGNAL \superMaquina:MODULE_8:g2:a0:d_1\ : bit;
+SIGNAL \superMaquina:MODULE_8:g2:a0:d_0\ : bit;
+SIGNAL \superMaquina:MODULE_8:g2:a0:g1:z1:s0:g1:u0:c_4\ : bit;
+SIGNAL \superMaquina:MODULE_8:g2:a0:g1:z1:s0:g1:u0:c_3\ : bit;
+SIGNAL \superMaquina:MODULE_8:g2:a0:g1:z1:s0:g1:u0:c_2\ : bit;
+SIGNAL \superMaquina:MODULE_8:g2:a0:g1:z1:s0:g1:u0:c_1\ : bit;
+SIGNAL \superMaquina:MODULE_8:g2:a0:g1:z1:s0:g1:u0:c_0\ : bit;
+SIGNAL \superMaquina:MODULE_8:g2:a0:g1:z1:s0:g1:u0:b_0\ : bit;
 TERMINAL Net_5547 : bit;
 TERMINAL Net_5546 : bit;
 SIGNAL tmpOE__AMux_Capacitor_net_0 : bit;
@@ -559,9 +1071,29 @@ SIGNAL tmpFB_0__PGAin_net_0 : bit;
 SIGNAL tmpIO_0__PGAin_net_0 : bit;
 TERMINAL tmpSIOVREF__PGAin_net_0 : bit;
 SIGNAL tmpINTERRUPT_0__PGAin_net_0 : bit;
-SIGNAL Net_4595D : bit;
+SIGNAL Net_6768 : bit;
+SIGNAL Net_6761 : bit;
+SIGNAL \Timer_1:Net_260\ : bit;
+SIGNAL \Timer_1:Net_266\ : bit;
+SIGNAL Net_6763 : bit;
+SIGNAL \Timer_1:Net_51\ : bit;
+SIGNAL \Timer_1:Net_261\ : bit;
+SIGNAL \Timer_1:Net_57\ : bit;
+SIGNAL Net_6767 : bit;
+SIGNAL \Timer_1:Net_102\ : bit;
+SIGNAL Net_6784 : bit;
+SIGNAL Net_6786 : bit;
+SIGNAL \Timer_3:Net_260\ : bit;
+SIGNAL \Timer_3:Net_266\ : bit;
+SIGNAL \Timer_3:Net_51\ : bit;
+SIGNAL \Timer_3:Net_261\ : bit;
+SIGNAL \Timer_3:Net_57\ : bit;
+SIGNAL Net_6790 : bit;
+SIGNAL Net_6791 : bit;
+SIGNAL \Timer_3:Net_102\ : bit;
 SIGNAL \Debouncer:DEBOUNCER[0]:d_sync_0\\D\ : bit;
 SIGNAL \Debouncer:DEBOUNCER[0]:d_sync_1\\D\ : bit;
+SIGNAL bpD : bit;
 SIGNAL Net_4593D : bit;
 SIGNAL Net_4594D : bit;
 SIGNAL \EdgeDetect:last\\D\ : bit;
@@ -594,22 +1126,54 @@ SIGNAL \UART:BUART:rx_break_status\\D\ : bit;
 SIGNAL \UART:BUART:rx_address_detected\\D\ : bit;
 SIGNAL \UART:BUART:rx_last\\D\ : bit;
 SIGNAL \UART:BUART:rx_parity_bit\\D\ : bit;
+SIGNAL \superMaquina:ctrl_arm_d\\D\ : bit;
+SIGNAL \superMaquina:ctrl_start_now_d\\D\ : bit;
+SIGNAL \superMaquina:ctrl_stop_d\\D\ : bit;
+SIGNAL \superMaquina:ctrl_clear_flags_d\\D\ : bit;
+SIGNAL \superMaquina:ctrl_load_batch_lo_d\\D\ : bit;
+SIGNAL \superMaquina:ctrl_load_batch_hi_d\\D\ : bit;
+SIGNAL \superMaquina:button_pos_d\\D\ : bit;
+SIGNAL \superMaquina:state_reg_2\\D\ : bit;
+SIGNAL \superMaquina:state_reg_1\\D\ : bit;
+SIGNAL \superMaquina:state_reg_0\\D\ : bit;
+SIGNAL \superMaquina:nrq_dma_adc_d\\D\ : bit;
+SIGNAL \superMaquina:nrq_dma_filter_d\\D\ : bit;
+SIGNAL \superMaquina:sample_count_reg_4\\D\ : bit;
+SIGNAL \superMaquina:sample_count_reg_3\\D\ : bit;
+SIGNAL \superMaquina:sample_count_reg_2\\D\ : bit;
+SIGNAL \superMaquina:sample_count_reg_1\\D\ : bit;
+SIGNAL \superMaquina:sample_count_reg_0\\D\ : bit;
+SIGNAL \superMaquina:irq_reg\\D\ : bit;
+SIGNAL \superMaquina:error_state_reg\\D\ : bit;
+SIGNAL \superMaquina:error_stop_reg\\D\ : bit;
+SIGNAL \superMaquina:button_seen_reg\\D\ : bit;
+SIGNAL \superMaquina:batch_seen_reg\\D\ : bit;
+SIGNAL \superMaquina:sync_seen_reg\\D\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_7\\D\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_6\\D\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_5\\D\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_4\\D\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_3\\D\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_2\\D\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_1\\D\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_0\\D\ : bit;
+SIGNAL \superMaquina:batch_limit_reg_8\\D\ : bit;
+SIGNAL \superMaquina:batch_count_reg_8\\D\ : bit;
+SIGNAL \superMaquina:batch_count_reg_7\\D\ : bit;
+SIGNAL \superMaquina:batch_count_reg_6\\D\ : bit;
+SIGNAL \superMaquina:batch_count_reg_5\\D\ : bit;
+SIGNAL \superMaquina:batch_count_reg_4\\D\ : bit;
+SIGNAL \superMaquina:batch_count_reg_3\\D\ : bit;
+SIGNAL \superMaquina:batch_count_reg_2\\D\ : bit;
+SIGNAL \superMaquina:batch_count_reg_1\\D\ : bit;
+SIGNAL \superMaquina:batch_count_reg_0\\D\ : bit;
 BEGIN
-
-Net_4843 <= ((Net_4922 and EOC));
-
-Net_4905 <= ((Net_4922 and Net_5031));
-
-Net_4892 <= ((not Net_4922 and EOC));
 
 zero <=  ('0') ;
 
 one <=  ('1') ;
 
-Net_4595D <= ((not \Debouncer:DEBOUNCER[0]:d_sync_1\ and \Debouncer:DEBOUNCER[0]:d_sync_0\));
-
-Net_2348 <= ((not Net_2338 and \EdgeDetect:last\)
-	OR (not \EdgeDetect:last\ and Net_2338));
+bpD <= ((not \Debouncer:DEBOUNCER[0]:d_sync_1\ and \Debouncer:DEBOUNCER[0]:d_sync_0\));
 
 Net_4758 <= (not \UART:BUART:txn\);
 
@@ -719,42 +1283,460 @@ Net_5525D <= ((not \UART:BUART:reset_reg\ and \UART:BUART:tx_state_2\)
 
 \UART:BUART:rx_address_detected\\D\ <= ((not \UART:BUART:reset_reg\ and \UART:BUART:rx_address_detected\));
 
-\Reg_Select:Sync:ctrl_reg\:cy_psoc3_control
-	GENERIC MAP(cy_init_value=>"00000000",
-		cy_force_order=>'1',
-		cy_ctrl_mode_1=>"00000000",
-		cy_ctrl_mode_0=>"00000000",
-		cy_ext_reset=>'0')
-	PORT MAP(reset=>zero,
-		clock=>zero,
-		control=>(\Reg_Select:control_7\, \Reg_Select:control_6\, \Reg_Select:control_5\, \Reg_Select:control_4\,
-			\Reg_Select:control_3\, \Reg_Select:control_2\, \Reg_Select:control_1\, Net_4922));
-isr_DMA_DelSig_RAM:cy_isr_v1_0
+\superMaquina:arm_pulse\ <= ((not \superMaquina:ctrl_arm_d\ and Net_5672_0));
+
+\superMaquina:start_now_pulse\ <= ((not \superMaquina:ctrl_start_now_d\ and Net_5672_1));
+
+\superMaquina:stop_pulse\ <= ((not \superMaquina:ctrl_stop_d\ and Net_5672_2));
+
+\superMaquina:clear_flags_pulse\ <= ((not \superMaquina:ctrl_clear_flags_d\ and Net_5672_3));
+
+\superMaquina:load_batch_lo_pulse\ <= ((not \superMaquina:ctrl_load_batch_lo_d\ and Net_5672_5));
+
+\superMaquina:sample_done_rise\ <= ((not Net_5694_0 and not \superMaquina:nrq_dma_filter_d\ and ndf and Net_5694_1)
+	OR (not Net_5694_1 and not \superMaquina:nrq_dma_filter_d\ and ndf and Net_5694_0)
+	OR (not Net_5694_1 and not Net_5694_0 and not \superMaquina:nrq_dma_adc_d\ and nda)
+	OR (not \superMaquina:nrq_dma_adc_d\ and nda and Net_5694_1 and Net_5694_0));
+
+\superMaquina:sample_will_close_batch\ <= ((not \superMaquina:sample_count_reg_4\ and not \superMaquina:sample_count_reg_3\ and not \superMaquina:sample_count_reg_2\ and not \superMaquina:sample_count_reg_1\ and not \superMaquina:sample_count_reg_0\));
+
+\superMaquina:batch_will_finish_capture\ <= ((not \superMaquina:batch_limit_reg_8\ and not \superMaquina:batch_count_reg_8\ and \superMaquina:MODULE_6:g1:a0:gx:u0:eqi_0\)
+	OR (\superMaquina:batch_limit_reg_8\ and \superMaquina:batch_count_reg_8\ and \superMaquina:MODULE_6:g1:a0:gx:u0:eqi_0\));
+
+dar <= ((not Net_6662_2 and not Net_6662_0 and not Net_5694_0 and Net_6662_1 and EOC)
+	OR (not Net_6662_2 and not Net_6662_0 and Net_6662_1 and Net_5694_1 and EOC)
+	OR (not Net_5694_0 and not Net_5672_6 and EOC)
+	OR (not Net_5672_6 and Net_5694_1 and EOC));
+
+daf <= ((not Net_6662_2 and not Net_6662_0 and not Net_5694_0 and Net_6662_1 and Net_5694_1 and EOC)
+	OR (not Net_6662_2 and not Net_6662_0 and not Net_5694_1 and Net_6662_1 and Net_5694_0 and EOC)
+	OR (not Net_5694_0 and not Net_5672_6 and Net_5694_1 and EOC)
+	OR (not Net_5694_1 and not Net_5672_6 and Net_5694_0 and EOC));
+
+dfr <= ((not Net_6662_2 and not Net_6662_0 and not Net_5694_0 and drf and Net_6662_1 and Net_5694_1)
+	OR (not Net_6662_2 and not Net_6662_0 and not Net_5694_1 and drf and Net_6662_1 and Net_5694_0)
+	OR (not Net_5694_0 and not Net_5672_6 and drf and Net_5694_1)
+	OR (not Net_5694_1 and not Net_5672_6 and drf and Net_5694_0));
+
+Net_6660_4 <= ((not Net_6662_1 and not Net_6662_0 and Net_6662_2));
+
+Net_6660_3 <= ((not Net_6662_2 and Net_6662_1 and Net_6662_0));
+
+Net_6660_2 <= ((not Net_6662_2 and not Net_6662_0 and Net_6662_1));
+
+Net_6660_1 <= ((not Net_6662_2 and not Net_6662_1 and Net_6662_0));
+
+Net_6660_0 <= ((not Net_6662_2 and not Net_6662_1 and not Net_6662_0));
+
+\superMaquina:irq_reg\\D\ <= ((not Net_2338 and not Net_6662_2 and not Net_6662_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and \EdgeDetect:last\ and Net_6662_0 and Net_5694_3 and Net_5672_6 and \superMaquina:start_now_pulse\)
+	OR (not \EdgeDetect:last\ and not Net_6662_2 and not Net_6662_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_2338 and Net_6662_0 and Net_5694_3 and Net_5672_6 and \superMaquina:start_now_pulse\)
+	OR (not Net_2338 and not Net_6662_2 and not Net_6662_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and \EdgeDetect:last\ and Net_6662_0 and Net_5694_3 and Net_5672_6 and Net_5672_4)
+	OR (not \EdgeDetect:last\ and not Net_6662_2 and not Net_6662_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_2338 and Net_6662_0 and Net_5694_3 and Net_5672_6 and Net_5672_4)
+	OR (not Net_6662_2 and not Net_6662_1 and not Net_6662_0 and not \superMaquina:button_pos_d\ and bp)
+	OR (not Net_6662_2 and not Net_6662_0 and Net_6662_1 and \superMaquina:clear_flags_pulse\ and \superMaquina:sample_done_rise\)
+	OR (not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and Net_6662_1 and \superMaquina:sample_done_rise\)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_5694_4 and Net_5672_6 and \superMaquina:stop_pulse\)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5694_4 and Net_5672_6 and \superMaquina:stop_pulse\)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_1 and Net_5694_4 and Net_5672_6)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6662_0 and Net_5694_4 and Net_5672_6 and \superMaquina:stop_pulse\)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_0 and Net_5694_4 and Net_5672_6)
+	OR (not Net_5672_6 and \superMaquina:sample_done_rise\));
+
+\superMaquina:button_seen_reg\\D\ <= ((not Net_6662_2 and not Net_6662_1 and not Net_6662_0 and not \superMaquina:clear_flags_pulse\ and not \superMaquina:button_pos_d\ and bp)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6660_7));
+
+\superMaquina:batch_limit_reg_7\\D\ <= ((not \superMaquina:load_batch_lo_pulse\ and \superMaquina:batch_limit_reg_7\)
+	OR (Net_5694_7 and \superMaquina:load_batch_lo_pulse\));
+
+\superMaquina:batch_limit_reg_6\\D\ <= ((not \superMaquina:load_batch_lo_pulse\ and \superMaquina:batch_limit_reg_6\)
+	OR (Net_5694_6 and \superMaquina:load_batch_lo_pulse\));
+
+\superMaquina:batch_limit_reg_5\\D\ <= ((not \superMaquina:load_batch_lo_pulse\ and \superMaquina:batch_limit_reg_5\)
+	OR (Net_5694_5 and \superMaquina:load_batch_lo_pulse\));
+
+\superMaquina:batch_limit_reg_4\\D\ <= ((not \superMaquina:load_batch_lo_pulse\ and \superMaquina:batch_limit_reg_4\)
+	OR (Net_5694_4 and \superMaquina:load_batch_lo_pulse\));
+
+\superMaquina:batch_limit_reg_3\\D\ <= ((not \superMaquina:load_batch_lo_pulse\ and \superMaquina:batch_limit_reg_3\)
+	OR (Net_5694_3 and \superMaquina:load_batch_lo_pulse\));
+
+\superMaquina:batch_limit_reg_2\\D\ <= ((not \superMaquina:load_batch_lo_pulse\ and \superMaquina:batch_limit_reg_2\)
+	OR (Net_5694_2 and \superMaquina:load_batch_lo_pulse\));
+
+\superMaquina:batch_limit_reg_1\\D\ <= ((not \superMaquina:load_batch_lo_pulse\ and \superMaquina:batch_limit_reg_1\)
+	OR (Net_5694_1 and \superMaquina:load_batch_lo_pulse\));
+
+\superMaquina:batch_limit_reg_0\\D\ <= ((not \superMaquina:load_batch_lo_pulse\ and \superMaquina:batch_limit_reg_0\)
+	OR (Net_5694_0 and \superMaquina:load_batch_lo_pulse\));
+
+\superMaquina:batch_limit_reg_8\\D\ <= ((not \superMaquina:ctrl_load_batch_hi_d\ and Net_5694_0 and Net_5672_7)
+	OR (\superMaquina:ctrl_load_batch_hi_d\ and \superMaquina:batch_limit_reg_8\)
+	OR (not Net_5672_7 and \superMaquina:batch_limit_reg_8\));
+
+\superMaquina:state_reg_2\\D\ <= ((not \superMaquina:clear_flags_pulse\ and Net_6662_0 and Net_5672_6 and \superMaquina:stop_pulse\)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6 and \superMaquina:stop_pulse\)
+	OR (Net_6662_2 and Net_6662_0 and Net_5672_6)
+	OR (Net_6662_2 and Net_6662_1 and Net_5672_6)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_5672_6));
+
+\superMaquina:state_reg_1\\D\ <= ((not Net_2338 and not Net_6662_2 and not Net_6662_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and \EdgeDetect:last\ and Net_6662_0 and Net_5672_6 and Net_5672_4)
+	OR (not \EdgeDetect:last\ and not Net_6662_2 and not Net_6662_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_2338 and Net_6662_0 and Net_5672_6 and Net_5672_4)
+	OR (not Net_6662_2 and not Net_6662_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_0 and Net_5672_6 and \superMaquina:start_now_pulse\)
+	OR (not Net_6662_2 and not \superMaquina:arm_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_5672_6 and \superMaquina:start_now_pulse\)
+	OR (not Net_6662_2 and not \superMaquina:arm_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6)
+	OR (Net_6662_2 and Net_6662_1 and Net_5672_6 and \superMaquina:clear_flags_pulse\)
+	OR (not Net_6662_0 and Net_6662_1 and Net_5672_6 and \superMaquina:clear_flags_pulse\)
+	OR (not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and Net_6662_1 and Net_5672_6));
+
+\superMaquina:state_reg_0\\D\ <= ((not \EdgeDetect:last\ and not Net_2338 and not Net_6662_2 and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_0 and Net_5672_6)
+	OR (not Net_6662_2 and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and \EdgeDetect:last\ and Net_2338 and Net_6662_0 and Net_5672_6)
+	OR (not Net_6662_2 and not Net_5672_4 and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_0 and Net_5672_6)
+	OR (not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:batch_will_finish_capture\)
+	OR (not Net_6662_2 and not Net_6662_1 and not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_5672_6 and \superMaquina:arm_pulse\)
+	OR (not Net_6662_2 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_6662_0 and Net_5672_6 and \superMaquina:arm_pulse\)
+	OR (not Net_6662_2 and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_6662_0 and Net_5672_6)
+	OR (Net_6662_2 and Net_6662_0 and Net_5672_6 and \superMaquina:clear_flags_pulse\)
+	OR (not Net_6662_1 and Net_6662_0 and Net_5672_6 and \superMaquina:clear_flags_pulse\));
+
+\superMaquina:sample_count_reg_4\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:sample_count_reg_4\ and not \superMaquina:sample_count_reg_3\ and not \superMaquina:sample_count_reg_2\ and not \superMaquina:sample_count_reg_1\ and not \superMaquina:sample_count_reg_0\ and \superMaquina:sample_done_rise\)
+	OR (not Net_6662_2 and not Net_6662_0 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\)
+	OR (not Net_6662_2 and Net_6662_0 and \superMaquina:start_now_pulse\)
+	OR (not Net_6662_2 and Net_6662_0 and \superMaquina:arm_pulse\)
+	OR (not Net_6662_1 and not Net_6662_0)
+	OR (not Net_6662_2 and not Net_6662_1)
+	OR (\superMaquina:sample_count_reg_4\ and \superMaquina:sample_count_reg_0\)
+	OR (\superMaquina:sample_count_reg_4\ and \superMaquina:sample_count_reg_1\)
+	OR (\superMaquina:sample_count_reg_4\ and \superMaquina:sample_count_reg_2\)
+	OR (\superMaquina:sample_count_reg_4\ and \superMaquina:sample_count_reg_3\)
+	OR (not \superMaquina:sample_done_rise\ and \superMaquina:sample_count_reg_4\)
+	OR (Net_6662_2 and \superMaquina:sample_count_reg_4\)
+	OR (Net_6662_0 and \superMaquina:sample_count_reg_4\)
+	OR \superMaquina:clear_flags_pulse\
+	OR \superMaquina:stop_pulse\
+	OR not Net_5672_6);
+
+\superMaquina:sample_count_reg_3\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:sample_count_reg_3\ and not \superMaquina:sample_count_reg_2\ and not \superMaquina:sample_count_reg_1\ and not \superMaquina:sample_count_reg_0\ and \superMaquina:sample_done_rise\)
+	OR (not Net_6662_2 and not Net_6662_0 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\)
+	OR (not Net_6662_2 and Net_6662_0 and \superMaquina:start_now_pulse\)
+	OR (not Net_6662_2 and Net_6662_0 and \superMaquina:arm_pulse\)
+	OR (not Net_6662_1 and not Net_6662_0)
+	OR (\superMaquina:sample_count_reg_3\ and \superMaquina:sample_count_reg_0\)
+	OR (\superMaquina:sample_count_reg_3\ and \superMaquina:sample_count_reg_1\)
+	OR (\superMaquina:sample_count_reg_3\ and \superMaquina:sample_count_reg_2\)
+	OR (not \superMaquina:sample_done_rise\ and \superMaquina:sample_count_reg_3\)
+	OR (Net_6662_2 and \superMaquina:sample_count_reg_3\)
+	OR (not Net_6662_2 and not Net_6662_1)
+	OR (Net_6662_0 and \superMaquina:sample_count_reg_3\)
+	OR \superMaquina:clear_flags_pulse\
+	OR \superMaquina:stop_pulse\
+	OR not Net_5672_6);
+
+\superMaquina:sample_count_reg_2\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:sample_count_reg_2\ and not \superMaquina:sample_count_reg_1\ and not \superMaquina:sample_count_reg_0\ and \superMaquina:sample_done_rise\)
+	OR (not Net_6662_2 and not Net_6662_0 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\)
+	OR (not Net_6662_2 and Net_6662_0 and \superMaquina:start_now_pulse\)
+	OR (not Net_6662_2 and Net_6662_0 and \superMaquina:arm_pulse\)
+	OR (not Net_6662_1 and not Net_6662_0)
+	OR (\superMaquina:sample_count_reg_2\ and \superMaquina:sample_count_reg_0\)
+	OR (\superMaquina:sample_count_reg_2\ and \superMaquina:sample_count_reg_1\)
+	OR (not \superMaquina:sample_done_rise\ and \superMaquina:sample_count_reg_2\)
+	OR (Net_6662_2 and \superMaquina:sample_count_reg_2\)
+	OR (not Net_6662_2 and not Net_6662_1)
+	OR (Net_6662_0 and \superMaquina:sample_count_reg_2\)
+	OR \superMaquina:clear_flags_pulse\
+	OR \superMaquina:stop_pulse\
+	OR not Net_5672_6);
+
+\superMaquina:sample_count_reg_1\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and not \superMaquina:sample_count_reg_1\ and not \superMaquina:sample_count_reg_0\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_done_rise\)
+	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_6662_0 and Net_5672_6 and \superMaquina:sample_count_reg_1\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_count_reg_1\ and \superMaquina:sample_count_reg_0\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_count_reg_1\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_0 and Net_5672_6 and \superMaquina:sample_count_reg_1\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_1 and Net_5672_6 and \superMaquina:sample_count_reg_1\));
+
+\superMaquina:sample_count_reg_0\\D\ <= ((\superMaquina:sample_will_close_batch\ and \superMaquina:sample_count_reg_0\)
+	OR (not Net_6662_2 and not Net_6662_0 and not \superMaquina:sample_count_reg_0\ and \superMaquina:sample_done_rise\)
+	OR (not Net_6662_2 and Net_6662_0 and \superMaquina:start_now_pulse\)
+	OR (not Net_6662_2 and Net_6662_0 and \superMaquina:arm_pulse\)
+	OR (not \superMaquina:sample_done_rise\ and \superMaquina:sample_count_reg_0\)
+	OR (Net_6662_2 and \superMaquina:sample_count_reg_0\)
+	OR (not Net_6662_1 and not Net_6662_0)
+	OR (Net_6662_0 and \superMaquina:sample_count_reg_0\)
+	OR (not Net_6662_2 and not Net_6662_1)
+	OR \superMaquina:clear_flags_pulse\
+	OR \superMaquina:stop_pulse\
+	OR not Net_5672_6);
+
+\superMaquina:batch_count_reg_8\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_8\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:MODULE_7:g2:a0:g1:z1:s0:g1:u0:c_8\)
+	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_8\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_8\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:MODULE_7:g2:a0:g1:z1:s0:g1:u0:c_8\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_8\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_8\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_8\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_8\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_8\));
+
+\superMaquina:batch_count_reg_7\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_7\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:batch_count_reg_6\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_0\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_1\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_2\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_3\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_4\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_5\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_6\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_7\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\));
+
+\superMaquina:batch_count_reg_6\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_6\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_0\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_1\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_2\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_3\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_4\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_5\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_6\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\));
+
+\superMaquina:batch_count_reg_5\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_5\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_0\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_1\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_2\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_3\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_4\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_5\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_5\));
+
+\superMaquina:batch_count_reg_4\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_4\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_4\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_4\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_0\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_4\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_1\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_4\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_2\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_4\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_3\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_4\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_4\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_4\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_4\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_4\));
+
+\superMaquina:batch_count_reg_3\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_3\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_3\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_3\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_0\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_3\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_1\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_3\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_2\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_3\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_3\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_3\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_3\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_3\));
+
+\superMaquina:batch_count_reg_2\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_2\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_2\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_2\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_0\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_2\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_1\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_2\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_2\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_2\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_2\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_2\));
+
+\superMaquina:batch_count_reg_1\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_1\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_1\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_1\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_0\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_1\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_1\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_1\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_1\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_1\));
+
+\superMaquina:batch_count_reg_0\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_0\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\)
+	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_0\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_0\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_0\)
+	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_0\));
+
+\superMaquina:error_stop_reg\\D\ <= ((not \superMaquina:clear_flags_pulse\ and Net_6662_0 and Net_5672_6 and \superMaquina:stop_pulse\)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6 and \superMaquina:stop_pulse\)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_5672_6 and \superMaquina:stop_pulse\)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6661_3));
+
+\superMaquina:error_state_reg\\D\ <= ((not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_0 and Net_5672_6)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_1 and Net_5672_6)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6661_4));
+
+\superMaquina:sync_seen_reg\\D\ <= ((not Net_2338 and not Net_6662_2 and not Net_6662_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and \EdgeDetect:last\ and Net_6662_0 and Net_5672_6 and \superMaquina:start_now_pulse\)
+	OR (not \EdgeDetect:last\ and not Net_6662_2 and not Net_6662_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_2338 and Net_6662_0 and Net_5672_6 and \superMaquina:start_now_pulse\)
+	OR (not Net_2338 and not Net_6662_2 and not Net_6662_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and \EdgeDetect:last\ and Net_6662_0 and Net_5672_6 and Net_5672_4)
+	OR (not \EdgeDetect:last\ and not Net_6662_2 and not Net_6662_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_2338 and Net_6662_0 and Net_5672_6 and Net_5672_4)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6660_5));
+
+\superMaquina:batch_seen_reg\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6660_6));
+
+\superMaquina:MODULE_6:g1:a0:gx:u0:eq_5\ <= ((not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_1\ and not \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_1\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_count_reg_5\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_1\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_count_reg_4\)
+	OR (not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_1\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_4\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_1\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_count_reg_3\)
+	OR (not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_1\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_3\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_1\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\)
+	OR (not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_1\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_1\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_count_reg_2\)
+	OR (not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_1\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_2\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_1\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_2\)
+	OR (not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_1\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_2\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_1\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\)
+	OR (not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_1\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_1\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\)
+	OR (not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_1\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_count_reg_1\)
+	OR (not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_1\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_1\)
+	OR (not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_1\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_1\)
+	OR (not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_1\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_1\)
+	OR (not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_1\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\)
+	OR (not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\)
+	OR (not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\)
+	OR (not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\)
+	OR (not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_1\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_1\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_1\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_1\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_1\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_1\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_1\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_1\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_1\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_1\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_1\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_1\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_1\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_1\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_1\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_count_reg_1\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_2\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_2\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_2\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_2\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_2\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_2\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_2\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_count_reg_2\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_3\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_3\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_3\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_count_reg_3\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_4\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_count_reg_4\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_count_reg_5\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (\superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\));
+
+\superMaquina:MODULE_6:g1:a0:gx:u0:eq_7\ <= ((not \superMaquina:batch_limit_reg_7\ and not \superMaquina:batch_limit_reg_6\ and not \superMaquina:batch_count_reg_7\ and not \superMaquina:batch_count_reg_6\ and \superMaquina:MODULE_6:g1:a0:gx:u0:eq_5\)
+	OR (not \superMaquina:batch_limit_reg_6\ and not \superMaquina:batch_count_reg_6\ and \superMaquina:batch_limit_reg_7\ and \superMaquina:batch_count_reg_7\ and \superMaquina:MODULE_6:g1:a0:gx:u0:eq_5\)
+	OR (not \superMaquina:batch_limit_reg_7\ and not \superMaquina:batch_count_reg_7\ and \superMaquina:batch_limit_reg_6\ and \superMaquina:batch_count_reg_6\ and \superMaquina:MODULE_6:g1:a0:gx:u0:eq_5\)
+	OR (\superMaquina:batch_limit_reg_7\ and \superMaquina:batch_limit_reg_6\ and \superMaquina:batch_count_reg_7\ and \superMaquina:batch_count_reg_6\ and \superMaquina:MODULE_6:g1:a0:gx:u0:eq_5\));
+
+\superMaquina:MODULE_6:g1:a0:gx:u0:lt_8\ <= ((not \superMaquina:batch_count_reg_8\ and not \superMaquina:batch_count_reg_7\ and not \superMaquina:batch_count_reg_6\ and \superMaquina:batch_limit_reg_6\)
+	OR (not \superMaquina:batch_count_reg_7\ and not \superMaquina:batch_count_reg_6\ and \superMaquina:batch_limit_reg_6\ and \superMaquina:batch_limit_reg_8\)
+	OR (not \superMaquina:batch_count_reg_8\ and not \superMaquina:batch_count_reg_6\ and \superMaquina:batch_limit_reg_7\ and \superMaquina:batch_limit_reg_6\)
+	OR (not \superMaquina:batch_count_reg_6\ and \superMaquina:batch_limit_reg_7\ and \superMaquina:batch_limit_reg_6\ and \superMaquina:batch_limit_reg_8\)
+	OR (not \superMaquina:batch_count_reg_8\ and not \superMaquina:batch_count_reg_7\ and \superMaquina:batch_limit_reg_7\)
+	OR (not \superMaquina:batch_count_reg_7\ and \superMaquina:batch_limit_reg_7\ and \superMaquina:batch_limit_reg_8\)
+	OR (not \superMaquina:batch_count_reg_8\ and \superMaquina:batch_limit_reg_8\));
+
+\superMaquina:MODULE_6:g1:a0:gx:u0:gt_8\ <= ((not \superMaquina:batch_limit_reg_6\ and \superMaquina:batch_count_reg_8\ and \superMaquina:batch_count_reg_7\ and \superMaquina:batch_count_reg_6\)
+	OR (not \superMaquina:batch_limit_reg_6\ and not \superMaquina:batch_limit_reg_8\ and \superMaquina:batch_count_reg_7\ and \superMaquina:batch_count_reg_6\)
+	OR (not \superMaquina:batch_limit_reg_7\ and not \superMaquina:batch_limit_reg_6\ and \superMaquina:batch_count_reg_8\ and \superMaquina:batch_count_reg_6\)
+	OR (not \superMaquina:batch_limit_reg_7\ and not \superMaquina:batch_limit_reg_6\ and not \superMaquina:batch_limit_reg_8\ and \superMaquina:batch_count_reg_6\)
+	OR (not \superMaquina:batch_limit_reg_7\ and \superMaquina:batch_count_reg_8\ and \superMaquina:batch_count_reg_7\)
+	OR (not \superMaquina:batch_limit_reg_7\ and not \superMaquina:batch_limit_reg_8\ and \superMaquina:batch_count_reg_7\)
+	OR (not \superMaquina:batch_limit_reg_8\ and \superMaquina:batch_count_reg_8\));
+
+\superMaquina:MODULE_6:g1:a0:gx:u0:lt_5\ <= ((not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_3\ and \superMaquina:batch_limit_reg_3\)
+	OR (not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_3\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_3\)
+	OR (not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_3\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_3\)
+	OR (not \superMaquina:batch_count_reg_3\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_limit_reg_3\)
+	OR (not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_4\ and \superMaquina:batch_limit_reg_4\)
+	OR (not \superMaquina:batch_count_reg_4\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_limit_reg_4\)
+	OR (not \superMaquina:batch_count_reg_5\ and \superMaquina:batch_limit_reg_5\));
+
+\superMaquina:MODULE_6:g1:a0:gx:u0:gt_5\ <= ((not \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\)
+	OR (not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_3\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_3\ and \superMaquina:batch_count_reg_3\)
+	OR (not \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_4\)
+	OR (not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_4\ and \superMaquina:batch_count_reg_4\)
+	OR (not \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_count_reg_5\));
+
+\superMaquina:MODULE_6:g1:a0:gx:u0:lt_2\ <= ((not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_1\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_0\)
+	OR (not \superMaquina:batch_count_reg_1\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_0\)
+	OR (not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_limit_reg_0\)
+	OR (not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_limit_reg_0\)
+	OR (not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_1\ and \superMaquina:batch_limit_reg_1\)
+	OR (not \superMaquina:batch_count_reg_1\ and \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_limit_reg_1\)
+	OR (not \superMaquina:batch_count_reg_2\ and \superMaquina:batch_limit_reg_2\));
+
+\superMaquina:MODULE_6:g1:a0:gx:u0:gt_2\ <= ((not \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_limit_reg_0\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\)
+	OR (not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_1\ and \superMaquina:batch_count_reg_1\)
+	OR (not \superMaquina:batch_limit_reg_2\ and \superMaquina:batch_count_reg_2\));
+
+\superMaquina:MODULE_7:g2:a0:g1:z1:s0:g1:u0:b_8\ <= ((\superMaquina:batch_count_reg_7\ and \superMaquina:batch_count_reg_6\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\));
+
+\Timer_2:TimerHW\:cy_psoc3_timer_v1_0
+	GENERIC MAP(cy_registers=>"")
+	PORT MAP(clock=>Net_6773,
+		kill=>zero,
+		enable=>one,
+		capture=>zero,
+		timer_reset=>zero,
+		tc=>Net_6780,
+		compare=>\Timer_2:Net_261\,
+		interrupt=>\Timer_2:Net_57\);
+isr_Timer_2:cy_isr_v1_0
 	GENERIC MAP(int_type=>"10",
 		is_nmi=>'0')
-	PORT MAP(int_signal=>Net_4854);
+	PORT MAP(int_signal=>Net_6780);
 DMA_DelSig_RAM:cy_dma_v1_0
 	GENERIC MAP(drq_type=>"10",
 		num_tds=>0)
-	PORT MAP(drq=>Net_4892,
+	PORT MAP(drq=>dar,
 		trq=>zero,
-		nrq=>Net_4854);
+		nrq=>nda);
 DMA_DelSig_Filter:cy_dma_v1_0
 	GENERIC MAP(drq_type=>"10",
 		num_tds=>0)
-	PORT MAP(drq=>Net_4843,
+	PORT MAP(drq=>daf,
 		trq=>zero,
 		nrq=>Net_4796);
-isr_DMA_Filter_RAM:cy_isr_v1_0
-	GENERIC MAP(int_type=>"10",
-		is_nmi=>'0')
-	PORT MAP(int_signal=>Net_4733);
 DMA_Filter_RAM:cy_dma_v1_0
 	GENERIC MAP(drq_type=>"10",
 		num_tds=>0)
-	PORT MAP(drq=>Net_4905,
+	PORT MAP(drq=>dfr,
 		trq=>zero,
-		nrq=>Net_4733);
+		nrq=>ndf);
 \Filter:DFB\:cy_psoc3_dfb_v1_0
 	GENERIC MAP(cy_registers=>"")
 	PORT MAP(clock=>zero,
@@ -762,13 +1744,9 @@ DMA_Filter_RAM:cy_dma_v1_0
 		in_2=>zero,
 		out_1=>\Filter:Net_8\,
 		out_2=>\Filter:Net_9\,
-		dmareq_1=>Net_5031,
+		dmareq_1=>drf,
 		dmareq_2=>Net_4728,
 		interrupt=>Net_4730);
-isr_Button:cy_isr_v1_0
-	GENERIC MAP(int_type=>"10",
-		is_nmi=>'0')
-	PORT MAP(int_signal=>Net_4595);
 Clock_1:cy_clock_v1_0
 	GENERIC MAP(cy_registers=>"",
 		id=>"a89a9500-30c9-4086-b81f-18da802372a5",
@@ -944,10 +1922,6 @@ timer_clock_1:cy_clock_v1_0
 		is_digital=>'1')
 	PORT MAP(clock_out=>Net_2337,
 		dig_domain_out=>open);
-isr_SyncIn:cy_isr_v1_0
-	GENERIC MAP(int_type=>"00",
-		is_nmi=>'0')
-	PORT MAP(int_signal=>Net_2348);
 \Sync:genblk1[0]:INST\:cy_psoc3_sync
 	PORT MAP(clock=>Net_2337,
 		sc_in=>Net_2336,
@@ -1499,6 +2473,125 @@ timer_clock:cy_clock_v1_0
 		is_digital=>'1')
 	PORT MAP(clock_out=>Net_10,
 		dig_domain_out=>open);
+isr_SuperMaquina:cy_isr_v1_0
+	GENERIC MAP(int_type=>"10",
+		is_nmi=>'0')
+	PORT MAP(int_signal=>Net_5570);
+timer_clock_8:cy_clock_v1_0
+	GENERIC MAP(cy_registers=>"",
+		id=>"7335911f-dbf4-438a-9729-ce0e4b010bcd",
+		source_clock_id=>"75C2148C-3656-4d8a-846D-0CAE99AB6FF7",
+		divisor=>0,
+		period=>"0",
+		is_direct=>'1',
+		is_digital=>'1')
+	PORT MAP(clock_out=>Net_6619,
+		dig_domain_out=>open);
+timer_clock_7:cy_clock_v1_0
+	GENERIC MAP(cy_registers=>"",
+		id=>"58d0879c-ab1f-41c9-9b0a-4a6ec8277807",
+		source_clock_id=>"75C2148C-3656-4d8a-846D-0CAE99AB6FF7",
+		divisor=>0,
+		period=>"0",
+		is_direct=>'1',
+		is_digital=>'1')
+	PORT MAP(clock_out=>Net_6621,
+		dig_domain_out=>open);
+timer_clock_6:cy_clock_v1_0
+	GENERIC MAP(cy_registers=>"",
+		id=>"c18e47f3-396b-4496-8dd0-4d9fd31efd1d",
+		source_clock_id=>"75C2148C-3656-4d8a-846D-0CAE99AB6FF7",
+		divisor=>0,
+		period=>"0",
+		is_direct=>'1',
+		is_digital=>'1')
+	PORT MAP(clock_out=>Net_6623,
+		dig_domain_out=>open);
+\state:sts:sts_reg\:cy_psoc3_status
+	GENERIC MAP(cy_force_order=>'1',
+		cy_md_select=>"00000000")
+	PORT MAP(reset=>zero,
+		clock=>Net_6619,
+		status=>(zero, zero, zero, zero,
+			zero, Net_6662_2, Net_6662_1, Net_6662_0));
+\error:sts:sts_reg\:cy_psoc3_status
+	GENERIC MAP(cy_force_order=>'1',
+		cy_md_select=>"00000000")
+	PORT MAP(reset=>zero,
+		clock=>Net_6621,
+		status=>(zero, zero, zero, Net_6661_4,
+			Net_6661_3, zero, zero, zero));
+\status:sts:sts_reg\:cy_psoc3_status
+	GENERIC MAP(cy_force_order=>'1',
+		cy_md_select=>"00000000")
+	PORT MAP(reset=>zero,
+		clock=>Net_6623,
+		status=>(Net_6660_7, Net_6660_6, Net_6660_5, Net_6660_4,
+			Net_6660_3, Net_6660_2, Net_6660_1, Net_6660_0));
+\reset:Sync:ctrl_reg\:cy_psoc3_control
+	GENERIC MAP(cy_init_value=>"00000000",
+		cy_force_order=>'1',
+		cy_ctrl_mode_1=>"00000000",
+		cy_ctrl_mode_0=>"00000000",
+		cy_ext_reset=>'0')
+	PORT MAP(reset=>zero,
+		clock=>zero,
+		control=>(\reset:control_7\, \reset:control_6\, \reset:control_5\, \reset:control_4\,
+			\reset:control_3\, \reset:control_2\, \reset:control_1\, Net_5549));
+\cfg:Sync:ctrl_reg\:cy_psoc3_control
+	GENERIC MAP(cy_init_value=>"00000000",
+		cy_force_order=>'1',
+		cy_ctrl_mode_1=>"00000000",
+		cy_ctrl_mode_0=>"00000000",
+		cy_ext_reset=>'0')
+	PORT MAP(reset=>zero,
+		clock=>zero,
+		control=>(Net_5694_7, Net_5694_6, Net_5694_5, Net_5694_4,
+			Net_5694_3, Net_5694_2, Net_5694_1, Net_5694_0));
+\ctrl:Sync:ctrl_reg\:cy_psoc3_control
+	GENERIC MAP(cy_init_value=>"00000000",
+		cy_force_order=>'1',
+		cy_ctrl_mode_1=>"00000000",
+		cy_ctrl_mode_0=>"00000000",
+		cy_ext_reset=>'0')
+	PORT MAP(reset=>zero,
+		clock=>zero,
+		control=>(Net_5672_7, Net_5672_6, Net_5672_5, Net_5672_4,
+			Net_5672_3, Net_5672_2, Net_5672_1, Net_5672_0));
+timer_clock_2:cy_clock_v1_0
+	GENERIC MAP(cy_registers=>"",
+		id=>"6f2182ce-4e55-4922-ba81-654d492e4c17",
+		source_clock_id=>"75C2148C-3656-4d8a-846D-0CAE99AB6FF7",
+		divisor=>0,
+		period=>"0",
+		is_direct=>'1',
+		is_digital=>'1')
+	PORT MAP(clock_out=>Net_5548,
+		dig_domain_out=>open);
+\superMaquina:MODULE_6:g1:a0:gx:u0:geq(0):c3:u1\:cy_buf
+	PORT MAP(x=>\superMaquina:MODULE_6:g1:a0:gx:u0:eq_7\,
+		y=>\superMaquina:MODULE_6:g1:a0:gx:u0:eqi_0\);
+\superMaquina:MODULE_6:g1:a0:gx:u0:gne(2):c4:c6:u1\:cy_buf
+	PORT MAP(x=>\superMaquina:MODULE_6:g1:a0:gx:u0:lt_8\,
+		y=>\superMaquina:MODULE_6:g1:a0:gx:u0:lti_2\);
+\superMaquina:MODULE_6:g1:a0:gx:u0:gne(2):c4:c6:u2\:cy_buf
+	PORT MAP(x=>\superMaquina:MODULE_6:g1:a0:gx:u0:gt_8\,
+		y=>\superMaquina:MODULE_6:g1:a0:gx:u0:gti_2\);
+\superMaquina:MODULE_6:g1:a0:gx:u0:gne(1):c3:u1\:cy_buf
+	PORT MAP(x=>\superMaquina:MODULE_6:g1:a0:gx:u0:lt_5\,
+		y=>\superMaquina:MODULE_6:g1:a0:gx:u0:lti_1\);
+\superMaquina:MODULE_6:g1:a0:gx:u0:gne(1):c3:u2\:cy_buf
+	PORT MAP(x=>\superMaquina:MODULE_6:g1:a0:gx:u0:gt_5\,
+		y=>\superMaquina:MODULE_6:g1:a0:gx:u0:gti_1\);
+\superMaquina:MODULE_6:g1:a0:gx:u0:gne(0):c3:u1\:cy_buf
+	PORT MAP(x=>\superMaquina:MODULE_6:g1:a0:gx:u0:lt_2\,
+		y=>\superMaquina:MODULE_6:g1:a0:gx:u0:lti_0\);
+\superMaquina:MODULE_6:g1:a0:gx:u0:gne(0):c3:u2\:cy_buf
+	PORT MAP(x=>\superMaquina:MODULE_6:g1:a0:gx:u0:gt_2\,
+		y=>\superMaquina:MODULE_6:g1:a0:gx:u0:gti_0\);
+\superMaquina:MODULE_7:g2:a0:g1:z1:s0:g1:u0:gs(8):g2:g3:ub\:cy_buf
+	PORT MAP(x=>\superMaquina:MODULE_7:g2:a0:g1:z1:s0:g1:u0:b_8\,
+		y=>\superMaquina:MODULE_7:g2:a0:g1:z1:s0:g1:u0:c_8\);
 GND_4:cy_annotation_universal_v1_0
 	GENERIC MAP(comp_name=>"Gnd_v1_0",
 		port_names=>"T1",
@@ -2292,10 +3385,64 @@ PGAin:cy_psoc3_pins_v1_10
 		out_clock_en=>one,
 		out_reset=>zero,
 		interrupt=>tmpINTERRUPT_0__PGAin_net_0);
-Net_4595:cy_dff
-	PORT MAP(d=>Net_4595D,
-		clk=>\Debouncer:op_clk\,
-		q=>Net_4595);
+timer_clock_4:cy_clock_v1_0
+	GENERIC MAP(cy_registers=>"",
+		id=>"39009ee0-8332-47c4-9167-035dbecdc33b",
+		source_clock_id=>"315365C3-2E3E-4f04-84A2-BB564A173261",
+		divisor=>1,
+		period=>"0",
+		is_direct=>'0',
+		is_digital=>'1')
+	PORT MAP(clock_out=>Net_6773,
+		dig_domain_out=>open);
+isr_Timer_1:cy_isr_v1_0
+	GENERIC MAP(int_type=>"10",
+		is_nmi=>'0')
+	PORT MAP(int_signal=>Net_6768);
+\Timer_1:TimerHW\:cy_psoc3_timer_v1_0
+	GENERIC MAP(cy_registers=>"")
+	PORT MAP(clock=>Net_6761,
+		kill=>zero,
+		enable=>one,
+		capture=>zero,
+		timer_reset=>zero,
+		tc=>Net_6768,
+		compare=>\Timer_1:Net_261\,
+		interrupt=>\Timer_1:Net_57\);
+timer_clock_3:cy_clock_v1_0
+	GENERIC MAP(cy_registers=>"",
+		id=>"854c5f18-4208-429b-80a2-c4252048af1b",
+		source_clock_id=>"315365C3-2E3E-4f04-84A2-BB564A173261",
+		divisor=>1,
+		period=>"0",
+		is_direct=>'0',
+		is_digital=>'1')
+	PORT MAP(clock_out=>Net_6761,
+		dig_domain_out=>open);
+timer_clock_5:cy_clock_v1_0
+	GENERIC MAP(cy_registers=>"",
+		id=>"9b8b6b17-0b0d-40b5-98ed-0418d8afbf22",
+		source_clock_id=>"315365C3-2E3E-4f04-84A2-BB564A173261",
+		divisor=>1,
+		period=>"0",
+		is_direct=>'0',
+		is_digital=>'1')
+	PORT MAP(clock_out=>Net_6784,
+		dig_domain_out=>open);
+\Timer_3:TimerHW\:cy_psoc3_timer_v1_0
+	GENERIC MAP(cy_registers=>"")
+	PORT MAP(clock=>Net_6784,
+		kill=>zero,
+		enable=>one,
+		capture=>zero,
+		timer_reset=>zero,
+		tc=>Net_6791,
+		compare=>\Timer_3:Net_261\,
+		interrupt=>\Timer_3:Net_57\);
+isr_Timer_3:cy_isr_v1_0
+	GENERIC MAP(int_type=>"10",
+		is_nmi=>'0')
+	PORT MAP(int_signal=>Net_6791);
 \Debouncer:DEBOUNCER[0]:d_sync_0\:cy_dff
 	PORT MAP(d=>Net_4589,
 		clk=>\Debouncer:op_clk\,
@@ -2304,6 +3451,10 @@ Net_4595:cy_dff
 	PORT MAP(d=>\Debouncer:DEBOUNCER[0]:d_sync_0\,
 		clk=>\Debouncer:op_clk\,
 		q=>\Debouncer:DEBOUNCER[0]:d_sync_1\);
+bp:cy_dff
+	PORT MAP(d=>bpD,
+		clk=>\Debouncer:op_clk\,
+		q=>bp);
 Net_4593:cy_dff
 	PORT MAP(d=>zero,
 		clk=>\Debouncer:op_clk\,
@@ -2432,5 +3583,251 @@ Net_5525:cy_dff
 	PORT MAP(d=>\UART:BUART:rx_parity_bit\,
 		clk=>\UART:BUART:clock_op\,
 		q=>\UART:BUART:rx_parity_bit\);
+\superMaquina:ctrl_arm_d\:cy_dsrff
+	PORT MAP(d=>Net_5672_0,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:ctrl_arm_d\);
+\superMaquina:ctrl_start_now_d\:cy_dsrff
+	PORT MAP(d=>Net_5672_1,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:ctrl_start_now_d\);
+\superMaquina:ctrl_stop_d\:cy_dsrff
+	PORT MAP(d=>Net_5672_2,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:ctrl_stop_d\);
+\superMaquina:ctrl_clear_flags_d\:cy_dsrff
+	PORT MAP(d=>Net_5672_3,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:ctrl_clear_flags_d\);
+\superMaquina:ctrl_load_batch_lo_d\:cy_dsrff
+	PORT MAP(d=>Net_5672_5,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:ctrl_load_batch_lo_d\);
+\superMaquina:ctrl_load_batch_hi_d\:cy_dsrff
+	PORT MAP(d=>Net_5672_7,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:ctrl_load_batch_hi_d\);
+\superMaquina:button_pos_d\:cy_dsrff
+	PORT MAP(d=>bp,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:button_pos_d\);
+\superMaquina:state_reg_2\:cy_dsrff
+	PORT MAP(d=>\superMaquina:state_reg_2\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>Net_6662_2);
+\superMaquina:state_reg_1\:cy_dsrff
+	PORT MAP(d=>\superMaquina:state_reg_1\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>Net_6662_1);
+\superMaquina:state_reg_0\:cy_dsrff
+	PORT MAP(d=>\superMaquina:state_reg_0\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>Net_6662_0);
+\superMaquina:nrq_dma_adc_d\:cy_dsrff
+	PORT MAP(d=>nda,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:nrq_dma_adc_d\);
+\superMaquina:nrq_dma_filter_d\:cy_dsrff
+	PORT MAP(d=>ndf,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:nrq_dma_filter_d\);
+\superMaquina:sample_count_reg_4\:cy_dsrff
+	PORT MAP(d=>\superMaquina:sample_count_reg_4\\D\,
+		s=>Net_5549,
+		r=>zero,
+		clk=>Net_5548,
+		q=>\superMaquina:sample_count_reg_4\);
+\superMaquina:sample_count_reg_3\:cy_dsrff
+	PORT MAP(d=>\superMaquina:sample_count_reg_3\\D\,
+		s=>Net_5549,
+		r=>zero,
+		clk=>Net_5548,
+		q=>\superMaquina:sample_count_reg_3\);
+\superMaquina:sample_count_reg_2\:cy_dsrff
+	PORT MAP(d=>\superMaquina:sample_count_reg_2\\D\,
+		s=>Net_5549,
+		r=>zero,
+		clk=>Net_5548,
+		q=>\superMaquina:sample_count_reg_2\);
+\superMaquina:sample_count_reg_1\:cy_dsrff
+	PORT MAP(d=>\superMaquina:sample_count_reg_1\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:sample_count_reg_1\);
+\superMaquina:sample_count_reg_0\:cy_dsrff
+	PORT MAP(d=>\superMaquina:sample_count_reg_0\\D\,
+		s=>Net_5549,
+		r=>zero,
+		clk=>Net_5548,
+		q=>\superMaquina:sample_count_reg_0\);
+\superMaquina:irq_reg\:cy_dsrff
+	PORT MAP(d=>\superMaquina:irq_reg\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>Net_5570);
+\superMaquina:error_state_reg\:cy_dsrff
+	PORT MAP(d=>\superMaquina:error_state_reg\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>Net_6661_4);
+\superMaquina:error_stop_reg\:cy_dsrff
+	PORT MAP(d=>\superMaquina:error_stop_reg\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>Net_6661_3);
+\superMaquina:button_seen_reg\:cy_dsrff
+	PORT MAP(d=>\superMaquina:button_seen_reg\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>Net_6660_7);
+\superMaquina:batch_seen_reg\:cy_dsrff
+	PORT MAP(d=>\superMaquina:batch_seen_reg\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>Net_6660_6);
+\superMaquina:sync_seen_reg\:cy_dsrff
+	PORT MAP(d=>\superMaquina:sync_seen_reg\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>Net_6660_5);
+\superMaquina:batch_limit_reg_7\:cy_dsrff
+	PORT MAP(d=>\superMaquina:batch_limit_reg_7\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:batch_limit_reg_7\);
+\superMaquina:batch_limit_reg_6\:cy_dsrff
+	PORT MAP(d=>\superMaquina:batch_limit_reg_6\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:batch_limit_reg_6\);
+\superMaquina:batch_limit_reg_5\:cy_dsrff
+	PORT MAP(d=>\superMaquina:batch_limit_reg_5\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:batch_limit_reg_5\);
+\superMaquina:batch_limit_reg_4\:cy_dsrff
+	PORT MAP(d=>\superMaquina:batch_limit_reg_4\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:batch_limit_reg_4\);
+\superMaquina:batch_limit_reg_3\:cy_dsrff
+	PORT MAP(d=>\superMaquina:batch_limit_reg_3\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:batch_limit_reg_3\);
+\superMaquina:batch_limit_reg_2\:cy_dsrff
+	PORT MAP(d=>\superMaquina:batch_limit_reg_2\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:batch_limit_reg_2\);
+\superMaquina:batch_limit_reg_1\:cy_dsrff
+	PORT MAP(d=>\superMaquina:batch_limit_reg_1\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:batch_limit_reg_1\);
+\superMaquina:batch_limit_reg_0\:cy_dsrff
+	PORT MAP(d=>\superMaquina:batch_limit_reg_0\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:batch_limit_reg_0\);
+\superMaquina:batch_limit_reg_8\:cy_dsrff
+	PORT MAP(d=>\superMaquina:batch_limit_reg_8\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:batch_limit_reg_8\);
+\superMaquina:batch_count_reg_8\:cy_dsrff
+	PORT MAP(d=>\superMaquina:batch_count_reg_8\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:batch_count_reg_8\);
+\superMaquina:batch_count_reg_7\:cy_dsrff
+	PORT MAP(d=>\superMaquina:batch_count_reg_7\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:batch_count_reg_7\);
+\superMaquina:batch_count_reg_6\:cy_dsrff
+	PORT MAP(d=>\superMaquina:batch_count_reg_6\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:batch_count_reg_6\);
+\superMaquina:batch_count_reg_5\:cy_dsrff
+	PORT MAP(d=>\superMaquina:batch_count_reg_5\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:batch_count_reg_5\);
+\superMaquina:batch_count_reg_4\:cy_dsrff
+	PORT MAP(d=>\superMaquina:batch_count_reg_4\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:batch_count_reg_4\);
+\superMaquina:batch_count_reg_3\:cy_dsrff
+	PORT MAP(d=>\superMaquina:batch_count_reg_3\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:batch_count_reg_3\);
+\superMaquina:batch_count_reg_2\:cy_dsrff
+	PORT MAP(d=>\superMaquina:batch_count_reg_2\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:batch_count_reg_2\);
+\superMaquina:batch_count_reg_1\:cy_dsrff
+	PORT MAP(d=>\superMaquina:batch_count_reg_1\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:batch_count_reg_1\);
+\superMaquina:batch_count_reg_0\:cy_dsrff
+	PORT MAP(d=>\superMaquina:batch_count_reg_0\\D\,
+		s=>zero,
+		r=>Net_5549,
+		clk=>Net_5548,
+		q=>\superMaquina:batch_count_reg_0\);
 
 END R_T_L;
