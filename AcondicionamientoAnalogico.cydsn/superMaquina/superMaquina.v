@@ -12,7 +12,7 @@
 // ========================================
 `include "cypress.v"
 //`#end` -- edit above this line, do not edit this line
-// Generated on 07/01/2026 at 22:40
+// Generated on 07/02/2026 at 14:23
 // Component: superMaquina
 module superMaquina (
 	output  drq_adc_ram,
@@ -22,6 +22,7 @@ module superMaquina (
 	output  irq,
 	output [7:0] state,
 	output [7:0] status,
+	output [7:0] timer_event,
 	input   button_pos,
 	input  [7:0] cfg,
 	input   clk,
@@ -31,7 +32,11 @@ module superMaquina (
 	input   nrq_dma_adc,
 	input   nrq_dma_filter,
 	input   reset,
-	input   sync_det
+	input   sync_det,
+	input   tc_led,
+	input   tc_ping,
+	input   tc_uart,
+	input   tc_watcdog
 );
 
 //`#start body` -- edit after this line, do not edit this line
@@ -60,9 +65,9 @@ wire [1:0] sample_source = cfg[1:0];
 wire cfg_irq_batch_en    = cfg[2];
 wire cfg_irq_sync_en     = cfg[3];
 wire cfg_irq_error_en    = cfg[4];
-/* cfg[5..7] libres. Ojo: un contador de descarte FIR en hardware NO entra en
- * los 24 UDB de este diseno (E2071); el descarte del retardo de grupo lo hace
- * el ARM (g_fir_discard en main.c) con el objetivo de lotes extendido. */
+/* cfg[5..7] libres. El descarte del retardo de grupo FIR lo hace el ARM:
+ * mantenerlo fuera de PLD evita que el camino filtrado por sync quede retenido
+ * si el contador UDB de descarte no recibe TC. */
 
 wire source_raw      = (sample_source == SRC_RAW) || (sample_source == SRC_DEBUG);
 wire source_filter   = (sample_source == SRC_FILTER);
@@ -105,8 +110,20 @@ wire sampling_active = ctrl_engine_en && (state_reg == ST_SAMPLING);
 wire nrq_dma_adc_rise = nrq_dma_adc & ~nrq_dma_adc_d;
 wire nrq_dma_filter_rise = nrq_dma_filter & ~nrq_dma_filter_d;
 wire sample_done_rise = (source_filter || source_combined) ? nrq_dma_filter_rise : nrq_dma_adc_rise;
-wire sample_irq_event = sample_done_rise && (sampling_active || bypass_raw_dma || bypass_filter_path);
+wire sample_irq_event = sample_done_rise &&
+                        (sampling_active || bypass_raw_dma || bypass_filter_path);
+/* Politica determinismo-primero: fuera de IDLE, todo lo secundario espera o
+ * se descarta; solo muestras y sync interrumpen al ARM durante una captura.
+ * - Muestras DMA: unica fuente de irq en ST_SAMPLING (y bypass).
+ * - sync_det: solo se mira en ST_ARMED (es quien inicia el muestreo).
+ * - button_pos: DESCARTE fuera de IDLE (solo irq/flag en ST_IDLE).
+ * - TC de timers: HOLD. Nunca generan irq; cada TC queda retenido en el
+ *   STATUS_TC de su propio timer fixed y el firmware lo consume por polling
+ *   (el watchdog de captura tambien por polling, atendido incluso durante
+ *   SAMPLING). timer_event expone la vista live solo como diagnostico. */
 wire button_irq_event = button_pos_rise && (state_reg == ST_IDLE);
+wire tc_capture_watchdog = tc_watcdog; /* typo externo mantenido por TopDesign */
+wire [3:0] timer_event_live = {tc_capture_watchdog, tc_led, tc_ping, tc_uart};
 wire sample_will_close_batch = (sample_count_reg == 5'd0);
 wire batch_will_finish_capture = (batch_count_reg == batch_limit_reg);
 
@@ -126,6 +143,7 @@ assign drq_filter_ram    = ctrl_engine_en ? (filter_feed_active && dma_req_filte
 
 assign irq               = irq_reg;
 assign error             = {3'b000, error_state_reg, error_stop_reg, 3'b000};
+assign timer_event       = {4'b0000, timer_event_live};
 /* Nota: exponer batch_count_reg en state[7:3] NO entra en los 24 UDB de este
  * diseno (el fitter falla con E2071); si se necesita progreso de lotes en el
  * ARM hay que liberar PLD antes. */

@@ -48,7 +48,7 @@ Durante calibración: `→ PSOC_CALIBRATING → PSOC_IDLE`
 | Datos raw | 95 | `[0xAB][n=30][seq_lo][seq_hi] + 30×3 bytes LE + [CRC XOR]` |
 | Ping | 4 | `[0xAB][0xC0][0x00][0xC0]` |
 | CFG ACK | 5 | `[0xAB][0xC2][cmd][val][cs]` |
-| FS report | 5 | `[0xAB][0xC3][fs_lo][fs_hi][cs]` — reporta 2929 Hz |
+| FS report | 5 | `[0xAB][0xC3][fs_lo][fs_hi][cs]` — reporta 1020 Hz |
 | Diag event | 6 | `[0xAB][0xC4][event][value][state][cs]` |
 
 ### RX (ESP → PSoC)
@@ -68,6 +68,7 @@ Durante calibración: `→ PSOC_CALIBRATING → PSOC_IDLE`
 | `0xB7` select stream | 4 | `0`=crudo, `1`=FIR hardware |
 | `0xB8` ADC snapshot | 4 | Diagnóstico ADC por etapa |
 | `0xB9` blink LED | 4 | Titila el LED de identificación ~8 s |
+| `0xBA` ADC config | 4 | `1`=±2.5 V, `2`=±0.512 V; ambos a 1020 Hz |
 | `0xC1` pong | 4 | Respuesta al ping del PSoC |
 
 ## DMA y filtro de hardware
@@ -91,7 +92,7 @@ Motor en `calibration.c/.h`. Arquitectura por etapas independientes con PI:
 2. Si todas las etapas ya están en rango → responde CAL OK sin mover VDACs.
 3. Si alguna etapa está fuera → corre el PI desde el DAC sembrado (no desde el centro).
 4. Cada etapa: objetivo 0 counts (diferencial), PI converge cuando N muestras consecutivas
-   dentro del deadband (1024 muestras = ~350ms a 2929 Hz para GEO_BP/LP).
+   dentro del deadband (1024 muestras = ~1.00 s a 1020 Hz para GEO_BP/LP).
 
 Parámetros por etapa en `calibration_tables_geo_*.h` / `calibration_tables_hammer_*.h`.
 
@@ -120,10 +121,10 @@ todas las etapas `ok=1`.
 
 ## Frecuencia de muestreo
 
-- **Nominal**: 3000 Hz
-- **Reportada (PSOC_REPORTED_SRATE_HZ)**: 2929 Hz
-- **Batches**: 30 muestras/lote → 97.6 ms/lote a 2929 Hz
-- **Máximo capturable**: 512 lotes = ~50 s
+- **Configs expuestas**: `ADC_CF_2V5` (±2.5 V, default) y `ADC_CF_0V512` (±0.512 V)
+- **Reportada por firmware**: 1020 Hz para ambas
+- **Batches**: 30 muestras/lote → 29.4 ms/lote a 1020 Hz
+- **Máximo capturable**: 512 lotes = 15360 muestras ≈ 15.06 s
 
 ## Archivos fuente
 

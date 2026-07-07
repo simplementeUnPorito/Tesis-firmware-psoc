@@ -3,14 +3,56 @@
 static volatile int32 g_psoc_adc_isr_counts = 0;
 static volatile uint8 g_psoc_adc_isr_ready = 0u;
 
+/* Config activa pedida por el host (ADC_CF_2V5 | ADC_CF_0V512). */
+static uint8 g_psoc_adc_config = ADC_CF_2V5;
+/* Override de calibración: fuerza 2V5 sin perder la elección del usuario. */
+static uint8 g_psoc_adc_cal_force_2v5 = 0u;
+
 int32 psoc_adc_counts_right_aligned(int32 adc_counts)
 {
-#if (ADC_CFG1_DEC_DIV != 0)
-    if (ADC_Config == ADC_CFG1) {
-        adc_counts /= ADC_CFG1_DEC_DIV;
+    /* Solo ADC_CF_2V5 es left-aligned (ALIGNMENT=1, DEC_DIV=32); las demás
+     * configs entregan counts right-aligned (DEC_DIV=0). Se consulta
+     * ADC_Config (variable del componente, mantenida por
+     * ADC_SelectConfiguration) y no g_psoc_adc_config, porque durante la
+     * calibración el override puede tener aplicada una config distinta. */
+#if (ADC_CF_2V5_DEC_DIV != 0)
+    if (ADC_Config == ADC_CF_2V5) {
+        adc_counts /= ADC_CF_2V5_DEC_DIV;
     }
 #endif
     return adc_counts;
+}
+
+uint8 psoc_adc_get_config(void)
+{
+    return g_psoc_adc_config;
+}
+
+uint8 psoc_adc_set_config(uint8 cfg)
+{
+    if ((cfg != ADC_CF_2V5) && (cfg != ADC_CF_0V512)) {
+        return 0u;
+    }
+    g_psoc_adc_config = cfg;
+    return 1u;
+}
+
+uint16 psoc_adc_effective_fs_hz(void)
+{
+    /* "Actual conv. rate" del customizer: la división de clock no alcanza
+     * el nominal de 1000 SPS y ambas configs expuestas quedan en 1020 SPS. */
+    return 1020u;
+}
+
+void psoc_adc_cal_override(uint8 force_2v5)
+{
+    g_psoc_adc_cal_force_2v5 = (force_2v5 != 0u) ? 1u : 0u;
+}
+
+void psoc_adc_select_calibration_config(void)
+{
+    psoc_adc_cal_override(1u);
+    psoc_adc_select_capture_config();
 }
 
 void psoc_adc_clear_isr_sample(void)
@@ -45,7 +87,16 @@ uint8 psoc_adc_take_isr_sample(int32 *out_counts)
 
 void psoc_adc_select_capture_config(void)
 {
-    ADC_Stop();
+    uint8 cfg = g_psoc_adc_cal_force_2v5 ? (uint8)ADC_CF_2V5 : g_psoc_adc_config;
+    /* SelectConfiguration hace ADC_Stop + InitConfig + compensación GCOR y
+     * deja ADC_Config actualizado; con restart=0 no arranca conversiones.
+     * ADC_Start posterior solo hace Enable (initVar!=0) y no pisa la config. */
+    ADC_SelectConfiguration(cfg, 0u);
+    /* Nuestros DMA leen ADC_DEC_SAMP_PTR en orden low-mid-high. La config 2
+     * generada usa coherencia LOW, que libera el registro en el primer byte y
+     * puede mezclar muestras. Forzamos HIGH para que el byte llave sea el
+     * último que lee el DMA, igual que en la config 1. */
+    ADC_SetCoherency(ADC_DEC_SAMP_KEY_HIGH);
     ADC_Start();
     ADC_StopConvert();
 }

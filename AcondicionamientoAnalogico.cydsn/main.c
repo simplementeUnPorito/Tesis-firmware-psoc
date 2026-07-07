@@ -56,16 +56,114 @@
 #include "error.h"
 #include "state.h"
 #include "isr_SuperMaquina.h"
+#include "isr_Timer.h"
+#include "isr_Timer_1.h"
+#include "isr_Timer_2.h"
+#include "isr_Timer_3.h"
+#include "tmr_event.h"
 #include "filter_coeffs.h"
 #include "FIR_adquisition.h"
 #include "psoc_debug.h"
 /* -------------------------------------------------------------------------- */
 #define LEGACY_VDAC_SHADOW_INIT 0x9Cu
+
+#if defined(CY_STATUS_REG_tmr_event_H)
+#define timer_event_Read tmr_event_Read
+#endif
+
+#if defined(isr_Timer__INTC_MASK)
+#define isr_Timer_SetPriority(priority)   (*(isr_Timer_INTC_PRIOR) = ((uint8)(priority) << 5))
+#define isr_Timer_Disable()               (*(isr_Timer_INTC_CLR_EN) = isr_Timer__INTC_MASK)
+#define isr_Timer_ClearPending()          (*(isr_Timer_INTC_CLR_PD) = isr_Timer__INTC_MASK)
+#else
+#define isr_Timer_SetPriority(priority)   ((void)(priority))
+#define isr_Timer_Disable()               ((void)0)
+#define isr_Timer_ClearPending()          ((void)0)
+#endif
+
+#if defined(isr_Timer_1__INTC_MASK)
+#define isr_Timer_1_SetPriority(priority) (*(isr_Timer_1_INTC_PRIOR) = ((uint8)(priority) << 5))
+#define isr_Timer_1_Disable()             (*(isr_Timer_1_INTC_CLR_EN) = isr_Timer_1__INTC_MASK)
+#define isr_Timer_1_ClearPending()        (*(isr_Timer_1_INTC_CLR_PD) = isr_Timer_1__INTC_MASK)
+#else
+#define isr_Timer_1_SetPriority(priority) ((void)(priority))
+#define isr_Timer_1_Disable()             ((void)0)
+#define isr_Timer_1_ClearPending()        ((void)0)
+#endif
+
+#if defined(isr_Timer_2__INTC_MASK)
+#define isr_Timer_2_SetPriority(priority) (*(isr_Timer_2_INTC_PRIOR) = ((uint8)(priority) << 5))
+#define isr_Timer_2_Disable()             (*(isr_Timer_2_INTC_CLR_EN) = isr_Timer_2__INTC_MASK)
+#define isr_Timer_2_ClearPending()        (*(isr_Timer_2_INTC_CLR_PD) = isr_Timer_2__INTC_MASK)
+#else
+#define isr_Timer_2_SetPriority(priority) ((void)(priority))
+#define isr_Timer_2_Disable()             ((void)0)
+#define isr_Timer_2_ClearPending()        ((void)0)
+#endif
+
+#if defined(isr_Timer_3__INTC_MASK)
+#define isr_Timer_3_SetPriority(priority) (*(isr_Timer_3_INTC_PRIOR) = ((uint8)(priority) << 5))
+#define isr_Timer_3_Disable()             (*(isr_Timer_3_INTC_CLR_EN) = isr_Timer_3__INTC_MASK)
+#define isr_Timer_3_ClearPending()        (*(isr_Timer_3_INTC_CLR_PD) = isr_Timer_3__INTC_MASK)
+#else
+#define isr_Timer_3_SetPriority(priority) ((void)(priority))
+#define isr_Timer_3_Disable()             ((void)0)
+#define isr_Timer_3_ClearPending()        ((void)0)
+#endif
+
+#if defined(Tmr_UartRxWatchdog_STATUS_TC) && !defined(Timer_STATUS_TC)
+#define Timer_Init               Tmr_UartRxWatchdog_Init
+#define Timer_Stop               Tmr_UartRxWatchdog_Stop
+#define Timer_Start              Tmr_UartRxWatchdog_Start
+#define Timer_Enable             Tmr_UartRxWatchdog_Enable
+#define Timer_WritePeriod        Tmr_UartRxWatchdog_WritePeriod
+#define Timer_WriteCounter       Tmr_UartRxWatchdog_WriteCounter
+#define Timer_ReadStatusRegister Tmr_UartRxWatchdog_ReadStatusRegister
+#define Timer_STATUS_TC          Tmr_UartRxWatchdog_STATUS_TC
+#define Timer_initVar            Tmr_UartRxWatchdog_initVar
+#endif
+
+#if defined(Tmr_PingCalTick_STATUS_TC) && !defined(Timer_1_STATUS_TC)
+#define Timer_1_Init               Tmr_PingCalTick_Init
+#define Timer_1_Stop               Tmr_PingCalTick_Stop
+#define Timer_1_Start              Tmr_PingCalTick_Start
+#define Timer_1_Enable             Tmr_PingCalTick_Enable
+#define Timer_1_WritePeriod        Tmr_PingCalTick_WritePeriod
+#define Timer_1_WriteCounter       Tmr_PingCalTick_WriteCounter
+#define Timer_1_ReadStatusRegister Tmr_PingCalTick_ReadStatusRegister
+#define Timer_1_STATUS_TC          Tmr_PingCalTick_STATUS_TC
+#define Timer_1_initVar            Tmr_PingCalTick_initVar
+#endif
+
+#if defined(Tmr_LedWait_STATUS_TC) && !defined(Timer_2_STATUS_TC)
+#define Timer_2_Init               Tmr_LedWait_Init
+#define Timer_2_Stop               Tmr_LedWait_Stop
+#define Timer_2_Start              Tmr_LedWait_Start
+#define Timer_2_Enable             Tmr_LedWait_Enable
+#define Timer_2_WritePeriod        Tmr_LedWait_WritePeriod
+#define Timer_2_WriteCounter       Tmr_LedWait_WriteCounter
+#define Timer_2_ReadStatusRegister Tmr_LedWait_ReadStatusRegister
+#define Timer_2_STATUS_TC          Tmr_LedWait_STATUS_TC
+#define Timer_2_initVar            Tmr_LedWait_initVar
+#endif
+
+#if defined(Tmr_CaptureWatchdog_STATUS_TC) && !defined(Timer_3_STATUS_TC)
+#define Timer_3_Init               Tmr_CaptureWatchdog_Init
+#define Timer_3_Stop               Tmr_CaptureWatchdog_Stop
+#define Timer_3_Start              Tmr_CaptureWatchdog_Start
+#define Timer_3_Enable             Tmr_CaptureWatchdog_Enable
+#define Timer_3_WritePeriod        Tmr_CaptureWatchdog_WritePeriod
+#define Timer_3_WriteCounter       Tmr_CaptureWatchdog_WriteCounter
+#define Timer_3_ReadStatusRegister Tmr_CaptureWatchdog_ReadStatusRegister
+#define Timer_3_STATUS_TC          Tmr_CaptureWatchdog_STATUS_TC
+#define Timer_3_initVar            Tmr_CaptureWatchdog_initVar
+#endif
+
 /* FILTER_FIR_NTAPS vive en filter_coeffs.h (unica fuente de verdad,
  * compartida con calibration.c). El descarte del retardo de grupo (63
- * muestras) lo hace superMaquina en hardware (FIR_DISCARD_SAMPLES en
- * superMaquina.v, habilitado por cfg[5]); si cambia el numero de taps hay
- * que actualizar AMBOS lados. */
+ * muestras) lo hace el ARM con g_fir_discard. superMaquina mantiene el FIR
+ * alimentado en ARMED y el objetivo de hardware se extiende para no perder
+ * lotes utiles al final. */
 #define FILTER_GROUP_DELAY ((FILTER_FIR_NTAPS - 1u) / 2u)   /* 63 muestras */
 
 #ifndef PSOC_LOAD_NV_CAL_ON_BOOT
@@ -138,11 +236,7 @@ static volatile uint8 * volatile g_capture_end = g_capture_raw;
 /* 1 = las muestras guardadas necesitan alineado (division DEC_DIV) al volcar;
  * 0 = rampa debug u otros datos sinteticos que van tal cual. */
 static volatile uint8  g_capture_align    = 1u;
-/* Muestras filtradas a descartar al entrar a SAMPLING desde ARMED: compensa
- * el retardo de grupo del FIR (superMaquina mantiene el filtro alimentado
- * durante ARMED, asi que las primeras 63 salidas corresponden a señal previa
- * al sync). El objetivo de lotes del hardware se extiende para que no falten
- * muestras al final (ver psoc_arm). */
+static volatile uint8  g_capture_adc_raw  = 1u;
 static volatile uint16 g_fir_discard      = 0u;
 static          uint16 g_seq              = 0u;
 static volatile uint16 g_batches_captured = 0u;
@@ -173,13 +267,17 @@ static          uint8  g_esp_connected  = 0u;
 static          uint8  g_nv_ready       = 0u;
 static          uint8  g_last_calibration_ok = 0u;
 
-/* Mapa de timers fixed (3 en uso; Timer_3 quedo LIBRE y puede eliminarse del
- * TopDesign — ver docs/psoc_supermaquina_handoff.md):
+/* Mapa de timers fixed (los 4 con rol propio; ver
+ * docs/psoc_supermaquina_handoff.md):
  *   Timer   : watchdog del parser UART RX (concurrente con todo lo demas).
  *   Timer_1 : ping boot/idle + tick de calibracion (nunca concurrentes:
  *             la calibracion detiene los pings antes de arrancar).
- *   Timer_2 : LED/esperas cortas + watchdog de captura (nunca concurrentes:
- *             la ventana de captura apaga LED/esperas). */
+ *   Timer_2 : LED/esperas cortas, sin multiplexar con nada mas.
+ *   Timer_3 : watchdog de captura dedicado. Antes compartia Timer_2 por modo;
+ *             dedicarlo elimina el riesgo de que un blink/espera pise el
+ *             watchdog (o al reves) si algun dia coinciden. Si se quisiera
+ *             reducir a 3 timers, este es el que se pliega de vuelta sobre
+ *             Timer_2 (modo CAPTURE_WD) y se elimina del TopDesign. */
 #define TIMER1_MODE_NONE       0u
 #define TIMER1_MODE_BOOT_PING  1u
 #define TIMER1_MODE_IDLE_PING  2u
@@ -189,7 +287,6 @@ static          uint8  g_last_calibration_ok = 0u;
 #define TIMER2_MODE_BOOT_LED_OFF  1u
 #define TIMER2_MODE_WAIT          2u
 #define TIMER2_MODE_COMM_BLINK    3u
-#define TIMER2_MODE_CAPTURE_WD    4u
 
 static volatile uint32 g_timer1_remaining_counts = 0u;
 static volatile uint8  g_timer1_mode             = TIMER1_MODE_NONE;
@@ -204,7 +301,27 @@ static volatile uint8  g_timer2_wait_done        = 0u;
 static volatile uint8  g_comm_blink_due          = 0u;
 static volatile uint16 g_comm_blinks_remaining   = 0u;
 static volatile uint8  g_comm_led_active         = 0u;
+
+/* Timer_3 es monoproposito (watchdog de captura): no necesita variable de
+ * modo, solo el resto de cuenta para el troceado a 60000 counts. */
+static volatile uint32 g_timer3_remaining_counts = 0u;
 static volatile uint8  g_capture_wd_due          = 0u;
+static volatile uint8  g_timer_event_pending     = 0u;
+
+/* ── Circuit-breaker de tormenta de IRQ de timers fixed ──────────────────────
+ * Visto en hardware (pyocd): la IRQ de un timer FF puede quedar re-disparando
+ * para siempre (VECTACTIVE fijo, ISPR=0, SR0=0, timer parado) y mata el
+ * sistema entero; leer el status no la corta, solo deshabilitar la IRQ en el
+ * NVIC. Cada ISR cuenta entradas espurias (status==0) consecutivas y al
+ * llegar a TIMER_STORM_TRIP se auto-deshabilita y marca su bit; el thread
+ * (timer_storm_recover) re-inicializa el bloque, emite diagnostico y restaura
+ * el estado del modo que estaba en vuelo. */
+#define TIMER_STORM_TRIP 4u
+static volatile uint8  g_timer_storm             = 0u;  /* bit0..3 = Timer..Timer_3 */
+static volatile uint8  g_t0_spurious             = 0u;
+static volatile uint8  g_t1_spurious             = 0u;
+static volatile uint8  g_t2_spurious             = 0u;
+static volatile uint8  g_t3_spurious             = 0u;
 
 static volatile uint8  g_cal_timer_active        = 0u;
 static volatile uint8  g_cal_progress_due        = 0u;
@@ -233,8 +350,8 @@ static volatile uint32 g_cal_watchdog_remaining_ms = 0u;
 #define CE_CFG_IRQ_BATCH_EN  0x04u
 #define CE_CFG_IRQ_SYNC_EN   0x08u
 #define CE_CFG_IRQ_ERROR_EN  0x10u
-/* cfg[5..7] libres. Un contador de descarte FIR en Verilog no entro en los
- * 24 UDB (E2071): el descarte lo hace el ARM (g_fir_discard). */
+/* cfg[5..7] libres. El descarte FIR queda en C: ponerlo en PLD/count7
+ * compila, pero en placa dejo el camino filtrado por sync retenido. */
 
 #define CE_STATUS_IDLE       0x01u
 #define CE_STATUS_ARMED      0x02u
@@ -242,6 +359,12 @@ static volatile uint32 g_cal_watchdog_remaining_ms = 0u;
 #define CE_STATUS_DONE       0x08u
 #define CE_STATUS_ERROR      0x10u
 #define CE_STATUS_BUTTON     0x80u
+
+#define CE_TIMER_EVT_UART       0x01u
+#define CE_TIMER_EVT_PING       0x02u
+#define CE_TIMER_EVT_LED        0x04u
+#define CE_TIMER_EVT_CAPTURE_WD 0x08u
+#define CE_TIMER_EVT_MASK       0x0Fu
 
 #ifndef PSOC_SUPERMAQUINA_OWNS_DMA_IRQ
 #define PSOC_SUPERMAQUINA_OWNS_DMA_IRQ 1u
@@ -269,8 +392,6 @@ static const uint8 g_ping_frame[4] = {
     0xABu, PSOC_CMD_PING, 0x00u, PSOC_CMD_PING
 };
 
-#define PSOC_REPORTED_SRATE_HZ 2929u
-
 static void uart_send_ping(void)
 {
     UART_PutArray(g_ping_frame, (uint8)sizeof(g_ping_frame));
@@ -287,10 +408,26 @@ static void uart_send_cfg_ack(uint8 cmd, uint8 val)
     UART_PutArray(frame, (uint8)sizeof(frame));
 }
 
+static void uart_wait_tx_complete_quiet(void)
+{
+    uint16 guard = 60000u;
+    while (guard-- != 0u) {
+#if (UART_TX_INTERRUPT_ENABLED && UART_TX_ENABLED)
+        if (UART_GetTxBufferSize() != 0u) {
+            continue;
+        }
+#endif
+        if ((UART_ReadTxStatus() & UART_TX_STS_COMPLETE) != 0u) {
+            break;
+        }
+    }
+}
+
 static void uart_send_fs_report(void)
 {
-    uint8 fs_lo = (uint8)((uint16)PSOC_REPORTED_SRATE_HZ & 0xFFu);
-    uint8 fs_hi = (uint8)(((uint16)PSOC_REPORTED_SRATE_HZ >> 8u) & 0xFFu);
+    uint16 fs = psoc_adc_effective_fs_hz();
+    uint8 fs_lo = (uint8)(fs & 0xFFu);
+    uint8 fs_hi = (uint8)((fs >> 8u) & 0xFFu);
     uint8 frame[5u];
     frame[0] = 0xABu;
     frame[1] = PSOC_CMD_FS_REPORT;
@@ -358,7 +495,8 @@ static void capture_engine_pulse(uint8 pulse)
 
 static void capture_engine_set_source(uint8 source)
 {
-    g_ce_cfg_level = (uint8)((g_ce_cfg_level & (uint8)~CE_CFG_SRC_MASK) |
+    g_ce_cfg_level = (uint8)((g_ce_cfg_level &
+                              (uint8)~CE_CFG_SRC_MASK) |
                              (source & CE_CFG_SRC_MASK) |
                              CE_CFG_IRQ_SYNC_EN |
                              CE_CFG_IRQ_ERROR_EN);
@@ -386,6 +524,7 @@ static void capture_engine_reset_hw(void)
 {
     reset_Write(1u);
     reset_Write(0u);
+    g_timer_event_pending = 0u;
     capture_engine_refresh_status();
 }
 
@@ -395,9 +534,73 @@ static void capture_engine_clear_flags(void)
     capture_engine_refresh_status();
 }
 
-/* Carga el objetivo de lotes en superMaquina. hw_target puede exceder los
- * lotes realmente almacenados (captura filtrada armada: +3 lotes para cubrir
- * las 63 muestras de retardo de grupo que el ARM descarta al arrancar). */
+static void timer_events_accumulate(uint8 events)
+{
+    uint8 saved;
+    events &= CE_TIMER_EVT_MASK;
+    if (events == 0u) {
+        return;
+    }
+    saved = CyEnterCriticalSection();
+    g_timer_event_pending |= events;
+    CyExitCriticalSection(saved);
+}
+
+/* Toma solo los eventos incluidos en mask; el resto queda holdeado en
+ * g_timer_event_pending hasta que un estado tranquilo los consuma. */
+static uint8 timer_events_take_pending(uint8 mask)
+{
+    uint8 events;
+    uint8 saved = CyEnterCriticalSection();
+    events = (uint8)(g_timer_event_pending & mask & CE_TIMER_EVT_MASK);
+    g_timer_event_pending &= (uint8)~events;
+    CyExitCriticalSection(saved);
+    return events;
+}
+
+/* Los TC ya no generan IRQ (política determinismo-primero): cada TC queda
+ * retenido en el STATUS_TC de su timer fixed hasta que el lazo principal lo
+ * lea acá. Durante ARMED/SAMPLING solo se sondea el watchdog de captura. */
+static uint8 capture_engine_poll_capture_wd(void)
+{
+    uint8 events = 0u;
+
+    if ((Timer_3_ReadStatusRegister() & Timer_3_STATUS_TC) != 0u) {
+        Timer_3_Stop();
+        events |= CE_TIMER_EVT_CAPTURE_WD;
+    }
+    if (events != 0u) {
+        timer_events_accumulate(events);
+    }
+    return events;
+}
+
+static uint8 capture_engine_poll_timer_events(void)
+{
+    uint8 events = 0u;
+
+    if ((Timer_ReadStatusRegister() & Timer_STATUS_TC) != 0u) {
+        Timer_Stop();
+        events |= CE_TIMER_EVT_UART;
+    }
+    if ((Timer_1_ReadStatusRegister() & Timer_1_STATUS_TC) != 0u) {
+        Timer_1_Stop();
+        events |= CE_TIMER_EVT_PING;
+    }
+    if ((Timer_2_ReadStatusRegister() & Timer_2_STATUS_TC) != 0u) {
+        Timer_2_Stop();
+        events |= CE_TIMER_EVT_LED;
+    }
+    if (events != 0u) {
+        timer_events_accumulate(events);
+    }
+    events |= capture_engine_poll_capture_wd();
+    return events;
+}
+
+/* Carga el objetivo de lotes en superMaquina. Para FIR armado el caller pasa
+ * un objetivo extendido: el ARM descarta FILTER_GROUP_DELAY muestras y aun asi
+ * quedan los lotes pedidos en el buffer final. */
 static void capture_engine_configure_target(uint16 hw_target)
 {
     uint16 limit = (uint16)(hw_target - 1u);
@@ -518,16 +721,55 @@ static void timer2_stop_quiet(void)
     CyExitCriticalSection(saved);
 }
 
-/* Timer_3 ya no se usa: su rol (tick de calibracion) vive en Timer_1. El
- * componente puede eliminarse del TopDesign junto con isr_Timer_3. */
+static void timer3_start_next_chunk(void)
+{
+    uint16 chunk = timer_take_chunk(&g_timer3_remaining_counts);
+    if (chunk == 0u) { return; }
+    Timer_3_Stop();
+    Timer_3_WritePeriod(chunk);
+    Timer_3_WriteCounter(chunk);
+    (void)Timer_3_ReadStatusRegister();
+    isr_Timer_3_ClearPending();
+    Timer_3_Start();
+}
+
+static void timer3_arm_ms(uint32 ms)
+{
+    uint8 saved = CyEnterCriticalSection();
+    Timer_3_Stop();
+    g_timer3_remaining_counts = timer_ms_to_counts(ms);
+    timer3_start_next_chunk();
+    CyExitCriticalSection(saved);
+}
+
+static void timer3_stop_quiet(void)
+{
+    uint8 saved = CyEnterCriticalSection();
+    Timer_3_Stop();
+    (void)Timer_3_ReadStatusRegister();
+    isr_Timer_3_ClearPending();
+    g_timer3_remaining_counts = 0u;
+    CyExitCriticalSection(saved);
+}
+
 static void fixed_timers_init(void)
 {
     Timer_Init();   Timer_initVar = 1u;   Timer_Stop();   (void)Timer_ReadStatusRegister();
     Timer_1_Init(); Timer_1_initVar = 1u; Timer_1_Stop(); (void)Timer_1_ReadStatusRegister();
     Timer_2_Init(); Timer_2_initVar = 1u; Timer_2_Stop(); (void)Timer_2_ReadStatusRegister();
+    Timer_3_Init(); Timer_3_initVar = 1u; Timer_3_Stop(); (void)Timer_3_ReadStatusRegister();
+    isr_Timer_SetPriority(7u);
+    isr_Timer_1_SetPriority(7u);
+    isr_Timer_2_SetPriority(7u);
+    isr_Timer_3_SetPriority(7u);
+    isr_Timer_Disable();
+    isr_Timer_1_Disable();
+    isr_Timer_2_Disable();
+    isr_Timer_3_Disable();
     isr_Timer_ClearPending();
     isr_Timer_1_ClearPending();
     isr_Timer_2_ClearPending();
+    isr_Timer_3_ClearPending();
 }
 
 static void rx_watchdog_start(void)
@@ -579,29 +821,28 @@ static void comm_led_stop(void)
     g_comm_blinks_remaining = 0u;
 }
 
-/* ── Watchdog de captura (Timer_2, libre durante la ventana silenciosa) ──
+/* ── Watchdog de captura (Timer_3, dedicado) ──
  * Si superMaquina nunca llega a DONE (p.ej. ADC detenido, DMA sin disparos),
  * el equipo antes quedaba mudo para siempre. Ahora el ARM se despierta al
- * vencer la duracion nominal + margen y aborta con diagnostico. */
+ * vencer la duracion nominal + margen y aborta con diagnostico. Al tener
+ * timer propio no compite con LED/esperas de Timer_2. */
 static uint32 capture_expected_ms(uint16 batches)
 {
-    /* 30 muestras/lote a ~2929 S/s ≈ 10.25 ms por lote. */
+    /* 30 muestras/lote a 1020 S/s ≈ 29.4 ms por lote (512 lotes ≈ 15.06 s). */
     return ((uint32)batches * (uint32)BATCH_SAMPLES * 1000u) /
-           (uint32)PSOC_REPORTED_SRATE_HZ;
+           (uint32)psoc_adc_effective_fs_hz();
 }
 
 static void capture_watchdog_arm(void)
 {
     uint32 ms = capture_expected_ms(capture_target_batches());
     g_capture_wd_due = 0u;
-    timer2_arm_ms(ms + (ms >> 1u) + CAPTURE_WD_MARGIN_MS, TIMER2_MODE_CAPTURE_WD);
+    timer3_arm_ms(ms + (ms >> 1u) + CAPTURE_WD_MARGIN_MS);
 }
 
 static void capture_watchdog_stop(void)
 {
-    if (g_timer2_mode == TIMER2_MODE_CAPTURE_WD) {
-        timer2_stop_quiet();
-    }
+    timer3_stop_quiet();
     g_capture_wd_due = 0u;
 }
 
@@ -678,11 +919,42 @@ static void capture_reset_locked(uint16 stored_batches)
     g_capture_end      = g_capture_raw + ((uint32)stored_batches * CAPTURE_BATCH_BYTES);
 }
 
-/* Reconstruye int32 signed a partir de 3 bytes LE (24 bits, extensión de signo) */
+static int32 sign_extend_bits(uint32 value, uint8 bits)
+{
+    uint32 sign;
+    uint32 mask;
+
+    if (bits == 0u || bits >= 32u) {
+        return (int32)value;
+    }
+    sign = (uint32)1u << (bits - 1u);
+    mask = (sign << 1u) - 1u;
+    value &= mask;
+    return (value & sign) ? (int32)(value | ~mask) : (int32)value;
+}
+
+/* Reconstruye int32 signed a partir de una palabra DMA LE de 24 bits. */
 static int32 dma_buf_to_i24(const volatile uint8 *buf)
 {
     uint32 u = (uint32)buf[0] | ((uint32)buf[1] << 8u) | ((uint32)buf[2] << 16u);
-    return (u & 0x00800000UL) ? (int32)(u | 0xFF000000UL) : (int32)u;
+    return sign_extend_bits(u, 24u);
+}
+
+/* El ADC raw puede venir right-aligned (config 2), donde el bit de signo real
+ * es resolution-1. La salida del DFB sigue usando dma_buf_to_i24(). */
+static int32 dma_buf_to_adc_counts(const volatile uint8 *buf)
+{
+    uint32 u = (uint32)buf[0] | ((uint32)buf[1] << 8u) | ((uint32)buf[2] << 16u);
+
+#if (ADC_DEFAULT_NUM_CONFIGS > 1)
+#if (ADC_CF_0V512_ALIGNMENT == 0u)
+    if (ADC_Config == ADC_CF_0V512) {
+        return sign_extend_bits(u, (uint8)ADC_CF_0V512_RESOLUTION);
+    }
+#endif
+#endif
+
+    return sign_extend_bits(u, 24u);
 }
 
 /* ── Handlers de muestra de superMaquina ─────────────────────────────────────
@@ -717,21 +989,17 @@ static void sm_sample_capture_raw(void)
 
 static void sm_sample_capture_filt(void)
 {
-    volatile uint8 *dst;
+    volatile uint8 *dst = g_capture_wr;
     if (g_fir_discard != 0u) {
-        /* Salidas del FIR previas al sync (retardo de grupo): descartar. */
         g_fir_discard--;
         return;
     }
-    dst = g_capture_wr;
     if (dst >= g_capture_end) { return; }
     dst[0] = g_dma_filt_buf[0];
     dst[1] = g_dma_filt_buf[1];
     dst[2] = g_dma_filt_buf[2];
     dst += SAMPLE_BYTES;
     g_capture_wr = dst;
-    /* El objetivo del hardware puede estar extendido (+3 lotes): el fin real
-     * lo marca el llenado del buffer, no el DONE de superMaquina. */
     if (dst >= g_capture_end) { g_capture_done = 1u; }
 }
 
@@ -754,7 +1022,7 @@ static void sm_sample_capture_debug(void)
 static void sm_sample_cal_raw(void)
 {
     psoc_adc_note_isr_sample(
-        psoc_adc_counts_right_aligned(dma_buf_to_i24(g_dma_raw_buf)));
+        psoc_adc_counts_right_aligned(dma_buf_to_adc_counts(g_dma_raw_buf)));
 }
 
 static void sm_sample_cal_filt(void)
@@ -783,11 +1051,9 @@ static void sm_sample_armed_wait(void)
 {
     /* Primer IRQ tras el sync (IRQ_SYNC_EN): superMaquina ya está muestreando.
      * No hay muestra que copiar todavía; solo bookkeeping de la ventana. */
-    runtime_timers_stop_for_quiet_window();
     capture_watchdog_arm();
     g_state = PSOC_SAMPLING;
     g_sm_sample_handler = g_sm_capture_handler;
-    uart_send_diag(PSOC_EVT_SYNC_RISE, CE_STATE_SAMPLING);
 }
 
 static void psoc_enter_sampling(uint8 debugMode)
@@ -813,6 +1079,7 @@ static void psoc_enter_sampling(uint8 debugMode)
 #else
     g_capture_align = 1u;
 #endif
+    g_capture_adc_raw = (source == CE_CFG_SRC_RAW) ? 1u : 0u;
     capture_engine_configure_target(target);
     /* start-now: el FIR viene alimentado en bypass, historia caliente — sin
      * descarte de retardo de grupo. */
@@ -832,31 +1099,15 @@ static void psoc_enter_sampling(uint8 debugMode)
     ADC_StartConvert();
 }
 
-/* Fallbacks legacy (solo compilados con PSOC_SUPERMAQUINA_OWNS_DMA_IRQ=0,
- * TopDesign viejo con ISRs de DMA separadas): despachan al mismo handler. */
-CY_ISR(isr_DMA_DelSig_RAM_Handler)
+static void service_timer_uart_tc(void)
 {
-    g_sm_sample_handler();
-}
-
-CY_ISR(isr_DMA_Filter_RAM_Handler)
-{
-    g_sm_sample_handler();
-}
-
-CY_ISR(isr_Timer)
-{
-    (void)Timer_ReadStatusRegister();
-    Timer_Stop();
     if (rx_state != 0u) {
         watchdog_rx = 1u;
     }
 }
 
-CY_ISR(isr_Timer_1)
+static void service_timer_ping_tc(void)
 {
-    (void)Timer_1_ReadStatusRegister();
-    Timer_1_Stop();
     if (g_timer1_remaining_counts != 0u) {
         timer1_start_next_chunk();
         return;
@@ -889,10 +1140,8 @@ CY_ISR(isr_Timer_1)
     }
 }
 
-CY_ISR(isr_Timer_2)
+static void service_timer_led_tc(void)
 {
-    (void)Timer_2_ReadStatusRegister();
-    Timer_2_Stop();
     if (g_timer2_remaining_counts != 0u) {
         timer2_start_next_chunk();
         return;
@@ -904,10 +1153,122 @@ CY_ISR(isr_Timer_2)
         g_timer2_wait_done = 1u;
     } else if (g_timer2_mode == TIMER2_MODE_COMM_BLINK) {
         g_comm_blink_due = 1u;
-    } else if (g_timer2_mode == TIMER2_MODE_CAPTURE_WD) {
-        g_capture_wd_due = 1u;
     }
     g_timer2_mode = TIMER2_MODE_NONE;
+}
+
+static void service_timer_capture_watchdog_tc(void)
+{
+    if (g_timer3_remaining_counts != 0u) {
+        timer3_start_next_chunk();
+        return;
+    }
+    g_capture_wd_due = 1u;
+}
+
+/* Despacha los eventos de timer permitidos por mask. Ya no pulsa CLEAR_FLAGS:
+ * los TC no tienen sticky en superMaquina (y un CLEAR_FLAGS durante SAMPLING
+ * resetearía los contadores de muestra/lote en pleno vuelo). */
+static void service_timer_events(uint8 mask)
+{
+    uint8 events = timer_events_take_pending(mask);
+
+    if ((events & CE_TIMER_EVT_UART) != 0u) {
+        Timer_Stop();
+        (void)Timer_ReadStatusRegister();
+        service_timer_uart_tc();
+    }
+    if ((events & CE_TIMER_EVT_PING) != 0u) {
+        Timer_1_Stop();
+        (void)Timer_1_ReadStatusRegister();
+        service_timer_ping_tc();
+    }
+    if ((events & CE_TIMER_EVT_LED) != 0u) {
+        Timer_2_Stop();
+        (void)Timer_2_ReadStatusRegister();
+        service_timer_led_tc();
+    }
+    if ((events & CE_TIMER_EVT_CAPTURE_WD) != 0u) {
+        Timer_3_Stop();
+        (void)Timer_3_ReadStatusRegister();
+        service_timer_capture_watchdog_tc();
+    }
+}
+
+/* Fallbacks legacy (solo compilados con PSOC_SUPERMAQUINA_OWNS_DMA_IRQ=0,
+ * TopDesign viejo con ISRs de DMA separadas): despachan al mismo handler. */
+CY_ISR(isr_DMA_DelSig_RAM_Handler)
+{
+    g_sm_sample_handler();
+}
+
+CY_ISR(isr_DMA_Filter_RAM_Handler)
+{
+    g_sm_sample_handler();
+}
+
+CY_ISR(isr_Timer)
+{
+    uint8 st = Timer_ReadStatusRegister();
+    Timer_Stop();
+    if (st == 0u) {
+        if (++g_t0_spurious >= TIMER_STORM_TRIP) {
+            isr_Timer_Disable();
+            g_timer_storm |= 0x01u;
+            g_t0_spurious = 0u;
+        }
+        return;
+    }
+    g_t0_spurious = 0u;
+    service_timer_uart_tc();
+}
+
+CY_ISR(isr_Timer_1)
+{
+    uint8 st = Timer_1_ReadStatusRegister();
+    Timer_1_Stop();
+    if (st == 0u) {
+        if (++g_t1_spurious >= TIMER_STORM_TRIP) {
+            isr_Timer_1_Disable();
+            g_timer_storm |= 0x02u;
+            g_t1_spurious = 0u;
+        }
+        return;
+    }
+    g_t1_spurious = 0u;
+    service_timer_ping_tc();
+}
+
+CY_ISR(isr_Timer_2)
+{
+    uint8 st = Timer_2_ReadStatusRegister();
+    Timer_2_Stop();
+    if (st == 0u) {
+        if (++g_t2_spurious >= TIMER_STORM_TRIP) {
+            isr_Timer_2_Disable();
+            g_timer_storm |= 0x04u;
+            g_t2_spurious = 0u;
+        }
+        return;
+    }
+    g_t2_spurious = 0u;
+    service_timer_led_tc();
+}
+
+CY_ISR(isr_Timer_3)
+{
+    uint8 st = Timer_3_ReadStatusRegister();
+    Timer_3_Stop();
+    if (st == 0u) {
+        if (++g_t3_spurious >= TIMER_STORM_TRIP) {
+            isr_Timer_3_Disable();
+            g_timer_storm |= 0x08u;
+            g_t3_spurious = 0u;
+        }
+        return;
+    }
+    g_t3_spurious = 0u;
+    service_timer_capture_watchdog_tc();
 }
 
 CY_ISR(isr_SyncIn)
@@ -939,7 +1300,10 @@ CY_ISR(isr_SyncIn)
 
 /* IRQ único de superMaquina. Fast path: una sola lectura de status y el
  * handler de muestra vigente; el resto (fin de captura, error, botón) va por
- * el camino lento, que ocurre a lo sumo unas pocas veces por captura. */
+ * el camino lento, que ocurre a lo sumo unas pocas veces por captura.
+ * Los TC de timers ya no llegan acá: quedan holdeados en el STATUS_TC de su
+ * timer y los consume el polling de service_runtime(). Así cada IRQ sin
+ * DONE/ERROR/BUTTON es una muestra, sin ambigüedad ni lecturas extra. */
 CY_ISR(isr_SuperMaquina_Handler)
 {
     uint8 st = status_Read();
@@ -975,7 +1339,6 @@ CY_ISR(isr_SuperMaquina_Handler)
             g_state = PSOC_SAMPLING;   /* canaliza el cierre por service_runtime */
         }
         g_capture_done = 1u;
-        uart_send_diag(PSOC_EVT_CAPTURE_DONE, g_ce_error);
         return;
     }
 
@@ -1022,6 +1385,10 @@ CY_ISR(isr_SyncIn_SafeVector)
 
 extern void IntDefaultHandler(void);
 
+#ifndef CY_NUM_INTERRUPTS
+#define CY_NUM_INTERRUPTS 32u
+#endif
+
 CY_ISR(unexpected_irq_trap)
 {
     uint32 vecactive = CY_GET_REG32((reg32 *)0xE000ED04u) & 0x1FFu;
@@ -1067,7 +1434,7 @@ static void led_write(uint8 value)
 static void led_toggle(void)
 {
 #ifdef CY_PINS_LED_H
-    if (g_state != PSOC_SAMPLING) {
+    if (g_state != PSOC_ARMED && g_state != PSOC_SAMPLING) {
         LED_Write(LED_Read() ^ 0x01u);
     }
 #endif
@@ -1151,9 +1518,6 @@ static void PGAvdac_Set(uint8 code)
     }
 }
 
-/* Lotes extra a pedirle a superMaquina en captura filtrada armada, para que
- * tras descartar las 63 muestras de retardo de grupo el buffer igual reciba
- * los 30*N puntos pedidos: ceil(63/30) = 3. */
 #define CAPTURE_FILTER_EXTRA_BATCHES \
     ((uint16)((FILTER_GROUP_DELAY + BATCH_SAMPLES - 1u) / BATCH_SAMPLES))
 
@@ -1165,15 +1529,11 @@ static void psoc_arm(void)
     uint16 hw_target;
     uint16 discard = 0u;
 
+    runtime_timers_stop_for_quiet_window();
     psoc_prepare_capture_path();
     source = capture_engine_source_from_stream(g_stream_mode);
     hw_target = stored_target;
     if (source == CE_CFG_SRC_FILTER || source == CE_CFG_SRC_COMBINED) {
-        /* Ruta filtrada armada: superMaquina mantiene el FIR alimentado en
-         * ARMED (historia caliente) y el ARM descarta las primeras 63 salidas
-         * tras el sync; asi la primera muestra almacenada corresponde al
-         * instante del sync, alineada con la ruta raw. El objetivo del
-         * hardware se extiende para cubrir el descarte. */
         discard = FILTER_GROUP_DELAY;
         if (stored_target > (uint16)(PSOC_CAPTURE_MAX_BATCHES - CAPTURE_FILTER_EXTRA_BATCHES)) {
             stored_target = (uint16)(PSOC_CAPTURE_MAX_BATCHES - CAPTURE_FILTER_EXTRA_BATCHES);
@@ -1186,6 +1546,7 @@ static void psoc_arm(void)
 #else
     g_capture_align = 1u;
 #endif
+    g_capture_adc_raw = (source == CE_CFG_SRC_RAW) ? 1u : 0u;
     saved = CyEnterCriticalSection();
     capture_reset_locked(stored_target);
     g_fir_discard = discard;
@@ -1199,7 +1560,6 @@ static void psoc_arm(void)
     capture_engine_clear_flags();
     capture_engine_pulse(CE_CTRL_ARM);
     ADC_StartConvert();
-    uart_send_diag(PSOC_EVT_ARMED, diag_u16_sat(g_n_batches));
 }
 
 static void psoc_start_now(void)
@@ -1223,23 +1583,24 @@ static uint8 psoc_start_calibration_if_idle(uint8 send_ack)
     g_batches_captured = 0u;
     g_capture_done = 0u;
     g_last_calibration_ok = 0u;
-    uart_send_diag(PSOC_EVT_BOOT, 0xA1u);  /* BREADCRUMB temporal */
     psoc_calibration_servo_abort();
     idle_ping_stop();
     comm_led_stop();
-    uart_send_diag(PSOC_EVT_BOOT, 0xA2u);  /* BREADCRUMB temporal */
     capture_engine_set_enabled(0u, 0u);
     capture_engine_clear_flags();
-    uart_send_diag(PSOC_EVT_BOOT, 0xA3u);  /* BREADCRUMB temporal */
-    /* La ruta del DMA (raw vs Filter) y el AMux los gobierna cal_pi_stage_begin
-     * (calibration.c) por etapa -- no hace falta forzar nada aca. */
+    /* La calibracion usa targets definidos para el rango ±2.5 V. Si el host
+     * dejo seleccionado ±0.512 V, se fuerza 2V5 solo durante esta corrida y
+     * se restaura la seleccion al terminar. La ruta DMA/AMux la gobierna
+     * cal_pi_stage_begin (calibration.c) por etapa. */
+    psoc_adc_select_calibration_config();
     uart_send_diag(PSOC_EVT_BOOT, PSOC_HW_CLASS);
     uart_send_diag(PSOC_EVT_CAL_START, 0u);
     cal_start = psoc_calibration_start_async();
     if (cal_start == 2u) {
         g_last_calibration_ok = 1u;
+        psoc_adc_cal_override(0u);
+        psoc_prepare_capture_path();
         idle_ping_schedule();
-        dma_route_select(g_stream_mode);
         uart_send_diag(PSOC_EVT_CAL_DONE, 1u);
         if (send_ack) {
             uart_send_cfg_ack(PSOC_CMD_CALIBRATE, 1u);
@@ -1247,6 +1608,8 @@ static uint8 psoc_start_calibration_if_idle(uint8 send_ack)
         return 1u;
     }
     if (!cal_start) {
+        psoc_adc_cal_override(0u);
+        psoc_prepare_capture_path();
         uart_send_diag(PSOC_EVT_CAL_DONE, 0u);
         if (send_ack) {
             uart_send_cfg_ack(PSOC_CMD_CALIBRATE, 0u);
@@ -1284,6 +1647,11 @@ static uint8 service_button_calibration(void)
     }
 
     g_cal_button_pressed = 0u;
+    if ((g_state == PSOC_ARMED) || (g_state == PSOC_SAMPLING)) {
+        /* Política: botón fuera de IDLE se descarta; en ventana crítica ni
+         * siquiera se emite diagnóstico UART. */
+        return 0u;
+    }
     uart_send_diag(PSOC_EVT_BUTTON, g_state);
     if (g_state == PSOC_IDLE) {
         (void)psoc_start_calibration_if_idle(0u);
@@ -1315,7 +1683,8 @@ static void uart_send_capture_batch(uint16 batchIndex)
     for (i = 0u; i < BATCH_SAMPLES; i++, p += 3u, src += 3u)
     {
         if (g_capture_align) {
-            int32 val = psoc_adc_counts_right_aligned(dma_buf_to_i24(src));
+            int32 val = psoc_adc_counts_right_aligned(
+                g_capture_adc_raw ? dma_buf_to_adc_counts(src) : dma_buf_to_i24(src));
             p[0] = (uint8)( val         & 0xFFu);
             p[1] = (uint8)((val >>  8u) & 0xFFu);
             p[2] = (uint8)((val >> 16u) & 0xFFu);
@@ -1352,7 +1721,7 @@ static void uart_service(void)
                     case 0xA5u: case 0xA6u: case 0xA9u: case 0xAAu:
                     case 0xB1u: case 0xB3u: case 0xB4u: case PSOC_CMD_CALIBRATE:
                     case PSOC_CMD_SAVE_EEPROM: case PSOC_CMD_SELECT_STREAM:
-                    case PSOC_CMD_ADC_SNAPSHOT:
+                    case PSOC_CMD_ADC_SNAPSHOT: case PSOC_CMD_ADC_CONFIG:
                     case PSOC_CMD_BLINK_LED:
                     case PSOC_CMD_PONG:
                         rx_cmd = rx; rx_state = 2u; break;
@@ -1390,7 +1759,7 @@ static void uart_service(void)
                     g_esp_connected = 1u;
                     uart_send_diag(PSOC_EVT_ESP_SEEN, rx_cmd);
                 }
-                if (rx_cmd != PSOC_CMD_PONG) {
+                if (rx_cmd != PSOC_CMD_PONG && rx_cmd != 0xB1u) {
                     uart_send_diag(PSOC_EVT_RX_CMD, rx_cmd);
                 }
 
@@ -1414,6 +1783,7 @@ static void uart_service(void)
                             break;
                         case 0xA6u: case 0xA9u: case 0xAAu:
                         case 0xB1u: case 0xB3u: case 0xB4u:
+                        case PSOC_CMD_ADC_CONFIG:
                             uart_send_diag(PSOC_EVT_CAL_BUSY, rx_cmd);
                             uart_send_cfg_ack(rx_cmd, 0u);
                             break;
@@ -1451,9 +1821,8 @@ static void uart_service(void)
                         uart_send_diag(PSOC_EVT_SETN, diag_u16_sat(g_n_batches));
                         break;
                     case 0xB1u:
+                        uart_wait_tx_complete_quiet();
                         psoc_arm();
-                        uart_send_cfg_ack(0xB1u, g_state);
-                        led_toggle();
                         break;
                     case 0xB4u:
                         uart_send_diag(PSOC_EVT_START_NOW, 0u);
@@ -1541,6 +1910,17 @@ static void uart_service(void)
                         uart_send_cfg_ack(PSOC_CMD_SELECT_STREAM, g_stream_mode);
                         led_toggle();
                         break;
+                    case PSOC_CMD_ADC_CONFIG:
+                        if ((g_state == PSOC_IDLE) && psoc_adc_set_config(rx_p1)) {
+                            psoc_adc_cal_override(0u);
+                            psoc_prepare_capture_path();
+                            uart_send_cfg_ack(PSOC_CMD_ADC_CONFIG, psoc_adc_get_config());
+                            uart_send_fs_report();
+                        } else {
+                            uart_send_cfg_ack(PSOC_CMD_ADC_CONFIG, 0u);
+                        }
+                        led_toggle();
+                        break;
                     case PSOC_CMD_ADC_SNAPSHOT:
                         psoc_report_adc_snapshot_if_idle();
                         led_toggle();
@@ -1560,15 +1940,114 @@ static void uart_service(void)
     }
 }
 
+/* Recuperación tras el breaker de tormenta de IRQ: re-inicializa el bloque
+ * (Enable deja propagar cualquier clear latcheado, doble lectura de status,
+ * pend limpio) y restaura el estado software del modo que estaba en vuelo
+ * para que ninguna espera quede huérfana. */
+static void timer_storm_recover(void)
+{
+    uint8 mask;
+    uint8 saved;
+
+    if (g_timer_storm == 0u) { return; }
+    saved = CyEnterCriticalSection();
+    mask = g_timer_storm;
+    g_timer_storm = 0u;
+    CyExitCriticalSection(saved);
+
+    if (mask & 0x01u) {
+        Timer_Enable();
+        (void)Timer_ReadStatusRegister();
+        Timer_Stop();
+        (void)Timer_ReadStatusRegister();
+        isr_Timer_ClearPending();
+        if (rx_state != 0u) {
+            watchdog_rx = 1u;   /* resincroniza el parser a mano */
+        }
+        uart_send_diag(PSOC_EVT_TIMER_STORM, 0u);
+    }
+    if (mask & 0x02u) {
+        uint8 mode;
+        Timer_1_Enable();
+        (void)Timer_1_ReadStatusRegister();
+        Timer_1_Stop();
+        (void)Timer_1_ReadStatusRegister();
+        isr_Timer_1_ClearPending();
+        saved = CyEnterCriticalSection();
+        mode = g_timer1_mode;
+        g_timer1_mode = TIMER1_MODE_NONE;
+        g_timer1_remaining_counts = 0u;
+        if (mode == TIMER1_MODE_BOOT_PING) {
+            g_boot_ping_due = 1u;
+        } else if (mode == TIMER1_MODE_IDLE_PING) {
+            g_idle_ping_due = 1u;
+            g_idle_ping_armed = 0u;
+        }
+        CyExitCriticalSection(saved);
+        if (mode == TIMER1_MODE_CAL_TICK && g_cal_timer_active) {
+            /* Reproduce la cadena del tick de calibración. */
+            g_cal_progress_due = 1u;
+            timer1_arm_ms(g_cal_progress_period_ms, TIMER1_MODE_CAL_TICK);
+        }
+        uart_send_diag(PSOC_EVT_TIMER_STORM, 1u);
+    }
+    if (mask & 0x04u) {
+        uint8 mode;
+        Timer_2_Enable();
+        (void)Timer_2_ReadStatusRegister();
+        Timer_2_Stop();
+        (void)Timer_2_ReadStatusRegister();
+        isr_Timer_2_ClearPending();
+        saved = CyEnterCriticalSection();
+        mode = g_timer2_mode;
+        g_timer2_mode = TIMER2_MODE_NONE;
+        g_timer2_remaining_counts = 0u;
+        if (mode == TIMER2_MODE_BOOT_LED_OFF) {
+            g_boot_led_off_due = 1u;
+        } else if (mode == TIMER2_MODE_WAIT) {
+            g_timer2_wait_done = 1u;
+        } else if (mode == TIMER2_MODE_COMM_BLINK) {
+            g_comm_blink_due = 1u;
+        }
+        CyExitCriticalSection(saved);
+        uart_send_diag(PSOC_EVT_TIMER_STORM, 2u);
+    }
+    if (mask & 0x08u) {
+        Timer_3_Enable();
+        (void)Timer_3_ReadStatusRegister();
+        Timer_3_Stop();
+        (void)Timer_3_ReadStatusRegister();
+        isr_Timer_3_ClearPending();
+        g_timer3_remaining_counts = 0u;
+        if (g_state == PSOC_SAMPLING && g_capture_done == 0u) {
+            capture_watchdog_arm();   /* re-arma la ventana completa */
+        }
+        uart_send_diag(PSOC_EVT_TIMER_STORM, 3u);
+    }
+}
+
 static void service_runtime(void)
 {
+    if ((g_state == PSOC_ARMED) || (g_state == PSOC_SAMPLING)) {
+        /* Ventana crítica: la única actividad secundaria permitida es el
+         * watchdog de captura (troceado del Timer_3). uart/ping/led quedan
+         * holdeados en su STATUS_TC hasta volver a un estado tranquilo. */
+        (void)capture_engine_poll_capture_wd();
+        service_timer_events(CE_TIMER_EVT_CAPTURE_WD);
+    } else {
+        (void)capture_engine_poll_timer_events();
+        service_timer_events(CE_TIMER_EVT_MASK);
+        timer_storm_recover();
+    }
+
     if (g_state == PSOC_CALIBRATING) {
         if (psoc_calibration_service_async()) {
             uint8 ok = psoc_calibration_async_result_ok();
             g_state = PSOC_IDLE;
             g_last_calibration_ok = ok ? 1u : 0u;
+            psoc_adc_cal_override(0u);
+            psoc_prepare_capture_path();
             idle_ping_schedule();
-            dma_route_select(g_stream_mode);  /* restaura ruta previa a la calibración */
             uart_send_diag(PSOC_EVT_CAL_DONE, ok);
             if (g_cal_ack_pending) {
                 g_cal_ack_pending = 0u;
@@ -1579,7 +2058,12 @@ static void service_runtime(void)
         return;
     }
 
+    if (g_state == PSOC_ARMED) {
+        return;   /* HOT_WAIT silencioso: sin UART RX/TX, LED ni pings. */
+    }
+
     if (g_state == PSOC_SAMPLING) {
+        uint8 capture_error = g_ce_error;
         if (g_capture_done == 0u) {
             if (!g_capture_wd_due) {
                 return;   /* Silencio total: sin UART RX/TX, sin LED, sin pings. */
@@ -1603,7 +2087,9 @@ static void service_runtime(void)
         g_batches_captured =
             (uint16)(((uint32)(g_capture_wr - g_capture_raw)) / CAPTURE_BATCH_BYTES);
         idle_ping_schedule();
-        uart_send_diag(PSOC_EVT_CAPTURE_DONE, diag_u16_sat(g_batches_captured));
+        uart_send_diag(PSOC_EVT_CAPTURE_DONE,
+                       (capture_error != 0u) ? capture_error : diag_u16_sat(g_batches_captured));
+        g_ce_error = 0u;
         g_capture_done = 0u;
         g_state = PSOC_IDLE;
     }
@@ -1903,16 +2389,13 @@ int main(void)
 #endif
 #endif
     fixed_timers_init();
-    isr_Timer_StartEx(isr_Timer);
-    isr_Timer_1_StartEx(isr_Timer_1);
-    isr_Timer_2_StartEx(isr_Timer_2);
-    /* isr_Timer_3 ya no se registra: Timer_3 quedó libre (ver mapa arriba). */
 #if !PSOC_SUPERMAQUINA_OWNS_SYNC_IRQ
 #ifdef CY_ISR_isr_SyncIn_H
     isr_SyncIn_StartEx(isr_SyncIn);
 #endif
 #endif
     isr_SuperMaquina_StartEx(isr_SuperMaquina_Handler);
+    isr_SuperMaquina_SetPriority(0u);
     Clock_1_Start();
 #if PSOC_BUTTON_CAL_ENABLE
 #ifdef CY_ISR_isr_Button_H
@@ -1920,6 +2403,12 @@ int main(void)
     isr_Button_StartEx(isr_Button_Handler);
 #endif
 #endif
+#if PSOC_SUPERMAQUINA_OWNS_SYNC_IRQ
+#ifdef CY_ISR_isr_SyncIn_H
+    *isr_SyncIn_INTC_VECTOR = (uint32)isr_SyncIn_SafeVector;
+#endif
+#endif
+    install_irq_traps();
 
     /* ── Loop de arranque: busca el ESP sin bloquear UART/ADC ───────────── */
     wait_for_esp();
@@ -1941,7 +2430,7 @@ int main(void)
         }
         service_runtime();
 
-        if (g_state == PSOC_SAMPLING || capture_dump_pending()) {
+        if (g_state == PSOC_ARMED || g_state == PSOC_SAMPLING || capture_dump_pending()) {
             idle_ping_stop();
             continue;   /* Sin LED ni pings durante captura y volcado */
         }

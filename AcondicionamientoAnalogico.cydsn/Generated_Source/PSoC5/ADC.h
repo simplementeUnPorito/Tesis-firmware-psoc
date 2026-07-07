@@ -96,28 +96,28 @@ CY_ISR_PROTO(ADC_ISR4);
 **************************************/
 
 /* Default configuration values from user parameters */
-#define ADC_CFG1_RESOLUTION         (18u )
-#define ADC_CFG1_INPUT_RANGE        (2u)
-#define ADC_CFG1_SRATE              (3000u)
-#define ADC_CFG1_REFERENCE          (6u)
-#define ADC_CFG1_BUFFER_GAIN        (1u)
-#define ADC_CFG1_CONV_MODE          (2u)
-#define ADC_CFG1_INPUT_RANGE_VALUE  (5)
+#define ADC_CF_2V5_RESOLUTION         (18u )
+#define ADC_CF_2V5_INPUT_RANGE        (5u)
+#define ADC_CF_2V5_SRATE              (1020u)
+#define ADC_CF_2V5_REFERENCE          (5u)
+#define ADC_CF_2V5_BUFFER_GAIN        (1u)
+#define ADC_CF_2V5_CONV_MODE          (2u)
+#define ADC_CF_2V5_INPUT_RANGE_VALUE  (2.5)
 #define ADC_DEFAULT_STROBE                     (0u)
 #define ADC_DEFAULT_INTERNAL_CLK               (1u)
-#define ADC_DEFAULT_NUM_CONFIGS                (1u)
+#define ADC_DEFAULT_NUM_CONFIGS                (4u)
 #define ADC_DEFAULT_CHARGE_PUMP_CLOCK          (1u)
-#define ADC_DEFAULT_INPUT_MODE                 (1u)
+#define ADC_DEFAULT_INPUT_MODE                 (0u)
 #define ADC_IRQ_REMOVE                         (0u)          /* Removes internal interrupt */
 #define ADC_MI_ENABLE                          (0u)
 
 /* Configuration constants which can be used as the "config" parameter of
 *  ADC_SelectConfiguration() API.
 */
-#define ADC_CFG1                (1u)
-#define ADC_CFG2                (2u)
-#define ADC_CFG3                (3u)
-#define ADC_CFG4                (4u)
+#define ADC_CF_2V5                (1u)
+#define ADC_CF_0V512                (2u)
+#define ADC_CF_1V024                (3u)
+#define ADC_CF_0V625                (4u)
 
 
 /**************************************
@@ -1337,412 +1337,412 @@ extern volatile int32 ADC_CountsPerVolt;
 
 /* Default register settings for the Config 1 */
 /* Default Config
-* ADC_CFG1 Sample Rate: 3000 Samples per Second
-* ADC_CFG1 Conversion Mode: 2
-* ADC_CFG1 Input Buffer Gain: 1
-* ADC_CFG1 Reference: 6
-* ADC_CFG1 Input Range: 2
-* ADC_CFG1 Resolution: 18 bits
-* ADC_CFG1 Clock: 3072000 Hz
+* ADC_CF_2V5 Sample Rate: 1020 Samples per Second
+* ADC_CF_2V5 Conversion Mode: 2
+* ADC_CF_2V5 Input Buffer Gain: 1
+* ADC_CF_2V5 Reference: 5
+* ADC_CF_2V5 Input Range: 5
+* ADC_CF_2V5 Resolution: 18 bits
+* ADC_CF_2V5 Clock: 1044480 Hz
 */
 
-#define ADC_CFG1_DEC_CR             (0xF8u)
-#define ADC_CFG1_DEC_SR             (0x14u)
-#define ADC_CFG1_DEC_SHIFT1         (0x04u)
-#define ADC_CFG1_DEC_SHIFT2         (0x03u)
-#define ADC_CFG1_DEC_DIV            (32)
-#define ADC_CFG1_DEC_DR2            (0x0Fu)
-#define ADC_CFG1_DEC_DR2H           (0x00u)
-#define ADC_CFG1_DEC_DR1            (0x3Fu)
-#define ADC_CFG1_DEC_OCOR           (0x00u)
-#define ADC_CFG1_DEC_OCORM          (0x00u)
-#define ADC_CFG1_DEC_OCORH          (0x00u)
-#define ADC_CFG1_DEC_GVAL           (0x0Fu)
-#define ADC_CFG1_DEC_GCOR           (0x00u)
-#define ADC_CFG1_DEC_GCORH          (0x00u)
-#define ADC_CFG1_DEC_COHER          (0x03u)
-#define ADC_CFG1_DSM_CR0            (0x0Au)
-#define ADC_CFG1_DSM_CR1            (0x00u)
-#define ADC_CFG1_DSM_CR2            (0x7Au)
-#define ADC_CFG1_DSM_CR3            (0x00u)
-#define ADC_CFG1_DSM_CR4            (0x50u)
-#define ADC_CFG1_DSM_CR5            (0x0Au)
-#define ADC_CFG1_DSM_CR6            (0x2Cu)
-#define ADC_CFG1_DSM_CR7            (0x00u)
-#define ADC_CFG1_DSM_CR8            (0x5Bu)
-#define ADC_CFG1_DSM_CR9            (0x5Eu)
-#define ADC_CFG1_DSM_CR10           (0x44u)
-#define ADC_CFG1_DSM_CR11           (0x48u)
-#define ADC_CFG1_DSM_CR12           (0x01u)
-#define ADC_CFG1_DSM_CR13           (0x00u)
-#define ADC_CFG1_DSM_CR14           (0x02u)
-#define ADC_CFG1_DSM_CR15           (0x12u)
-#define ADC_CFG1_DSM_CR16           (0x28u)
-#define ADC_CFG1_DSM_CR17           (0xEBu)
-#define ADC_CFG1_DSM_REF0           (0x52u)
-#define ADC_CFG1_DSM_REF1           (0x00u)
-#define ADC_CFG1_DSM_REF2           (0xC0u)
-#define ADC_CFG1_DSM_REF3           (0x03u)
-#define ADC_CFG1_DSM_DEM0           (0x04u)
-#define ADC_CFG1_DSM_DEM1           (0x00u)
-#define ADC_CFG1_DSM_MISC           (0x00u)
-#define ADC_CFG1_DSM_CLK            (0x18u)
-#define ADC_CFG1_DSM_BUF0           (0x02u)
-#define ADC_CFG1_DSM_BUF1           (0x02u)
-#define ADC_CFG1_DSM_BUF2           (0x00u)
-#define ADC_CFG1_DSM_BUF3           (0x00u)
-#define ADC_CFG1_DSM_OUT0           (0x00u)
-#define ADC_CFG1_DSM_OUT1           (0x00u)
-#define ADC_CFG1_DSM_SW3            (0x40u)
-#define ADC_CFG1_CLOCKS_PER_SAMPLE  (0x0400u)
-#define ADC_CFG1_CLOCK_FREQ         (3072000u)
-#define ADC_CFG1_CP_CLOCK_FREQ      (12000000u)
-#define ADC_CFG1_REFERENCE_VOLTAGE  (1.2500)
-#define ADC_CFG1_COUNTS_PER_VOLT    (52429)
-#define ADC_CFG1_IDEAL_DEC_GAIN     (0x8DF0u)
-#define ADC_CFG1_IDEAL_ODDDEC_GAIN  (0x8000u)
+#define ADC_CF_2V5_DEC_CR             (0xF8u)
+#define ADC_CF_2V5_DEC_SR             (0x14u)
+#define ADC_CF_2V5_DEC_SHIFT1         (0x04u)
+#define ADC_CF_2V5_DEC_SHIFT2         (0x04u)
+#define ADC_CF_2V5_DEC_DIV            (32)
+#define ADC_CF_2V5_DEC_DR2            (0x0Fu)
+#define ADC_CF_2V5_DEC_DR2H           (0x00u)
+#define ADC_CF_2V5_DEC_DR1            (0x3Fu)
+#define ADC_CF_2V5_DEC_OCOR           (0x00u)
+#define ADC_CF_2V5_DEC_OCORM          (0x00u)
+#define ADC_CF_2V5_DEC_OCORH          (0x00u)
+#define ADC_CF_2V5_DEC_GVAL           (0x0Fu)
+#define ADC_CF_2V5_DEC_GCOR           (0x00u)
+#define ADC_CF_2V5_DEC_GCORH          (0x00u)
+#define ADC_CF_2V5_DEC_COHER          (0x03u)
+#define ADC_CF_2V5_DSM_CR0            (0x0Au)
+#define ADC_CF_2V5_DSM_CR1            (0x00u)
+#define ADC_CF_2V5_DSM_CR2            (0x7Au)
+#define ADC_CF_2V5_DSM_CR3            (0x00u)
+#define ADC_CF_2V5_DSM_CR4            (0x50u)
+#define ADC_CF_2V5_DSM_CR5            (0x13u)
+#define ADC_CF_2V5_DSM_CR6            (0x2Bu)
+#define ADC_CF_2V5_DSM_CR7            (0x00u)
+#define ADC_CF_2V5_DSM_CR8            (0x5Bu)
+#define ADC_CF_2V5_DSM_CR9            (0x5Eu)
+#define ADC_CF_2V5_DSM_CR10           (0x44u)
+#define ADC_CF_2V5_DSM_CR11           (0x48u)
+#define ADC_CF_2V5_DSM_CR12           (0x02u)
+#define ADC_CF_2V5_DSM_CR13           (0x00u)
+#define ADC_CF_2V5_DSM_CR14           (0x02u)
+#define ADC_CF_2V5_DSM_CR15           (0x12u)
+#define ADC_CF_2V5_DSM_CR16           (0x28u)
+#define ADC_CF_2V5_DSM_CR17           (0xEBu)
+#define ADC_CF_2V5_DSM_REF0           (0x52u)
+#define ADC_CF_2V5_DSM_REF1           (0x00u)
+#define ADC_CF_2V5_DSM_REF2           (0x58u)
+#define ADC_CF_2V5_DSM_REF3           (0x00u)
+#define ADC_CF_2V5_DSM_DEM0           (0x04u)
+#define ADC_CF_2V5_DSM_DEM1           (0x00u)
+#define ADC_CF_2V5_DSM_MISC           (0x00u)
+#define ADC_CF_2V5_DSM_CLK            (0x18u)
+#define ADC_CF_2V5_DSM_BUF0           (0x02u)
+#define ADC_CF_2V5_DSM_BUF1           (0x02u)
+#define ADC_CF_2V5_DSM_BUF2           (0x00u)
+#define ADC_CF_2V5_DSM_BUF3           (0x00u)
+#define ADC_CF_2V5_DSM_OUT0           (0x00u)
+#define ADC_CF_2V5_DSM_OUT1           (0x00u)
+#define ADC_CF_2V5_DSM_SW3            (0x00u)
+#define ADC_CF_2V5_CLOCKS_PER_SAMPLE  (0x0400u)
+#define ADC_CF_2V5_CLOCK_FREQ         (1044480u)
+#define ADC_CF_2V5_CP_CLOCK_FREQ      (4177920u)
+#define ADC_CF_2V5_REFERENCE_VOLTAGE  (1.2500)
+#define ADC_CF_2V5_COUNTS_PER_VOLT    (52429)
+#define ADC_CF_2V5_IDEAL_DEC_GAIN     (0x915Bu)
+#define ADC_CF_2V5_IDEAL_ODDDEC_GAIN  (0x8000u)
 
-#define ADC_CFG1_ALIGNMENT          (1u)
-#define ADC_CFG1_ADC_CLK_DIVIDER    (7u)
-#define ADC_CFG1_CP_CLK_DIVIDER     (1u)
+#define ADC_CF_2V5_ALIGNMENT          (1u)
+#define ADC_CF_2V5_ADC_CLK_DIVIDER    (22u)
+#define ADC_CF_2V5_CP_CLK_DIVIDER     (5u)
 
 /* Input and DAC Cap values in pF */
-#define ADC_CFG1_IPCAP1VALUE        (0x03E0u)
-#define ADC_CFG1_DACAPVALUE         (0x1130u)
+#define ADC_CF_2V5_IPCAP1VALUE        (0x0760u)
+#define ADC_CF_2V5_DACAPVALUE         (0x10C0u)
 
 /* Below defines are deprecated and should not be used. These are provided
 *   just to keep the component backward compatible
 */
-#define ADC_DEFAULT_SRATE                      ADC_CFG1_SRATE
-#define ADC_CLOCKS_PER_SAMPLE                  ADC_CFG1_CLOCKS_PER_SAMPLE
-#define ADC_DFLT_CLOCK_FREQ                    ADC_CFG1_CLOCK_FREQ
-#define ADC_REFERENCE_VOLTAGE                  ADC_CFG1_REFERENCE_VOLTAGE
-#define ADC_DFLT_COUNTS_PER_VOLT               ADC_CFG1_COUNTS_PER_VOLT
-#define ADC_DEFAULT_RESOLUTION                 ADC_CFG1_RESOLUTION
-#define ADC_DEFAULT_CONV_MODE                  ADC_CFG1_CONV_MODE
-#define ADC_DEFAULT_IDEAL_DEC_GAIN             ADC_CFG1_IDEAL_DEC_GAIN
-#define ADC_DEFAULT_RANGE                      ADC_CFG1_RANGE
-#define ADC_DEFAULT_RANGE_VALUE                ADC_CFG1_RANGE_VALUE
-#define ADC_DEFAULT_REFERENCE                  ADC_CFG1_REFERENCE
-#define ADC_DEFAULT_BUF_GAIN                   ADC_CFG1_BUF_GAIN
-#define ADC_CFG1_BUF_GAIN           ADC_CFG1_BUFFER_GAIN
-#define ADC_CFG1_RANGE              ADC_CFG1_INPUT_RANGE
-#define ADC_CFG1_RANGE_VALUE        ADC_CFG1_INPUT_RANGE_VALUE
+#define ADC_DEFAULT_SRATE                      ADC_CF_2V5_SRATE
+#define ADC_CLOCKS_PER_SAMPLE                  ADC_CF_2V5_CLOCKS_PER_SAMPLE
+#define ADC_DFLT_CLOCK_FREQ                    ADC_CF_2V5_CLOCK_FREQ
+#define ADC_REFERENCE_VOLTAGE                  ADC_CF_2V5_REFERENCE_VOLTAGE
+#define ADC_DFLT_COUNTS_PER_VOLT               ADC_CF_2V5_COUNTS_PER_VOLT
+#define ADC_DEFAULT_RESOLUTION                 ADC_CF_2V5_RESOLUTION
+#define ADC_DEFAULT_CONV_MODE                  ADC_CF_2V5_CONV_MODE
+#define ADC_DEFAULT_IDEAL_DEC_GAIN             ADC_CF_2V5_IDEAL_DEC_GAIN
+#define ADC_DEFAULT_RANGE                      ADC_CF_2V5_RANGE
+#define ADC_DEFAULT_RANGE_VALUE                ADC_CF_2V5_RANGE_VALUE
+#define ADC_DEFAULT_REFERENCE                  ADC_CF_2V5_REFERENCE
+#define ADC_DEFAULT_BUF_GAIN                   ADC_CF_2V5_BUF_GAIN
+#define ADC_CF_2V5_BUF_GAIN           ADC_CF_2V5_BUFFER_GAIN
+#define ADC_CF_2V5_RANGE              ADC_CF_2V5_INPUT_RANGE
+#define ADC_CF_2V5_RANGE_VALUE        ADC_CF_2V5_INPUT_RANGE_VALUE
 
 /* Input and DAC Cap values in pF */
-#define ADC_DEFAULT_IPCAP1VALUE                ADC_CFG1_IPCAP1VALUE
-#define ADC_DEFAULT_DACAPVALUE                 ADC_CFG1_DACAPVALUE
-#define ADC_DEFAULT_IDEAL_ODDDEC_GAIN          ADC_CFG1_IDEAL_ODDDEC_GAIN
+#define ADC_DEFAULT_IPCAP1VALUE                ADC_CF_2V5_IPCAP1VALUE
+#define ADC_DEFAULT_DACAPVALUE                 ADC_CF_2V5_DACAPVALUE
+#define ADC_DEFAULT_IDEAL_ODDDEC_GAIN          ADC_CF_2V5_IDEAL_ODDDEC_GAIN
 
 
 /* Default register settings for the Config 2 */
 /* Second Config
-* ADC_CFG2 Sample Rate: 10000 Samples per Second
-* ADC_CFG2 Conversion Mode: 2
-* ADC_CFG2 Input Buffer Gain: 1
-* ADC_CFG2 Reference: 0
-* ADC_CFG2 Input Range: 0
-* ADC_CFG2 Resolution: 16 bits
-* ADC_CFG2 Clock: 640000 Hz
+* ADC_CF_0V512 Sample Rate: 1020 Samples per Second
+* ADC_CF_0V512 Conversion Mode: 2
+* ADC_CF_0V512 Input Buffer Gain: 1
+* ADC_CF_0V512 Reference: 0
+* ADC_CF_0V512 Input Range: 7
+* ADC_CF_0V512 Resolution: 18 bits
+* ADC_CF_0V512 Clock: 1044480 Hz
 */
 
-#define ADC_CFG2_DEC_CR             (0x38u)
-#define ADC_CFG2_DEC_SR             (0x14u)
-#define ADC_CFG2_DEC_SHIFT1         (0x04u)
-#define ADC_CFG2_DEC_SHIFT2         (0x06u)
-#define ADC_CFG2_DEC_DIV            (0)
-#define ADC_CFG2_DEC_DR2            (0x00u)
-#define ADC_CFG2_DEC_DR2H           (0x00u)
-#define ADC_CFG2_DEC_DR1            (0x3Fu)
-#define ADC_CFG2_DEC_OCOR           (0x00u)
-#define ADC_CFG2_DEC_OCORM          (0x00u)
-#define ADC_CFG2_DEC_OCORH          (0x00u)
-#define ADC_CFG2_DEC_GVAL           (0x0Fu)
-#define ADC_CFG2_DEC_GCOR           (0x00u)
-#define ADC_CFG2_DEC_GCORH          (0x00u)
-#define ADC_CFG2_DEC_COHER          (0x01u)
-#define ADC_CFG2_DSM_CR0            (0x0Au)
-#define ADC_CFG2_DSM_CR1            (0x00u)
-#define ADC_CFG2_DSM_CR2            (0x7Au)
-#define ADC_CFG2_DSM_CR3            (0x00u)
-#define ADC_CFG2_DSM_CR4            (0x50u)
-#define ADC_CFG2_DSM_CR5            (0x27u)
-#define ADC_CFG2_DSM_CR6            (0x2Cu)
-#define ADC_CFG2_DSM_CR7            (0x00u)
-#define ADC_CFG2_DSM_CR8            (0x5Bu)
-#define ADC_CFG2_DSM_CR9            (0x5Eu)
-#define ADC_CFG2_DSM_CR10           (0x55u)
-#define ADC_CFG2_DSM_CR11           (0x5Au)
-#define ADC_CFG2_DSM_CR12           (0x05u)
-#define ADC_CFG2_DSM_CR13           (0x00u)
-#define ADC_CFG2_DSM_CR14           (0x01u)
-#define ADC_CFG2_DSM_CR15           (0x11u)
-#define ADC_CFG2_DSM_CR16           (0x19u)
-#define ADC_CFG2_DSM_CR17           (0x97u)
-#define ADC_CFG2_DSM_REF0           (0x44u)
-#define ADC_CFG2_DSM_REF2           (0x58u)
-#define ADC_CFG2_DSM_REF3           (0x00u)
-#define ADC_CFG2_DSM_DEM0           (0x04u)
-#define ADC_CFG2_DSM_DEM1           (0x00u)
-#define ADC_CFG2_DSM_BUF0           (0x05u)
-#define ADC_CFG2_DSM_BUF1           (0x02u)
-#define ADC_CFG2_DSM_BUF2           (0x00u)
-#define ADC_CFG2_DSM_BUF3           (0x00u)
-#define ADC_CFG2_DSM_OUT0           (0x00u)
-#define ADC_CFG2_DSM_OUT1           (0x00u)
-#define ADC_CFG2_DSM_SW3            (0x40u)
-#define ADC_CFG2_SRATE              (10000u )
-#define ADC_CFG2_CLOCKS_PER_SAMPLE  (0x0040u)
-#define ADC_CFG2_CLOCK_FREQ         (640000u)
-#define ADC_CFG2_CP_CLOCK_FREQ      (4000000u)
-#define ADC_CFG2_REFERENCE_VOLTAGE  (1.0240)
-#define ADC_CFG2_COUNTS_PER_VOLT    (64000)
-#define ADC_CFG2_RESOLUTION         (16u)
-#define ADC_CFG2_CONV_MODE          (2u)
-#define ADC_CFG2_IDEAL_DEC_GAIN     (0x90DAu)
-#define ADC_CFG2_INPUT_RANGE        (0u)
-#define ADC_CFG2_INPUT_RANGE_VALUE  (1.024)
+#define ADC_CF_0V512_DEC_CR             (0x78u)
+#define ADC_CF_0V512_DEC_SR             (0x14u)
+#define ADC_CF_0V512_DEC_SHIFT1         (0x04u)
+#define ADC_CF_0V512_DEC_SHIFT2         (0x09u)
+#define ADC_CF_0V512_DEC_DIV            (0)
+#define ADC_CF_0V512_DEC_DR2            (0x0Fu)
+#define ADC_CF_0V512_DEC_DR2H           (0x00u)
+#define ADC_CF_0V512_DEC_DR1            (0x3Fu)
+#define ADC_CF_0V512_DEC_OCOR           (0x00u)
+#define ADC_CF_0V512_DEC_OCORM          (0x00u)
+#define ADC_CF_0V512_DEC_OCORH          (0x00u)
+#define ADC_CF_0V512_DEC_GVAL           (0x0Fu)
+#define ADC_CF_0V512_DEC_GCOR           (0x00u)
+#define ADC_CF_0V512_DEC_GCORH          (0x00u)
+#define ADC_CF_0V512_DEC_COHER          (0x01u)
+#define ADC_CF_0V512_DSM_CR0            (0x0Au)
+#define ADC_CF_0V512_DSM_CR1            (0x00u)
+#define ADC_CF_0V512_DSM_CR2            (0x7Au)
+#define ADC_CF_0V512_DSM_CR3            (0x00u)
+#define ADC_CF_0V512_DSM_CR4            (0x50u)
+#define ADC_CF_0V512_DSM_CR5            (0x3Cu)
+#define ADC_CF_0V512_DSM_CR6            (0x22u)
+#define ADC_CF_0V512_DSM_CR7            (0x00u)
+#define ADC_CF_0V512_DSM_CR8            (0x5Bu)
+#define ADC_CF_0V512_DSM_CR9            (0x5Eu)
+#define ADC_CF_0V512_DSM_CR10           (0x44u)
+#define ADC_CF_0V512_DSM_CR11           (0x46u)
+#define ADC_CF_0V512_DSM_CR12           (0x06u)
+#define ADC_CF_0V512_DSM_CR13           (0x00u)
+#define ADC_CF_0V512_DSM_CR14           (0x02u)
+#define ADC_CF_0V512_DSM_CR15           (0x12u)
+#define ADC_CF_0V512_DSM_CR16           (0x28u)
+#define ADC_CF_0V512_DSM_CR17           (0xEBu)
+#define ADC_CF_0V512_DSM_REF0           (0x44u)
+#define ADC_CF_0V512_DSM_REF2           (0x58u)
+#define ADC_CF_0V512_DSM_REF3           (0x00u)
+#define ADC_CF_0V512_DSM_DEM0           (0x04u)
+#define ADC_CF_0V512_DSM_DEM1           (0x00u)
+#define ADC_CF_0V512_DSM_BUF0           (0x02u)
+#define ADC_CF_0V512_DSM_BUF1           (0x02u)
+#define ADC_CF_0V512_DSM_BUF2           (0x00u)
+#define ADC_CF_0V512_DSM_BUF3           (0x00u)
+#define ADC_CF_0V512_DSM_OUT0           (0x00u)
+#define ADC_CF_0V512_DSM_OUT1           (0x00u)
+#define ADC_CF_0V512_DSM_SW3            (0x00u)
+#define ADC_CF_0V512_SRATE              (1020u )
+#define ADC_CF_0V512_CLOCKS_PER_SAMPLE  (0x0400u)
+#define ADC_CF_0V512_CLOCK_FREQ         (1044480u)
+#define ADC_CF_0V512_CP_CLOCK_FREQ      (4177920u)
+#define ADC_CF_0V512_REFERENCE_VOLTAGE  (1.0240)
+#define ADC_CF_0V512_COUNTS_PER_VOLT    (256000)
+#define ADC_CF_0V512_RESOLUTION         (18u)
+#define ADC_CF_0V512_CONV_MODE          (2u)
+#define ADC_CF_0V512_IDEAL_DEC_GAIN     (0x90B9u)
+#define ADC_CF_0V512_INPUT_RANGE        (7u)
+#define ADC_CF_0V512_INPUT_RANGE_VALUE  (0.512)
 
-#define ADC_CFG2_REFERENCE          (0u)
-#define ADC_CFG2_BUFFER_GAIN        (1u)
-#define ADC_CFG2_ALIGNMENT          (0u)
-#define ADC_CFG2_ADC_CLK_DIVIDER    (37u)
-#define ADC_CFG2_CP_CLK_DIVIDER     (5u)
+#define ADC_CF_0V512_REFERENCE          (0u)
+#define ADC_CF_0V512_BUFFER_GAIN        (1u)
+#define ADC_CF_0V512_ALIGNMENT          (0u)
+#define ADC_CF_0V512_ADC_CLK_DIVIDER    (22u)
+#define ADC_CF_0V512_CP_CLK_DIVIDER     (5u)
 
 /* Input and DAC Cap values in pF */
-#define ADC_CFG2_IPCAP1VALUE        (0x0F30u)
-#define ADC_CFG2_DACAPVALUE         (0x1130u)
-#define ADC_CFG2_IDEAL_ODDDEC_GAIN  (0x8000u)
+#define ADC_CF_0V512_IPCAP1VALUE        (0x1770u)
+#define ADC_CF_0V512_DACAPVALUE         (0x0D40u)
+#define ADC_CF_0V512_IDEAL_ODDDEC_GAIN  (0x8000u)
 
 /* Below defines are deprecated and should not be used. These are provided
 *   just to keep the component backward compatible
 */
-#define ADC_CFG2_CONVMODE           ADC_CFG2_CONV_MODE
-#define ADC_CFG2_INPUT_MODE         ADC_DEFAULT_INPUT_MODE
-#define ADC_DEFAULT_SRATE_CFG2                 ADC_CFG2_SRATE
-#define ADC_CLOCKS_PER_SAMPLE_CFG2             ADC_CFG2_CLOCKS_PER_SAMPLE
-#define ADC_DFLT_CLOCK_FREQ_CFG2               ADC_CFG2_CLOCK_FREQ
-#define ADC_REFERENCE_VOLTAGE_CFG2             ADC_CFG2_REFERENCE_VOLTAGE
-#define ADC_DFLT_COUNTS_PER_VOLT_CFG2          ADC_CFG2_COUNTS_PER_VOLT
-#define ADC_DEFAULT_RESOLUTION_CFG2            ADC_CFG2_RESOLUTION
-#define ADC_CONVMODE_CFG2                      ADC_CFG2_CONVMODE
-#define ADC_DEFAULT_IDEAL_DEC_GAIN_CFG2        ADC_CFG2_IDEAL_DEC_GAIN
-#define ADC_DEFAULT_INPUT_RANGE_CFG2           ADC_CFG2_INPUT_RANGE
-#define ADC_DEFAULT_INPUT_RANGE_VALUE_CFG2     ADC_CFG2_INPUT_RANGE_VALUE
-#define ADC_DEFAULT_INPUT_MODE_CFG2            ADC_CFG2_INPUT_MODE
-#define ADC_DEFAULT_REFERENCE_CFG2             ADC_CFG2_REFERENCE
-#define ADC_DEFAULT_BUFFER_GAIN_CONFIG2        ADC_CFG2_BUFFER_GAIN
+#define ADC_CF_0V512_CONVMODE           ADC_CF_0V512_CONV_MODE
+#define ADC_CF_0V512_INPUT_MODE         ADC_DEFAULT_INPUT_MODE
+#define ADC_DEFAULT_SRATE_CFG2                 ADC_CF_0V512_SRATE
+#define ADC_CLOCKS_PER_SAMPLE_CFG2             ADC_CF_0V512_CLOCKS_PER_SAMPLE
+#define ADC_DFLT_CLOCK_FREQ_CFG2               ADC_CF_0V512_CLOCK_FREQ
+#define ADC_REFERENCE_VOLTAGE_CFG2             ADC_CF_0V512_REFERENCE_VOLTAGE
+#define ADC_DFLT_COUNTS_PER_VOLT_CFG2          ADC_CF_0V512_COUNTS_PER_VOLT
+#define ADC_DEFAULT_RESOLUTION_CFG2            ADC_CF_0V512_RESOLUTION
+#define ADC_CONVMODE_CFG2                      ADC_CF_0V512_CONVMODE
+#define ADC_DEFAULT_IDEAL_DEC_GAIN_CFG2        ADC_CF_0V512_IDEAL_DEC_GAIN
+#define ADC_DEFAULT_INPUT_RANGE_CFG2           ADC_CF_0V512_INPUT_RANGE
+#define ADC_DEFAULT_INPUT_RANGE_VALUE_CFG2     ADC_CF_0V512_INPUT_RANGE_VALUE
+#define ADC_DEFAULT_INPUT_MODE_CFG2            ADC_CF_0V512_INPUT_MODE
+#define ADC_DEFAULT_REFERENCE_CFG2             ADC_CF_0V512_REFERENCE
+#define ADC_DEFAULT_BUFFER_GAIN_CONFIG2        ADC_CF_0V512_BUFFER_GAIN
 
 /* Input and DAC Cap values in pF */
-#define ADC_DEFAULT_IPCAP1VALUE_CFG2           ADC_CFG2_IPCAP1VALUE
-#define ADC_DEFAULT_DACAPVALUE_CFG2            ADC_CFG2_DACAPVALUE
-#define ADC_DEFAULT_IDEAL_ODDDEC_GAIN_CFG2     ADC_CFG2_IDEAL_ODDDEC_GAIN
+#define ADC_DEFAULT_IPCAP1VALUE_CFG2           ADC_CF_0V512_IPCAP1VALUE
+#define ADC_DEFAULT_DACAPVALUE_CFG2            ADC_CF_0V512_DACAPVALUE
+#define ADC_DEFAULT_IDEAL_ODDDEC_GAIN_CFG2     ADC_CF_0V512_IDEAL_ODDDEC_GAIN
 
 
 /* Default register settings for the following configuration */
 /* Third Config
-* ADC_CFG3 Sample Rate: 10000 Samples per Second
-* ADC_CFG3 Conversion Mode: 2
-* ADC_CFG3 Input Buffer Gain: 1
-* ADC_CFG3 Reference: 0
-* ADC_CFG3 Input Range: 0
-* ADC_CFG3 Resolution: 16 bits
-* ADC_CFG3 Clock: 640000 Hz
+* ADC_CF_1V024 Sample Rate: 1020 Samples per Second
+* ADC_CF_1V024 Conversion Mode: 2
+* ADC_CF_1V024 Input Buffer Gain: 1
+* ADC_CF_1V024 Reference: 0
+* ADC_CF_1V024 Input Range: 4
+* ADC_CF_1V024 Resolution: 18 bits
+* ADC_CF_1V024 Clock: 1044480 Hz
 */
 
-#define ADC_CFG3_DEC_CR             (0x38u)
-#define ADC_CFG3_DEC_SR             (0x14u)
-#define ADC_CFG3_DEC_SHIFT1         (0x04u)
-#define ADC_CFG3_DEC_SHIFT2         (0x06u)
-#define ADC_CFG3_DEC_DIV            (0)
-#define ADC_CFG3_DEC_DR2            (0x00u)
-#define ADC_CFG3_DEC_DR2H           (0x00u)
-#define ADC_CFG3_DEC_DR1            (0x3Fu)
-#define ADC_CFG3_DEC_OCOR           (0x00u)
-#define ADC_CFG3_DEC_OCORM          (0x00u)
-#define ADC_CFG3_DEC_OCORH          (0x00u)
-#define ADC_CFG3_DEC_GVAL           (0x0Fu)
-#define ADC_CFG3_DEC_GCOR           (0x00u)
-#define ADC_CFG3_DEC_GCORH          (0x00u)
-#define ADC_CFG3_DEC_COHER          (0x01u)
-#define ADC_CFG3_DSM_CR0            (0x0Au)
-#define ADC_CFG3_DSM_CR1            (0x00u)
-#define ADC_CFG3_DSM_CR2            (0x7Au)
-#define ADC_CFG3_DSM_CR3            (0x00u)
-#define ADC_CFG3_DSM_CR4            (0x50u)
-#define ADC_CFG3_DSM_CR5            (0x27u)
-#define ADC_CFG3_DSM_CR6            (0x2Cu)
-#define ADC_CFG3_DSM_CR7            (0x00u)
-#define ADC_CFG3_DSM_CR8            (0x5Bu)
-#define ADC_CFG3_DSM_CR9            (0x5Eu)
-#define ADC_CFG3_DSM_CR10           (0x55u)
-#define ADC_CFG3_DSM_CR11           (0x5Au)
-#define ADC_CFG3_DSM_CR12           (0x05u)
-#define ADC_CFG3_DSM_CR13           (0x00u)
-#define ADC_CFG3_DSM_CR14           (0x01u)
-#define ADC_CFG3_DSM_CR15           (0x11u)
-#define ADC_CFG3_DSM_CR16           (0x19u)
-#define ADC_CFG3_DSM_CR17           (0x97u)
-#define ADC_CFG3_DSM_REF0           (0x44u)
-#define ADC_CFG3_DSM_REF2           (0x58u)
-#define ADC_CFG3_DSM_REF3           (0x00u)
-#define ADC_CFG3_DSM_DEM0           (0x04u)
-#define ADC_CFG3_DSM_DEM1           (0x00u)
-#define ADC_CFG3_DSM_BUF0           (0x05u)
-#define ADC_CFG3_DSM_BUF1           (0x02u)
-#define ADC_CFG3_DSM_BUF2           (0x00u)
-#define ADC_CFG3_DSM_BUF3           (0x00u)
-#define ADC_CFG3_DSM_OUT0           (0x00u)
-#define ADC_CFG3_DSM_OUT1           (0x00u)
-#define ADC_CFG3_DSM_SW3            (0x40u)
-#define ADC_CFG3_SRATE              (10000u)
-#define ADC_CFG3_CLOCKS_PER_SAMPLE  (0x0040u)
-#define ADC_CFG3_CLOCK_FREQ         (640000u)
-#define ADC_CFG3_CP_CLOCK_FREQ      (4000000u)
-#define ADC_CFG3_REFERENCE_VOLTAGE  (1.0240)
-#define ADC_CFG3_COUNTS_PER_VOLT    (64000)
-#define ADC_CFG3_RESOLUTION         (16u)
-#define ADC_CFG3_CONV_MODE          (2u)
-#define ADC_CFG3_IDEAL_DEC_GAIN     (0x90DAu)
-#define ADC_CFG3_INPUT_RANGE        (0u)
-#define ADC_CFG3_REFERENCE          (0u)
-#define ADC_CFG3_BUFFER_GAIN        (1u)
-#define ADC_CFG3_INPUT_RANGE_VALUE  (1.024)
-#define ADC_CFG3_ALIGNMENT          (0u)
-#define ADC_CFG3_ADC_CLK_DIVIDER    (37u)
-#define ADC_CFG3_CP_CLK_DIVIDER     (5u)
+#define ADC_CF_1V024_DEC_CR             (0x78u)
+#define ADC_CF_1V024_DEC_SR             (0x14u)
+#define ADC_CF_1V024_DEC_SHIFT1         (0x04u)
+#define ADC_CF_1V024_DEC_SHIFT2         (0x09u)
+#define ADC_CF_1V024_DEC_DIV            (0)
+#define ADC_CF_1V024_DEC_DR2            (0x0Fu)
+#define ADC_CF_1V024_DEC_DR2H           (0x00u)
+#define ADC_CF_1V024_DEC_DR1            (0x3Fu)
+#define ADC_CF_1V024_DEC_OCOR           (0x00u)
+#define ADC_CF_1V024_DEC_OCORM          (0x00u)
+#define ADC_CF_1V024_DEC_OCORH          (0x00u)
+#define ADC_CF_1V024_DEC_GVAL           (0x0Fu)
+#define ADC_CF_1V024_DEC_GCOR           (0x00u)
+#define ADC_CF_1V024_DEC_GCORH          (0x00u)
+#define ADC_CF_1V024_DEC_COHER          (0x01u)
+#define ADC_CF_1V024_DSM_CR0            (0x0Au)
+#define ADC_CF_1V024_DSM_CR1            (0x00u)
+#define ADC_CF_1V024_DSM_CR2            (0x7Au)
+#define ADC_CF_1V024_DSM_CR3            (0x00u)
+#define ADC_CF_1V024_DSM_CR4            (0x50u)
+#define ADC_CF_1V024_DSM_CR5            (0x27u)
+#define ADC_CF_1V024_DSM_CR6            (0x2Cu)
+#define ADC_CF_1V024_DSM_CR7            (0x00u)
+#define ADC_CF_1V024_DSM_CR8            (0x5Bu)
+#define ADC_CF_1V024_DSM_CR9            (0x5Eu)
+#define ADC_CF_1V024_DSM_CR10           (0x55u)
+#define ADC_CF_1V024_DSM_CR11           (0x5Au)
+#define ADC_CF_1V024_DSM_CR12           (0x05u)
+#define ADC_CF_1V024_DSM_CR13           (0x00u)
+#define ADC_CF_1V024_DSM_CR14           (0x02u)
+#define ADC_CF_1V024_DSM_CR15           (0x12u)
+#define ADC_CF_1V024_DSM_CR16           (0x28u)
+#define ADC_CF_1V024_DSM_CR17           (0xEBu)
+#define ADC_CF_1V024_DSM_REF0           (0x44u)
+#define ADC_CF_1V024_DSM_REF2           (0x58u)
+#define ADC_CF_1V024_DSM_REF3           (0x00u)
+#define ADC_CF_1V024_DSM_DEM0           (0x04u)
+#define ADC_CF_1V024_DSM_DEM1           (0x00u)
+#define ADC_CF_1V024_DSM_BUF0           (0x05u)
+#define ADC_CF_1V024_DSM_BUF1           (0x01u)
+#define ADC_CF_1V024_DSM_BUF2           (0x00u)
+#define ADC_CF_1V024_DSM_BUF3           (0x0Au)
+#define ADC_CF_1V024_DSM_OUT0           (0x00u)
+#define ADC_CF_1V024_DSM_OUT1           (0x00u)
+#define ADC_CF_1V024_DSM_SW3            (0x00u)
+#define ADC_CF_1V024_SRATE              (1020u)
+#define ADC_CF_1V024_CLOCKS_PER_SAMPLE  (0x0400u)
+#define ADC_CF_1V024_CLOCK_FREQ         (1044480u)
+#define ADC_CF_1V024_CP_CLOCK_FREQ      (4177920u)
+#define ADC_CF_1V024_REFERENCE_VOLTAGE  (1.0240)
+#define ADC_CF_1V024_COUNTS_PER_VOLT    (128000)
+#define ADC_CF_1V024_RESOLUTION         (18u)
+#define ADC_CF_1V024_CONV_MODE          (2u)
+#define ADC_CF_1V024_IDEAL_DEC_GAIN     (0x90DAu)
+#define ADC_CF_1V024_INPUT_RANGE        (4u)
+#define ADC_CF_1V024_REFERENCE          (0u)
+#define ADC_CF_1V024_BUFFER_GAIN        (1u)
+#define ADC_CF_1V024_INPUT_RANGE_VALUE  (1.024)
+#define ADC_CF_1V024_ALIGNMENT          (0u)
+#define ADC_CF_1V024_ADC_CLK_DIVIDER    (22u)
+#define ADC_CF_1V024_CP_CLK_DIVIDER     (5u)
 
 /* Input and DAC Cap values in pF */
-#define ADC_CFG3_IPCAP1VALUE        (0x0F30u)
-#define ADC_CFG3_DACAPVALUE         (0x1130u)
-#define ADC_CFG3_IDEAL_ODDDEC_GAIN  (0x8000u)
+#define ADC_CF_1V024_IPCAP1VALUE        (0x0F30u)
+#define ADC_CF_1V024_DACAPVALUE         (0x1130u)
+#define ADC_CF_1V024_IDEAL_ODDDEC_GAIN  (0x8000u)
 
 /* Below defines are deprecated and should not be used. These are provided
 *   just to keep the component backward compatible
 */
-#define ADC_CFG3_CONVMODE           ADC_CFG3_CONV_MODE
-#define ADC_CFG3_INPUT_MODE         ADC_DEFAULT_INPUT_MODE
-#define ADC_DEFAULT_SRATE_CFG3                 ADC_CFG3_SRATE
-#define ADC_CLOCKS_PER_SAMPLE_CFG3             ADC_CFG3_CLOCKS_PER_SAMPLE
-#define ADC_DFLT_CLOCK_FREQ_CFG3               ADC_CFG3_CLOCK_FREQ
-#define ADC_REFERENCE_VOLTAGE_CFG3             ADC_CFG3_REFERENCE_VOLTAGE
-#define ADC_DFLT_COUNTS_PER_VOLT_CFG3          ADC_CFG3_COUNTS_PER_VOLT
-#define ADC_DEFAULT_RESOLUTION_CFG3            ADC_CFG3_RESOLUTION
-#define ADC_CONVMODE_CFG3                      ADC_CFG3_CONVMODE
-#define ADC_DEFAULT_IDEAL_DEC_GAIN_CFG3        ADC_CFG3_IDEAL_DEC_GAIN
-#define ADC_DEFAULT_INPUT_RANGE_CFG3           ADC_CFG3_INPUT_RANGE
-#define ADC_DEFAULT_INPUT_RANGE_VALUE_CFG3     ADC_CFG3_INPUT_RANGE_VALUE
-#define ADC_DEFAULT_INPUT_MODE_CFG3            ADC_CFG3_INPUT_MODE
-#define ADC_DEFAULT_REFERENCE_CFG3             ADC_CFG3_REFERENCE
-#define ADC_DEFAULT_BUFFER_GAIN_CONFIG3        ADC_CFG3_BUFFER_GAIN
+#define ADC_CF_1V024_CONVMODE           ADC_CF_1V024_CONV_MODE
+#define ADC_CF_1V024_INPUT_MODE         ADC_DEFAULT_INPUT_MODE
+#define ADC_DEFAULT_SRATE_CFG3                 ADC_CF_1V024_SRATE
+#define ADC_CLOCKS_PER_SAMPLE_CFG3             ADC_CF_1V024_CLOCKS_PER_SAMPLE
+#define ADC_DFLT_CLOCK_FREQ_CFG3               ADC_CF_1V024_CLOCK_FREQ
+#define ADC_REFERENCE_VOLTAGE_CFG3             ADC_CF_1V024_REFERENCE_VOLTAGE
+#define ADC_DFLT_COUNTS_PER_VOLT_CFG3          ADC_CF_1V024_COUNTS_PER_VOLT
+#define ADC_DEFAULT_RESOLUTION_CFG3            ADC_CF_1V024_RESOLUTION
+#define ADC_CONVMODE_CFG3                      ADC_CF_1V024_CONVMODE
+#define ADC_DEFAULT_IDEAL_DEC_GAIN_CFG3        ADC_CF_1V024_IDEAL_DEC_GAIN
+#define ADC_DEFAULT_INPUT_RANGE_CFG3           ADC_CF_1V024_INPUT_RANGE
+#define ADC_DEFAULT_INPUT_RANGE_VALUE_CFG3     ADC_CF_1V024_INPUT_RANGE_VALUE
+#define ADC_DEFAULT_INPUT_MODE_CFG3            ADC_CF_1V024_INPUT_MODE
+#define ADC_DEFAULT_REFERENCE_CFG3             ADC_CF_1V024_REFERENCE
+#define ADC_DEFAULT_BUFFER_GAIN_CONFIG3        ADC_CF_1V024_BUFFER_GAIN
 
 /* Input and DAC Cap values in pF */
-#define ADC_DEFAULT_IPCAP1VALUE_CFG3           ADC_CFG3_IPCAP1VALUE
-#define ADC_DEFAULT_DACAPVALUE_CFG3            ADC_CFG3_DACAPVALUE
-#define ADC_DEFAULT_IDEAL_ODDDEC_GAIN_CFG3     ADC_CFG3_IDEAL_ODDDEC_GAIN
+#define ADC_DEFAULT_IPCAP1VALUE_CFG3           ADC_CF_1V024_IPCAP1VALUE
+#define ADC_DEFAULT_DACAPVALUE_CFG3            ADC_CF_1V024_DACAPVALUE
+#define ADC_DEFAULT_IDEAL_ODDDEC_GAIN_CFG3     ADC_CF_1V024_IDEAL_ODDDEC_GAIN
 
 
 /* Default register settings for the following configuration */
 /* Fourth Config
-* ADC_CFG4 Sample Rate: 10000 Samples per Second
-* ADC_CFG4 Conversion Mode: 2
-* ADC_CFG4 Input Buffer Gain: 1
-* ADC_CFG4 Reference: 0
-* ADC_CFG4 Input Range: 0
-* ADC_CFG4 Resolution: 16 bits
-* ADC_CFG4 Clock: 640000 Hz
+* ADC_CF_0V625 Sample Rate: 1020 Samples per Second
+* ADC_CF_0V625 Conversion Mode: 2
+* ADC_CF_0V625 Input Buffer Gain: 1
+* ADC_CF_0V625 Reference: 5
+* ADC_CF_0V625 Input Range: 7
+* ADC_CF_0V625 Resolution: 18 bits
+* ADC_CF_0V625 Clock: 1044480 Hz
 */
 
-#define ADC_CFG4_DEC_CR             (0x38u)
-#define ADC_CFG4_DEC_SR             (0x14u)
-#define ADC_CFG4_DEC_SHIFT1         (0x04u)
-#define ADC_CFG4_DEC_SHIFT2         (0x06u)
-#define ADC_CFG4_DEC_DIV            (0)
-#define ADC_CFG4_DEC_DR2            (0x00u)
-#define ADC_CFG4_DEC_DR2H           (0x00u)
-#define ADC_CFG4_DEC_DR1            (0x3Fu)
-#define ADC_CFG4_DEC_OCOR           (0x00u)
-#define ADC_CFG4_DEC_OCORM          (0x00u)
-#define ADC_CFG4_DEC_OCORH          (0x00u)
-#define ADC_CFG4_DEC_GVAL           (0x0Fu)
-#define ADC_CFG4_DEC_GCOR           (0x00u)
-#define ADC_CFG4_DEC_GCORH          (0x00u)
-#define ADC_CFG4_DEC_COHER          (0x01u)
-#define ADC_CFG4_DSM_CR0            (0x0Au)
-#define ADC_CFG4_DSM_CR1            (0x00u)
-#define ADC_CFG4_DSM_CR2            (0x7Au)
-#define ADC_CFG4_DSM_CR3            (0x00u)
-#define ADC_CFG4_DSM_CR4            (0x50u)
-#define ADC_CFG4_DSM_CR5            (0x27u)
-#define ADC_CFG4_DSM_CR6            (0x2Cu)
-#define ADC_CFG4_DSM_CR7            (0x00u)
-#define ADC_CFG4_DSM_CR8            (0x5Bu)
-#define ADC_CFG4_DSM_CR9            (0x5Eu)
-#define ADC_CFG4_DSM_CR10           (0x55u)
-#define ADC_CFG4_DSM_CR11           (0x5Au)
-#define ADC_CFG4_DSM_CR12           (0x05u)
-#define ADC_CFG4_DSM_CR13           (0x00u)
-#define ADC_CFG4_DSM_CR14           (0x01u)
-#define ADC_CFG4_DSM_CR15           (0x11u)
-#define ADC_CFG4_DSM_CR16           (0x19u)
-#define ADC_CFG4_DSM_CR17           (0x97u)
-#define ADC_CFG4_DSM_REF0           (0x44u)
-#define ADC_CFG4_DSM_REF2           (0x58u)
-#define ADC_CFG4_DSM_REF3           (0x00u)
-#define ADC_CFG4_DSM_DEM0           (0x04u)
-#define ADC_CFG4_DSM_DEM1           (0x00u)
-#define ADC_CFG4_DSM_BUF0           (0x05u)
-#define ADC_CFG4_DSM_BUF1           (0x02u)
-#define ADC_CFG4_DSM_BUF2           (0x00u)
-#define ADC_CFG4_DSM_BUF3           (0x00u)
-#define ADC_CFG4_DSM_OUT0           (0x00u)
-#define ADC_CFG4_DSM_OUT1           (0x00u)
-#define ADC_CFG4_DSM_SW3            (0x40u)
-#define ADC_CFG4_SRATE              (10000u)
-#define ADC_CFG4_CLOCKS_PER_SAMPLE  (0x0040u)
-#define ADC_CFG4_CLOCK_FREQ         (640000u)
-#define ADC_CFG4_CP_CLOCK_FREQ      (4000000u)
-#define ADC_CFG4_REFERENCE_VOLTAGE  (1.0240)
-#define ADC_CFG4_COUNTS_PER_VOLT    (64000)
-#define ADC_CFG4_RESOLUTION         (16u)
-#define ADC_CFG4_CONV_MODE          (2u)
-#define ADC_CFG4_IDEAL_DEC_GAIN     (0x90DAu)
-#define ADC_CFG4_INPUT_RANGE        (0u)
-#define ADC_CFG4_REFERENCE          (0u)
-#define ADC_CFG4_BUFFER_GAIN        (1u)
-#define ADC_CFG4_INPUT_RANGE_VALUE  (1.024)
-#define ADC_CFG4_ALIGNMENT          (0u)
-#define ADC_CFG4_ADC_CLK_DIVIDER    (37u)
-#define ADC_CFG4_CP_CLK_DIVIDER     (5u)
+#define ADC_CF_0V625_DEC_CR             (0x78u)
+#define ADC_CF_0V625_DEC_SR             (0x14u)
+#define ADC_CF_0V625_DEC_SHIFT1         (0x04u)
+#define ADC_CF_0V625_DEC_SHIFT2         (0x09u)
+#define ADC_CF_0V625_DEC_DIV            (0)
+#define ADC_CF_0V625_DEC_DR2            (0x0Fu)
+#define ADC_CF_0V625_DEC_DR2H           (0x00u)
+#define ADC_CF_0V625_DEC_DR1            (0x3Fu)
+#define ADC_CF_0V625_DEC_OCOR           (0x00u)
+#define ADC_CF_0V625_DEC_OCORM          (0x00u)
+#define ADC_CF_0V625_DEC_OCORH          (0x00u)
+#define ADC_CF_0V625_DEC_GVAL           (0x0Fu)
+#define ADC_CF_0V625_DEC_GCOR           (0x00u)
+#define ADC_CF_0V625_DEC_GCORH          (0x00u)
+#define ADC_CF_0V625_DEC_COHER          (0x01u)
+#define ADC_CF_0V625_DSM_CR0            (0x0Au)
+#define ADC_CF_0V625_DSM_CR1            (0x00u)
+#define ADC_CF_0V625_DSM_CR2            (0x7Au)
+#define ADC_CF_0V625_DSM_CR3            (0x00u)
+#define ADC_CF_0V625_DSM_CR4            (0x50u)
+#define ADC_CF_0V625_DSM_CR5            (0x3Cu)
+#define ADC_CF_0V625_DSM_CR6            (0x22u)
+#define ADC_CF_0V625_DSM_CR7            (0x00u)
+#define ADC_CF_0V625_DSM_CR8            (0x5Bu)
+#define ADC_CF_0V625_DSM_CR9            (0x5Eu)
+#define ADC_CF_0V625_DSM_CR10           (0x44u)
+#define ADC_CF_0V625_DSM_CR11           (0x46u)
+#define ADC_CF_0V625_DSM_CR12           (0x06u)
+#define ADC_CF_0V625_DSM_CR13           (0x00u)
+#define ADC_CF_0V625_DSM_CR14           (0x02u)
+#define ADC_CF_0V625_DSM_CR15           (0x12u)
+#define ADC_CF_0V625_DSM_CR16           (0x28u)
+#define ADC_CF_0V625_DSM_CR17           (0xEBu)
+#define ADC_CF_0V625_DSM_REF0           (0x52u)
+#define ADC_CF_0V625_DSM_REF2           (0x58u)
+#define ADC_CF_0V625_DSM_REF3           (0x00u)
+#define ADC_CF_0V625_DSM_DEM0           (0x04u)
+#define ADC_CF_0V625_DSM_DEM1           (0x00u)
+#define ADC_CF_0V625_DSM_BUF0           (0x05u)
+#define ADC_CF_0V625_DSM_BUF1           (0x01u)
+#define ADC_CF_0V625_DSM_BUF2           (0x00u)
+#define ADC_CF_0V625_DSM_BUF3           (0x0Au)
+#define ADC_CF_0V625_DSM_OUT0           (0x00u)
+#define ADC_CF_0V625_DSM_OUT1           (0x00u)
+#define ADC_CF_0V625_DSM_SW3            (0x00u)
+#define ADC_CF_0V625_SRATE              (1020u)
+#define ADC_CF_0V625_CLOCKS_PER_SAMPLE  (0x0400u)
+#define ADC_CF_0V625_CLOCK_FREQ         (1044480u)
+#define ADC_CF_0V625_CP_CLOCK_FREQ      (4177920u)
+#define ADC_CF_0V625_REFERENCE_VOLTAGE  (1.2500)
+#define ADC_CF_0V625_COUNTS_PER_VOLT    (209715)
+#define ADC_CF_0V625_RESOLUTION         (18u)
+#define ADC_CF_0V625_CONV_MODE          (2u)
+#define ADC_CF_0V625_IDEAL_DEC_GAIN     (0x90B9u)
+#define ADC_CF_0V625_INPUT_RANGE        (7u)
+#define ADC_CF_0V625_REFERENCE          (5u)
+#define ADC_CF_0V625_BUFFER_GAIN        (1u)
+#define ADC_CF_0V625_INPUT_RANGE_VALUE  (0.625)
+#define ADC_CF_0V625_ALIGNMENT          (0u)
+#define ADC_CF_0V625_ADC_CLK_DIVIDER    (22u)
+#define ADC_CF_0V625_CP_CLK_DIVIDER     (5u)
 
 /* Input cap and DAC Cap values in pF */
-#define ADC_CFG4_IPCAP1VALUE        (0x0F30u)
-#define ADC_CFG4_DACAPVALUE         (0x1130u)
-#define ADC_CFG4_IDEAL_ODDDEC_GAIN  (0x8000u)
+#define ADC_CF_0V625_IPCAP1VALUE        (0x1770u)
+#define ADC_CF_0V625_DACAPVALUE         (0x0D40u)
+#define ADC_CF_0V625_IDEAL_ODDDEC_GAIN  (0x8000u)
 
 /* Below defines are deprecated and should not be used. These are provided
 *   just to keep the component backward compatible
 */
-#define ADC_CFG4_CONVMODE           ADC_CFG4_CONV_MODE
-#define ADC_CFG4_INPUT_MODE         ADC_DEFAULT_INPUT_MODE
-#define ADC_DEFAULT_SRATE_CFG4                 ADC_CFG4_SRATE
-#define ADC_CLOCKS_PER_SAMPLE_CFG4             ADC_CFG4_CLOCKS_PER_SAMPLE
-#define ADC_DFLT_CLOCK_FREQ_CFG4               ADC_CFG4_CLOCK_FREQ
-#define ADC_REFERENCE_VOLTAGE_CFG4             ADC_CFG4_REFERENCE_VOLTAGE
-#define ADC_DFLT_COUNTS_PER_VOLT_CFG4          ADC_CFG4_COUNTS_PER_VOLT
-#define ADC_DEFAULT_RESOLUTION_CFG4            ADC_CFG4_RESOLUTION
-#define ADC_CONVMODE_CFG4                      ADC_CFG4_CONVMODE
-#define ADC_DEFAULT_IDEAL_DEC_GAIN_CFG4        ADC_CFG4_IDEAL_DEC_GAIN
-#define ADC_DEFAULT_INPUT_RANGE_CFG4           ADC_CFG4_INPUT_RANGE
-#define ADC_DEFAULT_INPUT_RANGE_VALUE_CFG4     ADC_CFG4_INPUT_RANGE_VALUE
-#define ADC_DEFAULT_INPUT_MODE_CFG4            ADC_CFG4_INPUT_MODE
-#define ADC_DEFAULT_REFERENCE_CFG4             ADC_CFG4_REFERENCE
-#define ADC_DEFAULT_BUFFER_GAIN_CONFIG4        ADC_CFG4_BUFFER_GAIN
+#define ADC_CF_0V625_CONVMODE           ADC_CF_0V625_CONV_MODE
+#define ADC_CF_0V625_INPUT_MODE         ADC_DEFAULT_INPUT_MODE
+#define ADC_DEFAULT_SRATE_CFG4                 ADC_CF_0V625_SRATE
+#define ADC_CLOCKS_PER_SAMPLE_CFG4             ADC_CF_0V625_CLOCKS_PER_SAMPLE
+#define ADC_DFLT_CLOCK_FREQ_CFG4               ADC_CF_0V625_CLOCK_FREQ
+#define ADC_REFERENCE_VOLTAGE_CFG4             ADC_CF_0V625_REFERENCE_VOLTAGE
+#define ADC_DFLT_COUNTS_PER_VOLT_CFG4          ADC_CF_0V625_COUNTS_PER_VOLT
+#define ADC_DEFAULT_RESOLUTION_CFG4            ADC_CF_0V625_RESOLUTION
+#define ADC_CONVMODE_CFG4                      ADC_CF_0V625_CONVMODE
+#define ADC_DEFAULT_IDEAL_DEC_GAIN_CFG4        ADC_CF_0V625_IDEAL_DEC_GAIN
+#define ADC_DEFAULT_INPUT_RANGE_CFG4           ADC_CF_0V625_INPUT_RANGE
+#define ADC_DEFAULT_INPUT_RANGE_VALUE_CFG4     ADC_CF_0V625_INPUT_RANGE_VALUE
+#define ADC_DEFAULT_INPUT_MODE_CFG4            ADC_CF_0V625_INPUT_MODE
+#define ADC_DEFAULT_REFERENCE_CFG4             ADC_CF_0V625_REFERENCE
+#define ADC_DEFAULT_BUFFER_GAIN_CONFIG4        ADC_CF_0V625_BUFFER_GAIN
 
 /* Input and DAC Cap values in pF */
-#define ADC_DEFAULT_IPCAP1VALUE_CFG4           ADC_CFG4_IPCAP1VALUE
-#define ADC_DEFAULT_DACAPVALUE_CFG4            ADC_CFG4_DACAPVALUE
-#define ADC_DEFAULT_IDEAL_ODDDEC_GAIN_CFG4     ADC_CFG4_IDEAL_ODDDEC_GAIN
+#define ADC_DEFAULT_IPCAP1VALUE_CFG4           ADC_CF_0V625_IPCAP1VALUE
+#define ADC_DEFAULT_DACAPVALUE_CFG4            ADC_CF_0V625_DACAPVALUE
+#define ADC_DEFAULT_IDEAL_ODDDEC_GAIN_CFG4     ADC_CF_0V625_IDEAL_ODDDEC_GAIN
 
 
 /* Master clock value */

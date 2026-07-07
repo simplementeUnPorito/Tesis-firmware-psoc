@@ -2,11 +2,11 @@
 
 Flujo actual para `AcondicionamientoAnalogico.cydsn` en Windows con PSoC Creator 4.4.
 
-## Estado del build actual (2026-07-02)
+## Estado del build actual (2026-07-02, politica de eventos determinismo-primero)
 
-- Flash: **37510 bytes** -> filas a programar: **0..146**  
-  (`ceil(37510/256) - 1 = 146`)
-- SRAM: 49312 bytes
+- Flash: **40758 bytes** -> filas a programar: **0..159**  
+  (`ceil(40758/256) - 1 = 159`)
+- SRAM: 49352 bytes
 - KitProg observado: `KitProg (CMSIS-DAP/236111)` — **siempre correr `GetPorts` antes de programar** porque el nombre puede variar.
 
 ## Build (PowerShell)
@@ -55,7 +55,7 @@ $log        = Join-Path $env:TEMP "psoc_program_acondicionamiento_$timestamp.log
 $hex        = 'C:/Github/Tesis/src/psoc/AcondicionamientoAnalogico.cydsn/CortexM3/ARM_GCC_541/Debug/AcondicionamientoAnalogico.hex'
 $port       = 'KitProg (CMSIS-DAP/236111)'   # reemplazar con resultado exacto de GetPorts
 $programmer = 'C:/Program Files (x86)/Cypress/Programmer/'
-$lastRow    = 146                             # actualizar según el build actual
+$lastRow    = 159                             # actualizar según el build actual
 
 $cmds = New-Object System.Collections.Generic.List[string]
 $cmds.Add(('OpenPort "{0}" "{1}"' -f $port, $programmer))
@@ -92,6 +92,24 @@ DAP_ReleaseChip → 0 OK
 ClosePort → 0 OK
 ```
 
+Ultimo programado validado:
+
+- Build: 2026-07-02 17:13:43, `Build Succeeded` (TC de timers sin IRQ ni
+  sticky; ver `docs/psoc_supermaquina_handoff.md`, seccion "Politica de
+  eventos determinismo-primero").
+- Flash/SRAM: 40758 / 49352 bytes.
+- Filas: `0..159`, ECC option `0x01`.
+- Log: `C:\Users\elias\AppData\Local\Temp\psoc_program_eventpolicy_20260702_171417.log`.
+- Script: `C:\Users\elias\AppData\Local\Temp\psoc_program_eventpolicy_20260702_171417.cli`.
+
+Notas del build actual:
+
+- `Timer_3` sigue presente en TopDesign pero el firmware no lo usa ni registra
+  `isr_Timer_3`; se puede eliminar cuando se permita tocar componentes.
+- El intento de mover el descarte FIR de 63 muestras a `superMaquina.v` no cabe
+  en recursos PLD/UDB con el diseno actual. Mantener el descarte en C hasta
+  liberar recursos.
+
 ## Reset de target
 
 Si hace falta resetear después de programar:
@@ -118,6 +136,30 @@ finally { Pop-Location }
 Cadena: web → maestro → ESP-NOW `CMD_BLINK_LED` → esclavo → UART `0xB9` → PSoC.
 El PSoC parpadea ~8 s a 2.5 Hz (no bloqueante, servido por `Timer_2` fixed ILO 100 kHz)
 y vuelve a encendido fijo.
+
+## Prueba rápida por ESP USB
+
+Puertos observados 2026-07-06: ESP esclavo `COM12`, maestro `COM8`. Para esta
+prueba usar el esclavo (`COM12`, 115200).
+
+Secuencia validada tras el ultimo flash:
+
+```text
+clear
+probe
+stream 0
+debugpsoc 0
+cap 1
+status      # bBad=0, fill=1/1
+clear
+stream 1
+cap 2
+status      # bBad=0, fill=2/2
+clear
+```
+
+Pruebas adicionales del mismo firmware: `blink` no bloqueo pings; `cal` no
+colgo el sistema y una captura posterior `cap 1` volvio a completar.
 
 ## Wiring UART PSoC ↔ ESP esclavo
 

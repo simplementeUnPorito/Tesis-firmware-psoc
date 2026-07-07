@@ -20,7 +20,7 @@
 static ADC_BACKUP_STRUCT ADC_backup =
 {
     ADC_DISABLED,
-    ADC_CFG1_DEC_CR
+    ADC_CF_2V5_DEC_CR
 };
 
 

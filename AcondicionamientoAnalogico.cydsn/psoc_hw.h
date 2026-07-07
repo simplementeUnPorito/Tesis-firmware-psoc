@@ -92,7 +92,8 @@
 #define PSOC_EVT_CAL_PI_BUCKET32  0x42u  /* 4 bytes MSB-first: celda cuantizada de error */
 #define PSOC_EVT_CAL_PI_STABLE    0x43u  /* value=muestras consecutivas en la misma celda (saturado a 255) */
 #define PSOC_EVT_CAL_AMUX_CAP     0x44u  /* value=canal AMux_ADC del capacitor conectado durante calibracion */
-#define PSOC_EVT_CAPTURE_WATCHDOG 0x45u  /* value=state de superMaquina al vencer el watchdog de captura (Timer_2) */
+#define PSOC_EVT_CAPTURE_WATCHDOG 0x45u  /* value=state de superMaquina al vencer el watchdog de captura (Timer_3) */
+#define PSOC_EVT_TIMER_STORM      0x46u  /* value=timer (0=Timer RX,1,2,3): IRQ en tormenta, breaker disparado y timer re-inicializado */
 
 #define PSOC_CMD_STATUS         0xA5u
 #define PSOC_CMD_PGA            0xA6u
@@ -107,6 +108,7 @@
 #define PSOC_CMD_SELECT_STREAM  0xB7u  /* Param: 0=crudo, 1=filtrado FIR */
 #define PSOC_CMD_ADC_SNAPSHOT   0xB8u  /* Reporte diagnostico de ADC por etapa */
 #define PSOC_CMD_BLINK_LED      0xB9u  /* Titilar LED de identificación del nodo */
+#define PSOC_CMD_ADC_CONFIG     0xBAu  /* Param: 1=ADC_CF_2V5 (±2.5V), 2=ADC_CF_0V512 (±0.512V) */
 
 void psoc_hw_start_analog(uint8 pga_code, uint8 pgavdac_code);
 void psoc_hw_set_pga(uint8 code);
@@ -116,8 +118,8 @@ uint16 psoc_hw_pga_gain_x1000(void);
 
 /* Compatibilidad para el servo legacy de calibracion. La calibracion activa
  * usa Timer_1 (modo CAL_TICK, nunca concurrente con los pings) y los helpers
- * de abajo, no un tick periodico de sistema. Timer_3 quedo sin uso y puede
- * eliminarse del TopDesign. */
+ * de abajo, no un tick periodico de sistema. Timer_3 es el watchdog de
+ * captura dedicado (ver mapa de timers en main.c). */
 uint32 psoc_now_ticks(void);
 
 void psoc_cal_timer_start(uint32 progress_ms, uint32 watchdog_ms);

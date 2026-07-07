@@ -66,8 +66,8 @@
         /* Stop the conversion if conversion mode is single sample and resolution
         *  is above 16 bits.
         */
-        #if(ADC_CFG1_RESOLUTION > 16 && \
-            ADC_CFG1_CONV_MODE == ADC_MODE_SINGLE_SAMPLE)
+        #if(ADC_CF_2V5_RESOLUTION > 16 && \
+            ADC_CF_2V5_CONV_MODE == ADC_MODE_SINGLE_SAMPLE)
             ADC_StopConvert();
             /* Software flag for checking conversion complete or not. Will be used when
             *  resolution is above 16 bits and conversion mode is single sample 
@@ -116,8 +116,8 @@
         /* Stop the conversion conversion mode is single sample and resolution
         *  is above 16 bits.
         */
-        #if(ADC_CFG2_RESOLUTION > 16 && \
-            ADC_CFG2_CONVMODE == ADC_MODE_SINGLE_SAMPLE)
+        #if(ADC_CF_0V512_RESOLUTION > 16 && \
+            ADC_CF_0V512_CONVMODE == ADC_MODE_SINGLE_SAMPLE)
             ADC_StopConvert();
             /* Software flag for checking conversion complete or not. Will be used when
             *   resolution is above 16 bits and conversion mode is single sample 
@@ -166,8 +166,8 @@
         /* Stop the conversion if conversion mode is set to single sample and
         *  resolution is above 16 bits.
         */
-        #if(ADC_CFG3_RESOLUTION > 16 && \
-            ADC_CFG3_CONVMODE == ADC_MODE_SINGLE_SAMPLE)
+        #if(ADC_CF_1V024_RESOLUTION > 16 && \
+            ADC_CF_1V024_CONVMODE == ADC_MODE_SINGLE_SAMPLE)
             ADC_StopConvert();
             /* Software flag for checking conversion complete or not. Will be used when
             *  resolution is above 16 bits and conversion mode is single sample 
@@ -216,8 +216,8 @@
         /* Stop the conversion if conversion mode is set to single sample and
         *  resolution is above 16 bits.
         */
-        #if(ADC_CFG4_RESOLUTION > 16 && \
-            ADC_CFG4_CONVMODE == ADC_MODE_SINGLE_SAMPLE)
+        #if(ADC_CF_0V625_RESOLUTION > 16 && \
+            ADC_CF_0V625_CONVMODE == ADC_MODE_SINGLE_SAMPLE)
             ADC_StopConvert();
             /* Software flag for checking conversion complete or not. Will be used when
             *  resolution is above 16 bits and conversion mode is single sample 

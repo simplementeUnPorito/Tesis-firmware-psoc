@@ -107,54 +107,54 @@ void ADC_Init(void)
     #endif   /* End ADC_IRQ_REMOVE */
 
     /* Init static registers with common configuration */
-    ADC_DSM_DEM0_REG    = ADC_CFG1_DSM_DEM0;
-    ADC_DSM_DEM1_REG    = ADC_CFG1_DSM_DEM1;
-    ADC_DSM_MISC_REG    = ADC_CFG1_DSM_MISC;
-    ADC_DSM_CLK_REG    |= ADC_CFG1_DSM_CLK;
-    ADC_DSM_REF1_REG    = ADC_CFG1_DSM_REF1;
+    ADC_DSM_DEM0_REG    = ADC_CF_2V5_DSM_DEM0;
+    ADC_DSM_DEM1_REG    = ADC_CF_2V5_DSM_DEM1;
+    ADC_DSM_MISC_REG    = ADC_CF_2V5_DSM_MISC;
+    ADC_DSM_CLK_REG    |= ADC_CF_2V5_DSM_CLK;
+    ADC_DSM_REF1_REG    = ADC_CF_2V5_DSM_REF1;
 
-    ADC_DSM_OUT0_REG    = ADC_CFG1_DSM_OUT0;
-    ADC_DSM_OUT1_REG    = ADC_CFG1_DSM_OUT1;
+    ADC_DSM_OUT0_REG    = ADC_CF_2V5_DSM_OUT0;
+    ADC_DSM_OUT1_REG    = ADC_CF_2V5_DSM_OUT1;
 
-    ADC_DSM_CR0_REG     = ADC_CFG1_DSM_CR0;
-    ADC_DSM_CR1_REG     = ADC_CFG1_DSM_CR1;
+    ADC_DSM_CR0_REG     = ADC_CF_2V5_DSM_CR0;
+    ADC_DSM_CR1_REG     = ADC_CF_2V5_DSM_CR1;
 #if(ADC_MI_ENABLE != 0u) /* Enable Modulator Input */
     ADC_DSM_CR3_REG     |= ADC_DSM_MODBIT_EN;
 #else
-    ADC_DSM_CR3_REG     = ADC_CFG1_DSM_CR3;
+    ADC_DSM_CR3_REG     = ADC_CF_2V5_DSM_CR3;
 #endif /* ADC_MI_ENABLE != 0u*/    
-    ADC_DSM_CR8_REG     = ADC_CFG1_DSM_CR8;
-    ADC_DSM_CR9_REG     = ADC_CFG1_DSM_CR9;
-    ADC_DSM_CR13_REG    = ADC_CFG1_DSM_CR13;
+    ADC_DSM_CR8_REG     = ADC_CF_2V5_DSM_CR8;
+    ADC_DSM_CR9_REG     = ADC_CF_2V5_DSM_CR9;
+    ADC_DSM_CR13_REG    = ADC_CF_2V5_DSM_CR13;
 
-    ADC_DEC_SR_REG      = ADC_CFG1_DEC_SR;
+    ADC_DEC_SR_REG      = ADC_CF_2V5_DEC_SR;
 
     /* Calculate Gain compensation coefficients for all configurations */
-    ADC_GainCompensation(ADC_CFG1_INPUT_RANGE,
-                                      ADC_CFG1_IDEAL_DEC_GAIN,
-                                      ADC_CFG1_IDEAL_ODDDEC_GAIN,
-                                      ADC_CFG1_RESOLUTION,
-                                      ADC_CFG1);
+    ADC_GainCompensation(ADC_CF_2V5_INPUT_RANGE,
+                                      ADC_CF_2V5_IDEAL_DEC_GAIN,
+                                      ADC_CF_2V5_IDEAL_ODDDEC_GAIN,
+                                      ADC_CF_2V5_RESOLUTION,
+                                      ADC_CF_2V5);
     #if(ADC_DEFAULT_NUM_CONFIGS > 1)
-        ADC_GainCompensation(ADC_CFG2_INPUT_RANGE,
-                                          ADC_CFG2_IDEAL_DEC_GAIN,
-                                          ADC_CFG2_IDEAL_ODDDEC_GAIN,
-                                          ADC_CFG2_RESOLUTION,
-                                          ADC_CFG2);
+        ADC_GainCompensation(ADC_CF_0V512_INPUT_RANGE,
+                                          ADC_CF_0V512_IDEAL_DEC_GAIN,
+                                          ADC_CF_0V512_IDEAL_ODDDEC_GAIN,
+                                          ADC_CF_0V512_RESOLUTION,
+                                          ADC_CF_0V512);
     #endif /* ADC_DEFAULT_NUM_CONFIGS > 1 */
     #if(ADC_DEFAULT_NUM_CONFIGS > 2)
-        ADC_GainCompensation(ADC_CFG3_INPUT_RANGE,
-                                          ADC_CFG3_IDEAL_DEC_GAIN,
-                                          ADC_CFG3_IDEAL_ODDDEC_GAIN,
-                                          ADC_CFG3_RESOLUTION,
-                                          ADC_CFG3);
+        ADC_GainCompensation(ADC_CF_1V024_INPUT_RANGE,
+                                          ADC_CF_1V024_IDEAL_DEC_GAIN,
+                                          ADC_CF_1V024_IDEAL_ODDDEC_GAIN,
+                                          ADC_CF_1V024_RESOLUTION,
+                                          ADC_CF_1V024);
     #endif /* ADC_DEFAULT_NUM_CONFIGS > 2 */
     #if(ADC_DEFAULT_NUM_CONFIGS > 3)
-        ADC_GainCompensation(ADC_CFG4_INPUT_RANGE,
-                                          ADC_CFG4_IDEAL_DEC_GAIN,
-                                          ADC_CFG4_IDEAL_ODDDEC_GAIN,
-                                          ADC_CFG4_RESOLUTION,
-                                          ADC_CFG4);
+        ADC_GainCompensation(ADC_CF_0V625_INPUT_RANGE,
+                                          ADC_CF_0V625_IDEAL_DEC_GAIN,
+                                          ADC_CF_0V625_IDEAL_ODDDEC_GAIN,
+                                          ADC_CF_0V625_RESOLUTION,
+                                          ADC_CF_0V625);
     #endif /* ADC_DEFAULT_NUM_CONFIGS > 3 */
 
     /* Set GCOR register for config1 */
@@ -207,58 +207,58 @@ void ADC_Enable(void)
     ADC_DSM_CR17_REG |= (ADC_DSM_EN_BUF_VREF | ADC_DSM_EN_BUF_VCM);
 
     /* Code to disable the REFBUF0 if reference chosen is External ref */
-    #if (((ADC_CFG1_REFERENCE == ADC_EXT_REF_ON_P03) || \
-          (ADC_CFG1_REFERENCE == ADC_EXT_REF_ON_P32)) || \
+    #if (((ADC_CF_2V5_REFERENCE == ADC_EXT_REF_ON_P03) || \
+          (ADC_CF_2V5_REFERENCE == ADC_EXT_REF_ON_P32)) || \
          ((ADC_DEFAULT_NUM_CONFIGS > 1) && \
-          ((ADC_CFG2_REFERENCE == ADC_EXT_REF_ON_P03) ||  \
-           (ADC_CFG2_REFERENCE == ADC_EXT_REF_ON_P32))) || \
+          ((ADC_CF_0V512_REFERENCE == ADC_EXT_REF_ON_P03) ||  \
+           (ADC_CF_0V512_REFERENCE == ADC_EXT_REF_ON_P32))) || \
          ((ADC_DEFAULT_NUM_CONFIGS > 2) && \
-          ((ADC_CFG3_REFERENCE == ADC_EXT_REF_ON_P03) ||  \
-           (ADC_CFG3_REFERENCE == ADC_EXT_REF_ON_P32))) || \
+          ((ADC_CF_1V024_REFERENCE == ADC_EXT_REF_ON_P03) ||  \
+           (ADC_CF_1V024_REFERENCE == ADC_EXT_REF_ON_P32))) || \
          ((ADC_DEFAULT_NUM_CONFIGS > 3) && \
-          ((ADC_CFG4_REFERENCE == ADC_EXT_REF_ON_P03) || \
-           (ADC_CFG4_REFERENCE == ADC_EXT_REF_ON_P32))))
+          ((ADC_CF_0V625_REFERENCE == ADC_EXT_REF_ON_P03) || \
+           (ADC_CF_0V625_REFERENCE == ADC_EXT_REF_ON_P32))))
         if (((config == 1u) &&
-            ((ADC_CFG1_REFERENCE == ADC_EXT_REF_ON_P03) ||
-             (ADC_CFG1_REFERENCE == ADC_EXT_REF_ON_P32))) ||
+            ((ADC_CF_2V5_REFERENCE == ADC_EXT_REF_ON_P03) ||
+             (ADC_CF_2V5_REFERENCE == ADC_EXT_REF_ON_P32))) ||
             ((config == 2u) &&
-            ((ADC_CFG2_REFERENCE == ADC_EXT_REF_ON_P03) ||
-             (ADC_CFG2_REFERENCE == ADC_EXT_REF_ON_P32))) ||
+            ((ADC_CF_0V512_REFERENCE == ADC_EXT_REF_ON_P03) ||
+             (ADC_CF_0V512_REFERENCE == ADC_EXT_REF_ON_P32))) ||
             ((config == 3u) &&
-            ((ADC_CFG3_REFERENCE == ADC_EXT_REF_ON_P03) ||
-             (ADC_CFG3_REFERENCE == ADC_EXT_REF_ON_P32))) ||
+            ((ADC_CF_1V024_REFERENCE == ADC_EXT_REF_ON_P03) ||
+             (ADC_CF_1V024_REFERENCE == ADC_EXT_REF_ON_P32))) ||
             ((config == 4u) &&
-            ((ADC_CFG4_REFERENCE == ADC_EXT_REF_ON_P03) ||
-             (ADC_CFG4_REFERENCE == ADC_EXT_REF_ON_P32))))
+            ((ADC_CF_0V625_REFERENCE == ADC_EXT_REF_ON_P03) ||
+             (ADC_CF_0V625_REFERENCE == ADC_EXT_REF_ON_P32))))
         {
             /* Disable the REFBUF0 */
             ADC_DSM_CR17_REG &= (uint8)~ADC_DSM_EN_BUF_VREF;
         }
     #endif /* External ref */
 
-    #if (((ADC_CFG1_INPUT_RANGE == ADC_IR_VSSA_TO_2VREF) || \
+    #if (((ADC_CF_2V5_INPUT_RANGE == ADC_IR_VSSA_TO_2VREF) || \
          ((ADC_DEFAULT_NUM_CONFIGS > 1) && \
-          (ADC_CFG2_INPUT_RANGE == ADC_IR_VSSA_TO_2VREF)) || \
+          (ADC_CF_0V512_INPUT_RANGE == ADC_IR_VSSA_TO_2VREF)) || \
          ((ADC_DEFAULT_NUM_CONFIGS > 2) && \
-          (ADC_CFG3_INPUT_RANGE == ADC_IR_VSSA_TO_2VREF)) || \
+          (ADC_CF_1V024_INPUT_RANGE == ADC_IR_VSSA_TO_2VREF)) || \
          ((ADC_DEFAULT_NUM_CONFIGS > 3) && \
-          (ADC_CFG4_INPUT_RANGE == ADC_IR_VSSA_TO_2VREF))))
+          (ADC_CF_0V625_INPUT_RANGE == ADC_IR_VSSA_TO_2VREF))))
         if(((config == 1u) &&
-            (ADC_CFG1_INPUT_RANGE == ADC_IR_VSSA_TO_2VREF) &&
-            ((ADC_CFG1_REFERENCE != ADC_EXT_REF_ON_P03) &&
-             (ADC_CFG1_REFERENCE != ADC_EXT_REF_ON_P32))) ||
+            (ADC_CF_2V5_INPUT_RANGE == ADC_IR_VSSA_TO_2VREF) &&
+            ((ADC_CF_2V5_REFERENCE != ADC_EXT_REF_ON_P03) &&
+             (ADC_CF_2V5_REFERENCE != ADC_EXT_REF_ON_P32))) ||
              ((config == 2u) &&
-              (ADC_CFG2_INPUT_RANGE == ADC_IR_VSSA_TO_2VREF) &&
-             ((ADC_CFG2_REFERENCE != ADC_EXT_REF_ON_P03) &&
-             (ADC_CFG2_REFERENCE != ADC_EXT_REF_ON_P32))) ||
+              (ADC_CF_0V512_INPUT_RANGE == ADC_IR_VSSA_TO_2VREF) &&
+             ((ADC_CF_0V512_REFERENCE != ADC_EXT_REF_ON_P03) &&
+             (ADC_CF_0V512_REFERENCE != ADC_EXT_REF_ON_P32))) ||
              ((config == 3u) &&
-              (ADC_CFG3_INPUT_RANGE == ADC_IR_VSSA_TO_2VREF) &&
-             ((ADC_CFG3_REFERENCE != ADC_EXT_REF_ON_P03) &&
-             (ADC_CFG3_REFERENCE != ADC_EXT_REF_ON_P32))) ||
+              (ADC_CF_1V024_INPUT_RANGE == ADC_IR_VSSA_TO_2VREF) &&
+             ((ADC_CF_1V024_REFERENCE != ADC_EXT_REF_ON_P03) &&
+             (ADC_CF_1V024_REFERENCE != ADC_EXT_REF_ON_P32))) ||
              ((config == 4u) &&
-              (ADC_CFG4_INPUT_RANGE == ADC_IR_VSSA_TO_2VREF) &&
-             ((ADC_CFG4_REFERENCE != ADC_EXT_REF_ON_P03) &&
-             (ADC_CFG4_REFERENCE != ADC_EXT_REF_ON_P32))))
+              (ADC_CF_0V625_INPUT_RANGE == ADC_IR_VSSA_TO_2VREF) &&
+             ((ADC_CF_0V625_REFERENCE != ADC_EXT_REF_ON_P03) &&
+             (ADC_CF_0V625_REFERENCE != ADC_EXT_REF_ON_P32))))
         {
             /* Enable the REFBUF1 */
             ADC_DSM_REF0_REG |= ADC_DSM_EN_BUF_VREF_INN;
@@ -280,7 +280,7 @@ void ADC_Enable(void)
     ADC_PUMP_CR1_REG  |= ( ADC_PUMP_CR1_CLKSEL | ADC_PUMP_CR1_FORCE );
 
     /* Enable Modulator Chopping if required */
-    ADC_DSM_CR2_REG = ADC_CFG1_DSM_CR2;
+    ADC_DSM_CR2_REG = ADC_CF_2V5_DSM_CR2;
 
     /* This is only valid if there is an internal clock */
     #if(ADC_DEFAULT_INTERNAL_CLK)
@@ -968,30 +968,30 @@ int16 ADC_CountsTo_mVolts(int32 adcCounts)
     int16 mVolts;
 
     /* Convert adcCounts to the right align if left option selected */
-    #if(ADC_CFG1_DEC_DIV != 0)
-        if(ADC_Config == ADC_CFG1)
+    #if(ADC_CF_2V5_DEC_DIV != 0)
+        if(ADC_Config == ADC_CF_2V5)
         {
-            adcCounts /= ADC_CFG1_DEC_DIV;
+            adcCounts /= ADC_CF_2V5_DEC_DIV;
         }
-    #endif /* ADC_CFG1_DEC_DIV */
-    #if((ADC_CFG2_DEC_DIV != 0) && (ADC_DEFAULT_NUM_CONFIGS > 1))
-        if(ADC_Config == ADC_CFG2)
+    #endif /* ADC_CF_2V5_DEC_DIV */
+    #if((ADC_CF_0V512_DEC_DIV != 0) && (ADC_DEFAULT_NUM_CONFIGS > 1))
+        if(ADC_Config == ADC_CF_0V512)
         {
-            adcCounts /= ADC_CFG2_DEC_DIV;
+            adcCounts /= ADC_CF_0V512_DEC_DIV;
         }
-    #endif /* ADC_CFG2_DEC_DIV */
-    #if((ADC_CFG3_DEC_DIV != 0) && (ADC_DEFAULT_NUM_CONFIGS > 2))
-        if(ADC_Config == ADC_CFG3)
+    #endif /* ADC_CF_0V512_DEC_DIV */
+    #if((ADC_CF_1V024_DEC_DIV != 0) && (ADC_DEFAULT_NUM_CONFIGS > 2))
+        if(ADC_Config == ADC_CF_1V024)
         {
-            adcCounts /= ADC_CFG3_DEC_DIV;
+            adcCounts /= ADC_CF_1V024_DEC_DIV;
         }
-    #endif /* ADC_CFG2_DEC_DIV */
-    #if((ADC_CFG4_DEC_DIV != 0) && (ADC_DEFAULT_NUM_CONFIGS > 3))
-        if(ADC_Config == ADC_CFG4)
+    #endif /* ADC_CF_0V512_DEC_DIV */
+    #if((ADC_CF_0V625_DEC_DIV != 0) && (ADC_DEFAULT_NUM_CONFIGS > 3))
+        if(ADC_Config == ADC_CF_0V625)
         {
-            adcCounts /= ADC_CFG4_DEC_DIV;
+            adcCounts /= ADC_CF_0V625_DEC_DIV;
         }
-    #endif /* ADC_CFG2_DEC_DIV */
+    #endif /* ADC_CF_0V512_DEC_DIV */
 
     /* Subtract ADC offset */
     adcCounts -= ADC_Offset;
@@ -1029,30 +1029,30 @@ float32 ADC_CountsTo_Volts(int32 adcCounts)
     float32 Volts;
 
     /* Convert adcCounts to the right align if left option selected */
-    #if(ADC_CFG1_DEC_DIV != 0)
-        if(ADC_Config == ADC_CFG1)
+    #if(ADC_CF_2V5_DEC_DIV != 0)
+        if(ADC_Config == ADC_CF_2V5)
         {
-            adcCounts /= ADC_CFG1_DEC_DIV;
+            adcCounts /= ADC_CF_2V5_DEC_DIV;
         }
-    #endif /* ADC_CFG1_DEC_DIV */
-    #if((ADC_CFG2_DEC_DIV != 0) && (ADC_DEFAULT_NUM_CONFIGS > 1))
-        if(ADC_Config == ADC_CFG2)
+    #endif /* ADC_CF_2V5_DEC_DIV */
+    #if((ADC_CF_0V512_DEC_DIV != 0) && (ADC_DEFAULT_NUM_CONFIGS > 1))
+        if(ADC_Config == ADC_CF_0V512)
         {
-            adcCounts /= ADC_CFG2_DEC_DIV;
+            adcCounts /= ADC_CF_0V512_DEC_DIV;
         }
-    #endif /* ADC_CFG2_DEC_DIV */
-    #if((ADC_CFG3_DEC_DIV != 0) && (ADC_DEFAULT_NUM_CONFIGS > 2))
-        if(ADC_Config == ADC_CFG3)
+    #endif /* ADC_CF_0V512_DEC_DIV */
+    #if((ADC_CF_1V024_DEC_DIV != 0) && (ADC_DEFAULT_NUM_CONFIGS > 2))
+        if(ADC_Config == ADC_CF_1V024)
         {
-            adcCounts /= ADC_CFG3_DEC_DIV;
+            adcCounts /= ADC_CF_1V024_DEC_DIV;
         }
-    #endif /* ADC_CFG2_DEC_DIV */
-    #if((ADC_CFG4_DEC_DIV != 0) && (ADC_DEFAULT_NUM_CONFIGS > 3))
-        if(ADC_Config == ADC_CFG4)
+    #endif /* ADC_CF_0V512_DEC_DIV */
+    #if((ADC_CF_0V625_DEC_DIV != 0) && (ADC_DEFAULT_NUM_CONFIGS > 3))
+        if(ADC_Config == ADC_CF_0V625)
         {
-            adcCounts /= ADC_CFG4_DEC_DIV;
+            adcCounts /= ADC_CF_0V625_DEC_DIV;
         }
-    #endif /* ADC_CFG2_DEC_DIV */
+    #endif /* ADC_CF_0V512_DEC_DIV */
 
     /* Subtract ADC offset */
     adcCounts -= ADC_Offset;
@@ -1099,113 +1099,113 @@ int32 ADC_CountsTo_uVolts(int32 adcCounts)
 
     /* Set the resolution based on the configuration */
     /* Convert adcCounts to the right align if left option selected */
-    if (ADC_Config == ADC_CFG1)
+    if (ADC_Config == ADC_CF_2V5)
     {
-        resolution = ADC_CFG1_RESOLUTION;
-        #if(ADC_CFG1_DEC_DIV != 0)
-            adcCounts /= ADC_CFG1_DEC_DIV;
-        #endif /* ADC_CFG1_DEC_DIV */
+        resolution = ADC_CF_2V5_RESOLUTION;
+        #if(ADC_CF_2V5_DEC_DIV != 0)
+            adcCounts /= ADC_CF_2V5_DEC_DIV;
+        #endif /* ADC_CF_2V5_DEC_DIV */
     }
-    else if (ADC_Config == ADC_CFG2)
+    else if (ADC_Config == ADC_CF_0V512)
     {
-        resolution = ADC_CFG2_RESOLUTION;
-        #if(ADC_CFG2_DEC_DIV != 0)
-            adcCounts /= ADC_CFG2_DEC_DIV;
-        #endif /* ADC_CFG2_DEC_DIV */
+        resolution = ADC_CF_0V512_RESOLUTION;
+        #if(ADC_CF_0V512_DEC_DIV != 0)
+            adcCounts /= ADC_CF_0V512_DEC_DIV;
+        #endif /* ADC_CF_0V512_DEC_DIV */
     }
-    else if (ADC_Config == ADC_CFG3)
+    else if (ADC_Config == ADC_CF_1V024)
     {
-        resolution = ADC_CFG3_RESOLUTION;
-        #if(ADC_CFG3_DEC_DIV != 0)
-            adcCounts /= ADC_CFG3_DEC_DIV;
-        #endif /* ADC_CFG3_DEC_DIV */
+        resolution = ADC_CF_1V024_RESOLUTION;
+        #if(ADC_CF_1V024_DEC_DIV != 0)
+            adcCounts /= ADC_CF_1V024_DEC_DIV;
+        #endif /* ADC_CF_1V024_DEC_DIV */
     }
     else
     {
-        resolution = ADC_CFG4_RESOLUTION;
-        #if(ADC_CFG4_DEC_DIV != 0)
-            adcCounts /= ADC_CFG4_DEC_DIV;
-        #endif /* ADC_CFG4_DEC_DIV */
+        resolution = ADC_CF_0V625_RESOLUTION;
+        #if(ADC_CF_0V625_DEC_DIV != 0)
+            adcCounts /= ADC_CF_0V625_DEC_DIV;
+        #endif /* ADC_CF_0V625_DEC_DIV */
     }
 
     switch (resolution)
     {
-        #if( (ADC_CFG1_RESOLUTION == ADC__BITS_12) || \
-             (ADC_CFG2_RESOLUTION == ADC__BITS_12) || \
-             (ADC_CFG3_RESOLUTION == ADC__BITS_12) || \
-             (ADC_CFG4_RESOLUTION == ADC__BITS_12) )
+        #if( (ADC_CF_2V5_RESOLUTION == ADC__BITS_12) || \
+             (ADC_CF_0V512_RESOLUTION == ADC__BITS_12) || \
+             (ADC_CF_1V024_RESOLUTION == ADC__BITS_12) || \
+             (ADC_CF_0V625_RESOLUTION == ADC__BITS_12) )
             case (uint8)ADC__BITS_12:
                 coefA = ADC_1UV_COUNTS / ADC_DIVISOR_2;
                 coefB = ADC_DIVISOR_2;
                 break;
         #endif /* ADC__BITS_12 */    
-        #if( (ADC_CFG1_RESOLUTION == ADC__BITS_13) || \
-             (ADC_CFG2_RESOLUTION == ADC__BITS_13) || \
-             (ADC_CFG3_RESOLUTION == ADC__BITS_13) || \
-             (ADC_CFG4_RESOLUTION == ADC__BITS_13) )
+        #if( (ADC_CF_2V5_RESOLUTION == ADC__BITS_13) || \
+             (ADC_CF_0V512_RESOLUTION == ADC__BITS_13) || \
+             (ADC_CF_1V024_RESOLUTION == ADC__BITS_13) || \
+             (ADC_CF_0V625_RESOLUTION == ADC__BITS_13) )
             case (uint8)ADC__BITS_13:
                 coefA = ADC_1UV_COUNTS / ADC_DIVISOR_4;
                 coefB = ADC_DIVISOR_4;
                 break;
         #endif /* ADC__BITS_13 */    
-        #if( (ADC_CFG1_RESOLUTION == ADC__BITS_14) || \
-             (ADC_CFG2_RESOLUTION == ADC__BITS_14) || \
-             (ADC_CFG3_RESOLUTION == ADC__BITS_14) || \
-             (ADC_CFG4_RESOLUTION == ADC__BITS_14) )
+        #if( (ADC_CF_2V5_RESOLUTION == ADC__BITS_14) || \
+             (ADC_CF_0V512_RESOLUTION == ADC__BITS_14) || \
+             (ADC_CF_1V024_RESOLUTION == ADC__BITS_14) || \
+             (ADC_CF_0V625_RESOLUTION == ADC__BITS_14) )
             case (uint8)ADC__BITS_14:
                 coefA = ADC_1UV_COUNTS / ADC_DIVISOR_8;
                 coefB = ADC_DIVISOR_8;
                 break;
         #endif /* ADC__BITS_14 */    
-        #if( (ADC_CFG1_RESOLUTION == ADC__BITS_15) || \
-             (ADC_CFG2_RESOLUTION == ADC__BITS_15) || \
-             (ADC_CFG3_RESOLUTION == ADC__BITS_15) || \
-             (ADC_CFG4_RESOLUTION == ADC__BITS_15) )
+        #if( (ADC_CF_2V5_RESOLUTION == ADC__BITS_15) || \
+             (ADC_CF_0V512_RESOLUTION == ADC__BITS_15) || \
+             (ADC_CF_1V024_RESOLUTION == ADC__BITS_15) || \
+             (ADC_CF_0V625_RESOLUTION == ADC__BITS_15) )
             case (uint8)ADC__BITS_15:
                 coefA = ADC_1UV_COUNTS / ADC_DIVISOR_16;
                 coefB = ADC_DIVISOR_16;
                 break;
         #endif /* ADC__BITS_15 */    
-        #if( (ADC_CFG1_RESOLUTION == ADC__BITS_16) || \
-             (ADC_CFG2_RESOLUTION == ADC__BITS_16) || \
-             (ADC_CFG3_RESOLUTION == ADC__BITS_16) || \
-             (ADC_CFG4_RESOLUTION == ADC__BITS_16) )
+        #if( (ADC_CF_2V5_RESOLUTION == ADC__BITS_16) || \
+             (ADC_CF_0V512_RESOLUTION == ADC__BITS_16) || \
+             (ADC_CF_1V024_RESOLUTION == ADC__BITS_16) || \
+             (ADC_CF_0V625_RESOLUTION == ADC__BITS_16) )
             case (uint8)ADC__BITS_16:
                 coefA = ADC_1UV_COUNTS / ADC_DIVISOR_32;
                 coefB = ADC_DIVISOR_32;
                 break;
         #endif /* ADC__BITS_16 */    
-        #if( (ADC_CFG1_RESOLUTION == ADC__BITS_17) || \
-             (ADC_CFG2_RESOLUTION == ADC__BITS_17) || \
-             (ADC_CFG3_RESOLUTION == ADC__BITS_17) || \
-             (ADC_CFG4_RESOLUTION == ADC__BITS_17) )
+        #if( (ADC_CF_2V5_RESOLUTION == ADC__BITS_17) || \
+             (ADC_CF_0V512_RESOLUTION == ADC__BITS_17) || \
+             (ADC_CF_1V024_RESOLUTION == ADC__BITS_17) || \
+             (ADC_CF_0V625_RESOLUTION == ADC__BITS_17) )
             case (uint8)ADC__BITS_17:
                 coefA = ADC_1UV_COUNTS / ADC_DIVISOR_64;
                 coefB = ADC_DIVISOR_64;
                 break;
         #endif /* ADC__BITS_17 */    
-        #if( (ADC_CFG1_RESOLUTION == ADC__BITS_18) || \
-             (ADC_CFG2_RESOLUTION == ADC__BITS_18) || \
-             (ADC_CFG3_RESOLUTION == ADC__BITS_18) || \
-             (ADC_CFG4_RESOLUTION == ADC__BITS_18) )
+        #if( (ADC_CF_2V5_RESOLUTION == ADC__BITS_18) || \
+             (ADC_CF_0V512_RESOLUTION == ADC__BITS_18) || \
+             (ADC_CF_1V024_RESOLUTION == ADC__BITS_18) || \
+             (ADC_CF_0V625_RESOLUTION == ADC__BITS_18) )
             case (uint8)ADC__BITS_18:
                 coefA = ADC_1UV_COUNTS / ADC_DIVISOR_125;
                 coefB = ADC_DIVISOR_125;
                 break;
         #endif /* ADC__BITS_18 */    
-        #if( (ADC_CFG1_RESOLUTION == ADC__BITS_19) || \
-             (ADC_CFG2_RESOLUTION == ADC__BITS_19) || \
-             (ADC_CFG3_RESOLUTION == ADC__BITS_19) || \
-             (ADC_CFG4_RESOLUTION == ADC__BITS_19) )
+        #if( (ADC_CF_2V5_RESOLUTION == ADC__BITS_19) || \
+             (ADC_CF_0V512_RESOLUTION == ADC__BITS_19) || \
+             (ADC_CF_1V024_RESOLUTION == ADC__BITS_19) || \
+             (ADC_CF_0V625_RESOLUTION == ADC__BITS_19) )
             case (uint8)ADC__BITS_19:
                 coefA = ADC_1UV_COUNTS / ADC_DIVISOR_250;
                 coefB = ADC_DIVISOR_250;
                 break;
         #endif /* ADC__BITS_19 */    
-        #if( (ADC_CFG1_RESOLUTION == ADC__BITS_20) || \
-             (ADC_CFG2_RESOLUTION == ADC__BITS_20) || \
-             (ADC_CFG3_RESOLUTION == ADC__BITS_20) || \
-             (ADC_CFG4_RESOLUTION == ADC__BITS_20) )
+        #if( (ADC_CF_2V5_RESOLUTION == ADC__BITS_20) || \
+             (ADC_CF_0V512_RESOLUTION == ADC__BITS_20) || \
+             (ADC_CF_1V024_RESOLUTION == ADC__BITS_20) || \
+             (ADC_CF_0V625_RESOLUTION == ADC__BITS_20) )
             case (uint8)ADC__BITS_20:
                 coefA = ADC_1UV_COUNTS / ADC_DIVISOR_500;
                 coefB = ADC_DIVISOR_500;
@@ -1251,43 +1251,43 @@ static void ADC_InitConfig(uint8 config)
     if (config == 1u)
     {
         /* Default Config */
-        ADC_DEC_CR_REG      = ADC_CFG1_DEC_CR;
-        ADC_DEC_SHIFT1_REG  = ADC_CFG1_DEC_SHIFT1;
-        ADC_DEC_SHIFT2_REG  = ADC_CFG1_DEC_SHIFT2;
-        ADC_DEC_DR2_REG     = ADC_CFG1_DEC_DR2;
-        ADC_DEC_DR2H_REG    = ADC_CFG1_DEC_DR2H;
-        ADC_DEC_DR1_REG     = ADC_CFG1_DEC_DR1;
-        ADC_DEC_OCOR_REG    = ADC_CFG1_DEC_OCOR;
-        ADC_DEC_OCORM_REG   = ADC_CFG1_DEC_OCORM;
-        ADC_DEC_OCORH_REG   = ADC_CFG1_DEC_OCORH;
-        ADC_DEC_COHER_REG   = ADC_CFG1_DEC_COHER;
+        ADC_DEC_CR_REG      = ADC_CF_2V5_DEC_CR;
+        ADC_DEC_SHIFT1_REG  = ADC_CF_2V5_DEC_SHIFT1;
+        ADC_DEC_SHIFT2_REG  = ADC_CF_2V5_DEC_SHIFT2;
+        ADC_DEC_DR2_REG     = ADC_CF_2V5_DEC_DR2;
+        ADC_DEC_DR2H_REG    = ADC_CF_2V5_DEC_DR2H;
+        ADC_DEC_DR1_REG     = ADC_CF_2V5_DEC_DR1;
+        ADC_DEC_OCOR_REG    = ADC_CF_2V5_DEC_OCOR;
+        ADC_DEC_OCORM_REG   = ADC_CF_2V5_DEC_OCORM;
+        ADC_DEC_OCORH_REG   = ADC_CF_2V5_DEC_OCORH;
+        ADC_DEC_COHER_REG   = ADC_CF_2V5_DEC_COHER;
 
-        ADC_DSM_CR4_REG     = ADC_CFG1_DSM_CR4;
-        ADC_DSM_CR5_REG     = ADC_CFG1_DSM_CR5;
-        ADC_DSM_CR6_REG     = ADC_CFG1_DSM_CR6;
-        ADC_DSM_CR7_REG     = ADC_CFG1_DSM_CR7;
-        ADC_DSM_CR10_REG    = ADC_CFG1_DSM_CR10;
-        ADC_DSM_CR11_REG    = ADC_CFG1_DSM_CR11;
-        ADC_DSM_CR12_REG    = ADC_CFG1_DSM_CR12;
-        ADC_DSM_CR14_REG    = ADC_CFG1_DSM_CR14;
-        ADC_DSM_CR15_REG    = ADC_CFG1_DSM_CR15;
-        ADC_DSM_CR16_REG    = ADC_CFG1_DSM_CR16;
-        ADC_DSM_CR17_REG    = ADC_CFG1_DSM_CR17;
+        ADC_DSM_CR4_REG     = ADC_CF_2V5_DSM_CR4;
+        ADC_DSM_CR5_REG     = ADC_CF_2V5_DSM_CR5;
+        ADC_DSM_CR6_REG     = ADC_CF_2V5_DSM_CR6;
+        ADC_DSM_CR7_REG     = ADC_CF_2V5_DSM_CR7;
+        ADC_DSM_CR10_REG    = ADC_CF_2V5_DSM_CR10;
+        ADC_DSM_CR11_REG    = ADC_CF_2V5_DSM_CR11;
+        ADC_DSM_CR12_REG    = ADC_CF_2V5_DSM_CR12;
+        ADC_DSM_CR14_REG    = ADC_CF_2V5_DSM_CR14;
+        ADC_DSM_CR15_REG    = ADC_CF_2V5_DSM_CR15;
+        ADC_DSM_CR16_REG    = ADC_CF_2V5_DSM_CR16;
+        ADC_DSM_CR17_REG    = ADC_CF_2V5_DSM_CR17;
         /* Set DSM_REF0_REG by disabling and enabling the PRESS circuit */
-        ADC_SetDSMRef0Reg(ADC_CFG1_DSM_REF0);
-        ADC_DSM_REF2_REG    = ADC_CFG1_DSM_REF2;
-        ADC_DSM_REF3_REG    = ADC_CFG1_DSM_REF3;
+        ADC_SetDSMRef0Reg(ADC_CF_2V5_DSM_REF0);
+        ADC_DSM_REF2_REG    = ADC_CF_2V5_DSM_REF2;
+        ADC_DSM_REF3_REG    = ADC_CF_2V5_DSM_REF3;
 
-        ADC_DSM_BUF0_REG    = ADC_CFG1_DSM_BUF0;
-        ADC_DSM_BUF1_REG    = ADC_CFG1_DSM_BUF1;
-        ADC_DSM_BUF2_REG    = ADC_CFG1_DSM_BUF2;
-        ADC_DSM_BUF3_REG    = ADC_CFG1_DSM_BUF3;
+        ADC_DSM_BUF0_REG    = ADC_CF_2V5_DSM_BUF0;
+        ADC_DSM_BUF1_REG    = ADC_CF_2V5_DSM_BUF1;
+        ADC_DSM_BUF2_REG    = ADC_CF_2V5_DSM_BUF2;
+        ADC_DSM_BUF3_REG    = ADC_CF_2V5_DSM_BUF3;
 
         /* To select either Vssa or Vref to -ve input of DSM depending on
         *  the input  range selected.
         */
         #if(ADC_DEFAULT_INPUT_MODE)
-            #if (ADC_CFG1_INPUT_RANGE == ADC_IR_VSSA_TO_2VREF)
+            #if (ADC_CF_2V5_INPUT_RANGE == ADC_IR_VSSA_TO_2VREF)
                 ADC_AMux_Select(1u);
             #else
                 ADC_AMux_Select(0u);
@@ -1297,18 +1297,18 @@ static void ADC_InitConfig(uint8 config)
         /* Set the Conversion stop if resolution is above 16 bit and conversion
         *   mode is Single sample
         */
-        #if(ADC_CFG1_RESOLUTION > 16 && \
-            ADC_CFG1_CONV_MODE == ADC_MODE_SINGLE_SAMPLE)
+        #if(ADC_CF_2V5_RESOLUTION > 16 && \
+            ADC_CF_2V5_CONV_MODE == ADC_MODE_SINGLE_SAMPLE)
             ADC_stopConversion = 1u;
         #endif /* Single sample with resolution above 16 bits. */
 
-        ADC_CountsPerVolt = (int32)ADC_CFG1_COUNTS_PER_VOLT;
+        ADC_CountsPerVolt = (int32)ADC_CF_2V5_COUNTS_PER_VOLT;
 
-        ADC_Ext_CP_Clk_SetDividerRegister(ADC_CFG1_CP_CLK_DIVIDER, 1u);
+        ADC_Ext_CP_Clk_SetDividerRegister(ADC_CF_2V5_CP_CLK_DIVIDER, 1u);
 
         /* This is only valid if there is an internal clock */
         #if(ADC_DEFAULT_INTERNAL_CLK)
-            ADC_theACLK_SetDividerRegister(ADC_CFG1_ADC_CLK_DIVIDER, 1u);
+            ADC_theACLK_SetDividerRegister(ADC_CF_2V5_ADC_CLK_DIVIDER, 1u);
         #endif /* ADC_DEFAULT_INTERNAL_CLK */
 
         #if(ADC_IRQ_REMOVE == 0u)
@@ -1321,44 +1321,44 @@ static void ADC_InitConfig(uint8 config)
         if(config == 2u)
         {
             /* Second Config */
-            ADC_DEC_CR_REG      = ADC_CFG2_DEC_CR;
-            ADC_DEC_SHIFT1_REG  = ADC_CFG2_DEC_SHIFT1;
-            ADC_DEC_SHIFT2_REG  = ADC_CFG2_DEC_SHIFT2;
-            ADC_DEC_DR2_REG     = ADC_CFG2_DEC_DR2;
-            ADC_DEC_DR2H_REG    = ADC_CFG2_DEC_DR2H;
-            ADC_DEC_DR1_REG     = ADC_CFG2_DEC_DR1;
-            ADC_DEC_OCOR_REG    = ADC_CFG2_DEC_OCOR;
-            ADC_DEC_OCORM_REG   = ADC_CFG2_DEC_OCORM;
-            ADC_DEC_OCORH_REG   = ADC_CFG2_DEC_OCORH;
-            ADC_DEC_COHER_REG   = ADC_CFG2_DEC_COHER;
+            ADC_DEC_CR_REG      = ADC_CF_0V512_DEC_CR;
+            ADC_DEC_SHIFT1_REG  = ADC_CF_0V512_DEC_SHIFT1;
+            ADC_DEC_SHIFT2_REG  = ADC_CF_0V512_DEC_SHIFT2;
+            ADC_DEC_DR2_REG     = ADC_CF_0V512_DEC_DR2;
+            ADC_DEC_DR2H_REG    = ADC_CF_0V512_DEC_DR2H;
+            ADC_DEC_DR1_REG     = ADC_CF_0V512_DEC_DR1;
+            ADC_DEC_OCOR_REG    = ADC_CF_0V512_DEC_OCOR;
+            ADC_DEC_OCORM_REG   = ADC_CF_0V512_DEC_OCORM;
+            ADC_DEC_OCORH_REG   = ADC_CF_0V512_DEC_OCORH;
+            ADC_DEC_COHER_REG   = ADC_CF_0V512_DEC_COHER;
 
-            ADC_DSM_CR4_REG     = ADC_CFG2_DSM_CR4;
-            ADC_DSM_CR5_REG     = ADC_CFG2_DSM_CR5;
-            ADC_DSM_CR6_REG     = ADC_CFG2_DSM_CR6;
-            ADC_DSM_CR7_REG     = ADC_CFG2_DSM_CR7;
-            ADC_DSM_CR10_REG    = ADC_CFG2_DSM_CR10;
-            ADC_DSM_CR11_REG    = ADC_CFG2_DSM_CR11;
-            ADC_DSM_CR12_REG    = ADC_CFG2_DSM_CR12;
-            ADC_DSM_CR14_REG    = ADC_CFG2_DSM_CR14;
-            ADC_DSM_CR15_REG    = ADC_CFG2_DSM_CR15;
-            ADC_DSM_CR16_REG    = ADC_CFG2_DSM_CR16;
-            ADC_DSM_CR17_REG    = ADC_CFG2_DSM_CR17;
+            ADC_DSM_CR4_REG     = ADC_CF_0V512_DSM_CR4;
+            ADC_DSM_CR5_REG     = ADC_CF_0V512_DSM_CR5;
+            ADC_DSM_CR6_REG     = ADC_CF_0V512_DSM_CR6;
+            ADC_DSM_CR7_REG     = ADC_CF_0V512_DSM_CR7;
+            ADC_DSM_CR10_REG    = ADC_CF_0V512_DSM_CR10;
+            ADC_DSM_CR11_REG    = ADC_CF_0V512_DSM_CR11;
+            ADC_DSM_CR12_REG    = ADC_CF_0V512_DSM_CR12;
+            ADC_DSM_CR14_REG    = ADC_CF_0V512_DSM_CR14;
+            ADC_DSM_CR15_REG    = ADC_CF_0V512_DSM_CR15;
+            ADC_DSM_CR16_REG    = ADC_CF_0V512_DSM_CR16;
+            ADC_DSM_CR17_REG    = ADC_CF_0V512_DSM_CR17;
             /* Set DSM_REF0_REG by disabling and enabling the PRESS cirucit */
-            ADC_SetDSMRef0Reg(ADC_CFG2_DSM_REF0);
-            ADC_DSM_REF2_REG    = ADC_CFG2_DSM_REF2;
-            ADC_DSM_REF3_REG    = ADC_CFG2_DSM_REF3;
+            ADC_SetDSMRef0Reg(ADC_CF_0V512_DSM_REF0);
+            ADC_DSM_REF2_REG    = ADC_CF_0V512_DSM_REF2;
+            ADC_DSM_REF3_REG    = ADC_CF_0V512_DSM_REF3;
 
-            ADC_DSM_BUF0_REG    = ADC_CFG2_DSM_BUF0;
-            ADC_DSM_BUF1_REG    = ADC_CFG2_DSM_BUF1;
-            ADC_DSM_BUF2_REG    = ADC_CFG2_DSM_BUF2;
-            ADC_DSM_BUF3_REG    = ADC_CFG2_DSM_BUF3;
+            ADC_DSM_BUF0_REG    = ADC_CF_0V512_DSM_BUF0;
+            ADC_DSM_BUF1_REG    = ADC_CF_0V512_DSM_BUF1;
+            ADC_DSM_BUF2_REG    = ADC_CF_0V512_DSM_BUF2;
+            ADC_DSM_BUF3_REG    = ADC_CF_0V512_DSM_BUF3;
 
             /* To select either Vssa or Vref to -ve input of DSM depending on
             *  the input range selected.
             */
 
             #if(ADC_DEFAULT_INPUT_MODE)
-                #if (ADC_CFG2_INPUT_RANGE == ADC_IR_VSSA_TO_2VREF)
+                #if (ADC_CF_0V512_INPUT_RANGE == ADC_IR_VSSA_TO_2VREF)
                     ADC_AMux_Select(1u);
                 #else
                     ADC_AMux_Select(0u);
@@ -1368,18 +1368,18 @@ static void ADC_InitConfig(uint8 config)
             /* Set the Conversion stop if resolution is above 16 bit and
             *   conversion mode is Single sample
             */
-            #if(ADC_CFG2_RESOLUTION > 16 && \
-                ADC_CFG2_CONV_MODE == ADC_MODE_SINGLE_SAMPLE)
+            #if(ADC_CF_0V512_RESOLUTION > 16 && \
+                ADC_CF_0V512_CONV_MODE == ADC_MODE_SINGLE_SAMPLE)
                 ADC_stopConversion = 1u;
             #endif /* Single sample with resolution above 16 bits. */
 
-            ADC_CountsPerVolt = (int32)ADC_CFG2_COUNTS_PER_VOLT;
+            ADC_CountsPerVolt = (int32)ADC_CF_0V512_COUNTS_PER_VOLT;
 
-            ADC_Ext_CP_Clk_SetDividerRegister(ADC_CFG2_CP_CLK_DIVIDER, 1u);
+            ADC_Ext_CP_Clk_SetDividerRegister(ADC_CF_0V512_CP_CLK_DIVIDER, 1u);
 
             /* This is only valid if there is an internal clock */
             #if(ADC_DEFAULT_INTERNAL_CLK)
-                ADC_theACLK_SetDividerRegister(ADC_CFG2_ADC_CLK_DIVIDER, 1u);
+                ADC_theACLK_SetDividerRegister(ADC_CF_0V512_ADC_CLK_DIVIDER, 1u);
             #endif /* ADC_DEFAULT_INTERNAL_CLK */
 
             #if(ADC_IRQ_REMOVE == 0u)
@@ -1393,43 +1393,43 @@ static void ADC_InitConfig(uint8 config)
         if(config == 3u)
         {
             /* Third Config */
-            ADC_DEC_CR_REG      = ADC_CFG3_DEC_CR;
-            ADC_DEC_SHIFT1_REG  = ADC_CFG3_DEC_SHIFT1;
-            ADC_DEC_SHIFT2_REG  = ADC_CFG3_DEC_SHIFT2;
-            ADC_DEC_DR2_REG     = ADC_CFG3_DEC_DR2;
-            ADC_DEC_DR2H_REG    = ADC_CFG3_DEC_DR2H;
-            ADC_DEC_DR1_REG     = ADC_CFG3_DEC_DR1;
-            ADC_DEC_OCOR_REG    = ADC_CFG3_DEC_OCOR;
-            ADC_DEC_OCORM_REG   = ADC_CFG3_DEC_OCORM;
-            ADC_DEC_OCORH_REG   = ADC_CFG3_DEC_OCORH;
-            ADC_DEC_COHER_REG   = ADC_CFG3_DEC_COHER;
+            ADC_DEC_CR_REG      = ADC_CF_1V024_DEC_CR;
+            ADC_DEC_SHIFT1_REG  = ADC_CF_1V024_DEC_SHIFT1;
+            ADC_DEC_SHIFT2_REG  = ADC_CF_1V024_DEC_SHIFT2;
+            ADC_DEC_DR2_REG     = ADC_CF_1V024_DEC_DR2;
+            ADC_DEC_DR2H_REG    = ADC_CF_1V024_DEC_DR2H;
+            ADC_DEC_DR1_REG     = ADC_CF_1V024_DEC_DR1;
+            ADC_DEC_OCOR_REG    = ADC_CF_1V024_DEC_OCOR;
+            ADC_DEC_OCORM_REG   = ADC_CF_1V024_DEC_OCORM;
+            ADC_DEC_OCORH_REG   = ADC_CF_1V024_DEC_OCORH;
+            ADC_DEC_COHER_REG   = ADC_CF_1V024_DEC_COHER;
 
-            ADC_DSM_CR4_REG     = ADC_CFG3_DSM_CR4;
-            ADC_DSM_CR5_REG     = ADC_CFG3_DSM_CR5;
-            ADC_DSM_CR6_REG     = ADC_CFG3_DSM_CR6;
-            ADC_DSM_CR7_REG     = ADC_CFG3_DSM_CR7;
-            ADC_DSM_CR10_REG    = ADC_CFG3_DSM_CR10;
-            ADC_DSM_CR11_REG    = ADC_CFG3_DSM_CR11;
-            ADC_DSM_CR12_REG    = ADC_CFG3_DSM_CR12;
-            ADC_DSM_CR14_REG    = ADC_CFG3_DSM_CR14;
-            ADC_DSM_CR15_REG    = ADC_CFG3_DSM_CR15;
-            ADC_DSM_CR16_REG    = ADC_CFG3_DSM_CR16;
-            ADC_DSM_CR17_REG    = ADC_CFG3_DSM_CR17;
+            ADC_DSM_CR4_REG     = ADC_CF_1V024_DSM_CR4;
+            ADC_DSM_CR5_REG     = ADC_CF_1V024_DSM_CR5;
+            ADC_DSM_CR6_REG     = ADC_CF_1V024_DSM_CR6;
+            ADC_DSM_CR7_REG     = ADC_CF_1V024_DSM_CR7;
+            ADC_DSM_CR10_REG    = ADC_CF_1V024_DSM_CR10;
+            ADC_DSM_CR11_REG    = ADC_CF_1V024_DSM_CR11;
+            ADC_DSM_CR12_REG    = ADC_CF_1V024_DSM_CR12;
+            ADC_DSM_CR14_REG    = ADC_CF_1V024_DSM_CR14;
+            ADC_DSM_CR15_REG    = ADC_CF_1V024_DSM_CR15;
+            ADC_DSM_CR16_REG    = ADC_CF_1V024_DSM_CR16;
+            ADC_DSM_CR17_REG    = ADC_CF_1V024_DSM_CR17;
             /* Set DSM_REF0_REG by disabling and enabling the PRESS circuit */
-            ADC_SetDSMRef0Reg(ADC_CFG3_DSM_REF0);
-            ADC_DSM_REF2_REG    = ADC_CFG3_DSM_REF2;
-            ADC_DSM_REF3_REG    = ADC_CFG3_DSM_REF3;
+            ADC_SetDSMRef0Reg(ADC_CF_1V024_DSM_REF0);
+            ADC_DSM_REF2_REG    = ADC_CF_1V024_DSM_REF2;
+            ADC_DSM_REF3_REG    = ADC_CF_1V024_DSM_REF3;
 
-            ADC_DSM_BUF0_REG    = ADC_CFG3_DSM_BUF0;
-            ADC_DSM_BUF1_REG    = ADC_CFG3_DSM_BUF1;
-            ADC_DSM_BUF2_REG    = ADC_CFG3_DSM_BUF2;
-            ADC_DSM_BUF3_REG    = ADC_CFG3_DSM_BUF3;
+            ADC_DSM_BUF0_REG    = ADC_CF_1V024_DSM_BUF0;
+            ADC_DSM_BUF1_REG    = ADC_CF_1V024_DSM_BUF1;
+            ADC_DSM_BUF2_REG    = ADC_CF_1V024_DSM_BUF2;
+            ADC_DSM_BUF3_REG    = ADC_CF_1V024_DSM_BUF3;
 
             /* To select either Vssa or Vref to -ve input of DSM depending on
             *  the input range selected.
             */
             #if(ADC_DEFAULT_INPUT_MODE)
-                #if (ADC_CFG3_INPUT_RANGE == ADC_IR_VSSA_TO_2VREF)
+                #if (ADC_CF_1V024_INPUT_RANGE == ADC_IR_VSSA_TO_2VREF)
                     ADC_AMux_Select(1u);
                 #else
                     ADC_AMux_Select(0u);
@@ -1438,18 +1438,18 @@ static void ADC_InitConfig(uint8 config)
 
             /* Set the Conversion stop if resolution is above 16 bit and
                conversion  mode is Single sample */
-            #if(ADC_CFG3_RESOLUTION > 16 && \
-                ADC_CFG3_CONV_MODE == ADC_MODE_SINGLE_SAMPLE)
+            #if(ADC_CF_1V024_RESOLUTION > 16 && \
+                ADC_CF_1V024_CONV_MODE == ADC_MODE_SINGLE_SAMPLE)
                 ADC_stopConversion = 1u;
             #endif /* Single sample with resolution above 16 bits */
 
-            ADC_CountsPerVolt = (int32)ADC_CFG3_COUNTS_PER_VOLT;
+            ADC_CountsPerVolt = (int32)ADC_CF_1V024_COUNTS_PER_VOLT;
 
-            ADC_Ext_CP_Clk_SetDividerRegister(ADC_CFG3_CP_CLK_DIVIDER, 1u);
+            ADC_Ext_CP_Clk_SetDividerRegister(ADC_CF_1V024_CP_CLK_DIVIDER, 1u);
 
             /* This is only valid if there is an internal clock */
             #if(ADC_DEFAULT_INTERNAL_CLK)
-                ADC_theACLK_SetDividerRegister(ADC_CFG3_ADC_CLK_DIVIDER, 1u);
+                ADC_theACLK_SetDividerRegister(ADC_CF_1V024_ADC_CLK_DIVIDER, 1u);
             #endif /* ADC_DEFAULT_INTERNAL_CLK */
 
             #if(ADC_IRQ_REMOVE == 0u)
@@ -1463,43 +1463,43 @@ static void ADC_InitConfig(uint8 config)
         if (config == 4u)
         {
             /* Fourth Config */
-            ADC_DEC_CR_REG      = ADC_CFG4_DEC_CR;
-            ADC_DEC_SHIFT1_REG  = ADC_CFG4_DEC_SHIFT1;
-            ADC_DEC_SHIFT2_REG  = ADC_CFG4_DEC_SHIFT2;
-            ADC_DEC_DR2_REG     = ADC_CFG4_DEC_DR2;
-            ADC_DEC_DR2H_REG    = ADC_CFG4_DEC_DR2H;
-            ADC_DEC_DR1_REG     = ADC_CFG4_DEC_DR1;
-            ADC_DEC_OCOR_REG    = ADC_CFG4_DEC_OCOR;
-            ADC_DEC_OCORM_REG   = ADC_CFG4_DEC_OCORM;
-            ADC_DEC_OCORH_REG   = ADC_CFG4_DEC_OCORH;
-            ADC_DEC_COHER_REG   = ADC_CFG4_DEC_COHER;
+            ADC_DEC_CR_REG      = ADC_CF_0V625_DEC_CR;
+            ADC_DEC_SHIFT1_REG  = ADC_CF_0V625_DEC_SHIFT1;
+            ADC_DEC_SHIFT2_REG  = ADC_CF_0V625_DEC_SHIFT2;
+            ADC_DEC_DR2_REG     = ADC_CF_0V625_DEC_DR2;
+            ADC_DEC_DR2H_REG    = ADC_CF_0V625_DEC_DR2H;
+            ADC_DEC_DR1_REG     = ADC_CF_0V625_DEC_DR1;
+            ADC_DEC_OCOR_REG    = ADC_CF_0V625_DEC_OCOR;
+            ADC_DEC_OCORM_REG   = ADC_CF_0V625_DEC_OCORM;
+            ADC_DEC_OCORH_REG   = ADC_CF_0V625_DEC_OCORH;
+            ADC_DEC_COHER_REG   = ADC_CF_0V625_DEC_COHER;
 
-            ADC_DSM_CR4_REG     = ADC_CFG4_DSM_CR4;
-            ADC_DSM_CR5_REG     = ADC_CFG4_DSM_CR5;
-            ADC_DSM_CR6_REG     = ADC_CFG4_DSM_CR6;
-            ADC_DSM_CR7_REG     = ADC_CFG4_DSM_CR7;
-            ADC_DSM_CR10_REG    = ADC_CFG4_DSM_CR10;
-            ADC_DSM_CR11_REG    = ADC_CFG4_DSM_CR11;
-            ADC_DSM_CR12_REG    = ADC_CFG4_DSM_CR12;
-            ADC_DSM_CR14_REG    = ADC_CFG4_DSM_CR14;
-            ADC_DSM_CR15_REG    = ADC_CFG4_DSM_CR15;
-            ADC_DSM_CR16_REG    = ADC_CFG4_DSM_CR16;
-            ADC_DSM_CR17_REG    = ADC_CFG4_DSM_CR17;
+            ADC_DSM_CR4_REG     = ADC_CF_0V625_DSM_CR4;
+            ADC_DSM_CR5_REG     = ADC_CF_0V625_DSM_CR5;
+            ADC_DSM_CR6_REG     = ADC_CF_0V625_DSM_CR6;
+            ADC_DSM_CR7_REG     = ADC_CF_0V625_DSM_CR7;
+            ADC_DSM_CR10_REG    = ADC_CF_0V625_DSM_CR10;
+            ADC_DSM_CR11_REG    = ADC_CF_0V625_DSM_CR11;
+            ADC_DSM_CR12_REG    = ADC_CF_0V625_DSM_CR12;
+            ADC_DSM_CR14_REG    = ADC_CF_0V625_DSM_CR14;
+            ADC_DSM_CR15_REG    = ADC_CF_0V625_DSM_CR15;
+            ADC_DSM_CR16_REG    = ADC_CF_0V625_DSM_CR16;
+            ADC_DSM_CR17_REG    = ADC_CF_0V625_DSM_CR17;
             /* Set DSM_REF0_REG by disabling and enabling the PRESS circuit */
-            ADC_SetDSMRef0Reg(ADC_CFG4_DSM_REF0);
-            ADC_DSM_REF2_REG    = ADC_CFG4_DSM_REF2;
-            ADC_DSM_REF3_REG    = ADC_CFG4_DSM_REF3;
+            ADC_SetDSMRef0Reg(ADC_CF_0V625_DSM_REF0);
+            ADC_DSM_REF2_REG    = ADC_CF_0V625_DSM_REF2;
+            ADC_DSM_REF3_REG    = ADC_CF_0V625_DSM_REF3;
 
-            ADC_DSM_BUF0_REG    = ADC_CFG4_DSM_BUF0;
-            ADC_DSM_BUF1_REG    = ADC_CFG4_DSM_BUF1;
-            ADC_DSM_BUF2_REG    = ADC_CFG4_DSM_BUF2;
-            ADC_DSM_BUF3_REG    = ADC_CFG4_DSM_BUF3;
+            ADC_DSM_BUF0_REG    = ADC_CF_0V625_DSM_BUF0;
+            ADC_DSM_BUF1_REG    = ADC_CF_0V625_DSM_BUF1;
+            ADC_DSM_BUF2_REG    = ADC_CF_0V625_DSM_BUF2;
+            ADC_DSM_BUF3_REG    = ADC_CF_0V625_DSM_BUF3;
 
             /* To select either Vssa or Vref to -ve input of DSM depending on
             *  the input range selected.
             */
             #if(ADC_DEFAULT_INPUT_MODE)
-                #if (ADC_CFG4_INPUT_RANGE == ADC_IR_VSSA_TO_2VREF)
+                #if (ADC_CF_0V625_INPUT_RANGE == ADC_IR_VSSA_TO_2VREF)
                     ADC_AMux_Select(1u);
                 #else
                     ADC_AMux_Select(0u);
@@ -1508,18 +1508,18 @@ static void ADC_InitConfig(uint8 config)
 
             /* Set the Conversion stop if resolution is above 16 bit and
                conversion mode is Single sample */
-            #if(ADC_CFG4_RESOLUTION > 16 && \
-                ADC_CFG4_CONV_MODE == ADC_MODE_SINGLE_SAMPLE)
+            #if(ADC_CF_0V625_RESOLUTION > 16 && \
+                ADC_CF_0V625_CONV_MODE == ADC_MODE_SINGLE_SAMPLE)
                 ADC_stopConversion = 1u;
             #endif /* Single sample with resolution above 16 bits */
 
-            ADC_CountsPerVolt = (int32)ADC_CFG4_COUNTS_PER_VOLT;
+            ADC_CountsPerVolt = (int32)ADC_CF_0V625_COUNTS_PER_VOLT;
 
-            ADC_Ext_CP_Clk_SetDividerRegister(ADC_CFG4_CP_CLK_DIVIDER, 1u);
+            ADC_Ext_CP_Clk_SetDividerRegister(ADC_CF_0V625_CP_CLK_DIVIDER, 1u);
 
             /* This is only valid if there is an internal clock */
             #if(ADC_DEFAULT_INTERNAL_CLK)
-                ADC_theACLK_SetDividerRegister(ADC_CFG4_ADC_CLK_DIVIDER, 1u);
+                ADC_theACLK_SetDividerRegister(ADC_CF_0V625_ADC_CLK_DIVIDER, 1u);
             #endif /* ADC_DEFAULT_INTERNAL_CLK */
 
             #if(ADC_IRQ_REMOVE == 0u)

@@ -14,6 +14,21 @@
 
 int32 psoc_adc_counts_right_aligned(int32 adc_counts);
 void psoc_adc_select_capture_config(void);
+
+/* Config de usuario del ADC (rango de entrada). Solo se exponen
+ * ADC_CF_2V5 (1, ±2.5 V) y ADC_CF_0V512 (2, ±0.512 V), ambas a 1020 SPS
+ * efectivos; las configs 3/4 del componente (976 SPS) quedan fuera de la
+ * aplicación para que la Fs del sistema sea única. RAM only: al reset se
+ * vuelve a 2V5. */
+uint8  psoc_adc_get_config(void);
+uint8  psoc_adc_set_config(uint8 cfg);
+uint16 psoc_adc_effective_fs_hz(void);
+
+/* Mientras el override esté activo, psoc_adc_select_capture_config fuerza
+ * ADC_CF_2V5: la calibración (targets en counts de ±2.5 V,
+ * calibration_tables.h) debe correr siempre en ese rango. */
+void psoc_adc_select_calibration_config(void);
+void psoc_adc_cal_override(uint8 force_2v5);
 void psoc_adc_clear_isr_sample(void);
 void psoc_adc_note_isr_sample(int32 counts);
 uint8 psoc_adc_take_isr_sample(int32 *out_counts);

@@ -1553,21 +1553,18 @@ uint8 psoc_calibration_start_async(void)
         return 0u;
     }
 
-    cal_diag(PSOC_EVT_BOOT, 0xA4u);  /* BREADCRUMB temporal */
 #ifdef CY_ISR_isr_SyncIn_H
     isr_SyncIn_Disable();
 #endif
     ADC_Stop();
     psoc_adc_select_capture_config();
     ADC_Stop();
-    cal_diag(PSOC_EVT_BOOT, 0xA5u);  /* BREADCRUMB temporal */
 
     for (i = 0u; i < PSOC_CAL_STAGE_COUNT; i++) {
         seed_dac[i] = cal_stage_current_dac(i);
     }
 
     verify_ok = cal_verify_seeded_values();
-    cal_diag(PSOC_EVT_BOOT, 0xA6u);  /* BREADCRUMB temporal */
     if (verify_ok) {
         g_cal_async.busy = 0u;
         g_cal_async.done = 1u;
@@ -1582,7 +1579,6 @@ uint8 psoc_calibration_start_async(void)
     g_cal_async.stage_index = 0u;
     g_cal_async.pass_index = 0u;
     psoc_cal_timer_start(CAL_PROGRESS_PERIOD_MS, CAL_WATCHDOG_MS);
-    cal_diag(PSOC_EVT_BOOT, 0xA7u);  /* BREADCRUMB temporal */
     for (i = 0u; i < PSOC_CAL_STAGE_COUNT; i++) {
         g_psoc_cal_stages[i].write(seed_dac[i]);
         g_psoc_cal_results[i].final_dac = seed_dac[i];
@@ -1590,7 +1586,6 @@ uint8 psoc_calibration_start_async(void)
         g_psoc_cal_results[i].ok = 0u;
     }
     cal_pi_start();   /* unico camino de calibracion, GEO y HAMMER por igual */
-    cal_diag(PSOC_EVT_BOOT, 0xA8u);  /* BREADCRUMB temporal */
     return 1u;
 }
 

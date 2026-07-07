@@ -2,7 +2,7 @@
 --	Conversion of AcondicionamientoAnalogico.v to vh2:
 --
 --	Cypress Semiconductor - WARP Version 6.3 IR 41
---	Thu Jul 02 00:53:20 2026
+--	Tue Jul 07 12:33:15 2026
 --
 
 USE cypress.cypress.all;
@@ -13,16 +13,17 @@ END top_RTL;
 --------------------------------------------------------
 ARCHITECTURE R_T_L OF top_RTL IS
 SIGNAL Net_6773 : bit;
-SIGNAL \Timer_2:Net_260\ : bit;
-SIGNAL \Timer_2:Net_266\ : bit;
+SIGNAL \Tmr_LedWait:Net_260\ : bit;
+SIGNAL \Tmr_LedWait:Net_266\ : bit;
 SIGNAL zero : bit;
 SIGNAL Net_6775 : bit;
-SIGNAL \Timer_2:Net_51\ : bit;
-SIGNAL \Timer_2:Net_261\ : bit;
-SIGNAL \Timer_2:Net_57\ : bit;
+SIGNAL \Tmr_LedWait:Net_51\ : bit;
+SIGNAL \Tmr_LedWait:Net_261\ : bit;
+SIGNAL \Tmr_LedWait:Net_57\ : bit;
 SIGNAL Net_6779 : bit;
-SIGNAL Net_6780 : bit;
-SIGNAL \Timer_2:Net_102\ : bit;
+SIGNAL tcl : bit;
+SIGNAL \Tmr_LedWait:Net_102\ : bit;
+SIGNAL Net_6994 : bit;
 SIGNAL dar : bit;
 SIGNAL nda : bit;
 SIGNAL daf : bit;
@@ -414,68 +415,65 @@ SIGNAL \UART:BUART:sRX:MODULE_5:gte\ : bit;
 ATTRIBUTE port_state_att of \UART:BUART:sRX:MODULE_5:gte\:SIGNAL IS 2;
 SIGNAL \UART:BUART:sRX:MODULE_5:lte\ : bit;
 ATTRIBUTE port_state_att of \UART:BUART:sRX:MODULE_5:lte\:SIGNAL IS 2;
-SIGNAL Net_2277 : bit;
 SIGNAL Net_10 : bit;
-SIGNAL \Timer:Net_260\ : bit;
-SIGNAL \Timer:Net_266\ : bit;
+SIGNAL \Tmr_UartRxWatchdog:Net_260\ : bit;
+SIGNAL \Tmr_UartRxWatchdog:Net_266\ : bit;
 SIGNAL Net_12 : bit;
-SIGNAL \Timer:Net_51\ : bit;
-SIGNAL \Timer:Net_261\ : bit;
-SIGNAL \Timer:Net_57\ : bit;
-SIGNAL Net_2276 : bit;
-SIGNAL \Timer:Net_102\ : bit;
+SIGNAL \Tmr_UartRxWatchdog:Net_51\ : bit;
+SIGNAL \Tmr_UartRxWatchdog:Net_261\ : bit;
+SIGNAL \Tmr_UartRxWatchdog:Net_57\ : bit;
+SIGNAL Net_6857 : bit;
+SIGNAL tcu : bit;
+SIGNAL \Tmr_UartRxWatchdog:Net_102\ : bit;
 SIGNAL Net_5570 : bit;
-SIGNAL Net_6619 : bit;
-SIGNAL Net_6621 : bit;
-SIGNAL Net_6623 : bit;
 SIGNAL \state:status_7\ : bit;
-SIGNAL Net_6662_7 : bit;
+SIGNAL Net_6869_7 : bit;
 SIGNAL \state:status_6\ : bit;
-SIGNAL Net_6662_6 : bit;
+SIGNAL Net_6869_6 : bit;
 SIGNAL \state:status_5\ : bit;
-SIGNAL Net_6662_5 : bit;
+SIGNAL Net_6869_5 : bit;
 SIGNAL \state:status_4\ : bit;
-SIGNAL Net_6662_4 : bit;
+SIGNAL Net_6869_4 : bit;
 SIGNAL \state:status_3\ : bit;
-SIGNAL Net_6662_3 : bit;
+SIGNAL Net_6869_3 : bit;
 SIGNAL \state:status_2\ : bit;
-SIGNAL Net_6662_2 : bit;
+SIGNAL Net_6869_2 : bit;
 SIGNAL \state:status_1\ : bit;
-SIGNAL Net_6662_1 : bit;
+SIGNAL Net_6869_1 : bit;
 SIGNAL \state:status_0\ : bit;
-SIGNAL Net_6662_0 : bit;
+SIGNAL Net_6869_0 : bit;
 SIGNAL \error:status_7\ : bit;
-SIGNAL Net_6661_7 : bit;
+SIGNAL Net_6998_7 : bit;
 SIGNAL \error:status_6\ : bit;
-SIGNAL Net_6661_6 : bit;
+SIGNAL Net_6998_6 : bit;
 SIGNAL \error:status_5\ : bit;
-SIGNAL Net_6661_5 : bit;
+SIGNAL Net_6998_5 : bit;
 SIGNAL \error:status_4\ : bit;
-SIGNAL Net_6661_4 : bit;
+SIGNAL Net_6998_4 : bit;
 SIGNAL \error:status_3\ : bit;
-SIGNAL Net_6661_3 : bit;
+SIGNAL Net_6998_3 : bit;
 SIGNAL \error:status_2\ : bit;
-SIGNAL Net_6661_2 : bit;
+SIGNAL Net_6998_2 : bit;
 SIGNAL \error:status_1\ : bit;
-SIGNAL Net_6661_1 : bit;
+SIGNAL Net_6998_1 : bit;
 SIGNAL \error:status_0\ : bit;
-SIGNAL Net_6661_0 : bit;
+SIGNAL Net_6998_0 : bit;
 SIGNAL \status:status_7\ : bit;
-SIGNAL Net_6660_7 : bit;
+SIGNAL Net_6999_7 : bit;
 SIGNAL \status:status_6\ : bit;
-SIGNAL Net_6660_6 : bit;
+SIGNAL Net_6999_6 : bit;
 SIGNAL \status:status_5\ : bit;
-SIGNAL Net_6660_5 : bit;
+SIGNAL Net_6999_5 : bit;
 SIGNAL \status:status_4\ : bit;
-SIGNAL Net_6660_4 : bit;
+SIGNAL Net_6999_4 : bit;
 SIGNAL \status:status_3\ : bit;
-SIGNAL Net_6660_3 : bit;
+SIGNAL Net_6999_3 : bit;
 SIGNAL \status:status_2\ : bit;
-SIGNAL Net_6660_2 : bit;
+SIGNAL Net_6999_2 : bit;
 SIGNAL \status:status_1\ : bit;
-SIGNAL Net_6660_1 : bit;
+SIGNAL Net_6999_1 : bit;
 SIGNAL \status:status_0\ : bit;
-SIGNAL Net_6660_0 : bit;
+SIGNAL Net_6999_0 : bit;
 SIGNAL \reset:clk\ : bit;
 SIGNAL \reset:rst\ : bit;
 SIGNAL Net_5549 : bit;
@@ -606,6 +604,13 @@ SIGNAL \superMaquina:sample_done_rise\ : bit;
 ATTRIBUTE soft of \superMaquina:sample_done_rise\:SIGNAL IS '1';
 SIGNAL \superMaquina:sample_irq_event\ : bit;
 SIGNAL \superMaquina:button_irq_event\ : bit;
+SIGNAL \superMaquina:tc_capture_watchdog\ : bit;
+SIGNAL tcc : bit;
+SIGNAL \superMaquina:timer_event_live_3\ : bit;
+SIGNAL \superMaquina:timer_event_live_2\ : bit;
+SIGNAL \superMaquina:timer_event_live_1\ : bit;
+SIGNAL tcp : bit;
+SIGNAL \superMaquina:timer_event_live_0\ : bit;
 SIGNAL \superMaquina:sample_will_close_batch\ : bit;
 ATTRIBUTE soft of \superMaquina:sample_will_close_batch\:SIGNAL IS '1';
 SIGNAL \superMaquina:sample_count_reg_4\ : bit;
@@ -621,6 +626,14 @@ SIGNAL EOC : bit;
 SIGNAL \superMaquina:irq_reg\ : bit;
 SIGNAL \superMaquina:error_state_reg\ : bit;
 SIGNAL \superMaquina:error_stop_reg\ : bit;
+SIGNAL Net_6964_7 : bit;
+SIGNAL Net_6964_6 : bit;
+SIGNAL Net_6964_5 : bit;
+SIGNAL Net_6964_4 : bit;
+SIGNAL Net_6964_3 : bit;
+SIGNAL Net_6964_2 : bit;
+SIGNAL Net_6964_1 : bit;
+SIGNAL Net_6964_0 : bit;
 SIGNAL \superMaquina:button_seen_reg\ : bit;
 SIGNAL \superMaquina:batch_seen_reg\ : bit;
 SIGNAL \superMaquina:sync_seen_reg\ : bit;
@@ -955,62 +968,117 @@ SIGNAL \superMaquina:MODULE_8:g2:a0:g1:z1:s0:g1:u0:c_2\ : bit;
 SIGNAL \superMaquina:MODULE_8:g2:a0:g1:z1:s0:g1:u0:c_1\ : bit;
 SIGNAL \superMaquina:MODULE_8:g2:a0:g1:z1:s0:g1:u0:c_0\ : bit;
 SIGNAL \superMaquina:MODULE_8:g2:a0:g1:z1:s0:g1:u0:b_0\ : bit;
-TERMINAL Net_5547 : bit;
-TERMINAL Net_5546 : bit;
-SIGNAL tmpOE__AMux_Capacitor_net_0 : bit;
-SIGNAL tmpFB_0__AMux_Capacitor_net_0 : bit;
-TERMINAL Net_5076 : bit;
-SIGNAL tmpIO_0__AMux_Capacitor_net_0 : bit;
-TERMINAL tmpSIOVREF__AMux_Capacitor_net_0 : bit;
-SIGNAL tmpINTERRUPT_0__AMux_Capacitor_net_0 : bit;
-TERMINAL Net_4993 : bit;
-SIGNAL tmpOE__ref1V_net_0 : bit;
-SIGNAL tmpFB_0__ref1V_net_0 : bit;
-TERMINAL Net_4991 : bit;
-SIGNAL tmpIO_0__ref1V_net_0 : bit;
-TERMINAL tmpSIOVREF__ref1V_net_0 : bit;
-TERMINAL Net_2770 : bit;
-SIGNAL tmpINTERRUPT_0__ref1V_net_0 : bit;
-TERMINAL \Opa_ref_1V:Net_29\ : bit;
-TERMINAL Net_5540 : bit;
-TERMINAL \Opa_ref_PGA:Net_29\ : bit;
-TERMINAL Net_4447 : bit;
-TERMINAL Net_4444 : bit;
-TERMINAL Net_4154 : bit;
-TERMINAL Net_5077 : bit;
-SIGNAL \VDAC_LP:Net_83\ : bit;
-SIGNAL \VDAC_LP:Net_81\ : bit;
-SIGNAL \VDAC_LP:Net_82\ : bit;
-TERMINAL Net_4138 : bit;
-TERMINAL \VDAC_LP:Net_77\ : bit;
-TERMINAL Net_2666 : bit;
-TERMINAL Net_170 : bit;
-TERMINAL Net_2763 : bit;
-TERMINAL Net_5534 : bit;
-TERMINAL Net_2724 : bit;
-TERMINAL Net_2738 : bit;
+TERMINAL Net_7013 : bit;
+SIGNAL \VDAC_ref_PGA:Net_83\ : bit;
+SIGNAL \VDAC_ref_PGA:Net_81\ : bit;
+SIGNAL \VDAC_ref_PGA:Net_82\ : bit;
+TERMINAL Net_4664 : bit;
+TERMINAL \VDAC_ref_PGA:Net_77\ : bit;
+TERMINAL Net_2058 : bit;
+SIGNAL Net_6761 : bit;
+SIGNAL \Tmr_PingCalTick:Net_260\ : bit;
+SIGNAL \Tmr_PingCalTick:Net_266\ : bit;
+SIGNAL Net_6763 : bit;
+SIGNAL \Tmr_PingCalTick:Net_51\ : bit;
+SIGNAL \Tmr_PingCalTick:Net_261\ : bit;
+SIGNAL \Tmr_PingCalTick:Net_57\ : bit;
+SIGNAL Net_6767 : bit;
+SIGNAL \Tmr_PingCalTick:Net_102\ : bit;
+SIGNAL Net_6784 : bit;
+SIGNAL Net_6786 : bit;
+SIGNAL \Tmr_CaptureWatchdog:Net_260\ : bit;
+SIGNAL \Tmr_CaptureWatchdog:Net_266\ : bit;
+SIGNAL \Tmr_CaptureWatchdog:Net_51\ : bit;
+SIGNAL \Tmr_CaptureWatchdog:Net_261\ : bit;
+SIGNAL \Tmr_CaptureWatchdog:Net_57\ : bit;
+SIGNAL Net_6790 : bit;
+SIGNAL \Tmr_CaptureWatchdog:Net_102\ : bit;
+SIGNAL \tmr_event:status_7\ : bit;
+SIGNAL \tmr_event:status_6\ : bit;
+SIGNAL \tmr_event:status_5\ : bit;
+SIGNAL \tmr_event:status_4\ : bit;
+SIGNAL \tmr_event:status_3\ : bit;
+SIGNAL \tmr_event:status_2\ : bit;
+SIGNAL \tmr_event:status_1\ : bit;
+SIGNAL \tmr_event:status_0\ : bit;
+TERMINAL Net_2195 : bit;
+TERMINAL Net_2192 : bit;
+TERMINAL \PGAgain:Net_17\ : bit;
+SIGNAL \PGAgain:Net_37\ : bit;
+SIGNAL \PGAgain:Net_40\ : bit;
+SIGNAL \PGAgain:Net_38\ : bit;
+SIGNAL \PGAgain:Net_39\ : bit;
+SIGNAL \PGAgain:Net_41\ : bit;
+TERMINAL Net_4656 : bit;
+TERMINAL \PGAgain:Net_75\ : bit;
+TERMINAL Net_1933 : bit;
+TERMINAL Net_4952 : bit;
+TERMINAL Net_4947 : bit;
+TERMINAL \OPAadder:Net_29\ : bit;
+TERMINAL Net_4654 : bit;
+TERMINAL Net_7009 : bit;
+TERMINAL Net_1938 : bit;
+TERMINAL Net_4645 : bit;
+TERMINAL Net_2020 : bit;
+TERMINAL Net_2018 : bit;
+TERMINAL Net_4194 : bit;
+TERMINAL Net_2005 : bit;
 SIGNAL tmpOE__LPo_net_0 : bit;
 SIGNAL tmpFB_0__LPo_net_0 : bit;
+TERMINAL Net_4600 : bit;
 SIGNAL tmpIO_0__LPo_net_0 : bit;
 TERMINAL tmpSIOVREF__LPo_net_0 : bit;
 SIGNAL tmpINTERRUPT_0__LPo_net_0 : bit;
 SIGNAL tmpOE__LPm_net_0 : bit;
 SIGNAL tmpFB_0__LPm_net_0 : bit;
-TERMINAL Net_5541 : bit;
+TERMINAL Net_7010 : bit;
 SIGNAL tmpIO_0__LPm_net_0 : bit;
 TERMINAL tmpSIOVREF__LPm_net_0 : bit;
 SIGNAL tmpINTERRUPT_0__LPm_net_0 : bit;
-TERMINAL \Opa_LP:Net_29\ : bit;
-TERMINAL Net_2665 : bit;
-TERMINAL Net_2771 : bit;
-TERMINAL Net_4448 : bit;
-TERMINAL \ADC:Net_244\ : bit;
+TERMINAL Net_4285 : bit;
+TERMINAL \OPAlp:Net_29\ : bit;
+SIGNAL tmpOE__ADDERm_net_0 : bit;
+SIGNAL tmpFB_0__ADDERm_net_0 : bit;
+SIGNAL tmpIO_0__ADDERm_net_0 : bit;
+TERMINAL tmpSIOVREF__ADDERm_net_0 : bit;
+SIGNAL tmpINTERRUPT_0__ADDERm_net_0 : bit;
+SIGNAL \VDAC_Ref_Adder:Net_83\ : bit;
+SIGNAL \VDAC_Ref_Adder:Net_81\ : bit;
+SIGNAL \VDAC_Ref_Adder:Net_82\ : bit;
+TERMINAL \VDAC_Ref_Adder:Net_77\ : bit;
+TERMINAL Net_4644 : bit;
+TERMINAL Net_4508 : bit;
+SIGNAL tmpOE__BPm_net_0 : bit;
+SIGNAL tmpFB_0__BPm_net_0 : bit;
+TERMINAL Net_7005 : bit;
+SIGNAL tmpIO_0__BPm_net_0 : bit;
+TERMINAL tmpSIOVREF__BPm_net_0 : bit;
+SIGNAL tmpINTERRUPT_0__BPm_net_0 : bit;
+TERMINAL Net_2033 : bit;
+SIGNAL tmpOE__ADDERo_net_0 : bit;
+SIGNAL tmpFB_0__ADDERo_net_0 : bit;
+SIGNAL tmpIO_0__ADDERo_net_0 : bit;
+TERMINAL tmpSIOVREF__ADDERo_net_0 : bit;
+SIGNAL tmpINTERRUPT_0__ADDERo_net_0 : bit;
+SIGNAL tmpOE__BPo_net_0 : bit;
+SIGNAL tmpFB_0__BPo_net_0 : bit;
+TERMINAL Net_7006 : bit;
+SIGNAL tmpIO_0__BPo_net_0 : bit;
+TERMINAL tmpSIOVREF__BPo_net_0 : bit;
+SIGNAL tmpINTERRUPT_0__BPo_net_0 : bit;
+TERMINAL Net_4666 : bit;
+TERMINAL \OPAbp:Net_29\ : bit;
+SIGNAL tmpOE__SEo_net_0 : bit;
+SIGNAL tmpFB_0__SEo_net_0 : bit;
+SIGNAL tmpIO_0__SEo_net_0 : bit;
+TERMINAL tmpSIOVREF__SEo_net_0 : bit;
+SIGNAL tmpINTERRUPT_0__SEo_net_0 : bit;
 TERMINAL \ADC:Net_690\ : bit;
 TERMINAL \ADC:Net_35\ : bit;
 TERMINAL \ADC:Net_34\ : bit;
 TERMINAL \ADC:Net_677\ : bit;
-TERMINAL \ADC:Net_20\ : bit;
 SIGNAL \ADC:Net_488\ : bit;
+TERMINAL Net_4640 : bit;
 TERMINAL \ADC:Net_520\ : bit;
 SIGNAL \ADC:Net_481\ : bit;
 SIGNAL \ADC:Net_482\ : bit;
@@ -1033,65 +1101,120 @@ SIGNAL \ADC:Net_245_2\ : bit;
 SIGNAL \ADC:Net_245_1\ : bit;
 SIGNAL \ADC:Net_245_0\ : bit;
 TERMINAL \ADC:Net_352\ : bit;
-SIGNAL \ADC:tmpOE__Bypass_P03_net_0\ : bit;
-SIGNAL \ADC:tmpFB_0__Bypass_P03_net_0\ : bit;
-TERMINAL \ADC:Net_248\ : bit;
-SIGNAL \ADC:tmpIO_0__Bypass_P03_net_0\ : bit;
-TERMINAL \ADC:tmpSIOVREF__Bypass_P03_net_0\ : bit;
-SIGNAL \ADC:tmpINTERRUPT_0__Bypass_P03_net_0\ : bit;
 TERMINAL \ADC:Net_257\ : bit;
 TERMINAL \ADC:Net_249\ : bit;
+TERMINAL Net_4661 : bit;
 SIGNAL \ADC:Net_250\ : bit;
 SIGNAL \ADC:Net_252\ : bit;
 SIGNAL \ADC:soc\ : bit;
 SIGNAL \ADC:Net_268\ : bit;
 SIGNAL \ADC:Net_270\ : bit;
-SIGNAL tmpOE__PGAo_net_0 : bit;
-SIGNAL tmpFB_0__PGAo_net_0 : bit;
-SIGNAL tmpIO_0__PGAo_net_0 : bit;
-TERMINAL tmpSIOVREF__PGAo_net_0 : bit;
-SIGNAL tmpINTERRUPT_0__PGAo_net_0 : bit;
-TERMINAL Net_204 : bit;
-TERMINAL Net_193 : bit;
-TERMINAL Net_2661 : bit;
-TERMINAL Net_183 : bit;
-TERMINAL \PGA:Net_17\ : bit;
-TERMINAL Net_4475 : bit;
-SIGNAL \PGA:Net_37\ : bit;
-SIGNAL \PGA:Net_40\ : bit;
-SIGNAL \PGA:Net_38\ : bit;
-SIGNAL \PGA:Net_39\ : bit;
-SIGNAL \PGA:Net_41\ : bit;
-TERMINAL \PGA:Net_75\ : bit;
-SIGNAL \VDAC_PGA:Net_83\ : bit;
-SIGNAL \VDAC_PGA:Net_81\ : bit;
-SIGNAL \VDAC_PGA:Net_82\ : bit;
-TERMINAL \VDAC_PGA:Net_77\ : bit;
-SIGNAL tmpOE__PGAin_net_0 : bit;
-SIGNAL tmpFB_0__PGAin_net_0 : bit;
-SIGNAL tmpIO_0__PGAin_net_0 : bit;
-TERMINAL tmpSIOVREF__PGAin_net_0 : bit;
-SIGNAL tmpINTERRUPT_0__PGAin_net_0 : bit;
-SIGNAL Net_6768 : bit;
-SIGNAL Net_6761 : bit;
-SIGNAL \Timer_1:Net_260\ : bit;
-SIGNAL \Timer_1:Net_266\ : bit;
-SIGNAL Net_6763 : bit;
-SIGNAL \Timer_1:Net_51\ : bit;
-SIGNAL \Timer_1:Net_261\ : bit;
-SIGNAL \Timer_1:Net_57\ : bit;
-SIGNAL Net_6767 : bit;
-SIGNAL \Timer_1:Net_102\ : bit;
-SIGNAL Net_6784 : bit;
-SIGNAL Net_6786 : bit;
-SIGNAL \Timer_3:Net_260\ : bit;
-SIGNAL \Timer_3:Net_266\ : bit;
-SIGNAL \Timer_3:Net_51\ : bit;
-SIGNAL \Timer_3:Net_261\ : bit;
-SIGNAL \Timer_3:Net_57\ : bit;
-SIGNAL Net_6790 : bit;
-SIGNAL Net_6791 : bit;
-SIGNAL \Timer_3:Net_102\ : bit;
+SIGNAL tmpOE__INn_net_0 : bit;
+SIGNAL tmpFB_0__INn_net_0 : bit;
+TERMINAL Net_4547 : bit;
+SIGNAL tmpIO_0__INn_net_0 : bit;
+TERMINAL tmpSIOVREF__INn_net_0 : bit;
+TERMINAL Net_4585 : bit;
+SIGNAL tmpINTERRUPT_0__INn_net_0 : bit;
+SIGNAL tmpOE__INp_net_0 : bit;
+SIGNAL tmpFB_0__INp_net_0 : bit;
+TERMINAL Net_4517 : bit;
+SIGNAL tmpIO_0__INp_net_0 : bit;
+TERMINAL tmpSIOVREF__INp_net_0 : bit;
+TERMINAL Net_4584 : bit;
+SIGNAL tmpINTERRUPT_0__INp_net_0 : bit;
+TERMINAL \PGAn:Net_17\ : bit;
+SIGNAL \PGAn:Net_37\ : bit;
+SIGNAL \PGAn:Net_40\ : bit;
+SIGNAL \PGAn:Net_38\ : bit;
+SIGNAL \PGAn:Net_39\ : bit;
+SIGNAL \PGAn:Net_41\ : bit;
+TERMINAL Net_2158 : bit;
+TERMINAL \PGAn:Net_75\ : bit;
+TERMINAL \PGAp:Net_17\ : bit;
+SIGNAL \PGAp:Net_37\ : bit;
+SIGNAL \PGAp:Net_40\ : bit;
+SIGNAL \PGAp:Net_38\ : bit;
+SIGNAL \PGAp:Net_39\ : bit;
+SIGNAL \PGAp:Net_41\ : bit;
+TERMINAL \PGAp:Net_75\ : bit;
+TERMINAL Net_4204 : bit;
+TERMINAL \OPAref:Net_29\ : bit;
+SIGNAL \VDAC_ref_LP:Net_83\ : bit;
+SIGNAL \VDAC_ref_LP:Net_81\ : bit;
+SIGNAL \VDAC_ref_LP:Net_82\ : bit;
+TERMINAL \VDAC_ref_LP:Net_77\ : bit;
+SIGNAL tmpOE__Vref_net_0 : bit;
+SIGNAL tmpFB_0__Vref_net_0 : bit;
+SIGNAL tmpIO_0__Vref_net_0 : bit;
+TERMINAL tmpSIOVREF__Vref_net_0 : bit;
+TERMINAL Net_4219 : bit;
+SIGNAL tmpINTERRUPT_0__Vref_net_0 : bit;
+TERMINAL Net_7018 : bit;
+TERMINAL Net_7017 : bit;
+SIGNAL tmpOE__AMux_net_0 : bit;
+SIGNAL tmpFB_0__AMux_net_0 : bit;
+SIGNAL tmpIO_0__AMux_net_0 : bit;
+TERMINAL tmpSIOVREF__AMux_net_0 : bit;
+SIGNAL tmpINTERRUPT_0__AMux_net_0 : bit;
+TERMINAL \PGAshield:Net_17\ : bit;
+SIGNAL \PGAshield:Net_37\ : bit;
+SIGNAL \PGAshield:Net_40\ : bit;
+SIGNAL \PGAshield:Net_38\ : bit;
+SIGNAL \PGAshield:Net_39\ : bit;
+SIGNAL \PGAshield:Net_41\ : bit;
+TERMINAL Net_7019 : bit;
+TERMINAL \PGAshield:Net_75\ : bit;
+SIGNAL tmpOE__Vshield_net_0 : bit;
+SIGNAL tmpFB_0__Vshield_net_0 : bit;
+SIGNAL tmpIO_0__Vshield_net_0 : bit;
+TERMINAL tmpSIOVREF__Vshield_net_0 : bit;
+TERMINAL Net_4512 : bit;
+SIGNAL tmpINTERRUPT_0__Vshield_net_0 : bit;
+SIGNAL tmpOE__Vref_BP_net_0 : bit;
+SIGNAL tmpFB_0__Vref_BP_net_0 : bit;
+SIGNAL tmpIO_0__Vref_BP_net_0 : bit;
+TERMINAL tmpSIOVREF__Vref_BP_net_0 : bit;
+TERMINAL Net_7021 : bit;
+SIGNAL tmpINTERRUPT_0__Vref_BP_net_0 : bit;
+SIGNAL tmpOE__Vref_PGA_net_0 : bit;
+SIGNAL tmpFB_0__Vref_PGA_net_0 : bit;
+SIGNAL tmpIO_0__Vref_PGA_net_0 : bit;
+TERMINAL tmpSIOVREF__Vref_PGA_net_0 : bit;
+TERMINAL Net_4691 : bit;
+SIGNAL tmpINTERRUPT_0__Vref_PGA_net_0 : bit;
+SIGNAL tmpOE__Vref_ADDER_net_0 : bit;
+SIGNAL tmpFB_0__Vref_ADDER_net_0 : bit;
+SIGNAL tmpIO_0__Vref_ADDER_net_0 : bit;
+TERMINAL tmpSIOVREF__Vref_ADDER_net_0 : bit;
+TERMINAL Net_7022 : bit;
+SIGNAL tmpINTERRUPT_0__Vref_ADDER_net_0 : bit;
+SIGNAL tmpOE__Vref_LP_net_0 : bit;
+SIGNAL tmpFB_0__Vref_LP_net_0 : bit;
+SIGNAL tmpIO_0__Vref_LP_net_0 : bit;
+TERMINAL tmpSIOVREF__Vref_LP_net_0 : bit;
+TERMINAL Net_7023 : bit;
+SIGNAL tmpINTERRUPT_0__Vref_LP_net_0 : bit;
+SIGNAL \VDAC_ref_BP:Net_83\ : bit;
+SIGNAL \VDAC_ref_BP:Net_81\ : bit;
+SIGNAL \VDAC_ref_BP:Net_82\ : bit;
+TERMINAL \VDAC_ref_BP:Net_77\ : bit;
+SIGNAL tmpOE__AMuxCapacitor_net_0 : bit;
+SIGNAL tmpFB_0__AMuxCapacitor_net_0 : bit;
+SIGNAL tmpIO_0__AMuxCapacitor_net_0 : bit;
+TERMINAL tmpSIOVREF__AMuxCapacitor_net_0 : bit;
+TERMINAL Net_7026 : bit;
+SIGNAL tmpINTERRUPT_0__AMuxCapacitor_net_0 : bit;
+TERMINAL Net_7027 : bit;
+TERMINAL Net_4711 : bit;
+TERMINAL Net_7028 : bit;
+TERMINAL Net_4715 : bit;
+TERMINAL Net_4718 : bit;
+TERMINAL Net_4723 : bit;
+TERMINAL Net_7029 : bit;
+TERMINAL Net_7030 : bit;
+TERMINAL Net_7031 : bit;
+TERMINAL Net_4954 : bit;
 SIGNAL \Debouncer:DEBOUNCER[0]:d_sync_0\\D\ : bit;
 SIGNAL \Debouncer:DEBOUNCER[0]:d_sync_1\\D\ : bit;
 SIGNAL bpD : bit;
@@ -1304,51 +1427,51 @@ Net_5525D <= ((not \UART:BUART:reset_reg\ and \UART:BUART:tx_state_2\)
 \superMaquina:batch_will_finish_capture\ <= ((not \superMaquina:batch_limit_reg_8\ and not \superMaquina:batch_count_reg_8\ and \superMaquina:MODULE_6:g1:a0:gx:u0:eqi_0\)
 	OR (\superMaquina:batch_limit_reg_8\ and \superMaquina:batch_count_reg_8\ and \superMaquina:MODULE_6:g1:a0:gx:u0:eqi_0\));
 
-dar <= ((not Net_6662_2 and not Net_6662_0 and not Net_5694_0 and Net_6662_1 and EOC)
-	OR (not Net_6662_2 and not Net_6662_0 and Net_6662_1 and Net_5694_1 and EOC)
+dar <= ((not Net_6869_2 and not Net_6869_0 and not Net_5694_0 and Net_6869_1 and EOC)
+	OR (not Net_6869_2 and not Net_6869_0 and Net_6869_1 and Net_5694_1 and EOC)
 	OR (not Net_5694_0 and not Net_5672_6 and EOC)
 	OR (not Net_5672_6 and Net_5694_1 and EOC));
 
-daf <= ((not Net_6662_2 and not Net_6662_0 and not Net_5694_0 and Net_6662_1 and Net_5694_1 and EOC)
-	OR (not Net_6662_2 and not Net_6662_1 and not Net_5694_0 and Net_6662_0 and Net_5694_1 and EOC)
-	OR (not Net_6662_2 and not Net_6662_0 and not Net_5694_1 and Net_6662_1 and Net_5694_0 and EOC)
-	OR (not Net_6662_2 and not Net_6662_1 and not Net_5694_1 and Net_6662_0 and Net_5694_0 and EOC)
+daf <= ((not Net_6869_2 and not Net_6869_0 and not Net_5694_0 and Net_6869_1 and Net_5694_1 and EOC)
+	OR (not Net_6869_2 and not Net_6869_1 and not Net_5694_0 and Net_6869_0 and Net_5694_1 and EOC)
+	OR (not Net_6869_2 and not Net_6869_0 and not Net_5694_1 and Net_6869_1 and Net_5694_0 and EOC)
+	OR (not Net_6869_2 and not Net_6869_1 and not Net_5694_1 and Net_6869_0 and Net_5694_0 and EOC)
 	OR (not Net_5694_0 and not Net_5672_6 and Net_5694_1 and EOC)
 	OR (not Net_5694_1 and not Net_5672_6 and Net_5694_0 and EOC));
 
-dfr <= ((not Net_6662_2 and not Net_6662_0 and not Net_5694_0 and drf and Net_6662_1 and Net_5694_1)
-	OR (not Net_6662_2 and not Net_6662_1 and not Net_5694_0 and drf and Net_6662_0 and Net_5694_1)
-	OR (not Net_6662_2 and not Net_6662_0 and not Net_5694_1 and drf and Net_6662_1 and Net_5694_0)
-	OR (not Net_6662_2 and not Net_6662_1 and not Net_5694_1 and drf and Net_6662_0 and Net_5694_0)
+dfr <= ((not Net_6869_2 and not Net_6869_0 and not Net_5694_0 and drf and Net_6869_1 and Net_5694_1)
+	OR (not Net_6869_2 and not Net_6869_1 and not Net_5694_0 and drf and Net_6869_0 and Net_5694_1)
+	OR (not Net_6869_2 and not Net_6869_0 and not Net_5694_1 and drf and Net_6869_1 and Net_5694_0)
+	OR (not Net_6869_2 and not Net_6869_1 and not Net_5694_1 and drf and Net_6869_0 and Net_5694_0)
 	OR (not Net_5694_0 and not Net_5672_6 and drf and Net_5694_1)
 	OR (not Net_5694_1 and not Net_5672_6 and drf and Net_5694_0));
 
-Net_6660_4 <= ((not Net_6662_1 and not Net_6662_0 and Net_6662_2));
+Net_6999_4 <= ((not Net_6869_1 and not Net_6869_0 and Net_6869_2));
 
-Net_6660_3 <= ((not Net_6662_2 and Net_6662_1 and Net_6662_0));
+Net_6999_3 <= ((not Net_6869_2 and Net_6869_1 and Net_6869_0));
 
-Net_6660_2 <= ((not Net_6662_2 and not Net_6662_0 and Net_6662_1));
+Net_6999_2 <= ((not Net_6869_2 and not Net_6869_0 and Net_6869_1));
 
-Net_6660_1 <= ((not Net_6662_2 and not Net_6662_1 and Net_6662_0));
+Net_6999_1 <= ((not Net_6869_2 and not Net_6869_1 and Net_6869_0));
 
-Net_6660_0 <= ((not Net_6662_2 and not Net_6662_1 and not Net_6662_0));
+Net_6999_0 <= ((not Net_6869_2 and not Net_6869_1 and not Net_6869_0));
 
-\superMaquina:irq_reg\\D\ <= ((not Net_2338 and not Net_6662_2 and not Net_6662_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and \EdgeDetect:last\ and Net_6662_0 and Net_5694_3 and Net_5672_6 and \superMaquina:start_now_pulse\)
-	OR (not \EdgeDetect:last\ and not Net_6662_2 and not Net_6662_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_2338 and Net_6662_0 and Net_5694_3 and Net_5672_6 and \superMaquina:start_now_pulse\)
-	OR (not Net_2338 and not Net_6662_2 and not Net_6662_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and \EdgeDetect:last\ and Net_6662_0 and Net_5694_3 and Net_5672_6 and Net_5672_4)
-	OR (not \EdgeDetect:last\ and not Net_6662_2 and not Net_6662_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_2338 and Net_6662_0 and Net_5694_3 and Net_5672_6 and Net_5672_4)
-	OR (not Net_6662_2 and not Net_6662_1 and not Net_6662_0 and not \superMaquina:button_pos_d\ and bp)
-	OR (not Net_6662_2 and not Net_6662_0 and Net_6662_1 and \superMaquina:clear_flags_pulse\ and \superMaquina:sample_done_rise\)
-	OR (not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and Net_6662_1 and \superMaquina:sample_done_rise\)
-	OR (not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_5694_4 and Net_5672_6 and \superMaquina:stop_pulse\)
-	OR (not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5694_4 and Net_5672_6 and \superMaquina:stop_pulse\)
-	OR (not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_1 and Net_5694_4 and Net_5672_6)
-	OR (not \superMaquina:clear_flags_pulse\ and Net_6662_0 and Net_5694_4 and Net_5672_6 and \superMaquina:stop_pulse\)
-	OR (not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_0 and Net_5694_4 and Net_5672_6)
+\superMaquina:irq_reg\\D\ <= ((not Net_2338 and not Net_6869_2 and not Net_6869_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and \EdgeDetect:last\ and Net_6869_0 and Net_5694_3 and Net_5672_6 and \superMaquina:start_now_pulse\)
+	OR (not \EdgeDetect:last\ and not Net_6869_2 and not Net_6869_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_2338 and Net_6869_0 and Net_5694_3 and Net_5672_6 and \superMaquina:start_now_pulse\)
+	OR (not Net_2338 and not Net_6869_2 and not Net_6869_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and \EdgeDetect:last\ and Net_6869_0 and Net_5694_3 and Net_5672_6 and Net_5672_4)
+	OR (not \EdgeDetect:last\ and not Net_6869_2 and not Net_6869_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_2338 and Net_6869_0 and Net_5694_3 and Net_5672_6 and Net_5672_4)
+	OR (not Net_6869_2 and not Net_6869_1 and not Net_6869_0 and not \superMaquina:button_pos_d\ and bp)
+	OR (not Net_6869_2 and not Net_6869_0 and Net_6869_1 and \superMaquina:clear_flags_pulse\ and \superMaquina:sample_done_rise\)
+	OR (not Net_6869_2 and not Net_6869_0 and not \superMaquina:stop_pulse\ and Net_6869_1 and \superMaquina:sample_done_rise\)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_5694_4 and Net_5672_6 and \superMaquina:stop_pulse\)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_5694_4 and Net_5672_6 and \superMaquina:stop_pulse\)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_6869_1 and Net_5694_4 and Net_5672_6)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6869_0 and Net_5694_4 and Net_5672_6 and \superMaquina:stop_pulse\)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_6869_0 and Net_5694_4 and Net_5672_6)
 	OR (not Net_5672_6 and \superMaquina:sample_done_rise\));
 
-\superMaquina:button_seen_reg\\D\ <= ((not Net_6662_2 and not Net_6662_1 and not Net_6662_0 and not \superMaquina:clear_flags_pulse\ and not \superMaquina:button_pos_d\ and bp)
-	OR (not \superMaquina:clear_flags_pulse\ and Net_6660_7));
+\superMaquina:button_seen_reg\\D\ <= ((not Net_6869_2 and not Net_6869_1 and not Net_6869_0 and not \superMaquina:clear_flags_pulse\ and not \superMaquina:button_pos_d\ and bp)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6999_7));
 
 \superMaquina:batch_limit_reg_7\\D\ <= ((not \superMaquina:load_batch_lo_pulse\ and \superMaquina:batch_limit_reg_7\)
 	OR (Net_5694_7 and \superMaquina:load_batch_lo_pulse\));
@@ -1378,217 +1501,217 @@ Net_6660_0 <= ((not Net_6662_2 and not Net_6662_1 and not Net_6662_0));
 	OR (\superMaquina:ctrl_load_batch_hi_d\ and \superMaquina:batch_limit_reg_8\)
 	OR (not Net_5672_7 and \superMaquina:batch_limit_reg_8\));
 
-\superMaquina:state_reg_2\\D\ <= ((not \superMaquina:clear_flags_pulse\ and Net_6662_0 and Net_5672_6 and \superMaquina:stop_pulse\)
-	OR (not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6 and \superMaquina:stop_pulse\)
-	OR (Net_6662_2 and Net_6662_0 and Net_5672_6)
-	OR (Net_6662_2 and Net_6662_1 and Net_5672_6)
-	OR (not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_5672_6));
+\superMaquina:state_reg_2\\D\ <= ((not \superMaquina:clear_flags_pulse\ and Net_6869_0 and Net_5672_6 and \superMaquina:stop_pulse\)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_5672_6 and \superMaquina:stop_pulse\)
+	OR (Net_6869_2 and Net_6869_0 and Net_5672_6)
+	OR (Net_6869_2 and Net_6869_1 and Net_5672_6)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_5672_6));
 
-\superMaquina:state_reg_1\\D\ <= ((not Net_2338 and not Net_6662_2 and not Net_6662_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and \EdgeDetect:last\ and Net_6662_0 and Net_5672_6 and Net_5672_4)
-	OR (not \EdgeDetect:last\ and not Net_6662_2 and not Net_6662_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_2338 and Net_6662_0 and Net_5672_6 and Net_5672_4)
-	OR (not Net_6662_2 and not Net_6662_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_0 and Net_5672_6 and \superMaquina:start_now_pulse\)
-	OR (not Net_6662_2 and not \superMaquina:arm_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_5672_6 and \superMaquina:start_now_pulse\)
-	OR (not Net_6662_2 and not \superMaquina:arm_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6)
-	OR (Net_6662_2 and Net_6662_1 and Net_5672_6 and \superMaquina:clear_flags_pulse\)
-	OR (not Net_6662_0 and Net_6662_1 and Net_5672_6 and \superMaquina:clear_flags_pulse\)
-	OR (not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and Net_6662_1 and Net_5672_6));
+\superMaquina:state_reg_1\\D\ <= ((not Net_2338 and not Net_6869_2 and not Net_6869_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and \EdgeDetect:last\ and Net_6869_0 and Net_5672_6 and Net_5672_4)
+	OR (not \EdgeDetect:last\ and not Net_6869_2 and not Net_6869_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_2338 and Net_6869_0 and Net_5672_6 and Net_5672_4)
+	OR (not Net_6869_2 and not Net_6869_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_0 and Net_5672_6 and \superMaquina:start_now_pulse\)
+	OR (not Net_6869_2 and not \superMaquina:arm_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_5672_6 and \superMaquina:start_now_pulse\)
+	OR (not Net_6869_2 and not \superMaquina:arm_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_5672_6)
+	OR (Net_6869_2 and Net_6869_1 and Net_5672_6 and \superMaquina:clear_flags_pulse\)
+	OR (not Net_6869_0 and Net_6869_1 and Net_5672_6 and \superMaquina:clear_flags_pulse\)
+	OR (not Net_6869_2 and not Net_6869_0 and not \superMaquina:stop_pulse\ and Net_6869_1 and Net_5672_6));
 
-\superMaquina:state_reg_0\\D\ <= ((not \EdgeDetect:last\ and not Net_2338 and not Net_6662_2 and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_0 and Net_5672_6)
-	OR (not Net_6662_2 and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and \EdgeDetect:last\ and Net_2338 and Net_6662_0 and Net_5672_6)
-	OR (not Net_6662_2 and not Net_5672_4 and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_0 and Net_5672_6)
-	OR (not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:batch_will_finish_capture\)
-	OR (not Net_6662_2 and not Net_6662_1 and not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_5672_6 and \superMaquina:arm_pulse\)
-	OR (not Net_6662_2 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_6662_0 and Net_5672_6 and \superMaquina:arm_pulse\)
-	OR (not Net_6662_2 and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_6662_0 and Net_5672_6)
-	OR (Net_6662_2 and Net_6662_0 and Net_5672_6 and \superMaquina:clear_flags_pulse\)
-	OR (not Net_6662_1 and Net_6662_0 and Net_5672_6 and \superMaquina:clear_flags_pulse\));
+\superMaquina:state_reg_0\\D\ <= ((not \EdgeDetect:last\ and not Net_2338 and not Net_6869_2 and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_0 and Net_5672_6)
+	OR (not Net_6869_2 and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and \EdgeDetect:last\ and Net_2338 and Net_6869_0 and Net_5672_6)
+	OR (not Net_6869_2 and not Net_5672_4 and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_0 and Net_5672_6)
+	OR (not Net_6869_2 and not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:batch_will_finish_capture\)
+	OR (not Net_6869_2 and not Net_6869_1 and not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_5672_6 and \superMaquina:arm_pulse\)
+	OR (not Net_6869_2 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_6869_0 and Net_5672_6 and \superMaquina:arm_pulse\)
+	OR (not Net_6869_2 and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_6869_0 and Net_5672_6)
+	OR (Net_6869_2 and Net_6869_0 and Net_5672_6 and \superMaquina:clear_flags_pulse\)
+	OR (not Net_6869_1 and Net_6869_0 and Net_5672_6 and \superMaquina:clear_flags_pulse\));
 
-\superMaquina:sample_count_reg_4\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:sample_count_reg_4\ and not \superMaquina:sample_count_reg_3\ and not \superMaquina:sample_count_reg_2\ and not \superMaquina:sample_count_reg_1\ and not \superMaquina:sample_count_reg_0\ and \superMaquina:sample_done_rise\)
-	OR (not Net_6662_2 and not Net_6662_0 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\)
-	OR (not Net_6662_2 and Net_6662_0 and \superMaquina:start_now_pulse\)
-	OR (not Net_6662_2 and Net_6662_0 and \superMaquina:arm_pulse\)
-	OR (not Net_6662_1 and not Net_6662_0)
-	OR (not Net_6662_2 and not Net_6662_1)
+\superMaquina:sample_count_reg_4\\D\ <= ((not Net_6869_2 and not Net_6869_0 and not \superMaquina:sample_count_reg_4\ and not \superMaquina:sample_count_reg_3\ and not \superMaquina:sample_count_reg_2\ and not \superMaquina:sample_count_reg_1\ and not \superMaquina:sample_count_reg_0\ and \superMaquina:sample_done_rise\)
+	OR (not Net_6869_2 and not Net_6869_0 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\)
+	OR (not Net_6869_2 and Net_6869_0 and \superMaquina:start_now_pulse\)
+	OR (not Net_6869_2 and Net_6869_0 and \superMaquina:arm_pulse\)
+	OR (not Net_6869_1 and not Net_6869_0)
+	OR (not Net_6869_2 and not Net_6869_1)
 	OR (\superMaquina:sample_count_reg_4\ and \superMaquina:sample_count_reg_0\)
 	OR (\superMaquina:sample_count_reg_4\ and \superMaquina:sample_count_reg_1\)
 	OR (\superMaquina:sample_count_reg_4\ and \superMaquina:sample_count_reg_2\)
 	OR (\superMaquina:sample_count_reg_4\ and \superMaquina:sample_count_reg_3\)
 	OR (not \superMaquina:sample_done_rise\ and \superMaquina:sample_count_reg_4\)
-	OR (Net_6662_2 and \superMaquina:sample_count_reg_4\)
-	OR (Net_6662_0 and \superMaquina:sample_count_reg_4\)
+	OR (Net_6869_2 and \superMaquina:sample_count_reg_4\)
+	OR (Net_6869_0 and \superMaquina:sample_count_reg_4\)
 	OR \superMaquina:clear_flags_pulse\
 	OR \superMaquina:stop_pulse\
 	OR not Net_5672_6);
 
-\superMaquina:sample_count_reg_3\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:sample_count_reg_3\ and not \superMaquina:sample_count_reg_2\ and not \superMaquina:sample_count_reg_1\ and not \superMaquina:sample_count_reg_0\ and \superMaquina:sample_done_rise\)
-	OR (not Net_6662_2 and not Net_6662_0 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\)
-	OR (not Net_6662_2 and Net_6662_0 and \superMaquina:start_now_pulse\)
-	OR (not Net_6662_2 and Net_6662_0 and \superMaquina:arm_pulse\)
-	OR (not Net_6662_1 and not Net_6662_0)
+\superMaquina:sample_count_reg_3\\D\ <= ((not Net_6869_2 and not Net_6869_0 and not \superMaquina:sample_count_reg_3\ and not \superMaquina:sample_count_reg_2\ and not \superMaquina:sample_count_reg_1\ and not \superMaquina:sample_count_reg_0\ and \superMaquina:sample_done_rise\)
+	OR (not Net_6869_2 and not Net_6869_0 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\)
+	OR (not Net_6869_2 and Net_6869_0 and \superMaquina:start_now_pulse\)
+	OR (not Net_6869_2 and Net_6869_0 and \superMaquina:arm_pulse\)
+	OR (not Net_6869_1 and not Net_6869_0)
 	OR (\superMaquina:sample_count_reg_3\ and \superMaquina:sample_count_reg_0\)
 	OR (\superMaquina:sample_count_reg_3\ and \superMaquina:sample_count_reg_1\)
 	OR (\superMaquina:sample_count_reg_3\ and \superMaquina:sample_count_reg_2\)
 	OR (not \superMaquina:sample_done_rise\ and \superMaquina:sample_count_reg_3\)
-	OR (Net_6662_2 and \superMaquina:sample_count_reg_3\)
-	OR (not Net_6662_2 and not Net_6662_1)
-	OR (Net_6662_0 and \superMaquina:sample_count_reg_3\)
+	OR (Net_6869_2 and \superMaquina:sample_count_reg_3\)
+	OR (not Net_6869_2 and not Net_6869_1)
+	OR (Net_6869_0 and \superMaquina:sample_count_reg_3\)
 	OR \superMaquina:clear_flags_pulse\
 	OR \superMaquina:stop_pulse\
 	OR not Net_5672_6);
 
-\superMaquina:sample_count_reg_2\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:sample_count_reg_2\ and not \superMaquina:sample_count_reg_1\ and not \superMaquina:sample_count_reg_0\ and \superMaquina:sample_done_rise\)
-	OR (not Net_6662_2 and not Net_6662_0 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\)
-	OR (not Net_6662_2 and Net_6662_0 and \superMaquina:start_now_pulse\)
-	OR (not Net_6662_2 and Net_6662_0 and \superMaquina:arm_pulse\)
-	OR (not Net_6662_1 and not Net_6662_0)
+\superMaquina:sample_count_reg_2\\D\ <= ((not Net_6869_2 and not Net_6869_0 and not \superMaquina:sample_count_reg_2\ and not \superMaquina:sample_count_reg_1\ and not \superMaquina:sample_count_reg_0\ and \superMaquina:sample_done_rise\)
+	OR (not Net_6869_2 and not Net_6869_0 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\)
+	OR (not Net_6869_2 and Net_6869_0 and \superMaquina:start_now_pulse\)
+	OR (not Net_6869_2 and Net_6869_0 and \superMaquina:arm_pulse\)
+	OR (not Net_6869_1 and not Net_6869_0)
 	OR (\superMaquina:sample_count_reg_2\ and \superMaquina:sample_count_reg_0\)
 	OR (\superMaquina:sample_count_reg_2\ and \superMaquina:sample_count_reg_1\)
 	OR (not \superMaquina:sample_done_rise\ and \superMaquina:sample_count_reg_2\)
-	OR (Net_6662_2 and \superMaquina:sample_count_reg_2\)
-	OR (not Net_6662_2 and not Net_6662_1)
-	OR (Net_6662_0 and \superMaquina:sample_count_reg_2\)
+	OR (Net_6869_2 and \superMaquina:sample_count_reg_2\)
+	OR (not Net_6869_2 and not Net_6869_1)
+	OR (Net_6869_0 and \superMaquina:sample_count_reg_2\)
 	OR \superMaquina:clear_flags_pulse\
 	OR \superMaquina:stop_pulse\
 	OR not Net_5672_6);
 
-\superMaquina:sample_count_reg_1\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and not \superMaquina:sample_count_reg_1\ and not \superMaquina:sample_count_reg_0\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_done_rise\)
-	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_6662_0 and Net_5672_6 and \superMaquina:sample_count_reg_1\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_count_reg_1\ and \superMaquina:sample_count_reg_0\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_count_reg_1\)
-	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_0 and Net_5672_6 and \superMaquina:sample_count_reg_1\)
-	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_1 and Net_5672_6 and \superMaquina:sample_count_reg_1\));
+\superMaquina:sample_count_reg_1\\D\ <= ((not Net_6869_2 and not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and not \superMaquina:sample_count_reg_1\ and not \superMaquina:sample_count_reg_0\ and Net_6869_1 and Net_5672_6 and \superMaquina:sample_done_rise\)
+	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_6869_0 and Net_5672_6 and \superMaquina:sample_count_reg_1\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6869_1 and Net_5672_6 and \superMaquina:sample_count_reg_1\ and \superMaquina:sample_count_reg_0\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6869_1 and Net_5672_6 and \superMaquina:sample_count_reg_1\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_6869_0 and Net_5672_6 and \superMaquina:sample_count_reg_1\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_6869_1 and Net_5672_6 and \superMaquina:sample_count_reg_1\));
 
 \superMaquina:sample_count_reg_0\\D\ <= ((\superMaquina:sample_will_close_batch\ and \superMaquina:sample_count_reg_0\)
-	OR (not Net_6662_2 and not Net_6662_0 and not \superMaquina:sample_count_reg_0\ and \superMaquina:sample_done_rise\)
-	OR (not Net_6662_2 and Net_6662_0 and \superMaquina:start_now_pulse\)
-	OR (not Net_6662_2 and Net_6662_0 and \superMaquina:arm_pulse\)
+	OR (not Net_6869_2 and not Net_6869_0 and not \superMaquina:sample_count_reg_0\ and \superMaquina:sample_done_rise\)
+	OR (not Net_6869_2 and Net_6869_0 and \superMaquina:start_now_pulse\)
+	OR (not Net_6869_2 and Net_6869_0 and \superMaquina:arm_pulse\)
 	OR (not \superMaquina:sample_done_rise\ and \superMaquina:sample_count_reg_0\)
-	OR (Net_6662_2 and \superMaquina:sample_count_reg_0\)
-	OR (not Net_6662_1 and not Net_6662_0)
-	OR (Net_6662_0 and \superMaquina:sample_count_reg_0\)
-	OR (not Net_6662_2 and not Net_6662_1)
+	OR (Net_6869_2 and \superMaquina:sample_count_reg_0\)
+	OR (not Net_6869_1 and not Net_6869_0)
+	OR (Net_6869_0 and \superMaquina:sample_count_reg_0\)
+	OR (not Net_6869_2 and not Net_6869_1)
 	OR \superMaquina:clear_flags_pulse\
 	OR \superMaquina:stop_pulse\
 	OR not Net_5672_6);
 
-\superMaquina:batch_count_reg_8\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_8\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:MODULE_7:g2:a0:g1:z1:s0:g1:u0:c_8\)
-	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_8\)
-	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_8\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:MODULE_7:g2:a0:g1:z1:s0:g1:u0:c_8\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_8\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_8\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_8\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_8\)
-	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_8\));
+\superMaquina:batch_count_reg_8\\D\ <= ((not Net_6869_2 and not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_8\ and Net_6869_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:MODULE_7:g2:a0:g1:z1:s0:g1:u0:c_8\)
+	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_6869_0 and Net_5672_6 and \superMaquina:batch_count_reg_8\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_6869_0 and Net_5672_6 and \superMaquina:batch_count_reg_8\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:MODULE_7:g2:a0:g1:z1:s0:g1:u0:c_8\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_8\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_8\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_8\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_8\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_8\));
 
-\superMaquina:batch_count_reg_7\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_7\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:batch_count_reg_6\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
-	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
-	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_0\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_1\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_2\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_3\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_4\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_5\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_6\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_7\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
-	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\));
+\superMaquina:batch_count_reg_7\\D\ <= ((not Net_6869_2 and not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_7\ and Net_6869_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:batch_count_reg_6\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_6869_0 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_6869_0 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_0\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_1\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_2\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_3\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_4\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_5\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_6\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_7\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_7\));
 
-\superMaquina:batch_count_reg_6\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_6\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
-	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
-	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_0\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_1\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_2\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_3\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_4\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_5\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_6\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
-	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\));
+\superMaquina:batch_count_reg_6\\D\ <= ((not Net_6869_2 and not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_6\ and Net_6869_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_6869_0 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_6869_0 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_0\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_1\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_2\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_3\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_4\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_5\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_6\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_6\));
 
-\superMaquina:batch_count_reg_5\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_5\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
-	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
-	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_0\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_1\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_2\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_3\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_4\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_5\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
-	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_5\));
+\superMaquina:batch_count_reg_5\\D\ <= ((not Net_6869_2 and not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_5\ and Net_6869_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_6869_0 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_6869_0 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_0\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_1\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_2\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_3\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_4\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_5\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_5\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_5\));
 
-\superMaquina:batch_count_reg_4\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_4\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
-	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_4\)
-	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_4\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_0\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_4\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_1\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_4\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_2\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_4\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_3\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_4\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_4\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_4\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_4\)
-	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_4\));
+\superMaquina:batch_count_reg_4\\D\ <= ((not Net_6869_2 and not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_4\ and Net_6869_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_6869_0 and Net_5672_6 and \superMaquina:batch_count_reg_4\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_6869_0 and Net_5672_6 and \superMaquina:batch_count_reg_4\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_0\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_4\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_1\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_4\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_2\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_4\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_3\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_4\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_4\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_4\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_4\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_4\));
 
-\superMaquina:batch_count_reg_3\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_3\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
-	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_3\)
-	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_3\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_0\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_3\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_1\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_3\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_2\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_3\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_3\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_3\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_3\)
-	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_3\));
+\superMaquina:batch_count_reg_3\\D\ <= ((not Net_6869_2 and not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_3\ and Net_6869_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_6869_0 and Net_5672_6 and \superMaquina:batch_count_reg_3\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_6869_0 and Net_5672_6 and \superMaquina:batch_count_reg_3\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_0\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_3\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_1\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_3\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_2\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_3\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_3\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_3\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_3\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_3\));
 
-\superMaquina:batch_count_reg_2\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_2\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
-	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_2\)
-	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_2\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_0\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_2\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_1\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_2\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_2\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_2\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_2\)
-	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_2\));
+\superMaquina:batch_count_reg_2\\D\ <= ((not Net_6869_2 and not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_2\ and Net_6869_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_6869_0 and Net_5672_6 and \superMaquina:batch_count_reg_2\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_6869_0 and Net_5672_6 and \superMaquina:batch_count_reg_2\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_0\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_2\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_1\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_2\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_2\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_2\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_2\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_2\));
 
-\superMaquina:batch_count_reg_1\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_1\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:batch_count_reg_0\)
-	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_1\)
-	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_1\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_0\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_1\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_1\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_1\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_1\)
-	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_1\));
+\superMaquina:batch_count_reg_1\\D\ <= ((not Net_6869_2 and not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_1\ and Net_6869_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\ and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_6869_0 and Net_5672_6 and \superMaquina:batch_count_reg_1\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_6869_0 and Net_5672_6 and \superMaquina:batch_count_reg_1\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_count_reg_0\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_1\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_1\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_1\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_1\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_1\));
 
-\superMaquina:batch_count_reg_0\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_0\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\)
-	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_0\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_0\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_0\)
-	OR (not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_0\)
-	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_0 and Net_5672_6 and \superMaquina:batch_count_reg_0\)
-	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_1 and Net_5672_6 and \superMaquina:batch_count_reg_0\));
+\superMaquina:batch_count_reg_0\\D\ <= ((not Net_6869_2 and not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:batch_will_finish_capture\ and not \superMaquina:batch_count_reg_0\ and Net_6869_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\)
+	OR (not \superMaquina:arm_pulse\ and not \superMaquina:start_now_pulse\ and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_6869_0 and Net_5672_6 and \superMaquina:batch_count_reg_0\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_will_finish_capture\ and \superMaquina:batch_count_reg_0\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_will_close_batch\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_0\)
+	OR (not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and not \superMaquina:sample_done_rise\ and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_6869_0 and Net_5672_6 and \superMaquina:batch_count_reg_0\)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_6869_1 and Net_5672_6 and \superMaquina:batch_count_reg_0\));
 
-\superMaquina:error_stop_reg\\D\ <= ((not \superMaquina:clear_flags_pulse\ and Net_6662_0 and Net_5672_6 and \superMaquina:stop_pulse\)
-	OR (not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6 and \superMaquina:stop_pulse\)
-	OR (not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_5672_6 and \superMaquina:stop_pulse\)
-	OR (not \superMaquina:clear_flags_pulse\ and Net_6661_3));
+\superMaquina:error_stop_reg\\D\ <= ((not \superMaquina:clear_flags_pulse\ and Net_6869_0 and Net_5672_6 and \superMaquina:stop_pulse\)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_5672_6 and \superMaquina:stop_pulse\)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_5672_6 and \superMaquina:stop_pulse\)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6998_3));
 
-\superMaquina:error_state_reg\\D\ <= ((not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_0 and Net_5672_6)
-	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_2 and Net_6662_1 and Net_5672_6)
-	OR (not \superMaquina:clear_flags_pulse\ and Net_6661_4));
+\superMaquina:error_state_reg\\D\ <= ((not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_6869_0 and Net_5672_6)
+	OR (not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_2 and Net_6869_1 and Net_5672_6)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6998_4));
 
-\superMaquina:sync_seen_reg\\D\ <= ((not Net_2338 and not Net_6662_2 and not Net_6662_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and \EdgeDetect:last\ and Net_6662_0 and Net_5672_6 and \superMaquina:start_now_pulse\)
-	OR (not \EdgeDetect:last\ and not Net_6662_2 and not Net_6662_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_2338 and Net_6662_0 and Net_5672_6 and \superMaquina:start_now_pulse\)
-	OR (not Net_2338 and not Net_6662_2 and not Net_6662_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and \EdgeDetect:last\ and Net_6662_0 and Net_5672_6 and Net_5672_4)
-	OR (not \EdgeDetect:last\ and not Net_6662_2 and not Net_6662_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_2338 and Net_6662_0 and Net_5672_6 and Net_5672_4)
-	OR (not \superMaquina:clear_flags_pulse\ and Net_6660_5));
+\superMaquina:sync_seen_reg\\D\ <= ((not Net_2338 and not Net_6869_2 and not Net_6869_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and \EdgeDetect:last\ and Net_6869_0 and Net_5672_6 and \superMaquina:start_now_pulse\)
+	OR (not \EdgeDetect:last\ and not Net_6869_2 and not Net_6869_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_2338 and Net_6869_0 and Net_5672_6 and \superMaquina:start_now_pulse\)
+	OR (not Net_2338 and not Net_6869_2 and not Net_6869_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and \EdgeDetect:last\ and Net_6869_0 and Net_5672_6 and Net_5672_4)
+	OR (not \EdgeDetect:last\ and not Net_6869_2 and not Net_6869_1 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_2338 and Net_6869_0 and Net_5672_6 and Net_5672_4)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6999_5));
 
-\superMaquina:batch_seen_reg\\D\ <= ((not Net_6662_2 and not Net_6662_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6662_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\)
-	OR (not \superMaquina:clear_flags_pulse\ and Net_6660_6));
+\superMaquina:batch_seen_reg\\D\ <= ((not Net_6869_2 and not Net_6869_0 and not \superMaquina:stop_pulse\ and not \superMaquina:clear_flags_pulse\ and Net_6869_1 and Net_5672_6 and \superMaquina:sample_done_rise\ and \superMaquina:sample_will_close_batch\)
+	OR (not \superMaquina:clear_flags_pulse\ and Net_6999_6));
 
 \superMaquina:MODULE_6:g1:a0:gx:u0:eq_5\ <= ((not \superMaquina:batch_limit_reg_5\ and not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_5\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_1\ and not \superMaquina:batch_count_reg_0\)
 	OR (not \superMaquina:batch_limit_reg_4\ and not \superMaquina:batch_limit_reg_3\ and not \superMaquina:batch_limit_reg_2\ and not \superMaquina:batch_limit_reg_1\ and not \superMaquina:batch_limit_reg_0\ and not \superMaquina:batch_count_reg_4\ and not \superMaquina:batch_count_reg_3\ and not \superMaquina:batch_count_reg_2\ and not \superMaquina:batch_count_reg_1\ and not \superMaquina:batch_count_reg_0\ and \superMaquina:batch_limit_reg_5\ and \superMaquina:batch_count_reg_5\)
@@ -1710,20 +1833,26 @@ Net_6660_0 <= ((not Net_6662_2 and not Net_6662_1 and not Net_6662_0));
 
 \superMaquina:MODULE_7:g2:a0:g1:z1:s0:g1:u0:b_8\ <= ((\superMaquina:batch_count_reg_7\ and \superMaquina:batch_count_reg_6\ and \superMaquina:batch_count_reg_5\ and \superMaquina:batch_count_reg_4\ and \superMaquina:batch_count_reg_3\ and \superMaquina:batch_count_reg_2\ and \superMaquina:batch_count_reg_1\ and \superMaquina:batch_count_reg_0\));
 
-\Timer_2:TimerHW\:cy_psoc3_timer_v1_0
+\Tmr_LedWait:TimerHW\:cy_psoc3_timer_v1_0
 	GENERIC MAP(cy_registers=>"")
 	PORT MAP(clock=>Net_6773,
 		kill=>zero,
 		enable=>one,
 		capture=>zero,
 		timer_reset=>zero,
-		tc=>Net_6780,
-		compare=>\Timer_2:Net_261\,
-		interrupt=>\Timer_2:Net_57\);
-isr_Timer_2:cy_isr_v1_0
-	GENERIC MAP(int_type=>"10",
-		is_nmi=>'0')
-	PORT MAP(int_signal=>Net_6780);
+		tc=>tcl,
+		compare=>\Tmr_LedWait:Net_261\,
+		interrupt=>\Tmr_LedWait:Net_57\);
+timer_clock_9:cy_clock_v1_0
+	GENERIC MAP(cy_registers=>"",
+		id=>"d8a4adcb-9945-4163-8100-b5cc88ea06e4",
+		source_clock_id=>"75C2148C-3656-4d8a-846D-0CAE99AB6FF7",
+		divisor=>0,
+		period=>"0",
+		is_direct=>'1',
+		is_digital=>'1')
+	PORT MAP(clock_out=>Net_6994,
+		dig_domain_out=>open);
 DMA_DelSig_RAM:cy_dma_v1_0
 	GENERIC MAP(drq_type=>"10",
 		num_tds=>0)
@@ -2454,20 +2583,16 @@ Rx_1:cy_psoc3_pins_v1_10
 		status=>(zero, \UART:BUART:rx_status_5\, \UART:BUART:rx_status_4\, \UART:BUART:rx_status_3\,
 			\UART:BUART:rx_status_2\, zero, zero),
 		interrupt=>Net_5522);
-isr_Timer:cy_isr_v1_0
-	GENERIC MAP(int_type=>"10",
-		is_nmi=>'0')
-	PORT MAP(int_signal=>Net_2277);
-\Timer:TimerHW\:cy_psoc3_timer_v1_0
+\Tmr_UartRxWatchdog:TimerHW\:cy_psoc3_timer_v1_0
 	GENERIC MAP(cy_registers=>"")
 	PORT MAP(clock=>Net_10,
 		kill=>zero,
 		enable=>one,
 		capture=>zero,
 		timer_reset=>zero,
-		tc=>Net_2277,
-		compare=>\Timer:Net_261\,
-		interrupt=>\Timer:Net_57\);
+		tc=>tcu,
+		compare=>\Tmr_UartRxWatchdog:Net_261\,
+		interrupt=>\Tmr_UartRxWatchdog:Net_57\);
 timer_clock:cy_clock_v1_0
 	GENERIC MAP(cy_registers=>"",
 		id=>"c0fb34bd-1044-4931-9788-16b01ce89812",
@@ -2482,57 +2607,27 @@ isr_SuperMaquina:cy_isr_v1_0
 	GENERIC MAP(int_type=>"10",
 		is_nmi=>'0')
 	PORT MAP(int_signal=>Net_5570);
-timer_clock_8:cy_clock_v1_0
-	GENERIC MAP(cy_registers=>"",
-		id=>"7335911f-dbf4-438a-9729-ce0e4b010bcd",
-		source_clock_id=>"75C2148C-3656-4d8a-846D-0CAE99AB6FF7",
-		divisor=>0,
-		period=>"0",
-		is_direct=>'1',
-		is_digital=>'1')
-	PORT MAP(clock_out=>Net_6619,
-		dig_domain_out=>open);
-timer_clock_7:cy_clock_v1_0
-	GENERIC MAP(cy_registers=>"",
-		id=>"58d0879c-ab1f-41c9-9b0a-4a6ec8277807",
-		source_clock_id=>"75C2148C-3656-4d8a-846D-0CAE99AB6FF7",
-		divisor=>0,
-		period=>"0",
-		is_direct=>'1',
-		is_digital=>'1')
-	PORT MAP(clock_out=>Net_6621,
-		dig_domain_out=>open);
-timer_clock_6:cy_clock_v1_0
-	GENERIC MAP(cy_registers=>"",
-		id=>"c18e47f3-396b-4496-8dd0-4d9fd31efd1d",
-		source_clock_id=>"75C2148C-3656-4d8a-846D-0CAE99AB6FF7",
-		divisor=>0,
-		period=>"0",
-		is_direct=>'1',
-		is_digital=>'1')
-	PORT MAP(clock_out=>Net_6623,
-		dig_domain_out=>open);
 \state:sts:sts_reg\:cy_psoc3_status
 	GENERIC MAP(cy_force_order=>'1',
 		cy_md_select=>"00000000")
 	PORT MAP(reset=>zero,
-		clock=>Net_6619,
+		clock=>Net_6994,
 		status=>(zero, zero, zero, zero,
-			zero, Net_6662_2, Net_6662_1, Net_6662_0));
+			zero, Net_6869_2, Net_6869_1, Net_6869_0));
 \error:sts:sts_reg\:cy_psoc3_status
 	GENERIC MAP(cy_force_order=>'1',
 		cy_md_select=>"00000000")
 	PORT MAP(reset=>zero,
-		clock=>Net_6621,
-		status=>(zero, zero, zero, Net_6661_4,
-			Net_6661_3, zero, zero, zero));
+		clock=>Net_6994,
+		status=>(zero, zero, zero, Net_6998_4,
+			Net_6998_3, zero, zero, zero));
 \status:sts:sts_reg\:cy_psoc3_status
 	GENERIC MAP(cy_force_order=>'1',
 		cy_md_select=>"00000000")
 	PORT MAP(reset=>zero,
-		clock=>Net_6623,
-		status=>(Net_6660_7, Net_6660_6, Net_6660_5, Net_6660_4,
-			Net_6660_3, Net_6660_2, Net_6660_1, Net_6660_0));
+		clock=>Net_6994,
+		status=>(Net_6999_7, Net_6999_6, Net_6999_5, Net_6999_4,
+			Net_6999_3, Net_6999_2, Net_6999_1, Net_6999_0));
 \reset:Sync:ctrl_reg\:cy_psoc3_control
 	GENERIC MAP(cy_init_value=>"00000000",
 		cy_force_order=>'1',
@@ -2597,194 +2692,13 @@ timer_clock_2:cy_clock_v1_0
 \superMaquina:MODULE_7:g2:a0:g1:z1:s0:g1:u0:gs(8):g2:g3:ub\:cy_buf
 	PORT MAP(x=>\superMaquina:MODULE_7:g2:a0:g1:z1:s0:g1:u0:b_8\,
 		y=>\superMaquina:MODULE_7:g2:a0:g1:z1:s0:g1:u0:c_8\);
-GND_4:cy_annotation_universal_v1_0
-	GENERIC MAP(comp_name=>"Gnd_v1_0",
-		port_names=>"T1",
-		width=>1)
-	PORT MAP(connect=>Net_5547);
-C_6:cy_annotation_universal_v1_0
-	GENERIC MAP(comp_name=>"Capacitor_v1_0",
-		port_names=>"T1, T2",
-		width=>2)
-	PORT MAP(connect=>(Net_5547, Net_5546));
-AMux_Capacitor:cy_psoc3_pins_v1_10
-	GENERIC MAP(id=>"3ce36874-cb2f-4348-a7e2-8a3e4becb49b",
-		drive_mode=>"000",
-		ibuf_enabled=>"0",
-		init_dr_st=>"0",
-		input_sync=>"1",
-		input_clk_en=>'0',
-		input_sync_mode=>"0",
-		intr_mode=>"00",
-		invert_in_clock=>'0',
-		invert_in_clock_en=>'0',
-		invert_in_reset=>'0',
-		invert_out_clock=>'0',
-		invert_out_clock_en=>'0',
-		invert_out_reset=>'0',
-		io_voltage=>"",
-		layout_mode=>"CONTIGUOUS",
-		output_conn=>"0",
-		output_sync=>"0",
-		output_clk_en=>'0',
-		output_mode=>"0",
-		output_reset=>'0',
-		output_clock_mode=>"0",
-		oe_sync=>"0",
-		oe_conn=>"0",
-		oe_reset=>'0',
-		pin_aliases=>"",
-		pin_mode=>"A",
-		por_state=>4,
-		sio_group_cnt=>0,
-		sio_hifreq=>"00000000",
-		sio_hyst=>"1",
-		sio_ibuf=>"00000000",
-		sio_info=>"00",
-		sio_obuf=>"00000000",
-		sio_refsel=>"00000000",
-		sio_vtrip=>"00000000",
-		sio_vohsel=>"00000000",
-		slew_rate=>"0",
-		spanning=>'0',
-		sw_only=>'0',
-		vtrip=>"10",
-		width=>1,
-		port_alias_required=>'0',
-		port_alias_group=>"",
-		use_annotation=>"1",
-		pa_in_clock=>-1,
-		pa_in_clock_en=>-1,
-		pa_in_reset=>-1,
-		pa_out_clock=>-1,
-		pa_out_clock_en=>-1,
-		pa_out_reset=>-1,
-		ovt_needed=>"0",
-		ovt_slew_control=>"00",
-		ovt_hyst_trim=>"0",
-		input_buffer_sel=>"00")
-	PORT MAP(oe=>(one),
-		y=>(zero),
-		fb=>(tmpFB_0__AMux_Capacitor_net_0),
-		analog=>Net_5076,
-		io=>(tmpIO_0__AMux_Capacitor_net_0),
-		siovref=>(tmpSIOVREF__AMux_Capacitor_net_0),
-		annotation=>Net_5546,
-		in_clock=>zero,
-		in_clock_en=>one,
-		in_reset=>zero,
-		out_clock=>zero,
-		out_clock_en=>one,
-		out_reset=>zero,
-		interrupt=>tmpINTERRUPT_0__AMux_Capacitor_net_0);
 vRef_1:cy_vref_v1_0
-	GENERIC MAP(guid=>"89B398AD-36A8-4627-9212-707F2986319E",
-		name=>"1.024V",
+	GENERIC MAP(guid=>"4720866E-BC14-478d-B8A0-3E44F38CADAC",
+		name=>"Vdda/2",
 		autoenable=>'1',
 		ignoresleep=>'0')
-	PORT MAP(vout=>Net_4993);
-ref1V:cy_psoc3_pins_v1_10
-	GENERIC MAP(id=>"53cdb6ab-6d31-4f0c-adb7-79f8921d194f",
-		drive_mode=>"000",
-		ibuf_enabled=>"0",
-		init_dr_st=>"0",
-		input_sync=>"1",
-		input_clk_en=>'0',
-		input_sync_mode=>"0",
-		intr_mode=>"00",
-		invert_in_clock=>'0',
-		invert_in_clock_en=>'0',
-		invert_in_reset=>'0',
-		invert_out_clock=>'0',
-		invert_out_clock_en=>'0',
-		invert_out_reset=>'0',
-		io_voltage=>"",
-		layout_mode=>"CONTIGUOUS",
-		output_conn=>"0",
-		output_sync=>"0",
-		output_clk_en=>'0',
-		output_mode=>"0",
-		output_reset=>'0',
-		output_clock_mode=>"0",
-		oe_sync=>"0",
-		oe_conn=>"0",
-		oe_reset=>'0',
-		pin_aliases=>"",
-		pin_mode=>"A",
-		por_state=>4,
-		sio_group_cnt=>0,
-		sio_hifreq=>"00000000",
-		sio_hyst=>"1",
-		sio_ibuf=>"00000000",
-		sio_info=>"00",
-		sio_obuf=>"00000000",
-		sio_refsel=>"00000000",
-		sio_vtrip=>"00000000",
-		sio_vohsel=>"00000000",
-		slew_rate=>"0",
-		spanning=>'0',
-		sw_only=>'0',
-		vtrip=>"10",
-		width=>1,
-		port_alias_required=>'0',
-		port_alias_group=>"",
-		use_annotation=>"1",
-		pa_in_clock=>-1,
-		pa_in_clock_en=>-1,
-		pa_in_reset=>-1,
-		pa_out_clock=>-1,
-		pa_out_clock_en=>-1,
-		pa_out_reset=>-1,
-		ovt_needed=>"0",
-		ovt_slew_control=>"00",
-		ovt_hyst_trim=>"0",
-		input_buffer_sel=>"00")
-	PORT MAP(oe=>(one),
-		y=>(zero),
-		fb=>(tmpFB_0__ref1V_net_0),
-		analog=>Net_4991,
-		io=>(tmpIO_0__ref1V_net_0),
-		siovref=>(tmpSIOVREF__ref1V_net_0),
-		annotation=>Net_2770,
-		in_clock=>zero,
-		in_clock_en=>one,
-		in_reset=>zero,
-		out_clock=>zero,
-		out_clock_en=>one,
-		out_reset=>zero,
-		interrupt=>tmpINTERRUPT_0__ref1V_net_0);
-\Opa_ref_1V:ABuf\:cy_psoc3_abuf_v1_0
-	GENERIC MAP(cy_registers=>"")
-	PORT MAP(vplus=>Net_4993,
-		vminus=>\Opa_ref_1V:Net_29\,
-		vout=>Net_4991);
-\Opa_ref_1V:abuf_negInput_mux_connect\:cy_connect_v1_0
-	GENERIC MAP(sig_width=>1,
-		is_net_join=>'0')
-	PORT MAP(signal1=>\Opa_ref_1V:Net_29\,
-		signal2=>Net_4991);
-\Opa_ref_PGA:ABuf\:cy_psoc3_abuf_v1_0
-	GENERIC MAP(cy_registers=>"")
-	PORT MAP(vplus=>Net_5540,
-		vminus=>\Opa_ref_PGA:Net_29\,
-		vout=>Net_4447);
-\Opa_ref_PGA:abuf_negInput_mux_connect\:cy_connect_v1_0
-	GENERIC MAP(sig_width=>1,
-		is_net_join=>'0')
-	PORT MAP(signal1=>\Opa_ref_PGA:Net_29\,
-		signal2=>Net_4447);
-AMux_ADC:cy_psoc3_amux_v1_0
-	GENERIC MAP(cy_registers=>"",
-		muxin_width=>3,
-		hw_control=>'0',
-		one_active=>'0',
-		init_mux_sel=>"000",
-		api_type=>0,
-		connect_mode=>2)
-	PORT MAP(muxin=>(Net_5076, Net_4444, Net_4154),
-		hw_ctrl_en=>(others => zero),
-		vout=>Net_5077);
-\VDAC_LP:viDAC8\:cy_psoc3_vidac8_v1_0
+	PORT MAP(vout=>Net_7013);
+\VDAC_ref_PGA:viDAC8\:cy_psoc3_vidac8_v1_0
 	GENERIC MAP(cy_registers=>"",
 		reg_data=>'0',
 		is_all_if_any=>'0')
@@ -2795,47 +2709,150 @@ AMux_ADC:cy_psoc3_amux_v1_0
 			zero, zero, zero, zero),
 		strobe=>zero,
 		strobe_udb=>zero,
-		vout=>Net_4138,
-		iout=>\VDAC_LP:Net_77\);
-\VDAC_LP:cy_analog_noconnect_1\:cy_analog_noconnect_v1_0
-	PORT MAP(noconnect=>\VDAC_LP:Net_77\);
+		vout=>Net_4664,
+		iout=>\VDAC_ref_PGA:Net_77\);
+\VDAC_ref_PGA:cy_analog_noconnect_1\:cy_analog_noconnect_v1_0
+	PORT MAP(noconnect=>\VDAC_ref_PGA:Net_77\);
+timer_clock_4:cy_clock_v1_0
+	GENERIC MAP(cy_registers=>"",
+		id=>"39009ee0-8332-47c4-9167-035dbecdc33b",
+		source_clock_id=>"315365C3-2E3E-4f04-84A2-BB564A173261",
+		divisor=>1,
+		period=>"0",
+		is_direct=>'0',
+		is_digital=>'1')
+	PORT MAP(clock_out=>Net_6773,
+		dig_domain_out=>open);
 GND_3:cy_annotation_universal_v1_0
 	GENERIC MAP(comp_name=>"Gnd_v1_0",
 		port_names=>"T1",
 		width=>1)
-	PORT MAP(connect=>Net_2666);
-C_3:cy_annotation_universal_v1_0
+	PORT MAP(connect=>Net_2058);
+\Tmr_PingCalTick:TimerHW\:cy_psoc3_timer_v1_0
+	GENERIC MAP(cy_registers=>"")
+	PORT MAP(clock=>Net_6761,
+		kill=>zero,
+		enable=>one,
+		capture=>zero,
+		timer_reset=>zero,
+		tc=>tcp,
+		compare=>\Tmr_PingCalTick:Net_261\,
+		interrupt=>\Tmr_PingCalTick:Net_57\);
+timer_clock_3:cy_clock_v1_0
+	GENERIC MAP(cy_registers=>"",
+		id=>"854c5f18-4208-429b-80a2-c4252048af1b",
+		source_clock_id=>"315365C3-2E3E-4f04-84A2-BB564A173261",
+		divisor=>1,
+		period=>"0",
+		is_direct=>'0',
+		is_digital=>'1')
+	PORT MAP(clock_out=>Net_6761,
+		dig_domain_out=>open);
+timer_clock_5:cy_clock_v1_0
+	GENERIC MAP(cy_registers=>"",
+		id=>"9b8b6b17-0b0d-40b5-98ed-0418d8afbf22",
+		source_clock_id=>"315365C3-2E3E-4f04-84A2-BB564A173261",
+		divisor=>1,
+		period=>"0",
+		is_direct=>'0',
+		is_digital=>'1')
+	PORT MAP(clock_out=>Net_6784,
+		dig_domain_out=>open);
+\Tmr_CaptureWatchdog:TimerHW\:cy_psoc3_timer_v1_0
+	GENERIC MAP(cy_registers=>"")
+	PORT MAP(clock=>Net_6784,
+		kill=>zero,
+		enable=>one,
+		capture=>zero,
+		timer_reset=>zero,
+		tc=>tcc,
+		compare=>\Tmr_CaptureWatchdog:Net_261\,
+		interrupt=>\Tmr_CaptureWatchdog:Net_57\);
+\tmr_event:sts:sts_reg\:cy_psoc3_status
+	GENERIC MAP(cy_force_order=>'1',
+		cy_md_select=>"00000000")
+	PORT MAP(reset=>zero,
+		clock=>Net_6994,
+		status=>(zero, zero, zero, zero,
+			tcc, tcl, tcp, tcu));
+\LPF_1:cy_psoc3_lpf_1\:cy_psoc3_lpf_v1_0
+	GENERIC MAP(cy_registers=>"")
+	PORT MAP(vin=>Net_2195,
+		vout=>Net_2192);
+\PGAgain:SC\:cy_psoc3_scblock_v1_0
+	GENERIC MAP(cy_registers=>"")
+	PORT MAP(vref=>\PGAgain:Net_17\,
+		vin=>Net_2192,
+		aclk=>zero,
+		bst_clk=>zero,
+		clk_udb=>zero,
+		dyn_cntl=>zero,
+		modout_sync=>\PGAgain:Net_41\,
+		vout=>Net_4656);
+\PGAgain:cy_analog_virtualmux_1_connect\:cy_connect_v1_0
+	GENERIC MAP(sig_width=>1,
+		is_net_join=>'0')
+	PORT MAP(signal1=>\PGAgain:Net_17\,
+		signal2=>Net_4664);
+\PGAgain:cy_analog_noconnect_2\:cy_analog_noconnect_v1_0
+	PORT MAP(noconnect=>\PGAgain:Net_75\);
+C_2:cy_annotation_universal_v1_0
 	GENERIC MAP(comp_name=>"Capacitor_v1_0",
 		port_names=>"T1, T2",
 		width=>2)
-	PORT MAP(connect=>(Net_170, Net_2770));
-C_5:cy_annotation_universal_v1_0
+	PORT MAP(connect=>(Net_1933, Net_4952));
+R_11:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Resistor_v1_0",
+		port_names=>"T1, T2",
+		width=>2)
+	PORT MAP(connect=>(Net_4952, Net_1933));
+\OPAadder:ABuf\:cy_psoc3_abuf_v1_0
+	GENERIC MAP(cy_registers=>"")
+	PORT MAP(vplus=>Net_4947,
+		vminus=>\OPAadder:Net_29\,
+		vout=>Net_4654);
+\OPAadder:abuf_negInput_mux_connect\:cy_connect_v1_0
+	GENERIC MAP(sig_width=>1,
+		is_net_join=>'0')
+	PORT MAP(signal1=>\OPAadder:Net_29\,
+		signal2=>Net_7009);
+C_1:cy_annotation_universal_v1_0
 	GENERIC MAP(comp_name=>"Capacitor_v1_0",
 		port_names=>"T1, T2",
 		width=>2)
-	PORT MAP(connect=>(Net_2770, Net_2763));
-R_7:cy_annotation_universal_v1_0
+	PORT MAP(connect=>(Net_1938, Net_4645));
+R_2:cy_annotation_universal_v1_0
 	GENERIC MAP(comp_name=>"Resistor_v1_0",
 		port_names=>"T1, T2",
 		width=>2)
-	PORT MAP(connect=>(Net_2763, Net_5534));
-R_6:cy_annotation_universal_v1_0
+	PORT MAP(connect=>(Net_1938, Net_4645));
+R_31:cy_annotation_universal_v1_0
 	GENERIC MAP(comp_name=>"Resistor_v1_0",
 		port_names=>"T1, T2",
 		width=>2)
-	PORT MAP(connect=>(Net_2724, Net_2763));
-R_5:cy_annotation_universal_v1_0
+	PORT MAP(connect=>(Net_1933, Net_2020));
+R_32:cy_annotation_universal_v1_0
 	GENERIC MAP(comp_name=>"Resistor_v1_0",
 		port_names=>"T1, T2",
 		width=>2)
-	PORT MAP(connect=>(Net_2738, Net_2763));
-C_4:cy_annotation_universal_v1_0
+	PORT MAP(connect=>(Net_2018, Net_2020));
+C_9:cy_annotation_universal_v1_0
 	GENERIC MAP(comp_name=>"Capacitor_v1_0",
 		port_names=>"T1, T2",
 		width=>2)
-	PORT MAP(connect=>(Net_2738, Net_2724));
+	PORT MAP(connect=>(Net_4194, Net_2020));
+R_30:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Resistor_v1_0",
+		port_names=>"T1, T2",
+		width=>2)
+	PORT MAP(connect=>(Net_2020, Net_2005));
+C_8:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Capacitor_v1_0",
+		port_names=>"T1, T2",
+		width=>2)
+	PORT MAP(connect=>(Net_2005, Net_2018));
 LPo:cy_psoc3_pins_v1_10
-	GENERIC MAP(id=>"42841100-2752-4558-a3ae-ac2370069529",
+	GENERIC MAP(id=>"efdea9d7-dbde-4222-a75a-6960856938ef",
 		drive_mode=>"000",
 		ibuf_enabled=>"0",
 		init_dr_st=>"0",
@@ -2893,10 +2910,10 @@ LPo:cy_psoc3_pins_v1_10
 	PORT MAP(oe=>(one),
 		y=>(zero),
 		fb=>(tmpFB_0__LPo_net_0),
-		analog=>Net_4444,
+		analog=>Net_4600,
 		io=>(tmpIO_0__LPo_net_0),
 		siovref=>(tmpSIOVREF__LPo_net_0),
-		annotation=>Net_2724,
+		annotation=>Net_2018,
 		in_clock=>zero,
 		in_clock_en=>one,
 		in_reset=>zero,
@@ -2905,7 +2922,7 @@ LPo:cy_psoc3_pins_v1_10
 		out_reset=>zero,
 		interrupt=>tmpINTERRUPT_0__LPo_net_0);
 LPm:cy_psoc3_pins_v1_10
-	GENERIC MAP(id=>"77715107-f8d5-47e5-a629-0fb83101ac6b",
+	GENERIC MAP(id=>"a8e741cb-52da-4eb1-8013-3a9f7793e90a",
 		drive_mode=>"000",
 		ibuf_enabled=>"0",
 		init_dr_st=>"0",
@@ -2963,10 +2980,10 @@ LPm:cy_psoc3_pins_v1_10
 	PORT MAP(oe=>(one),
 		y=>(zero),
 		fb=>(tmpFB_0__LPm_net_0),
-		analog=>Net_5541,
+		analog=>Net_7010,
 		io=>(tmpIO_0__LPm_net_0),
 		siovref=>(tmpSIOVREF__LPm_net_0),
-		annotation=>Net_2738,
+		annotation=>Net_2005,
 		in_clock=>zero,
 		in_clock_en=>one,
 		in_reset=>zero,
@@ -2974,46 +2991,416 @@ LPm:cy_psoc3_pins_v1_10
 		out_clock_en=>one,
 		out_reset=>zero,
 		interrupt=>tmpINTERRUPT_0__LPm_net_0);
-\Opa_LP:ABuf\:cy_psoc3_abuf_v1_0
+\OPAlp:ABuf\:cy_psoc3_abuf_v1_0
 	GENERIC MAP(cy_registers=>"")
-	PORT MAP(vplus=>Net_4138,
-		vminus=>\Opa_LP:Net_29\,
-		vout=>Net_4444);
-\Opa_LP:abuf_negInput_mux_connect\:cy_connect_v1_0
+	PORT MAP(vplus=>Net_4285,
+		vminus=>\OPAlp:Net_29\,
+		vout=>Net_4600);
+\OPAlp:abuf_negInput_mux_connect\:cy_connect_v1_0
 	GENERIC MAP(sig_width=>1,
 		is_net_join=>'0')
-	PORT MAP(signal1=>\Opa_LP:Net_29\,
-		signal2=>Net_5541);
-GND_2:cy_annotation_universal_v1_0
-	GENERIC MAP(comp_name=>"Gnd_v1_0",
-		port_names=>"T1",
-		width=>1)
-	PORT MAP(connect=>Net_2665);
-GND_1:cy_annotation_universal_v1_0
-	GENERIC MAP(comp_name=>"Gnd_v1_0",
-		port_names=>"T1",
-		width=>1)
-	PORT MAP(connect=>Net_2771);
-USB:cy_annotation_universal_v1_0
-	GENERIC MAP(comp_name=>"VSource_v1_0",
-		port_names=>"N, P",
+	PORT MAP(signal1=>\OPAlp:Net_29\,
+		signal2=>Net_7010);
+ADDERm:cy_psoc3_pins_v1_10
+	GENERIC MAP(id=>"3fde1f9b-8262-4d24-a0cd-27c32cc9ef2a",
+		drive_mode=>"000",
+		ibuf_enabled=>"0",
+		init_dr_st=>"0",
+		input_sync=>"1",
+		input_clk_en=>'0',
+		input_sync_mode=>"0",
+		intr_mode=>"00",
+		invert_in_clock=>'0',
+		invert_in_clock_en=>'0',
+		invert_in_reset=>'0',
+		invert_out_clock=>'0',
+		invert_out_clock_en=>'0',
+		invert_out_reset=>'0',
+		io_voltage=>"",
+		layout_mode=>"CONTIGUOUS",
+		output_conn=>"0",
+		output_sync=>"0",
+		output_clk_en=>'0',
+		output_mode=>"0",
+		output_reset=>'0',
+		output_clock_mode=>"0",
+		oe_sync=>"0",
+		oe_conn=>"0",
+		oe_reset=>'0',
+		pin_aliases=>"",
+		pin_mode=>"A",
+		por_state=>4,
+		sio_group_cnt=>0,
+		sio_hifreq=>"00000000",
+		sio_hyst=>"1",
+		sio_ibuf=>"00000000",
+		sio_info=>"00",
+		sio_obuf=>"00000000",
+		sio_refsel=>"00000000",
+		sio_vtrip=>"00000000",
+		sio_vohsel=>"00000000",
+		slew_rate=>"0",
+		spanning=>'0',
+		sw_only=>'0',
+		vtrip=>"10",
+		width=>1,
+		port_alias_required=>'0',
+		port_alias_group=>"",
+		use_annotation=>"1",
+		pa_in_clock=>-1,
+		pa_in_clock_en=>-1,
+		pa_in_reset=>-1,
+		pa_out_clock=>-1,
+		pa_out_clock_en=>-1,
+		pa_out_reset=>-1,
+		ovt_needed=>"0",
+		ovt_slew_control=>"00",
+		ovt_hyst_trim=>"0",
+		input_buffer_sel=>"00")
+	PORT MAP(oe=>(one),
+		y=>(zero),
+		fb=>(tmpFB_0__ADDERm_net_0),
+		analog=>Net_7009,
+		io=>(tmpIO_0__ADDERm_net_0),
+		siovref=>(tmpSIOVREF__ADDERm_net_0),
+		annotation=>Net_4952,
+		in_clock=>zero,
+		in_clock_en=>one,
+		in_reset=>zero,
+		out_clock=>zero,
+		out_clock_en=>one,
+		out_reset=>zero,
+		interrupt=>tmpINTERRUPT_0__ADDERm_net_0);
+\VDAC_Ref_Adder:viDAC8\:cy_psoc3_vidac8_v1_0
+	GENERIC MAP(cy_registers=>"",
+		reg_data=>'0',
+		is_all_if_any=>'0')
+	PORT MAP(reset=>zero,
+		idir=>zero,
+		ioff=>zero,
+		data=>(zero, zero, zero, zero,
+			zero, zero, zero, zero),
+		strobe=>zero,
+		strobe_udb=>zero,
+		vout=>Net_4947,
+		iout=>\VDAC_Ref_Adder:Net_77\);
+\VDAC_Ref_Adder:cy_analog_noconnect_1\:cy_analog_noconnect_v1_0
+	PORT MAP(noconnect=>\VDAC_Ref_Adder:Net_77\);
+R_18:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Resistor_v1_0",
+		port_names=>"T1, T2",
 		width=>2)
-	PORT MAP(connect=>(Net_2666, Net_2665));
-D_2:cy_annotation_universal_v1_0
-	GENERIC MAP(comp_name=>"Schottky_v1_0",
-		port_names=>"A, K",
+	PORT MAP(connect=>(Net_4644, Net_4645));
+C_7:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Capacitor_v1_0",
+		port_names=>"T1, T2",
 		width=>2)
-	PORT MAP(connect=>(Net_170, Net_2665));
-\LPF_ADC:cy_psoc3_lpf_1\:cy_psoc3_lpf_v1_0
+	PORT MAP(connect=>(Net_1933, Net_4952));
+R_16:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Resistor_v1_0",
+		port_names=>"T1, T2",
+		width=>2)
+	PORT MAP(connect=>(Net_4508, Net_4952));
+BPm:cy_psoc3_pins_v1_10
+	GENERIC MAP(id=>"11268be6-e82b-4a3c-a773-58d27b1e7e5e",
+		drive_mode=>"000",
+		ibuf_enabled=>"0",
+		init_dr_st=>"0",
+		input_sync=>"1",
+		input_clk_en=>'0',
+		input_sync_mode=>"0",
+		intr_mode=>"00",
+		invert_in_clock=>'0',
+		invert_in_clock_en=>'0',
+		invert_in_reset=>'0',
+		invert_out_clock=>'0',
+		invert_out_clock_en=>'0',
+		invert_out_reset=>'0',
+		io_voltage=>"",
+		layout_mode=>"CONTIGUOUS",
+		output_conn=>"0",
+		output_sync=>"0",
+		output_clk_en=>'0',
+		output_mode=>"0",
+		output_reset=>'0',
+		output_clock_mode=>"0",
+		oe_sync=>"0",
+		oe_conn=>"0",
+		oe_reset=>'0',
+		pin_aliases=>"",
+		pin_mode=>"A",
+		por_state=>4,
+		sio_group_cnt=>0,
+		sio_hifreq=>"00000000",
+		sio_hyst=>"1",
+		sio_ibuf=>"00000000",
+		sio_info=>"00",
+		sio_obuf=>"00000000",
+		sio_refsel=>"00000000",
+		sio_vtrip=>"00000000",
+		sio_vohsel=>"00000000",
+		slew_rate=>"0",
+		spanning=>'0',
+		sw_only=>'0',
+		vtrip=>"10",
+		width=>1,
+		port_alias_required=>'0',
+		port_alias_group=>"",
+		use_annotation=>"1",
+		pa_in_clock=>-1,
+		pa_in_clock_en=>-1,
+		pa_in_reset=>-1,
+		pa_out_clock=>-1,
+		pa_out_clock_en=>-1,
+		pa_out_reset=>-1,
+		ovt_needed=>"0",
+		ovt_slew_control=>"00",
+		ovt_hyst_trim=>"0",
+		input_buffer_sel=>"00")
+	PORT MAP(oe=>(one),
+		y=>(zero),
+		fb=>(tmpFB_0__BPm_net_0),
+		analog=>Net_7005,
+		io=>(tmpIO_0__BPm_net_0),
+		siovref=>(tmpSIOVREF__BPm_net_0),
+		annotation=>Net_1938,
+		in_clock=>zero,
+		in_clock_en=>one,
+		in_reset=>zero,
+		out_clock=>zero,
+		out_clock_en=>one,
+		out_reset=>zero,
+		interrupt=>tmpINTERRUPT_0__BPm_net_0);
+C_4:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Capacitor_v1_0",
+		port_names=>"T1, T2",
+		width=>2)
+	PORT MAP(connect=>(Net_1938, Net_2033));
+R_10:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Resistor_v1_0",
+		port_names=>"T1, T2",
+		width=>2)
+	PORT MAP(connect=>(Net_4508, Net_2033));
+ADDERo:cy_psoc3_pins_v1_10
+	GENERIC MAP(id=>"0b740478-9e54-4120-9bf2-d02741c863a9",
+		drive_mode=>"000",
+		ibuf_enabled=>"0",
+		init_dr_st=>"0",
+		input_sync=>"1",
+		input_clk_en=>'0',
+		input_sync_mode=>"0",
+		intr_mode=>"00",
+		invert_in_clock=>'0',
+		invert_in_clock_en=>'0',
+		invert_in_reset=>'0',
+		invert_out_clock=>'0',
+		invert_out_clock_en=>'0',
+		invert_out_reset=>'0',
+		io_voltage=>"",
+		layout_mode=>"CONTIGUOUS",
+		output_conn=>"0",
+		output_sync=>"0",
+		output_clk_en=>'0',
+		output_mode=>"0",
+		output_reset=>'0',
+		output_clock_mode=>"0",
+		oe_sync=>"0",
+		oe_conn=>"0",
+		oe_reset=>'0',
+		pin_aliases=>"",
+		pin_mode=>"A",
+		por_state=>4,
+		sio_group_cnt=>0,
+		sio_hifreq=>"00000000",
+		sio_hyst=>"1",
+		sio_ibuf=>"00000000",
+		sio_info=>"00",
+		sio_obuf=>"00000000",
+		sio_refsel=>"00000000",
+		sio_vtrip=>"00000000",
+		sio_vohsel=>"00000000",
+		slew_rate=>"0",
+		spanning=>'0',
+		sw_only=>'0',
+		vtrip=>"10",
+		width=>1,
+		port_alias_required=>'0',
+		port_alias_group=>"",
+		use_annotation=>"1",
+		pa_in_clock=>-1,
+		pa_in_clock_en=>-1,
+		pa_in_reset=>-1,
+		pa_out_clock=>-1,
+		pa_out_clock_en=>-1,
+		pa_out_reset=>-1,
+		ovt_needed=>"0",
+		ovt_slew_control=>"00",
+		ovt_hyst_trim=>"0",
+		input_buffer_sel=>"00")
+	PORT MAP(oe=>(one),
+		y=>(zero),
+		fb=>(tmpFB_0__ADDERo_net_0),
+		analog=>Net_4654,
+		io=>(tmpIO_0__ADDERo_net_0),
+		siovref=>(tmpSIOVREF__ADDERo_net_0),
+		annotation=>Net_1933,
+		in_clock=>zero,
+		in_clock_en=>one,
+		in_reset=>zero,
+		out_clock=>zero,
+		out_clock_en=>one,
+		out_reset=>zero,
+		interrupt=>tmpINTERRUPT_0__ADDERo_net_0);
+BPo:cy_psoc3_pins_v1_10
+	GENERIC MAP(id=>"4d3ad0a1-0ec3-4326-981d-69cc2ae37a01",
+		drive_mode=>"000",
+		ibuf_enabled=>"0",
+		init_dr_st=>"0",
+		input_sync=>"1",
+		input_clk_en=>'0',
+		input_sync_mode=>"0",
+		intr_mode=>"00",
+		invert_in_clock=>'0',
+		invert_in_clock_en=>'0',
+		invert_in_reset=>'0',
+		invert_out_clock=>'0',
+		invert_out_clock_en=>'0',
+		invert_out_reset=>'0',
+		io_voltage=>"",
+		layout_mode=>"CONTIGUOUS",
+		output_conn=>"0",
+		output_sync=>"0",
+		output_clk_en=>'0',
+		output_mode=>"0",
+		output_reset=>'0',
+		output_clock_mode=>"0",
+		oe_sync=>"0",
+		oe_conn=>"0",
+		oe_reset=>'0',
+		pin_aliases=>"",
+		pin_mode=>"A",
+		por_state=>4,
+		sio_group_cnt=>0,
+		sio_hifreq=>"00000000",
+		sio_hyst=>"1",
+		sio_ibuf=>"00000000",
+		sio_info=>"00",
+		sio_obuf=>"00000000",
+		sio_refsel=>"00000000",
+		sio_vtrip=>"00000000",
+		sio_vohsel=>"00000000",
+		slew_rate=>"0",
+		spanning=>'0',
+		sw_only=>'0',
+		vtrip=>"10",
+		width=>1,
+		port_alias_required=>'0',
+		port_alias_group=>"",
+		use_annotation=>"1",
+		pa_in_clock=>-1,
+		pa_in_clock_en=>-1,
+		pa_in_reset=>-1,
+		pa_out_clock=>-1,
+		pa_out_clock_en=>-1,
+		pa_out_reset=>-1,
+		ovt_needed=>"0",
+		ovt_slew_control=>"00",
+		ovt_hyst_trim=>"0",
+		input_buffer_sel=>"00")
+	PORT MAP(oe=>(one),
+		y=>(zero),
+		fb=>(tmpFB_0__BPo_net_0),
+		analog=>Net_7006,
+		io=>(tmpIO_0__BPo_net_0),
+		siovref=>(tmpSIOVREF__BPo_net_0),
+		annotation=>Net_4645,
+		in_clock=>zero,
+		in_clock_en=>one,
+		in_reset=>zero,
+		out_clock=>zero,
+		out_clock_en=>one,
+		out_reset=>zero,
+		interrupt=>tmpINTERRUPT_0__BPo_net_0);
+\OPAbp:ABuf\:cy_psoc3_abuf_v1_0
 	GENERIC MAP(cy_registers=>"")
-	PORT MAP(vin=>Net_4448,
-		vout=>Net_5540);
-\ADC:vRef_2\:cy_vref_v1_0
-	GENERIC MAP(guid=>"15B3DB15-B7B3-4d62-A2DF-25EA392A7161",
-		name=>"Vssa (GND)",
-		autoenable=>'1',
-		ignoresleep=>'0')
-	PORT MAP(vout=>\ADC:Net_244\);
+	PORT MAP(vplus=>Net_4666,
+		vminus=>\OPAbp:Net_29\,
+		vout=>Net_7006);
+\OPAbp:abuf_negInput_mux_connect\:cy_connect_v1_0
+	GENERIC MAP(sig_width=>1,
+		is_net_join=>'0')
+	PORT MAP(signal1=>\OPAbp:Net_29\,
+		signal2=>Net_7005);
+SEo:cy_psoc3_pins_v1_10
+	GENERIC MAP(id=>"cc3bcd7e-5dc0-48ea-9bf6-6aa082be1ada",
+		drive_mode=>"000",
+		ibuf_enabled=>"0",
+		init_dr_st=>"0",
+		input_sync=>"1",
+		input_clk_en=>'0',
+		input_sync_mode=>"0",
+		intr_mode=>"00",
+		invert_in_clock=>'0',
+		invert_in_clock_en=>'0',
+		invert_in_reset=>'0',
+		invert_out_clock=>'0',
+		invert_out_clock_en=>'0',
+		invert_out_reset=>'0',
+		io_voltage=>"",
+		layout_mode=>"NONCONTIGUOUS",
+		output_conn=>"0",
+		output_sync=>"0",
+		output_clk_en=>'0',
+		output_mode=>"0",
+		output_reset=>'0',
+		output_clock_mode=>"0",
+		oe_sync=>"0",
+		oe_conn=>"0",
+		oe_reset=>'0',
+		pin_aliases=>"",
+		pin_mode=>"A",
+		por_state=>4,
+		sio_group_cnt=>0,
+		sio_hifreq=>"00000000",
+		sio_hyst=>"1",
+		sio_ibuf=>"00000000",
+		sio_info=>"00",
+		sio_obuf=>"00000000",
+		sio_refsel=>"00000000",
+		sio_vtrip=>"00000000",
+		sio_vohsel=>"00000000",
+		slew_rate=>"0",
+		spanning=>'1',
+		sw_only=>'0',
+		vtrip=>"10",
+		width=>1,
+		port_alias_required=>'0',
+		port_alias_group=>"",
+		use_annotation=>"1",
+		pa_in_clock=>-1,
+		pa_in_clock_en=>-1,
+		pa_in_reset=>-1,
+		pa_out_clock=>-1,
+		pa_out_clock_en=>-1,
+		pa_out_reset=>-1,
+		ovt_needed=>"0",
+		ovt_slew_control=>"00",
+		ovt_hyst_trim=>"0",
+		input_buffer_sel=>"00")
+	PORT MAP(oe=>(one),
+		y=>(zero),
+		fb=>(tmpFB_0__SEo_net_0),
+		analog=>Net_4656,
+		io=>(tmpIO_0__SEo_net_0),
+		siovref=>(tmpSIOVREF__SEo_net_0),
+		annotation=>Net_4508,
+		in_clock=>zero,
+		in_clock_en=>one,
+		in_reset=>zero,
+		out_clock=>zero,
+		out_clock_en=>one,
+		out_reset=>zero,
+		interrupt=>tmpINTERRUPT_0__SEo_net_0);
 \ADC:cy_analog_virtualmux_6_connect\:cy_connect_v1_0
 	GENERIC MAP(sig_width=>1,
 		is_net_join=>'0')
@@ -3026,22 +3413,11 @@ D_2:cy_annotation_universal_v1_0
 		is_net_join=>'0')
 	PORT MAP(signal1=>\ADC:Net_677\,
 		signal2=>\ADC:Net_34\);
-\ADC:AMux\:cy_psoc3_amux_v1_0
-	GENERIC MAP(cy_registers=>"",
-		muxin_width=>2,
-		hw_control=>'0',
-		one_active=>'0',
-		init_mux_sel=>"00",
-		api_type=>0,
-		connect_mode=>1)
-	PORT MAP(muxin=>(\ADC:Net_690\, \ADC:Net_244\),
-		hw_ctrl_en=>(others => zero),
-		vout=>\ADC:Net_20\);
 \ADC:DSM\:cy_psoc3_ds_mod_v4_0
 	GENERIC MAP(cy_registers=>"",
 		resolution=>18)
 	PORT MAP(aclock=>\ADC:Net_488\,
-		vplus=>Net_5077,
+		vplus=>Net_4640,
 		vminus=>\ADC:Net_520\,
 		modbit=>zero,
 		reset_udb=>zero,
@@ -3073,76 +3449,6 @@ D_2:cy_annotation_universal_v1_0
 		is_digital=>'1')
 	PORT MAP(clock_out=>\ADC:Net_93\,
 		dig_domain_out=>open);
-\ADC:Bypass_P03\:cy_psoc3_pins_v1_10
-	GENERIC MAP(id=>"ac3f5e87-ab78-49da-9484-ce1001bd2697/20681f4c-d171-47ae-a1cb-d832cd711191",
-		drive_mode=>"000",
-		ibuf_enabled=>"0",
-		init_dr_st=>"0",
-		input_sync=>"1",
-		input_clk_en=>'0',
-		input_sync_mode=>"0",
-		intr_mode=>"00",
-		invert_in_clock=>'0',
-		invert_in_clock_en=>'0',
-		invert_in_reset=>'0',
-		invert_out_clock=>'0',
-		invert_out_clock_en=>'0',
-		invert_out_reset=>'0',
-		io_voltage=>"",
-		layout_mode=>"NONCONTIGUOUS",
-		output_conn=>"0",
-		output_sync=>"0",
-		output_clk_en=>'0',
-		output_mode=>"0",
-		output_reset=>'0',
-		output_clock_mode=>"0",
-		oe_sync=>"0",
-		oe_conn=>"0",
-		oe_reset=>'0',
-		pin_aliases=>"",
-		pin_mode=>"A",
-		por_state=>4,
-		sio_group_cnt=>0,
-		sio_hifreq=>"00000000",
-		sio_hyst=>"1",
-		sio_ibuf=>"00000000",
-		sio_info=>"00",
-		sio_obuf=>"00000000",
-		sio_refsel=>"00000000",
-		sio_vtrip=>"00000000",
-		sio_vohsel=>"00000000",
-		slew_rate=>"0",
-		spanning=>'1',
-		sw_only=>'0',
-		vtrip=>"10",
-		width=>1,
-		port_alias_required=>'0',
-		port_alias_group=>"",
-		use_annotation=>"0",
-		pa_in_clock=>-1,
-		pa_in_clock_en=>-1,
-		pa_in_reset=>-1,
-		pa_out_clock=>-1,
-		pa_out_clock_en=>-1,
-		pa_out_reset=>-1,
-		ovt_needed=>"0",
-		ovt_slew_control=>"00",
-		ovt_hyst_trim=>"0",
-		input_buffer_sel=>"00")
-	PORT MAP(oe=>(one),
-		y=>(zero),
-		fb=>(\ADC:tmpFB_0__Bypass_P03_net_0\),
-		analog=>\ADC:Net_248\,
-		io=>(\ADC:tmpIO_0__Bypass_P03_net_0\),
-		siovref=>(\ADC:tmpSIOVREF__Bypass_P03_net_0\),
-		annotation=>(open),
-		in_clock=>zero,
-		in_clock_en=>one,
-		in_reset=>zero,
-		out_clock=>zero,
-		out_clock_en=>one,
-		out_reset=>zero,
-		interrupt=>\ADC:tmpINTERRUPT_0__Bypass_P03_net_0\);
 \ADC:cy_analog_noconnect_3\:cy_analog_noconnect_v1_0
 	PORT MAP(noconnect=>\ADC:Net_257\);
 \ADC:cy_analog_noconnect_2\:cy_analog_noconnect_v1_0
@@ -3156,12 +3462,12 @@ D_2:cy_annotation_universal_v1_0
 	GENERIC MAP(sig_width=>1,
 		is_net_join=>'0')
 	PORT MAP(signal1=>\ADC:Net_573\,
-		signal2=>\ADC:Net_248\);
+		signal2=>\ADC:Net_249\);
 \ADC:cy_analog_virtualmux_1_connect\:cy_connect_v1_0
 	GENERIC MAP(sig_width=>1,
 		is_net_join=>'0')
 	PORT MAP(signal1=>\ADC:Net_520\,
-		signal2=>\ADC:Net_20\);
+		signal2=>Net_4661);
 \ADC:IRQ\:cy_isr_v1_0
 	GENERIC MAP(int_type=>"10",
 		is_nmi=>'0')
@@ -3171,7 +3477,7 @@ D_2:cy_annotation_universal_v1_0
 		id=>"ac3f5e87-ab78-49da-9484-ce1001bd2697/edd15f43-b66b-457b-be3a-5342345270c8",
 		source_clock_id=>"61737EF6-3B74-48f9-8B91-F7473A442AE7",
 		divisor=>0,
-		period=>"325520833.333333",
+		period=>"957854406.130268",
 		is_direct=>'0',
 		is_digital=>'0')
 	PORT MAP(clock_out=>\ADC:Net_488\,
@@ -3183,8 +3489,8 @@ D_2:cy_annotation_universal_v1_0
 		ext_start=>one,
 		mod_reset=>\ADC:mod_reset\,
 		interrupt=>EOC);
-PGAo:cy_psoc3_pins_v1_10
-	GENERIC MAP(id=>"341d5c7d-cd8d-4c0d-80ec-b29f64a211f1",
+INn:cy_psoc3_pins_v1_10
+	GENERIC MAP(id=>"d43cd46e-28b0-4f4f-8ddb-1abc5d80acdb",
 		drive_mode=>"000",
 		ibuf_enabled=>"0",
 		init_dr_st=>"0",
@@ -3199,7 +3505,7 @@ PGAo:cy_psoc3_pins_v1_10
 		invert_out_clock_en=>'0',
 		invert_out_reset=>'0',
 		io_voltage=>"",
-		layout_mode=>"NONCONTIGUOUS",
+		layout_mode=>"CONTIGUOUS",
 		output_conn=>"0",
 		output_sync=>"0",
 		output_clk_en=>'0',
@@ -3222,7 +3528,7 @@ PGAo:cy_psoc3_pins_v1_10
 		sio_vtrip=>"00000000",
 		sio_vohsel=>"00000000",
 		slew_rate=>"0",
-		spanning=>'1',
+		spanning=>'0',
 		sw_only=>'0',
 		vtrip=>"10",
 		width=>1,
@@ -3241,71 +3547,147 @@ PGAo:cy_psoc3_pins_v1_10
 		input_buffer_sel=>"00")
 	PORT MAP(oe=>(one),
 		y=>(zero),
-		fb=>(tmpFB_0__PGAo_net_0),
-		analog=>Net_4154,
-		io=>(tmpIO_0__PGAo_net_0),
-		siovref=>(tmpSIOVREF__PGAo_net_0),
-		annotation=>Net_5534,
+		fb=>(tmpFB_0__INn_net_0),
+		analog=>Net_4547,
+		io=>(tmpIO_0__INn_net_0),
+		siovref=>(tmpSIOVREF__INn_net_0),
+		annotation=>Net_4585,
 		in_clock=>zero,
 		in_clock_en=>one,
 		in_reset=>zero,
 		out_clock=>zero,
 		out_clock_en=>one,
 		out_reset=>zero,
-		interrupt=>tmpINTERRUPT_0__PGAo_net_0);
+		interrupt=>tmpINTERRUPT_0__INn_net_0);
+INp:cy_psoc3_pins_v1_10
+	GENERIC MAP(id=>"e3b927a2-b845-409d-aa52-8c1fc1a669ec",
+		drive_mode=>"000",
+		ibuf_enabled=>"0",
+		init_dr_st=>"0",
+		input_sync=>"1",
+		input_clk_en=>'0',
+		input_sync_mode=>"0",
+		intr_mode=>"00",
+		invert_in_clock=>'0',
+		invert_in_clock_en=>'0',
+		invert_in_reset=>'0',
+		invert_out_clock=>'0',
+		invert_out_clock_en=>'0',
+		invert_out_reset=>'0',
+		io_voltage=>"",
+		layout_mode=>"CONTIGUOUS",
+		output_conn=>"0",
+		output_sync=>"0",
+		output_clk_en=>'0',
+		output_mode=>"0",
+		output_reset=>'0',
+		output_clock_mode=>"0",
+		oe_sync=>"0",
+		oe_conn=>"0",
+		oe_reset=>'0',
+		pin_aliases=>"",
+		pin_mode=>"A",
+		por_state=>4,
+		sio_group_cnt=>0,
+		sio_hifreq=>"00000000",
+		sio_hyst=>"1",
+		sio_ibuf=>"00000000",
+		sio_info=>"00",
+		sio_obuf=>"00000000",
+		sio_refsel=>"00000000",
+		sio_vtrip=>"00000000",
+		sio_vohsel=>"00000000",
+		slew_rate=>"0",
+		spanning=>'0',
+		sw_only=>'0',
+		vtrip=>"10",
+		width=>1,
+		port_alias_required=>'0',
+		port_alias_group=>"",
+		use_annotation=>"1",
+		pa_in_clock=>-1,
+		pa_in_clock_en=>-1,
+		pa_in_reset=>-1,
+		pa_out_clock=>-1,
+		pa_out_clock_en=>-1,
+		pa_out_reset=>-1,
+		ovt_needed=>"0",
+		ovt_slew_control=>"00",
+		ovt_hyst_trim=>"0",
+		input_buffer_sel=>"00")
+	PORT MAP(oe=>(one),
+		y=>(zero),
+		fb=>(tmpFB_0__INp_net_0),
+		analog=>Net_4517,
+		io=>(tmpIO_0__INp_net_0),
+		siovref=>(tmpSIOVREF__INp_net_0),
+		annotation=>Net_4584,
+		in_clock=>zero,
+		in_clock_en=>one,
+		in_reset=>zero,
+		out_clock=>zero,
+		out_clock_en=>one,
+		out_reset=>zero,
+		interrupt=>tmpINTERRUPT_0__INp_net_0);
 R_4:cy_annotation_universal_v1_0
 	GENERIC MAP(comp_name=>"Resistor_v1_0",
 		port_names=>"T1, T2",
 		width=>2)
-	PORT MAP(connect=>(Net_170, Net_204));
-D_1:cy_annotation_universal_v1_0
-	GENERIC MAP(comp_name=>"Schottky_v1_0",
-		port_names=>"A, K",
-		width=>2)
-	PORT MAP(connect=>(Net_2771, Net_170));
+	PORT MAP(connect=>(Net_4585, Net_2058));
 R_3:cy_annotation_universal_v1_0
 	GENERIC MAP(comp_name=>"Resistor_v1_0",
 		port_names=>"T1, T2",
 		width=>2)
-	PORT MAP(connect=>(Net_193, Net_2661));
-C_2:cy_annotation_universal_v1_0
-	GENERIC MAP(comp_name=>"Capacitor_v1_0",
-		port_names=>"T1, T2",
-		width=>2)
-	PORT MAP(connect=>(Net_2666, Net_183));
-LM7805:cy_annotation_universal_v1_0
-	GENERIC MAP(comp_name=>"VREG_v1_0",
-		port_names=>"REF, VIN, VOUT",
-		width=>3)
-	PORT MAP(connect=>(Net_193, Net_183, Net_2661));
-R_2:cy_annotation_universal_v1_0
-	GENERIC MAP(comp_name=>"Resistor_v1_0",
-		port_names=>"T1, T2",
-		width=>2)
-	PORT MAP(connect=>(Net_2770, Net_204));
-C_1:cy_annotation_universal_v1_0
-	GENERIC MAP(comp_name=>"Capacitor_v1_0",
-		port_names=>"T1, T2",
-		width=>2)
-	PORT MAP(connect=>(Net_193, Net_204));
-\PGA:SC\:cy_psoc3_scblock_v1_0
+	PORT MAP(connect=>(Net_2058, Net_4584));
+\PGAn:SC\:cy_psoc3_scblock_v1_0
 	GENERIC MAP(cy_registers=>"")
-	PORT MAP(vref=>\PGA:Net_17\,
-		vin=>Net_4475,
+	PORT MAP(vref=>\PGAn:Net_17\,
+		vin=>Net_4547,
 		aclk=>zero,
 		bst_clk=>zero,
 		clk_udb=>zero,
 		dyn_cntl=>zero,
-		modout_sync=>\PGA:Net_41\,
-		vout=>Net_4154);
-\PGA:cy_analog_virtualmux_1_connect\:cy_connect_v1_0
+		modout_sync=>\PGAn:Net_41\,
+		vout=>Net_2158);
+\PGAn:cy_analog_virtualmux_1_connect\:cy_connect_v1_0
 	GENERIC MAP(sig_width=>1,
 		is_net_join=>'0')
-	PORT MAP(signal1=>\PGA:Net_17\,
-		signal2=>Net_4447);
-\PGA:cy_analog_noconnect_2\:cy_analog_noconnect_v1_0
-	PORT MAP(noconnect=>\PGA:Net_75\);
-\VDAC_PGA:viDAC8\:cy_psoc3_vidac8_v1_0
+	PORT MAP(signal1=>\PGAn:Net_17\,
+		signal2=>Net_4664);
+\PGAn:cy_analog_noconnect_2\:cy_analog_noconnect_v1_0
+	PORT MAP(noconnect=>\PGAn:Net_75\);
+\PGAp:SC\:cy_psoc3_scblock_v1_0
+	GENERIC MAP(cy_registers=>"")
+	PORT MAP(vref=>\PGAp:Net_17\,
+		vin=>Net_4517,
+		aclk=>zero,
+		bst_clk=>zero,
+		clk_udb=>zero,
+		dyn_cntl=>zero,
+		modout_sync=>\PGAp:Net_41\,
+		vout=>Net_2195);
+\PGAp:cy_analog_virtualmux_1_connect\:cy_connect_v1_0
+	GENERIC MAP(sig_width=>1,
+		is_net_join=>'0')
+	PORT MAP(signal1=>\PGAp:Net_17\,
+		signal2=>Net_2158);
+\PGAp:cy_analog_noconnect_2\:cy_analog_noconnect_v1_0
+	PORT MAP(noconnect=>\PGAp:Net_75\);
+\OPAref:ABuf\:cy_psoc3_abuf_v1_0
+	GENERIC MAP(cy_registers=>"")
+	PORT MAP(vplus=>Net_4204,
+		vminus=>\OPAref:Net_29\,
+		vout=>Net_4661);
+\OPAref:abuf_negInput_mux_connect\:cy_connect_v1_0
+	GENERIC MAP(sig_width=>1,
+		is_net_join=>'0')
+	PORT MAP(signal1=>\OPAref:Net_29\,
+		signal2=>Net_4661);
+\LPF_2:cy_psoc3_lpf_1\:cy_psoc3_lpf_v1_0
+	GENERIC MAP(cy_registers=>"")
+	PORT MAP(vin=>Net_7013,
+		vout=>Net_4204);
+\VDAC_ref_LP:viDAC8\:cy_psoc3_vidac8_v1_0
 	GENERIC MAP(cy_registers=>"",
 		reg_data=>'0',
 		is_all_if_any=>'0')
@@ -3316,12 +3698,12 @@ C_1:cy_annotation_universal_v1_0
 			zero, zero, zero, zero),
 		strobe=>zero,
 		strobe_udb=>zero,
-		vout=>Net_4448,
-		iout=>\VDAC_PGA:Net_77\);
-\VDAC_PGA:cy_analog_noconnect_1\:cy_analog_noconnect_v1_0
-	PORT MAP(noconnect=>\VDAC_PGA:Net_77\);
-PGAin:cy_psoc3_pins_v1_10
-	GENERIC MAP(id=>"73dd02f4-0e06-46c2-a41d-979aeec9d969",
+		vout=>Net_4285,
+		iout=>\VDAC_ref_LP:Net_77\);
+\VDAC_ref_LP:cy_analog_noconnect_1\:cy_analog_noconnect_v1_0
+	PORT MAP(noconnect=>\VDAC_ref_LP:Net_77\);
+Vref:cy_psoc3_pins_v1_10
+	GENERIC MAP(id=>"9a3f4733-40d7-4c3b-8187-c7cd10160c7a",
 		drive_mode=>"000",
 		ibuf_enabled=>"0",
 		init_dr_st=>"0",
@@ -3336,7 +3718,7 @@ PGAin:cy_psoc3_pins_v1_10
 		invert_out_clock_en=>'0',
 		invert_out_reset=>'0',
 		io_voltage=>"",
-		layout_mode=>"NONCONTIGUOUS",
+		layout_mode=>"CONTIGUOUS",
 		output_conn=>"0",
 		output_sync=>"0",
 		output_clk_en=>'0',
@@ -3359,7 +3741,7 @@ PGAin:cy_psoc3_pins_v1_10
 		sio_vtrip=>"00000000",
 		sio_vohsel=>"00000000",
 		slew_rate=>"0",
-		spanning=>'1',
+		spanning=>'0',
 		sw_only=>'0',
 		vtrip=>"10",
 		width=>1,
@@ -3378,76 +3760,667 @@ PGAin:cy_psoc3_pins_v1_10
 		input_buffer_sel=>"00")
 	PORT MAP(oe=>(one),
 		y=>(zero),
-		fb=>(tmpFB_0__PGAin_net_0),
-		analog=>Net_4475,
-		io=>(tmpIO_0__PGAin_net_0),
-		siovref=>(tmpSIOVREF__PGAin_net_0),
-		annotation=>Net_170,
+		fb=>(tmpFB_0__Vref_net_0),
+		analog=>Net_4661,
+		io=>(tmpIO_0__Vref_net_0),
+		siovref=>(tmpSIOVREF__Vref_net_0),
+		annotation=>Net_4219,
 		in_clock=>zero,
 		in_clock_en=>one,
 		in_reset=>zero,
 		out_clock=>zero,
 		out_clock_en=>one,
 		out_reset=>zero,
-		interrupt=>tmpINTERRUPT_0__PGAin_net_0);
-timer_clock_4:cy_clock_v1_0
+		interrupt=>tmpINTERRUPT_0__Vref_net_0);
+GND_4:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Gnd_v1_0",
+		port_names=>"T1",
+		width=>1)
+	PORT MAP(connect=>Net_4219);
+GND_5:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Gnd_v1_0",
+		port_names=>"T1",
+		width=>1)
+	PORT MAP(connect=>Net_4194);
+AMux_ADC:cy_psoc3_amux_v1_0
 	GENERIC MAP(cy_registers=>"",
-		id=>"39009ee0-8332-47c4-9167-035dbecdc33b",
-		source_clock_id=>"315365C3-2E3E-4f04-84A2-BB564A173261",
-		divisor=>1,
-		period=>"0",
-		is_direct=>'0',
-		is_digital=>'1')
-	PORT MAP(clock_out=>Net_6773,
-		dig_domain_out=>open);
-isr_Timer_1:cy_isr_v1_0
-	GENERIC MAP(int_type=>"10",
-		is_nmi=>'0')
-	PORT MAP(int_signal=>Net_6768);
-\Timer_1:TimerHW\:cy_psoc3_timer_v1_0
+		muxin_width=>5,
+		hw_control=>'0',
+		one_active=>'0',
+		init_mux_sel=>"00000",
+		api_type=>0,
+		connect_mode=>2)
+	PORT MAP(muxin=>(Net_7018, Net_4600, Net_4654, Net_7017,
+			Net_4656),
+		hw_ctrl_en=>(others => zero),
+		vout=>Net_4640);
+AMux:cy_psoc3_pins_v1_10
+	GENERIC MAP(id=>"722a3d3a-e5ae-4944-ba2b-f19c6576e1ec",
+		drive_mode=>"000",
+		ibuf_enabled=>"0",
+		init_dr_st=>"0",
+		input_sync=>"1",
+		input_clk_en=>'0',
+		input_sync_mode=>"0",
+		intr_mode=>"00",
+		invert_in_clock=>'0',
+		invert_in_clock_en=>'0',
+		invert_in_reset=>'0',
+		invert_out_clock=>'0',
+		invert_out_clock_en=>'0',
+		invert_out_reset=>'0',
+		io_voltage=>"",
+		layout_mode=>"CONTIGUOUS",
+		output_conn=>"0",
+		output_sync=>"0",
+		output_clk_en=>'0',
+		output_mode=>"0",
+		output_reset=>'0',
+		output_clock_mode=>"0",
+		oe_sync=>"0",
+		oe_conn=>"0",
+		oe_reset=>'0',
+		pin_aliases=>"",
+		pin_mode=>"A",
+		por_state=>4,
+		sio_group_cnt=>0,
+		sio_hifreq=>"00000000",
+		sio_hyst=>"1",
+		sio_ibuf=>"00000000",
+		sio_info=>"00",
+		sio_obuf=>"00000000",
+		sio_refsel=>"00000000",
+		sio_vtrip=>"00000000",
+		sio_vohsel=>"00000000",
+		slew_rate=>"0",
+		spanning=>'0',
+		sw_only=>'0',
+		vtrip=>"10",
+		width=>1,
+		port_alias_required=>'0',
+		port_alias_group=>"",
+		use_annotation=>"1",
+		pa_in_clock=>-1,
+		pa_in_clock_en=>-1,
+		pa_in_reset=>-1,
+		pa_out_clock=>-1,
+		pa_out_clock_en=>-1,
+		pa_out_reset=>-1,
+		ovt_needed=>"0",
+		ovt_slew_control=>"00",
+		ovt_hyst_trim=>"0",
+		input_buffer_sel=>"00")
+	PORT MAP(oe=>(one),
+		y=>(zero),
+		fb=>(tmpFB_0__AMux_net_0),
+		analog=>Net_7017,
+		io=>(tmpIO_0__AMux_net_0),
+		siovref=>(tmpSIOVREF__AMux_net_0),
+		annotation=>Net_4645,
+		in_clock=>zero,
+		in_clock_en=>one,
+		in_reset=>zero,
+		out_clock=>zero,
+		out_clock_en=>one,
+		out_reset=>zero,
+		interrupt=>tmpINTERRUPT_0__AMux_net_0);
+\PGAshield:SC\:cy_psoc3_scblock_v1_0
 	GENERIC MAP(cy_registers=>"")
-	PORT MAP(clock=>Net_6761,
-		kill=>zero,
-		enable=>one,
-		capture=>zero,
-		timer_reset=>zero,
-		tc=>Net_6768,
-		compare=>\Timer_1:Net_261\,
-		interrupt=>\Timer_1:Net_57\);
-timer_clock_3:cy_clock_v1_0
+	PORT MAP(vref=>\PGAshield:Net_17\,
+		vin=>Net_4204,
+		aclk=>zero,
+		bst_clk=>zero,
+		clk_udb=>zero,
+		dyn_cntl=>zero,
+		modout_sync=>\PGAshield:Net_41\,
+		vout=>Net_7019);
+\PGAshield:cy_analog_virtualmux_1_connect\:cy_connect_v1_0
+	GENERIC MAP(sig_width=>1,
+		is_net_join=>'0')
+	PORT MAP(signal1=>\PGAshield:Net_17\,
+		signal2=>\PGAshield:Net_75\);
+\PGAshield:cy_analog_noconnect_2\:cy_analog_noconnect_v1_0
+	PORT MAP(noconnect=>\PGAshield:Net_75\);
+Vshield:cy_psoc3_pins_v1_10
+	GENERIC MAP(id=>"21a9a051-9155-4243-94d5-efd4a04e64dc",
+		drive_mode=>"000",
+		ibuf_enabled=>"0",
+		init_dr_st=>"0",
+		input_sync=>"1",
+		input_clk_en=>'0',
+		input_sync_mode=>"0",
+		intr_mode=>"00",
+		invert_in_clock=>'0',
+		invert_in_clock_en=>'0',
+		invert_in_reset=>'0',
+		invert_out_clock=>'0',
+		invert_out_clock_en=>'0',
+		invert_out_reset=>'0',
+		io_voltage=>"",
+		layout_mode=>"CONTIGUOUS",
+		output_conn=>"0",
+		output_sync=>"0",
+		output_clk_en=>'0',
+		output_mode=>"0",
+		output_reset=>'0',
+		output_clock_mode=>"0",
+		oe_sync=>"0",
+		oe_conn=>"0",
+		oe_reset=>'0',
+		pin_aliases=>"",
+		pin_mode=>"A",
+		por_state=>4,
+		sio_group_cnt=>0,
+		sio_hifreq=>"00000000",
+		sio_hyst=>"1",
+		sio_ibuf=>"00000000",
+		sio_info=>"00",
+		sio_obuf=>"00000000",
+		sio_refsel=>"00000000",
+		sio_vtrip=>"00000000",
+		sio_vohsel=>"00000000",
+		slew_rate=>"0",
+		spanning=>'0',
+		sw_only=>'0',
+		vtrip=>"10",
+		width=>1,
+		port_alias_required=>'0',
+		port_alias_group=>"",
+		use_annotation=>"1",
+		pa_in_clock=>-1,
+		pa_in_clock_en=>-1,
+		pa_in_reset=>-1,
+		pa_out_clock=>-1,
+		pa_out_clock_en=>-1,
+		pa_out_reset=>-1,
+		ovt_needed=>"0",
+		ovt_slew_control=>"00",
+		ovt_hyst_trim=>"0",
+		input_buffer_sel=>"00")
+	PORT MAP(oe=>(one),
+		y=>(zero),
+		fb=>(tmpFB_0__Vshield_net_0),
+		analog=>Net_7019,
+		io=>(tmpIO_0__Vshield_net_0),
+		siovref=>(tmpSIOVREF__Vshield_net_0),
+		annotation=>Net_4512,
+		in_clock=>zero,
+		in_clock_en=>one,
+		in_reset=>zero,
+		out_clock=>zero,
+		out_clock_en=>one,
+		out_reset=>zero,
+		interrupt=>tmpINTERRUPT_0__Vshield_net_0);
+Vref_BP:cy_psoc3_pins_v1_10
+	GENERIC MAP(id=>"21660380-cb52-4656-a735-42dfba73e25f",
+		drive_mode=>"000",
+		ibuf_enabled=>"0",
+		init_dr_st=>"0",
+		input_sync=>"1",
+		input_clk_en=>'0',
+		input_sync_mode=>"0",
+		intr_mode=>"00",
+		invert_in_clock=>'0',
+		invert_in_clock_en=>'0',
+		invert_in_reset=>'0',
+		invert_out_clock=>'0',
+		invert_out_clock_en=>'0',
+		invert_out_reset=>'0',
+		io_voltage=>"",
+		layout_mode=>"CONTIGUOUS",
+		output_conn=>"0",
+		output_sync=>"0",
+		output_clk_en=>'0',
+		output_mode=>"0",
+		output_reset=>'0',
+		output_clock_mode=>"0",
+		oe_sync=>"0",
+		oe_conn=>"0",
+		oe_reset=>'0',
+		pin_aliases=>"",
+		pin_mode=>"A",
+		por_state=>4,
+		sio_group_cnt=>0,
+		sio_hifreq=>"00000000",
+		sio_hyst=>"1",
+		sio_ibuf=>"00000000",
+		sio_info=>"00",
+		sio_obuf=>"00000000",
+		sio_refsel=>"00000000",
+		sio_vtrip=>"00000000",
+		sio_vohsel=>"00000000",
+		slew_rate=>"0",
+		spanning=>'0',
+		sw_only=>'0',
+		vtrip=>"10",
+		width=>1,
+		port_alias_required=>'0',
+		port_alias_group=>"",
+		use_annotation=>"1",
+		pa_in_clock=>-1,
+		pa_in_clock_en=>-1,
+		pa_in_reset=>-1,
+		pa_out_clock=>-1,
+		pa_out_clock_en=>-1,
+		pa_out_reset=>-1,
+		ovt_needed=>"0",
+		ovt_slew_control=>"00",
+		ovt_hyst_trim=>"0",
+		input_buffer_sel=>"00")
+	PORT MAP(oe=>(one),
+		y=>(zero),
+		fb=>(tmpFB_0__Vref_BP_net_0),
+		analog=>Net_4666,
+		io=>(tmpIO_0__Vref_BP_net_0),
+		siovref=>(tmpSIOVREF__Vref_BP_net_0),
+		annotation=>Net_7021,
+		in_clock=>zero,
+		in_clock_en=>one,
+		in_reset=>zero,
+		out_clock=>zero,
+		out_clock_en=>one,
+		out_reset=>zero,
+		interrupt=>tmpINTERRUPT_0__Vref_BP_net_0);
+Vref_PGA:cy_psoc3_pins_v1_10
+	GENERIC MAP(id=>"6dca8981-f62c-4f5a-a751-5b73bdd201af",
+		drive_mode=>"000",
+		ibuf_enabled=>"0",
+		init_dr_st=>"0",
+		input_sync=>"1",
+		input_clk_en=>'0',
+		input_sync_mode=>"0",
+		intr_mode=>"00",
+		invert_in_clock=>'0',
+		invert_in_clock_en=>'0',
+		invert_in_reset=>'0',
+		invert_out_clock=>'0',
+		invert_out_clock_en=>'0',
+		invert_out_reset=>'0',
+		io_voltage=>"",
+		layout_mode=>"CONTIGUOUS",
+		output_conn=>"0",
+		output_sync=>"0",
+		output_clk_en=>'0',
+		output_mode=>"0",
+		output_reset=>'0',
+		output_clock_mode=>"0",
+		oe_sync=>"0",
+		oe_conn=>"0",
+		oe_reset=>'0',
+		pin_aliases=>"",
+		pin_mode=>"A",
+		por_state=>4,
+		sio_group_cnt=>0,
+		sio_hifreq=>"00000000",
+		sio_hyst=>"1",
+		sio_ibuf=>"00000000",
+		sio_info=>"00",
+		sio_obuf=>"00000000",
+		sio_refsel=>"00000000",
+		sio_vtrip=>"00000000",
+		sio_vohsel=>"00000000",
+		slew_rate=>"0",
+		spanning=>'0',
+		sw_only=>'0',
+		vtrip=>"10",
+		width=>1,
+		port_alias_required=>'0',
+		port_alias_group=>"",
+		use_annotation=>"1",
+		pa_in_clock=>-1,
+		pa_in_clock_en=>-1,
+		pa_in_reset=>-1,
+		pa_out_clock=>-1,
+		pa_out_clock_en=>-1,
+		pa_out_reset=>-1,
+		ovt_needed=>"0",
+		ovt_slew_control=>"00",
+		ovt_hyst_trim=>"0",
+		input_buffer_sel=>"00")
+	PORT MAP(oe=>(one),
+		y=>(zero),
+		fb=>(tmpFB_0__Vref_PGA_net_0),
+		analog=>Net_4664,
+		io=>(tmpIO_0__Vref_PGA_net_0),
+		siovref=>(tmpSIOVREF__Vref_PGA_net_0),
+		annotation=>Net_4691,
+		in_clock=>zero,
+		in_clock_en=>one,
+		in_reset=>zero,
+		out_clock=>zero,
+		out_clock_en=>one,
+		out_reset=>zero,
+		interrupt=>tmpINTERRUPT_0__Vref_PGA_net_0);
+Vref_ADDER:cy_psoc3_pins_v1_10
+	GENERIC MAP(id=>"b7698a5a-9f16-4afe-84f5-368c95424baf",
+		drive_mode=>"000",
+		ibuf_enabled=>"0",
+		init_dr_st=>"0",
+		input_sync=>"1",
+		input_clk_en=>'0',
+		input_sync_mode=>"0",
+		intr_mode=>"00",
+		invert_in_clock=>'0',
+		invert_in_clock_en=>'0',
+		invert_in_reset=>'0',
+		invert_out_clock=>'0',
+		invert_out_clock_en=>'0',
+		invert_out_reset=>'0',
+		io_voltage=>"",
+		layout_mode=>"CONTIGUOUS",
+		output_conn=>"0",
+		output_sync=>"0",
+		output_clk_en=>'0',
+		output_mode=>"0",
+		output_reset=>'0',
+		output_clock_mode=>"0",
+		oe_sync=>"0",
+		oe_conn=>"0",
+		oe_reset=>'0',
+		pin_aliases=>"",
+		pin_mode=>"A",
+		por_state=>4,
+		sio_group_cnt=>0,
+		sio_hifreq=>"00000000",
+		sio_hyst=>"1",
+		sio_ibuf=>"00000000",
+		sio_info=>"00",
+		sio_obuf=>"00000000",
+		sio_refsel=>"00000000",
+		sio_vtrip=>"00000000",
+		sio_vohsel=>"00000000",
+		slew_rate=>"0",
+		spanning=>'0',
+		sw_only=>'0',
+		vtrip=>"10",
+		width=>1,
+		port_alias_required=>'0',
+		port_alias_group=>"",
+		use_annotation=>"1",
+		pa_in_clock=>-1,
+		pa_in_clock_en=>-1,
+		pa_in_reset=>-1,
+		pa_out_clock=>-1,
+		pa_out_clock_en=>-1,
+		pa_out_reset=>-1,
+		ovt_needed=>"0",
+		ovt_slew_control=>"00",
+		ovt_hyst_trim=>"0",
+		input_buffer_sel=>"00")
+	PORT MAP(oe=>(one),
+		y=>(zero),
+		fb=>(tmpFB_0__Vref_ADDER_net_0),
+		analog=>Net_4947,
+		io=>(tmpIO_0__Vref_ADDER_net_0),
+		siovref=>(tmpSIOVREF__Vref_ADDER_net_0),
+		annotation=>Net_7022,
+		in_clock=>zero,
+		in_clock_en=>one,
+		in_reset=>zero,
+		out_clock=>zero,
+		out_clock_en=>one,
+		out_reset=>zero,
+		interrupt=>tmpINTERRUPT_0__Vref_ADDER_net_0);
+Vref_LP:cy_psoc3_pins_v1_10
+	GENERIC MAP(id=>"c8eed0ad-f4a0-4055-b31d-7dda03abcdb0",
+		drive_mode=>"000",
+		ibuf_enabled=>"0",
+		init_dr_st=>"0",
+		input_sync=>"1",
+		input_clk_en=>'0',
+		input_sync_mode=>"0",
+		intr_mode=>"00",
+		invert_in_clock=>'0',
+		invert_in_clock_en=>'0',
+		invert_in_reset=>'0',
+		invert_out_clock=>'0',
+		invert_out_clock_en=>'0',
+		invert_out_reset=>'0',
+		io_voltage=>"",
+		layout_mode=>"CONTIGUOUS",
+		output_conn=>"0",
+		output_sync=>"0",
+		output_clk_en=>'0',
+		output_mode=>"0",
+		output_reset=>'0',
+		output_clock_mode=>"0",
+		oe_sync=>"0",
+		oe_conn=>"0",
+		oe_reset=>'0',
+		pin_aliases=>"",
+		pin_mode=>"A",
+		por_state=>4,
+		sio_group_cnt=>0,
+		sio_hifreq=>"00000000",
+		sio_hyst=>"1",
+		sio_ibuf=>"00000000",
+		sio_info=>"00",
+		sio_obuf=>"00000000",
+		sio_refsel=>"00000000",
+		sio_vtrip=>"00000000",
+		sio_vohsel=>"00000000",
+		slew_rate=>"0",
+		spanning=>'0',
+		sw_only=>'0',
+		vtrip=>"10",
+		width=>1,
+		port_alias_required=>'0',
+		port_alias_group=>"",
+		use_annotation=>"1",
+		pa_in_clock=>-1,
+		pa_in_clock_en=>-1,
+		pa_in_reset=>-1,
+		pa_out_clock=>-1,
+		pa_out_clock_en=>-1,
+		pa_out_reset=>-1,
+		ovt_needed=>"0",
+		ovt_slew_control=>"00",
+		ovt_hyst_trim=>"0",
+		input_buffer_sel=>"00")
+	PORT MAP(oe=>(one),
+		y=>(zero),
+		fb=>(tmpFB_0__Vref_LP_net_0),
+		analog=>Net_4285,
+		io=>(tmpIO_0__Vref_LP_net_0),
+		siovref=>(tmpSIOVREF__Vref_LP_net_0),
+		annotation=>Net_7023,
+		in_clock=>zero,
+		in_clock_en=>one,
+		in_reset=>zero,
+		out_clock=>zero,
+		out_clock_en=>one,
+		out_reset=>zero,
+		interrupt=>tmpINTERRUPT_0__Vref_LP_net_0);
+\VDAC_ref_BP:viDAC8\:cy_psoc3_vidac8_v1_0
 	GENERIC MAP(cy_registers=>"",
-		id=>"854c5f18-4208-429b-80a2-c4252048af1b",
-		source_clock_id=>"315365C3-2E3E-4f04-84A2-BB564A173261",
-		divisor=>1,
-		period=>"0",
-		is_direct=>'0',
-		is_digital=>'1')
-	PORT MAP(clock_out=>Net_6761,
-		dig_domain_out=>open);
-timer_clock_5:cy_clock_v1_0
-	GENERIC MAP(cy_registers=>"",
-		id=>"9b8b6b17-0b0d-40b5-98ed-0418d8afbf22",
-		source_clock_id=>"315365C3-2E3E-4f04-84A2-BB564A173261",
-		divisor=>1,
-		period=>"0",
-		is_direct=>'0',
-		is_digital=>'1')
-	PORT MAP(clock_out=>Net_6784,
-		dig_domain_out=>open);
-\Timer_3:TimerHW\:cy_psoc3_timer_v1_0
-	GENERIC MAP(cy_registers=>"")
-	PORT MAP(clock=>Net_6784,
-		kill=>zero,
-		enable=>one,
-		capture=>zero,
-		timer_reset=>zero,
-		tc=>Net_6791,
-		compare=>\Timer_3:Net_261\,
-		interrupt=>\Timer_3:Net_57\);
-isr_Timer_3:cy_isr_v1_0
-	GENERIC MAP(int_type=>"10",
-		is_nmi=>'0')
-	PORT MAP(int_signal=>Net_6791);
+		reg_data=>'0',
+		is_all_if_any=>'0')
+	PORT MAP(reset=>zero,
+		idir=>zero,
+		ioff=>zero,
+		data=>(zero, zero, zero, zero,
+			zero, zero, zero, zero),
+		strobe=>zero,
+		strobe_udb=>zero,
+		vout=>Net_4666,
+		iout=>\VDAC_ref_BP:Net_77\);
+\VDAC_ref_BP:cy_analog_noconnect_1\:cy_analog_noconnect_v1_0
+	PORT MAP(noconnect=>\VDAC_ref_BP:Net_77\);
+AMuxCapacitor:cy_psoc3_pins_v1_10
+	GENERIC MAP(id=>"6607d90a-4585-4268-9b0e-8e04a1da165e",
+		drive_mode=>"000",
+		ibuf_enabled=>"0",
+		init_dr_st=>"0",
+		input_sync=>"1",
+		input_clk_en=>'0',
+		input_sync_mode=>"0",
+		intr_mode=>"00",
+		invert_in_clock=>'0',
+		invert_in_clock_en=>'0',
+		invert_in_reset=>'0',
+		invert_out_clock=>'0',
+		invert_out_clock_en=>'0',
+		invert_out_reset=>'0',
+		io_voltage=>"",
+		layout_mode=>"CONTIGUOUS",
+		output_conn=>"0",
+		output_sync=>"0",
+		output_clk_en=>'0',
+		output_mode=>"0",
+		output_reset=>'0',
+		output_clock_mode=>"0",
+		oe_sync=>"0",
+		oe_conn=>"0",
+		oe_reset=>'0',
+		pin_aliases=>"",
+		pin_mode=>"A",
+		por_state=>4,
+		sio_group_cnt=>0,
+		sio_hifreq=>"00000000",
+		sio_hyst=>"1",
+		sio_ibuf=>"00000000",
+		sio_info=>"00",
+		sio_obuf=>"00000000",
+		sio_refsel=>"00000000",
+		sio_vtrip=>"00000000",
+		sio_vohsel=>"00000000",
+		slew_rate=>"0",
+		spanning=>'0',
+		sw_only=>'0',
+		vtrip=>"10",
+		width=>1,
+		port_alias_required=>'0',
+		port_alias_group=>"",
+		use_annotation=>"1",
+		pa_in_clock=>-1,
+		pa_in_clock_en=>-1,
+		pa_in_reset=>-1,
+		pa_out_clock=>-1,
+		pa_out_clock_en=>-1,
+		pa_out_reset=>-1,
+		ovt_needed=>"0",
+		ovt_slew_control=>"00",
+		ovt_hyst_trim=>"0",
+		input_buffer_sel=>"00")
+	PORT MAP(oe=>(one),
+		y=>(zero),
+		fb=>(tmpFB_0__AMuxCapacitor_net_0),
+		analog=>Net_7018,
+		io=>(tmpIO_0__AMuxCapacitor_net_0),
+		siovref=>(tmpSIOVREF__AMuxCapacitor_net_0),
+		annotation=>Net_7026,
+		in_clock=>zero,
+		in_clock_en=>one,
+		in_reset=>zero,
+		out_clock=>zero,
+		out_clock_en=>one,
+		out_reset=>zero,
+		interrupt=>tmpINTERRUPT_0__AMuxCapacitor_net_0);
+C_3:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Capacitor_v1_0",
+		port_names=>"T1, T2",
+		width=>2)
+	PORT MAP(connect=>(Net_7027, Net_7026));
+GND_6:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Gnd_v1_0",
+		port_names=>"T1",
+		width=>1)
+	PORT MAP(connect=>Net_7027);
+GND_7:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Gnd_v1_0",
+		port_names=>"T1",
+		width=>1)
+	PORT MAP(connect=>Net_4711);
+C_10:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Capacitor_v1_0",
+		port_names=>"T1, T2",
+		width=>2)
+	PORT MAP(connect=>(Net_4691, Net_4711));
+GND_8:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Gnd_v1_0",
+		port_names=>"T1",
+		width=>1)
+	PORT MAP(connect=>Net_7028);
+C_12:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Capacitor_v1_0",
+		port_names=>"T1, T2",
+		width=>2)
+	PORT MAP(connect=>(Net_7021, Net_7028));
+GND_9:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Gnd_v1_0",
+		port_names=>"T1",
+		width=>1)
+	PORT MAP(connect=>Net_4715);
+C_13:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Capacitor_v1_0",
+		port_names=>"T1, T2",
+		width=>2)
+	PORT MAP(connect=>(Net_4219, Net_4715));
+GND_1:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Gnd_v1_0",
+		port_names=>"T1",
+		width=>1)
+	PORT MAP(connect=>Net_4512);
+GND_10:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Gnd_v1_0",
+		port_names=>"T1",
+		width=>1)
+	PORT MAP(connect=>Net_4718);
+C_5:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Capacitor_v1_0",
+		port_names=>"T1, T2",
+		width=>2)
+	PORT MAP(connect=>(Net_4512, Net_4718));
+C_6:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Capacitor_v1_0",
+		port_names=>"T1, T2",
+		width=>2)
+	PORT MAP(connect=>(Net_4219, Net_4715));
+C_11:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Capacitor_v1_0",
+		port_names=>"T1, T2",
+		width=>2)
+	PORT MAP(connect=>(Net_4512, Net_4718));
+GND_11:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Gnd_v1_0",
+		port_names=>"T1",
+		width=>1)
+	PORT MAP(connect=>Net_4723);
+GND_12:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Gnd_v1_0",
+		port_names=>"T1",
+		width=>1)
+	PORT MAP(connect=>Net_7029);
+C_14:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Capacitor_v1_0",
+		port_names=>"T1, T2",
+		width=>2)
+	PORT MAP(connect=>(Net_7023, Net_7029));
+GND_13:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Gnd_v1_0",
+		port_names=>"T1",
+		width=>1)
+	PORT MAP(connect=>Net_7030);
+C_15:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Capacitor_v1_0",
+		port_names=>"T1, T2",
+		width=>2)
+	PORT MAP(connect=>(Net_7022, Net_7030));
+C_16:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Capacitor_v1_0",
+		port_names=>"T1, T2",
+		width=>2)
+	PORT MAP(connect=>(Net_1938, Net_4645));
+R_5:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Potentiometer_v1_0",
+		port_names=>"T1, T2, W",
+		width=>3)
+	PORT MAP(connect=>(Net_4644, Net_7031, Net_4954));
+C_17:cy_annotation_universal_v1_0
+	GENERIC MAP(comp_name=>"Capacitor_v1_0",
+		port_names=>"T1, T2",
+		width=>2)
+	PORT MAP(connect=>(Net_4691, Net_4711));
 \Debouncer:DEBOUNCER[0]:d_sync_0\:cy_dff
 	PORT MAP(d=>Net_4589,
 		clk=>\Debouncer:op_clk\,
@@ -3635,19 +4608,19 @@ Net_5525:cy_dff
 		s=>zero,
 		r=>Net_5549,
 		clk=>Net_5548,
-		q=>Net_6662_2);
+		q=>Net_6869_2);
 \superMaquina:state_reg_1\:cy_dsrff
 	PORT MAP(d=>\superMaquina:state_reg_1\\D\,
 		s=>zero,
 		r=>Net_5549,
 		clk=>Net_5548,
-		q=>Net_6662_1);
+		q=>Net_6869_1);
 \superMaquina:state_reg_0\:cy_dsrff
 	PORT MAP(d=>\superMaquina:state_reg_0\\D\,
 		s=>zero,
 		r=>Net_5549,
 		clk=>Net_5548,
-		q=>Net_6662_0);
+		q=>Net_6869_0);
 \superMaquina:nrq_dma_adc_d\:cy_dsrff
 	PORT MAP(d=>nda,
 		s=>zero,
@@ -3701,31 +4674,31 @@ Net_5525:cy_dff
 		s=>zero,
 		r=>Net_5549,
 		clk=>Net_5548,
-		q=>Net_6661_4);
+		q=>Net_6998_4);
 \superMaquina:error_stop_reg\:cy_dsrff
 	PORT MAP(d=>\superMaquina:error_stop_reg\\D\,
 		s=>zero,
 		r=>Net_5549,
 		clk=>Net_5548,
-		q=>Net_6661_3);
+		q=>Net_6998_3);
 \superMaquina:button_seen_reg\:cy_dsrff
 	PORT MAP(d=>\superMaquina:button_seen_reg\\D\,
 		s=>zero,
 		r=>Net_5549,
 		clk=>Net_5548,
-		q=>Net_6660_7);
+		q=>Net_6999_7);
 \superMaquina:batch_seen_reg\:cy_dsrff
 	PORT MAP(d=>\superMaquina:batch_seen_reg\\D\,
 		s=>zero,
 		r=>Net_5549,
 		clk=>Net_5548,
-		q=>Net_6660_6);
+		q=>Net_6999_6);
 \superMaquina:sync_seen_reg\:cy_dsrff
 	PORT MAP(d=>\superMaquina:sync_seen_reg\\D\,
 		s=>zero,
 		r=>Net_5549,
 		clk=>Net_5548,
-		q=>Net_6660_5);
+		q=>Net_6999_5);
 \superMaquina:batch_limit_reg_7\:cy_dsrff
 	PORT MAP(d=>\superMaquina:batch_limit_reg_7\\D\,
 		s=>zero,
