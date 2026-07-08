@@ -15,11 +15,11 @@
 int32 psoc_adc_counts_right_aligned(int32 adc_counts);
 void psoc_adc_select_capture_config(void);
 
-/* Config de usuario del ADC (rango de entrada). Solo se exponen
- * ADC_CF_2V5 (1, ±2.5 V) y ADC_CF_0V512 (2, ±0.512 V), ambas a 1020 SPS
- * efectivos; las configs 3/4 del componente (976 SPS) quedan fuera de la
- * aplicación para que la Fs del sistema sea única. RAM only: al reset se
- * vuelve a 2V5. */
+/* Config de usuario del ADC (rango de entrada). Se exponen las 4 configs
+ * del componente: ADC_CF_2V5 (1, ±2.5 V), ADC_CF_0V512 (2, ±0.512 V),
+ * ADC_CF_1V024 (3, ±1.024 V) y ADC_CF_0V625 (4, ±0.625 V), las cuatro a
+ * 1020 SPS efectivos / 18 bits para que la Fs del sistema sea única.
+ * RAM only: al reset se vuelve a 2V5. */
 uint8  psoc_adc_get_config(void);
 uint8  psoc_adc_set_config(uint8 cfg);
 uint16 psoc_adc_effective_fs_hz(void);

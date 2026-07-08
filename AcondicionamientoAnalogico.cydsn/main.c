@@ -940,15 +940,17 @@ static int32 dma_buf_to_i24(const volatile uint8 *buf)
     return sign_extend_bits(u, 24u);
 }
 
-/* El ADC raw puede venir right-aligned (config 2), donde el bit de signo real
- * es resolution-1. La salida del DFB sigue usando dma_buf_to_i24(). */
+/* El ADC raw puede venir right-aligned (configs 2/3/4: CF_0V512, CF_1V024,
+ * CF_0V625), donde el bit de signo real es resolution-1. Solo CF_2V5 es
+ * left-aligned (Bit-23 OVF Protected) y ya viene sign-extendido en 24 bits.
+ * La salida del DFB sigue usando dma_buf_to_i24(). */
 static int32 dma_buf_to_adc_counts(const volatile uint8 *buf)
 {
     uint32 u = (uint32)buf[0] | ((uint32)buf[1] << 8u) | ((uint32)buf[2] << 16u);
 
 #if (ADC_DEFAULT_NUM_CONFIGS > 1)
 #if (ADC_CF_0V512_ALIGNMENT == 0u)
-    if (ADC_Config == ADC_CF_0V512) {
+    if (ADC_Config != ADC_CF_2V5) {
         return sign_extend_bits(u, (uint8)ADC_CF_0V512_RESOLUTION);
     }
 #endif

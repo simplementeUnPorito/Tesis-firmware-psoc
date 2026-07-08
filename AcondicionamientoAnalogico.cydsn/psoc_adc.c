@@ -3,7 +3,8 @@
 static volatile int32 g_psoc_adc_isr_counts = 0;
 static volatile uint8 g_psoc_adc_isr_ready = 0u;
 
-/* Config activa pedida por el host (ADC_CF_2V5 | ADC_CF_0V512). */
+/* Config activa pedida por el host (ADC_CF_2V5 | ADC_CF_0V512 |
+ * ADC_CF_1V024 | ADC_CF_0V625). */
 static uint8 g_psoc_adc_config = ADC_CF_2V5;
 /* Override de calibración: fuerza 2V5 sin perder la elección del usuario. */
 static uint8 g_psoc_adc_cal_force_2v5 = 0u;
@@ -30,7 +31,8 @@ uint8 psoc_adc_get_config(void)
 
 uint8 psoc_adc_set_config(uint8 cfg)
 {
-    if ((cfg != ADC_CF_2V5) && (cfg != ADC_CF_0V512)) {
+    if ((cfg != ADC_CF_2V5) && (cfg != ADC_CF_0V512) &&
+        (cfg != ADC_CF_1V024) && (cfg != ADC_CF_0V625)) {
         return 0u;
     }
     g_psoc_adc_config = cfg;
