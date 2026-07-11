@@ -1,0 +1,828 @@
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc5X7tAh.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 2
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"SPI_INT.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.section	.gnu.lto_.profile.4d82bf59,"",%progbits
+  19 0000 789C6361 		.ascii	"x\234ca`d`a`\000\221L\000\000t\000\021"
+  19      60646061 
+  19      6000914C 
+  19      00007400 
+  19      11
+  20              		.text
+  21              		.section	.gnu.lto_.icf.4d82bf59,"",%progbits
+  22 0000 789C6361 		.ascii	"x\234ca`d\000\001>\006\004`bX?\363A\013\023#\230d\000"
+  22      60640001 
+  22      3E060460 
+  22      62583FF3 
+  22      410B1323 
+  23 0017 002ABB05 		.ascii	"\000*\273\005s"
+  23      73
+  24              		.text
+  25              		.section	.gnu.lto_.jmpfuncs.4d82bf59,"",%progbits
+  26 0000 789C6361 		.ascii	"x\234ca`d\000\001\016\006\004`\002b\220(\000\001Z\000"
+  26      60640001 
+  26      0E060460 
+  26      02629028 
+  26      00015A00 
+  27 0014 11       		.ascii	"\021"
+  28              		.text
+  29              		.section	.gnu.lto_.inline.4d82bf59,"",%progbits
+  30 0000 789C6361 		.ascii	"x\234ca`d\000\0015\006\004`b``fb\004Q\014l\013\344A"
+  30      60640001 
+  30      35060460 
+  30      62606066 
+  30      6204510C 
+  31 0018 145011BA 		.ascii	"\024P\021\272\010\003\000$\341\001\315"
+  31      08030024 
+  31      E101CD
+  32              		.text
+  33              		.section	.gnu.lto_.pureconst.4d82bf59,"",%progbits
+  34 0000 789C6361 		.ascii	"x\234ca`d`e```b\0002\000\000\205\000\016"
+  34      60646065 
+  34      60606062 
+  34      00320000 
+  34      85000E
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc5X7tAh.s 			page 2
+
+
+  35              		.text
+  36              		.section	.gnu.lto_SPI_TX_ISR.4d82bf59,"",%progbits
+  37 0000 789C6361 		.ascii	"x\234ca`d\000\201* V\006bi fdf`d\232p\216\201\241\221"
+  37      60640081 
+  37      2A205606 
+  37      62692066 
+  37      64666064 
+  38 001a 83899111 		.ascii	"\203\211\221\021\304h\340`d\250gb\254g\374\312\364\227"
+  38      C468E060 
+  38      64A86762 
+  38      AC67FCCA 
+  38      F497
+  39 002c 89F150FB 		.ascii	"\211\361P\373\263\235L\232\313\033\200\340Akt\303\212"
+  39      B39D4C9A 
+  39      CB1B80E0 
+  39      416B74C3 
+  39      8A
+  40 003d 038CADCC 		.ascii	"\003\214\255\314\014\014\377\231\300\00610.g\324d\000"
+  40      0C0CFF99 
+  40      C0063130 
+  40      2E67D464 
+  40      00
+  41 004e AA7AB4F1 		.ascii	"\252z\264\361\337T^\266\026\220*\005\210$\343\012F6"
+  41      DF545EB6 
+  41      16902A05 
+  41      8824E30A 
+  41      4636
+  42 0060 906DEB83 		.ascii	"\220m\353\203\0164\374\377\337\334p\340\226\340\033"
+  42      0E34FCFF 
+  42      DFDC70E0 
+  42      96E01B
+  43 006f 66A0C407 		.ascii	"f\240\304\007 \006\331\362\221\211\011D3\277bd\002)"
+  43      2006D9F2 
+  43      91890944 
+  43      33BF6264 
+  43      0229
+  44 0081 059BF681 		.ascii	"\005\233\366\201\211\021$\006T\241\350\236\232\227Z"
+  44      89112406 
+  44      54A1E89E 
+  44      9A975A
+  45 0090 9458929A 		.ascii	"\224X\222\232\022\037\234_Z\224\234\032\023\020\234"
+  45      121F9C5F 
+  45      5A949C1A 
+  45      13109C
+  46 009f EF6C1A13 		.ascii	"\357l\032\023\034\340\031\357\351\027\242\227\314\000"
+  46      1CE019EF 
+  46      E917A297 
+  46      CC00
+  47 00ad 00576337 		.ascii	"\000Wc7\332"
+  47      DA
+  48              		.text
+  49              		.section	.gnu.lto_SPI_RX_ISR.4d82bf59,"",%progbits
+  50 0000 789C6361 		.ascii	"x\234ca`d\000\201j V\006bi fdf`d\232p\216\201\241\221"
+  50      60640081 
+  50      6A205606 
+  50      62692066 
+  50      64666064 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc5X7tAh.s 			page 3
+
+
+  51 001a 83899111 		.ascii	"\203\211\221\021\304h\340`d\250gb\254g\374\312\364\227"
+  51      C468E060 
+  51      64A86762 
+  51      AC67FCCA 
+  51      F497
+  52 002c 89F150FB 		.ascii	"\211\361P\373\263\235L\232\313\033\200\340\301\323\345"
+  52      B39D4C9A 
+  52      CB1B80E0 
+  52      C1D3E5
+  53 003b 9C0D2B0E 		.ascii	"\234\015+\0160\266230\374g\002\233\304\300\270\234Q"
+  53      30B63233 
+  53      30FC6702 
+  53      9BC4C0B8 
+  53      9C51
+  54 004d 9301A8EC 		.ascii	"\223\001\250\354\321\306\177Sy\331Z@\312\024 \222\214"
+  54      D1C67F53 
+  54      79D95A40 
+  54      CA142092 
+  54      8C
+  55 005e 2B18D940 		.ascii	"+\030\331@\326\255\017:\320\360\377\177s\303\201\013"
+  55      D6AD0F3A 
+  55      D0F0FF7F 
+  55      73C3810B 
+  56 006e 5C1F6580 		.ascii	"\\\037e\200\022\037\200\030d\315G&&\020\315\374\212"
+  56      121F8018 
+  56      64CD4726 
+  56      2610CDFC 
+  56      8A
+  57 007f 9109A414 		.ascii	"\221\011\244\024l\332\007&F\220\030P\205\242{j^jQbI"
+  57      6CDA0726 
+  57      46901850 
+  57      85A27B6A 
+  57      5E6A5162 
+  58 0094 6A4A7C70 		.ascii	"jJ|p~iQrjL@p\276\263iLp\200g\274\247_\210^2\003\000"
+  58      7E695172 
+  58      6A4C4070 
+  58      BEB3694C 
+  58      708067BC 
+  59 00af CE3A389D 		.ascii	"\316:8\235"
+  60              		.text
+  61              		.section	.gnu.lto_.symbol_nodes.4d82bf59,"",%progbits
+  62 0000 789C6361 		.ascii	"x\234ca`dPa\000\002&\206z\006\206\011\347\030@\324\256"
+  62      60645061 
+  62      00022686 
+  62      7A068609 
+  62      E71840D4 
+  63 0015 0645A000 		.ascii	"\006E\240\000c=#\212\000\003\000\217\325\007\236"
+  63      633D238A 
+  63      0003008F 
+  63      D5079E
+  64              		.text
+  65              		.section	.gnu.lto_.refs.4d82bf59,"",%progbits
+  66 0000 789C6361 		.ascii	"x\234ca`\004B \000\000\0009\000\007"
+  66      60044220 
+  66      00000039 
+  66      0007
+  67              		.text
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc5X7tAh.s 			page 4
+
+
+  68              		.section	.gnu.lto_.decls.4d82bf59,"",%progbits
+  69 0000 789C6361 		.ascii	"x\234ca`d\000\201G@\312\011H\327\000\361\177 `\006\322"
+  69      60640081 
+  69      4740CA09 
+  69      48D700F1 
+  69      7F206006 
+  70 0015 610C08C0 		.ascii	"a\014\010\300\004\304k\201x=\003&\000\2113\"\251g\204"
+  70      04C46B81 
+  70      783D0326 
+  70      00893322 
+  70      A96784
+  71 0028 8AA183F5 		.ascii	"\212\241\203\365X\324a3\357/\023\343\377\371[\3729n"
+  71      58D46133 
+  71      EF2F13E3 
+  71      FFF95BFA 
+  71      396E
+  72 003a 33DE6464 		.ascii	"3\336ddf\200:\220\201\221\021B2\2021\003\004\203\271"
+  72      66803A90 
+  72      81911142 
+  72      32823103 
+  72      0483B9
+  73 004d 40061303 		.ascii	"@\006\023\003\204\001\023\202\003\006\250\022&\030\023"
+  73      84011382 
+  73      0306A812 
+  73      261813
+  74 005c 61181841 		.ascii	"a\030\030A\3653\376\207\001\260!\010\323\031\241\232"
+  74      F533FE87 
+  74      01B02108 
+  74      D319A19A 
+  75 006c 207C98BB 		.ascii	" |\230\273\241\232\030\231\020\0260B\2700\035H\346\241"
+  75      A19A1899 
+  75      10163042 
+  75      B8301D48 
+  75      E6A1
+  76 007e B908E666 		.ascii	"\271\010\346f\2305\340\240\005{z\301\301]\327\371\231"
+  76      9835E0A0 
+  76      057B7AC1 
+  76      C15DD7F9 
+  76      99
+  77 008f 991841EC 		.ascii	"\231\030A\354\373?W\270\351\255i\000\202\011\015\015"
+  77      FB3F57B8 
+  77      E9AD6900 
+  77      82090D0D 
+  78 009f 4CB28890 		.ascii	"L\262\210\220\271\330\262a\016\363\027&F!.F\026 \367"
+  78      B9D8B261 
+  78      0EF31726 
+  78      46212E46 
+  78      1620F7
+  79 00b2 E3D9598F 		.ascii	"\343\331Y\217\371\200\\\021.F\005 \367\357\311\331\263"
+  79      F9805C11 
+  79      2E460520 
+  79      F7EFC9D9 
+  79      B3
+  80 00c3 9824A681 		.ascii	"\230$\246\201\36557(\2600\206\2111\256f\224a\\\305("
+  80      F5353728 
+  80      B0308689 
+  80      31AE6694 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc5X7tAh.s 			page 5
+
+
+  80      615CC528 
+  81 00d7 03B46F0D 		.ascii	"\003\264o\015\243\004\220Lb\201\230\264\375j\303C^\245"
+  81      A304904C 
+  81      628198B4 
+  81      FD6AC343 
+  81      5EA5
+  82 00e9 050D1B36 		.ascii	"\005\015\03364<\270\273\201{f\303\201\026\2406&\220"
+  82      343CB8BB 
+  82      817B66C3 
+  82      8116A036 
+  82      2690
+  83 00fb 2AC6158C 		.ascii	"*\306\025\214\314\214+\031\365@\216\\\001\212\003\006"
+  83      CC8C2B19 
+  83      F5408E5C 
+  83      018A0306 
+  84 010b C6E58CB7 		.ascii	"\306\345\214\267\201\356]\313\250\004\324yt\306\214"
+  84      81EE5DCB 
+  84      A804D479 
+  84      74C68C
+  85 011a 53DCCC16 		.ascii	"S\334\314\026`\207\236y{\370\023\017\304\224\003\373"
+  85      60879E79 
+  85      7BF8130F 
+  85      C49403FB 
+  86 012a 4EF1344C 		.ascii	"N\3614Lhlhp\000\233\261\016a\306:d3\3263*1p\005\007"
+  86      686C6870 
+  86      009BB10E 
+  86      61C63A64 
+  86      33D6332A 
+  87 0142 78C68744 		.ascii	"x\306\207D\304{\006\007q\270\373\205*8\033\0322(\272"
+  87      C47B0607 
+  87      71B8FB85 
+  87      2A381B1A 
+  87      3228BA
+  88 0155 A7E6A516 		.ascii	"\247\346\245\026%\226\244\246\304\007\347\227\026%\247"
+  88      2596A4A6 
+  88      C407E797 
+  88      1625A7
+  89 0164 C60404E7 		.ascii	"\306\004\004\347;\233\306\200\224z\372\205\350%Ct\005"
+  89      3B9BC680 
+  89      947AFA85 
+  89      E8254374 
+  89      05
+  90 0175 81750100 		.ascii	"\201u\001\000\260\307\201\265"
+  90      B0C781B5 
+  91              		.text
+  92              		.section	.gnu.lto_.symtab.4d82bf59,"",%progbits
+  93 0000 5350495F 		.ascii	"SPI_TX_ISR\000"
+  93      54585F49 
+  93      535200
+  94 000b 00       		.ascii	"\000"
+  95 000c 00       		.ascii	"\000"
+  96 000d 00       		.ascii	"\000"
+  97 000e 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+  97      00000000 
+  98 0016 AD000000 		.ascii	"\255\000\000\000"
+  99 001a 5350495F 		.ascii	"SPI_RX_ISR\000"
+  99      52585F49 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc5X7tAh.s 			page 6
+
+
+  99      535200
+ 100 0025 00       		.ascii	"\000"
+ 101 0026 00       		.ascii	"\000"
+ 102 0027 00       		.ascii	"\000"
+ 103 0028 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 103      00000000 
+ 104 0030 AF000000 		.ascii	"\257\000\000\000"
+ 105              		.text
+ 106              		.section	.gnu.lto_.opts,"",%progbits
+ 107 0000 272D666D 		.ascii	"'-fmath-errno' '-fsigned-zeros' '-ftrapping-math' '"
+ 107      6174682D 
+ 107      6572726E 
+ 107      6F272027 
+ 107      2D667369 
+ 108 0033 2D666E6F 		.ascii	"-fno-trapv' '-fno-openmp' '-fno-openacc' '-mcpu=cor"
+ 108      2D747261 
+ 108      70762720 
+ 108      272D666E 
+ 108      6F2D6F70 
+ 109 0066 7465782D 		.ascii	"tex-m3' '-mthumb' '-g' '-O3' '-ffunction-sections' "
+ 109      6D332720 
+ 109      272D6D74 
+ 109      68756D62 
+ 109      2720272D 
+ 110 0099 272D6666 		.ascii	"'-ffat-lto-objects' '-finline-functions' '-flto'\000"
+ 110      61742D6C 
+ 110      746F2D6F 
+ 110      626A6563 
+ 110      74732720 
+ 111              		.text
+ 112              		.cfi_sections	.debug_frame
+ 113              		.section	.text.SPI_TX_ISR,"ax",%progbits
+ 114              		.align	2
+ 115              		.global	SPI_TX_ISR
+ 116              		.thumb
+ 117              		.thumb_func
+ 118              		.type	SPI_TX_ISR, %function
+ 119              	SPI_TX_ISR:
+ 120              	.LFB3:
+ 121              		.cfi_startproc
+ 122              		@ args = 0, pretend = 0, frame = 0
+ 123              		@ frame_needed = 0, uses_anonymous_args = 0
+ 124              		@ link register save eliminated.
+ 125 0000 7047     		bx	lr
+ 126              		.cfi_endproc
+ 127              	.LFE3:
+ 128              		.size	SPI_TX_ISR, .-SPI_TX_ISR
+ 129 0002 00BF     		.section	.text.SPI_RX_ISR,"ax",%progbits
+ 130              		.align	2
+ 131              		.global	SPI_RX_ISR
+ 132              		.thumb
+ 133              		.thumb_func
+ 134              		.type	SPI_RX_ISR, %function
+ 135              	SPI_RX_ISR:
+ 136              	.LFB1:
+ 137              		.file 1 "Generated_Source\\PSoC5\\SPI_INT.c"
+   1:Generated_Source\PSoC5/SPI_INT.c **** /*******************************************************************************
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc5X7tAh.s 			page 7
+
+
+   2:Generated_Source\PSoC5/SPI_INT.c **** * File Name: SPI_INT.c
+   3:Generated_Source\PSoC5/SPI_INT.c **** * Version 2.50
+   4:Generated_Source\PSoC5/SPI_INT.c **** *
+   5:Generated_Source\PSoC5/SPI_INT.c **** * Description:
+   6:Generated_Source\PSoC5/SPI_INT.c **** *  This file provides all Interrupt Service Routine (ISR) for the SPI Master
+   7:Generated_Source\PSoC5/SPI_INT.c **** *  component.
+   8:Generated_Source\PSoC5/SPI_INT.c **** *
+   9:Generated_Source\PSoC5/SPI_INT.c **** * Note:
+  10:Generated_Source\PSoC5/SPI_INT.c **** *  None.
+  11:Generated_Source\PSoC5/SPI_INT.c **** *
+  12:Generated_Source\PSoC5/SPI_INT.c **** ********************************************************************************
+  13:Generated_Source\PSoC5/SPI_INT.c **** * Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+  14:Generated_Source\PSoC5/SPI_INT.c **** * You may use this file only in accordance with the license, terms, conditions,
+  15:Generated_Source\PSoC5/SPI_INT.c **** * disclaimers, and limitations in the end user license agreement accompanying
+  16:Generated_Source\PSoC5/SPI_INT.c **** * the software package with which this file was provided.
+  17:Generated_Source\PSoC5/SPI_INT.c **** *******************************************************************************/
+  18:Generated_Source\PSoC5/SPI_INT.c **** 
+  19:Generated_Source\PSoC5/SPI_INT.c **** #include "SPI_PVT.h"
+  20:Generated_Source\PSoC5/SPI_INT.c **** #include "cyapicallbacks.h"
+  21:Generated_Source\PSoC5/SPI_INT.c **** 
+  22:Generated_Source\PSoC5/SPI_INT.c **** /* User code required at start of ISR */
+  23:Generated_Source\PSoC5/SPI_INT.c **** /* `#START SPI_ISR_START_DEF` */
+  24:Generated_Source\PSoC5/SPI_INT.c **** 
+  25:Generated_Source\PSoC5/SPI_INT.c **** /* `#END` */
+  26:Generated_Source\PSoC5/SPI_INT.c **** 
+  27:Generated_Source\PSoC5/SPI_INT.c **** 
+  28:Generated_Source\PSoC5/SPI_INT.c **** /*******************************************************************************
+  29:Generated_Source\PSoC5/SPI_INT.c **** * Function Name: SPI_TX_ISR
+  30:Generated_Source\PSoC5/SPI_INT.c **** ********************************************************************************
+  31:Generated_Source\PSoC5/SPI_INT.c **** *
+  32:Generated_Source\PSoC5/SPI_INT.c **** * Summary:
+  33:Generated_Source\PSoC5/SPI_INT.c **** *  Interrupt Service Routine for TX portion of the SPI Master.
+  34:Generated_Source\PSoC5/SPI_INT.c **** *
+  35:Generated_Source\PSoC5/SPI_INT.c **** * Parameters:
+  36:Generated_Source\PSoC5/SPI_INT.c **** *  None.
+  37:Generated_Source\PSoC5/SPI_INT.c **** *
+  38:Generated_Source\PSoC5/SPI_INT.c **** * Return:
+  39:Generated_Source\PSoC5/SPI_INT.c **** *  None.
+  40:Generated_Source\PSoC5/SPI_INT.c **** *
+  41:Generated_Source\PSoC5/SPI_INT.c **** * Global variables:
+  42:Generated_Source\PSoC5/SPI_INT.c **** *  SPI_txBufferWrite - used for the account of the bytes which
+  43:Generated_Source\PSoC5/SPI_INT.c **** *  have been written down in the TX software buffer.
+  44:Generated_Source\PSoC5/SPI_INT.c **** *  SPI_txBufferRead - used for the account of the bytes which
+  45:Generated_Source\PSoC5/SPI_INT.c **** *  have been read from the TX software buffer, modified when exist data to
+  46:Generated_Source\PSoC5/SPI_INT.c **** *  sending and FIFO Not Full.
+  47:Generated_Source\PSoC5/SPI_INT.c **** *  SPI_txBuffer[SPI_TX_BUFFER_SIZE] - used to store
+  48:Generated_Source\PSoC5/SPI_INT.c **** *  data to sending.
+  49:Generated_Source\PSoC5/SPI_INT.c **** *  All described above Global variables are used when Software Buffer is used.
+  50:Generated_Source\PSoC5/SPI_INT.c **** *
+  51:Generated_Source\PSoC5/SPI_INT.c **** *******************************************************************************/
+  52:Generated_Source\PSoC5/SPI_INT.c **** CY_ISR(SPI_TX_ISR)
+  53:Generated_Source\PSoC5/SPI_INT.c **** {
+  54:Generated_Source\PSoC5/SPI_INT.c ****     #if(SPI_TX_SOFTWARE_BUF_ENABLED)
+  55:Generated_Source\PSoC5/SPI_INT.c ****         uint8 tmpStatus;
+  56:Generated_Source\PSoC5/SPI_INT.c ****     #endif /* (SPI_TX_SOFTWARE_BUF_ENABLED) */
+  57:Generated_Source\PSoC5/SPI_INT.c **** 
+  58:Generated_Source\PSoC5/SPI_INT.c ****     #ifdef SPI_TX_ISR_ENTRY_CALLBACK
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc5X7tAh.s 			page 8
+
+
+  59:Generated_Source\PSoC5/SPI_INT.c ****         SPI_TX_ISR_EntryCallback();
+  60:Generated_Source\PSoC5/SPI_INT.c ****     #endif /* SPI_TX_ISR_ENTRY_CALLBACK */
+  61:Generated_Source\PSoC5/SPI_INT.c **** 
+  62:Generated_Source\PSoC5/SPI_INT.c ****     /* User code required at start of ISR */
+  63:Generated_Source\PSoC5/SPI_INT.c ****     /* `#START SPI_TX_ISR_START` */
+  64:Generated_Source\PSoC5/SPI_INT.c **** 
+  65:Generated_Source\PSoC5/SPI_INT.c ****     /* `#END` */
+  66:Generated_Source\PSoC5/SPI_INT.c ****     
+  67:Generated_Source\PSoC5/SPI_INT.c ****     #if(SPI_TX_SOFTWARE_BUF_ENABLED)
+  68:Generated_Source\PSoC5/SPI_INT.c ****         /* Check if TX data buffer is not empty and there is space in TX FIFO */
+  69:Generated_Source\PSoC5/SPI_INT.c ****         while(SPI_txBufferRead != SPI_txBufferWrite)
+  70:Generated_Source\PSoC5/SPI_INT.c ****         {
+  71:Generated_Source\PSoC5/SPI_INT.c ****             tmpStatus = SPI_GET_STATUS_TX(SPI_swStatusTx);
+  72:Generated_Source\PSoC5/SPI_INT.c ****             SPI_swStatusTx = tmpStatus;
+  73:Generated_Source\PSoC5/SPI_INT.c **** 
+  74:Generated_Source\PSoC5/SPI_INT.c ****             if(0u != (SPI_swStatusTx & SPI_STS_TX_FIFO_NOT_FULL))
+  75:Generated_Source\PSoC5/SPI_INT.c ****             {
+  76:Generated_Source\PSoC5/SPI_INT.c ****                 if(0u == SPI_txBufferFull)
+  77:Generated_Source\PSoC5/SPI_INT.c ****                 {
+  78:Generated_Source\PSoC5/SPI_INT.c ****                    SPI_txBufferRead++;
+  79:Generated_Source\PSoC5/SPI_INT.c **** 
+  80:Generated_Source\PSoC5/SPI_INT.c ****                     if(SPI_txBufferRead >= SPI_TX_BUFFER_SIZE)
+  81:Generated_Source\PSoC5/SPI_INT.c ****                     {
+  82:Generated_Source\PSoC5/SPI_INT.c ****                         SPI_txBufferRead = 0u;
+  83:Generated_Source\PSoC5/SPI_INT.c ****                     }
+  84:Generated_Source\PSoC5/SPI_INT.c ****                 }
+  85:Generated_Source\PSoC5/SPI_INT.c ****                 else
+  86:Generated_Source\PSoC5/SPI_INT.c ****                 {
+  87:Generated_Source\PSoC5/SPI_INT.c ****                     SPI_txBufferFull = 0u;
+  88:Generated_Source\PSoC5/SPI_INT.c ****                 }
+  89:Generated_Source\PSoC5/SPI_INT.c **** 
+  90:Generated_Source\PSoC5/SPI_INT.c ****                 /* Put data element into the TX FIFO */
+  91:Generated_Source\PSoC5/SPI_INT.c ****                 CY_SET_REG8(SPI_TXDATA_PTR, 
+  92:Generated_Source\PSoC5/SPI_INT.c ****                                              SPI_txBuffer[SPI_txBufferRead]);
+  93:Generated_Source\PSoC5/SPI_INT.c ****             }
+  94:Generated_Source\PSoC5/SPI_INT.c ****             else
+  95:Generated_Source\PSoC5/SPI_INT.c ****             {
+  96:Generated_Source\PSoC5/SPI_INT.c ****                 break;
+  97:Generated_Source\PSoC5/SPI_INT.c ****             }
+  98:Generated_Source\PSoC5/SPI_INT.c ****         }
+  99:Generated_Source\PSoC5/SPI_INT.c **** 
+ 100:Generated_Source\PSoC5/SPI_INT.c ****         if(SPI_txBufferRead == SPI_txBufferWrite)
+ 101:Generated_Source\PSoC5/SPI_INT.c ****         {
+ 102:Generated_Source\PSoC5/SPI_INT.c ****             /* TX Buffer is EMPTY: disable interrupt on TX NOT FULL */
+ 103:Generated_Source\PSoC5/SPI_INT.c ****             SPI_TX_STATUS_MASK_REG &= ((uint8) ~SPI_STS_TX_FIFO_NOT_FULL);
+ 104:Generated_Source\PSoC5/SPI_INT.c ****         }
+ 105:Generated_Source\PSoC5/SPI_INT.c **** 
+ 106:Generated_Source\PSoC5/SPI_INT.c ****     #endif /* (SPI_TX_SOFTWARE_BUF_ENABLED) */
+ 107:Generated_Source\PSoC5/SPI_INT.c **** 
+ 108:Generated_Source\PSoC5/SPI_INT.c ****     /* User code required at end of ISR (Optional) */
+ 109:Generated_Source\PSoC5/SPI_INT.c ****     /* `#START SPI_TX_ISR_END` */
+ 110:Generated_Source\PSoC5/SPI_INT.c **** 
+ 111:Generated_Source\PSoC5/SPI_INT.c ****     /* `#END` */
+ 112:Generated_Source\PSoC5/SPI_INT.c ****     
+ 113:Generated_Source\PSoC5/SPI_INT.c ****     #ifdef SPI_TX_ISR_EXIT_CALLBACK
+ 114:Generated_Source\PSoC5/SPI_INT.c ****         SPI_TX_ISR_ExitCallback();
+ 115:Generated_Source\PSoC5/SPI_INT.c ****     #endif /* SPI_TX_ISR_EXIT_CALLBACK */
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc5X7tAh.s 			page 9
+
+
+ 116:Generated_Source\PSoC5/SPI_INT.c **** }
+ 117:Generated_Source\PSoC5/SPI_INT.c **** 
+ 118:Generated_Source\PSoC5/SPI_INT.c **** 
+ 119:Generated_Source\PSoC5/SPI_INT.c **** /*******************************************************************************
+ 120:Generated_Source\PSoC5/SPI_INT.c **** * Function Name: SPI_RX_ISR
+ 121:Generated_Source\PSoC5/SPI_INT.c **** ********************************************************************************
+ 122:Generated_Source\PSoC5/SPI_INT.c **** *
+ 123:Generated_Source\PSoC5/SPI_INT.c **** * Summary:
+ 124:Generated_Source\PSoC5/SPI_INT.c **** *  Interrupt Service Routine for RX portion of the SPI Master.
+ 125:Generated_Source\PSoC5/SPI_INT.c **** *
+ 126:Generated_Source\PSoC5/SPI_INT.c **** * Parameters:
+ 127:Generated_Source\PSoC5/SPI_INT.c **** *  None.
+ 128:Generated_Source\PSoC5/SPI_INT.c **** *
+ 129:Generated_Source\PSoC5/SPI_INT.c **** * Return:
+ 130:Generated_Source\PSoC5/SPI_INT.c **** *  None.
+ 131:Generated_Source\PSoC5/SPI_INT.c **** *
+ 132:Generated_Source\PSoC5/SPI_INT.c **** * Global variables:
+ 133:Generated_Source\PSoC5/SPI_INT.c **** *  SPI_rxBufferWrite - used for the account of the bytes which
+ 134:Generated_Source\PSoC5/SPI_INT.c **** *  have been written down in the RX software buffer modified when FIFO contains
+ 135:Generated_Source\PSoC5/SPI_INT.c **** *  new data.
+ 136:Generated_Source\PSoC5/SPI_INT.c **** *  SPI_rxBufferRead - used for the account of the bytes which
+ 137:Generated_Source\PSoC5/SPI_INT.c **** *  have been read from the RX software buffer, modified when overflow occurred.
+ 138:Generated_Source\PSoC5/SPI_INT.c **** *  SPI_rxBuffer[SPI_RX_BUFFER_SIZE] - used to store
+ 139:Generated_Source\PSoC5/SPI_INT.c **** *  received data, modified when FIFO contains new data.
+ 140:Generated_Source\PSoC5/SPI_INT.c **** *  All described above Global variables are used when Software Buffer is used.
+ 141:Generated_Source\PSoC5/SPI_INT.c **** *
+ 142:Generated_Source\PSoC5/SPI_INT.c **** *******************************************************************************/
+ 143:Generated_Source\PSoC5/SPI_INT.c **** CY_ISR(SPI_RX_ISR)
+ 144:Generated_Source\PSoC5/SPI_INT.c **** {
+ 138              		.loc 1 144 0
+ 139              		.cfi_startproc
+ 140              		@ args = 0, pretend = 0, frame = 0
+ 141              		@ frame_needed = 0, uses_anonymous_args = 0
+ 142              		@ link register save eliminated.
+ 143 0000 7047     		bx	lr
+ 144              		.cfi_endproc
+ 145              	.LFE1:
+ 146              		.size	SPI_RX_ISR, .-SPI_RX_ISR
+ 147 0002 00BF     		.text
+ 148              	.Letext0:
+ 149              		.section	.debug_info,"",%progbits
+ 150              	.Ldebug_info0:
+ 151 0000 A2000000 		.4byte	0xa2
+ 152 0004 0400     		.2byte	0x4
+ 153 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 154 000a 04       		.byte	0x4
+ 155 000b 01       		.uleb128 0x1
+ 156 000c 11010000 		.4byte	.LASF14
+ 157 0010 0C       		.byte	0xc
+ 158 0011 A0000000 		.4byte	.LASF15
+ 159 0015 4A000000 		.4byte	.LASF16
+ 160 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 161 001d 00000000 		.4byte	0
+ 162 0021 00000000 		.4byte	.Ldebug_line0
+ 163 0025 02       		.uleb128 0x2
+ 164 0026 01       		.byte	0x1
+ 165 0027 06       		.byte	0x6
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc5X7tAh.s 			page 10
+
+
+ 166 0028 E5000000 		.4byte	.LASF0
+ 167 002c 02       		.uleb128 0x2
+ 168 002d 01       		.byte	0x1
+ 169 002e 08       		.byte	0x8
+ 170 002f 84000000 		.4byte	.LASF1
+ 171 0033 02       		.uleb128 0x2
+ 172 0034 02       		.byte	0x2
+ 173 0035 05       		.byte	0x5
+ 174 0036 C1000000 		.4byte	.LASF2
+ 175 003a 02       		.uleb128 0x2
+ 176 003b 02       		.byte	0x2
+ 177 003c 07       		.byte	0x7
+ 178 003d D2000000 		.4byte	.LASF3
+ 179 0041 02       		.uleb128 0x2
+ 180 0042 04       		.byte	0x4
+ 181 0043 05       		.byte	0x5
+ 182 0044 97000000 		.4byte	.LASF4
+ 183 0048 02       		.uleb128 0x2
+ 184 0049 04       		.byte	0x4
+ 185 004a 07       		.byte	0x7
+ 186 004b 1B000000 		.4byte	.LASF5
+ 187 004f 02       		.uleb128 0x2
+ 188 0050 08       		.byte	0x8
+ 189 0051 05       		.byte	0x5
+ 190 0052 00000000 		.4byte	.LASF6
+ 191 0056 02       		.uleb128 0x2
+ 192 0057 08       		.byte	0x8
+ 193 0058 07       		.byte	0x7
+ 194 0059 2D000000 		.4byte	.LASF7
+ 195 005d 03       		.uleb128 0x3
+ 196 005e 04       		.byte	0x4
+ 197 005f 05       		.byte	0x5
+ 198 0060 696E7400 		.ascii	"int\000"
+ 199 0064 02       		.uleb128 0x2
+ 200 0065 04       		.byte	0x4
+ 201 0066 07       		.byte	0x7
+ 202 0067 0E000000 		.4byte	.LASF8
+ 203 006b 02       		.uleb128 0x2
+ 204 006c 04       		.byte	0x4
+ 205 006d 04       		.byte	0x4
+ 206 006e 44000000 		.4byte	.LASF9
+ 207 0072 02       		.uleb128 0x2
+ 208 0073 08       		.byte	0x8
+ 209 0074 04       		.byte	0x4
+ 210 0075 CB000000 		.4byte	.LASF10
+ 211 0079 02       		.uleb128 0x2
+ 212 007a 01       		.byte	0x1
+ 213 007b 08       		.byte	0x8
+ 214 007c 92000000 		.4byte	.LASF11
+ 215 0080 02       		.uleb128 0x2
+ 216 0081 08       		.byte	0x8
+ 217 0082 04       		.byte	0x4
+ 218 0083 F1000000 		.4byte	.LASF12
+ 219 0087 02       		.uleb128 0x2
+ 220 0088 04       		.byte	0x4
+ 221 0089 07       		.byte	0x7
+ 222 008a 08010000 		.4byte	.LASF13
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc5X7tAh.s 			page 11
+
+
+ 223 008e 04       		.uleb128 0x4
+ 224 008f FD000000 		.4byte	.LASF17
+ 225 0093 01       		.byte	0x1
+ 226 0094 8F       		.byte	0x8f
+ 227 0095 01       		.byte	0x1
+ 228 0096 05       		.uleb128 0x5
+ 229 0097 8E000000 		.4byte	0x8e
+ 230 009b 00000000 		.4byte	.LFB1
+ 231 009f 02000000 		.4byte	.LFE1-.LFB1
+ 232 00a3 01       		.uleb128 0x1
+ 233 00a4 9C       		.byte	0x9c
+ 234 00a5 00       		.byte	0
+ 235              		.section	.debug_abbrev,"",%progbits
+ 236              	.Ldebug_abbrev0:
+ 237 0000 01       		.uleb128 0x1
+ 238 0001 11       		.uleb128 0x11
+ 239 0002 01       		.byte	0x1
+ 240 0003 25       		.uleb128 0x25
+ 241 0004 0E       		.uleb128 0xe
+ 242 0005 13       		.uleb128 0x13
+ 243 0006 0B       		.uleb128 0xb
+ 244 0007 03       		.uleb128 0x3
+ 245 0008 0E       		.uleb128 0xe
+ 246 0009 1B       		.uleb128 0x1b
+ 247 000a 0E       		.uleb128 0xe
+ 248 000b 55       		.uleb128 0x55
+ 249 000c 17       		.uleb128 0x17
+ 250 000d 11       		.uleb128 0x11
+ 251 000e 01       		.uleb128 0x1
+ 252 000f 10       		.uleb128 0x10
+ 253 0010 17       		.uleb128 0x17
+ 254 0011 00       		.byte	0
+ 255 0012 00       		.byte	0
+ 256 0013 02       		.uleb128 0x2
+ 257 0014 24       		.uleb128 0x24
+ 258 0015 00       		.byte	0
+ 259 0016 0B       		.uleb128 0xb
+ 260 0017 0B       		.uleb128 0xb
+ 261 0018 3E       		.uleb128 0x3e
+ 262 0019 0B       		.uleb128 0xb
+ 263 001a 03       		.uleb128 0x3
+ 264 001b 0E       		.uleb128 0xe
+ 265 001c 00       		.byte	0
+ 266 001d 00       		.byte	0
+ 267 001e 03       		.uleb128 0x3
+ 268 001f 24       		.uleb128 0x24
+ 269 0020 00       		.byte	0
+ 270 0021 0B       		.uleb128 0xb
+ 271 0022 0B       		.uleb128 0xb
+ 272 0023 3E       		.uleb128 0x3e
+ 273 0024 0B       		.uleb128 0xb
+ 274 0025 03       		.uleb128 0x3
+ 275 0026 08       		.uleb128 0x8
+ 276 0027 00       		.byte	0
+ 277 0028 00       		.byte	0
+ 278 0029 04       		.uleb128 0x4
+ 279 002a 2E       		.uleb128 0x2e
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc5X7tAh.s 			page 12
+
+
+ 280 002b 00       		.byte	0
+ 281 002c 3F       		.uleb128 0x3f
+ 282 002d 19       		.uleb128 0x19
+ 283 002e 03       		.uleb128 0x3
+ 284 002f 0E       		.uleb128 0xe
+ 285 0030 3A       		.uleb128 0x3a
+ 286 0031 0B       		.uleb128 0xb
+ 287 0032 3B       		.uleb128 0x3b
+ 288 0033 0B       		.uleb128 0xb
+ 289 0034 27       		.uleb128 0x27
+ 290 0035 19       		.uleb128 0x19
+ 291 0036 20       		.uleb128 0x20
+ 292 0037 0B       		.uleb128 0xb
+ 293 0038 00       		.byte	0
+ 294 0039 00       		.byte	0
+ 295 003a 05       		.uleb128 0x5
+ 296 003b 2E       		.uleb128 0x2e
+ 297 003c 00       		.byte	0
+ 298 003d 31       		.uleb128 0x31
+ 299 003e 13       		.uleb128 0x13
+ 300 003f 11       		.uleb128 0x11
+ 301 0040 01       		.uleb128 0x1
+ 302 0041 12       		.uleb128 0x12
+ 303 0042 06       		.uleb128 0x6
+ 304 0043 40       		.uleb128 0x40
+ 305 0044 18       		.uleb128 0x18
+ 306 0045 9742     		.uleb128 0x2117
+ 307 0047 19       		.uleb128 0x19
+ 308 0048 00       		.byte	0
+ 309 0049 00       		.byte	0
+ 310 004a 00       		.byte	0
+ 311              		.section	.debug_aranges,"",%progbits
+ 312 0000 1C000000 		.4byte	0x1c
+ 313 0004 0200     		.2byte	0x2
+ 314 0006 00000000 		.4byte	.Ldebug_info0
+ 315 000a 04       		.byte	0x4
+ 316 000b 00       		.byte	0
+ 317 000c 0000     		.2byte	0
+ 318 000e 0000     		.2byte	0
+ 319 0010 00000000 		.4byte	.LFB1
+ 320 0014 02000000 		.4byte	.LFE1-.LFB1
+ 321 0018 00000000 		.4byte	0
+ 322 001c 00000000 		.4byte	0
+ 323              		.section	.debug_ranges,"",%progbits
+ 324              	.Ldebug_ranges0:
+ 325 0000 00000000 		.4byte	.LFB1
+ 326 0004 02000000 		.4byte	.LFE1
+ 327 0008 00000000 		.4byte	0
+ 328 000c 00000000 		.4byte	0
+ 329              		.section	.debug_line,"",%progbits
+ 330              	.Ldebug_line0:
+ 331 0000 4D000000 		.section	.debug_str,"MS",%progbits,1
+ 331      02003700 
+ 331      00000201 
+ 331      FB0E0D00 
+ 331      01010101 
+ 332              	.LASF6:
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc5X7tAh.s 			page 13
+
+
+ 333 0000 6C6F6E67 		.ascii	"long long int\000"
+ 333      206C6F6E 
+ 333      6720696E 
+ 333      7400
+ 334              	.LASF8:
+ 335 000e 756E7369 		.ascii	"unsigned int\000"
+ 335      676E6564 
+ 335      20696E74 
+ 335      00
+ 336              	.LASF5:
+ 337 001b 6C6F6E67 		.ascii	"long unsigned int\000"
+ 337      20756E73 
+ 337      69676E65 
+ 337      6420696E 
+ 337      7400
+ 338              	.LASF7:
+ 339 002d 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 339      206C6F6E 
+ 339      6720756E 
+ 339      7369676E 
+ 339      65642069 
+ 340              	.LASF9:
+ 341 0044 666C6F61 		.ascii	"float\000"
+ 341      7400
+ 342              	.LASF16:
+ 343 004a 433A5C47 		.ascii	"C:\\Github\\Tesis\\src\\psoc\\AcondicionamientoAnal"
+ 343      69746875 
+ 343      625C5465 
+ 343      7369735C 
+ 343      7372635C 
+ 344 0078 6F676963 		.ascii	"ogico.cydsn\000"
+ 344      6F2E6379 
+ 344      64736E00 
+ 345              	.LASF1:
+ 346 0084 756E7369 		.ascii	"unsigned char\000"
+ 346      676E6564 
+ 346      20636861 
+ 346      7200
+ 347              	.LASF11:
+ 348 0092 63686172 		.ascii	"char\000"
+ 348      00
+ 349              	.LASF4:
+ 350 0097 6C6F6E67 		.ascii	"long int\000"
+ 350      20696E74 
+ 350      00
+ 351              	.LASF15:
+ 352 00a0 47656E65 		.ascii	"Generated_Source\\PSoC5\\SPI_INT.c\000"
+ 352      72617465 
+ 352      645F536F 
+ 352      75726365 
+ 352      5C50536F 
+ 353              	.LASF2:
+ 354 00c1 73686F72 		.ascii	"short int\000"
+ 354      7420696E 
+ 354      7400
+ 355              	.LASF10:
+ 356 00cb 646F7562 		.ascii	"double\000"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\cc5X7tAh.s 			page 14
+
+
+ 356      6C6500
+ 357              	.LASF3:
+ 358 00d2 73686F72 		.ascii	"short unsigned int\000"
+ 358      7420756E 
+ 358      7369676E 
+ 358      65642069 
+ 358      6E7400
+ 359              	.LASF0:
+ 360 00e5 7369676E 		.ascii	"signed char\000"
+ 360      65642063 
+ 360      68617200 
+ 361              	.LASF12:
+ 362 00f1 6C6F6E67 		.ascii	"long double\000"
+ 362      20646F75 
+ 362      626C6500 
+ 363              	.LASF17:
+ 364 00fd 5350495F 		.ascii	"SPI_RX_ISR\000"
+ 364      52585F49 
+ 364      535200
+ 365              	.LASF13:
+ 366 0108 73697A65 		.ascii	"sizetype\000"
+ 366      74797065 
+ 366      00
+ 367              	.LASF14:
+ 368 0111 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 368      43313120 
+ 368      352E342E 
+ 368      31203230 
+ 368      31363036 
+ 369 0144 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"
+ 369      20726576 
+ 369      6973696F 
+ 369      6E203233 
+ 369      37373135 
+ 370 0177 33202D66 		.ascii	"3 -ffunction-sections -ffat-lto-objects -finline-fu"
+ 370      66756E63 
+ 370      74696F6E 
+ 370      2D736563 
+ 370      74696F6E 
+ 371 01aa 6E637469 		.ascii	"nctions -flto\000"
+ 371      6F6E7320 
+ 371      2D666C74 
+ 371      6F00
+ 372              		.comm	__gnu_lto_v1,1,1
+ 373              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

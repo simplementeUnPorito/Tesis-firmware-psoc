@@ -8,6 +8,8 @@ static volatile uint8 g_psoc_adc_isr_ready = 0u;
 static uint8 g_psoc_adc_config = ADC_CF_2V5;
 /* Override de calibración: fuerza 2V5 sin perder la elección del usuario. */
 static uint8 g_psoc_adc_cal_force_2v5 = 0u;
+/* Factor de decimación con promedio (1 = sin decimar). */
+static uint8 g_psoc_adc_decimation = 1u;
 
 int32 psoc_adc_counts_right_aligned(int32 adc_counts)
 {
@@ -39,11 +41,27 @@ uint8 psoc_adc_set_config(uint8 cfg)
     return 1u;
 }
 
+uint8 psoc_adc_get_decimation(void)
+{
+    return g_psoc_adc_decimation;
+}
+
+uint8 psoc_adc_set_decimation(uint8 factor)
+{
+    if (factor == 0u || factor > PSOC_ADC_DECIMATION_MAX) {
+        return 0u;
+    }
+    g_psoc_adc_decimation = factor;
+    return 1u;
+}
+
 uint16 psoc_adc_effective_fs_hz(void)
 {
-    /* "Actual conv. rate" del customizer: la división de clock no alcanza
-     * el nominal de 1000 SPS y ambas configs expuestas quedan en 1020 SPS. */
-    return 1020u;
+    /* "Actual conv. rate" del customizer (las 4 configs regeneradas a
+     * 2929 SPS nativos, ver ADC_CF_2V5_SRATE etc. en Generated_Source),
+     * dividido por el factor de decimación con promedio aplicado en el
+     * ISR de captura (main.c). */
+    return (uint16)(2929u / (uint16)g_psoc_adc_decimation);
 }
 
 void psoc_adc_cal_override(uint8 force_2v5)

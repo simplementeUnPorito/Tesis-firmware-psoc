@@ -18,10 +18,19 @@ void psoc_adc_select_capture_config(void);
 /* Config de usuario del ADC (rango de entrada). Se exponen las 4 configs
  * del componente: ADC_CF_2V5 (1, ±2.5 V), ADC_CF_0V512 (2, ±0.512 V),
  * ADC_CF_1V024 (3, ±1.024 V) y ADC_CF_0V625 (4, ±0.625 V), las cuatro a
- * 1020 SPS efectivos / 18 bits para que la Fs del sistema sea única.
+ * 2929 SPS nativos / 18 bits para que la Fs base del sistema sea única.
  * RAM only: al reset se vuelve a 2V5. */
 uint8  psoc_adc_get_config(void);
 uint8  psoc_adc_set_config(uint8 cfg);
+
+/* Factor de decimación con promedio, aplicado en el ISR de captura (main.c)
+ * después de la selección RAW/FIR. 1 = sin decimar (2929 Hz tal cual).
+ * RAM only: al reset vuelve a 1. Rango válido 1..PSOC_ADC_DECIMATION_MAX. */
+#define PSOC_ADC_DECIMATION_MAX 100u
+uint8  psoc_adc_get_decimation(void);
+uint8  psoc_adc_set_decimation(uint8 factor);
+
+/* Fs efectiva = 2929 / factor_de_decimación (redondeada hacia abajo). */
 uint16 psoc_adc_effective_fs_hz(void);
 
 /* Mientras el override esté activo, psoc_adc_select_capture_config fuerza

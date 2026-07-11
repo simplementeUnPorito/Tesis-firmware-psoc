@@ -94,6 +94,10 @@
 #define PSOC_EVT_CAL_AMUX_CAP     0x44u  /* value=canal AMux_ADC del capacitor conectado durante calibracion */
 #define PSOC_EVT_CAPTURE_WATCHDOG 0x45u  /* value=state de superMaquina al vencer el watchdog de captura (Timer_3) */
 #define PSOC_EVT_TIMER_STORM      0x46u  /* value=timer (0=Timer RX,1,2,3): IRQ en tormenta, breaker disparado y timer re-inicializado */
+#define PSOC_EVT_CHAIN_NEXT       0x47u  /* value=lotes DECIMADOS acumulados; se terminó un trozo y se re-arma la próxima corrida (captura encadenada) */
+#define PSOC_EVT_SD_STATUS        0x48u  /* value=sd_spi_status_byte(): bit0 presente, bits1-2 tipo, bit3 self-test OK */
+#define PSOC_EVT_SD_SESSION       0x49u  /* value=bloques de datos escritos en la sesión SD (saturado a 255) */
+#define PSOC_EVT_SD_ERROR         0x4Au  /* value: bit0 write fail, bit1 overrun ring, bit2 header/dir fail, bit3 read fail en dump */
 
 #define PSOC_CMD_STATUS         0xA5u
 #define PSOC_CMD_PGA            0xA6u
@@ -110,6 +114,17 @@
 #define PSOC_CMD_BLINK_LED      0xB9u  /* Titilar LED de identificación del nodo */
 #define PSOC_CMD_ADC_CONFIG     0xBAu  /* Param: 1=ADC_CF_2V5 (±2.5V), 2=ADC_CF_0V512 (±0.512V),
                                           3=ADC_CF_1V024 (±1.024V), 4=ADC_CF_0V625 (±0.625V) */
+#define PSOC_CMD_SET_DECIMATION 0xBBu  /* Param: factor de decimación 1..100 (1=sin decimar,
+                                          Fs efectiva = 2929/factor). Promedia `factor` muestras
+                                          consecutivas del stream ya elegido (raw/FIR) antes de
+                                          guardarlas. Solo aceptado en PSOC_IDLE. */
+#define PSOC_CMD_SD_STATUS      0xBCu  /* Param: 0=consultar estado cacheado, 1=re-init (solo IDLE).
+                                          Ack: sd_spi_status_byte(). */
+#define PSOC_CMD_SD_TEST        0xBDu  /* Self-test write/read/verify de un bloque scratch (solo
+                                          IDLE, requiere SD presente). Ack: 1 OK / 0 fallo. */
+#define PSOC_CMD_SD_CAPTURE     0xBEu  /* Param: 1=capturar a SD (ring RAM->SD, permite N>512),
+                                          0=modo RAM-only clásico. Solo IDLE. Ack: 0/1=aplicado,
+                                          0xEE=rechazado (sin SD o estado ocupado). */
 
 void psoc_hw_start_analog(uint8 pga_code, uint8 pgavdac_code);
 void psoc_hw_set_pga(uint8 code);

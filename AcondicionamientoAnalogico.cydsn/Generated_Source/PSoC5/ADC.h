@@ -98,7 +98,7 @@ CY_ISR_PROTO(ADC_ISR4);
 /* Default configuration values from user parameters */
 #define ADC_CF_2V5_RESOLUTION         (18u )
 #define ADC_CF_2V5_INPUT_RANGE        (2u)
-#define ADC_CF_2V5_SRATE              (1000u)
+#define ADC_CF_2V5_SRATE              (2929u)
 #define ADC_CF_2V5_REFERENCE          (6u)
 #define ADC_CF_2V5_BUFFER_GAIN        (1u)
 #define ADC_CF_2V5_CONV_MODE          (2u)
@@ -1337,13 +1337,13 @@ extern volatile int32 ADC_CountsPerVolt;
 
 /* Default register settings for the Config 1 */
 /* Default Config
-* ADC_CF_2V5 Sample Rate: 1000 Samples per Second
+* ADC_CF_2V5 Sample Rate: 2929 Samples per Second
 * ADC_CF_2V5 Conversion Mode: 2
 * ADC_CF_2V5 Input Buffer Gain: 1
 * ADC_CF_2V5 Reference: 6
 * ADC_CF_2V5 Input Range: 2
 * ADC_CF_2V5 Resolution: 18 bits
-* ADC_CF_2V5 Clock: 1024000 Hz
+* ADC_CF_2V5 Clock: 2999296 Hz
 */
 
 #define ADC_CF_2V5_DEC_CR             (0xF8u)
@@ -1395,16 +1395,16 @@ extern volatile int32 ADC_CountsPerVolt;
 #define ADC_CF_2V5_DSM_OUT1           (0x00u)
 #define ADC_CF_2V5_DSM_SW3            (0x40u)
 #define ADC_CF_2V5_CLOCKS_PER_SAMPLE  (0x0400u)
-#define ADC_CF_2V5_CLOCK_FREQ         (1024000u)
-#define ADC_CF_2V5_CP_CLOCK_FREQ      (4096000u)
+#define ADC_CF_2V5_CLOCK_FREQ         (2999296u)
+#define ADC_CF_2V5_CP_CLOCK_FREQ      (11997184u)
 #define ADC_CF_2V5_REFERENCE_VOLTAGE  (1.2500)
 #define ADC_CF_2V5_COUNTS_PER_VOLT    (52429)
 #define ADC_CF_2V5_IDEAL_DEC_GAIN     (0x8DF0u)
 #define ADC_CF_2V5_IDEAL_ODDDEC_GAIN  (0x8000u)
 
 #define ADC_CF_2V5_ALIGNMENT          (1u)
-#define ADC_CF_2V5_ADC_CLK_DIVIDER    (22u)
-#define ADC_CF_2V5_CP_CLK_DIVIDER     (5u)
+#define ADC_CF_2V5_ADC_CLK_DIVIDER    (7u)
+#define ADC_CF_2V5_CP_CLK_DIVIDER     (1u)
 
 /* Input and DAC Cap values in pF */
 #define ADC_CF_2V5_IPCAP1VALUE        (0x03E0u)
@@ -1437,13 +1437,13 @@ extern volatile int32 ADC_CountsPerVolt;
 
 /* Default register settings for the Config 2 */
 /* Second Config
-* ADC_CF_0V512 Sample Rate: 1000 Samples per Second
+* ADC_CF_0V512 Sample Rate: 2929 Samples per Second
 * ADC_CF_0V512 Conversion Mode: 2
 * ADC_CF_0V512 Input Buffer Gain: 1
 * ADC_CF_0V512 Reference: 5
 * ADC_CF_0V512 Input Range: 0
 * ADC_CF_0V512 Resolution: 18 bits
-* ADC_CF_0V512 Clock: 1024000 Hz
+* ADC_CF_0V512 Clock: 2999296 Hz
 */
 
 #define ADC_CF_0V512_DEC_CR             (0x78u)
@@ -1491,10 +1491,10 @@ extern volatile int32 ADC_CountsPerVolt;
 #define ADC_CF_0V512_DSM_OUT0           (0x00u)
 #define ADC_CF_0V512_DSM_OUT1           (0x00u)
 #define ADC_CF_0V512_DSM_SW3            (0x40u)
-#define ADC_CF_0V512_SRATE              (1000u )
+#define ADC_CF_0V512_SRATE              (2929u )
 #define ADC_CF_0V512_CLOCKS_PER_SAMPLE  (0x0400u)
-#define ADC_CF_0V512_CLOCK_FREQ         (1024000u)
-#define ADC_CF_0V512_CP_CLOCK_FREQ      (4096000u)
+#define ADC_CF_0V512_CLOCK_FREQ         (2999296u)
+#define ADC_CF_0V512_CP_CLOCK_FREQ      (11997184u)
 #define ADC_CF_0V512_REFERENCE_VOLTAGE  (1.2500)
 #define ADC_CF_0V512_COUNTS_PER_VOLT    (209715)
 #define ADC_CF_0V512_RESOLUTION         (18u)
@@ -1506,8 +1506,8 @@ extern volatile int32 ADC_CountsPerVolt;
 #define ADC_CF_0V512_REFERENCE          (5u)
 #define ADC_CF_0V512_BUFFER_GAIN        (1u)
 #define ADC_CF_0V512_ALIGNMENT          (0u)
-#define ADC_CF_0V512_ADC_CLK_DIVIDER    (22u)
-#define ADC_CF_0V512_CP_CLK_DIVIDER     (5u)
+#define ADC_CF_0V512_ADC_CLK_DIVIDER    (7u)
+#define ADC_CF_0V512_CP_CLK_DIVIDER     (1u)
 
 /* Input and DAC Cap values in pF */
 #define ADC_CF_0V512_IPCAP1VALUE        (0x0F30u)
@@ -1541,13 +1541,13 @@ extern volatile int32 ADC_CountsPerVolt;
 
 /* Default register settings for the following configuration */
 /* Third Config
-* ADC_CF_1V024 Sample Rate: 1020 Samples per Second
+* ADC_CF_1V024 Sample Rate: 2929 Samples per Second
 * ADC_CF_1V024 Conversion Mode: 2
 * ADC_CF_1V024 Input Buffer Gain: 1
 * ADC_CF_1V024 Reference: 0
 * ADC_CF_1V024 Input Range: 1
 * ADC_CF_1V024 Resolution: 18 bits
-* ADC_CF_1V024 Clock: 1044480 Hz
+* ADC_CF_1V024 Clock: 2999296 Hz
 */
 
 #define ADC_CF_1V024_DEC_CR             (0x78u)
@@ -1595,10 +1595,10 @@ extern volatile int32 ADC_CountsPerVolt;
 #define ADC_CF_1V024_DSM_OUT0           (0x00u)
 #define ADC_CF_1V024_DSM_OUT1           (0x00u)
 #define ADC_CF_1V024_DSM_SW3            (0x00u)
-#define ADC_CF_1V024_SRATE              (1020u)
+#define ADC_CF_1V024_SRATE              (2929u)
 #define ADC_CF_1V024_CLOCKS_PER_SAMPLE  (0x0400u)
-#define ADC_CF_1V024_CLOCK_FREQ         (1044480u)
-#define ADC_CF_1V024_CP_CLOCK_FREQ      (4177920u)
+#define ADC_CF_1V024_CLOCK_FREQ         (2999296u)
+#define ADC_CF_1V024_CP_CLOCK_FREQ      (11997184u)
 #define ADC_CF_1V024_REFERENCE_VOLTAGE  (1.0240)
 #define ADC_CF_1V024_COUNTS_PER_VOLT    (128000)
 #define ADC_CF_1V024_RESOLUTION         (18u)
@@ -1609,8 +1609,8 @@ extern volatile int32 ADC_CountsPerVolt;
 #define ADC_CF_1V024_BUFFER_GAIN        (1u)
 #define ADC_CF_1V024_INPUT_RANGE_VALUE  (2.048)
 #define ADC_CF_1V024_ALIGNMENT          (0u)
-#define ADC_CF_1V024_ADC_CLK_DIVIDER    (22u)
-#define ADC_CF_1V024_CP_CLK_DIVIDER     (5u)
+#define ADC_CF_1V024_ADC_CLK_DIVIDER    (7u)
+#define ADC_CF_1V024_CP_CLK_DIVIDER     (1u)
 
 /* Input and DAC Cap values in pF */
 #define ADC_CF_1V024_IPCAP1VALUE        (0x0F30u)
@@ -1644,13 +1644,13 @@ extern volatile int32 ADC_CountsPerVolt;
 
 /* Default register settings for the following configuration */
 /* Fourth Config
-* ADC_CF_0V625 Sample Rate: 1020 Samples per Second
+* ADC_CF_0V625 Sample Rate: 2929 Samples per Second
 * ADC_CF_0V625 Conversion Mode: 2
 * ADC_CF_0V625 Input Buffer Gain: 1
 * ADC_CF_0V625 Reference: 0
 * ADC_CF_0V625 Input Range: 0
 * ADC_CF_0V625 Resolution: 18 bits
-* ADC_CF_0V625 Clock: 1044480 Hz
+* ADC_CF_0V625 Clock: 2999296 Hz
 */
 
 #define ADC_CF_0V625_DEC_CR             (0x78u)
@@ -1698,10 +1698,10 @@ extern volatile int32 ADC_CountsPerVolt;
 #define ADC_CF_0V625_DSM_OUT0           (0x00u)
 #define ADC_CF_0V625_DSM_OUT1           (0x00u)
 #define ADC_CF_0V625_DSM_SW3            (0x40u)
-#define ADC_CF_0V625_SRATE              (1020u)
+#define ADC_CF_0V625_SRATE              (2929u)
 #define ADC_CF_0V625_CLOCKS_PER_SAMPLE  (0x0400u)
-#define ADC_CF_0V625_CLOCK_FREQ         (1044480u)
-#define ADC_CF_0V625_CP_CLOCK_FREQ      (4177920u)
+#define ADC_CF_0V625_CLOCK_FREQ         (2999296u)
+#define ADC_CF_0V625_CP_CLOCK_FREQ      (11997184u)
 #define ADC_CF_0V625_REFERENCE_VOLTAGE  (1.0240)
 #define ADC_CF_0V625_COUNTS_PER_VOLT    (256000)
 #define ADC_CF_0V625_RESOLUTION         (18u)
@@ -1712,8 +1712,8 @@ extern volatile int32 ADC_CountsPerVolt;
 #define ADC_CF_0V625_BUFFER_GAIN        (1u)
 #define ADC_CF_0V625_INPUT_RANGE_VALUE  (1.024)
 #define ADC_CF_0V625_ALIGNMENT          (0u)
-#define ADC_CF_0V625_ADC_CLK_DIVIDER    (22u)
-#define ADC_CF_0V625_CP_CLK_DIVIDER     (5u)
+#define ADC_CF_0V625_ADC_CLK_DIVIDER    (7u)
+#define ADC_CF_0V625_CP_CLK_DIVIDER     (1u)
 
 /* Input cap and DAC Cap values in pF */
 #define ADC_CF_0V625_IPCAP1VALUE        (0x0F30u)
