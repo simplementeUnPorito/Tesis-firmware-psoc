@@ -42,6 +42,7 @@
 #include "psoc_hw.h"
 #include "psoc_adc.h"
 #include "sd_spi.h"
+#include "fatfs/ff.h"
 #include "calibration.h"
 #include "psoc_nv.h"
 #include "LED.h"
@@ -57,7 +58,6 @@
 #include "error.h"
 #include "state.h"
 #include "isr_SuperMaquina.h"
-#include "isr_Timer.h"
 #include "isr_Timer_1.h"
 #include "isr_Timer_2.h"
 #include "isr_Timer_3.h"
@@ -261,7 +261,7 @@ static volatile uint16 g_batches_sent = 0u;
 
 /* ── Captura encadenada (multi-corrida) ──────────────────────────────────────
  * El contador de lotes crudos de superMaquina topa en PSOC_CAPTURE_MAX_BATCHES
- * (512) lotes CRUDOS por corrida ≈ 5.24 s @ 2929 Hz. Para capturas mas largas
+ * (512) lotes CRUDOS por corrida ≈ 5.90 s @ 2604 Hz. Para capturas mas largas
  * que ese trozo de hardware, el PSoC rearma superMaquina y sigue escribiendo en
  * el mismo buffer hasta completar g_total_target lotes DECIMADOS. El volcado
  * UART se hace una sola vez, al final, para que el ESP vea una captura completa
@@ -271,38 +271,41 @@ static volatile uint16 g_total_sent   = 0u; /* lotes DECIMADOS ya volcados al ES
 static volatile uint8  g_chain_active  = 0u; /* 1 = captura multi-corrida en curso */
 
 /* ── Captura a SD (PSOC_CMD_SD_CAPTURE) ──────────────────────────────────────
- * Con g_sd_cap_active, g_capture_raw deja de ser un buffer lineal y pasa a ser
- * un RING de SD_RING_SAMPLES muestras decimadas: la ISR escribe con contadores
- * monotónicos (g_sd_ring_samples) y el main loop drena de a bloques de 512 B a
- * la SD (g_sd_ring_drained) DURANTE el muestreo — la SD sostiene de sobra la
- * tasa media (~2.9-8.8 KB/s) y el ring de 45 KB absorbe los picos de latencia
- * de escritura. Los contadores separados (uno lo escribe solo la ISR, el otro
- * solo el main loop) evitan cualquier RMW compartido. Con el flag apagado el
- * camino RAM-only validado queda byte-idéntico.
- * Layout SD (bloques de 512 B, sin filesystem):
- *   LBA 2048               bloque directorio: "GDIR" + next_free_lba + count
- *   LBA session            header de sesión: "GSES" + id + n_batches + fs + …
- *   LBA session+1 ..       datos: 5 lotes de 90 B por bloque (450 B + padding)
+ * La ISR escribe un ring y main lo drena al archivo FatFs 0:/GEOLAST.BIN.
+ * Nunca se escriben LBAs fijos: la tabla FAT, otros archivos y el sector de
+ * arranque quedan intactos. El archivo contiene una cabecera de 512 B y luego
+ * bloques de 512 B con 5 lotes canónicos int24-LE (450 B + padding).
  */
-#define SD_CAPTURE_DIR_LBA   2048u
-#define SD_CAPTURE_DATA_LBA  2049u   /* primera sesión si el directorio está virgen */
 #define SD_BATCHES_PER_BLOCK 5u
 #define SD_RING_SAMPLES      ((uint32)PSOC_CAPTURE_MAX_BATCHES * BATCH_SAMPLES)
 /* Techo de N con SD: uint16 de SETN menos margen; 60000 lotes ≈ 30 min a 976 Hz. */
 #define PSOC_SD_MAX_BATCHES  60000u
+#define SD_CAPTURE_PATH      "0:/GEOLAST.BIN"
+#define SD_TEST_PATH         "0:/GEOTEST.BIN"
+#define SD_HEADER_VERSION    1u
+#define SD_HEADER_INPROGRESS 1u
+#define SD_HEADER_COMPLETE   2u
+#define SD_HEADER_CRC_OFFSET 508u
+#define SD_SYNC_BLOCKS       32u
 
 static volatile uint8  g_sd_cap_en         = 0u; /* config (0xBE), pedida por el ESP */
 static volatile uint8  g_sd_cap_active     = 0u; /* esta captura/dump usa SD */
 static volatile uint32 g_sd_ring_samples   = 0u; /* muestras decimadas escritas (solo ISR) */
-static          uint32 g_sd_ring_drained   = 0u; /* muestras drenadas a SD (solo main) */
+static volatile uint32 g_sd_ring_drained   = 0u; /* main escribe; ISR consulta overrun */
 static volatile uint32 g_sd_target_samples = 0u; /* g_total_target * BATCH_SAMPLES */
 static volatile uint32 g_sd_drop_samples   = 0u; /* overrun del ring (solo ISR) */
 static uint8  g_sd_blk[SD_BLOCK_BYTES];          /* staging drenaje / caché de dump */
 static uint16 g_sd_blk_fill        = 0u;
-static uint32 g_sd_session_lba     = 0u;
 static uint32 g_sd_blocks_written  = 0u;
 static uint32 g_sd_dump_blk_cached = 0xFFFFFFFFu;
 static uint8  g_sd_err_flags       = 0u;         /* bits de PSOC_EVT_SD_ERROR (solo main) */
+static uint8  g_sd_write_failed    = 0u;
+static FATFS  g_sd_fs;
+static FIL    g_sd_file;
+static uint8  g_sd_fs_mounted      = 0u;
+static uint8  g_sd_file_open       = 0u;
+static uint8  g_sd_session_ready   = 0u;
+static uint16 g_sd_session_batches = 0u;
 static volatile uint8  g_debug_psoc   = 0u;
 static          uint32 g_dbg_cnt      = 0u;
 static volatile uint8  g_cal_ack_pending = 0u;
@@ -612,32 +615,212 @@ static void sd_put_le32(uint8 *p, uint32 v)
     p[3] = (uint8)(v >> 24u);
 }
 
+static void sd_put_le16(uint8 *p, uint16 v)
+{
+    p[0] = (uint8)v;
+    p[1] = (uint8)(v >> 8u);
+}
+
+static uint16 sd_get_le16(const uint8 *p)
+{
+    return (uint16)p[0] | ((uint16)p[1] << 8u);
+}
+
 static uint32 sd_get_le32(const uint8 *p)
 {
     return (uint32)p[0] | ((uint32)p[1] << 8u) |
            ((uint32)p[2] << 16u) | ((uint32)p[3] << 24u);
 }
 
-/* Lee el bloque directorio y reserva el arranque de la próxima sesión.
- * Directorio virgen/corrupto se re-inicializa (la SD es de uso exclusivo).
- * Devuelve 1 si la sesión quedó lista para escribir. */
-static uint8 sd_session_begin(void)
+static uint32 sd_crc32(const uint8 *data, uint16 n)
 {
-    uint32 next_lba;
+    uint32 crc = 0xFFFFFFFFu;
+    uint16 i;
+    uint8 bit;
+    for (i = 0u; i < n; i++) {
+        crc ^= (uint32)data[i];
+        for (bit = 0u; bit < 8u; bit++) {
+            crc = (crc >> 1u) ^ ((crc & 1u) ? 0xEDB88320u : 0u);
+        }
+    }
+    return ~crc;
+}
 
-    if (!sd_spi_read_block(SD_CAPTURE_DIR_LBA, g_sd_blk)) {
+static void sd_file_close(void)
+{
+    if (g_sd_file_open) {
+        (void)f_close(&g_sd_file);
+        g_sd_file_open = 0u;
+    }
+}
+
+static uint8 sd_fs_mount(void)
+{
+    if (g_sd_fs_mounted) {
+        return 1u;
+    }
+    if (!sd_spi_present()) {
         return 0u;
     }
-    if ((g_sd_blk[0] == (uint8)'G') && (g_sd_blk[1] == (uint8)'D') &&
-        (g_sd_blk[2] == (uint8)'I') && (g_sd_blk[3] == (uint8)'R')) {
-        next_lba = sd_get_le32(&g_sd_blk[4]);
-        if (next_lba < SD_CAPTURE_DATA_LBA) {
-            next_lba = SD_CAPTURE_DATA_LBA;
-        }
-    } else {
-        next_lba = SD_CAPTURE_DATA_LBA;
+    if (f_mount(&g_sd_fs, "0:", 1u) != FR_OK) {
+        return 0u;
     }
-    g_sd_session_lba = next_lba;
+    g_sd_fs_mounted = 1u;
+    return 1u;
+}
+
+static uint8 sd_runtime_status_byte(void)
+{
+    uint8 status = sd_spi_status_byte();
+    if (g_sd_fs_mounted) { status |= 0x10u; }
+    if (g_sd_session_ready) { status |= 0x20u; }
+    if (g_sd_cap_en) { status |= 0x40u; }
+    return status;
+}
+
+static void sd_header_build(uint8 state, uint16 target, uint16 captured,
+                            uint32 blocks)
+{
+    uint16 i;
+    uint32 crc;
+    for (i = 0u; i < SD_BLOCK_BYTES; i++) { g_sd_blk[i] = 0u; }
+    g_sd_blk[0] = (uint8)'G'; g_sd_blk[1] = (uint8)'E';
+    g_sd_blk[2] = (uint8)'O'; g_sd_blk[3] = (uint8)'L';
+    g_sd_blk[4] = (uint8)'A'; g_sd_blk[5] = (uint8)'S';
+    g_sd_blk[6] = (uint8)'T'; g_sd_blk[7] = (uint8)'1';
+    g_sd_blk[8] = SD_HEADER_VERSION;
+    g_sd_blk[9] = state;
+    g_sd_blk[10] = 1u; /* bloques de cabecera */
+    g_sd_blk[11] = (uint8)SD_BATCHES_PER_BLOCK;
+    g_sd_blk[12] = (uint8)SAMPLE_BYTES;
+    g_sd_blk[13] = (uint8)BATCH_SAMPLES;
+    g_sd_blk[14] = 1u; /* signed int24 LE, right-aligned/canónico */
+    g_sd_blk[15] = g_stream_mode;
+    g_sd_blk[16] = psoc_adc_get_config();
+    g_sd_blk[17] = psoc_adc_get_decimation();
+    sd_put_le16(&g_sd_blk[18], (uint16)PSOC_ADC_NATIVE_FS_HZ);
+    sd_put_le16(&g_sd_blk[20], psoc_adc_effective_fs_hz());
+    sd_put_le16(&g_sd_blk[22], target);
+    sd_put_le16(&g_sd_blk[24], captured);
+    sd_put_le32(&g_sd_blk[28], blocks);
+    crc = sd_crc32(g_sd_blk, SD_HEADER_CRC_OFFSET);
+    sd_put_le32(&g_sd_blk[SD_HEADER_CRC_OFFSET], crc);
+}
+
+static uint8 sd_header_valid(uint16 *captured_out, uint32 *blocks_out)
+{
+    uint16 target;
+    uint16 captured;
+    uint32 blocks;
+    uint32 expected_crc;
+    if (g_sd_blk[0] != (uint8)'G' || g_sd_blk[1] != (uint8)'E' ||
+        g_sd_blk[2] != (uint8)'O' || g_sd_blk[3] != (uint8)'L' ||
+        g_sd_blk[4] != (uint8)'A' || g_sd_blk[5] != (uint8)'S' ||
+        g_sd_blk[6] != (uint8)'T' || g_sd_blk[7] != (uint8)'1' ||
+        g_sd_blk[8] != SD_HEADER_VERSION ||
+        g_sd_blk[9] != SD_HEADER_COMPLETE ||
+        g_sd_blk[10] != 1u || g_sd_blk[11] != SD_BATCHES_PER_BLOCK ||
+        g_sd_blk[12] != SAMPLE_BYTES || g_sd_blk[13] != BATCH_SAMPLES ||
+        g_sd_blk[14] != 1u) {
+        return 0u;
+    }
+    expected_crc = sd_get_le32(&g_sd_blk[SD_HEADER_CRC_OFFSET]);
+    if (sd_crc32(g_sd_blk, SD_HEADER_CRC_OFFSET) != expected_crc) {
+        return 0u;
+    }
+    target = sd_get_le16(&g_sd_blk[22]);
+    captured = sd_get_le16(&g_sd_blk[24]);
+    blocks = sd_get_le32(&g_sd_blk[28]);
+    if (target == 0u || target > PSOC_SD_MAX_BATCHES || captured != target ||
+        blocks != (((uint32)captured + SD_BATCHES_PER_BLOCK - 1u) /
+                   SD_BATCHES_PER_BLOCK)) {
+        return 0u;
+    }
+    *captured_out = captured;
+    *blocks_out = blocks;
+    return 1u;
+}
+
+/* Recupera la última sesión COMPLETE tras reset. Un archivo IN_PROGRESS jamás
+ * se presenta como válido ni se rellena con ceros. */
+static uint8 sd_session_recover(void)
+{
+    UINT nread = 0u;
+    uint16 captured = 0u;
+    uint32 blocks = 0u;
+    FSIZE_t expected_size;
+
+    g_sd_session_ready = 0u;
+    g_sd_session_batches = 0u;
+    sd_file_close();
+    if (!sd_fs_mount()) { return 0u; }
+    if (f_open(&g_sd_file, SD_CAPTURE_PATH, FA_READ) != FR_OK) { return 0u; }
+    g_sd_file_open = 1u;
+    if (f_read(&g_sd_file, g_sd_blk, SD_BLOCK_BYTES, &nread) != FR_OK ||
+        nread != SD_BLOCK_BYTES || !sd_header_valid(&captured, &blocks)) {
+        sd_file_close();
+        return 0u;
+    }
+    expected_size = (FSIZE_t)SD_BLOCK_BYTES + (FSIZE_t)blocks * SD_BLOCK_BYTES;
+    if (f_size(&g_sd_file) < expected_size) {
+        sd_file_close();
+        return 0u;
+    }
+    g_sd_session_batches = captured;
+    g_sd_session_ready = 1u;
+    g_sd_dump_blk_cached = 0xFFFFFFFFu;
+    return 1u;
+}
+
+static uint8 sd_write_header(uint8 state, uint16 target, uint16 captured,
+                             uint32 blocks)
+{
+    UINT nwritten = 0u;
+    sd_header_build(state, target, captured, blocks);
+    if (f_lseek(&g_sd_file, 0u) != FR_OK ||
+        f_write(&g_sd_file, g_sd_blk, SD_BLOCK_BYTES, &nwritten) != FR_OK ||
+        nwritten != SD_BLOCK_BYTES || f_sync(&g_sd_file) != FR_OK) {
+        return 0u;
+    }
+    return 1u;
+}
+
+/* Crea/preasigna el único archivo de captura antes de entrar a la ventana
+ * silenciosa. Devuelve 0 si no hay filesystem o espacio suficiente. */
+static uint8 sd_session_begin(uint16 target_batches)
+{
+    FRESULT fr;
+    FSIZE_t total_bytes;
+    UINT nwritten = 0u;
+    uint8 zero = 0u;
+    uint32 blocks = ((uint32)target_batches + SD_BATCHES_PER_BLOCK - 1u) /
+                    SD_BATCHES_PER_BLOCK;
+
+    g_sd_session_ready = 0u;
+    g_sd_session_batches = 0u;
+    sd_file_close();
+    if (!sd_fs_mount()) { return 0u; }
+    fr = f_open(&g_sd_file, SD_CAPTURE_PATH,
+                (BYTE)(FA_CREATE_ALWAYS | FA_READ | FA_WRITE));
+    if (fr != FR_OK) { return 0u; }
+    g_sd_file_open = 1u;
+    total_bytes = (FSIZE_t)SD_BLOCK_BYTES + (FSIZE_t)blocks * SD_BLOCK_BYTES;
+    fr = f_expand(&g_sd_file, total_bytes, 1u);
+    if (fr != FR_OK) {
+        /* Fallback seguro para una tarjeta fragmentada: FatFs asigna la cadena
+         * al extender; no se toca ningún sector fuera del archivo. */
+        if (f_lseek(&g_sd_file, total_bytes - 1u) != FR_OK ||
+            f_write(&g_sd_file, &zero, 1u, &nwritten) != FR_OK ||
+            nwritten != 1u) {
+            sd_file_close();
+            return 0u;
+        }
+    }
+    if (!sd_write_header(SD_HEADER_INPROGRESS, target_batches, 0u, blocks) ||
+        f_lseek(&g_sd_file, SD_BLOCK_BYTES) != FR_OK) {
+        sd_file_close();
+        return 0u;
+    }
     return 1u;
 }
 
@@ -647,10 +830,12 @@ static uint8 sd_session_begin(void)
  * parte en el wrap. */
 static void sd_capture_drain(uint8 flush)
 {
+    if (g_sd_write_failed || !g_sd_file_open) { return; }
     for (;;) {
         uint32 avail_samples = g_sd_ring_samples - g_sd_ring_drained;
         const volatile uint8 *src;
         uint16 i;
+        UINT nwritten = 0u;
 
         if (avail_samples < (uint32)BATCH_SAMPLES) {
             break;
@@ -667,23 +852,37 @@ static void sd_capture_drain(uint8 flush)
             for (i = g_sd_blk_fill; i < SD_BLOCK_BYTES; i++) {
                 g_sd_blk[i] = 0u;
             }
-            if (!sd_spi_write_block(g_sd_session_lba + 1u + g_sd_blocks_written,
-                                    g_sd_blk)) {
+            if (f_write(&g_sd_file, g_sd_blk, SD_BLOCK_BYTES, &nwritten) != FR_OK ||
+                nwritten != SD_BLOCK_BYTES) {
                 g_sd_err_flags |= 0x01u;
+                g_sd_write_failed = 1u;
+                g_capture_done = 1u;
+                return;
             }
             g_sd_blocks_written++;
             g_sd_blk_fill = 0u;
+            if ((g_sd_blocks_written % SD_SYNC_BLOCKS) == 0u &&
+                f_sync(&g_sd_file) != FR_OK) {
+                g_sd_err_flags |= 0x01u;
+                g_sd_write_failed = 1u;
+                g_capture_done = 1u;
+                return;
+            }
         }
     }
 
     if (flush && (g_sd_blk_fill != 0u)) {
         uint16 i;
+        UINT nwritten = 0u;
         for (i = g_sd_blk_fill; i < SD_BLOCK_BYTES; i++) {
             g_sd_blk[i] = 0u;
         }
-        if (!sd_spi_write_block(g_sd_session_lba + 1u + g_sd_blocks_written,
-                                g_sd_blk)) {
+        if (f_write(&g_sd_file, g_sd_blk, SD_BLOCK_BYTES, &nwritten) != FR_OK ||
+            nwritten != SD_BLOCK_BYTES) {
             g_sd_err_flags |= 0x01u;
+            g_sd_write_failed = 1u;
+            g_capture_done = 1u;
+            return;
         }
         g_sd_blocks_written++;
         g_sd_blk_fill = 0u;
@@ -694,53 +893,74 @@ static void sd_capture_drain(uint8 flush)
  * Deja la sesión persistida en la SD (respaldo de campo) además del dump UART. */
 static void sd_session_finalize(uint16 batches_captured)
 {
-    uint32 session_count = 0u;
+    uint8 complete;
+    if (g_sd_drop_samples != 0u) { g_sd_err_flags |= 0x02u; }
+    complete = (g_sd_err_flags == 0u && !g_sd_write_failed &&
+                batches_captured == g_total_target &&
+                g_sd_blocks_written ==
+                    (((uint32)batches_captured + SD_BATCHES_PER_BLOCK - 1u) /
+                     SD_BATCHES_PER_BLOCK)) ? 1u : 0u;
+    if (complete && !sd_write_header(SD_HEADER_COMPLETE, g_total_target,
+                                     batches_captured, g_sd_blocks_written)) {
+        g_sd_err_flags |= 0x04u;
+        complete = 0u;
+    }
+    sd_file_close();
+    if (complete && sd_session_recover()) {
+        uart_send_diag(PSOC_EVT_SD_SESSION, 1u);
+    } else {
+        g_sd_session_ready = 0u;
+        uart_send_diag(PSOC_EVT_SD_SESSION, 0u);
+        if (g_sd_err_flags == 0u) { g_sd_err_flags = 0x04u; }
+    }
+    if (g_sd_err_flags != 0u) { uart_send_diag(PSOC_EVT_SD_ERROR, g_sd_err_flags); }
+}
+
+static uint8 sd_session_read_batch(uint16 batch_index)
+{
+    UINT nread = 0u;
+    uint32 block;
+    if (!g_sd_session_ready || batch_index >= g_sd_session_batches) { return 0u; }
+    if (!g_sd_file_open && !sd_session_recover()) { return 0u; }
+    block = (uint32)batch_index / SD_BATCHES_PER_BLOCK;
+    if (block != g_sd_dump_blk_cached) {
+        FSIZE_t offset = (FSIZE_t)SD_BLOCK_BYTES + (FSIZE_t)block * SD_BLOCK_BYTES;
+        if (f_lseek(&g_sd_file, offset) != FR_OK ||
+            f_read(&g_sd_file, g_sd_blk, SD_BLOCK_BYTES, &nread) != FR_OK ||
+            nread != SD_BLOCK_BYTES) {
+            g_sd_err_flags |= 0x08u;
+            return 0u;
+        }
+        g_sd_dump_blk_cached = block;
+    }
+    return 1u;
+}
+
+static uint8 sd_fs_self_test(void)
+{
+    FIL test;
+    UINT n = 0u;
     uint16 i;
-
-    if (sd_spi_read_block(SD_CAPTURE_DIR_LBA, g_sd_blk) &&
-        (g_sd_blk[0] == (uint8)'G') && (g_sd_blk[1] == (uint8)'D') &&
-        (g_sd_blk[2] == (uint8)'I') && (g_sd_blk[3] == (uint8)'R')) {
-        session_count = sd_get_le32(&g_sd_blk[8]);
+    uint8 ok = 0u;
+    if (!sd_fs_mount()) { sd_spi_set_self_test_result(0u); return 0u; }
+    for (i = 0u; i < 128u; i++) { g_sd_blk[i] = (uint8)(0xA5u ^ (uint8)i); }
+    if (f_open(&test, SD_TEST_PATH, (BYTE)(FA_CREATE_ALWAYS | FA_READ | FA_WRITE)) != FR_OK) {
+        sd_spi_set_self_test_result(0u); return 0u;
     }
-
-    for (i = 0u; i < SD_BLOCK_BYTES; i++) {
-        g_sd_blk[i] = 0u;
+    if (f_write(&test, g_sd_blk, 128u, &n) == FR_OK && n == 128u &&
+        f_sync(&test) == FR_OK && f_lseek(&test, 0u) == FR_OK) {
+        for (i = 0u; i < 128u; i++) { g_sd_blk[i] = 0u; }
+        if (f_read(&test, g_sd_blk, 128u, &n) == FR_OK && n == 128u) {
+            ok = 1u;
+            for (i = 0u; i < 128u; i++) {
+                if (g_sd_blk[i] != (uint8)(0xA5u ^ (uint8)i)) { ok = 0u; break; }
+            }
+        }
     }
-    g_sd_blk[0] = (uint8)'G'; g_sd_blk[1] = (uint8)'S';
-    g_sd_blk[2] = (uint8)'E'; g_sd_blk[3] = (uint8)'S';
-    sd_put_le32(&g_sd_blk[4], session_count);
-    sd_put_le32(&g_sd_blk[8], (uint32)batches_captured);
-    g_sd_blk[12] = (uint8)(psoc_adc_effective_fs_hz() & 0xFFu);
-    g_sd_blk[13] = (uint8)((psoc_adc_effective_fs_hz() >> 8u) & 0xFFu);
-    g_sd_blk[14] = psoc_adc_get_decimation();
-    g_sd_blk[15] = g_stream_mode;
-    g_sd_blk[16] = (uint8)SD_BATCHES_PER_BLOCK;
-    g_sd_blk[17] = (uint8)BATCH_SAMPLES;
-    if (!sd_spi_write_block(g_sd_session_lba, g_sd_blk)) {
-        g_sd_err_flags |= 0x04u;
-    }
-
-    for (i = 0u; i < SD_BLOCK_BYTES; i++) {
-        g_sd_blk[i] = 0u;
-    }
-    g_sd_blk[0] = (uint8)'G'; g_sd_blk[1] = (uint8)'D';
-    g_sd_blk[2] = (uint8)'I'; g_sd_blk[3] = (uint8)'R';
-    sd_put_le32(&g_sd_blk[4], g_sd_session_lba + 1u + g_sd_blocks_written);
-    sd_put_le32(&g_sd_blk[8], session_count + 1u);
-    if (!sd_spi_write_block(SD_CAPTURE_DIR_LBA, g_sd_blk)) {
-        g_sd_err_flags |= 0x04u;
-    }
-    /* El staging queda libre: el dump lo reusa como caché de lectura. */
-    g_sd_dump_blk_cached = 0xFFFFFFFFu;
-
-    if (g_sd_drop_samples != 0u) {
-        g_sd_err_flags |= 0x02u;
-    }
-    uart_send_diag(PSOC_EVT_SD_SESSION,
-                   (g_sd_blocks_written > 255u) ? 255u : (uint8)g_sd_blocks_written);
-    if (g_sd_err_flags != 0u) {
-        uart_send_diag(PSOC_EVT_SD_ERROR, g_sd_err_flags);
-    }
+    (void)f_close(&test);
+    if (f_unlink(SD_TEST_PATH) != FR_OK) { ok = 0u; }
+    sd_spi_set_self_test_result(ok);
+    return ok;
 }
 
 static void capture_engine_refresh_status(void)
@@ -1097,9 +1317,9 @@ static void comm_led_stop(void)
 static uint32 capture_expected_ms(uint16 batches)
 {
     /* `batches` son lotes DECIMADOS (almacenados); psoc_adc_effective_fs_hz()
-     * ya refleja 2929/factor, así que esta cuenta da el tiempo real de pared
+     * ya refleja 2604/factor, así que esta cuenta da el tiempo real de pared
      * de la corrida sin tener que multiplicar por el factor a mano acá.
-     * A 2929 S/s sin decimar: 30 muestras/lote ≈ 10.24 ms/lote. */
+     * A 2604 S/s sin decimar: 30 muestras/lote ≈ 11.52 ms/lote. */
     return ((uint32)batches * (uint32)BATCH_SAMPLES * 1000u) /
            (uint32)psoc_adc_effective_fs_hz();
 }
@@ -1202,6 +1422,7 @@ static void capture_reset_locked(uint16 stored_batches)
     g_sd_blocks_written = 0u;
     g_sd_dump_blk_cached = 0xFFFFFFFFu;
     g_sd_err_flags      = 0u;
+    g_sd_write_failed   = 0u;
 }
 
 static int32 sign_extend_bits(uint32 value, uint8 bits)
@@ -1330,9 +1551,13 @@ static void sd_ring_store(int32 val)
         /* Ring lleno: la SD no drenó a tiempo. Se descarta la muestra y se
          * reporta al final (PSOC_EVT_SD_ERROR bit1). */
         g_sd_drop_samples++;
+        g_capture_done = 1u;
         return;
     }
     dst = g_capture_raw + ((written % SD_RING_SAMPLES) * (uint32)SAMPLE_BYTES);
+    /* El archivo es independiente de la config ADC activa: guarda siempre el
+     * mismo int24 right-aligned que se transmite por UART. */
+    val = psoc_adc_counts_right_aligned(val);
     capture_store_decoded(dst, val);
     written++;
     g_sd_ring_samples = written;
@@ -1431,6 +1656,7 @@ static void psoc_enter_sampling(uint8 debugMode)
 {
     uint8 saved;
     uint8 source;
+    uint8 use_sd = 0u;
     uint16 decim = (uint16)psoc_adc_get_decimation();
     uint16 total_target = capture_target_batches();
     uint16 hw_target;
@@ -1444,6 +1670,22 @@ static void psoc_enter_sampling(uint8 debugMode)
 #endif
     ADC_StopConvert();
     runtime_timers_stop_for_quiet_window();
+    source = capture_engine_source_from_stream(g_stream_mode);
+#if PSOC_RAMP_DEBUG_ENABLE
+    if (debugMode) { source = CE_CFG_SRC_DEBUG; }
+#endif
+    if (g_sd_cap_en
+#if PSOC_RAMP_DEBUG_ENABLE
+        && (source != CE_CFG_SRC_DEBUG)
+#endif
+       ) {
+        use_sd = sd_session_begin(total_target);
+        if (!use_sd) {
+            idle_ping_schedule();
+            uart_send_diag(PSOC_EVT_SD_ERROR, 0x04u);
+            return;
+        }
+    }
     saved = CyEnterCriticalSection();
 #if PSOC_RAMP_DEBUG_ENABLE
     g_debug_psoc = debugMode ? 1u : 0u;
@@ -1451,7 +1693,9 @@ static void psoc_enter_sampling(uint8 debugMode)
     (void)debugMode;
     g_debug_psoc = 0u;
 #endif
-    capture_reset_locked(total_target);
+    capture_reset_locked(use_sd ? (uint16)PSOC_CAPTURE_MAX_BATCHES : total_target);
+    g_sd_cap_active = use_sd;
+    g_sd_target_samples = (uint32)total_target * (uint32)BATCH_SAMPLES;
     g_capture_decim_factor = (uint8)decim;
     g_total_target = total_target;
     g_total_sent   = 0u;
@@ -1462,7 +1706,6 @@ static void psoc_enter_sampling(uint8 debugMode)
         g_chain_active = 1u;
     }
     CyExitCriticalSection(saved);
-    source = capture_engine_source_from_stream(g_stream_mode);
 #if PSOC_RAMP_DEBUG_ENABLE
     g_capture_align = (source == CE_CFG_SRC_DEBUG) ? 0u : 1u;
 #else
@@ -1479,7 +1722,7 @@ static void psoc_enter_sampling(uint8 debugMode)
     capture_engine_clear_flags();
     capture_watchdog_arm();
     capture_engine_pulse(CE_CTRL_START_NOW);
-    if (g_n_batches > PSOC_CAPTURE_MAX_BATCHES) {
+    if (!use_sd && g_n_batches > PSOC_CAPTURE_MAX_BATCHES) {
         /* Pedido recortado al buffer RAM del PSoC. */
         uart_send_diag(PSOC_EVT_CAPTURE_CLAMPED, diag_u16_sat(g_n_batches));
     }
@@ -1953,9 +2196,18 @@ static void psoc_arm(void)
         && (source != CE_CFG_SRC_DEBUG)
 #endif
        ) {
-        use_sd = sd_session_begin();
+        use_sd = sd_session_begin(total_target);
     }
-    if (!use_sd && (total_target > PSOC_CAPTURE_MAX_BATCHES)) {
+    if (g_sd_cap_en && !use_sd
+#if PSOC_RAMP_DEBUG_ENABLE
+        && (source != CE_CFG_SRC_DEBUG)
+#endif
+       ) {
+        idle_ping_schedule();
+        uart_send_diag(PSOC_EVT_SD_ERROR, 0x04u);
+        return;
+    }
+    if (!use_sd && total_target > PSOC_CAPTURE_MAX_BATCHES) {
         total_target = PSOC_CAPTURE_MAX_BATCHES;
     }
 
@@ -1983,6 +2235,7 @@ static void psoc_arm(void)
     capture_engine_clear_flags();
     capture_engine_pulse(CE_CTRL_ARM);
     ADC_StartConvert();
+    uart_send_diag(PSOC_EVT_ARMED, diag_u16_sat(total_target));
 }
 
 static void psoc_start_now(void)
@@ -2141,7 +2394,8 @@ static uint8 service_button_calibration(void)
 #endif
 }
 
-static void uart_send_capture_frame(const volatile uint8 *src)
+static void uart_send_capture_frame_ex(const volatile uint8 *src, uint16 seq,
+                                       uint8 align_samples)
 {
     uint8  frame[FRAME_BYTES];
     uint8 *p;
@@ -2150,8 +2404,8 @@ static void uart_send_capture_frame(const volatile uint8 *src)
 
     frame[0] = 0xABu;
     frame[1] = (uint8)BATCH_SAMPLES;
-    frame[2] = (uint8)( g_seq        & 0xFFu);
-    frame[3] = (uint8)((g_seq >> 8u) & 0xFFu);
+    frame[2] = (uint8)( seq        & 0xFFu);
+    frame[3] = (uint8)((seq >> 8u) & 0xFFu);
 
     /* La ISR guarda los 3 bytes crudos del DMA sin procesar; el alineado a
      * counts (division por DEC_DIV) se hace acá, fuera de la ventana crítica
@@ -2159,7 +2413,7 @@ static void uart_send_capture_frame(const volatile uint8 *src)
     p = &frame[4];
     for (i = 0u; i < BATCH_SAMPLES; i++, p += 3u, src += 3u)
     {
-        if (g_capture_align) {
+        if (align_samples) {
             int32 val = psoc_adc_counts_right_aligned(
                 g_capture_adc_raw ? dma_buf_to_adc_counts(src) : dma_buf_to_i24(src));
             p[0] = (uint8)( val         & 0xFFu);
@@ -2175,8 +2429,14 @@ static void uart_send_capture_frame(const volatile uint8 *src)
     for (i = 0u; i < (FRAME_BYTES - 1u); i++) { crc ^= frame[i]; }
     frame[FRAME_BYTES - 1u] = crc;
 
-    g_seq++;
     UART_PutArray(frame, FRAME_BYTES);
+}
+
+static void uart_send_capture_frame(const volatile uint8 *src)
+{
+    uint16 seq = g_seq;
+    g_seq++;
+    uart_send_capture_frame_ex(src, seq, g_capture_align);
 }
 
 static void uart_send_capture_batch(uint16 batchIndex)
@@ -2184,26 +2444,17 @@ static void uart_send_capture_batch(uint16 batchIndex)
     uart_send_capture_frame(&g_capture_raw[(uint32)batchIndex * CAPTURE_BATCH_BYTES]);
 }
 
-/* Dump de un lote desde la SD (captura con g_sd_cap_active): lee el bloque de
- * la sesión que lo contiene (caché de 1 bloque en g_sd_blk, los lotes se piden
- * en orden) y manda el frame con el mismo formato que el camino RAM. */
-static void uart_send_sd_batch(uint16 batchIndex)
+/* Lee exactamente el lote pedido. En éxito el seq UART coincide con el índice;
+ * en fallo no se transmite ningún frame de datos. */
+static uint8 uart_send_sd_batch(uint16 batchIndex)
 {
-    uint32 blk = (uint32)batchIndex / SD_BATCHES_PER_BLOCK;
     uint16 offset = (uint16)((uint32)batchIndex % SD_BATCHES_PER_BLOCK) *
                     CAPTURE_BATCH_BYTES;
-
-    if (blk != g_sd_dump_blk_cached) {
-        if (!sd_spi_read_block(g_sd_session_lba + 1u + blk, g_sd_blk)) {
-            uint16 i;
-            g_sd_err_flags |= 0x08u;
-            for (i = 0u; i < SD_BLOCK_BYTES; i++) {
-                g_sd_blk[i] = 0u;
-            }
-        }
-        g_sd_dump_blk_cached = blk;
+    if (!sd_session_read_batch(batchIndex)) {
+        return 0u;
     }
-    uart_send_capture_frame(&g_sd_blk[offset]);
+    uart_send_capture_frame_ex(&g_sd_blk[offset], batchIndex, 0u);
+    return 1u;
 }
 
 static void uart_service(void)
@@ -2232,7 +2483,7 @@ static void uart_service(void)
                     case PSOC_CMD_BLINK_LED:
                     case PSOC_CMD_PONG:
                         rx_cmd = rx; rx_state = 2u; break;
-                    case 0xA3u:
+                    case 0xA3u: case PSOC_CMD_SD_READ_BATCH:
                         rx_cmd = rx; rx_state = 4u; break;
                     default:
                         rx_watchdog_stop(); rx_state = 0u; break;
@@ -2295,6 +2546,7 @@ static void uart_service(void)
                         case PSOC_CMD_SD_STATUS:
                         case PSOC_CMD_SD_TEST:
                         case PSOC_CMD_SD_CAPTURE:
+                        case PSOC_CMD_SD_READ_BATCH:
                             uart_send_diag(PSOC_EVT_CAL_BUSY, rx_cmd);
                             uart_send_cfg_ack(rx_cmd, 0u);
                             break;
@@ -2448,14 +2700,19 @@ static void uart_service(void)
                     case PSOC_CMD_SD_STATUS:
                         /* p1=1: re-init completo (solo IDLE); p1=0: estado cacheado. */
                         if ((rx_p1 != 0u) && (g_state == PSOC_IDLE)) {
+                            sd_file_close();
+                            (void)f_mount((FATFS *)0, "0:", 0u);
+                            g_sd_fs_mounted = 0u;
+                            g_sd_session_ready = 0u;
                             (void)sd_spi_init();
+                            (void)sd_session_recover();
                         }
-                        uart_send_diag(PSOC_EVT_SD_STATUS, sd_spi_status_byte());
-                        uart_send_cfg_ack(PSOC_CMD_SD_STATUS, sd_spi_status_byte());
+                        uart_send_diag(PSOC_EVT_SD_STATUS, sd_runtime_status_byte());
+                        uart_send_cfg_ack(PSOC_CMD_SD_STATUS, sd_runtime_status_byte());
                         break;
                     case PSOC_CMD_SD_TEST:
                         if ((g_state == PSOC_IDLE) && sd_spi_present()) {
-                            uart_send_cfg_ack(PSOC_CMD_SD_TEST, sd_spi_self_test());
+                            uart_send_cfg_ack(PSOC_CMD_SD_TEST, sd_fs_self_test());
                         } else {
                             uart_send_cfg_ack(PSOC_CMD_SD_TEST, 0u);
                         }
@@ -2467,13 +2724,24 @@ static void uart_service(void)
                         } else if (rx_p1 == 0u) {
                             g_sd_cap_en = 0u;
                             uart_send_cfg_ack(PSOC_CMD_SD_CAPTURE, 0u);
-                        } else if (sd_spi_present()) {
+                        } else if (sd_spi_present() && sd_fs_mount()) {
                             g_sd_cap_en = 1u;
                             uart_send_cfg_ack(PSOC_CMD_SD_CAPTURE, 1u);
                         } else {
                             uart_send_cfg_ack(PSOC_CMD_SD_CAPTURE, 0xEEu);
                         }
+                        uart_send_diag(PSOC_EVT_SD_STATUS, sd_runtime_status_byte());
                         led_toggle();
+                        break;
+                    case PSOC_CMD_SD_READ_BATCH:
+                        if (g_state == PSOC_IDLE &&
+                            uart_send_sd_batch((uint16)rx_p1 | ((uint16)rx_p2 << 8u))) {
+                            /* El frame con seq solicitado es el ACK positivo. */
+                        } else {
+                            g_sd_err_flags |= 0x08u;
+                            uart_send_cfg_ack(PSOC_CMD_SD_READ_BATCH, 0u);
+                            uart_send_diag(PSOC_EVT_SD_ERROR, g_sd_err_flags);
+                        }
                         break;
                     case PSOC_CMD_BLINK_LED:
                         /* Identificacion no bloqueante: Timer_2 encadena
@@ -2649,10 +2917,13 @@ static void service_runtime(void)
             }
         }
         if (g_sd_cap_active) {
-            /* Fin real de la captura: vaciar el ring a SD y persistir la
-             * sesión (header + directorio) antes de arrancar el dump UART. */
+            /* Fin real: persistir y cerrar. Una captura SD no se auto-vuelca
+             * por UART; el ESP pedirá cada lote con 0xBF durante DUMPING. */
             sd_capture_drain(1u);
             sd_session_finalize(g_batches_captured);
+            g_batches_sent = g_batches_captured;
+            g_total_sent = g_batches_captured;
+            g_chain_active = 0u;
         }
         idle_ping_schedule();
         uart_send_diag(PSOC_EVT_CAPTURE_DONE,
@@ -2660,17 +2931,16 @@ static void service_runtime(void)
         g_ce_error = 0u;
         g_capture_done = 0u;
         g_state = PSOC_IDLE;
+        if (g_sd_cap_active) {
+            uart_send_diag(PSOC_EVT_DUMP_DONE, diag_u16_sat(g_batches_captured));
+        }
     }
 
     if (capture_dump_pending()) {
         if (g_batches_sent == 0u) {
             uart_send_diag(PSOC_EVT_DUMP_START, diag_u16_sat(g_batches_captured));
         }
-        if (g_sd_cap_active) {
-            uart_send_sd_batch(g_batches_sent);
-        } else {
-            uart_send_capture_batch(g_batches_sent);
-        }
+        uart_send_capture_batch(g_batches_sent);
         g_batches_sent++;
         if (!capture_dump_pending()) {
             g_total_sent = g_batches_sent;
@@ -2954,11 +3224,14 @@ int main(void)
     psoc_prepare_capture_path();
     uart_send_diag(PSOC_EVT_ANALOG_READY, 0u);
 
-    /* Detección de SD en boot (rápida si no hay tarjeta: CMD0 sin respuesta).
-     * El resultado queda cacheado; el ESP lo consulta con PSOC_CMD_SD_STATUS. */
+    /* Detección + montaje FatFs. Si GEOLAST.BIN terminó antes de un reset se
+     * recupera y queda inmediatamente disponible para lecturas 0xBF. */
     (void)sd_spi_init();
-    uart_send_diag(PSOC_EVT_SD_STATUS, sd_spi_status_byte());
-    psoc_debug_print_u32("[PC] sd_status=", sd_spi_status_byte());
+    (void)sd_session_recover();
+    if (g_sd_fs_mounted && sd_spi_present()) { g_sd_cap_en = 1u; }
+    uart_send_diag(PSOC_EVT_SD_STATUS, sd_runtime_status_byte());
+    if (g_sd_session_ready) { uart_send_diag(PSOC_EVT_SD_SESSION, 1u); }
+    psoc_debug_print_u32("[PC] sd_status=", sd_runtime_status_byte());
 
 #if !PSOC_SUPERMAQUINA_OWNS_DMA_IRQ
 #ifdef CY_ISR_isr_DMA_DelSig_RAM_H

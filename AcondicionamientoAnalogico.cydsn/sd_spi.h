@@ -1,8 +1,6 @@
 /* Driver SD en modo SPI sobre el componente SPI Master del TopDesign (SPIp:
- * CS=P2.3, SCK=P2.4, MOSI=P2.5, MISO=P2.6). Sin filesystem: la tarjeta se usa
- * como almacenamiento crudo por bloques de 512 bytes (ver layout en
- * psoc_hw.c). La implementación vive en psoc_hw.c para no tener que registrar
- * un .c nuevo en el .cyprj (prohibido editarlo a mano).
+ * CS=P2.3, SCK=P2.4, MOSI=P2.5, MISO=P2.6). Expone bloques de 512 bytes a
+ * FatFs; las capturas nunca escriben LBAs fijos ni pisan la tabla FAT.
  *
  * El CS del TopDesign quedó cableado al `ss` de hardware del SPIM, que sube
  * entre bytes — inservible para el protocolo SD. sd_spi_init() lo desengancha
@@ -32,6 +30,7 @@ uint8 sd_spi_init(void);
 
 uint8 sd_spi_present(void);
 uint8 sd_spi_card_type(void);
+uint32 sd_spi_sector_count(void);
 
 /* Byte de estado compacto para telemetría (PSOC_EVT_SD_STATUS / ack 0xBC):
  * bit0 = presente, bits1-2 = tipo (SD_TYPE_*), bit3 = self-test OK previo. */
@@ -46,6 +45,7 @@ uint8 sd_spi_write_block(uint32 lba, const uint8 *src);
 /* Escribe un patrón en un bloque de scratch, lo relee y compara.
  * No pisa el área de datos de capturas. Devuelve 1 si verificó. */
 uint8 sd_spi_self_test(void);
+void sd_spi_set_self_test_result(uint8 ok);
 
 #endif
 

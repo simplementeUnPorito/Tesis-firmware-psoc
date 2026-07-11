@@ -58,10 +58,10 @@ uint8 psoc_adc_set_decimation(uint8 factor)
 uint16 psoc_adc_effective_fs_hz(void)
 {
     /* "Actual conv. rate" del customizer (las 4 configs regeneradas a
-     * 2929 SPS nativos, ver ADC_CF_2V5_SRATE etc. en Generated_Source),
+     * 2604 SPS nativos, ver ADC_CF_2V5_SRATE etc. en Generated_Source),
      * dividido por el factor de decimación con promedio aplicado en el
      * ISR de captura (main.c). */
-    return (uint16)(2929u / (uint16)g_psoc_adc_decimation);
+    return (uint16)(PSOC_ADC_NATIVE_FS_HZ / (uint16)g_psoc_adc_decimation);
 }
 
 void psoc_adc_cal_override(uint8 force_2v5)

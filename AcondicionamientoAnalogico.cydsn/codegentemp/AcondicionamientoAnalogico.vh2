@@ -2,7 +2,7 @@
 --	Conversion of AcondicionamientoAnalogico.v to vh2:
 --
 --	Cypress Semiconductor - WARP Version 6.3 IR 41
---	Sat Jul 11 02:20:40 2026
+--	Sat Jul 11 12:09:20 2026
 --
 
 USE cypress.cypress.all;
@@ -1218,7 +1218,6 @@ ATTRIBUTE port_state_att of \SPI:BSPIM:sR8:Dp:f1_bus_stat_reg\:SIGNAL IS 2;
 SIGNAL \SPI:BSPIM:sR8:Dp:f1_blk_stat_reg\ : bit;
 ATTRIBUTE port_state_att of \SPI:BSPIM:sR8:Dp:f1_blk_stat_reg\:SIGNAL IS 2;
 SIGNAL \SPI:Net_289\ : bit;
-TERMINAL Net_7100 : bit;
 TERMINAL \OPAref:Net_29\ : bit;
 SIGNAL \VDAC_ref_PGA:Net_83\ : bit;
 SIGNAL \VDAC_ref_PGA:Net_81\ : bit;
@@ -3893,10 +3892,6 @@ SPIp:cy_psoc3_pins_v1_10
 		pi=>(zero, zero, zero, zero,
 			zero, zero, zero, zero),
 		po=>open);
-\LPF_2:cy_psoc3_lpf_1\:cy_psoc3_lpf_v1_0
-	GENERIC MAP(cy_registers=>"")
-	PORT MAP(vin=>Net_7100,
-		vout=>Net_4204);
 \OPAref:ABuf\:cy_psoc3_abuf_v1_0
 	GENERIC MAP(cy_registers=>"")
 	PORT MAP(vplus=>Net_4204,
@@ -3912,7 +3907,7 @@ vRef_1:cy_vref_v1_0
 		name=>"Vdda/2",
 		autoenable=>'1',
 		ignoresleep=>'0')
-	PORT MAP(vout=>Net_7100);
+	PORT MAP(vout=>Net_4204);
 \VDAC_ref_PGA:viDAC8\:cy_psoc3_vidac8_v1_0
 	GENERIC MAP(cy_registers=>"",
 		reg_data=>'0',
@@ -4635,7 +4630,7 @@ SEo:cy_psoc3_pins_v1_10
 		id=>"ac3f5e87-ab78-49da-9484-ce1001bd2697/edd15f43-b66b-457b-be3a-5342345270c8",
 		source_clock_id=>"61737EF6-3B74-48f9-8B91-F7473A442AE7",
 		divisor=>0,
-		period=>"325520833.333333",
+		period=>"375093773.443361",
 		is_direct=>'0',
 		is_digital=>'0')
 	PORT MAP(clock_out=>\ADC:Net_488\,

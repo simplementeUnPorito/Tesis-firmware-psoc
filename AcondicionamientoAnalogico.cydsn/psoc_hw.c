@@ -66,7 +66,7 @@ void psoc_hw_start_analog(uint8 pga_code, uint8 pgavdac_code)
     PGAp_SetGain(PGAp_GAIN_02);
     PGAn_SetGain(PGAn_GAIN_02);
     LPF_1_Start();
-    LPF_2_Start();
+    //LPF_2_Start();
     PGAgain_Start();
     psoc_hw_set_pga(pga_code);
     OPAbp_Start();
@@ -100,9 +100,6 @@ void psoc_hw_start_analog(uint8 pga_code, uint8 pgavdac_code)
 #define SD_CMD_RETRY        8u
 #define SD_R1_IDLE          0x01u
 #define SD_TOKEN_START      0xFEu
-/* Bloque de scratch para self-test; el área de capturas empieza en 2048. */
-#define SD_SELFTEST_LBA     1024u
-
 /* Divisor de SPI_IntClock para el init lento: 24 MHz / 64 = 375 kHz de clock
  * interno -> 187.5 kbps en el bus. */
 #define SD_INIT_CLK_DIVIDER 64u
@@ -111,6 +108,7 @@ static uint8  g_sd_type          = SD_TYPE_NONE;
 static uint8  g_sd_selftest_ok   = 0u;
 static uint8  g_sd_spi_started   = 0u;
 static uint16 g_sd_fast_divider  = 0u;
+static uint32 g_sd_sector_count  = 0u;
 static uint8  g_sd_scratch[SD_BLOCK_BYTES];
 
 /* CS (P2.3) quedó ruteado al `ss` de hardware del BSPIM, que deassertea entre
@@ -221,6 +219,51 @@ static uint8 sd_acmd(uint8 cmd, uint32 arg)
     return sd_cmd(cmd, arg, 0xFFu);
 }
 
+/* Lee uno de los registros de 16 bytes (CMD9=CSD). Debe llamarse con CS bajo. */
+static uint8 sd_read_register(uint8 cmd, uint8 *dst)
+{
+    uint16 guard;
+    uint8 token = 0xFFu;
+    uint8 i;
+
+    if (sd_cmd(cmd, 0u, 0xFFu) != 0x00u) {
+        return 0u;
+    }
+    for (guard = 0u; guard < 15000u; guard++) {
+        token = sd_xfer(0xFFu);
+        if (token != 0xFFu) {
+            break;
+        }
+    }
+    if (token != SD_TOKEN_START) {
+        return 0u;
+    }
+    for (i = 0u; i < 16u; i++) {
+        dst[i] = sd_xfer(0xFFu);
+    }
+    (void)sd_xfer(0xFFu);
+    (void)sd_xfer(0xFFu);
+    return 1u;
+}
+
+static uint32 sd_sector_count_from_csd(const uint8 *csd)
+{
+    if ((csd[0] & 0xC0u) == 0x40u) {
+        uint32 c_size = ((uint32)(csd[7] & 0x3Fu) << 16u) |
+                        ((uint32)csd[8] << 8u) | (uint32)csd[9];
+        return (c_size + 1u) * 1024u;
+    } else {
+        uint32 c_size = ((uint32)(csd[6] & 0x03u) << 10u) |
+                        ((uint32)csd[7] << 2u) |
+                        ((uint32)(csd[8] >> 6u) & 0x03u);
+        uint8 c_mult = (uint8)(((csd[9] & 0x03u) << 1u) |
+                               ((csd[10] >> 7u) & 0x01u));
+        uint8 read_bl_len = (uint8)(csd[5] & 0x0Fu);
+        uint64 bytes = ((uint64)c_size + 1u) << ((uint8)c_mult + 2u + read_bl_len);
+        return (uint32)(bytes / (uint64)SD_BLOCK_BYTES);
+    }
+}
+
 /* Dirección efectiva del bloque según el tipo (SDHC direcciona por bloque,
  * SDSC por byte). */
 static uint32 sd_block_addr(uint32 lba)
@@ -238,6 +281,7 @@ uint8 sd_spi_init(void)
 
     g_sd_type = SD_TYPE_NONE;
     g_sd_selftest_ok = 0u;
+    g_sd_sector_count = 0u;
 
     if (!g_sd_spi_started) {
         sd_cs_detach_dsi();
@@ -319,6 +363,15 @@ uint8 sd_spi_init(void)
             goto done;
         }
     }
+    if (!sd_read_register(9u, g_sd_scratch)) {
+        g_sd_type = SD_TYPE_NONE;
+        goto done;
+    }
+    g_sd_sector_count = sd_sector_count_from_csd(g_sd_scratch);
+    if (g_sd_sector_count == 0u) {
+        g_sd_type = SD_TYPE_NONE;
+        goto done;
+    }
     ok = 1u;
 
 done:
@@ -336,6 +389,11 @@ uint8 sd_spi_present(void)
 uint8 sd_spi_card_type(void)
 {
     return g_sd_type;
+}
+
+uint32 sd_spi_sector_count(void)
+{
+    return g_sd_sector_count;
 }
 
 uint8 sd_spi_status_byte(void)
@@ -433,26 +491,20 @@ uint8 sd_spi_self_test(void)
     uint16 i;
 
     g_sd_selftest_ok = 0u;
-    if (g_sd_type == SD_TYPE_NONE) {
+    if (g_sd_type == SD_TYPE_NONE || g_sd_sector_count == 0u) {
         return 0u;
     }
-    for (i = 0u; i < SD_BLOCK_BYTES; i++) {
-        g_sd_scratch[i] = (uint8)((i * 7u + 0xA5u) & 0xFFu);
-    }
-    if (!sd_spi_write_block(SD_SELFTEST_LBA, g_sd_scratch)) {
+    /* Prueba de bajo nivel estrictamente no destructiva. La prueba de escritura
+     * vive en FatFs y usa únicamente GEOTEST.BIN, que luego se elimina. */
+    if (!sd_spi_read_block(0u, g_sd_scratch)) {
         return 0u;
     }
-    for (i = 0u; i < SD_BLOCK_BYTES; i++) {
-        g_sd_scratch[i] = 0u;
-    }
-    if (!sd_spi_read_block(SD_SELFTEST_LBA, g_sd_scratch)) {
-        return 0u;
-    }
-    for (i = 0u; i < SD_BLOCK_BYTES; i++) {
-        if (g_sd_scratch[i] != (uint8)((i * 7u + 0xA5u) & 0xFFu)) {
-            return 0u;
-        }
-    }
+    for (i = 0u; i < 16u; i++) { (void)g_sd_scratch[i]; }
     g_sd_selftest_ok = 1u;
     return 1u;
+}
+
+void sd_spi_set_self_test_result(uint8 ok)
+{
+    g_sd_selftest_ok = ok ? 1u : 0u;
 }
