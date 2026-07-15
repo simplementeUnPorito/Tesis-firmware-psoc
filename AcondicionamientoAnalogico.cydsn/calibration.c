@@ -988,6 +988,10 @@ static int32 cal_pi_stage_gain_x1000(uint8 stage_index)
 
 static int32 cal_pi_deadband_dac_codes(uint8 stage_index)
 {
+#ifdef CAL_PI_FORCE_MIN_DEADBAND
+    (void)stage_index;
+    return CAL_PI_DEADBAND_MIN_DAC_CODES;
+#else
     int32 gain_x1000 = cal_pi_stage_gain_x1000(stage_index);
     int64 num;
     int64 den;
@@ -1003,6 +1007,7 @@ static int32 cal_pi_deadband_dac_codes(uint8 stage_index)
         deadband = CAL_PI_DEADBAND_MIN_DAC_CODES;
     }
     return deadband;
+#endif
 }
 
 static int32 cal_pi_error_bucket(int32 error_dac, int32 deadband_dac)

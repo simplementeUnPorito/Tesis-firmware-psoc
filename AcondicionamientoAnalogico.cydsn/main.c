@@ -3146,6 +3146,7 @@ static void dma_adc_init(void)
 
 int main(void)
 {
+    CyDelay(1000);
     uint8 i;
 
     CyGlobalIntEnable;
@@ -3266,7 +3267,7 @@ int main(void)
     /* ── Loop de arranque: busca el ESP sin bloquear UART/ADC ───────────── */
     wait_for_esp();
     psoc_calibration_servo_enable(0u);
-
+    
     /* ── 5 parpadeos rápidos al conectar ─────────────────────────────────── */
     for (i = 0u; i < 5u; i++)
     {
@@ -3274,7 +3275,7 @@ int main(void)
         led_write(1u); wait_ms_timer2(CONNECT_BLINK_MS);
     }
     idle_ping_schedule();
-
+    
     /* ── Loop principal ─────────────────────────────────────────────────── */
     for (;;)
     {

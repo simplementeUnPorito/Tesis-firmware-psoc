@@ -49,6 +49,12 @@
 #define CAL_VDAC8_MV_PER_LSB 16L
 #endif
 
+/* Definir esta macro (o pasarla por flag de compilador) fuerza Delta_i=1 en
+ * todas las etapas, saltandose el margen de banda muerta de abajo. Uso: test
+ * A1 de la revision (distinguir banda-muerta vs velocidad de convergencia).
+ * Dejar comentado en builds normales. */
+/* #define CAL_PI_FORCE_MIN_DEADBAND */
+
 #ifndef CAL_PI_DEADBAND_MARGIN_NUM
 #define CAL_PI_DEADBAND_MARGIN_NUM 6L
 #endif

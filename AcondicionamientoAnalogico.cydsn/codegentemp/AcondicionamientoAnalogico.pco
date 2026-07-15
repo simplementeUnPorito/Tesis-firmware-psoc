@@ -1,5 +1,5 @@
 # AcondicionamientoAnalogico
-# 2026-07-12 22:20:01Z
+# 2026-07-15 02:35:02Z
 
 # IO_0@[IOP=(1)][IoId=(0)] is reserved: SWDDebugEnabled
 dont_use_io iocell 1 0
@@ -9,15 +9,16 @@ dont_use_io iocell 1 1
 dont_use_io iocell 1 3
 # IO_0@[IOP=(15)][IoId=(0)] is reserved: AnalogTrackJump
 dont_use_io iocell 15 0
-set_location "\superMaquina:MODULE_6:g1:a0:gx:u0:eq_5_split\" 1 0 1 0
+set_location "\SignalController:MODULE_6:g1:a0:gx:u0:eq_5_split\" 1 0 1 0
 set_location "ClockBlock" clockblockcell -1 -1 0
 set_io "Button(0)" iocell 2 2
 set_io "LED(0)" iocell 2 1
 set_io "SYNC_IN(0)" iocell 12 2
 set_io "Tx_1(0)" iocell 1 2
 set_io "Rx_1(0)" iocell 1 5
+set_io "LPm(0)" iocell 3 2
 set_io "AMuxCapacitor(0)" iocell 1 7
-set_io "Vref_LP(0)" iocell 3 3
+set_io "LPo(0)" iocell 3 7
 set_io "Vref_ADDER(0)" iocell 3 5
 set_io "Vref_PGA(0)" iocell 0 6
 set_io "Vref_BP(0)" iocell 0 2
@@ -28,8 +29,7 @@ set_io "SPIp(0)" iocell 2 3
 set_io "SPIp(1)" iocell 2 4
 set_io "SPIp(2)" iocell 2 5
 set_io "SPIp(3)" iocell 2 6
-set_io "LPo(0)" iocell 3 7
-set_io "LPm(0)" iocell 3 2
+set_io "Vref_LP(0)" iocell 3 3
 set_io "ADDERm(0)" iocell 3 4
 set_io "BPm(0)" iocell 0 3
 set_io "ADDERo(0)" iocell 3 6
@@ -45,14 +45,14 @@ set_location "\UART:BUART:rx_counter_load\" 0 2 1 1
 set_location "\UART:BUART:rx_postpoll\" 0 1 0 2
 set_location "\UART:BUART:rx_status_4\" 1 4 0 1
 set_location "\UART:BUART:rx_status_5\" 0 4 1 3
-set_location "\superMaquina:arm_pulse\" 2 0 1 2
-set_location "\superMaquina:start_now_pulse\" 2 1 0 1
-set_location "\superMaquina:stop_pulse\" 3 2 1 0
-set_location "\superMaquina:clear_flags_pulse\" 1 2 1 2
-set_location "\superMaquina:load_batch_lo_pulse\" 2 1 1 2
-set_location "\superMaquina:sample_done_rise\" 1 5 1 0
-set_location "\superMaquina:sample_will_close_batch\" 2 4 1 0
-set_location "\superMaquina:batch_will_finish_capture\" 1 2 1 1
+set_location "\SignalController:arm_pulse\" 2 0 1 2
+set_location "\SignalController:start_now_pulse\" 2 1 0 1
+set_location "\SignalController:stop_pulse\" 3 2 1 0
+set_location "\SignalController:clear_flags_pulse\" 1 2 1 2
+set_location "\SignalController:load_batch_lo_pulse\" 2 1 1 2
+set_location "\SignalController:sample_done_rise\" 1 5 1 0
+set_location "\SignalController:sample_will_close_batch\" 2 4 1 0
+set_location "\SignalController:batch_will_finish_capture\" 1 2 1 1
 set_location "dar" 2 1 1 0
 set_location "daf" 2 0 1 0
 set_location "dfr" 1 5 0 0
@@ -61,31 +61,31 @@ set_location "Net_6999_3" 3 3 1 1
 set_location "Net_6999_2" 3 3 1 3
 set_location "Net_6999_1" 3 3 0 2
 set_location "Net_6999_0" 3 4 0 2
-set_location "\superMaquina:batch_count_reg_1_split\" 0 4 0 0
-set_location "\superMaquina:batch_count_reg_2_split\" 0 1 1 1
-set_location "\superMaquina:batch_count_reg_3_split\" 0 1 1 0
-set_location "\superMaquina:batch_count_reg_4_split_1\" 0 3 0 0
-set_location "\superMaquina:batch_count_reg_4_split\" 0 4 0 3
-set_location "\superMaquina:batch_count_reg_5_split_1\" 1 1 1 0
-set_location "\superMaquina:batch_count_reg_5_split\" 0 1 1 2
-set_location "\superMaquina:MODULE_6:g1:a0:gx:u0:eq_5\" 1 1 0 0
-set_location "\superMaquina:MODULE_6:g1:a0:gx:u0:eq_7\" 1 2 1 0
-set_location "\superMaquina:MODULE_7:g2:a0:g1:z1:s0:g1:u0:b_8\" 2 1 0 0
+set_location "\SignalController:batch_count_reg_1_split\" 0 4 0 0
+set_location "\SignalController:batch_count_reg_2_split\" 0 1 1 1
+set_location "\SignalController:batch_count_reg_3_split\" 0 1 1 0
+set_location "\SignalController:batch_count_reg_4_split_1\" 0 3 0 0
+set_location "\SignalController:batch_count_reg_4_split\" 0 4 0 3
+set_location "\SignalController:batch_count_reg_5_split_1\" 1 1 1 0
+set_location "\SignalController:batch_count_reg_5_split\" 0 1 1 2
+set_location "\SignalController:MODULE_6:g1:a0:gx:u0:eq_5\" 1 1 0 0
+set_location "\SignalController:MODULE_6:g1:a0:gx:u0:eq_7\" 1 2 1 0
+set_location "\SignalController:MODULE_7:g2:a0:g1:z1:s0:g1:u0:b_8\" 2 1 0 0
 set_location "\SPI:BSPIM:load_rx_data\" 1 4 0 2
-set_location "\superMaquina:batch_count_reg_6_split_1\" 0 3 1 0
+set_location "\SignalController:batch_count_reg_6_split_1\" 0 3 1 0
 set_location "\SPI:BSPIM:tx_status_0\" 2 4 0 3
 set_location "\SPI:BSPIM:tx_status_4\" 2 4 0 2
 set_location "\SPI:BSPIM:rx_status_6\" 2 4 0 1
-set_location "\superMaquina:batch_count_reg_6_split\" 1 3 1 2
-set_location "\superMaquina:batch_count_reg_7_split_1\" 2 2 0 0
-set_location "\superMaquina:batch_count_reg_7_split\" 2 2 1 2
-set_location "\superMaquina:batch_count_reg_8_split\" 1 3 1 0
+set_location "\SignalController:batch_count_reg_6_split\" 1 3 1 2
+set_location "\SignalController:batch_count_reg_7_split_1\" 2 2 0 0
+set_location "\SignalController:batch_count_reg_7_split\" 2 2 1 2
+set_location "\SignalController:batch_count_reg_8_split\" 1 3 1 0
 set_location "Net_5570_split_1" 3 1 1 0
 set_location "Net_5570_split" 3 0 1 0
-set_location "\superMaquina:sample_count_reg_2_split\" 3 3 0 0
-set_location "\superMaquina:sample_count_reg_3_split\" 3 4 0 0
+set_location "\SignalController:sample_count_reg_2_split\" 3 3 0 0
+set_location "\SignalController:sample_count_reg_3_split\" 3 4 0 0
 set_location "\Tmr_LedWait:TimerHW\" timercell -1 -1 1
-set_location "\superMaquina:sample_count_reg_4_split_1\" 2 5 0 0
+set_location "\SignalController:sample_count_reg_4_split_1\" 2 5 0 0
 set_location "__ONE__" 3 1 1 1
 set_location "DMA_DelSig_RAM" drqcell -1 -1 1
 set_location "DMA_DelSig_Filter" drqcell -1 -1 0
@@ -111,9 +111,9 @@ set_location "\ctrl:Sync:ctrl_reg\" 2 2 6
 set_location "\Tmr_PingCalTick:TimerHW\" timercell -1 -1 2
 set_location "\Tmr_CaptureWatchdog:TimerHW\" timercell -1 -1 0
 set_location "\tmr_event:sts:sts_reg\" 2 5 3
+set_location "\OPAlp:ABuf\" abufcell -1 -1 3
 set_location "\VDAC_ref_BP:viDAC8\" vidaccell -1 -1 2
 set_location "\PGAshield:SC\" sccell -1 -1 3
-set_location "\VDAC_ref_LP:viDAC8\" vidaccell -1 -1 3
 set_location "\SPI:BSPIM:BitCounter\" 1 4 7
 set_location "\SPI:BSPIM:TxStsReg\" 2 4 4
 set_location "\SPI:BSPIM:RxStsReg\" 2 3 4
@@ -123,7 +123,7 @@ set_location "\VDAC_ref_PGA:viDAC8\" vidaccell -1 -1 0
 set_location "\LPF_1:cy_psoc3_lpf_1\" lpfcell -1 -1 0
 set_location "\PGAgain:SC\" sccell -1 -1 0
 set_location "\OPAadder:ABuf\" abufcell -1 -1 1
-set_location "\OPAlp:ABuf\" abufcell -1 -1 3
+set_location "\VDAC_ref_LP:viDAC8\" vidaccell -1 -1 3
 set_location "\VDAC_Ref_Adder:viDAC8\" vidaccell -1 -1 1
 set_location "\OPAbp:ABuf\" abufcell -1 -1 0
 set_location "\ADC:DSM\" dsmodcell -1 -1 0
@@ -135,7 +135,7 @@ set_location "\Debouncer:DEBOUNCER[0]:d_sync_0\" 0 4 1 2
 set_location "\Debouncer:DEBOUNCER[0]:d_sync_1\" 0 4 1 1
 set_location "bp" 0 4 1 0
 set_location "\EdgeDetect:last\" 3 0 1 3
-set_location "\superMaquina:sample_count_reg_4_split\" 2 5 1 2
+set_location "\SignalController:sample_count_reg_4_split\" 2 5 1 2
 set_location "\UART:BUART:txn\" 0 5 1 0
 set_location "\UART:BUART:tx_state_1\" 0 5 0 3
 set_location "\UART:BUART:tx_state_0\" 0 5 0 0
@@ -153,47 +153,47 @@ set_location "\UART:BUART:pollcount_0\" 0 1 0 1
 set_location "Net_6869_0_split" 3 3 1 0
 set_location "\UART:BUART:rx_status_3\" 0 2 1 3
 set_location "\UART:BUART:rx_last\" 0 2 0 3
-set_location "\superMaquina:ctrl_arm_d\" 2 0 1 1
-set_location "\superMaquina:ctrl_start_now_d\" 2 1 0 3
-set_location "\superMaquina:ctrl_stop_d\" 3 2 1 3
-set_location "\superMaquina:ctrl_clear_flags_d\" 1 2 1 3
-set_location "\superMaquina:ctrl_load_batch_lo_d\" 2 1 1 3
-set_location "\superMaquina:ctrl_load_batch_hi_d\" 3 4 1 3
-set_location "\superMaquina:button_pos_d\" 3 0 1 2
+set_location "\SignalController:ctrl_arm_d\" 2 0 1 1
+set_location "\SignalController:ctrl_start_now_d\" 2 1 0 3
+set_location "\SignalController:ctrl_stop_d\" 3 2 1 3
+set_location "\SignalController:ctrl_clear_flags_d\" 1 2 1 3
+set_location "\SignalController:ctrl_load_batch_lo_d\" 2 1 1 3
+set_location "\SignalController:ctrl_load_batch_hi_d\" 3 4 1 3
+set_location "\SignalController:button_pos_d\" 3 0 1 2
 set_location "Net_6869_2" 0 3 1 2
 set_location "Net_6869_1" 3 2 0 0
 set_location "Net_6869_0" 2 3 0 1
-set_location "\superMaquina:nrq_dma_adc_d\" 1 5 1 3
-set_location "\superMaquina:nrq_dma_filter_d\" 1 1 0 1
-set_location "\superMaquina:sample_count_reg_4\" 2 5 1 0
-set_location "\superMaquina:sample_count_reg_3\" 3 4 1 1
-set_location "\superMaquina:sample_count_reg_2\" 3 4 1 0
-set_location "\superMaquina:sample_count_reg_1\" 3 5 1 0
-set_location "\superMaquina:sample_count_reg_0\" 3 5 0 0
+set_location "\SignalController:nrq_dma_adc_d\" 1 5 1 3
+set_location "\SignalController:nrq_dma_filter_d\" 1 1 0 1
+set_location "\SignalController:sample_count_reg_4\" 2 5 1 0
+set_location "\SignalController:sample_count_reg_3\" 3 4 1 1
+set_location "\SignalController:sample_count_reg_2\" 3 4 1 0
+set_location "\SignalController:sample_count_reg_1\" 3 5 1 0
+set_location "\SignalController:sample_count_reg_0\" 3 5 0 0
 set_location "Net_5570" 3 0 0 0
 set_location "Net_6998_4" 3 1 0 1
 set_location "Net_6998_3" 3 0 0 1
 set_location "Net_6999_7" 3 2 1 2
 set_location "Net_6999_6" 3 5 0 1
 set_location "Net_6999_5" 3 1 0 0
-set_location "\superMaquina:batch_limit_reg_7\" 3 2 1 1
-set_location "\superMaquina:batch_limit_reg_6\" 1 0 0 3
-set_location "\superMaquina:batch_limit_reg_5\" 0 0 0 1
-set_location "\superMaquina:batch_limit_reg_4\" 1 0 0 1
-set_location "\superMaquina:batch_limit_reg_3\" 0 0 0 3
-set_location "\superMaquina:batch_limit_reg_2\" 1 1 0 3
-set_location "\superMaquina:batch_limit_reg_1\" 1 0 0 2
-set_location "\superMaquina:batch_limit_reg_0\" 1 0 0 0
-set_location "\superMaquina:batch_limit_reg_8\" 2 1 1 1
-set_location "\superMaquina:batch_count_reg_8\" 1 3 0 0
-set_location "\superMaquina:batch_count_reg_7\" 2 3 0 0
-set_location "\superMaquina:batch_count_reg_6\" 1 3 0 1
-set_location "\superMaquina:batch_count_reg_5\" 0 0 1 1
-set_location "\superMaquina:batch_count_reg_4\" 1 2 0 0
-set_location "\superMaquina:batch_count_reg_3\" 0 0 1 0
-set_location "\superMaquina:batch_count_reg_2\" 0 0 0 0
-set_location "\superMaquina:batch_count_reg_1\" 1 2 0 1
-set_location "\superMaquina:batch_count_reg_0\" 2 0 0 0
+set_location "\SignalController:batch_limit_reg_7\" 3 2 1 1
+set_location "\SignalController:batch_limit_reg_6\" 1 0 0 3
+set_location "\SignalController:batch_limit_reg_5\" 0 0 0 1
+set_location "\SignalController:batch_limit_reg_4\" 1 0 0 1
+set_location "\SignalController:batch_limit_reg_3\" 0 0 0 3
+set_location "\SignalController:batch_limit_reg_2\" 1 1 0 3
+set_location "\SignalController:batch_limit_reg_1\" 1 0 0 2
+set_location "\SignalController:batch_limit_reg_0\" 1 0 0 0
+set_location "\SignalController:batch_limit_reg_8\" 2 1 1 1
+set_location "\SignalController:batch_count_reg_8\" 1 3 0 0
+set_location "\SignalController:batch_count_reg_7\" 2 3 0 0
+set_location "\SignalController:batch_count_reg_6\" 1 3 0 1
+set_location "\SignalController:batch_count_reg_5\" 0 0 1 1
+set_location "\SignalController:batch_count_reg_4\" 1 2 0 0
+set_location "\SignalController:batch_count_reg_3\" 0 0 1 0
+set_location "\SignalController:batch_count_reg_2\" 0 0 0 0
+set_location "\SignalController:batch_count_reg_1\" 1 2 0 1
+set_location "\SignalController:batch_count_reg_0\" 2 0 0 0
 set_location "Net_25" 1 4 1 0
 set_location "Net_7080" 1 4 1 2
 set_location "Net_7074" 2 4 0 0
