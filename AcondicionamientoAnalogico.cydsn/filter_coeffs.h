@@ -9,7 +9,7 @@
  * #error mas abajo, que lo verifica contra Filter_FIR_A_SIZE (generado por
  * PSoC Creator a partir de esa misma configuracion). Si en el futuro se
  * reconfigura el Filter a otro N de taps (p.ej. para usar un diseño FIR
- * generado desde MATLAB, ver src/matlab/Simulaciones Controladores/Desacople),
+ * generado desde MATLAB, ver modelado/matlab/Simulaciones Controladores/Desacople),
  * hay que actualizar este valor Y regenerar el coeficiente por defecto de
  * abajo -- el sistema de generacion de coeficientes vive aparte de esto. */
 #define FILTER_FIR_NTAPS 128u

@@ -873,7 +873,7 @@ static void cal_async_abort_watchdog(void)
 /* ============================================================
  * Controlador PI de calibracion: unico algoritmo activo. Puerto directo de
  * Subsystem_step() en
- * src/matlab/Simulaciones Controladores/Desacople/Subsystem_grt_rtw/Subsystem.c
+ * modelado/matlab/Simulaciones Controladores/Desacople/Subsystem_grt_rtw/Subsystem.c
  * -- ESE es el diseño de referencia, no una variacion: misma ley PI
  * posicional, sin paso de "refine"/promediado al cerrar la etapa. Toda
  * la suavizacion viene del FIR de hardware (Filter, FIR_calibration.h) leido

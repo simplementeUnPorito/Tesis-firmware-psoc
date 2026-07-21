@@ -48,7 +48,7 @@ Ver sección "Prueba rápida por ESP USB" más abajo.
 ## Build (PowerShell)
 
 ```powershell
-Push-Location "C:\Github\Tesis\src\psoc\AcondicionamientoAnalogico.cydsn"
+Push-Location ".\AcondicionamientoAnalogico.cydsn"
 try {
   & "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\bin\cyprjmgr.exe" `
     -wrk "AcondicionamientoAnalogico.cywrk" `
@@ -88,7 +88,7 @@ esperando prompt. Usar siempre runfile con `quit`.
 ```powershell
 $timestamp  = Get-Date -Format 'yyyyMMdd_HHmmss'
 $log        = Join-Path $env:TEMP "psoc_program_acondicionamiento_$timestamp.log"
-$hex        = 'C:/Github/Tesis/src/psoc/AcondicionamientoAnalogico.cydsn/CortexM3/ARM_GCC_541/Debug/AcondicionamientoAnalogico.hex'
+$hex        = (Resolve-Path '.\AcondicionamientoAnalogico.cydsn\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.hex').Path.Replace('\', '/')
 $port       = 'KitProg (CMSIS-DAP/236111)'   # reemplazar con resultado exacto de GetPorts
 $programmer = 'C:/Program Files (x86)/Cypress/Programmer/'
 $lastRow    = 159                             # actualizar según el build actual
@@ -210,7 +210,7 @@ Firmware de esclavo compilado con flags de banco de pruebas (no son las de
 `platformio.ini` por defecto, que traen todo apagado para campo):
 
 ```bash
-cd src/esp/Nodo\ comunicación/slave
+cd firmware/esp32/Nodo\ comunicación/slave
 PLATFORMIO_BUILD_FLAGS="-DSLAVE_USB_CMD_ENABLE=1 -DSLAVE_LAB_TOOLS_ENABLE=1 -DSLAVE_LOGS_ENABLE=1 -DDBG_HUMAN=1" \
   pio run -e slave2 -t upload
 ```
