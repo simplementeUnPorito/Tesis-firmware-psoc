@@ -21,6 +21,11 @@
 #define CAL_PI_GAIN_HAMMER_LP_X1000 6000L
 #endif
 
+/* 0 conserva la seleccion automatica a partir de la ganancia fisica. */
+#ifndef CAL_PI_DEADBAND_HAMMER_LP_DAC_CODES
+#define CAL_PI_DEADBAND_HAMMER_LP_DAC_CODES 0L
+#endif
+
 /* P=100e-6, I=500e-6. */
 #define CAL_PI_KP_NUM_HAMMER_LP 1L
 #define CAL_PI_KP_DIV_HAMMER_LP 10000L

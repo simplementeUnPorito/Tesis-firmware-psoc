@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: VDAC_Ref_Adder_PM.c  
+* File Name: VDAC_Ref_Sum_PM.c  
 * Version 1.90
 *
 * Description:
@@ -16,13 +16,13 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#include "VDAC_Ref_Adder.h"
+#include "VDAC_Ref_Sum.h"
 
-static VDAC_Ref_Adder_backupStruct VDAC_Ref_Adder_backup;
+static VDAC_Ref_Sum_backupStruct VDAC_Ref_Sum_backup;
 
 
 /*******************************************************************************
-* Function Name: VDAC_Ref_Adder_SaveConfig
+* Function Name: VDAC_Ref_Sum_SaveConfig
 ********************************************************************************
 * Summary:
 *  Save the current user configuration
@@ -34,17 +34,17 @@ static VDAC_Ref_Adder_backupStruct VDAC_Ref_Adder_backup;
 *  void
 *
 *******************************************************************************/
-void VDAC_Ref_Adder_SaveConfig(void) 
+void VDAC_Ref_Sum_SaveConfig(void) 
 {
-    if (!((VDAC_Ref_Adder_CR1 & VDAC_Ref_Adder_SRC_MASK) == VDAC_Ref_Adder_SRC_UDB))
+    if (!((VDAC_Ref_Sum_CR1 & VDAC_Ref_Sum_SRC_MASK) == VDAC_Ref_Sum_SRC_UDB))
     {
-        VDAC_Ref_Adder_backup.data_value = VDAC_Ref_Adder_Data;
+        VDAC_Ref_Sum_backup.data_value = VDAC_Ref_Sum_Data;
     }
 }
 
 
 /*******************************************************************************
-* Function Name: VDAC_Ref_Adder_RestoreConfig
+* Function Name: VDAC_Ref_Sum_RestoreConfig
 ********************************************************************************
 *
 * Summary:
@@ -57,26 +57,26 @@ void VDAC_Ref_Adder_SaveConfig(void)
 *  void
 *
 *******************************************************************************/
-void VDAC_Ref_Adder_RestoreConfig(void) 
+void VDAC_Ref_Sum_RestoreConfig(void) 
 {
-    if (!((VDAC_Ref_Adder_CR1 & VDAC_Ref_Adder_SRC_MASK) == VDAC_Ref_Adder_SRC_UDB))
+    if (!((VDAC_Ref_Sum_CR1 & VDAC_Ref_Sum_SRC_MASK) == VDAC_Ref_Sum_SRC_UDB))
     {
-        if((VDAC_Ref_Adder_Strobe & VDAC_Ref_Adder_STRB_MASK) == VDAC_Ref_Adder_STRB_EN)
+        if((VDAC_Ref_Sum_Strobe & VDAC_Ref_Sum_STRB_MASK) == VDAC_Ref_Sum_STRB_EN)
         {
-            VDAC_Ref_Adder_Strobe &= (uint8)(~VDAC_Ref_Adder_STRB_MASK);
-            VDAC_Ref_Adder_Data = VDAC_Ref_Adder_backup.data_value;
-            VDAC_Ref_Adder_Strobe |= VDAC_Ref_Adder_STRB_EN;
+            VDAC_Ref_Sum_Strobe &= (uint8)(~VDAC_Ref_Sum_STRB_MASK);
+            VDAC_Ref_Sum_Data = VDAC_Ref_Sum_backup.data_value;
+            VDAC_Ref_Sum_Strobe |= VDAC_Ref_Sum_STRB_EN;
         }
         else
         {
-            VDAC_Ref_Adder_Data = VDAC_Ref_Adder_backup.data_value;
+            VDAC_Ref_Sum_Data = VDAC_Ref_Sum_backup.data_value;
         }
     }
 }
 
 
 /*******************************************************************************
-* Function Name: VDAC_Ref_Adder_Sleep
+* Function Name: VDAC_Ref_Sum_Sleep
 ********************************************************************************
 * Summary:
 *  Stop and Save the user configuration
@@ -88,31 +88,31 @@ void VDAC_Ref_Adder_RestoreConfig(void)
 *  void
 *
 * Global variables:
-*  VDAC_Ref_Adder_backup.enableState:  Is modified depending on the enable 
+*  VDAC_Ref_Sum_backup.enableState:  Is modified depending on the enable 
 *  state  of the block before entering sleep mode.
 *
 *******************************************************************************/
-void VDAC_Ref_Adder_Sleep(void) 
+void VDAC_Ref_Sum_Sleep(void) 
 {
     /* Save VDAC8's enable state */    
-    if(VDAC_Ref_Adder_ACT_PWR_EN == (VDAC_Ref_Adder_PWRMGR & VDAC_Ref_Adder_ACT_PWR_EN))
+    if(VDAC_Ref_Sum_ACT_PWR_EN == (VDAC_Ref_Sum_PWRMGR & VDAC_Ref_Sum_ACT_PWR_EN))
     {
         /* VDAC8 is enabled */
-        VDAC_Ref_Adder_backup.enableState = 1u;
+        VDAC_Ref_Sum_backup.enableState = 1u;
     }
     else
     {
         /* VDAC8 is disabled */
-        VDAC_Ref_Adder_backup.enableState = 0u;
+        VDAC_Ref_Sum_backup.enableState = 0u;
     }
     
-    VDAC_Ref_Adder_Stop();
-    VDAC_Ref_Adder_SaveConfig();
+    VDAC_Ref_Sum_Stop();
+    VDAC_Ref_Sum_SaveConfig();
 }
 
 
 /*******************************************************************************
-* Function Name: VDAC_Ref_Adder_Wakeup
+* Function Name: VDAC_Ref_Sum_Wakeup
 ********************************************************************************
 *
 * Summary:
@@ -125,21 +125,21 @@ void VDAC_Ref_Adder_Sleep(void)
 *  void
 *
 * Global variables:
-*  VDAC_Ref_Adder_backup.enableState:  Is used to restore the enable state of 
+*  VDAC_Ref_Sum_backup.enableState:  Is used to restore the enable state of 
 *  block on wakeup from sleep mode.
 *
 *******************************************************************************/
-void VDAC_Ref_Adder_Wakeup(void) 
+void VDAC_Ref_Sum_Wakeup(void) 
 {
-    VDAC_Ref_Adder_RestoreConfig();
+    VDAC_Ref_Sum_RestoreConfig();
     
-    if(VDAC_Ref_Adder_backup.enableState == 1u)
+    if(VDAC_Ref_Sum_backup.enableState == 1u)
     {
         /* Enable VDAC8's operation */
-        VDAC_Ref_Adder_Enable();
+        VDAC_Ref_Sum_Enable();
 
         /* Restore the data register */
-        VDAC_Ref_Adder_SetValue(VDAC_Ref_Adder_Data);
+        VDAC_Ref_Sum_SetValue(VDAC_Ref_Sum_Data);
     } /* Do nothing if VDAC8 was disabled before */    
 }
 

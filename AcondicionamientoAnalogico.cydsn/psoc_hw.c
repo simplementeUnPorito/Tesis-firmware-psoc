@@ -70,7 +70,7 @@ void psoc_hw_start_analog(uint8 pga_code, uint8 pgavdac_code)
     PGAgain_Start();
     psoc_hw_set_pga(pga_code);
     OPAbp_Start();
-    OPAadder_Start();
+    OPAsum_Start();
     #if defined(PGAvdac_DEFAULT_GAIN)
     PGAvdac_Start();
     psoc_hw_set_pgavdac(pgavdac_code);

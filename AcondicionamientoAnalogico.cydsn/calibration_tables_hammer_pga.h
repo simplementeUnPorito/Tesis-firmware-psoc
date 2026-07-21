@@ -21,6 +21,11 @@
 /* 0 = ganancia dinamica 1 - GainDirecta. */
 #define CAL_PI_GAIN_HAMMER_PGA_X1000 0L
 
+/* 0 conserva la seleccion automatica a partir de la ganancia fisica. */
+#ifndef CAL_PI_DEADBAND_HAMMER_PGA_DAC_CODES
+#define CAL_PI_DEADBAND_HAMMER_PGA_DAC_CODES 0L
+#endif
+
 /* P=1e-3, I=300e-6. */
 #define CAL_PI_KP_NUM_HAMMER_PGA 1L
 #define CAL_PI_KP_DIV_HAMMER_PGA 1000L

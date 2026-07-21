@@ -9,9 +9,9 @@
 #endif
 #define CAL_TARGET_COUNTS_GEO_PGA (CAL_TARGET_GEO_PGA_MV * CAL_TARGET_1V_COUNTS / 1000L)
 
-/* PGA entra por inversor; la ganancia efectiva VDAC->medida se calcula en
- * runtime como 1 - GainDirecta. */
-#define CAL_DIRECTION_GEO_PGA (-1)
+/* Para la topologia GEO, la ganancia DC VDAC->nodo PGA es +1 e independiente
+ * de la ganancia diferencial programada. */
+#define CAL_DIRECTION_GEO_PGA 1
 
 #ifndef CAL_ADELANTO_GEO_PGA_MV
 #define CAL_ADELANTO_GEO_PGA_MV 2500L
@@ -20,9 +20,14 @@
 
 #define CAL_DAC_MAX_CHANGE_GEO_PGA 255u
 
-/* 0 = ganancia dinamica 1 - GainDirecta. */
 #ifndef CAL_PI_GAIN_GEO_PGA_X1000
-#define CAL_PI_GAIN_GEO_PGA_X1000 0L
+#define CAL_PI_GAIN_GEO_PGA_X1000 1000L
+#endif
+
+/* Delta_PGA del firmware actual. La corrida experimental documentada en el
+ * manuscrito uso deliberadamente Delta_PGA=18. */
+#ifndef CAL_PI_DEADBAND_GEO_PGA_DAC_CODES
+#define CAL_PI_DEADBAND_GEO_PGA_DAC_CODES 3L
 #endif
 
 /* P=1e-3, I=300e-6. */

@@ -361,7 +361,7 @@ static const PsocCalServoTune g_cal_servo_tune[PSOC_CAL_STAGE_COUNT] = {
 #if defined(VDAC_ref_BP_DEFAULT_DATA) || defined(CY_DVDAC_VDAC_ref_BP_H)
     { CAL_SERVO_KP_NUM_GEO_BP,    CAL_SERVO_KI_NUM_GEO_BP,    CAL_SERVO_KI_DIV_GEO_BP,    CAL_SERVO_DEADBAND_GEO_BP,    CAL_SERVO_FINE_STEP_GEO_BP,    CAL_SERVO_RECOVERY_STEP_GEO_BP },
 #endif
-    { CAL_SERVO_KP_NUM_GEO_ADDER, CAL_SERVO_KI_NUM_GEO_ADDER, CAL_SERVO_KI_DIV_GEO_ADDER, CAL_SERVO_DEADBAND_GEO_ADDER, CAL_SERVO_FINE_STEP_GEO_ADDER, CAL_SERVO_RECOVERY_STEP_GEO_ADDER },
+    { CAL_SERVO_KP_NUM_GEO_SUM,   CAL_SERVO_KI_NUM_GEO_SUM,   CAL_SERVO_KI_DIV_GEO_SUM,   CAL_SERVO_DEADBAND_GEO_SUM,   CAL_SERVO_FINE_STEP_GEO_SUM,   CAL_SERVO_RECOVERY_STEP_GEO_SUM },
     { CAL_SERVO_KP_NUM_GEO_LP,    CAL_SERVO_KI_NUM_GEO_LP,    CAL_SERVO_KI_DIV_GEO_LP,    CAL_SERVO_DEADBAND_GEO_LP,    CAL_SERVO_FINE_STEP_GEO_LP,    CAL_SERVO_RECOVERY_STEP_GEO_LP },
 #else
     { CAL_SERVO_KP_NUM_HAMMER_PGA, CAL_SERVO_KI_NUM_HAMMER_PGA, CAL_SERVO_KI_DIV_HAMMER_PGA, CAL_SERVO_DEADBAND_HAMMER_PGA, CAL_SERVO_FINE_STEP_HAMMER_PGA, CAL_SERVO_RECOVERY_STEP_HAMMER_PGA },
@@ -387,9 +387,9 @@ static uint16 cal_servo_settle_samples(uint8 stage_index)
         case 0u: return CAL_SERVO_SETTLE_SAMPLES_GEO_PGA;
 #if defined(VDAC_ref_BP_DEFAULT_DATA) || defined(CY_DVDAC_VDAC_ref_BP_H)
         case 1u: return CAL_SERVO_SETTLE_SAMPLES_GEO_BP;
-        case 2u: return CAL_SERVO_SETTLE_SAMPLES_GEO_ADDER;
+        case 2u: return CAL_SERVO_SETTLE_SAMPLES_GEO_SUM;
 #else
-        case 1u: return CAL_SERVO_SETTLE_SAMPLES_GEO_ADDER;
+        case 1u: return CAL_SERVO_SETTLE_SAMPLES_GEO_SUM;
 #endif
         default: return CAL_SERVO_SETTLE_SAMPLES_GEO_LP;
     }
@@ -699,7 +699,7 @@ void psoc_calibration_start_references(void)
 #if defined(VDAC_ref_BP_DEFAULT_DATA) || defined(CY_DVDAC_VDAC_ref_BP_H)
     VDAC_ref_BP_Start();
 #endif
-    VDAC_Ref_Adder_Start();
+    VDAC_Ref_Sum_Start();
     VDAC_ref_LP_Start();
 #else
     VDAC_PGA_Start();
@@ -903,6 +903,7 @@ typedef struct {
     int32 ki_num;
     int32 ki_div;
     int32 gain_x1000;       /* ganancia fija VDAC->medida; 0 = dinamica por etapa */
+    int32 deadband_dac;     /* Delta_i usado; 0 = derivar del piso fisico */
     uint16 lock_samples;    /* M muestras en la misma celda de error */
     uint16 settle_samples;  /* espera inicial del FIR al cambiar AMux/VDAC */
     uint16 timeout_samples; /* techo de muestras de PI para esta etapa */
@@ -957,33 +958,35 @@ static int32 cal_pi_clip_integral(int32 value)
 
 #if PSOC_HW_CLASS == PSOC_HW_GEO
 static const PsocCalPiCfg g_cal_pi_cfg[PSOC_CAL_STAGE_COUNT] = {
-    { CAL_PI_KP_NUM_GEO_PGA,   CAL_PI_KP_DIV_GEO_PGA,   CAL_PI_KI_NUM_GEO_PGA,   CAL_PI_KI_DIV_GEO_PGA,   CAL_PI_GAIN_GEO_PGA_X1000,   CAL_PI_LOCK_SAMPLES_GEO_PGA,   CAL_PI_SETTLE_SAMPLES_GEO_PGA,   CAL_PI_TIMEOUT_SAMPLES_GEO_PGA,   CAL_PI_REFINE_ENABLE_GEO_PGA,   CAL_PI_REFINE_SETTLE_SAMPLES_GEO_PGA },
+    { CAL_PI_KP_NUM_GEO_PGA, CAL_PI_KP_DIV_GEO_PGA, CAL_PI_KI_NUM_GEO_PGA, CAL_PI_KI_DIV_GEO_PGA, CAL_PI_GAIN_GEO_PGA_X1000, CAL_PI_DEADBAND_GEO_PGA_DAC_CODES, CAL_PI_LOCK_SAMPLES_GEO_PGA, CAL_PI_SETTLE_SAMPLES_GEO_PGA, CAL_PI_TIMEOUT_SAMPLES_GEO_PGA, CAL_PI_REFINE_ENABLE_GEO_PGA, CAL_PI_REFINE_SETTLE_SAMPLES_GEO_PGA },
 #if defined(VDAC_ref_BP_DEFAULT_DATA) || defined(CY_DVDAC_VDAC_ref_BP_H)
-    { CAL_PI_KP_NUM_GEO_BP,    CAL_PI_KP_DIV_GEO_BP,    CAL_PI_KI_NUM_GEO_BP,    CAL_PI_KI_DIV_GEO_BP,    CAL_PI_GAIN_GEO_BP_X1000,    CAL_PI_LOCK_SAMPLES_GEO_BP,    CAL_PI_SETTLE_SAMPLES_GEO_BP,    CAL_PI_TIMEOUT_SAMPLES_GEO_BP,    CAL_PI_REFINE_ENABLE_GEO_BP,    CAL_PI_REFINE_SETTLE_SAMPLES_GEO_BP },
+    { CAL_PI_KP_NUM_GEO_BP, CAL_PI_KP_DIV_GEO_BP, CAL_PI_KI_NUM_GEO_BP, CAL_PI_KI_DIV_GEO_BP, CAL_PI_GAIN_GEO_BP_X1000, CAL_PI_DEADBAND_GEO_BP_DAC_CODES, CAL_PI_LOCK_SAMPLES_GEO_BP, CAL_PI_SETTLE_SAMPLES_GEO_BP, CAL_PI_TIMEOUT_SAMPLES_GEO_BP, CAL_PI_REFINE_ENABLE_GEO_BP, CAL_PI_REFINE_SETTLE_SAMPLES_GEO_BP },
 #endif
-    { CAL_PI_KP_NUM_GEO_ADDER, CAL_PI_KP_DIV_GEO_ADDER, CAL_PI_KI_NUM_GEO_ADDER, CAL_PI_KI_DIV_GEO_ADDER, CAL_PI_GAIN_GEO_ADDER_X1000, CAL_PI_LOCK_SAMPLES_GEO_ADDER, CAL_PI_SETTLE_SAMPLES_GEO_ADDER, CAL_PI_TIMEOUT_SAMPLES_GEO_ADDER, CAL_PI_REFINE_ENABLE_GEO_ADDER, CAL_PI_REFINE_SETTLE_SAMPLES_GEO_ADDER },
-    { CAL_PI_KP_NUM_GEO_LP,    CAL_PI_KP_DIV_GEO_LP,    CAL_PI_KI_NUM_GEO_LP,    CAL_PI_KI_DIV_GEO_LP,    CAL_PI_GAIN_GEO_LP_X1000,    CAL_PI_LOCK_SAMPLES_GEO_LP,    CAL_PI_SETTLE_SAMPLES_GEO_LP,    CAL_PI_TIMEOUT_SAMPLES_GEO_LP,    CAL_PI_REFINE_ENABLE_GEO_LP,    CAL_PI_REFINE_SETTLE_SAMPLES_GEO_LP },
+    { CAL_PI_KP_NUM_GEO_SUM, CAL_PI_KP_DIV_GEO_SUM, CAL_PI_KI_NUM_GEO_SUM, CAL_PI_KI_DIV_GEO_SUM, CAL_PI_GAIN_GEO_SUM_X1000, CAL_PI_DEADBAND_GEO_SUM_DAC_CODES, CAL_PI_LOCK_SAMPLES_GEO_SUM, CAL_PI_SETTLE_SAMPLES_GEO_SUM, CAL_PI_TIMEOUT_SAMPLES_GEO_SUM, CAL_PI_REFINE_ENABLE_GEO_SUM, CAL_PI_REFINE_SETTLE_SAMPLES_GEO_SUM },
+    { CAL_PI_KP_NUM_GEO_LP, CAL_PI_KP_DIV_GEO_LP, CAL_PI_KI_NUM_GEO_LP, CAL_PI_KI_DIV_GEO_LP, CAL_PI_GAIN_GEO_LP_X1000, CAL_PI_DEADBAND_GEO_LP_DAC_CODES, CAL_PI_LOCK_SAMPLES_GEO_LP, CAL_PI_SETTLE_SAMPLES_GEO_LP, CAL_PI_TIMEOUT_SAMPLES_GEO_LP, CAL_PI_REFINE_ENABLE_GEO_LP, CAL_PI_REFINE_SETTLE_SAMPLES_GEO_LP },
 };
 #else
 static const PsocCalPiCfg g_cal_pi_cfg[PSOC_CAL_STAGE_COUNT] = {
-    { CAL_PI_KP_NUM_HAMMER_PGA, CAL_PI_KP_DIV_HAMMER_PGA, CAL_PI_KI_NUM_HAMMER_PGA, CAL_PI_KI_DIV_HAMMER_PGA, CAL_PI_GAIN_HAMMER_PGA_X1000, CAL_PI_LOCK_SAMPLES_HAMMER_PGA, CAL_PI_SETTLE_SAMPLES_HAMMER_PGA, CAL_PI_TIMEOUT_SAMPLES_HAMMER_PGA, CAL_PI_REFINE_ENABLE_HAMMER_PGA, CAL_PI_REFINE_SETTLE_SAMPLES_HAMMER_PGA },
-    { CAL_PI_KP_NUM_HAMMER_LP,  CAL_PI_KP_DIV_HAMMER_LP,  CAL_PI_KI_NUM_HAMMER_LP,  CAL_PI_KI_DIV_HAMMER_LP,  CAL_PI_GAIN_HAMMER_LP_X1000,  CAL_PI_LOCK_SAMPLES_HAMMER_LP,  CAL_PI_SETTLE_SAMPLES_HAMMER_LP,  CAL_PI_TIMEOUT_SAMPLES_HAMMER_LP,  CAL_PI_REFINE_ENABLE_HAMMER_LP,  CAL_PI_REFINE_SETTLE_SAMPLES_HAMMER_LP },
+    { CAL_PI_KP_NUM_HAMMER_PGA, CAL_PI_KP_DIV_HAMMER_PGA, CAL_PI_KI_NUM_HAMMER_PGA, CAL_PI_KI_DIV_HAMMER_PGA, CAL_PI_GAIN_HAMMER_PGA_X1000, CAL_PI_DEADBAND_HAMMER_PGA_DAC_CODES, CAL_PI_LOCK_SAMPLES_HAMMER_PGA, CAL_PI_SETTLE_SAMPLES_HAMMER_PGA, CAL_PI_TIMEOUT_SAMPLES_HAMMER_PGA, CAL_PI_REFINE_ENABLE_HAMMER_PGA, CAL_PI_REFINE_SETTLE_SAMPLES_HAMMER_PGA },
+    { CAL_PI_KP_NUM_HAMMER_LP, CAL_PI_KP_DIV_HAMMER_LP, CAL_PI_KI_NUM_HAMMER_LP, CAL_PI_KI_DIV_HAMMER_LP, CAL_PI_GAIN_HAMMER_LP_X1000, CAL_PI_DEADBAND_HAMMER_LP_DAC_CODES, CAL_PI_LOCK_SAMPLES_HAMMER_LP, CAL_PI_SETTLE_SAMPLES_HAMMER_LP, CAL_PI_TIMEOUT_SAMPLES_HAMMER_LP, CAL_PI_REFINE_ENABLE_HAMMER_LP, CAL_PI_REFINE_SETTLE_SAMPLES_HAMMER_LP },
 };
 #endif
 
 static int32 cal_counts_error_to_dac_scale(int32 error_counts)
 {
-    return cal_round_div_i64((int64)error_counts * (int64)CAL_ADC_SPAN_MV * (int64)CAL_VDAC_CODE_MAX,
-                             (int64)CAL_ADC_FULL_SCALE_COUNTS * (int64)CAL_VDAC_SPAN_MV);
+    return cal_round_div_i64((int64)error_counts * (int64)CAL_ADC_SPAN_MV * (int64)CAL_VDAC_LEVELS,
+                             (int64)CAL_ADC_LEVELS * (int64)CAL_VDAC_QUANT_SPAN_MV);
 }
 
 static int32 cal_pi_stage_gain_x1000(uint8 stage_index)
 {
-    if (stage_index == 0u) {
+    int32 configured_gain = g_cal_pi_cfg[stage_index].gain_x1000;
+
+    if (configured_gain == 0L && stage_index == 0u) {
         int32 pga_gain = (int32)psoc_hw_pga_gain_x1000();
         return 1000L - pga_gain;
     }
-    return g_cal_pi_cfg[stage_index].gain_x1000;
+    return configured_gain;
 }
 
 static int32 cal_pi_deadband_dac_codes(uint8 stage_index)
@@ -992,17 +995,20 @@ static int32 cal_pi_deadband_dac_codes(uint8 stage_index)
     (void)stage_index;
     return CAL_PI_DEADBAND_MIN_DAC_CODES;
 #else
-    int32 gain_x1000 = cal_pi_stage_gain_x1000(stage_index);
+    int32 deadband = g_cal_pi_cfg[stage_index].deadband_dac;
+    int32 gain_x1000;
     int64 num;
     int64 den;
-    int32 deadband;
 
-    if (gain_x1000 < 0L) {
-        gain_x1000 = -gain_x1000;
+    if (deadband <= 0L) {
+        gain_x1000 = cal_pi_stage_gain_x1000(stage_index);
+        if (gain_x1000 < 0L) {
+            gain_x1000 = -gain_x1000;
+        }
+        num = (int64)gain_x1000 * (int64)CAL_PI_DEADBAND_MARGIN_NUM;
+        den = 1000LL * (int64)CAL_PI_DEADBAND_MARGIN_DEN;
+        deadband = (int32)((num + den - 1LL) / den);
     }
-    num = (int64)gain_x1000 * (int64)CAL_PI_DEADBAND_MARGIN_NUM;
-    den = 1000LL * (int64)CAL_PI_DEADBAND_MARGIN_DEN;
-    deadband = (int32)((num + den - 1LL) / den);
     if (deadband < CAL_PI_DEADBAND_MIN_DAC_CODES) {
         deadband = CAL_PI_DEADBAND_MIN_DAC_CODES;
     }
@@ -1027,7 +1033,8 @@ static int32 cal_pi_error_bucket(int32 error_dac, int32 deadband_dac)
 
 static uint8 cal_pi_measurement_valid(int32 measured)
 {
-    return (abs_counts(measured) <= CAL_ADC_FULL_SCALE_COUNTS) ? 1u : 0u;
+    return (measured >= CAL_ADC_SIGNED_MIN_COUNTS &&
+            measured <= CAL_ADC_SIGNED_MAX_COUNTS) ? 1u : 0u;
 }
 
 static uint8 cal_stage_measure_current(uint8 stage_index, uint8 dac, int32 *measured)
@@ -1424,17 +1431,15 @@ static uint8 cal_pi_run_service(void)
     can_integrate = 0u;
 
     if (stage_gain_x1000 == 0L) {
-        /* PGA con ganancia directa 1 implica ganancia efectiva VDAC->medida 0
-         * (1 - GainDirecta). No hay autoridad fisica para corregir, asi que
-         * no se debe perseguir el error hasta saturar el DAC. */
+        /* Una etapa configurada con ganancia dinamica puede carecer de
+         * autoridad en algun ajuste; no se persigue el error hasta saturar. */
         effort = (int32)dac_sample;
     } else if (control_error == 0L) {
         g_cal_pi.integral = 0L;
         effort = (int32)dac_sample;
     } else {
         /* PI posicional en escala DAC: error_counts -> error_dac antes de
-         * entrar al PI; P/I se dividen por la ganancia fisica VDAC->medida.
-         * En los PGA esa ganancia es firmada y dinamica: 1 - GainDirecta. */
+         * entrar al PI; P/I se dividen por la ganancia fisica VDAC->medida. */
         p_term = cal_pi_gain_scaled_term(control_error, cfg->kp_num, cfg->kp_div, stage_gain_x1000);
         i_term = cal_pi_gain_scaled_term(g_cal_pi.integral, cfg->ki_num, cfg->ki_div, stage_gain_x1000);
         effort = (int32)g_cal_pi.base_dac + (int32)stage->direction * (p_term + i_term);

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: VDAC_Ref_Adder.c  
+* File Name: VDAC_Ref_Sum.c  
 * Version 1.90
 *
 * Description:
@@ -18,25 +18,25 @@
 *******************************************************************************/
 
 #include "cytypes.h"
-#include "VDAC_Ref_Adder.h"
+#include "VDAC_Ref_Sum.h"
 
 #if (CY_PSOC5A)
 #include <CyLib.h>
 #endif /* CY_PSOC5A */
 
-uint8 VDAC_Ref_Adder_initVar = 0u;
+uint8 VDAC_Ref_Sum_initVar = 0u;
 
 #if (CY_PSOC5A)
-    static uint8 VDAC_Ref_Adder_restoreVal = 0u;
+    static uint8 VDAC_Ref_Sum_restoreVal = 0u;
 #endif /* CY_PSOC5A */
 
 #if (CY_PSOC5A)
-    static VDAC_Ref_Adder_backupStruct VDAC_Ref_Adder_backup;
+    static VDAC_Ref_Sum_backupStruct VDAC_Ref_Sum_backup;
 #endif /* CY_PSOC5A */
 
 
 /*******************************************************************************
-* Function Name: VDAC_Ref_Adder_Init
+* Function Name: VDAC_Ref_Sum_Init
 ********************************************************************************
 * Summary:
 *  Initialize to the schematic state.
@@ -52,32 +52,32 @@ uint8 VDAC_Ref_Adder_initVar = 0u;
 * Side Effects:
 *
 *******************************************************************************/
-void VDAC_Ref_Adder_Init(void) 
+void VDAC_Ref_Sum_Init(void) 
 {
-    VDAC_Ref_Adder_CR0 = (VDAC_Ref_Adder_MODE_V );
+    VDAC_Ref_Sum_CR0 = (VDAC_Ref_Sum_MODE_V );
 
     /* Set default data source */
-    #if(VDAC_Ref_Adder_DEFAULT_DATA_SRC != 0 )
-        VDAC_Ref_Adder_CR1 = (VDAC_Ref_Adder_DEFAULT_CNTL | VDAC_Ref_Adder_DACBUS_ENABLE) ;
+    #if(VDAC_Ref_Sum_DEFAULT_DATA_SRC != 0 )
+        VDAC_Ref_Sum_CR1 = (VDAC_Ref_Sum_DEFAULT_CNTL | VDAC_Ref_Sum_DACBUS_ENABLE) ;
     #else
-        VDAC_Ref_Adder_CR1 = (VDAC_Ref_Adder_DEFAULT_CNTL | VDAC_Ref_Adder_DACBUS_DISABLE) ;
-    #endif /* (VDAC_Ref_Adder_DEFAULT_DATA_SRC != 0 ) */
+        VDAC_Ref_Sum_CR1 = (VDAC_Ref_Sum_DEFAULT_CNTL | VDAC_Ref_Sum_DACBUS_DISABLE) ;
+    #endif /* (VDAC_Ref_Sum_DEFAULT_DATA_SRC != 0 ) */
 
     /* Set default strobe mode */
-    #if(VDAC_Ref_Adder_DEFAULT_STRB != 0)
-        VDAC_Ref_Adder_Strobe |= VDAC_Ref_Adder_STRB_EN ;
-    #endif/* (VDAC_Ref_Adder_DEFAULT_STRB != 0) */
+    #if(VDAC_Ref_Sum_DEFAULT_STRB != 0)
+        VDAC_Ref_Sum_Strobe |= VDAC_Ref_Sum_STRB_EN ;
+    #endif/* (VDAC_Ref_Sum_DEFAULT_STRB != 0) */
 
     /* Set default range */
-    VDAC_Ref_Adder_SetRange(VDAC_Ref_Adder_DEFAULT_RANGE); 
+    VDAC_Ref_Sum_SetRange(VDAC_Ref_Sum_DEFAULT_RANGE); 
 
     /* Set default speed */
-    VDAC_Ref_Adder_SetSpeed(VDAC_Ref_Adder_DEFAULT_SPEED);
+    VDAC_Ref_Sum_SetSpeed(VDAC_Ref_Sum_DEFAULT_SPEED);
 }
 
 
 /*******************************************************************************
-* Function Name: VDAC_Ref_Adder_Enable
+* Function Name: VDAC_Ref_Sum_Enable
 ********************************************************************************
 * Summary:
 *  Enable the VDAC8
@@ -93,25 +93,25 @@ void VDAC_Ref_Adder_Init(void)
 * Side Effects:
 *
 *******************************************************************************/
-void VDAC_Ref_Adder_Enable(void) 
+void VDAC_Ref_Sum_Enable(void) 
 {
-    VDAC_Ref_Adder_PWRMGR |= VDAC_Ref_Adder_ACT_PWR_EN;
-    VDAC_Ref_Adder_STBY_PWRMGR |= VDAC_Ref_Adder_STBY_PWR_EN;
+    VDAC_Ref_Sum_PWRMGR |= VDAC_Ref_Sum_ACT_PWR_EN;
+    VDAC_Ref_Sum_STBY_PWRMGR |= VDAC_Ref_Sum_STBY_PWR_EN;
 
     /*This is to restore the value of register CR0 ,
     which is modified  in Stop API , this prevents misbehaviour of VDAC */
     #if (CY_PSOC5A)
-        if(VDAC_Ref_Adder_restoreVal == 1u) 
+        if(VDAC_Ref_Sum_restoreVal == 1u) 
         {
-             VDAC_Ref_Adder_CR0 = VDAC_Ref_Adder_backup.data_value;
-             VDAC_Ref_Adder_restoreVal = 0u;
+             VDAC_Ref_Sum_CR0 = VDAC_Ref_Sum_backup.data_value;
+             VDAC_Ref_Sum_restoreVal = 0u;
         }
     #endif /* CY_PSOC5A */
 }
 
 
 /*******************************************************************************
-* Function Name: VDAC_Ref_Adder_Start
+* Function Name: VDAC_Ref_Sum_Start
 ********************************************************************************
 *
 * Summary:
@@ -126,29 +126,29 @@ void VDAC_Ref_Adder_Enable(void)
 *  void 
 *
 * Global variables:
-*  VDAC_Ref_Adder_initVar: Is modified when this function is called for the 
+*  VDAC_Ref_Sum_initVar: Is modified when this function is called for the 
 *  first time. Is used to ensure that initialization happens only once.
 *
 *******************************************************************************/
-void VDAC_Ref_Adder_Start(void)  
+void VDAC_Ref_Sum_Start(void)  
 {
     /* Hardware initiazation only needs to occure the first time */
-    if(VDAC_Ref_Adder_initVar == 0u)
+    if(VDAC_Ref_Sum_initVar == 0u)
     { 
-        VDAC_Ref_Adder_Init();
-        VDAC_Ref_Adder_initVar = 1u;
+        VDAC_Ref_Sum_Init();
+        VDAC_Ref_Sum_initVar = 1u;
     }
 
     /* Enable power to DAC */
-    VDAC_Ref_Adder_Enable();
+    VDAC_Ref_Sum_Enable();
 
     /* Set default value */
-    VDAC_Ref_Adder_SetValue(VDAC_Ref_Adder_DEFAULT_DATA); 
+    VDAC_Ref_Sum_SetValue(VDAC_Ref_Sum_DEFAULT_DATA); 
 }
 
 
 /*******************************************************************************
-* Function Name: VDAC_Ref_Adder_Stop
+* Function Name: VDAC_Ref_Sum_Stop
 ********************************************************************************
 *
 * Summary:
@@ -165,24 +165,24 @@ void VDAC_Ref_Adder_Start(void)
 * Side Effects:
 *
 *******************************************************************************/
-void VDAC_Ref_Adder_Stop(void) 
+void VDAC_Ref_Sum_Stop(void) 
 {
     /* Disble power to DAC */
-    VDAC_Ref_Adder_PWRMGR &= (uint8)(~VDAC_Ref_Adder_ACT_PWR_EN);
-    VDAC_Ref_Adder_STBY_PWRMGR &= (uint8)(~VDAC_Ref_Adder_STBY_PWR_EN);
+    VDAC_Ref_Sum_PWRMGR &= (uint8)(~VDAC_Ref_Sum_ACT_PWR_EN);
+    VDAC_Ref_Sum_STBY_PWRMGR &= (uint8)(~VDAC_Ref_Sum_STBY_PWR_EN);
 
     /* This is a work around for PSoC5A  ,
     this sets VDAC to current mode with output off */
     #if (CY_PSOC5A)
-        VDAC_Ref_Adder_backup.data_value = VDAC_Ref_Adder_CR0;
-        VDAC_Ref_Adder_CR0 = VDAC_Ref_Adder_CUR_MODE_OUT_OFF;
-        VDAC_Ref_Adder_restoreVal = 1u;
+        VDAC_Ref_Sum_backup.data_value = VDAC_Ref_Sum_CR0;
+        VDAC_Ref_Sum_CR0 = VDAC_Ref_Sum_CUR_MODE_OUT_OFF;
+        VDAC_Ref_Sum_restoreVal = 1u;
     #endif /* CY_PSOC5A */
 }
 
 
 /*******************************************************************************
-* Function Name: VDAC_Ref_Adder_SetSpeed
+* Function Name: VDAC_Ref_Sum_SetSpeed
 ********************************************************************************
 *
 * Summary:
@@ -199,16 +199,16 @@ void VDAC_Ref_Adder_Stop(void)
 * Side Effects:
 *
 *******************************************************************************/
-void VDAC_Ref_Adder_SetSpeed(uint8 speed) 
+void VDAC_Ref_Sum_SetSpeed(uint8 speed) 
 {
     /* Clear power mask then write in new value */
-    VDAC_Ref_Adder_CR0 &= (uint8)(~VDAC_Ref_Adder_HS_MASK);
-    VDAC_Ref_Adder_CR0 |=  (speed & VDAC_Ref_Adder_HS_MASK);
+    VDAC_Ref_Sum_CR0 &= (uint8)(~VDAC_Ref_Sum_HS_MASK);
+    VDAC_Ref_Sum_CR0 |=  (speed & VDAC_Ref_Sum_HS_MASK);
 }
 
 
 /*******************************************************************************
-* Function Name: VDAC_Ref_Adder_SetRange
+* Function Name: VDAC_Ref_Sum_SetRange
 ********************************************************************************
 *
 * Summary:
@@ -225,16 +225,16 @@ void VDAC_Ref_Adder_SetSpeed(uint8 speed)
 * Side Effects:
 *
 *******************************************************************************/
-void VDAC_Ref_Adder_SetRange(uint8 range) 
+void VDAC_Ref_Sum_SetRange(uint8 range) 
 {
-    VDAC_Ref_Adder_CR0 &= (uint8)(~VDAC_Ref_Adder_RANGE_MASK);      /* Clear existing mode */
-    VDAC_Ref_Adder_CR0 |= (range & VDAC_Ref_Adder_RANGE_MASK);      /*  Set Range  */
-    VDAC_Ref_Adder_DacTrim();
+    VDAC_Ref_Sum_CR0 &= (uint8)(~VDAC_Ref_Sum_RANGE_MASK);      /* Clear existing mode */
+    VDAC_Ref_Sum_CR0 |= (range & VDAC_Ref_Sum_RANGE_MASK);      /*  Set Range  */
+    VDAC_Ref_Sum_DacTrim();
 }
 
 
 /*******************************************************************************
-* Function Name: VDAC_Ref_Adder_SetValue
+* Function Name: VDAC_Ref_Sum_SetValue
 ********************************************************************************
 *
 * Summary:
@@ -251,25 +251,25 @@ void VDAC_Ref_Adder_SetRange(uint8 range)
 * Side Effects:
 *
 *******************************************************************************/
-void VDAC_Ref_Adder_SetValue(uint8 value) 
+void VDAC_Ref_Sum_SetValue(uint8 value) 
 {
     #if (CY_PSOC5A)
-        uint8 VDAC_Ref_Adder_intrStatus = CyEnterCriticalSection();
+        uint8 VDAC_Ref_Sum_intrStatus = CyEnterCriticalSection();
     #endif /* CY_PSOC5A */
 
-    VDAC_Ref_Adder_Data = value;                /*  Set Value  */
+    VDAC_Ref_Sum_Data = value;                /*  Set Value  */
 
     /* PSOC5A requires a double write */
     /* Exit Critical Section */
     #if (CY_PSOC5A)
-        VDAC_Ref_Adder_Data = value;
-        CyExitCriticalSection(VDAC_Ref_Adder_intrStatus);
+        VDAC_Ref_Sum_Data = value;
+        CyExitCriticalSection(VDAC_Ref_Sum_intrStatus);
     #endif /* CY_PSOC5A */
 }
 
 
 /*******************************************************************************
-* Function Name: VDAC_Ref_Adder_DacTrim
+* Function Name: VDAC_Ref_Sum_DacTrim
 ********************************************************************************
 *
 * Summary:
@@ -286,12 +286,12 @@ void VDAC_Ref_Adder_SetValue(uint8 value)
 * Side Effects:
 *
 *******************************************************************************/
-void VDAC_Ref_Adder_DacTrim(void) 
+void VDAC_Ref_Sum_DacTrim(void) 
 {
     uint8 mode;
 
-    mode = (uint8)((VDAC_Ref_Adder_CR0 & VDAC_Ref_Adder_RANGE_MASK) >> 2) + VDAC_Ref_Adder_TRIM_M7_1V_RNG_OFFSET;
-    VDAC_Ref_Adder_TR = CY_GET_XTND_REG8((uint8 *)(VDAC_Ref_Adder_DAC_TRIM_BASE + mode));
+    mode = (uint8)((VDAC_Ref_Sum_CR0 & VDAC_Ref_Sum_RANGE_MASK) >> 2) + VDAC_Ref_Sum_TRIM_M7_1V_RNG_OFFSET;
+    VDAC_Ref_Sum_TR = CY_GET_XTND_REG8((uint8 *)(VDAC_Ref_Sum_DAC_TRIM_BASE + mode));
 }
 
 

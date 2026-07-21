@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: ADDERo.c  
+* File Name: SUMm.c  
 * Version 2.20
 *
 * Description:
@@ -15,15 +15,15 @@
 *******************************************************************************/
 
 #include "cytypes.h"
-#include "ADDERo.h"
+#include "SUMm.h"
 
 /* APIs are not generated for P15[7:6] on PSoC 5 */
 #if !(CY_PSOC5A &&\
-	 ADDERo__PORT == 15 && ((ADDERo__MASK & 0xC0) != 0))
+	 SUMm__PORT == 15 && ((SUMm__MASK & 0xC0) != 0))
 
 
 /*******************************************************************************
-* Function Name: ADDERo_Write
+* Function Name: SUMm_Write
 ****************************************************************************//**
 *
 * \brief Writes the value to the physical port (data output register), masking
@@ -52,17 +52,17 @@
 *  this function.
 *
 * \funcusage
-*  \snippet ADDERo_SUT.c usage_ADDERo_Write
+*  \snippet SUMm_SUT.c usage_SUMm_Write
 *******************************************************************************/
-void ADDERo_Write(uint8 value)
+void SUMm_Write(uint8 value)
 {
-    uint8 staticBits = (ADDERo_DR & (uint8)(~ADDERo_MASK));
-    ADDERo_DR = staticBits | ((uint8)(value << ADDERo_SHIFT) & ADDERo_MASK);
+    uint8 staticBits = (SUMm_DR & (uint8)(~SUMm_MASK));
+    SUMm_DR = staticBits | ((uint8)(value << SUMm_SHIFT) & SUMm_MASK);
 }
 
 
 /*******************************************************************************
-* Function Name: ADDERo_SetDriveMode
+* Function Name: SUMm_SetDriveMode
 ****************************************************************************//**
 *
 * \brief Sets the drive mode for each of the Pins component's pins.
@@ -85,16 +85,16 @@ void ADDERo_Write(uint8 value)
 *  APIs (primary method) or disable interrupts around this function.
 *
 * \funcusage
-*  \snippet ADDERo_SUT.c usage_ADDERo_SetDriveMode
+*  \snippet SUMm_SUT.c usage_SUMm_SetDriveMode
 *******************************************************************************/
-void ADDERo_SetDriveMode(uint8 mode)
+void SUMm_SetDriveMode(uint8 mode)
 {
-	CyPins_SetPinDriveMode(ADDERo_0, mode);
+	CyPins_SetPinDriveMode(SUMm_0, mode);
 }
 
 
 /*******************************************************************************
-* Function Name: ADDERo_Read
+* Function Name: SUMm_Read
 ****************************************************************************//**
 *
 * \brief Reads the associated physical port (pin status register) and masks 
@@ -108,16 +108,16 @@ void ADDERo_SetDriveMode(uint8 mode)
 *  The current value for the pins in the component as a right justified number.
 *
 * \funcusage
-*  \snippet ADDERo_SUT.c usage_ADDERo_Read  
+*  \snippet SUMm_SUT.c usage_SUMm_Read  
 *******************************************************************************/
-uint8 ADDERo_Read(void)
+uint8 SUMm_Read(void)
 {
-    return (ADDERo_PS & ADDERo_MASK) >> ADDERo_SHIFT;
+    return (SUMm_PS & SUMm_MASK) >> SUMm_SHIFT;
 }
 
 
 /*******************************************************************************
-* Function Name: ADDERo_ReadDataReg
+* Function Name: SUMm_ReadDataReg
 ****************************************************************************//**
 *
 * \brief Reads the associated physical port's data output register and masks 
@@ -126,8 +126,8 @@ uint8 ADDERo_Read(void)
 *
 * The data output register controls the signal applied to the physical pin in 
 * conjunction with the drive mode parameter. This is not the same as the 
-* preferred ADDERo_Read() API because the 
-* ADDERo_ReadDataReg() reads the data register instead of the status 
+* preferred SUMm_Read() API because the 
+* SUMm_ReadDataReg() reads the data register instead of the status 
 * register. For output pins this is a useful function to determine the value 
 * just written to the pin.
 *
@@ -136,19 +136,19 @@ uint8 ADDERo_Read(void)
 *  justified number for the component instance.
 *
 * \funcusage
-*  \snippet ADDERo_SUT.c usage_ADDERo_ReadDataReg 
+*  \snippet SUMm_SUT.c usage_SUMm_ReadDataReg 
 *******************************************************************************/
-uint8 ADDERo_ReadDataReg(void)
+uint8 SUMm_ReadDataReg(void)
 {
-    return (ADDERo_DR & ADDERo_MASK) >> ADDERo_SHIFT;
+    return (SUMm_DR & SUMm_MASK) >> SUMm_SHIFT;
 }
 
 
 /* If interrupt is connected for this Pins component */ 
-#if defined(ADDERo_INTSTAT) 
+#if defined(SUMm_INTSTAT) 
 
     /*******************************************************************************
-    * Function Name: ADDERo_SetInterruptMode
+    * Function Name: SUMm_SetInterruptMode
     ****************************************************************************//**
     *
     * \brief Configures the interrupt mode for each of the Pins component's
@@ -161,12 +161,12 @@ uint8 ADDERo_ReadDataReg(void)
     * \param position
     *  The pin position as listed in the Pins component. You may OR these to be 
     *  able to configure the interrupt mode of multiple pins within a Pins 
-    *  component. Or you may use ADDERo_INTR_ALL to configure the
+    *  component. Or you may use SUMm_INTR_ALL to configure the
     *  interrupt mode of all the pins in the Pins component.       
-    *  - ADDERo_0_INTR       (First pin in the list)
-    *  - ADDERo_1_INTR       (Second pin in the list)
+    *  - SUMm_0_INTR       (First pin in the list)
+    *  - SUMm_1_INTR       (Second pin in the list)
     *  - ...
-    *  - ADDERo_INTR_ALL     (All pins in Pins component)
+    *  - SUMm_INTR_ALL     (All pins in Pins component)
     *
     * \param mode
     *  Interrupt mode for the selected pins. Valid options are documented in
@@ -182,19 +182,19 @@ uint8 ADDERo_ReadDataReg(void)
     *  port.
     *
     * \funcusage
-    *  \snippet ADDERo_SUT.c usage_ADDERo_SetInterruptMode
+    *  \snippet SUMm_SUT.c usage_SUMm_SetInterruptMode
     *******************************************************************************/
-    void ADDERo_SetInterruptMode(uint16 position, uint16 mode)
+    void SUMm_SetInterruptMode(uint16 position, uint16 mode)
     {
-		if((position & ADDERo_0_INTR) != 0u) 
+		if((position & SUMm_0_INTR) != 0u) 
 		{ 
-			 ADDERo_0_INTTYPE_REG = (uint8)mode; 
+			 SUMm_0_INTTYPE_REG = (uint8)mode; 
 		}
     }
     
     
     /*******************************************************************************
-    * Function Name: ADDERo_ClearInterrupt
+    * Function Name: SUMm_ClearInterrupt
     ****************************************************************************//**
     *
     * \brief Clears any active interrupts attached with the component and returns 
@@ -211,11 +211,11 @@ uint8 ADDERo_ReadDataReg(void)
     *  those associated with the Pins component.
     *
     * \funcusage
-    *  \snippet ADDERo_SUT.c usage_ADDERo_ClearInterrupt
+    *  \snippet SUMm_SUT.c usage_SUMm_ClearInterrupt
     *******************************************************************************/
-    uint8 ADDERo_ClearInterrupt(void)
+    uint8 SUMm_ClearInterrupt(void)
     {
-        return (ADDERo_INTSTAT & ADDERo_MASK) >> ADDERo_SHIFT;
+        return (SUMm_INTSTAT & SUMm_MASK) >> SUMm_SHIFT;
     }
 
 #endif /* If Interrupts Are Enabled for this Pins component */ 

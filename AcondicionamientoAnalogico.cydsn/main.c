@@ -9,7 +9,7 @@
 * ─────────────────────────────────────────────────────────────────────────────
 *  GEO — componentes TopDesign:
 *    UART, ADC, AMux_ADC, VDAC_ref_*, PGAgain, OPAref, PGAp,
-*    PGAn, LPF_1, LPF_2, OPAbp, OPAadder, OPAlp, Timer, LED, isr_*.
+*    PGAn, LPF_1, LPF_2, OPAbp, OPAsum, OPAlp, Timer, LED, isr_*.
 *
 *  HAMMER — componentes TopDesign (simplificado en "Precambios", ya sin
 *  etapa de referencia de entrada separada):

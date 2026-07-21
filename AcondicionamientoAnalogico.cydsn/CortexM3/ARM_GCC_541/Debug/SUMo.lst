@@ -1,0 +1,1625 @@
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 2
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"SUMo.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.section	.gnu.lto_.profile.6b711a2b,"",%progbits
+  19 0000 789C6361 		.ascii	"x\234ca`d`a`\000\222\222\242\000\000\261\0009"
+  19      60646061 
+  19      60009292 
+  19      A20000B1 
+  19      0039
+  20              		.text
+  21              		.section	.gnu.lto_.icf.6b711a2b,"",%progbits
+  22 0000 789C6361 		.ascii	"x\234ca`d\000\001)\006\004`axyrG\007/\343\202]\375o"
+  22      60640001 
+  22      29060460 
+  22      61787972 
+  22      47072FE3 
+  23 0018 D9992EBE 		.ascii	"\331\231.\276|>\217\237\371\311\203\013W\371\031\000"
+  23      7C3E8F9F 
+  23      F9C9830B 
+  23      57F91900 
+  24 0028 AABA0CCC 		.ascii	"\252\272\014\314"
+  25              		.text
+  26              		.section	.gnu.lto_.jmpfuncs.6b711a2b,"",%progbits
+  27 0000 789C6361 		.ascii	"x\234ca`d\000\001!\006\004`a`dd\254g\004\021L\014\014"
+  27      60640001 
+  27      21060460 
+  27      61606464 
+  27      AC670411 
+  28 0017 CC401100 		.ascii	"\314@\021\000\016\"\001&"
+  28      0E220126 
+  29              		.text
+  30              		.section	.gnu.lto_.inline.6b711a2b,"",%progbits
+  31 0000 789C6361 		.ascii	"x\234ca`d\000\201$\006\004`a`\340\344`dd\340\000J1s"
+  31      60640081 
+  31      24060460 
+  31      6160E0E4 
+  31      606464E0 
+  32 0018 1CB06360 		.ascii	"\034\260c`[ \317\304\300\262@\236\005$\013\024g\307"
+  32      5B20CFC4 
+  32      C0B2409E 
+  32      05240B14 
+  32      67C7
+  33 002a 9064BAC0 		.ascii	"\220d\272\300\017\226db`ced`b\373\240\007\021\007\002"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 2
+
+
+  33      0F966462 
+  33      60636564 
+  33      6062FBA0 
+  33      07110702 
+  34 003e 664C2106 		.ascii	"fL!\006\000\346\332\011\346"
+  34      00E6DA09 
+  34      E6
+  35              		.text
+  36              		.section	.gnu.lto_.pureconst.6b711a2b,"",%progbits
+  37 0000 789C6361 		.ascii	"x\234ca`d\340d```a\220b\224b\222b\226\002\000\002\261"
+  37      6064E064 
+  37      60606061 
+  37      90629462 
+  37      92629602 
+  38 0017 0081     		.ascii	"\000\201"
+  39              		.text
+  40              		.section	.gnu.lto_SUMo_Write.6b711a2b,"",%progbits
+  41 0000 789C5551 		.ascii	"x\234UQ]K\024a\024>\317\373\316\207\265\351\037h\021"
+  41      5D4B1461 
+  41      143ECFFB 
+  41      CE87B5E9 
+  41      1F6811
+  42 0013 BB904582 		.ascii	"\273\220E\202(\242?P\027]\005\321\322\335B,\333\\\010"
+  42      28A23F50 
+  42      175D05D1 
+  42      D2DD422C 
+  42      DB5C08
+  43 0026 E982AEDD 		.ascii	"\351\202\256\335\372\216\343\256`\004\336\244\004\225"
+  43      FA8EE3AE 
+  43      6004DEA4 
+  43      0495
+  44 0034 B0229AE6 		.ascii	"\260\"\232\346gW\205\3400?\240n\214\350\203\022\211"
+  44      675785E0 
+  44      303FA06E 
+  44      8CE88312 
+  44      89
+  45 0045 09226283 		.ascii	"\011\"b\203\266\254\255\266sf\274\310\003\357\307\234"
+  45      B6ACADB6 
+  45      7366BCC8 
+  45      03EFC79C 
+  46 0055 799EE73C 		.ascii	"y\236\347<\347\274\026\201$N*\2423|\036\347\005MPS\317"
+  46      E7BC1681 
+  46      244E2AA2 
+  46      337C1EE7 
+  46      054D5053 
+  47 006a 88FC0E05 		.ascii	"\210\374\016\005\310\305t\200F\025F\321T\177\024\242"
+  47      C8C57480 
+  47      461546D1 
+  47      547F14A2 
+  48 007a 89F889EA 		.ascii	"\211\370\211\352[0\034\273\363\017\264Y\014Q\325Dm\225"
+  48      5B301CBB 
+  48      F30FB459 
+  48      0C51D544 
+  48      6D95
+  49 008c 281116D0 		.ascii	"(\021\026\320\307\250\217[\023;\320'@|\257E\315F&7o"
+  49      C7A88F5B 
+  49      133BD027 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 3
+
+
+  49      407CAF45 
+  49      CD462637 
+  50 00a1 CC9831EF 		.ascii	"\314\2301\357\013FW5\260\010\315\014\234\315\342t\226"
+  50      0B465735 
+  50      B008CD0C 
+  50      9CCDE274 
+  50      96
+  51 00b2 38417888 		.ascii	"8Ax\210\234\200\367_\357\254v\351\\B\2342q\375X\357"
+  51      9C80F75F 
+  51      EFAC76E9 
+  51      5C429C32 
+  51      71FD58EF 
+  52 00c6 9C10C31F 		.ascii	"\234\020\303\037\0033&\364{\204\273\364?W\202\241{\033"
+  52      033326F4 
+  52      7B84BBF4 
+  52      3F5782A1 
+  52      7B1B
+  53 00d8 7FEF743A 		.ascii	"\177\357t:\343\342\252\007\313\350M\375\340\021\034"
+  53      E3E2AA07 
+  53      CBE84DFD 
+  53      E0111C
+  54 00e7 EE109259 		.ascii	"\356\020\222Y\273\022\232v;0a\323n\352#\212\213*\356"
+  54      BB129A76 
+  54      3B3061D3 
+  54      6EEA238A 
+  54      8B2AEE
+  55 00fa 947F5890 		.ascii	"\224\177X\220\332\266$\034\331\\\331\210\032\274\244"
+  55      DAB6241C 
+  55      D95CD988 
+  55      1ABCA4
+  56 0109 FBAF4AC9 		.ascii	"\373\257J\311\251cD\277&\337\315\270\242\031h\231\304"
+  56      A96344BF 
+  56      26DFCDB8 
+  56      A2196899 
+  56      C4
+  57 011a 74357AEE 		.ascii	"t5z\356~SU\255\023\267\257\336\334\375\342\244\237\353"
+  57      7E5355AD 
+  57      13B7AFDE 
+  57      DCFDE2A4 
+  57      9FEB
+  58 012c 75DF589C 		.ascii	"u\337X\234\332\235\274\327rgq\337\037\347\031YXE\026"
+  58      DA9DBCD7 
+  58      726771DF 
+  58      1FE71959 
+  58      584516
+  59 013f 2B60CF58 		.ascii	"+`\317X\303,(F\360\273\366\026\251\240N5o\375\334|\321"
+  59      C32C2846 
+  59      F0BBF616 
+  59      A9A04E35 
+  59      6FFDDC7C 
+  60 0154 2922C036 		.ascii	")\"\3006\260\316\340=\250\244\015v\312(!5j\361\313\003"
+  60      B0CEE03D 
+  60      A8A40D76 
+  60      CA282135 
+  60      6AF1CB03 
+  61 0168 1B76A0A5 		.ascii	"\033v\240\245\316\207\326\312\323.a\331\014\334`R\""
+  61      CE87D6CA 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 4
+
+
+  61      D32E61D9 
+  61      0CDC6052 
+  61      22
+  62 0179 FDF9405A 		.ascii	"\375\371@Zp\014\252\177\017ng\004d!$l\246\250}'\305"
+  62      700CAA7F 
+  62      0F6E6704 
+  62      6421246C 
+  62      A6A87D27 
+  63 018e B8890387 		.ascii	"\270\211\003\207S\321tB;\344\3367&s\270\201\307\334"
+  63      53D17442 
+  63      3BE4DE37 
+  63      2673B881 
+  63      C7DC
+  64 01a0 00B3E813 		.ascii	"\000\263\350\023\306\302\226-\204\344%\032\0122,\036"
+  64      C6C2962D 
+  64      84E4251A 
+  64      0A322C1E 
+  65 01b0 5DF7456F 		.ascii	"]\367Eo\320\033*V\274\353\327\362\345\221\241\222W\270"
+  65      D01B2A56 
+  65      BCEBD7F2 
+  65      E591A192 
+  65      57B8
+  66 01c2 9C2F5F38 		.ascii	"\234/_8W\310_\275T>U\"\373f\361\306\210wt\270R\254\364"
+  66      57C85FBD 
+  66      543E5522 
+  66      FB66F1C6 
+  66      887774B8 
+  67 01d9 97CEF757 		.ascii	"\227\316\367W\206\377\001\013Q\303\026"
+  67      86FF010B 
+  67      51C316
+  68              		.text
+  69              		.section	.gnu.lto_SUMo_SetDriveMode.6b711a2b,"",%progbits
+  70 0000 789C7D51 		.ascii	"x\234}Q=K#Q\024\275\347\275\311\314\0041\177`\203h!"
+  70      3D4B2351 
+  70      14BDE7BD 
+  70      C9CC0431 
+  70      7F608368 
+  71 0015 622382F8 		.ascii	"b#\202\370\013\004\267Z\020\203]@D\247\324\240h\355"
+  71      0B04B75A 
+  71      10835D40 
+  71      44A7D4A0 
+  71      68ED
+  72 0027 4B6210B4 		.ascii	"Kb\020\264pA\264\021?\032\361#~be7\006\264\260P+\013"
+  72      7041B411 
+  72      3F1AF123 
+  72      7E626537 
+  72      06B4B050 
+  73 003d 0B118B20 		.ascii	"\013\021\213 \202\022u\227]\324\030\357\235\261H\345"
+  73      82127597 
+  73      5DD418EF 
+  73      9DB148E5 
+  74 004d 63DEFD38 		.ascii	"c\336\3758\234s\270\367\215E 9w\234\0329\377\340\013"
+  74      9C73B8F7 
+  74      8D452039 
+  74      779C1A39 
+  74      FFE00B
+  75 0060 4D50BFCF 		.ascii	"MP\277\317\210\322\256\002\2440.h\\a\034\177UY\2410"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 5
+
+
+  75      88D2AE02 
+  75      A4302E68 
+  75      5C611C7F 
+  75      5559A130 
+  76 0074 593C54CD 		.ascii	"Y<T\315k\206\317\315\361c\253Y\367\221\323D\025\025"
+  76      6B86CFCD 
+  76      F163AB59 
+  76      F791D344 
+  76      1515
+  77 0086 3811D6D0 		.ascii	"8\021\326\320\314\254\227\203\325\331\032\335\000\342"
+  77      CCAC9783 
+  77      D5D91ADD 
+  77      00E2
+  78 0094 FAE9AC74 		.ascii	"\372\351\254t\035kZ5&cL9itN\003\353\320\254@[\034\255"
+  78      1D6B5A35 
+  78      26634C39 
+  78      69744E03 
+  78      EBD0AC40 
+  79 00ab 716280B0 		.ascii	"qb\200\260\201&!\337\356\177\314\325\332\023b_\037\232"
+  79      812621DF 
+  79      EE7FCCD5 
+  79      DA13625F 
+  79      1F9A
+  80 00bd 6213B68C 		.ascii	"b\023\266\214\271\333\355\233J%k\374\177\366\321\253"
+  80      B9DBED9B 
+  80      4A256BFC 
+  80      7FF6D1AB 
+  81 00cd 5DA358A6 		.ascii	"]\243X\2464\007mI\210@\034l)\035\011\256\204\250p\210"
+  81      34076D49 
+  81      88401C6C 
+  81      291D09AE 
+  81      84A87088 
+  82 00e1 4A7C6591 		.ascii	"J|e\221'\245$\353\"\012\257S\305\005K\234\263Z\226\232"
+  82      27A524EB 
+  82      220AAF53 
+  82      C5054B9C 
+  82      B35A969A 
+  83 00f5 CF15CE9D 		.ascii	"\317\025\316\235?*\247\255`\342\323{\377\"\026\266K"
+  83      3F2AA7AD 
+  83      60E2D37B 
+  83      FF2216B6 
+  83      4B
+  84 0106 2B696331 		.ascii	"+ic1\264\237\2371\3562\026\323\023\274n\004[\210#\217"
+  84      B49F9F31 
+  84      EE3216D3 
+  84      13BC6E04 
+  84      5B88238F 
+  85 011a 384FB78D 		.ascii	"8O\267\215eP\021\231g'\264\323\354\310}\366\335\016"
+  85      65501199 
+  85      6727B4D3 
+  85      ECC87DF6 
+  85      DD0E
+  86 012c 7B8B21D6 		.ascii	"{\213!\326_\235L\227\243b\2511\214\035VVI\370\213TK"
+  86      5F9D4C97 
+  86      A362A931 
+  86      8C1D5656 
+  86      49F88B54 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 6
+
+
+  87 0141 1C8658F2 		.ascii	"\034\206X\362p\231\337\322\241$\206\335@\222\375\377"
+  87      7099DFD2 
+  87      A12486DD 
+  87      4092FDFF 
+  88 0151 45710363 		.ascii	"Eq\003c\247\332%\312(\367\205yH\377\335\310{<2\363\351"
+  88      A7DA25CA 
+  88      28F78579 
+  88      48FFDDC8 
+  88      7B3C32F3 
+  89 0166 1E19FFAD 		.ascii	"\036\031\377\255S\330\301\257+)\310\363\360c\325\375"
+  89      53D8C1AF 
+  89      2B29C8F3 
+  89      F063D5FD 
+  90 0176 F486BC91 		.ascii	"\364\206\274\221\276Qo\2407\221\032\033\351\367\222"
+  90      BE516FA0 
+  90      37911A1B 
+  90      E9F792
+  91 0185 5D895447 		.ascii	"]\211TG{2\321\363+\325\322O\326`j\300\373\0041\365\244"
+  91      7B32D1F3 
+  91      2BD5D24F 
+  91      D6606AC0 
+  91      FB0431F5 
+  92 019a 7A       		.ascii	"z"
+  93              		.text
+  94              		.section	.gnu.lto_SUMo_Read.6b711a2b,"",%progbits
+  95 0000 789C354F 		.ascii	"x\2345O\315K\002Q\020\237\337{\353\256\024\372\017$"
+  95      CD4B0251 
+  95      109FDF7B 
+  95      EBAE14FA 
+  95      0F24
+  96 0012 E1D54B04 		.ascii	"\341\325K\004\021D\327\240NA$\321E\210\260\275&H\235"
+  96      1144D7A0 
+  96      4E4124D1 
+  96      4588B0BD 
+  96      26489D
+  97 0025 DD75DD82 		.ascii	"\335u\335\202\350\320\245:U\020\204\226Ix\022:m\236"
+  97      E8D0A53A 
+  97      55108496 
+  97      4978123A 
+  97      6D9E
+  98 0037 82A00E15 		.ascii	"\202\240\016\025\004\205D\210AD\224\024\201}\330\274"
+  98      04854488 
+  98      41449414 
+  98      817DD8BC 
+  99 0047 B606DECC 		.ascii	"\266\006\336\314{\363~\0373\032\201TLr\211r\355\342"
+  99      7BF37E1F 
+  99      331A8154 
+  99      4C728972 
+  99      EDE2
+ 100 0059 0349102B 		.ascii	"\003I\020+\247DvP\000\352b\005A\031\201\014\336\304"
+ 100      A7447650 
+ 100      00EA6205 
+ 100      4119810C 
+ 100      DEC4
+ 101 006b 97C0C9FB 		.ascii	"\227\300\311\373\361rG,oYY\353v\2475\260^\360\340J\242"
+ 101      F172472C 
+ 101      6F5959EB 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 7
+
+
+ 101      76A735B0 
+ 101      5EF0E04A 
+ 102 0080 B620F445 		.ascii	"\266 \364E\320\033Q\022y\304\210\241w\345\357\325\220"
+ 102      D01B5112 
+ 102      79C488A1 
+ 102      77E5EFD5 
+ 102      90
+ 103 0091 9EB338A2 		.ascii	"\236\2638\242\012\300?\005\350\312\362`\334\263\332"
+ 103      0AC03F05 
+ 103      E8CAF260 
+ 103      DCB3DA
+ 104 00a0 6DC7F22E 		.ascii	"m\307\362.\215\243+\303\000\271\222}9i\234D@%\235\224"
+ 104      8DA32BC3 
+ 104      00B9927D 
+ 104      39699C44 
+ 104      40259D94 
+ 105 00b4 2C3D334D 		.ascii	",=3M\015\361\"\204\252\262\201jk\251\2669\250\224\034"
+ 105      0DF12284 
+ 105      AAB2816A 
+ 105      6BA9B639 
+ 105      A8941C
+ 106 00c7 29D965CD 		.ascii	")\331e\315\255\236\031\257\302\225\022\3124{_\273\356"
+ 106      AD9E19AF 
+ 106      C29512CA 
+ 106      347B5FBB 
+ 106      EE
+ 107 00d8 F49FE56D 		.ascii	"\364\237\345m\333\322\270\345\332\3477\341-l\3309\036"
+ 107      DBD2B8E5 
+ 107      DAE737E1 
+ 107      2D6CD839 
+ 107      1E
+ 108 00e9 55C31E22 		.ascii	"U\303\036\"\330\005\017\212\"\266@\0158\237\303\344"
+ 108      D8050F8A 
+ 108      22B6400D 
+ 108      389FC3E4 
+ 109 00f9 48F87295 		.ascii	"H\370r\225\247b%\244\370\200G\330g\\\003\331\346\342"
+ 109      A76225A4 
+ 109      F88047D8 
+ 109      675C03D9 
+ 109      E6E2
+ 110 010b A3F01D35 		.ascii	"\243\360\0355\006*Js\341B\363;\001n2\257\376Q:\014+"
+ 110      062A4A73 
+ 110      E142F33B 
+ 110      016E32AF 
+ 110      FE513A0C 
+ 111 0120 9EE0154B 		.ascii	"\236\340\025K\377\264:|\220\302\321\003\376Dt\372\335"
+ 111      FFB43A7C 
+ 111      90C2D103 
+ 111      FE4474FA 
+ 111      DD
+ 112 0131 0C6A23DE 		.ascii	"\014j#\336\257{\304\2345\323\323s\346\314T<5\237N\232"
+ 112      AF7BC49C 
+ 112      35D3D373 
+ 112      E6CC543C 
+ 112      359F4E9A 
+ 113 0145 89B1786A 		.ascii	"\211\261xj\250?\021\237\030M\365$\351\007\014\213{\233"
+ 113      A83F119F 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 8
+
+
+ 113      184DF524 
+ 113      E9070C8B 
+ 113      7B9B
+ 114              		.text
+ 115              		.section	.gnu.lto_SUMo_ReadDataReg.6b711a2b,"",%progbits
+ 116 0000 789C354F 		.ascii	"x\2345O\315KBA\020\237\337\356\363)\202\375\003Ix\365"
+ 116      CD4B4241 
+ 116      109FDFEE 
+ 116      F32982FD 
+ 116      034978F5 
+ 117 0014 124174A8 		.ascii	"\022At\250kP\247 \222\350\"D\330\273&H\235]?^\201t\350"
+ 117      6B50A720 
+ 117      92E82244 
+ 117      D8BB2648 
+ 117      9D5D3F5E 
+ 118 002b 52111442 		.ascii	"R\021\024B\020j&\325I\010\202\227\247 \250\016]\242"
+ 118      106A26D5 
+ 118      49088297 
+ 118      A720A80E 
+ 118      5DA2
+ 119 003d 8B847888 		.ascii	"\213\204x\210\220\222\"\310\322f{5\2603\273\263\277"
+ 119      909222C8 
+ 119      D2667B35 
+ 119      B033BBB3 
+ 119      BF
+ 120 004e 8F198340 		.ascii	"\217\031\203@:\346\270\204\270\366\363\201$\210\215"
+ 120      3AE6B884 
+ 120      B8F6F381 
+ 120      24888D
+ 121 005d 6BA2944F 		.ascii	"k\242\224O\000\372\242|\240\244@\022\357\342[\340\352"
+ 121      00FAA27C 
+ 121      A0A44012 
+ 121      EFE25BE0 
+ 121      EA
+ 122 006e E372DD1F 		.ascii	"\343r\335\037.(\225V\365\203\302\350v\321\201-\211z"
+ 122      2E289556 
+ 122      F583C2E8 
+ 122      76D1812D 
+ 122      897A
+ 123 0080 82301CC4 		.ascii	"\2020\034\304PPK\024\020&\206>\236v7\003fVq\2044\200"
+ 123      50504B14 
+ 123      1026863E 
+ 123      9E763703 
+ 123      66567184 
+ 124 0096 7F8A30B5 		.ascii	"\177\2120\265\345\361\214\243z\275\214r\316\375\027"
+ 124      E5F18CA3 
+ 124      7ABD8C72 
+ 124      CEFD17
+ 125 00a5 B77E2FC8 		.ascii	"\267~/\310\226\354\313\311\340$<:\231\244e\351\205i"
+ 125      96ECCBC9 
+ 125      E0243C3A 
+ 125      99A465E9 
+ 125      8569
+ 126 00b7 7A885721 		.ascii	"z\210W!t\225M\324>s\335\322\230V\312H\311.[v\355\306"
+ 126      74954DD4 
+ 126      3E73DDD2 
+ 126      9856CA48 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 9
+
+
+ 126      C92E5B76 
+ 127 00cd FB266C29 		.ascii	"\373&l)\241M\357\037vZ\246\373<\331O)\203[\365\334n"
+ 127      A14DEF1F 
+ 127      765AA6FB 
+ 127      3CD94F29 
+ 127      835BF5DC 
+ 128 00e2 C79BC75E 		.ascii	"\307\233\307^*\313\243\0328D\020%\360\240(#\017j\"\363"
+ 128      2ACBA31A 
+ 128      38441025 
+ 128      F0A02823 
+ 128      0F6A22F3 
+ 129 00f6 35411909 		.ascii	"5A\031\011W\256\332*W\003\232\0178\204#\3065\221n\257"
+ 129      57AEDA2A 
+ 129      57039A0F 
+ 129      388423C6 
+ 129      35916EAF 
+ 130 010a 3D0BD7D1 		.ascii	"=\013\327\321`\240\246\264W\357\014\267\343\341&\363"
+ 130      60A0A6B4 
+ 130      57EF0CB7 
+ 130      E3E126F3 
+ 131 011a 1A9DCA59 		.ascii	"\032\235\312Y\237\346\011^\261\362Ok\300\005i\034=\341"
+ 131      9FE6095E 
+ 131      B1F24F6B 
+ 131      C005691C 
+ 131      3DE1
+ 132 012c 4FC4A4DF 		.ascii	"O\304\244\337\315\2407\342\375\006&\255%+\261\260l-"
+ 132      CDA037E2 
+ 132      FD0626AD 
+ 132      252BB1B0 
+ 132      6C2D
+ 133 013e CE47E22B 		.ascii	"\316G\342+\211\230\025\235\216\304\307G\242\221\331"
+ 133      8998159D 
+ 133      8EC4C747 
+ 133      A291D9
+ 134 014d A9F8608C 		.ascii	"\251\370`\214~\000\350\"{\262"
+ 134      7E00E822 
+ 134      7BB2
+ 135              		.text
+ 136              		.section	.gnu.lto_.symbol_nodes.6b711a2b,"",%progbits
+ 137 0000 789C6361 		.ascii	"x\234ca`dpc\000\002&\206z\006\206\011\347\030@\324\256"
+ 137      60647063 
+ 137      00022686 
+ 137      7A068609 
+ 137      E71840D4 
+ 138 0015 0645A000 		.ascii	"\006E\240\000c=#\252\000S=\023\252\000s=3\212\000\003"
+ 138      633D23AA 
+ 138      00533D13 
+ 138      AA00733D 
+ 138      338A0003 
+ 139 0029 0026B60F 		.ascii	"\000&\266\017<"
+ 139      3C
+ 140              		.text
+ 141              		.section	.gnu.lto_.refs.6b711a2b,"",%progbits
+ 142 0000 789C6361 		.ascii	"x\234ca`\004B \000\000\0009\000\007"
+ 142      60044220 
+ 142      00000039 
+ 142      0007
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 10
+
+
+ 143              		.text
+ 144              		.section	.gnu.lto_.decls.6b711a2b,"",%progbits
+ 145 0000 789C8D53 		.ascii	"x\234\215S]H\024Q\024\276gfv]\307\337$\304\207-\314"
+ 145      5D481451 
+ 145      14BE6766 
+ 145      765DC7DF 
+ 145      24C4872D 
+ 146 0015 279F2491 		.ascii	"'\237$\221\300'\013\224|2\303E{1d\325\301|qc[\003\337"
+ 146      C0270B94 
+ 146      7C32C345 
+ 146      7B3164D5 
+ 146      C17C7163 
+ 147 002c AEBA4119 		.ascii	"\256\272A\031\225\022V\232\240%\231?\353O\356\256\271"
+ 147      9512569A 
+ 147      A025993F 
+ 147      EB4FEEAE 
+ 147      B9
+ 148 003d AB960AFD 		.ascii	"\253\226\012\375\020\030\212`\204A\222\372 YX\371b\241"
+ 148      10188A60 
+ 148      844192FA 
+ 148      205958F9 
+ 148      62A1
+ 149 004f DBB97766 		.ascii	"\333\271wf\234\3056\3600g\366\234{\317\367\235\357\236"
+ 149      9CC536F0 
+ 149      3067F69C 
+ 149      7BCFF79D 
+ 149      EF9E
+ 150 0061 B92B1120 		.ascii	"\271+\021 \314r$Bn\343\257\025\323\020\232\011\343\022"
+ 150      CC722442 
+ 150      6EE3AF15 
+ 150      D3109A09 
+ 150      E312
+ 151 0073 62186E13 		.ascii	"b\030n\023/\272\037}\034=H\3765\266o\326pC\214\013\375"
+ 151      2FBA1F7D 
+ 151      1C3D48FE 
+ 151      35B66FD6 
+ 151      70438C0B 
+ 152 0088 25FA147A 		.ascii	"%\372\024z\241V\003Z\335A\363G\300\316\206\341u\254"
+ 152      A156035A 
+ 152      DD41F347 
+ 152      C0CE86E1 
+ 152      75AC
+ 153 009a 3F0296E9 		.ascii	"?\002\226\3511\205\341\012#\340\306#\340\202\207\300"
+ 153      3185E10A 
+ 153      23E0C623 
+ 153      E08287C0 
+ 154 00aa 453AE7AE 		.ascii	"E:\347\256\000\241N\337\035\3132|\004\221h\003$\000"
+ 154      00A14EDF 
+ 154      1DCB327C 
+ 154      04916803 
+ 154      2400
+ 155 00bc EA1BB813 		.ascii	"\352\033\270\023\325y\212\201@\324@_\3327\242\225\010"
+ 155      D5798A81 
+ 155      40D4405F 
+ 155      DA37A295 
+ 155      08
+ 156 00cd 7A6890F1 		.ascii	"zh\220\361G\303CH7Nb\260\203\006Rs]\267\006\002\301"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 11
+
+
+ 156      47C34348 
+ 156      374E62B0 
+ 156      83065273 
+ 156      5DB70602 
+ 157 00e2 68006AAA 		.ascii	"h\000j\252#\302\370\016(\3225\353m\210\240\037zp\252"
+ 157      23C2F80E 
+ 157      28D235EB 
+ 157      6D88A01F 
+ 157      7A70AA
+ 158 00f5 A73D4E14 		.ascii	"\247=N\024\200\305\237wz\317fx(Z3\245\3021c2\303\327"
+ 158      80C59F77 
+ 158      7ACF6678 
+ 158      285A33A5 
+ 158      C2316332 
+ 159 010b D6FA2CDB 		.ascii	"\326\372,\333\002Xe\010\001\3137\003;qj\316\266\333"
+ 159      02586508 
+ 159      01CB3703 
+ 159      3B716ACE 
+ 159      B6DB
+ 160 011d 5A56F762 		.ascii	"ZV\367b\304d\026\013\213\253\003\033\022\244\313=\214"
+ 160      C464160B 
+ 160      8BAB031B 
+ 160      12A4CB3D 
+ 160      8C
+ 161 012e 6665672D 		.ascii	"feg-'@i\"\014\201\014\036\020\241\0172\230\006\253\214"
+ 161      27406922 
+ 161      0C810C1E 
+ 161      10A10F32 
+ 161      9806AB8C 
+ 162 0142 EFEB9436 		.ascii	"\357\353\2246\320\255\307\324\234B \313\012'\255\004"
+ 162      D0ADC7D4 
+ 162      9C4220CB 
+ 162      0A27AD04 
+ 163 0152 06219D71 		.ascii	"\006!\235q\262*\030\000+\364\203\225\361\257\337\357"
+ 163      B22A1800 
+ 163      2BF48395 
+ 163      F1AFDFEF 
+ 164 0162 FC6A9650 		.ascii	"\374j\226P2\347)\227\330\332\202{\244CD\011I2H\230\376"
+ 164      32E72997 
+ 164      D8DA827B 
+ 164      A4434409 
+ 164      49324898 
+ 165 0177 986B5F8D 		.ascii	"\230k_\215\307\364\250\014\251\230z\202\2376\315)\367"
+ 165      C7F4A80C 
+ 165      A9987A82 
+ 165      9F36CD29 
+ 165      F7
+ 166 0188 F8511A69 		.ascii	"\370Q\032i\252\004%\311\360\014\011G\220\220\300(\244"
+ 166      AA0425C9 
+ 166      F00C0947 
+ 166      9090C028 
+ 166      A4
+ 167 0199 E07B1824 		.ascii	"\340{\030$\365t\375\335?\275\011i]\264k\204\256\354"
+ 167      F574FDDD 
+ 167      3FBD0969 
+ 167      5DB46B84 
+ 167      AEEC
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 12
+
+
+ 168 01ab AE67B5D1 		.ascii	"\256g\265\321i7\342\004V\006\275\206\350^v/\010<\205"
+ 168      6937E204 
+ 168      5606BD86 
+ 168      E85E762F 
+ 168      083C85
+ 169 01be 659CA117 		.ascii	"e\234\241\027\322\020y\313=\372[\026/\362!\014\356M"
+ 169      D21079CB 
+ 169      3DFA5B16 
+ 169      2FF2210C 
+ 169      EE4D
+ 170 01d0 BC8F5659 		.ascii	"\274\217VY\246\267_\307\322\346zJ\317p\016\237\301\341"
+ 170      A6B75FC7 
+ 170      D2E67A4A 
+ 170      CF700E9F 
+ 170      C1E1
+ 171 01e2 0BE7F073 		.ascii	"\013\347\360s\216/\365\037\356\306\210\016\3161\177"
+ 171      8E2FF51F 
+ 171      EEC6880E 
+ 171      CE317F
+ 172 01f1 F3556342 		.ascii	"\363UcB\270lv^C\367s\256\273\\\223\275\373\275iK\324"
+ 172      B86C765E 
+ 172      43F773AE 
+ 172      BB5C93BD 
+ 172      FBBD694B 
+ 173 0206 1A2EBE11 		.ascii	"\032.\276\021\367ec\025\214\031-\307\302[\216\363\226"
+ 173      F7656315 
+ 173      8C192DC7 
+ 173      C25B8EF3 
+ 173      96
+ 174 0217 DD9BCD7F 		.ascii	"\335\233\315\177D\261\216\267\\\014\316<\261h,\301w"
+ 174      44B18EB7 
+ 174      5C0CCE3C 
+ 174      B1682CC1 
+ 174      77
+ 175 0228 BA6CC611 		.ascii	"\272l\306\02108\002\341\034A\316\261\355\376\265d\226"
+ 175      303802E1 
+ 175      1C41CEB1 
+ 175      EDFEB564 
+ 175      96
+ 176 0239 F11B361E 		.ascii	"\361\0336\036\356\033\316m<\012E\211M\300/\211\267\265"
+ 176      EE1BCE6D 
+ 176      3C0A4589 
+ 176      4DC02F89 
+ 176      B7B5
+ 177 024b AD350AE4 		.ascii	"\2555\012\344\364\010\360\027\021\340\332]\362\024\267"
+ 177      F408F017 
+ 177      11E0DA5D 
+ 177      F214B7
+ 178 025a DC60079C 		.ascii	"\334`\007\234\302\241L\032\342&@V\007\342\233\3776l"
+ 178      C2A14C1A 
+ 178      E2264056 
+ 178      07E29BFF 
+ 178      366C
+ 179 026c 8A6D62D7 		.ascii	"\212mb\327\012\247\227\3646\236W\032\343{\011\261\374"
+ 179      0AA797F4 
+ 179      369E571A 
+ 179      E37B09B1 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 13
+
+
+ 179      FC
+ 180 027d 1F80BFBB 		.ascii	"\037\200\277\273\2028\271\364\260C\304=\366\310\355"
+ 180      8238B9F4 
+ 180      B043C43D 
+ 180      F6C8ED
+ 181 028c 14A5D005 		.ascii	"\024\245\320\005\200Y$\343\311\326i\036\263e\272\325"
+ 181      805924E3 
+ 181      C9D6691E 
+ 181      B365BAD5 
+ 182 029c 40CD0FE2 		.ascii	"@\315\017\342u\211\204o\020\230F\344\014\022\363T\266"
+ 182      7589846F 
+ 182      109846E4 
+ 182      0C12F354 
+ 182      B6
+ 183 02ad 151738CA 		.ascii	"\025\0278\312.8\253]\212%\377\\qjnf&1\325V\327\270\262"
+ 183      2E38AB5D 
+ 183      8A25FF5C 
+ 183      716A6E66 
+ 183      2631D556 
+ 184 02c4 4FE42B35 		.ascii	"O\344+5\212\323\356R*\313l\216Zg\205Rz\336\346\310="
+ 184      8AD3EE52 
+ 184      2ACB6C8E 
+ 184      5A678552 
+ 184      7ADEE6C8 
+ 185 02d9 555A51E7 		.ascii	"UZQ\347\252\273\254\\\311\270D\216\377\247\202QfT\220"
+ 185      AABBAC5C 
+ 185      C9B8448E 
+ 185      FFA78251 
+ 185      665490
+ 186 02ec 239CDAA6 		.ascii	"#\234\332\246\270\362\234\325W\225\002G\245\022\315"
+ 186      B8F29CD5 
+ 186      57950247 
+ 186      A512CD
+ 187 02fb 578A147B 		.ascii	"W\212\024{e\342~\224gw\331\213\224*\311\251Te\377\005"
+ 187      65E27E94 
+ 187      6777D98B 
+ 187      942AC9A9 
+ 187      5465FF05 
+ 188 030f CB7A5FAE 		.ascii	"\313z_\256"
+ 189              		.text
+ 190              		.section	.gnu.lto_.symtab.6b711a2b,"",%progbits
+ 191 0000 53554D6F 		.ascii	"SUMo_Write\000"
+ 191      5F577269 
+ 191      746500
+ 192 000b 00       		.ascii	"\000"
+ 193 000c 00       		.ascii	"\000"
+ 194 000d 00       		.ascii	"\000"
+ 195 000e 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 195      00000000 
+ 196 0016 B3000000 		.ascii	"\263\000\000\000"
+ 197 001a 53554D6F 		.ascii	"SUMo_SetDriveMode\000"
+ 197      5F536574 
+ 197      44726976 
+ 197      654D6F64 
+ 197      6500
+ 198 002c 00       		.ascii	"\000"
+ 199 002d 00       		.ascii	"\000"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 14
+
+
+ 200 002e 00       		.ascii	"\000"
+ 201 002f 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 201      00000000 
+ 202 0037 B5000000 		.ascii	"\265\000\000\000"
+ 203 003b 53554D6F 		.ascii	"SUMo_Read\000"
+ 203      5F526561 
+ 203      6400
+ 204 0045 00       		.ascii	"\000"
+ 205 0046 00       		.ascii	"\000"
+ 206 0047 00       		.ascii	"\000"
+ 207 0048 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 207      00000000 
+ 208 0050 B8000000 		.ascii	"\270\000\000\000"
+ 209 0054 53554D6F 		.ascii	"SUMo_ReadDataReg\000"
+ 209      5F526561 
+ 209      64446174 
+ 209      61526567 
+ 209      00
+ 210 0065 00       		.ascii	"\000"
+ 211 0066 00       		.ascii	"\000"
+ 212 0067 00       		.ascii	"\000"
+ 213 0068 00000000 		.ascii	"\000\000\000\000\000\000\000\000"
+ 213      00000000 
+ 214 0070 BA000000 		.ascii	"\272\000\000\000"
+ 215              		.text
+ 216              		.section	.gnu.lto_.opts,"",%progbits
+ 217 0000 272D666D 		.ascii	"'-fmath-errno' '-fsigned-zeros' '-ftrapping-math' '"
+ 217      6174682D 
+ 217      6572726E 
+ 217      6F272027 
+ 217      2D667369 
+ 218 0033 2D666E6F 		.ascii	"-fno-trapv' '-fno-openmp' '-fno-openacc' '-mcpu=cor"
+ 218      2D747261 
+ 218      70762720 
+ 218      272D666E 
+ 218      6F2D6F70 
+ 219 0066 7465782D 		.ascii	"tex-m3' '-mthumb' '-g' '-O3' '-ffunction-sections' "
+ 219      6D332720 
+ 219      272D6D74 
+ 219      68756D62 
+ 219      2720272D 
+ 220 0099 272D6666 		.ascii	"'-ffat-lto-objects' '-finline-functions' '-flto'\000"
+ 220      61742D6C 
+ 220      746F2D6F 
+ 220      626A6563 
+ 220      74732720 
+ 221              		.text
+ 222              		.cfi_sections	.debug_frame
+ 223              		.section	.text.SUMo_Write,"ax",%progbits
+ 224              		.align	2
+ 225              		.global	SUMo_Write
+ 226              		.thumb
+ 227              		.thumb_func
+ 228              		.type	SUMo_Write, %function
+ 229              	SUMo_Write:
+ 230              	.LFB0:
+ 231              		.file 1 "Generated_Source\\PSoC5\\SUMo.c"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 15
+
+
+   1:Generated_Source\PSoC5/SUMo.c **** /*******************************************************************************
+   2:Generated_Source\PSoC5/SUMo.c **** * File Name: SUMo.c  
+   3:Generated_Source\PSoC5/SUMo.c **** * Version 2.20
+   4:Generated_Source\PSoC5/SUMo.c **** *
+   5:Generated_Source\PSoC5/SUMo.c **** * Description:
+   6:Generated_Source\PSoC5/SUMo.c **** *  This file contains API to enable firmware control of a Pins component.
+   7:Generated_Source\PSoC5/SUMo.c **** *
+   8:Generated_Source\PSoC5/SUMo.c **** * Note:
+   9:Generated_Source\PSoC5/SUMo.c **** *
+  10:Generated_Source\PSoC5/SUMo.c **** ********************************************************************************
+  11:Generated_Source\PSoC5/SUMo.c **** * Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+  12:Generated_Source\PSoC5/SUMo.c **** * You may use this file only in accordance with the license, terms, conditions, 
+  13:Generated_Source\PSoC5/SUMo.c **** * disclaimers, and limitations in the end user license agreement accompanying 
+  14:Generated_Source\PSoC5/SUMo.c **** * the software package with which this file was provided.
+  15:Generated_Source\PSoC5/SUMo.c **** *******************************************************************************/
+  16:Generated_Source\PSoC5/SUMo.c **** 
+  17:Generated_Source\PSoC5/SUMo.c **** #include "cytypes.h"
+  18:Generated_Source\PSoC5/SUMo.c **** #include "SUMo.h"
+  19:Generated_Source\PSoC5/SUMo.c **** 
+  20:Generated_Source\PSoC5/SUMo.c **** /* APIs are not generated for P15[7:6] on PSoC 5 */
+  21:Generated_Source\PSoC5/SUMo.c **** #if !(CY_PSOC5A &&\
+  22:Generated_Source\PSoC5/SUMo.c **** 	 SUMo__PORT == 15 && ((SUMo__MASK & 0xC0) != 0))
+  23:Generated_Source\PSoC5/SUMo.c **** 
+  24:Generated_Source\PSoC5/SUMo.c **** 
+  25:Generated_Source\PSoC5/SUMo.c **** /*******************************************************************************
+  26:Generated_Source\PSoC5/SUMo.c **** * Function Name: SUMo_Write
+  27:Generated_Source\PSoC5/SUMo.c **** ****************************************************************************//**
+  28:Generated_Source\PSoC5/SUMo.c **** *
+  29:Generated_Source\PSoC5/SUMo.c **** * \brief Writes the value to the physical port (data output register), masking
+  30:Generated_Source\PSoC5/SUMo.c **** *  and shifting the bits appropriately. 
+  31:Generated_Source\PSoC5/SUMo.c **** *
+  32:Generated_Source\PSoC5/SUMo.c **** * The data output register controls the signal applied to the physical pin in 
+  33:Generated_Source\PSoC5/SUMo.c **** * conjunction with the drive mode parameter. This function avoids changing 
+  34:Generated_Source\PSoC5/SUMo.c **** * other bits in the port by using the appropriate method (read-modify-write or
+  35:Generated_Source\PSoC5/SUMo.c **** * bit banding).
+  36:Generated_Source\PSoC5/SUMo.c **** *
+  37:Generated_Source\PSoC5/SUMo.c **** * <b>Note</b> This function should not be used on a hardware digital output pin 
+  38:Generated_Source\PSoC5/SUMo.c **** * as it is driven by the hardware signal attached to it.
+  39:Generated_Source\PSoC5/SUMo.c **** *
+  40:Generated_Source\PSoC5/SUMo.c **** * \param value
+  41:Generated_Source\PSoC5/SUMo.c **** *  Value to write to the component instance.
+  42:Generated_Source\PSoC5/SUMo.c **** *
+  43:Generated_Source\PSoC5/SUMo.c **** * \return 
+  44:Generated_Source\PSoC5/SUMo.c **** *  None 
+  45:Generated_Source\PSoC5/SUMo.c **** *
+  46:Generated_Source\PSoC5/SUMo.c **** * \sideeffect
+  47:Generated_Source\PSoC5/SUMo.c **** *  If you use read-modify-write operations that are not atomic; the Interrupt 
+  48:Generated_Source\PSoC5/SUMo.c **** *  Service Routines (ISR) can cause corruption of this function. An ISR that 
+  49:Generated_Source\PSoC5/SUMo.c **** *  interrupts this function and performs writes to the Pins component data 
+  50:Generated_Source\PSoC5/SUMo.c **** *  register can cause corrupted port data. To avoid this issue, you should 
+  51:Generated_Source\PSoC5/SUMo.c **** *  either use the Per-Pin APIs (primary method) or disable interrupts around 
+  52:Generated_Source\PSoC5/SUMo.c **** *  this function.
+  53:Generated_Source\PSoC5/SUMo.c **** *
+  54:Generated_Source\PSoC5/SUMo.c **** * \funcusage
+  55:Generated_Source\PSoC5/SUMo.c **** *  \snippet SUMo_SUT.c usage_SUMo_Write
+  56:Generated_Source\PSoC5/SUMo.c **** *******************************************************************************/
+  57:Generated_Source\PSoC5/SUMo.c **** void SUMo_Write(uint8 value)
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 16
+
+
+  58:Generated_Source\PSoC5/SUMo.c **** {
+ 232              		.loc 1 58 0
+ 233              		.cfi_startproc
+ 234              		@ args = 0, pretend = 0, frame = 0
+ 235              		@ frame_needed = 0, uses_anonymous_args = 0
+ 236              		@ link register save eliminated.
+ 237              	.LVL0:
+  59:Generated_Source\PSoC5/SUMo.c ****     uint8 staticBits = (SUMo_DR & (uint8)(~SUMo_MASK));
+ 238              		.loc 1 59 0
+ 239 0000 044A     		ldr	r2, .L2
+  60:Generated_Source\PSoC5/SUMo.c ****     SUMo_DR = staticBits | ((uint8)(value << SUMo_SHIFT) & SUMo_MASK);
+ 240              		.loc 1 60 0
+ 241 0002 8001     		lsls	r0, r0, #6
+ 242              	.LVL1:
+  59:Generated_Source\PSoC5/SUMo.c ****     uint8 staticBits = (SUMo_DR & (uint8)(~SUMo_MASK));
+ 243              		.loc 1 59 0
+ 244 0004 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 245              	.LVL2:
+ 246              		.loc 1 60 0
+ 247 0006 00F04000 		and	r0, r0, #64
+ 248 000a 03F0BF03 		and	r3, r3, #191
+ 249              	.LVL3:
+ 250 000e 1843     		orrs	r0, r0, r3
+ 251 0010 1070     		strb	r0, [r2]
+ 252 0012 7047     		bx	lr
+ 253              	.L3:
+ 254              		.align	2
+ 255              	.L2:
+ 256 0014 30510040 		.word	1073762608
+ 257              		.cfi_endproc
+ 258              	.LFE0:
+ 259              		.size	SUMo_Write, .-SUMo_Write
+ 260              		.section	.text.SUMo_SetDriveMode,"ax",%progbits
+ 261              		.align	2
+ 262              		.global	SUMo_SetDriveMode
+ 263              		.thumb
+ 264              		.thumb_func
+ 265              		.type	SUMo_SetDriveMode, %function
+ 266              	SUMo_SetDriveMode:
+ 267              	.LFB1:
+  61:Generated_Source\PSoC5/SUMo.c **** }
+  62:Generated_Source\PSoC5/SUMo.c **** 
+  63:Generated_Source\PSoC5/SUMo.c **** 
+  64:Generated_Source\PSoC5/SUMo.c **** /*******************************************************************************
+  65:Generated_Source\PSoC5/SUMo.c **** * Function Name: SUMo_SetDriveMode
+  66:Generated_Source\PSoC5/SUMo.c **** ****************************************************************************//**
+  67:Generated_Source\PSoC5/SUMo.c **** *
+  68:Generated_Source\PSoC5/SUMo.c **** * \brief Sets the drive mode for each of the Pins component's pins.
+  69:Generated_Source\PSoC5/SUMo.c **** * 
+  70:Generated_Source\PSoC5/SUMo.c **** * <b>Note</b> This affects all pins in the Pins component instance. Use the
+  71:Generated_Source\PSoC5/SUMo.c **** * Per-Pin APIs if you wish to control individual pin's drive modes.
+  72:Generated_Source\PSoC5/SUMo.c **** *
+  73:Generated_Source\PSoC5/SUMo.c **** * \param mode
+  74:Generated_Source\PSoC5/SUMo.c **** *  Mode for the selected signals. Valid options are documented in 
+  75:Generated_Source\PSoC5/SUMo.c **** *  \ref driveMode.
+  76:Generated_Source\PSoC5/SUMo.c **** *
+  77:Generated_Source\PSoC5/SUMo.c **** * \return
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 17
+
+
+  78:Generated_Source\PSoC5/SUMo.c **** *  None
+  79:Generated_Source\PSoC5/SUMo.c **** *
+  80:Generated_Source\PSoC5/SUMo.c **** * \sideeffect
+  81:Generated_Source\PSoC5/SUMo.c **** *  If you use read-modify-write operations that are not atomic, the ISR can
+  82:Generated_Source\PSoC5/SUMo.c **** *  cause corruption of this function. An ISR that interrupts this function 
+  83:Generated_Source\PSoC5/SUMo.c **** *  and performs writes to the Pins component Drive Mode registers can cause 
+  84:Generated_Source\PSoC5/SUMo.c **** *  corrupted port data. To avoid this issue, you should either use the Per-Pin
+  85:Generated_Source\PSoC5/SUMo.c **** *  APIs (primary method) or disable interrupts around this function.
+  86:Generated_Source\PSoC5/SUMo.c **** *
+  87:Generated_Source\PSoC5/SUMo.c **** * \funcusage
+  88:Generated_Source\PSoC5/SUMo.c **** *  \snippet SUMo_SUT.c usage_SUMo_SetDriveMode
+  89:Generated_Source\PSoC5/SUMo.c **** *******************************************************************************/
+  90:Generated_Source\PSoC5/SUMo.c **** void SUMo_SetDriveMode(uint8 mode)
+  91:Generated_Source\PSoC5/SUMo.c **** {
+ 268              		.loc 1 91 0
+ 269              		.cfi_startproc
+ 270              		@ args = 0, pretend = 0, frame = 0
+ 271              		@ frame_needed = 0, uses_anonymous_args = 0
+ 272              		@ link register save eliminated.
+ 273              	.LVL4:
+  92:Generated_Source\PSoC5/SUMo.c **** 	CyPins_SetPinDriveMode(SUMo_0, mode);
+ 274              		.loc 1 92 0
+ 275 0000 044A     		ldr	r2, .L5
+ 276 0002 00F00E00 		and	r0, r0, #14
+ 277              	.LVL5:
+ 278 0006 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 279 0008 03F0F103 		and	r3, r3, #241
+ 280 000c 1843     		orrs	r0, r0, r3
+ 281 000e 1070     		strb	r0, [r2]
+ 282 0010 7047     		bx	lr
+ 283              	.L6:
+ 284 0012 00BF     		.align	2
+ 285              	.L5:
+ 286 0014 1E500040 		.word	1073762334
+ 287              		.cfi_endproc
+ 288              	.LFE1:
+ 289              		.size	SUMo_SetDriveMode, .-SUMo_SetDriveMode
+ 290              		.section	.text.SUMo_Read,"ax",%progbits
+ 291              		.align	2
+ 292              		.global	SUMo_Read
+ 293              		.thumb
+ 294              		.thumb_func
+ 295              		.type	SUMo_Read, %function
+ 296              	SUMo_Read:
+ 297              	.LFB2:
+  93:Generated_Source\PSoC5/SUMo.c **** }
+  94:Generated_Source\PSoC5/SUMo.c **** 
+  95:Generated_Source\PSoC5/SUMo.c **** 
+  96:Generated_Source\PSoC5/SUMo.c **** /*******************************************************************************
+  97:Generated_Source\PSoC5/SUMo.c **** * Function Name: SUMo_Read
+  98:Generated_Source\PSoC5/SUMo.c **** ****************************************************************************//**
+  99:Generated_Source\PSoC5/SUMo.c **** *
+ 100:Generated_Source\PSoC5/SUMo.c **** * \brief Reads the associated physical port (pin status register) and masks 
+ 101:Generated_Source\PSoC5/SUMo.c **** *  the required bits according to the width and bit position of the component
+ 102:Generated_Source\PSoC5/SUMo.c **** *  instance. 
+ 103:Generated_Source\PSoC5/SUMo.c **** *
+ 104:Generated_Source\PSoC5/SUMo.c **** * The pin's status register returns the current logic level present on the 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 18
+
+
+ 105:Generated_Source\PSoC5/SUMo.c **** * physical pin.
+ 106:Generated_Source\PSoC5/SUMo.c **** *
+ 107:Generated_Source\PSoC5/SUMo.c **** * \return 
+ 108:Generated_Source\PSoC5/SUMo.c **** *  The current value for the pins in the component as a right justified number.
+ 109:Generated_Source\PSoC5/SUMo.c **** *
+ 110:Generated_Source\PSoC5/SUMo.c **** * \funcusage
+ 111:Generated_Source\PSoC5/SUMo.c **** *  \snippet SUMo_SUT.c usage_SUMo_Read  
+ 112:Generated_Source\PSoC5/SUMo.c **** *******************************************************************************/
+ 113:Generated_Source\PSoC5/SUMo.c **** uint8 SUMo_Read(void)
+ 114:Generated_Source\PSoC5/SUMo.c **** {
+ 298              		.loc 1 114 0
+ 299              		.cfi_startproc
+ 300              		@ args = 0, pretend = 0, frame = 0
+ 301              		@ frame_needed = 0, uses_anonymous_args = 0
+ 302              		@ link register save eliminated.
+ 115:Generated_Source\PSoC5/SUMo.c ****     return (SUMo_PS & SUMo_MASK) >> SUMo_SHIFT;
+ 303              		.loc 1 115 0
+ 304 0000 024B     		ldr	r3, .L8
+ 305 0002 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 116:Generated_Source\PSoC5/SUMo.c **** }
+ 306              		.loc 1 116 0
+ 307 0004 C0F38010 		ubfx	r0, r0, #6, #1
+ 308 0008 7047     		bx	lr
+ 309              	.L9:
+ 310 000a 00BF     		.align	2
+ 311              	.L8:
+ 312 000c 31510040 		.word	1073762609
+ 313              		.cfi_endproc
+ 314              	.LFE2:
+ 315              		.size	SUMo_Read, .-SUMo_Read
+ 316              		.section	.text.SUMo_ReadDataReg,"ax",%progbits
+ 317              		.align	2
+ 318              		.global	SUMo_ReadDataReg
+ 319              		.thumb
+ 320              		.thumb_func
+ 321              		.type	SUMo_ReadDataReg, %function
+ 322              	SUMo_ReadDataReg:
+ 323              	.LFB3:
+ 117:Generated_Source\PSoC5/SUMo.c **** 
+ 118:Generated_Source\PSoC5/SUMo.c **** 
+ 119:Generated_Source\PSoC5/SUMo.c **** /*******************************************************************************
+ 120:Generated_Source\PSoC5/SUMo.c **** * Function Name: SUMo_ReadDataReg
+ 121:Generated_Source\PSoC5/SUMo.c **** ****************************************************************************//**
+ 122:Generated_Source\PSoC5/SUMo.c **** *
+ 123:Generated_Source\PSoC5/SUMo.c **** * \brief Reads the associated physical port's data output register and masks 
+ 124:Generated_Source\PSoC5/SUMo.c **** *  the correct bits according to the width and bit position of the component 
+ 125:Generated_Source\PSoC5/SUMo.c **** *  instance. 
+ 126:Generated_Source\PSoC5/SUMo.c **** *
+ 127:Generated_Source\PSoC5/SUMo.c **** * The data output register controls the signal applied to the physical pin in 
+ 128:Generated_Source\PSoC5/SUMo.c **** * conjunction with the drive mode parameter. This is not the same as the 
+ 129:Generated_Source\PSoC5/SUMo.c **** * preferred SUMo_Read() API because the 
+ 130:Generated_Source\PSoC5/SUMo.c **** * SUMo_ReadDataReg() reads the data register instead of the status 
+ 131:Generated_Source\PSoC5/SUMo.c **** * register. For output pins this is a useful function to determine the value 
+ 132:Generated_Source\PSoC5/SUMo.c **** * just written to the pin.
+ 133:Generated_Source\PSoC5/SUMo.c **** *
+ 134:Generated_Source\PSoC5/SUMo.c **** * \return 
+ 135:Generated_Source\PSoC5/SUMo.c **** *  The current value of the data register masked and shifted into a right 
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 19
+
+
+ 136:Generated_Source\PSoC5/SUMo.c **** *  justified number for the component instance.
+ 137:Generated_Source\PSoC5/SUMo.c **** *
+ 138:Generated_Source\PSoC5/SUMo.c **** * \funcusage
+ 139:Generated_Source\PSoC5/SUMo.c **** *  \snippet SUMo_SUT.c usage_SUMo_ReadDataReg 
+ 140:Generated_Source\PSoC5/SUMo.c **** *******************************************************************************/
+ 141:Generated_Source\PSoC5/SUMo.c **** uint8 SUMo_ReadDataReg(void)
+ 142:Generated_Source\PSoC5/SUMo.c **** {
+ 324              		.loc 1 142 0
+ 325              		.cfi_startproc
+ 326              		@ args = 0, pretend = 0, frame = 0
+ 327              		@ frame_needed = 0, uses_anonymous_args = 0
+ 328              		@ link register save eliminated.
+ 143:Generated_Source\PSoC5/SUMo.c ****     return (SUMo_DR & SUMo_MASK) >> SUMo_SHIFT;
+ 329              		.loc 1 143 0
+ 330 0000 024B     		ldr	r3, .L11
+ 331 0002 1878     		ldrb	r0, [r3]	@ zero_extendqisi2
+ 144:Generated_Source\PSoC5/SUMo.c **** }
+ 332              		.loc 1 144 0
+ 333 0004 C0F38010 		ubfx	r0, r0, #6, #1
+ 334 0008 7047     		bx	lr
+ 335              	.L12:
+ 336 000a 00BF     		.align	2
+ 337              	.L11:
+ 338 000c 30510040 		.word	1073762608
+ 339              		.cfi_endproc
+ 340              	.LFE3:
+ 341              		.size	SUMo_ReadDataReg, .-SUMo_ReadDataReg
+ 342              		.text
+ 343              	.Letext0:
+ 344              		.file 2 "Generated_Source\\PSoC5\\cytypes.h"
+ 345              		.section	.debug_info,"",%progbits
+ 346              	.Ldebug_info0:
+ 347 0000 1D010000 		.4byte	0x11d
+ 348 0004 0400     		.2byte	0x4
+ 349 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 350 000a 04       		.byte	0x4
+ 351 000b 01       		.uleb128 0x1
+ 352 000c 41000000 		.4byte	.LASF20
+ 353 0010 0C       		.byte	0xc
+ 354 0011 C5010000 		.4byte	.LASF21
+ 355 0015 FA000000 		.4byte	.LASF22
+ 356 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 357 001d 00000000 		.4byte	0
+ 358 0021 00000000 		.4byte	.Ldebug_line0
+ 359 0025 02       		.uleb128 0x2
+ 360 0026 01       		.byte	0x1
+ 361 0027 06       		.byte	0x6
+ 362 0028 A8010000 		.4byte	.LASF0
+ 363 002c 02       		.uleb128 0x2
+ 364 002d 01       		.byte	0x1
+ 365 002e 08       		.byte	0x8
+ 366 002f 33000000 		.4byte	.LASF1
+ 367 0033 02       		.uleb128 0x2
+ 368 0034 02       		.byte	0x2
+ 369 0035 05       		.byte	0x5
+ 370 0036 8F010000 		.4byte	.LASF2
+ 371 003a 02       		.uleb128 0x2
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 20
+
+
+ 372 003b 02       		.byte	0x2
+ 373 003c 07       		.byte	0x7
+ 374 003d 34010000 		.4byte	.LASF3
+ 375 0041 02       		.uleb128 0x2
+ 376 0042 04       		.byte	0x4
+ 377 0043 05       		.byte	0x5
+ 378 0044 9F010000 		.4byte	.LASF4
+ 379 0048 02       		.uleb128 0x2
+ 380 0049 04       		.byte	0x4
+ 381 004a 07       		.byte	0x7
+ 382 004b E8000000 		.4byte	.LASF5
+ 383 004f 02       		.uleb128 0x2
+ 384 0050 08       		.byte	0x8
+ 385 0051 05       		.byte	0x5
+ 386 0052 7C010000 		.4byte	.LASF6
+ 387 0056 02       		.uleb128 0x2
+ 388 0057 08       		.byte	0x8
+ 389 0058 07       		.byte	0x7
+ 390 0059 5B010000 		.4byte	.LASF7
+ 391 005d 03       		.uleb128 0x3
+ 392 005e 04       		.byte	0x4
+ 393 005f 05       		.byte	0x5
+ 394 0060 696E7400 		.ascii	"int\000"
+ 395 0064 02       		.uleb128 0x2
+ 396 0065 04       		.byte	0x4
+ 397 0066 07       		.byte	0x7
+ 398 0067 4E010000 		.4byte	.LASF8
+ 399 006b 04       		.uleb128 0x4
+ 400 006c 99010000 		.4byte	.LASF12
+ 401 0070 02       		.byte	0x2
+ 402 0071 E901     		.2byte	0x1e9
+ 403 0073 2C000000 		.4byte	0x2c
+ 404 0077 02       		.uleb128 0x2
+ 405 0078 04       		.byte	0x4
+ 406 0079 04       		.byte	0x4
+ 407 007a 2D000000 		.4byte	.LASF9
+ 408 007e 02       		.uleb128 0x2
+ 409 007f 08       		.byte	0x8
+ 410 0080 04       		.byte	0x4
+ 411 0081 47010000 		.4byte	.LASF10
+ 412 0085 02       		.uleb128 0x2
+ 413 0086 01       		.byte	0x1
+ 414 0087 08       		.byte	0x8
+ 415 0088 8A010000 		.4byte	.LASF11
+ 416 008c 04       		.uleb128 0x4
+ 417 008d 77010000 		.4byte	.LASF13
+ 418 0091 02       		.byte	0x2
+ 419 0092 9302     		.2byte	0x293
+ 420 0094 98000000 		.4byte	0x98
+ 421 0098 05       		.uleb128 0x5
+ 422 0099 6B000000 		.4byte	0x6b
+ 423 009d 06       		.uleb128 0x6
+ 424 009e E3010000 		.4byte	.LASF14
+ 425 00a2 01       		.byte	0x1
+ 426 00a3 39       		.byte	0x39
+ 427 00a4 00000000 		.4byte	.LFB0
+ 428 00a8 18000000 		.4byte	.LFE0-.LFB0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 21
+
+
+ 429 00ac 01       		.uleb128 0x1
+ 430 00ad 9C       		.byte	0x9c
+ 431 00ae D1000000 		.4byte	0xd1
+ 432 00b2 07       		.uleb128 0x7
+ 433 00b3 0A000000 		.4byte	.LASF16
+ 434 00b7 01       		.byte	0x1
+ 435 00b8 39       		.byte	0x39
+ 436 00b9 6B000000 		.4byte	0x6b
+ 437 00bd 00000000 		.4byte	.LLST0
+ 438 00c1 08       		.uleb128 0x8
+ 439 00c2 10000000 		.4byte	.LASF23
+ 440 00c6 01       		.byte	0x1
+ 441 00c7 3B       		.byte	0x3b
+ 442 00c8 6B000000 		.4byte	0x6b
+ 443 00cc 21000000 		.4byte	.LLST1
+ 444 00d0 00       		.byte	0
+ 445 00d1 06       		.uleb128 0x6
+ 446 00d2 1B000000 		.4byte	.LASF15
+ 447 00d6 01       		.byte	0x1
+ 448 00d7 5A       		.byte	0x5a
+ 449 00d8 00000000 		.4byte	.LFB1
+ 450 00dc 18000000 		.4byte	.LFE1-.LFB1
+ 451 00e0 01       		.uleb128 0x1
+ 452 00e1 9C       		.byte	0x9c
+ 453 00e2 F6000000 		.4byte	0xf6
+ 454 00e6 07       		.uleb128 0x7
+ 455 00e7 72010000 		.4byte	.LASF17
+ 456 00eb 01       		.byte	0x1
+ 457 00ec 5A       		.byte	0x5a
+ 458 00ed 6B000000 		.4byte	0x6b
+ 459 00f1 39000000 		.4byte	.LLST2
+ 460 00f5 00       		.byte	0
+ 461 00f6 09       		.uleb128 0x9
+ 462 00f7 00000000 		.4byte	.LASF18
+ 463 00fb 01       		.byte	0x1
+ 464 00fc 71       		.byte	0x71
+ 465 00fd 6B000000 		.4byte	0x6b
+ 466 0101 00000000 		.4byte	.LFB2
+ 467 0105 10000000 		.4byte	.LFE2-.LFB2
+ 468 0109 01       		.uleb128 0x1
+ 469 010a 9C       		.byte	0x9c
+ 470 010b 09       		.uleb128 0x9
+ 471 010c B4010000 		.4byte	.LASF19
+ 472 0110 01       		.byte	0x1
+ 473 0111 8D       		.byte	0x8d
+ 474 0112 6B000000 		.4byte	0x6b
+ 475 0116 00000000 		.4byte	.LFB3
+ 476 011a 10000000 		.4byte	.LFE3-.LFB3
+ 477 011e 01       		.uleb128 0x1
+ 478 011f 9C       		.byte	0x9c
+ 479 0120 00       		.byte	0
+ 480              		.section	.debug_abbrev,"",%progbits
+ 481              	.Ldebug_abbrev0:
+ 482 0000 01       		.uleb128 0x1
+ 483 0001 11       		.uleb128 0x11
+ 484 0002 01       		.byte	0x1
+ 485 0003 25       		.uleb128 0x25
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 22
+
+
+ 486 0004 0E       		.uleb128 0xe
+ 487 0005 13       		.uleb128 0x13
+ 488 0006 0B       		.uleb128 0xb
+ 489 0007 03       		.uleb128 0x3
+ 490 0008 0E       		.uleb128 0xe
+ 491 0009 1B       		.uleb128 0x1b
+ 492 000a 0E       		.uleb128 0xe
+ 493 000b 55       		.uleb128 0x55
+ 494 000c 17       		.uleb128 0x17
+ 495 000d 11       		.uleb128 0x11
+ 496 000e 01       		.uleb128 0x1
+ 497 000f 10       		.uleb128 0x10
+ 498 0010 17       		.uleb128 0x17
+ 499 0011 00       		.byte	0
+ 500 0012 00       		.byte	0
+ 501 0013 02       		.uleb128 0x2
+ 502 0014 24       		.uleb128 0x24
+ 503 0015 00       		.byte	0
+ 504 0016 0B       		.uleb128 0xb
+ 505 0017 0B       		.uleb128 0xb
+ 506 0018 3E       		.uleb128 0x3e
+ 507 0019 0B       		.uleb128 0xb
+ 508 001a 03       		.uleb128 0x3
+ 509 001b 0E       		.uleb128 0xe
+ 510 001c 00       		.byte	0
+ 511 001d 00       		.byte	0
+ 512 001e 03       		.uleb128 0x3
+ 513 001f 24       		.uleb128 0x24
+ 514 0020 00       		.byte	0
+ 515 0021 0B       		.uleb128 0xb
+ 516 0022 0B       		.uleb128 0xb
+ 517 0023 3E       		.uleb128 0x3e
+ 518 0024 0B       		.uleb128 0xb
+ 519 0025 03       		.uleb128 0x3
+ 520 0026 08       		.uleb128 0x8
+ 521 0027 00       		.byte	0
+ 522 0028 00       		.byte	0
+ 523 0029 04       		.uleb128 0x4
+ 524 002a 16       		.uleb128 0x16
+ 525 002b 00       		.byte	0
+ 526 002c 03       		.uleb128 0x3
+ 527 002d 0E       		.uleb128 0xe
+ 528 002e 3A       		.uleb128 0x3a
+ 529 002f 0B       		.uleb128 0xb
+ 530 0030 3B       		.uleb128 0x3b
+ 531 0031 05       		.uleb128 0x5
+ 532 0032 49       		.uleb128 0x49
+ 533 0033 13       		.uleb128 0x13
+ 534 0034 00       		.byte	0
+ 535 0035 00       		.byte	0
+ 536 0036 05       		.uleb128 0x5
+ 537 0037 35       		.uleb128 0x35
+ 538 0038 00       		.byte	0
+ 539 0039 49       		.uleb128 0x49
+ 540 003a 13       		.uleb128 0x13
+ 541 003b 00       		.byte	0
+ 542 003c 00       		.byte	0
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 23
+
+
+ 543 003d 06       		.uleb128 0x6
+ 544 003e 2E       		.uleb128 0x2e
+ 545 003f 01       		.byte	0x1
+ 546 0040 3F       		.uleb128 0x3f
+ 547 0041 19       		.uleb128 0x19
+ 548 0042 03       		.uleb128 0x3
+ 549 0043 0E       		.uleb128 0xe
+ 550 0044 3A       		.uleb128 0x3a
+ 551 0045 0B       		.uleb128 0xb
+ 552 0046 3B       		.uleb128 0x3b
+ 553 0047 0B       		.uleb128 0xb
+ 554 0048 27       		.uleb128 0x27
+ 555 0049 19       		.uleb128 0x19
+ 556 004a 11       		.uleb128 0x11
+ 557 004b 01       		.uleb128 0x1
+ 558 004c 12       		.uleb128 0x12
+ 559 004d 06       		.uleb128 0x6
+ 560 004e 40       		.uleb128 0x40
+ 561 004f 18       		.uleb128 0x18
+ 562 0050 9742     		.uleb128 0x2117
+ 563 0052 19       		.uleb128 0x19
+ 564 0053 01       		.uleb128 0x1
+ 565 0054 13       		.uleb128 0x13
+ 566 0055 00       		.byte	0
+ 567 0056 00       		.byte	0
+ 568 0057 07       		.uleb128 0x7
+ 569 0058 05       		.uleb128 0x5
+ 570 0059 00       		.byte	0
+ 571 005a 03       		.uleb128 0x3
+ 572 005b 0E       		.uleb128 0xe
+ 573 005c 3A       		.uleb128 0x3a
+ 574 005d 0B       		.uleb128 0xb
+ 575 005e 3B       		.uleb128 0x3b
+ 576 005f 0B       		.uleb128 0xb
+ 577 0060 49       		.uleb128 0x49
+ 578 0061 13       		.uleb128 0x13
+ 579 0062 02       		.uleb128 0x2
+ 580 0063 17       		.uleb128 0x17
+ 581 0064 00       		.byte	0
+ 582 0065 00       		.byte	0
+ 583 0066 08       		.uleb128 0x8
+ 584 0067 34       		.uleb128 0x34
+ 585 0068 00       		.byte	0
+ 586 0069 03       		.uleb128 0x3
+ 587 006a 0E       		.uleb128 0xe
+ 588 006b 3A       		.uleb128 0x3a
+ 589 006c 0B       		.uleb128 0xb
+ 590 006d 3B       		.uleb128 0x3b
+ 591 006e 0B       		.uleb128 0xb
+ 592 006f 49       		.uleb128 0x49
+ 593 0070 13       		.uleb128 0x13
+ 594 0071 02       		.uleb128 0x2
+ 595 0072 17       		.uleb128 0x17
+ 596 0073 00       		.byte	0
+ 597 0074 00       		.byte	0
+ 598 0075 09       		.uleb128 0x9
+ 599 0076 2E       		.uleb128 0x2e
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 24
+
+
+ 600 0077 00       		.byte	0
+ 601 0078 3F       		.uleb128 0x3f
+ 602 0079 19       		.uleb128 0x19
+ 603 007a 03       		.uleb128 0x3
+ 604 007b 0E       		.uleb128 0xe
+ 605 007c 3A       		.uleb128 0x3a
+ 606 007d 0B       		.uleb128 0xb
+ 607 007e 3B       		.uleb128 0x3b
+ 608 007f 0B       		.uleb128 0xb
+ 609 0080 27       		.uleb128 0x27
+ 610 0081 19       		.uleb128 0x19
+ 611 0082 49       		.uleb128 0x49
+ 612 0083 13       		.uleb128 0x13
+ 613 0084 11       		.uleb128 0x11
+ 614 0085 01       		.uleb128 0x1
+ 615 0086 12       		.uleb128 0x12
+ 616 0087 06       		.uleb128 0x6
+ 617 0088 40       		.uleb128 0x40
+ 618 0089 18       		.uleb128 0x18
+ 619 008a 9742     		.uleb128 0x2117
+ 620 008c 19       		.uleb128 0x19
+ 621 008d 00       		.byte	0
+ 622 008e 00       		.byte	0
+ 623 008f 00       		.byte	0
+ 624              		.section	.debug_loc,"",%progbits
+ 625              	.Ldebug_loc0:
+ 626              	.LLST0:
+ 627 0000 00000000 		.4byte	.LVL0
+ 628 0004 04000000 		.4byte	.LVL1
+ 629 0008 0100     		.2byte	0x1
+ 630 000a 50       		.byte	0x50
+ 631 000b 04000000 		.4byte	.LVL1
+ 632 000f 18000000 		.4byte	.LFE0
+ 633 0013 0400     		.2byte	0x4
+ 634 0015 F3       		.byte	0xf3
+ 635 0016 01       		.uleb128 0x1
+ 636 0017 50       		.byte	0x50
+ 637 0018 9F       		.byte	0x9f
+ 638 0019 00000000 		.4byte	0
+ 639 001d 00000000 		.4byte	0
+ 640              	.LLST1:
+ 641 0021 06000000 		.4byte	.LVL2
+ 642 0025 0E000000 		.4byte	.LVL3
+ 643 0029 0600     		.2byte	0x6
+ 644 002b 73       		.byte	0x73
+ 645 002c 00       		.sleb128 0
+ 646 002d 09       		.byte	0x9
+ 647 002e BF       		.byte	0xbf
+ 648 002f 1A       		.byte	0x1a
+ 649 0030 9F       		.byte	0x9f
+ 650 0031 00000000 		.4byte	0
+ 651 0035 00000000 		.4byte	0
+ 652              	.LLST2:
+ 653 0039 00000000 		.4byte	.LVL4
+ 654 003d 06000000 		.4byte	.LVL5
+ 655 0041 0100     		.2byte	0x1
+ 656 0043 50       		.byte	0x50
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 25
+
+
+ 657 0044 06000000 		.4byte	.LVL5
+ 658 0048 18000000 		.4byte	.LFE1
+ 659 004c 0400     		.2byte	0x4
+ 660 004e F3       		.byte	0xf3
+ 661 004f 01       		.uleb128 0x1
+ 662 0050 50       		.byte	0x50
+ 663 0051 9F       		.byte	0x9f
+ 664 0052 00000000 		.4byte	0
+ 665 0056 00000000 		.4byte	0
+ 666              		.section	.debug_aranges,"",%progbits
+ 667 0000 34000000 		.4byte	0x34
+ 668 0004 0200     		.2byte	0x2
+ 669 0006 00000000 		.4byte	.Ldebug_info0
+ 670 000a 04       		.byte	0x4
+ 671 000b 00       		.byte	0
+ 672 000c 0000     		.2byte	0
+ 673 000e 0000     		.2byte	0
+ 674 0010 00000000 		.4byte	.LFB0
+ 675 0014 18000000 		.4byte	.LFE0-.LFB0
+ 676 0018 00000000 		.4byte	.LFB1
+ 677 001c 18000000 		.4byte	.LFE1-.LFB1
+ 678 0020 00000000 		.4byte	.LFB2
+ 679 0024 10000000 		.4byte	.LFE2-.LFB2
+ 680 0028 00000000 		.4byte	.LFB3
+ 681 002c 10000000 		.4byte	.LFE3-.LFB3
+ 682 0030 00000000 		.4byte	0
+ 683 0034 00000000 		.4byte	0
+ 684              		.section	.debug_ranges,"",%progbits
+ 685              	.Ldebug_ranges0:
+ 686 0000 00000000 		.4byte	.LFB0
+ 687 0004 18000000 		.4byte	.LFE0
+ 688 0008 00000000 		.4byte	.LFB1
+ 689 000c 18000000 		.4byte	.LFE1
+ 690 0010 00000000 		.4byte	.LFB2
+ 691 0014 10000000 		.4byte	.LFE2
+ 692 0018 00000000 		.4byte	.LFB3
+ 693 001c 10000000 		.4byte	.LFE3
+ 694 0020 00000000 		.4byte	0
+ 695 0024 00000000 		.4byte	0
+ 696              		.section	.debug_line,"",%progbits
+ 697              	.Ldebug_line0:
+ 698 0000 8F000000 		.section	.debug_str,"MS",%progbits,1
+ 698      02004100 
+ 698      00000201 
+ 698      FB0E0D00 
+ 698      01010101 
+ 699              	.LASF18:
+ 700 0000 53554D6F 		.ascii	"SUMo_Read\000"
+ 700      5F526561 
+ 700      6400
+ 701              	.LASF16:
+ 702 000a 76616C75 		.ascii	"value\000"
+ 702      6500
+ 703              	.LASF23:
+ 704 0010 73746174 		.ascii	"staticBits\000"
+ 704      69634269 
+ 704      747300
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 26
+
+
+ 705              	.LASF15:
+ 706 001b 53554D6F 		.ascii	"SUMo_SetDriveMode\000"
+ 706      5F536574 
+ 706      44726976 
+ 706      654D6F64 
+ 706      6500
+ 707              	.LASF9:
+ 708 002d 666C6F61 		.ascii	"float\000"
+ 708      7400
+ 709              	.LASF1:
+ 710 0033 756E7369 		.ascii	"unsigned char\000"
+ 710      676E6564 
+ 710      20636861 
+ 710      7200
+ 711              	.LASF20:
+ 712 0041 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 712      43313120 
+ 712      352E342E 
+ 712      31203230 
+ 712      31363036 
+ 713 0074 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"
+ 713      20726576 
+ 713      6973696F 
+ 713      6E203233 
+ 713      37373135 
+ 714 00a7 33202D66 		.ascii	"3 -ffunction-sections -ffat-lto-objects -finline-fu"
+ 714      66756E63 
+ 714      74696F6E 
+ 714      2D736563 
+ 714      74696F6E 
+ 715 00da 6E637469 		.ascii	"nctions -flto\000"
+ 715      6F6E7320 
+ 715      2D666C74 
+ 715      6F00
+ 716              	.LASF5:
+ 717 00e8 6C6F6E67 		.ascii	"long unsigned int\000"
+ 717      20756E73 
+ 717      69676E65 
+ 717      6420696E 
+ 717      7400
+ 718              	.LASF22:
+ 719 00fa 433A5C47 		.ascii	"C:\\Github\\Tesis\\src\\psoc\\AcondicionamientoAnal"
+ 719      69746875 
+ 719      625C5465 
+ 719      7369735C 
+ 719      7372635C 
+ 720 0128 6F676963 		.ascii	"ogico.cydsn\000"
+ 720      6F2E6379 
+ 720      64736E00 
+ 721              	.LASF3:
+ 722 0134 73686F72 		.ascii	"short unsigned int\000"
+ 722      7420756E 
+ 722      7369676E 
+ 722      65642069 
+ 722      6E7400
+ 723              	.LASF10:
+ 724 0147 646F7562 		.ascii	"double\000"
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 27
+
+
+ 724      6C6500
+ 725              	.LASF8:
+ 726 014e 756E7369 		.ascii	"unsigned int\000"
+ 726      676E6564 
+ 726      20696E74 
+ 726      00
+ 727              	.LASF7:
+ 728 015b 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 728      206C6F6E 
+ 728      6720756E 
+ 728      7369676E 
+ 728      65642069 
+ 729              	.LASF17:
+ 730 0172 6D6F6465 		.ascii	"mode\000"
+ 730      00
+ 731              	.LASF13:
+ 732 0177 72656738 		.ascii	"reg8\000"
+ 732      00
+ 733              	.LASF6:
+ 734 017c 6C6F6E67 		.ascii	"long long int\000"
+ 734      206C6F6E 
+ 734      6720696E 
+ 734      7400
+ 735              	.LASF11:
+ 736 018a 63686172 		.ascii	"char\000"
+ 736      00
+ 737              	.LASF2:
+ 738 018f 73686F72 		.ascii	"short int\000"
+ 738      7420696E 
+ 738      7400
+ 739              	.LASF12:
+ 740 0199 75696E74 		.ascii	"uint8\000"
+ 740      3800
+ 741              	.LASF4:
+ 742 019f 6C6F6E67 		.ascii	"long int\000"
+ 742      20696E74 
+ 742      00
+ 743              	.LASF0:
+ 744 01a8 7369676E 		.ascii	"signed char\000"
+ 744      65642063 
+ 744      68617200 
+ 745              	.LASF19:
+ 746 01b4 53554D6F 		.ascii	"SUMo_ReadDataReg\000"
+ 746      5F526561 
+ 746      64446174 
+ 746      61526567 
+ 746      00
+ 747              	.LASF21:
+ 748 01c5 47656E65 		.ascii	"Generated_Source\\PSoC5\\SUMo.c\000"
+ 748      72617465 
+ 748      645F536F 
+ 748      75726365 
+ 748      5C50536F 
+ 749              	.LASF14:
+ 750 01e3 53554D6F 		.ascii	"SUMo_Write\000"
+ 750      5F577269 
+ 750      746500
+ARM GAS  C:\Users\elias\AppData\Local\Temp\ccGIenQr.s 			page 28
+
+
+ 751              		.comm	__gnu_lto_v1,1,1
+ 752              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

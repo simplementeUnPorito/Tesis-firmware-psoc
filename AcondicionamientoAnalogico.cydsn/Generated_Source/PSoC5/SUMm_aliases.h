@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: ADDERm.h  
+* File Name: SUMm.h  
 * Version 2.20
 *
 * Description:
@@ -15,8 +15,8 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#if !defined(CY_PINS_ADDERm_ALIASES_H) /* Pins ADDERm_ALIASES_H */
-#define CY_PINS_ADDERm_ALIASES_H
+#if !defined(CY_PINS_SUMm_ALIASES_H) /* Pins SUMm_ALIASES_H */
+#define CY_PINS_SUMm_ALIASES_H
 
 #include "cytypes.h"
 #include "cyfitter.h"
@@ -25,12 +25,12 @@
 /***************************************
 *              Constants        
 ***************************************/
-#define ADDERm_0			(ADDERm__0__PC)
-#define ADDERm_0_INTR	((uint16)((uint16)0x0001u << ADDERm__0__SHIFT))
+#define SUMm_0			(SUMm__0__PC)
+#define SUMm_0_INTR	((uint16)((uint16)0x0001u << SUMm__0__SHIFT))
 
-#define ADDERm_INTR_ALL	 ((uint16)(ADDERm_0_INTR))
+#define SUMm_INTR_ALL	 ((uint16)(SUMm_0_INTR))
 
-#endif /* End Pins ADDERm_ALIASES_H */
+#endif /* End Pins SUMm_ALIASES_H */
 
 
 /* [] END OF FILE */

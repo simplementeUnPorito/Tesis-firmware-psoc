@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: OPAadder_PM.c
+* File Name: OPAsum_PM.c
 * Version 1.90
 *
 * Description:
@@ -15,13 +15,13 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#include "OPAadder.h"
+#include "OPAsum.h"
 
-static OPAadder_BACKUP_STRUCT  OPAadder_backup;
+static OPAsum_BACKUP_STRUCT  OPAsum_backup;
 
 
 /*******************************************************************************  
-* Function Name: OPAadder_SaveConfig
+* Function Name: OPAsum_SaveConfig
 ********************************************************************************
 *
 * Summary:
@@ -34,14 +34,14 @@ static OPAadder_BACKUP_STRUCT  OPAadder_backup;
 *  void
 *
 *******************************************************************************/
-void OPAadder_SaveConfig(void) 
+void OPAsum_SaveConfig(void) 
 {
     /* Nothing to save as registers are System reset on retention flops */
 }
 
 
 /*******************************************************************************  
-* Function Name: OPAadder_RestoreConfig
+* Function Name: OPAsum_RestoreConfig
 ********************************************************************************
 *
 * Summary:
@@ -54,14 +54,14 @@ void OPAadder_SaveConfig(void)
 *  void
 *
 *******************************************************************************/
-void OPAadder_RestoreConfig(void) 
+void OPAsum_RestoreConfig(void) 
 {
     /* Nothing to restore */
 }
 
 
 /*******************************************************************************   
-* Function Name: OPAadder_Sleep
+* Function Name: OPAsum_Sleep
 ********************************************************************************
 *
 * Summary:
@@ -75,32 +75,32 @@ void OPAadder_RestoreConfig(void)
 *  void
 *
 * Global variables:
-*  OPAadder_backup: The structure field 'enableState' is modified 
+*  OPAsum_backup: The structure field 'enableState' is modified 
 *  depending on the enable state of the block before entering to sleep mode.
 *
 *******************************************************************************/
-void OPAadder_Sleep(void) 
+void OPAsum_Sleep(void) 
 {
     /* Save OpAmp enable state */
-    if((OPAadder_PM_ACT_CFG_REG & OPAadder_ACT_PWR_EN) != 0u)
+    if((OPAsum_PM_ACT_CFG_REG & OPAsum_ACT_PWR_EN) != 0u)
     {
         /* Component is enabled */
-        OPAadder_backup.enableState = 1u;
+        OPAsum_backup.enableState = 1u;
          /* Stops the component */
-         OPAadder_Stop();
+         OPAsum_Stop();
     }
     else
     {
         /* Component is disabled */
-        OPAadder_backup.enableState = 0u;
+        OPAsum_backup.enableState = 0u;
     }
     /* Saves the configuration */
-    OPAadder_SaveConfig();
+    OPAsum_SaveConfig();
 }
 
 
 /*******************************************************************************  
-* Function Name: OPAadder_Wakeup
+* Function Name: OPAsum_Wakeup
 ********************************************************************************
 *
 * Summary:
@@ -114,19 +114,19 @@ void OPAadder_Sleep(void)
 *  void
 *
 * Global variables:
-*  OPAadder_backup: The structure field 'enableState' is used to 
+*  OPAsum_backup: The structure field 'enableState' is used to 
 *  restore the enable state of block after wakeup from sleep mode.
 *
 *******************************************************************************/
-void OPAadder_Wakeup(void) 
+void OPAsum_Wakeup(void) 
 {
     /* Restore the user configuration */
-    OPAadder_RestoreConfig();
+    OPAsum_RestoreConfig();
 
     /* Enables the component operation */
-    if(OPAadder_backup.enableState == 1u)
+    if(OPAsum_backup.enableState == 1u)
     {
-        OPAadder_Enable();
+        OPAsum_Enable();
     } /* Do nothing if component was disable before */
 }
 

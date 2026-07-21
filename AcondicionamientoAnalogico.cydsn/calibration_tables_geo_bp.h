@@ -21,6 +21,11 @@
 #define CAL_PI_GAIN_GEO_BP_X1000 1000L
 #endif
 
+/* Delta_BP usado: tres codigos, con holgura sobre el piso de un codigo. */
+#ifndef CAL_PI_DEADBAND_GEO_BP_DAC_CODES
+#define CAL_PI_DEADBAND_GEO_BP_DAC_CODES 3L
+#endif
+
 /* P=100e-6, I=500e-6. */
 #define CAL_PI_KP_NUM_GEO_BP 1L
 #define CAL_PI_KP_DIV_GEO_BP 10000L

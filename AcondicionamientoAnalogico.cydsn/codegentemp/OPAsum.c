@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: OPAadder.c
+* File Name: OPAsum.c
 * Version 1.90
 *
 * Description:
@@ -15,19 +15,19 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#include "OPAadder.h"
+#include "OPAsum.h"
 
-uint8 OPAadder_initVar = 0u;
+uint8 OPAsum_initVar = 0u;
 
 
 /*******************************************************************************   
-* Function Name: OPAadder_Init
+* Function Name: OPAsum_Init
 ********************************************************************************
 *
 * Summary:
 *  Initialize component's parameters to the parameters set by user in the 
 *  customizer of the component placed onto schematic. Usually called in 
-*  OPAadder_Start().
+*  OPAsum_Start().
 *
 * Parameters:
 *  void
@@ -36,14 +36,14 @@ uint8 OPAadder_initVar = 0u;
 *  void
 *
 *******************************************************************************/
-void OPAadder_Init(void) 
+void OPAsum_Init(void) 
 {
-    OPAadder_SetPower(OPAadder_DEFAULT_POWER);
+    OPAsum_SetPower(OPAsum_DEFAULT_POWER);
 }
 
 
 /*******************************************************************************   
-* Function Name: OPAadder_Enable
+* Function Name: OPAsum_Enable
 ********************************************************************************
 *
 * Summary:
@@ -56,21 +56,21 @@ void OPAadder_Init(void)
 *  void
 *
 *******************************************************************************/
-void OPAadder_Enable(void) 
+void OPAsum_Enable(void) 
 {
     /* Enable negative charge pumps in ANIF */
-    OPAadder_PUMP_CR1_REG  |= (OPAadder_PUMP_CR1_CLKSEL | OPAadder_PUMP_CR1_FORCE);
+    OPAsum_PUMP_CR1_REG  |= (OPAsum_PUMP_CR1_CLKSEL | OPAsum_PUMP_CR1_FORCE);
 
     /* Enable power to buffer in active mode */
-    OPAadder_PM_ACT_CFG_REG |= OPAadder_ACT_PWR_EN;
+    OPAsum_PM_ACT_CFG_REG |= OPAsum_ACT_PWR_EN;
 
     /* Enable power to buffer in alternative active mode */
-    OPAadder_PM_STBY_CFG_REG |= OPAadder_STBY_PWR_EN;
+    OPAsum_PM_STBY_CFG_REG |= OPAsum_STBY_PWR_EN;
 }
 
 
 /*******************************************************************************
-* Function Name:   OPAadder_Start
+* Function Name:   OPAsum_Start
 ********************************************************************************
 *
 * Summary:
@@ -85,24 +85,24 @@ void OPAadder_Enable(void)
 *  void
 *
 * Global variables:
-*  OPAadder_initVar: Used to check the initial configuration, modified 
+*  OPAsum_initVar: Used to check the initial configuration, modified 
 *  when this function is called for the first time.
 *
 *******************************************************************************/
-void OPAadder_Start(void) 
+void OPAsum_Start(void) 
 {
-    if(OPAadder_initVar == 0u)
+    if(OPAsum_initVar == 0u)
     {
-        OPAadder_initVar = 1u;
-        OPAadder_Init();
+        OPAsum_initVar = 1u;
+        OPAsum_Init();
     }
 
-    OPAadder_Enable();
+    OPAsum_Enable();
 }
 
 
 /*******************************************************************************
-* Function Name: OPAadder_Stop
+* Function Name: OPAsum_Stop
 ********************************************************************************
 *
 * Summary:
@@ -115,24 +115,24 @@ void OPAadder_Start(void)
 *  void
 *
 *******************************************************************************/
-void OPAadder_Stop(void) 
+void OPAsum_Stop(void) 
 {
     /* Disable power to buffer in active mode template */
-    OPAadder_PM_ACT_CFG_REG &= (uint8)(~OPAadder_ACT_PWR_EN);
+    OPAsum_PM_ACT_CFG_REG &= (uint8)(~OPAsum_ACT_PWR_EN);
 
     /* Disable power to buffer in alternative active mode template */
-    OPAadder_PM_STBY_CFG_REG &= (uint8)(~OPAadder_STBY_PWR_EN);
+    OPAsum_PM_STBY_CFG_REG &= (uint8)(~OPAsum_STBY_PWR_EN);
     
     /* Disable negative charge pumps for ANIF only if all ABuf is turned OFF */
-    if(OPAadder_PM_ACT_CFG_REG == 0u)
+    if(OPAsum_PM_ACT_CFG_REG == 0u)
     {
-        OPAadder_PUMP_CR1_REG &= (uint8)(~(OPAadder_PUMP_CR1_CLKSEL | OPAadder_PUMP_CR1_FORCE));
+        OPAsum_PUMP_CR1_REG &= (uint8)(~(OPAsum_PUMP_CR1_CLKSEL | OPAsum_PUMP_CR1_FORCE));
     }
 }
 
 
 /*******************************************************************************
-* Function Name: OPAadder_SetPower
+* Function Name: OPAsum_SetPower
 ********************************************************************************
 *
 * Summary:
@@ -146,13 +146,13 @@ void OPAadder_Stop(void)
 *  void
 *
 **********************************************************************************/
-void OPAadder_SetPower(uint8 power) 
+void OPAsum_SetPower(uint8 power) 
 {
     #if (CY_PSOC3 || CY_PSOC5LP)
-        OPAadder_CR_REG &= (uint8)(~OPAadder_PWR_MASK);
-        OPAadder_CR_REG |= power & OPAadder_PWR_MASK;      /* Set device power */
+        OPAsum_CR_REG &= (uint8)(~OPAsum_PWR_MASK);
+        OPAsum_CR_REG |= power & OPAsum_PWR_MASK;      /* Set device power */
     #else
-        CYASSERT(OPAadder_HIGHPOWER == power);
+        CYASSERT(OPAsum_HIGHPOWER == power);
     #endif /* CY_PSOC3 || CY_PSOC5LP */
 }
 

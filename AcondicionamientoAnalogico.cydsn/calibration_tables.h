@@ -11,7 +11,7 @@
  * parametros ajustables viven por etapa en:
  *   - calibration_tables_geo_pga.h
  *   - calibration_tables_geo_bp.h
- *   - calibration_tables_geo_adder.h
+ *   - calibration_tables_geo_sum.h
  *   - calibration_tables_geo_lp.h
  *   - calibration_tables_hammer_pga.h
  *   - calibration_tables_hammer_lp.h
@@ -27,22 +27,33 @@
 #define CAL_TARGET_1V5_COUNTS 78644L
 #endif
 
-/* Escalas fisicas usadas por el PI activo. El ADC se compara en el mismo
- * dominio que el VDAC: ADC 0..5V, 18 bits; VDAC8 0..4.080V, 8 bits. */
+/* Escalas de cuantizacion usadas por el PI activo. N_*_LEVELS es la cantidad
+ * de niveles (2^B), no el codigo maximo (2^B - 1). El VDAC8 tiene 256 niveles
+ * separados 16 mV: span de cuantizacion 4.096 V, codigos 0..255 y salida
+ * maxima realizable 4.080 V. */
 #ifndef CAL_ADC_SPAN_MV
 #define CAL_ADC_SPAN_MV 5000L
 #endif
 
-#ifndef CAL_ADC_FULL_SCALE_COUNTS
-#define CAL_ADC_FULL_SCALE_COUNTS 262144L
+#ifndef CAL_ADC_LEVELS
+#define CAL_ADC_LEVELS 262144L
 #endif
 
-#ifndef CAL_VDAC_SPAN_MV
-#define CAL_VDAC_SPAN_MV 4080L
+/* Salida diferencial signed de 18 bits: -2^17 .. 2^17-1. */
+#ifndef CAL_ADC_SIGNED_MIN_COUNTS
+#define CAL_ADC_SIGNED_MIN_COUNTS (-(CAL_ADC_LEVELS / 2L))
 #endif
 
-#ifndef CAL_VDAC_CODE_MAX
-#define CAL_VDAC_CODE_MAX 255L
+#ifndef CAL_ADC_SIGNED_MAX_COUNTS
+#define CAL_ADC_SIGNED_MAX_COUNTS ((CAL_ADC_LEVELS / 2L) - 1L)
+#endif
+
+#ifndef CAL_VDAC_QUANT_SPAN_MV
+#define CAL_VDAC_QUANT_SPAN_MV 4096L
+#endif
+
+#ifndef CAL_VDAC_LEVELS
+#define CAL_VDAC_LEVELS 256L
 #endif
 
 #ifndef CAL_VDAC8_MV_PER_LSB
@@ -93,7 +104,7 @@
 #include "calibration_tables_hammer_lp.h"
 #include "calibration_tables_geo_pga.h"
 #include "calibration_tables_geo_bp.h"
-#include "calibration_tables_geo_adder.h"
+#include "calibration_tables_geo_sum.h"
 #include "calibration_tables_geo_lp.h"
 
 #if PSOC_HW_CLASS == PSOC_HW_GEO
@@ -105,8 +116,8 @@
 #if !defined(VDAC_ref_PGA_DEFAULT_DATA)
     #error "AnalogGeo requiere el componente VDAC_ref_PGA."
 #endif
-#if !defined(VDAC_Ref_Adder_DEFAULT_DATA)
-    #error "AnalogGeo requiere el componente VDAC_Ref_Adder."
+#if !defined(VDAC_Ref_Sum_DEFAULT_DATA)
+    #error "AnalogGeo requiere el componente VDAC_Ref_Sum."
 #endif
 #if !defined(VDAC_ref_LP_DEFAULT_DATA)
     #error "AnalogGeo requiere el componente VDAC_ref_LP."
@@ -116,7 +127,7 @@ static void cal_vdac_geo_pga(uint8 value)   { VDAC_ref_PGA_SetValue(value); }
 #if defined(VDAC_ref_BP_DEFAULT_DATA) || defined(CY_DVDAC_VDAC_ref_BP_H)
 static void cal_vdac_geo_bp(uint8 value)    { VDAC_ref_BP_SetValue(value); }
 #endif
-static void cal_vdac_geo_adder(uint8 value) { VDAC_Ref_Adder_SetValue(value); }
+static void cal_vdac_geo_sum(uint8 value)   { VDAC_Ref_Sum_SetValue(value); }
 static void cal_vdac_geo_lp(uint8 value)    { VDAC_ref_LP_SetValue(value); }
 
 static const PsocCalStage g_psoc_cal_stages[] = {
@@ -124,7 +135,7 @@ static const PsocCalStage g_psoc_cal_stages[] = {
 #if defined(VDAC_ref_BP_DEFAULT_DATA) || defined(CY_DVDAC_VDAC_ref_BP_H)
     { "GEO_BP",    1u, CAL_TARGET_COUNTS_GEO_BP,    CAL_DIRECTION_GEO_BP,    CAL_DAC_CENTER_GEO_BP,    CAL_DAC_MAX_CHANGE_GEO_BP,    cal_vdac_geo_bp },
 #endif
-    { "GEO_ADDER", 2u, CAL_TARGET_COUNTS_GEO_ADDER, CAL_DIRECTION_GEO_ADDER, CAL_DAC_CENTER_GEO_ADDER, CAL_DAC_MAX_CHANGE_GEO_ADDER, cal_vdac_geo_adder },
+    { "GEO_SUM",   2u, CAL_TARGET_COUNTS_GEO_SUM,   CAL_DIRECTION_GEO_SUM,   CAL_DAC_CENTER_GEO_SUM,   CAL_DAC_MAX_CHANGE_GEO_SUM,   cal_vdac_geo_sum },
     { "GEO_LP",    3u, CAL_TARGET_COUNTS_GEO_LP,    CAL_DIRECTION_GEO_LP,    CAL_DAC_CENTER_GEO_LP,    CAL_DAC_MAX_CHANGE_GEO_LP,    cal_vdac_geo_lp },
 };
 
