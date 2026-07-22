@@ -1,165 +1,250 @@
 /*******************************************************************************
-* File Name: PGAin.h  
-* Version 2.20
+* File Name: PGAIn.h  
+* Version 2.0
 *
 * Description:
-*  This file contains Pin function prototypes and register defines
+*  This file contains the function prototypes and constants used in
+*  the PGA User Module.
 *
 * Note:
 *
 ********************************************************************************
-* Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2008-2012, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions, 
 * disclaimers, and limitations in the end user license agreement accompanying 
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#if !defined(CY_PINS_PGAin_H) /* Pins PGAin_H */
-#define CY_PINS_PGAin_H
+#if !defined(CY_PGA_PGAIn_H) 
+#define CY_PGA_PGAIn_H 
 
 #include "cytypes.h"
 #include "cyfitter.h"
-#include "cypins.h"
-#include "PGAin_aliases.h"
+#include "CyLib.h"
 
-/* APIs are not generated for P15[7:6] */
-#if !(CY_PSOC5A &&\
-	 PGAin__PORT == 15 && ((PGAin__MASK & 0xC0) != 0))
+/* Check to see if required defines such as CY_PSOC5LP are available */
+/* They are defined starting with cy_boot v3.0 */
+#if !defined (CY_PSOC5LP)
+    #error Component PGA_v2_0 requires cy_boot v3.0 or later
+#endif /* (CY_ PSOC5LP) */
 
 
-/***************************************
-*        Function Prototypes             
-***************************************/    
-
-/**
-* \addtogroup group_general
-* @{
-*/
-void    PGAin_Write(uint8 value);
-void    PGAin_SetDriveMode(uint8 mode);
-uint8   PGAin_ReadDataReg(void);
-uint8   PGAin_Read(void);
-void    PGAin_SetInterruptMode(uint16 position, uint16 mode);
-uint8   PGAin_ClearInterrupt(void);
-/** @} general */
+#if(!CY_PSOC5A)
+    #if(CYDEV_VARIABLE_VDDA == 1)
+        #if (!defined(CY_LIB_SC_BST_CLK_EN))
+            #error Component PGA_v2_0 requires cy_boot v3.30 or later
+        #endif /* (!defined(CY_LIB_SC_BST_CLK_EN)) */
+    #endif /* CYDEV_VARIABLE_VDDA == 1 */
+#endif /* (!CY_PSOC5A) */
 
 /***************************************
-*           API Constants        
-***************************************/
-/**
-* \addtogroup group_constants
-* @{
-*/
-    /** \addtogroup driveMode Drive mode constants
-     * \brief Constants to be passed as "mode" parameter in the PGAin_SetDriveMode() function.
-     *  @{
-     */
-        #define PGAin_DM_ALG_HIZ         PIN_DM_ALG_HIZ
-        #define PGAin_DM_DIG_HIZ         PIN_DM_DIG_HIZ
-        #define PGAin_DM_RES_UP          PIN_DM_RES_UP
-        #define PGAin_DM_RES_DWN         PIN_DM_RES_DWN
-        #define PGAin_DM_OD_LO           PIN_DM_OD_LO
-        #define PGAin_DM_OD_HI           PIN_DM_OD_HI
-        #define PGAin_DM_STRONG          PIN_DM_STRONG
-        #define PGAin_DM_RES_UPDWN       PIN_DM_RES_UPDWN
-    /** @} driveMode */
-/** @} group_constants */
-    
-/* Digital Port Constants */
-#define PGAin_MASK               PGAin__MASK
-#define PGAin_SHIFT              PGAin__SHIFT
-#define PGAin_WIDTH              1u
-
-/* Interrupt constants */
-#if defined(PGAin__INTSTAT)
-/**
-* \addtogroup group_constants
-* @{
-*/
-    /** \addtogroup intrMode Interrupt constants
-     * \brief Constants to be passed as "mode" parameter in PGAin_SetInterruptMode() function.
-     *  @{
-     */
-        #define PGAin_INTR_NONE      (uint16)(0x0000u)
-        #define PGAin_INTR_RISING    (uint16)(0x0001u)
-        #define PGAin_INTR_FALLING   (uint16)(0x0002u)
-        #define PGAin_INTR_BOTH      (uint16)(0x0003u) 
-    /** @} intrMode */
-/** @} group_constants */
-
-    #define PGAin_INTR_MASK      (0x01u) 
-#endif /* (PGAin__INTSTAT) */
-
-
-/***************************************
-*             Registers        
+*   Data Struct Definition
 ***************************************/
 
-/* Main Port Registers */
-/* Pin State */
-#define PGAin_PS                     (* (reg8 *) PGAin__PS)
-/* Data Register */
-#define PGAin_DR                     (* (reg8 *) PGAin__DR)
-/* Port Number */
-#define PGAin_PRT_NUM                (* (reg8 *) PGAin__PRT) 
-/* Connect to Analog Globals */                                                  
-#define PGAin_AG                     (* (reg8 *) PGAin__AG)                       
-/* Analog MUX bux enable */
-#define PGAin_AMUX                   (* (reg8 *) PGAin__AMUX) 
-/* Bidirectional Enable */                                                        
-#define PGAin_BIE                    (* (reg8 *) PGAin__BIE)
-/* Bit-mask for Aliased Register Access */
-#define PGAin_BIT_MASK               (* (reg8 *) PGAin__BIT_MASK)
-/* Bypass Enable */
-#define PGAin_BYP                    (* (reg8 *) PGAin__BYP)
-/* Port wide control signals */                                                   
-#define PGAin_CTL                    (* (reg8 *) PGAin__CTL)
-/* Drive Modes */
-#define PGAin_DM0                    (* (reg8 *) PGAin__DM0) 
-#define PGAin_DM1                    (* (reg8 *) PGAin__DM1)
-#define PGAin_DM2                    (* (reg8 *) PGAin__DM2) 
-/* Input Buffer Disable Override */
-#define PGAin_INP_DIS                (* (reg8 *) PGAin__INP_DIS)
-/* LCD Common or Segment Drive */
-#define PGAin_LCD_COM_SEG            (* (reg8 *) PGAin__LCD_COM_SEG)
-/* Enable Segment LCD */
-#define PGAin_LCD_EN                 (* (reg8 *) PGAin__LCD_EN)
-/* Slew Rate Control */
-#define PGAin_SLW                    (* (reg8 *) PGAin__SLW)
+/* Low power Mode API Support */
+typedef struct
+{
+    uint8   enableState;
+    uint8   scCR1Reg;
+    uint8   scCR2Reg;
+    uint8   scCR3Reg;
+}   PGAIn_BACKUP_STRUCT;
 
-/* DSI Port Registers */
-/* Global DSI Select Register */
-#define PGAin_PRTDSI__CAPS_SEL       (* (reg8 *) PGAin__PRTDSI__CAPS_SEL) 
-/* Double Sync Enable */
-#define PGAin_PRTDSI__DBL_SYNC_IN    (* (reg8 *) PGAin__PRTDSI__DBL_SYNC_IN) 
-/* Output Enable Select Drive Strength */
-#define PGAin_PRTDSI__OE_SEL0        (* (reg8 *) PGAin__PRTDSI__OE_SEL0) 
-#define PGAin_PRTDSI__OE_SEL1        (* (reg8 *) PGAin__PRTDSI__OE_SEL1) 
-/* Port Pin Output Select Registers */
-#define PGAin_PRTDSI__OUT_SEL0       (* (reg8 *) PGAin__PRTDSI__OUT_SEL0) 
-#define PGAin_PRTDSI__OUT_SEL1       (* (reg8 *) PGAin__PRTDSI__OUT_SEL1) 
-/* Sync Output Enable Registers */
-#define PGAin_PRTDSI__SYNC_OUT       (* (reg8 *) PGAin__PRTDSI__SYNC_OUT) 
 
-/* SIO registers */
-#if defined(PGAin__SIO_CFG)
-    #define PGAin_SIO_HYST_EN        (* (reg8 *) PGAin__SIO_HYST_EN)
-    #define PGAin_SIO_REG_HIFREQ     (* (reg8 *) PGAin__SIO_REG_HIFREQ)
-    #define PGAin_SIO_CFG            (* (reg8 *) PGAin__SIO_CFG)
-    #define PGAin_SIO_DIFF           (* (reg8 *) PGAin__SIO_DIFF)
-#endif /* (PGAin__SIO_CFG) */
+/* variable describes init state of the component */
+extern uint8 PGAIn_initVar;
 
-/* Interrupt Registers */
-#if defined(PGAin__INTSTAT)
-    #define PGAin_INTSTAT            (* (reg8 *) PGAin__INTSTAT)
-    #define PGAin_SNAP               (* (reg8 *) PGAin__SNAP)
-    
-	#define PGAin_0_INTTYPE_REG 		(* (reg8 *) PGAin__0__INTTYPE)
-#endif /* (PGAin__INTSTAT) */
 
-#endif /* CY_PSOC5A... */
+/***************************************
+*        Function Prototypes 
+***************************************/
 
-#endif /*  CY_PINS_PGAin_H */
+void PGAIn_Start(void)                 ; 
+void PGAIn_Stop(void)                  ; 
+void PGAIn_SetPower(uint8 power)       ;
+void PGAIn_SetGain(uint8 gain)         ;
+void PGAIn_Sleep(void)                 ; 
+void PGAIn_Wakeup(void)                ;
+void PGAIn_SaveConfig(void)            ; 
+void PGAIn_RestoreConfig(void)         ;
+void PGAIn_Init(void)                  ;
+void PGAIn_Enable(void)                ;
+
+
+/***************************************
+*            API Constants
+***************************************/
+
+/* Power constants for SetPower function */
+#define PGAIn_MINPOWER                 (0x00u)
+#define PGAIn_LOWPOWER                 (0x01u)
+#define PGAIn_MEDPOWER                 (0x02u)
+#define PGAIn_HIGHPOWER                (0x03u)
+
+/* Constants for SetGain function */
+#define PGAIn_GAIN_01                  (0x00u)
+#define PGAIn_GAIN_02                  (0x01u)
+#define PGAIn_GAIN_04                  (0x02u)
+#define PGAIn_GAIN_08                  (0x03u)
+#define PGAIn_GAIN_16                  (0x04u)
+#define PGAIn_GAIN_24                  (0x05u)
+#define PGAIn_GAIN_32                  (0x06u)
+#define PGAIn_GAIN_48                  (0x07u)
+#define PGAIn_GAIN_50                  (0x08u)
+#define PGAIn_GAIN_MAX                 (0x08u)
+
+
+/***************************************
+*       Initialization Values
+***************************************/
+
+#define PGAIn_DEFAULT_GAIN             (0u)
+#define PGAIn_VREF_MODE                ((1u != 0x00u) ? (0x00u) : PGAIn_GNDVREF_E)
+#define PGAIn_DEFAULT_POWER            (3u)
+
+
+/***************************************
+*              Registers
+***************************************/
+
+#define PGAIn_CR0_REG                  (* (reg8 *) PGAIn_SC__CR0 )
+#define PGAIn_CR0_PTR                  (  (reg8 *) PGAIn_SC__CR0 )
+#define PGAIn_CR1_REG                  (* (reg8 *) PGAIn_SC__CR1 )
+#define PGAIn_CR1_PTR                  (  (reg8 *) PGAIn_SC__CR1 )
+#define PGAIn_CR2_REG                  (* (reg8 *) PGAIn_SC__CR2 )
+#define PGAIn_CR2_PTR                  (  (reg8 *) PGAIn_SC__CR2 )
+  /* Power manager */
+#define PGAIn_PM_ACT_CFG_REG           (* (reg8 *) PGAIn_SC__PM_ACT_CFG )
+#define PGAIn_PM_ACT_CFG_PTR           (  (reg8 *) PGAIn_SC__PM_ACT_CFG )  
+#define PGAIn_PM_STBY_CFG_REG          (* (reg8 *) PGAIn_SC__PM_STBY_CFG )
+  /* Power manager */
+#define PGAIn_PM_STBY_CFG_PTR          (  (reg8 *) PGAIn_SC__PM_STBY_CFG )  
+#define PGAIn_BSTCLK_REG               (* (reg8 *) PGAIn_SC__BST )
+#define PGAIn_BSTCLK_PTR               (  (reg8 *) PGAIn_SC__BST )
+/* Pump clock selectin register */
+#define PGAIn_PUMP_CR1_REG             (* (reg8 *) CYDEV_ANAIF_CFG_PUMP_CR1)
+#define PGAIn_PUMP_CR1_PTR             (  (reg8 *) CYDEV_ANAIF_CFG_PUMP_CR1)
+
+/* Pump Register for SC block */
+#define PGAIn_SC_MISC_REG              (* (reg8 *) CYDEV_ANAIF_RT_SC_MISC)
+#define PGAIn_SC_MISC_PTR              (  (reg8 *) CYDEV_ANAIF_RT_SC_MISC)
+
+/* PM_ACT_CFG (Active Power Mode CFG Register)mask */ 
+#define PGAIn_ACT_PWR_EN               PGAIn_SC__PM_ACT_MSK 
+
+/* PM_STBY_CFG (Alternate Active Power Mode CFG Register)mask */ 
+#define PGAIn_STBY_PWR_EN              PGAIn_SC__PM_STBY_MSK 
+
+
+/***************************************
+*            Register Constants
+***************************************/
+
+/* SC_MISC constants */
+#define PGAIn_PUMP_FORCE               (0x20u)
+#define PGAIn_PUMP_AUTO                (0x10u)
+#define PGAIn_DIFF_PGA_1_3             (0x02u)
+#define PGAIn_DIFF_PGA_0_2             (0x01u)
+
+/* ANIF.PUMP.CR1 Constants */
+#define PGAIn_PUMP_CR1_SC_CLKSEL       (0x80u)
+
+/* CR0 SC/CT Control Register 0 definitions */
+#define PGAIn_MODE_PGA                 (0x0Cu)
+
+/* CR1 SC/CT Control Register 1 definitions */
+
+/* Bit Field  SC_COMP_ENUM */
+#define PGAIn_COMP_MASK                (0x0Cu)
+#define PGAIn_COMP_3P0PF               (0x00u)
+#define PGAIn_COMP_3P6PF               (0x04u)
+#define PGAIn_COMP_4P35PF              (0x08u)
+#define PGAIn_COMP_5P1PF               (0x0Cu)
+
+/* Bit Field  SC_DIV2_ENUM */
+#define PGAIn_DIV2_MASK                (0x10u)
+#define PGAIn_DIV2_DISABLE             (0x00u)
+#define PGAIn_DIV2_ENABLE              (0x10u)
+
+/* Bit Field  SC_DRIVE_ENUM */
+#define PGAIn_DRIVE_MASK               (0x03u)
+#define PGAIn_DRIVE_280UA              (0x00u)
+#define PGAIn_DRIVE_420UA              (0x01u)
+#define PGAIn_DRIVE_530UA              (0x02u)
+#define PGAIn_DRIVE_650UA              (0x03u)
+
+/* Bit Field  SC_PGA_MODE_ENUM */
+#define PGAIn_PGA_MODE_MASK            (0x20u)
+#define PGAIn_PGA_INV                  (0x00u)
+#define PGAIn_PGA_NINV                 (0x20u)
+
+/* CR2 SC/CT Control Register 2 definitions */
+
+/* Bit Field  SC_BIAS_CONTROL_ENUM */
+#define PGAIn_BIAS_MASK                (0x01u)
+#define PGAIn_BIAS_NORMAL              (0x00u)
+#define PGAIn_BIAS_LOW                 (0x01u)
+
+/* Bit Field  SC_PGA_GNDVREF_ENUM  */
+#define PGAIn_GNDVREF_MASK             (0x80u)
+#define PGAIn_GNDVREF_DI               (0x00u)
+#define PGAIn_GNDVREF_E                (0x80u)
+
+/* Bit Field  SC_R20_40B_ENUM */
+#define PGAIn_R20_40B_MASK             (0x02u)
+#define PGAIn_R20_40B_40K              (0x00u)
+#define PGAIn_R20_40B_20K              (0x02u)
+
+/* Bit Field  SC_REDC_ENUM */
+#define PGAIn_REDC_MASK                (0x0Cu)
+#define PGAIn_REDC_00                  (0x00u)
+#define PGAIn_REDC_01                  (0x04u)
+#define PGAIn_REDC_10                  (0x08u)
+#define PGAIn_REDC_11                  (0x0Cu)
+
+/* Bit Field  SC_RVAL_ENUM */
+#define PGAIn_RVAL_MASK                (0x70u)
+#define PGAIn_RVAL_0K                  (0x00u)
+#define PGAIn_RVAL_40K                 (0x10u)
+#define PGAIn_RVAL_120K                (0x20u)
+#define PGAIn_RVAL_280K                (0x30u)
+#define PGAIn_RVAL_600K                (0x40u)
+#define PGAIn_RVAL_460K                (0x60u)
+#define PGAIn_RVAL_620K                (0x50u)
+#define PGAIn_RVAL_470K                (0x60u)
+#define PGAIn_RVAL_490K                (0x70u)
+
+/* Bit Field  PGA_GAIN_ENUM */
+#define PGAIn_PGA_GAIN_MASK            (0x72u)
+#define PGAIn_PGA_GAIN_01              (0x00u)
+#define PGAIn_PGA_GAIN_02              (0x10u)
+#define PGAIn_PGA_GAIN_04              (0x20u)
+#define PGAIn_PGA_GAIN_08              (0x30u)
+#define PGAIn_PGA_GAIN_16              (0x40u)
+#define PGAIn_PGA_GAIN_24              (0x50u)
+#define PGAIn_PGA_GAIN_25              (0x70u)
+#define PGAIn_PGA_GAIN_32              (0x52u)
+#define PGAIn_PGA_GAIN_48              (0x62u)
+#define PGAIn_PGA_GAIN_50              (0x72u)
+
+#define PGAIn_BST_CLK_EN               (0x08u)
+#define PGAIn_BST_CLK_INDEX_MASK       (0x07u)
+#define PGAIn_PM_ACT_CFG_MASK          (0x0Fu)
+
+/* Constant for VDDA Threshold */
+#define PGAIn_CYDEV_VDDA_MV       (CYDEV_VDDA_MV)
+#define PGAIn_MINIMUM_VDDA_THRESHOLD_MV   (2700u)
+
+/*******************************************************************************
+* Following code are OBSOLETE and must not be used starting from PGA 2.0
+*******************************************************************************/
+#define PGAIn_BST_REG            (PGAIn_BSTCLK_REG)
+#define PGAIn_BST_PTR            (PGAIn_BSTCLK_PTR)
+#define PGAIn_SC_REG_CLR         (0x00u)
+#define PGAIn_BST_REG_EN         (0x08u)
+
+
+#endif /* CY_PGA_PGAIn_H */
 
 
 /* [] END OF FILE */

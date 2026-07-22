@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: PGAIn.c  
+* File Name: PGAout.c  
 * Version 2.0
 *
 * Description:
@@ -15,7 +15,7 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#include "PGAIn.h"
+#include "PGAout.h"
 
 #if (!CY_PSOC5A)
     #if (CYDEV_VARIABLE_VDDA == 1u)
@@ -24,20 +24,20 @@
 #endif /* (!CY_PSOC5A) */
 
 #if (CY_PSOC5A)
-    static PGAIn_BACKUP_STRUCT  PGAIn_P5backup;
+    static PGAout_BACKUP_STRUCT  PGAout_P5backup;
 #endif /* (CY_ PSOC5A) */
 
-uint8 PGAIn_initVar = 0u;
+uint8 PGAout_initVar = 0u;
 
 
 /*******************************************************************************   
-* Function Name: PGAIn_Init
+* Function Name: PGAout_Init
 ********************************************************************************
 *
 * Summary:
 *  Initialize component's parameters to the parameters set by user in the 
 *  customizer of the component placed onto schematic. Usually called in 
-*  PGAIn_Start().
+*  PGAout_Start().
 *
 * Parameters:
 *  void
@@ -46,23 +46,23 @@ uint8 PGAIn_initVar = 0u;
 *  void
 *
 *******************************************************************************/
-void PGAIn_Init(void) 
+void PGAout_Init(void) 
 {
     /* Set PGA mode */
-    PGAIn_CR0_REG = PGAIn_MODE_PGA;      
+    PGAout_CR0_REG = PGAout_MODE_PGA;      
     /* Set non-inverting PGA mode and reference mode */
-    PGAIn_CR1_REG |= PGAIn_PGA_NINV;  
+    PGAout_CR1_REG |= PGAout_PGA_NINV;  
     /* Set default gain and ref mode */
-    PGAIn_CR2_REG = PGAIn_VREF_MODE;
+    PGAout_CR2_REG = PGAout_VREF_MODE;
     /* Set gain and compensation */
-    PGAIn_SetGain(PGAIn_DEFAULT_GAIN);
+    PGAout_SetGain(PGAout_DEFAULT_GAIN);
     /* Set power */
-    PGAIn_SetPower(PGAIn_DEFAULT_POWER);
+    PGAout_SetPower(PGAout_DEFAULT_POWER);
 }
 
 
 /*******************************************************************************   
-* Function Name: PGAIn_Enable
+* Function Name: PGAout_Enable
 ********************************************************************************
 *
 * Summary:
@@ -75,40 +75,40 @@ void PGAIn_Init(void)
 *  void
 *
 *******************************************************************************/
-void PGAIn_Enable(void) 
+void PGAout_Enable(void) 
 {
     /* This is to restore the value of register CR1 and CR2 which is saved 
       in prior to the modifications in stop() API */
     #if (CY_PSOC5A)
-        if(PGAIn_P5backup.enableState == 1u)
+        if(PGAout_P5backup.enableState == 1u)
         {
-            PGAIn_CR1_REG = PGAIn_P5backup.scCR1Reg;
-            PGAIn_CR2_REG = PGAIn_P5backup.scCR2Reg;
-            PGAIn_P5backup.enableState = 0u;
+            PGAout_CR1_REG = PGAout_P5backup.scCR1Reg;
+            PGAout_CR2_REG = PGAout_P5backup.scCR2Reg;
+            PGAout_P5backup.enableState = 0u;
         }
     #endif /* CY_PSOC5A */   
 
     /* Enable power to the Amp in Active mode*/
-    PGAIn_PM_ACT_CFG_REG |= PGAIn_ACT_PWR_EN;
+    PGAout_PM_ACT_CFG_REG |= PGAout_ACT_PWR_EN;
 
     /* Enable power to the Amp in Alternative Active mode*/
-    PGAIn_PM_STBY_CFG_REG |= PGAIn_STBY_PWR_EN;
+    PGAout_PM_STBY_CFG_REG |= PGAout_STBY_PWR_EN;
     
-    PGAIn_PUMP_CR1_REG |= PGAIn_PUMP_CR1_SC_CLKSEL;
+    PGAout_PUMP_CR1_REG |= PGAout_PUMP_CR1_SC_CLKSEL;
     
     #if (!CY_PSOC5A)
         #if (CYDEV_VARIABLE_VDDA == 1u)
             if(CyScPumpEnabled == 1u)
             {
-                PGAIn_BSTCLK_REG &= (uint8)(~PGAIn_BST_CLK_INDEX_MASK);
-                PGAIn_BSTCLK_REG |= PGAIn_BST_CLK_EN | CyScBoostClk__INDEX;
-                PGAIn_SC_MISC_REG |= PGAIn_PUMP_FORCE;
+                PGAout_BSTCLK_REG &= (uint8)(~PGAout_BST_CLK_INDEX_MASK);
+                PGAout_BSTCLK_REG |= PGAout_BST_CLK_EN | CyScBoostClk__INDEX;
+                PGAout_SC_MISC_REG |= PGAout_PUMP_FORCE;
                 CyScBoostClk_Start();
             }
             else
             {
-                PGAIn_BSTCLK_REG &= (uint8)(~PGAIn_BST_CLK_EN);
-                PGAIn_SC_MISC_REG &= (uint8)(~PGAIn_PUMP_FORCE);
+                PGAout_BSTCLK_REG &= (uint8)(~PGAout_BST_CLK_EN);
+                PGAout_SC_MISC_REG &= (uint8)(~PGAout_PUMP_FORCE);
             }
         #endif /* (CYDEV_VARIABLE_VDDA == 1u) */
     #endif /* (!CY_PSOC5A) */
@@ -116,7 +116,7 @@ void PGAIn_Enable(void)
 
 
 /*******************************************************************************
-* Function Name: PGAIn_Start
+* Function Name: PGAout_Start
 ********************************************************************************
 *
 * Summary:
@@ -131,24 +131,24 @@ void PGAIn_Enable(void)
 *  void
 *
 *******************************************************************************/
-void PGAIn_Start(void) 
+void PGAout_Start(void) 
 {
 
     /* This is to restore the value of register CR1 and CR2 which is saved 
       in prior to the modification in stop() API */
 
-    if(PGAIn_initVar == 0u)
+    if(PGAout_initVar == 0u)
     {
-        PGAIn_Init();
-        PGAIn_initVar = 1u;
+        PGAout_Init();
+        PGAout_initVar = 1u;
     }
 
-    PGAIn_Enable();
+    PGAout_Enable();
 }
 
 
 /*******************************************************************************
-* Function Name: PGAIn_Stop
+* Function Name: PGAout_Stop
 ********************************************************************************
 *
 * Summary:
@@ -161,22 +161,22 @@ void PGAIn_Start(void)
 *  void
 *
 *******************************************************************************/
-void PGAIn_Stop(void) 
+void PGAout_Stop(void) 
 { 
     /* Disble power to the Amp in Active mode template */
-    PGAIn_PM_ACT_CFG_REG &= (uint8)(~PGAIn_ACT_PWR_EN);
+    PGAout_PM_ACT_CFG_REG &= (uint8)(~PGAout_ACT_PWR_EN);
 
     /* Disble power to the Amp in Alternative Active mode template */
-    PGAIn_PM_STBY_CFG_REG &= (uint8)(~PGAIn_STBY_PWR_EN);
+    PGAout_PM_STBY_CFG_REG &= (uint8)(~PGAout_STBY_PWR_EN);
 
     #if (!CY_PSOC5A)
         #if (CYDEV_VARIABLE_VDDA == 1u)
-            PGAIn_BSTCLK_REG &= (uint8)(~PGAIn_BST_CLK_EN);
+            PGAout_BSTCLK_REG &= (uint8)(~PGAout_BST_CLK_EN);
             /* Disable pumps only if there aren't any SC block in use */
-            if ((PGAIn_PM_ACT_CFG_REG & PGAIn_PM_ACT_CFG_MASK) == 0u)
+            if ((PGAout_PM_ACT_CFG_REG & PGAout_PM_ACT_CFG_MASK) == 0u)
             {
-                PGAIn_SC_MISC_REG &= (uint8)(~PGAIn_PUMP_FORCE);
-                PGAIn_PUMP_CR1_REG &= (uint8)(~PGAIn_PUMP_CR1_SC_CLKSEL);
+                PGAout_SC_MISC_REG &= (uint8)(~PGAout_PUMP_FORCE);
+                PGAout_PUMP_CR1_REG &= (uint8)(~PGAout_PUMP_CR1_SC_CLKSEL);
                 CyScBoostClk_Stop();
             }
         #endif /* CYDEV_VARIABLE_VDDA == 1u */
@@ -184,17 +184,17 @@ void PGAIn_Stop(void)
 
     /* This sets PGA in zero current mode and output routes are valid */
     #if (CY_PSOC5A)
-        PGAIn_P5backup.scCR1Reg = PGAIn_CR1_REG;
-        PGAIn_P5backup.scCR2Reg = PGAIn_CR2_REG;
-        PGAIn_CR1_REG = 0x00u;
-        PGAIn_CR2_REG = 0x00u;
-        PGAIn_P5backup.enableState = 1u;
+        PGAout_P5backup.scCR1Reg = PGAout_CR1_REG;
+        PGAout_P5backup.scCR2Reg = PGAout_CR2_REG;
+        PGAout_CR1_REG = 0x00u;
+        PGAout_CR2_REG = 0x00u;
+        PGAout_P5backup.enableState = 1u;
     #endif /* CY_PSOC5A */
 }
 
 
 /*******************************************************************************
-* Function Name: PGAIn_SetPower
+* Function Name: PGAout_SetPower
 ********************************************************************************
 *
 * Summary:
@@ -207,18 +207,18 @@ void PGAIn_Stop(void)
 *  void
 *
 *******************************************************************************/
-void PGAIn_SetPower(uint8 power) 
+void PGAout_SetPower(uint8 power) 
 {
     uint8 tmpCR;
 
-    tmpCR = PGAIn_CR1_REG & (uint8)(~PGAIn_DRIVE_MASK);
-    tmpCR |= (power & PGAIn_DRIVE_MASK);
-    PGAIn_CR1_REG = tmpCR;  
+    tmpCR = PGAout_CR1_REG & (uint8)(~PGAout_DRIVE_MASK);
+    tmpCR |= (power & PGAout_DRIVE_MASK);
+    PGAout_CR1_REG = tmpCR;  
 }
 
 
 /*******************************************************************************
-* Function Name: PGAIn_SetGain
+* Function Name: PGAout_SetGain
 ********************************************************************************
 *
 * Summary:
@@ -232,49 +232,49 @@ void PGAIn_SetPower(uint8 power)
 *  void 
 *
 *******************************************************************************/
-void PGAIn_SetGain(uint8 gain) 
+void PGAout_SetGain(uint8 gain) 
 {
     /* Constant array for gain settings */
-    const uint8 PGAIn_GainArray[9] = { 
-        (PGAIn_RVAL_0K   | PGAIn_R20_40B_40K | PGAIn_BIAS_LOW), /* G=1  */
-        (PGAIn_RVAL_40K  | PGAIn_R20_40B_40K | PGAIn_BIAS_LOW), /* G=2  */
-        (PGAIn_RVAL_120K | PGAIn_R20_40B_40K | PGAIn_BIAS_LOW), /* G=4  */
-        (PGAIn_RVAL_280K | PGAIn_R20_40B_40K | PGAIn_BIAS_LOW), /* G=8  */
-        (PGAIn_RVAL_600K | PGAIn_R20_40B_40K | PGAIn_BIAS_LOW), /* G=16 */
-        (PGAIn_RVAL_460K | PGAIn_R20_40B_40K | PGAIn_BIAS_LOW), /* G=24, Sets Rin as 20k */
-        (PGAIn_RVAL_620K | PGAIn_R20_40B_20K | PGAIn_BIAS_LOW), /* G=32 */
-        (PGAIn_RVAL_470K | PGAIn_R20_40B_20K | PGAIn_BIAS_LOW), /* G=48, Sets Rin as 10k */
-        (PGAIn_RVAL_490K | PGAIn_R20_40B_20K | PGAIn_BIAS_LOW)  /* G=50, Sets Rin as 10k */
+    const uint8 PGAout_GainArray[9] = { 
+        (PGAout_RVAL_0K   | PGAout_R20_40B_40K | PGAout_BIAS_LOW), /* G=1  */
+        (PGAout_RVAL_40K  | PGAout_R20_40B_40K | PGAout_BIAS_LOW), /* G=2  */
+        (PGAout_RVAL_120K | PGAout_R20_40B_40K | PGAout_BIAS_LOW), /* G=4  */
+        (PGAout_RVAL_280K | PGAout_R20_40B_40K | PGAout_BIAS_LOW), /* G=8  */
+        (PGAout_RVAL_600K | PGAout_R20_40B_40K | PGAout_BIAS_LOW), /* G=16 */
+        (PGAout_RVAL_460K | PGAout_R20_40B_40K | PGAout_BIAS_LOW), /* G=24, Sets Rin as 20k */
+        (PGAout_RVAL_620K | PGAout_R20_40B_20K | PGAout_BIAS_LOW), /* G=32 */
+        (PGAout_RVAL_470K | PGAout_R20_40B_20K | PGAout_BIAS_LOW), /* G=48, Sets Rin as 10k */
+        (PGAout_RVAL_490K | PGAout_R20_40B_20K | PGAout_BIAS_LOW)  /* G=50, Sets Rin as 10k */
     };
     
     /* Constant array for gain compenstion settings */
-    const uint8 PGAIn_GainComp[9] = { 
-        ( PGAIn_COMP_4P35PF  | (uint8)( PGAIn_REDC_00 >> 2 )), /* G=1  */
-        ( PGAIn_COMP_4P35PF  | (uint8)( PGAIn_REDC_01 >> 2 )), /* G=2  */
-        ( PGAIn_COMP_3P0PF   | (uint8)( PGAIn_REDC_01 >> 2 )), /* G=4  */
-        ( PGAIn_COMP_3P0PF   | (uint8)( PGAIn_REDC_01 >> 2 )), /* G=8  */
-        ( PGAIn_COMP_3P6PF   | (uint8)( PGAIn_REDC_01 >> 2 )), /* G=16 */
-        ( PGAIn_COMP_3P6PF   | (uint8)( PGAIn_REDC_11 >> 2 )), /* G=24 */
-        ( PGAIn_COMP_3P6PF   | (uint8)( PGAIn_REDC_11 >> 2 )), /* G=32 */
-        ( PGAIn_COMP_3P6PF   | (uint8)( PGAIn_REDC_00 >> 2 )), /* G=48 */
-        ( PGAIn_COMP_3P6PF   | (uint8)( PGAIn_REDC_00 >> 2 ))  /* G=50 */
+    const uint8 PGAout_GainComp[9] = { 
+        ( PGAout_COMP_4P35PF  | (uint8)( PGAout_REDC_00 >> 2 )), /* G=1  */
+        ( PGAout_COMP_4P35PF  | (uint8)( PGAout_REDC_01 >> 2 )), /* G=2  */
+        ( PGAout_COMP_3P0PF   | (uint8)( PGAout_REDC_01 >> 2 )), /* G=4  */
+        ( PGAout_COMP_3P0PF   | (uint8)( PGAout_REDC_01 >> 2 )), /* G=8  */
+        ( PGAout_COMP_3P6PF   | (uint8)( PGAout_REDC_01 >> 2 )), /* G=16 */
+        ( PGAout_COMP_3P6PF   | (uint8)( PGAout_REDC_11 >> 2 )), /* G=24 */
+        ( PGAout_COMP_3P6PF   | (uint8)( PGAout_REDC_11 >> 2 )), /* G=32 */
+        ( PGAout_COMP_3P6PF   | (uint8)( PGAout_REDC_00 >> 2 )), /* G=48 */
+        ( PGAout_COMP_3P6PF   | (uint8)( PGAout_REDC_00 >> 2 ))  /* G=50 */
     };
     
     /* Only set new gain if it is a valid gain */
-    if( gain <= PGAIn_GAIN_MAX)
+    if( gain <= PGAout_GAIN_MAX)
     {
         /* Clear resistors, redc, and bias */
-        PGAIn_CR2_REG &= (uint8)(~(PGAIn_RVAL_MASK | PGAIn_R20_40B_MASK | 
-                                PGAIn_REDC_MASK | PGAIn_BIAS_MASK ));
+        PGAout_CR2_REG &= (uint8)(~(PGAout_RVAL_MASK | PGAout_R20_40B_MASK | 
+                                PGAout_REDC_MASK | PGAout_BIAS_MASK ));
 
         /* Set gain value resistors, redc comp, and bias */
-        PGAIn_CR2_REG |= (PGAIn_GainArray[gain] |
-                                ((uint8)(PGAIn_GainComp[gain] << 2 ) & PGAIn_REDC_MASK));
+        PGAout_CR2_REG |= (PGAout_GainArray[gain] |
+                                ((uint8)(PGAout_GainComp[gain] << 2 ) & PGAout_REDC_MASK));
 
         /* Clear sc_comp  */
-        PGAIn_CR1_REG &= (uint8)(~PGAIn_COMP_MASK);
+        PGAout_CR1_REG &= (uint8)(~PGAout_COMP_MASK);
         /* Set sc_comp  */
-        PGAIn_CR1_REG |= ( PGAIn_GainComp[gain] | PGAIn_COMP_MASK );
+        PGAout_CR1_REG |= ( PGAout_GainComp[gain] | PGAout_COMP_MASK );
     }
 }
 
