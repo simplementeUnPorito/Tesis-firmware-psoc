@@ -1,14 +1,13 @@
 /*******************************************************************************
-* File Name: VDAC_ref_PGA.c  
-* Version 1.90
+* File Name: VDAC_ref_PGA.c
+* Version 2.0
 *
 * Description:
-*  This file provides the source code to the API for the 8-bit Voltage DAC 
-*  (VDAC8) User Module.
+*  This file provides the source code to the API for the 8-bit Current 
+*  DAC (IDAC8) User Module.
 *
 * Note:
-*  Any unusual or non-standard behavior should be noted here. Other-
-*  wise, this section should remain blank.
+*  None
 *
 ********************************************************************************
 * Copyright 2008-2012, Cypress Semiconductor Corporation.  All rights reserved.
@@ -18,20 +17,24 @@
 *******************************************************************************/
 
 #include "cytypes.h"
-#include "VDAC_ref_PGA.h"
+#include "VDAC_ref_PGA.h"   
 
 #if (CY_PSOC5A)
-#include <CyLib.h>
+    #include <CyLib.h>
 #endif /* CY_PSOC5A */
+
 
 uint8 VDAC_ref_PGA_initVar = 0u;
 
-#if (CY_PSOC5A)
-    static uint8 VDAC_ref_PGA_restoreVal = 0u;
-#endif /* CY_PSOC5A */
 
 #if (CY_PSOC5A)
-    static VDAC_ref_PGA_backupStruct VDAC_ref_PGA_backup;
+    static VDAC_ref_PGA_LOWPOWER_BACKUP_STRUCT  VDAC_ref_PGA_lowPowerBackup;
+#endif /* CY_PSOC5A */
+
+/* Variable to decide whether or not to restore control register in Enable()
+   API. This valid only for PSoC5A */
+#if (CY_PSOC5A)
+    static uint8 VDAC_ref_PGA_restoreReg = 0u;
 #endif /* CY_PSOC5A */
 
 
@@ -45,7 +48,7 @@ uint8 VDAC_ref_PGA_initVar = 0u;
 *  void:
 *
 * Return:
-*  void
+*  (void)
 *
 * Theory:
 *
@@ -54,25 +57,37 @@ uint8 VDAC_ref_PGA_initVar = 0u;
 *******************************************************************************/
 void VDAC_ref_PGA_Init(void) 
 {
-    VDAC_ref_PGA_CR0 = (VDAC_ref_PGA_MODE_V );
+    VDAC_ref_PGA_CR0 = (VDAC_ref_PGA_MODE_I | VDAC_ref_PGA_DEFAULT_RANGE );
 
     /* Set default data source */
-    #if(VDAC_ref_PGA_DEFAULT_DATA_SRC != 0 )
-        VDAC_ref_PGA_CR1 = (VDAC_ref_PGA_DEFAULT_CNTL | VDAC_ref_PGA_DACBUS_ENABLE) ;
+    #if(VDAC_ref_PGA_DEFAULT_DATA_SRC != 0u )    
+        VDAC_ref_PGA_CR1 = (VDAC_ref_PGA_DEFAULT_CNTL | VDAC_ref_PGA_DACBUS_ENABLE);
     #else
-        VDAC_ref_PGA_CR1 = (VDAC_ref_PGA_DEFAULT_CNTL | VDAC_ref_PGA_DACBUS_DISABLE) ;
-    #endif /* (VDAC_ref_PGA_DEFAULT_DATA_SRC != 0 ) */
-
+        VDAC_ref_PGA_CR1 = (VDAC_ref_PGA_DEFAULT_CNTL | VDAC_ref_PGA_DACBUS_DISABLE);
+    #endif /* (VDAC_ref_PGA_DEFAULT_DATA_SRC != 0u ) */
+    
+    /*Controls polarity from UDB Control*/
+    #if(VDAC_ref_PGA_DEFAULT_POLARITY == VDAC_ref_PGA_HARDWARE_CONTROLLED)
+        VDAC_ref_PGA_CR1 |= VDAC_ref_PGA_IDIR_SRC_UDB;
+    #else
+        VDAC_ref_PGA_CR1 |= VDAC_ref_PGA_DEFAULT_POLARITY;
+    #endif/* (VDAC_ref_PGA_DEFAULT_POLARITY == VDAC_ref_PGA_HARDWARE_CONTROLLED) */
+    /*Controls Current Source from UDB Control*/
+    #if(VDAC_ref_PGA_HARDWARE_ENABLE != 0u ) 
+        VDAC_ref_PGA_CR1 |= VDAC_ref_PGA_IDIR_CTL_UDB;
+    #endif /* (VDAC_ref_PGA_HARDWARE_ENABLE != 0u ) */ 
+    
     /* Set default strobe mode */
-    #if(VDAC_ref_PGA_DEFAULT_STRB != 0)
-        VDAC_ref_PGA_Strobe |= VDAC_ref_PGA_STRB_EN ;
-    #endif/* (VDAC_ref_PGA_DEFAULT_STRB != 0) */
-
-    /* Set default range */
-    VDAC_ref_PGA_SetRange(VDAC_ref_PGA_DEFAULT_RANGE); 
-
+    #if(VDAC_ref_PGA_DEFAULT_STRB != 0u)
+        VDAC_ref_PGA_Strobe |= VDAC_ref_PGA_STRB_EN;
+    #endif /* (VDAC_ref_PGA_DEFAULT_STRB != 0u) */
+    
     /* Set default speed */
     VDAC_ref_PGA_SetSpeed(VDAC_ref_PGA_DEFAULT_SPEED);
+    
+    /* Set proper DAC trim */
+    VDAC_ref_PGA_DacTrim();
+    
 }
 
 
@@ -80,13 +95,13 @@ void VDAC_ref_PGA_Init(void)
 * Function Name: VDAC_ref_PGA_Enable
 ********************************************************************************
 * Summary:
-*  Enable the VDAC8
+*  Enable the IDAC8
 * 
 * Parameters:
-*  void
+*  void:
 *
 * Return:
-*  void
+*  (void)
 *
 * Theory:
 *
@@ -98,13 +113,15 @@ void VDAC_ref_PGA_Enable(void)
     VDAC_ref_PGA_PWRMGR |= VDAC_ref_PGA_ACT_PWR_EN;
     VDAC_ref_PGA_STBY_PWRMGR |= VDAC_ref_PGA_STBY_PWR_EN;
 
-    /*This is to restore the value of register CR0 ,
-    which is modified  in Stop API , this prevents misbehaviour of VDAC */
+    /* This is to restore the value of register CR0 which is saved 
+      in prior to the modification in stop() API */
     #if (CY_PSOC5A)
-        if(VDAC_ref_PGA_restoreVal == 1u) 
+        if(VDAC_ref_PGA_restoreReg == 1u)
         {
-             VDAC_ref_PGA_CR0 = VDAC_ref_PGA_backup.data_value;
-             VDAC_ref_PGA_restoreVal = 0u;
+            VDAC_ref_PGA_CR0 = VDAC_ref_PGA_lowPowerBackup.DACCR0Reg;
+
+            /* Clear the flag */
+            VDAC_ref_PGA_restoreReg = 0u;
         }
     #endif /* CY_PSOC5A */
 }
@@ -113,52 +130,50 @@ void VDAC_ref_PGA_Enable(void)
 /*******************************************************************************
 * Function Name: VDAC_ref_PGA_Start
 ********************************************************************************
-*
 * Summary:
-*  The start function initializes the voltage DAC with the default values, 
-*  and sets the power to the given level.  A power level of 0, is the same as
-*  executing the stop function.
+*  Set power level then turn on IDAC8.
 *
-* Parameters:
-*  Power: Sets power level between off (0) and (3) high power
+* Parameters:  
+*  power: Sets power level between off (0) and (3) high power
 *
 * Return:
-*  void 
+*  (void)
 *
 * Global variables:
-*  VDAC_ref_PGA_initVar: Is modified when this function is called for the 
-*  first time. Is used to ensure that initialization happens only once.
+*  VDAC_ref_PGA_initVar: Is modified when this function is called for 
+*   the first time. Is used to ensure that initialization happens only once.
 *
 *******************************************************************************/
-void VDAC_ref_PGA_Start(void)  
+void VDAC_ref_PGA_Start(void) 
 {
-    /* Hardware initiazation only needs to occure the first time */
-    if(VDAC_ref_PGA_initVar == 0u)
-    { 
+    /* Hardware initiazation only needs to occur the first time */
+    if ( VDAC_ref_PGA_initVar == 0u)  
+    {
         VDAC_ref_PGA_Init();
+        
         VDAC_ref_PGA_initVar = 1u;
     }
-
+   
     /* Enable power to DAC */
     VDAC_ref_PGA_Enable();
 
     /* Set default value */
-    VDAC_ref_PGA_SetValue(VDAC_ref_PGA_DEFAULT_DATA); 
+    VDAC_ref_PGA_SetValue(VDAC_ref_PGA_DEFAULT_DATA);
+
 }
 
 
 /*******************************************************************************
 * Function Name: VDAC_ref_PGA_Stop
 ********************************************************************************
-*
 * Summary:
-*  Powers down DAC to lowest power state.
+*  Powers down IDAC8 to lowest power state.
 *
 * Parameters:
-*  void
+*  (void)
 *
 * Return:
-*  void
+*  (void)
 *
 * Theory:
 *
@@ -170,13 +185,15 @@ void VDAC_ref_PGA_Stop(void)
     /* Disble power to DAC */
     VDAC_ref_PGA_PWRMGR &= (uint8)(~VDAC_ref_PGA_ACT_PWR_EN);
     VDAC_ref_PGA_STBY_PWRMGR &= (uint8)(~VDAC_ref_PGA_STBY_PWR_EN);
-
-    /* This is a work around for PSoC5A  ,
-    this sets VDAC to current mode with output off */
+    
     #if (CY_PSOC5A)
-        VDAC_ref_PGA_backup.data_value = VDAC_ref_PGA_CR0;
-        VDAC_ref_PGA_CR0 = VDAC_ref_PGA_CUR_MODE_OUT_OFF;
-        VDAC_ref_PGA_restoreVal = 1u;
+    
+        /* Set the global variable  */
+        VDAC_ref_PGA_restoreReg = 1u;
+
+        /* Save the control register and then Clear it. */
+        VDAC_ref_PGA_lowPowerBackup.DACCR0Reg = VDAC_ref_PGA_CR0;
+        VDAC_ref_PGA_CR0 = (VDAC_ref_PGA_MODE_I | VDAC_ref_PGA_RANGE_3 | VDAC_ref_PGA_HS_HIGHSPEED);
     #endif /* CY_PSOC5A */
 }
 
@@ -184,7 +201,6 @@ void VDAC_ref_PGA_Stop(void)
 /*******************************************************************************
 * Function Name: VDAC_ref_PGA_SetSpeed
 ********************************************************************************
-*
 * Summary:
 *  Set DAC speed
 *
@@ -192,7 +208,7 @@ void VDAC_ref_PGA_Stop(void)
 *  power: Sets speed value
 *
 * Return:
-*  void
+*  (void)
 *
 * Theory:
 *
@@ -203,22 +219,51 @@ void VDAC_ref_PGA_SetSpeed(uint8 speed)
 {
     /* Clear power mask then write in new value */
     VDAC_ref_PGA_CR0 &= (uint8)(~VDAC_ref_PGA_HS_MASK);
-    VDAC_ref_PGA_CR0 |=  (speed & VDAC_ref_PGA_HS_MASK);
+    VDAC_ref_PGA_CR0 |=  ( speed & VDAC_ref_PGA_HS_MASK);
 }
+
+
+/*******************************************************************************
+* Function Name: VDAC_ref_PGA_SetPolarity
+********************************************************************************
+* Summary:
+*  Sets IDAC to Sink or Source current.
+*  
+* Parameters:
+*  Polarity: Sets the IDAC to Sink or Source 
+*  0x00 - Source
+*  0x04 - Sink
+*
+* Return:
+*  (void)
+*
+* Theory:
+*
+* Side Effects:
+*
+*******************************************************************************/
+#if(VDAC_ref_PGA_DEFAULT_POLARITY != VDAC_ref_PGA_HARDWARE_CONTROLLED)
+    void VDAC_ref_PGA_SetPolarity(uint8 polarity) 
+    {
+        VDAC_ref_PGA_CR1 &= (uint8)(~VDAC_ref_PGA_IDIR_MASK);                /* clear polarity bit */
+        VDAC_ref_PGA_CR1 |= (polarity & VDAC_ref_PGA_IDIR_MASK);             /* set new value */
+    
+        VDAC_ref_PGA_DacTrim();
+    }
+#endif/*(VDAC_ref_PGA_DEFAULT_POLARITY != VDAC_ref_PGA_HARDWARE_CONTROLLED)*/
 
 
 /*******************************************************************************
 * Function Name: VDAC_ref_PGA_SetRange
 ********************************************************************************
-*
 * Summary:
-*  Set one of three current ranges.
+*  Set current range
 *
 * Parameters:
-*  Range: Sets one of Three valid ranges.
+*  Range: Sets on of four valid ranges.
 *
 * Return:
-*  void 
+*  (void)
 *
 * Theory:
 *
@@ -227,8 +272,8 @@ void VDAC_ref_PGA_SetSpeed(uint8 speed)
 *******************************************************************************/
 void VDAC_ref_PGA_SetRange(uint8 range) 
 {
-    VDAC_ref_PGA_CR0 &= (uint8)(~VDAC_ref_PGA_RANGE_MASK);      /* Clear existing mode */
-    VDAC_ref_PGA_CR0 |= (range & VDAC_ref_PGA_RANGE_MASK);      /*  Set Range  */
+    VDAC_ref_PGA_CR0 &= (uint8)(~VDAC_ref_PGA_RANGE_MASK);       /* Clear existing mode */
+    VDAC_ref_PGA_CR0 |= ( range & VDAC_ref_PGA_RANGE_MASK );     /*  Set Range  */
     VDAC_ref_PGA_DacTrim();
 }
 
@@ -236,31 +281,30 @@ void VDAC_ref_PGA_SetRange(uint8 range)
 /*******************************************************************************
 * Function Name: VDAC_ref_PGA_SetValue
 ********************************************************************************
-*
 * Summary:
-*  Set 8-bit DAC value
+*  Set DAC value
 *
-* Parameters:  
-*  value:  Sets DAC value between 0 and 255.
+* Parameters:
+*  value: Sets DAC value between 0 and 255.
 *
-* Return: 
-*  void 
+* Return:
+*  (void)
 *
-* Theory: 
+* Theory:
 *
 * Side Effects:
 *
 *******************************************************************************/
 void VDAC_ref_PGA_SetValue(uint8 value) 
 {
+
     #if (CY_PSOC5A)
         uint8 VDAC_ref_PGA_intrStatus = CyEnterCriticalSection();
     #endif /* CY_PSOC5A */
 
-    VDAC_ref_PGA_Data = value;                /*  Set Value  */
-
-    /* PSOC5A requires a double write */
-    /* Exit Critical Section */
+    VDAC_ref_PGA_Data = value;         /*  Set Value  */
+    
+    /* PSOC5A silicons require a double write */
     #if (CY_PSOC5A)
         VDAC_ref_PGA_Data = value;
         CyExitCriticalSection(VDAC_ref_PGA_intrStatus);
@@ -271,17 +315,28 @@ void VDAC_ref_PGA_SetValue(uint8 value)
 /*******************************************************************************
 * Function Name: VDAC_ref_PGA_DacTrim
 ********************************************************************************
-*
 * Summary:
 *  Set the trim value for the given range.
 *
 * Parameters:
-*  range:  1V or 4V range.  See constants.
+*  None
 *
 * Return:
-*  void
+*  (void) 
 *
-* Theory: 
+* Theory:
+*  Trim values for the IDAC blocks are stored in the "Customer Table" area in 
+*  Row 1 of the Hidden Flash.  There are 8 bytes of trim data for each 
+*  IDAC block.
+*  The values are:
+*       I Gain offset, min range, Sourcing
+*       I Gain offset, min range, Sinking
+*       I Gain offset, med range, Sourcing
+*       I Gain offset, med range, Sinking
+*       I Gain offset, max range, Sourcing
+*       I Gain offset, max range, Sinking
+*       V Gain offset, 1V range
+*       V Gain offset, 4V range
 *
 * Side Effects:
 *
@@ -290,7 +345,13 @@ void VDAC_ref_PGA_DacTrim(void)
 {
     uint8 mode;
 
-    mode = (uint8)((VDAC_ref_PGA_CR0 & VDAC_ref_PGA_RANGE_MASK) >> 2) + VDAC_ref_PGA_TRIM_M7_1V_RNG_OFFSET;
+    mode = ((VDAC_ref_PGA_CR0 & VDAC_ref_PGA_RANGE_MASK) >> 1u);
+    
+    if((VDAC_ref_PGA_IDIR_MASK & VDAC_ref_PGA_CR1) == VDAC_ref_PGA_IDIR_SINK)
+    {
+        mode++;
+    }
+
     VDAC_ref_PGA_TR = CY_GET_XTND_REG8((uint8 *)(VDAC_ref_PGA_DAC_TRIM_BASE + mode));
 }
 

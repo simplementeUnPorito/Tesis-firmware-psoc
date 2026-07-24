@@ -12,9 +12,9 @@
 // ========================================
 `include "cypress.v"
 //`#end` -- edit above this line, do not edit this line
-// Generated on 07/15/2026 at 20:02
-// Component: button
-module button (
+// Generated on 07/22/2026 at 08:52
+// Component: Button
+module Button (
 	inout   Terminal_1,
 	inout   Terminal_2
 );

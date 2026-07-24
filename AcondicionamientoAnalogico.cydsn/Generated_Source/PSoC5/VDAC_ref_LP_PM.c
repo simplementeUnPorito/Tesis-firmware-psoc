@@ -1,10 +1,10 @@
 /*******************************************************************************
-* File Name: VDAC_ref_LP_PM.c  
-* Version 1.90
+* File Name: VDAC_ref_LP.c
+* Version 2.0
 *
 * Description:
 *  This file provides the power management source code to API for the
-*  VDAC8.  
+*  IDAC8.
 *
 * Note:
 *  None
@@ -15,6 +15,7 @@
 * disclaimers, and limitations in the end user license agreement accompanying 
 * the software package with which this file was provided.
 *******************************************************************************/
+
 
 #include "VDAC_ref_LP.h"
 
@@ -27,10 +28,10 @@ static VDAC_ref_LP_backupStruct VDAC_ref_LP_backup;
 * Summary:
 *  Save the current user configuration
 *
-* Parameters:  
-*  void  
+* Parameters:
+*  void
 *
-* Return: 
+* Return:
 *  void
 *
 *******************************************************************************/
@@ -50,10 +51,10 @@ void VDAC_ref_LP_SaveConfig(void)
 * Summary:
 *  Restores the current user configuration.
 *
-* Parameters:  
+* Parameters:
 *  void
 *
-* Return: 
+* Return:
 *  void
 *
 *******************************************************************************/
@@ -81,31 +82,30 @@ void VDAC_ref_LP_RestoreConfig(void)
 * Summary:
 *  Stop and Save the user configuration
 *
-* Parameters:  
-*  void:  
+* Parameters:
+*  void:
 *
-* Return: 
+* Return:
 *  void
 *
 * Global variables:
-*  VDAC_ref_LP_backup.enableState:  Is modified depending on the enable 
-*  state  of the block before entering sleep mode.
+*  VDAC_ref_LP_backup.enableState: Is modified depending on the enable 
+*  state of the block before entering sleep mode.
 *
 *******************************************************************************/
 void VDAC_ref_LP_Sleep(void) 
 {
-    /* Save VDAC8's enable state */    
     if(VDAC_ref_LP_ACT_PWR_EN == (VDAC_ref_LP_PWRMGR & VDAC_ref_LP_ACT_PWR_EN))
     {
-        /* VDAC8 is enabled */
+        /* IDAC8 is enabled */
         VDAC_ref_LP_backup.enableState = 1u;
     }
     else
     {
-        /* VDAC8 is disabled */
+        /* IDAC8 is disabled */
         VDAC_ref_LP_backup.enableState = 0u;
     }
-    
+
     VDAC_ref_LP_Stop();
     VDAC_ref_LP_SaveConfig();
 }
@@ -118,14 +118,14 @@ void VDAC_ref_LP_Sleep(void)
 * Summary:
 *  Restores and enables the user configuration
 *  
-* Parameters:  
+* Parameters:
 *  void
 *
-* Return: 
+* Return:
 *  void
 *
 * Global variables:
-*  VDAC_ref_LP_backup.enableState:  Is used to restore the enable state of 
+*  VDAC_ref_LP_backup.enableState: Is used to restore the enable state of 
 *  block on wakeup from sleep mode.
 *
 *******************************************************************************/
@@ -135,12 +135,12 @@ void VDAC_ref_LP_Wakeup(void)
     
     if(VDAC_ref_LP_backup.enableState == 1u)
     {
-        /* Enable VDAC8's operation */
+        /* Enable IDAC8's operation */
         VDAC_ref_LP_Enable();
-
-        /* Restore the data register */
+        
+        /* Set the data register */
         VDAC_ref_LP_SetValue(VDAC_ref_LP_Data);
-    } /* Do nothing if VDAC8 was disabled before */    
+    } /* Do nothing if IDAC8 was disabled before */    
 }
 
 
