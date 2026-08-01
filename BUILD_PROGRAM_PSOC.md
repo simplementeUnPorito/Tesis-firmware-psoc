@@ -250,10 +250,13 @@ Resultado validado (PSoC recién programado, calibración asentada):
 ## Wiring UART PSoC ↔ ESP esclavo
 
 ```
-PSoC Tx_1 = P1[5]  →  ESP GPIO16 (PSOC_UART_RX)
-PSoC Rx_1 = P1[2]  ←  ESP GPIO17 (PSOC_UART_TX)
-PSoC SYNC_IN       ←  ESP GPIO23 (SYNC_TO_PSOC_PIN)
+PSoC Tx = P12[7] / J1.9  →  ESP GPIO25 / J2.9  (PSOC_UART_RX)
+PSoC Rx = P2[0]  / J1.1  ←  ESP GPIO26 / J2.10 (PSOC_UART_TX)
+PSoC SYNC_IN = P1[5] / J1.22 ← ESP GPIO27 / J2.11
 GND común
 ```
 
-Baud: 115200. El arranque del PSoC es siempre por flanco en SYNC_IN, nunca por UART.
+Baud: 115200. `Tx` del PSoC está configurado como open-drain y en la carrier
+lleva un pull-up de 4.7 kΩ a los 3.3 V del ESP32; no elevar esa línea a 5 V.
+El arranque del PSoC es siempre por flanco en `SYNC_IN`, nunca por UART. La
+entrada de sincronismo externo del ESP32 quedó separada en GPIO32.

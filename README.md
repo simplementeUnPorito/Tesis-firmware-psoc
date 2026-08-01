@@ -9,6 +9,13 @@ Este repositorio contiene el firmware y los diseños PSoC 5LP del sistema de adq
 - `shared/`: código compartido.
 - `BUILD_PROGRAM_PSOC.md`: compilación y programación con PSoC Creator 4.4.
 - `program_psoc.ps1`: automatización de programación.
+- `TOPDESIGN_TO_KICAD.md`: pinout, valores recuperados y criterios para
+  transferir el TopDesign a una placa KiCad con CY8CKIT-059 y ESP32 DevKitC.
+- `extract_topdesign_strings.ps1`: extractor de referencias y valores del
+  archivo binario `TopDesign.cysch`, sin depender de la interfaz gráfica.
+- `verify_carrier_pinout.ps1`: comprueba que el pinout físico usado por la
+  carrier coincide con `cyfitter.h`, está bloqueado en el `.cydwr` y proviene
+  de una compilación exitosa.
 
 Los directorios de compilación (`CortexM3/` y `codegentemp/`) se regeneran con PSoC Creator y no se versionan.
 
