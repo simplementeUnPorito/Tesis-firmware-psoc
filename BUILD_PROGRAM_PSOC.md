@@ -2,6 +2,25 @@
 
 Flujo actual para `AcondicionamientoAnalogico.cydsn` en Windows con PSoC Creator 4.4.
 
+## Rama `cambios-hardware` (2026-08-03) — placa nueva
+
+Todo lo de esta sección vive en la rama `cambios-hardware`, no en `main`.
+Build verificado: **Flash 60400 B / SRAM 51928 B**, `Build Succeeded`.
+
+Cambios de TopDesign y lo que hubo que tocar en firmware:
+
+| Cambio de hardware | Impacto en firmware |
+|---|---|
+| Los cuatro `VDAC_ref_*` pasan de VDAC8 a **IDAC8** (mismo nombre de instancia, por eso compilan) | `psoc_hw.h/.c`: globales `g_psoc_idac_rset_ohm` (30 kΩ), `g_psoc_idac_vref_uv` (2.048 V), `g_psoc_idac_fullscale_na` (31.875 µA) + helpers código↔tensión. `V = Vref + I·R`, LSB = 125 nA → **3.75 mV**, rango 2.048–3.004 V |
+| **PGAout** agregado al pipeline GEO | comando `0xA8` (`PSOC_CMD_PGAOUT`), `psoc_hw_set_pgaout()`, y `psoc_hw_start_analog()` toma un tercer parámetro |
+| UART del PSoC queda **solo RX** | toda la salida sale por `psoc_link_put_array()` (I2C maestro) en vez de `UART_PutArray()` |
+| **I2C** nuevo: PSoC maestro, ESP esclavo en `0x42` | `psoc_link_*` en `psoc_hw.c`. La instancia del TopDesign se llama `I2C` (los `I2C_1.*` de `Generated_Source` son restos viejos; el `.cyprj` todavía los lista pero no se compilan) |
+| Los pines de `SPIp` quedaron repartidos en varios puertos | el fitter dejó de emitir los macros agregados (`SPIp__DR`, `SPIp__BYP`, `SPIp__PRTDSI__*`); el CS de la SD ahora usa los del pin 0 |
+| El pin **LED desapareció** del TopDesign | se quitó el `#include "LED.h"` de `main.c` para que los guards `CY_PINS_LED_H` hagan efecto; sin eso el link falla con `undefined reference to LED_Write` |
+
+Pendiente de placa: la SD sigue compilando pero su CS depende del ruteo nuevo
+de `SPIp`; hay que revalidarla cuando esté el hardware.
+
 ## Estado del build actual (2026-07-07, 4 configs de ADC)
 
 - Flash: **41982 bytes** -> filas a programar: **0..163**
@@ -247,7 +266,22 @@ Resultado validado (PSoC recién programado, calibración asentada):
 | 3 `CF_1V024` | ok=1 | FULL -> STOPPED | bOK++, bBad=0, fill=1/1 |
 | 4 `CF_0V625` | ok=1 | FULL -> STOPPED | bOK++, bBad=0, fill=1/1 |
 
-## Wiring UART PSoC ↔ ESP esclavo
+## Wiring PSoC ↔ ESP esclavo
+
+En `cambios-hardware` el enlace es **asimétrico**:
+
+```
+ESP → PSoC : UART   ESP GPIO26 (PSOC_UART_TX) → PSoC Rx = P2[0]
+PSoC → ESP : I2C    PSoC maestro (SCL/SDA) → ESP GPIO22/GPIO21, esclavo 0x42
+Sync       :        ESP GPIO27 (SYNC_TO_PSOC_PIN) → PSoC SYNC_IN = P1[5]
+GND común
+```
+
+`PSOC_I2C_ADDR` (esclavo, `platformio.ini`) tiene que coincidir con
+`PSOC_LINK_I2C_ADDR` (`psoc_hw.h`). No hay entrada de sync por cable desde el
+maestro: el arranque viaja por ESP-NOW y el esclavo genera el flanco.
+
+Wiring anterior (rama `main`, UART bidireccional):
 
 ```
 PSoC Tx = P12[7] / J1.9  →  ESP GPIO25 / J2.9  (PSOC_UART_RX)
