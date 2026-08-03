@@ -45,7 +45,10 @@
 #include "fatfs/ff.h"
 #include "calibration.h"
 #include "psoc_nv.h"
-#include "LED.h"
+/* LED.h a propósito NO se incluye directo: la placa nueva no tiene el pin LED
+ * en el TopDesign. project.h lo trae solo si el pin existe, y led_write() /
+ * led_toggle() ya están guardados por CY_PINS_LED_H. Incluirlo a mano hacía
+ * que el guard diera verdadero y el link fallara por LED_Write/LED_Read. */
 #include "DMA_DelSig_RAM_dma.h"
 #include "DMA_Filter_RAM_dma.h"
 #include "DMA_DelSig_Filter_dma.h"
@@ -252,6 +255,7 @@ static volatile uint8  g_capture_done     = 0u;
 
 static uint8  g_pga_code     = PSOC_PGA_DEFAULT_CODE;
 static uint8  g_pgavdac_code = PSOC_PGAVDAC_DEFAULT_CODE;
+static uint8  g_pgaout_code  = PSOC_PGAOUT_DEFAULT_CODE;
 
 static uint8  g_vdac_val     = LEGACY_VDAC_SHADOW_INIT;
 
@@ -450,7 +454,7 @@ static const uint8 g_ping_frame[4] = {
 
 static void uart_send_ping(void)
 {
-    UART_PutArray(g_ping_frame, (uint8)sizeof(g_ping_frame));
+    psoc_link_put_array(g_ping_frame, (uint8)sizeof(g_ping_frame));
 }
 
 static void uart_send_cfg_ack(uint8 cmd, uint8 val)
@@ -461,22 +465,15 @@ static void uart_send_cfg_ack(uint8 cmd, uint8 val)
     frame[2] = cmd;
     frame[3] = val;
     frame[4] = (uint8)(PSOC_CMD_CFG_ACK ^ cmd ^ val);
-    UART_PutArray(frame, (uint8)sizeof(frame));
+    psoc_link_put_array(frame, (uint8)sizeof(frame));
 }
 
+/* La UART ya no transmite (placa nueva: UART = solo RX). Vaciar la salida
+ * antes de una ventana crítica ahora significa esperar a que termine la
+ * transferencia I2C en curso hacia el ESP. */
 static void uart_wait_tx_complete_quiet(void)
 {
-    uint16 guard = 60000u;
-    while (guard-- != 0u) {
-#if (UART_TX_INTERRUPT_ENABLED && UART_TX_ENABLED)
-        if (UART_GetTxBufferSize() != 0u) {
-            continue;
-        }
-#endif
-        if ((UART_ReadTxStatus() & UART_TX_STS_COMPLETE) != 0u) {
-            break;
-        }
-    }
+    psoc_link_wait_idle();
 }
 
 static void uart_send_fs_report(void)
@@ -490,7 +487,7 @@ static void uart_send_fs_report(void)
     frame[2] = fs_lo;
     frame[3] = fs_hi;
     frame[4] = (uint8)(PSOC_CMD_FS_REPORT ^ fs_lo ^ fs_hi);
-    UART_PutArray(frame, (uint8)sizeof(frame));
+    psoc_link_put_array(frame, (uint8)sizeof(frame));
 }
 
 static void uart_send_diag(uint8 event, uint8 value)
@@ -504,7 +501,7 @@ static void uart_send_diag(uint8 event, uint8 value)
     frame[3] = value;
     frame[4] = state;
     frame[5] = (uint8)(PSOC_CMD_DIAG_EVT ^ event ^ value ^ state);
-    UART_PutArray(frame, (uint8)sizeof(frame));
+    psoc_link_put_array(frame, (uint8)sizeof(frame));
     psoc_debug_print_evt(event, value, state);
 #else
     (void)event;
@@ -2152,6 +2149,17 @@ static void PGAvdac_Set(uint8 code)
     }
 }
 
+/* Etapa de salida del pipeline GEO. A diferencia de PGAgain no invalida la
+ * calibración de referencias: los DAC calibran el camino de entrada, y PGAout
+ * está aguas abajo del sumador. */
+static void PGAout_Set(uint8 code)
+{
+    if (code <= 8u) {
+        g_pgaout_code = code;
+        psoc_hw_set_pgaout(code);
+    }
+}
+
 #define CAPTURE_FILTER_EXTRA_BATCHES \
     ((uint16)((FILTER_GROUP_DELAY + BATCH_SAMPLES - 1u) / BATCH_SAMPLES))
 
@@ -2429,7 +2437,7 @@ static void uart_send_capture_frame_ex(const volatile uint8 *src, uint16 seq,
     for (i = 0u; i < (FRAME_BYTES - 1u); i++) { crc ^= frame[i]; }
     frame[FRAME_BYTES - 1u] = crc;
 
-    UART_PutArray(frame, FRAME_BYTES);
+    psoc_link_put_array(frame, FRAME_BYTES);
 }
 
 static void uart_send_capture_frame(const volatile uint8 *src)
@@ -2473,7 +2481,8 @@ static void uart_service(void)
                 rx_watchdog_start();
                 switch (rx)
                 {
-                    case 0xA5u: case 0xA6u: case 0xA9u: case 0xAAu:
+                    case 0xA5u: case 0xA6u: case PSOC_CMD_PGAOUT:
+                    case 0xA9u: case 0xAAu:
                     case 0xB1u: case 0xB3u: case 0xB4u: case PSOC_CMD_CALIBRATE:
                     case PSOC_CMD_SAVE_EEPROM: case PSOC_CMD_SELECT_STREAM:
                     case PSOC_CMD_ADC_SNAPSHOT: case PSOC_CMD_ADC_CONFIG:
@@ -2539,7 +2548,7 @@ static void uart_service(void)
                             uart_send_diag(PSOC_EVT_CAL_BUSY, g_state);
                             uart_send_cfg_ack(PSOC_CMD_ADC_SNAPSHOT, 0u);
                             break;
-                        case 0xA6u: case 0xA9u: case 0xAAu:
+                        case 0xA6u: case PSOC_CMD_PGAOUT: case 0xA9u: case 0xAAu:
                         case 0xB1u: case 0xB3u: case 0xB4u:
                         case PSOC_CMD_ADC_CONFIG:
                         case PSOC_CMD_SET_DECIMATION:
@@ -2569,6 +2578,10 @@ static void uart_service(void)
                     case 0xA6u:
                         PGAgain_Set(rx_p1);
                         uart_send_cfg_ack(0xA6u, g_pga_code);
+                        led_toggle(); break;
+                    case PSOC_CMD_PGAOUT:
+                        PGAout_Set(rx_p1);
+                        uart_send_cfg_ack(PSOC_CMD_PGAOUT, g_pgaout_code);
                         led_toggle(); break;
                     case 0xA9u:
                         PGAvdac_Set(rx_p1);
@@ -3178,7 +3191,8 @@ int main(void)
     }
 #endif
 
-    UART_Start();
+    UART_Start();        /* solo RX: comandos del ESP                        */
+    psoc_link_start();   /* I2C maestro: toda la salida hacia el ESP          */
     psoc_debug_start();
     psoc_debug_print("\r\n[PC] boot\r\n");
     psoc_debug_print_u32("[PC] PSOC_HW_CLASS=", PSOC_HW_CLASS);
@@ -3200,7 +3214,7 @@ int main(void)
     EEPROM_Start();
     g_nv_ready = 1u;
 
-    psoc_hw_start_analog(g_pga_code, g_pgavdac_code);
+    psoc_hw_start_analog(g_pga_code, g_pgavdac_code, g_pgaout_code);
     /* Arranca todos los VDAC de calibracion en su adelanto/feedforward de
      * tabla. Si EEPROM tiene una calibracion valida, se pisa justo abajo con
      * esos valores guardados para ahorrar aun mas tiempo. */

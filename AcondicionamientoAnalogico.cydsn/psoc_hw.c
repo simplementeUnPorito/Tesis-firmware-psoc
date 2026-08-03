@@ -1,7 +1,48 @@
 #include "psoc_hw.h"
 #include "sd_spi.h"
 
-static uint8 g_psoc_hw_pga_code = PSOC_PGA_DEFAULT_CODE;
+static uint8 g_psoc_hw_pga_code    = PSOC_PGA_DEFAULT_CODE;
+static uint8 g_psoc_hw_pgaout_code = PSOC_PGAOUT_DEFAULT_CODE;
+
+/* Parámetros de la red IDAC->tensión de la placa. Globales (no macros) para
+ * poder ajustarlas si cambia la resistencia sin recompilar las tablas. */
+uint32 g_psoc_idac_rset_ohm      = PSOC_IDAC_RSET_OHM_DEFAULT;
+uint32 g_psoc_idac_vref_uv       = PSOC_IDAC_VREF_UV_DEFAULT;
+uint32 g_psoc_idac_fullscale_na  = PSOC_IDAC_FULLSCALE_NA_DEFAULT;
+
+uint32 psoc_idac_code_to_na(uint8 code)
+{
+    /* code * I_fs / 255 con redondeo al nA. Con I_fs=31875 nA el producto
+     * máximo es 8.1e6, sin riesgo de overflow en 32 bits. */
+    return (((uint32)code * g_psoc_idac_fullscale_na) + (PSOC_IDAC_CODE_MAX / 2u)) /
+           PSOC_IDAC_CODE_MAX;
+}
+
+uint32 psoc_idac_lsb_uv(void)
+{
+    /* (I_fs/255) [nA] * R [ohm] / 1000 -> µV. Con 125 nA y 30 kΩ da 3750 µV. */
+    return ((g_psoc_idac_fullscale_na / PSOC_IDAC_CODE_MAX) * g_psoc_idac_rset_ohm) / 1000u;
+}
+
+uint32 psoc_idac_code_to_uv(uint8 code)
+{
+    /* nA * ohm = nV; /1000 -> µV. El máximo (31875 nA * 30 kΩ) son 956 mV,
+     * que en nV son 9.6e8: entra justo en uint32. */
+    uint32 na = psoc_idac_code_to_na(code);
+    return g_psoc_idac_vref_uv + ((na * g_psoc_idac_rset_ohm) / 1000u);
+}
+
+uint8 psoc_idac_uv_to_code(uint32 uv)
+{
+    uint32 lsb = psoc_idac_lsb_uv();
+    uint32 code;
+
+    if (lsb == 0u || uv <= g_psoc_idac_vref_uv) {
+        return 0u;
+    }
+    code = ((uv - g_psoc_idac_vref_uv) + (lsb / 2u)) / lsb;
+    return (code > PSOC_IDAC_CODE_MAX) ? (uint8)PSOC_IDAC_CODE_MAX : (uint8)code;
+}
 
 static uint16 psoc_hw_pga_code_to_gain_x1000(uint8 code)
 {
@@ -39,6 +80,24 @@ uint16 psoc_hw_pga_gain_x1000(void)
     return psoc_hw_pga_code_to_gain_x1000(g_psoc_hw_pga_code);
 }
 
+void psoc_hw_set_pgaout(uint8 code)
+{
+    g_psoc_hw_pgaout_code = code;
+#if PSOC_HW_CLASS == PSOC_HW_GEO
+    PGAout_SetGain(code);
+#endif
+}
+
+uint8 psoc_hw_get_pgaout_code(void)
+{
+    return g_psoc_hw_pgaout_code;
+}
+
+uint16 psoc_hw_pgaout_gain_x1000(void)
+{
+    return psoc_hw_pga_code_to_gain_x1000(g_psoc_hw_pgaout_code);
+}
+
 void psoc_hw_set_pgavdac(uint8 code)
 {
 #if PSOC_HW_CLASS == PSOC_HW_GEO
@@ -56,11 +115,12 @@ void psoc_hw_set_pgavdac(uint8 code)
 #endif
 }
 
-void psoc_hw_start_analog(uint8 pga_code, uint8 pgavdac_code)
+void psoc_hw_start_analog(uint8 pga_code, uint8 pgavdac_code, uint8 pgaout_code)
 {
 #if PSOC_HW_CLASS == PSOC_HW_GEO
     OPAref_Start();
     PGAout_Start();
+    psoc_hw_set_pgaout(pgaout_code);
     PGAp_Start();
     PGAn_Start();
     PGAp_SetGain(PGAp_GAIN_02);
@@ -86,7 +146,94 @@ void psoc_hw_start_analog(uint8 pga_code, uint8 pgavdac_code)
     psoc_hw_set_pga(pga_code);
     Opa_LP_Start();
     (void)pgavdac_code;
+    (void)pgaout_code;
 #endif
+}
+
+/* ==========================================================================
+ * Enlace de salida PSoC -> ESP32 por I2C (I2C_1 en modo maestro)
+ * --------------------------------------------------------------------------
+ * Reemplaza al TX de la UART, que en la placa nueva ya no existe. Se escribe
+ * de a un frame completo hacia PSOC_LINK_I2C_ADDR; el ESP lo recibe en su
+ * callback onReceive() y lo mete en el mismo parser de frames de siempre.
+ *
+ * MasterWriteBuf() es asíncrono y se queda con el puntero, así que el frame
+ * se copia a un buffer estático antes de arrancar la transferencia. La espera
+ * está acotada por un guard: si el bus queda trabado el firmware pierde el
+ * frame pero no se cuelga.
+ * ========================================================================== */
+
+/* El TopDesign nombra la instancia `I2C`; si en algún rediseño vuelve a salir
+ * como `I2C_1` el enlace sigue compilando sin tocar este archivo. */
+#if defined(CY_I2C_I2C_H)
+    #define LINK_I2C(sym)            I2C_##sym
+#elif defined(CY_I2C_I2C_1_H)
+    #define LINK_I2C(sym)            I2C_1_##sym
+#else
+    #error "No hay componente I2C en el TopDesign: el enlace PSoC->ESP lo necesita."
+#endif
+
+static uint8 g_link_started = 0u;
+static uint8 g_link_last_ok = 1u;
+static uint8 g_link_buf[PSOC_LINK_MAX_FRAME];
+
+void psoc_link_start(void)
+{
+    if (!g_link_started) {
+        LINK_I2C(Start)();
+        (void)LINK_I2C(MasterClearStatus)();
+        g_link_started = 1u;
+    }
+}
+
+void psoc_link_wait_idle(void)
+{
+    /* A 400 kHz un frame de 95 bytes tarda ~2.4 ms. El guard cubre órdenes de
+     * magnitud más que eso sin bloquear el main loop de forma indefinida. */
+    uint32 guard = 400000u;
+    if (!g_link_started) {
+        return;
+    }
+    while (guard-- != 0u) {
+        if ((LINK_I2C(MasterStatus)() & LINK_I2C(MSTAT_XFER_INP)) == 0u) {
+            return;
+        }
+    }
+    g_link_last_ok = 0u;
+}
+
+void psoc_link_put_array(const uint8 *buf, uint16 len)
+{
+    uint16 i;
+    uint8  status;
+
+    if ((buf == 0) || (len == 0u)) {
+        return;
+    }
+    psoc_link_start();
+    if (len > (uint16)sizeof(g_link_buf)) {
+        len = (uint16)sizeof(g_link_buf);
+    }
+
+    psoc_link_wait_idle();
+    for (i = 0u; i < len; i++) {
+        g_link_buf[i] = buf[i];
+    }
+    (void)LINK_I2C(MasterClearStatus)();
+
+    if (LINK_I2C(MasterWriteBuf)(PSOC_LINK_I2C_ADDR, g_link_buf, (uint8)len,
+                                 LINK_I2C(MODE_COMPLETE_XFER)) != LINK_I2C(MSTR_NO_ERROR)) {
+        g_link_last_ok = 0u;
+        return;
+    }
+    psoc_link_wait_idle();
+    status = LINK_I2C(MasterStatus)();
+    g_link_last_ok = ((status & LINK_I2C(MSTAT_ERR_XFER)) == 0u) ? 1u : 0u;
+}
+
+uint8 psoc_link_last_ok(void)
+{
+    return g_link_last_ok;
 }
 
 /* ==========================================================================
@@ -114,36 +261,57 @@ static uint8  g_sd_scratch[SD_BLOCK_BYTES];
 /* CS (P2.3) quedó ruteado al `ss` de hardware del BSPIM, que deassertea entre
  * bytes. Se lo desengancha del DSI con el bypass del puerto (patrón calcado de
  * tx1_gpio_detach_dsi) para manejarlo por software durante toda la transacción. */
+/* En la placa nueva los cuatro pines de SPIp ya no caen en el mismo puerto,
+ * así que el fitter dejó de emitir los macros agregados (SPIp__DR, SPIp__BYP,
+ * SPIp__PRTDSI__*) y hay que ir por los del pin 0, que es CS. Se mantiene el
+ * camino viejo por si un rediseño vuelve a juntarlos en un puerto. */
+#if defined(SPIp__DR)
+    #define SD_CS_DR            SPIp__DR
+    #define SD_CS_BYP           SPIp__BYP
+    #define SD_CS_OUT_SEL0      SPIp__PRTDSI__OUT_SEL0
+    #define SD_CS_OUT_SEL1      SPIp__PRTDSI__OUT_SEL1
+    #define SD_CS_OE_SEL0       SPIp__PRTDSI__OE_SEL0
+    #define SD_CS_OE_SEL1       SPIp__PRTDSI__OE_SEL1
+#else
+    #define SD_CS_DR            SPIp__0__DR
+    #define SD_CS_BYP           SPIp__0__BYP
+    #define SD_CS_OUT_SEL0      SPIp__0__PRTDSI__OUT_SEL0
+    #define SD_CS_OUT_SEL1      SPIp__0__PRTDSI__OUT_SEL1
+    #define SD_CS_OE_SEL0       SPIp__0__PRTDSI__OE_SEL0
+    #define SD_CS_OE_SEL1       SPIp__0__PRTDSI__OE_SEL1
+#endif
+#define SD_CS_MASK              SPIp__CS__MASK
+
 static void sd_cs_detach_dsi(void)
 {
-    reg8 *outSel0 = (reg8 *)SPIp__PRTDSI__OUT_SEL0;
-    reg8 *outSel1 = (reg8 *)SPIp__PRTDSI__OUT_SEL1;
-    reg8 *oeSel0  = (reg8 *)SPIp__PRTDSI__OE_SEL0;
-    reg8 *oeSel1  = (reg8 *)SPIp__PRTDSI__OE_SEL1;
-    reg8 *byp     = (reg8 *)SPIp__BYP;
-    reg8 *dr      = (reg8 *)SPIp__DR;
+    reg8 *outSel0 = (reg8 *)SD_CS_OUT_SEL0;
+    reg8 *outSel1 = (reg8 *)SD_CS_OUT_SEL1;
+    reg8 *oeSel0  = (reg8 *)SD_CS_OE_SEL0;
+    reg8 *oeSel1  = (reg8 *)SD_CS_OE_SEL1;
+    reg8 *byp     = (reg8 *)SD_CS_BYP;
+    reg8 *dr      = (reg8 *)SD_CS_DR;
     uint8 saved   = CyEnterCriticalSection();
 
     /* DR alto ANTES del bypass para que el pin no glitchee a 0 al cambiar de
      * fuente (la SD interpreta CS bajo como selección). */
-    *dr      |= SPIp__CS__MASK;
-    *outSel0 &= (uint8)~SPIp__CS__MASK;
-    *outSel1 &= (uint8)~SPIp__CS__MASK;
-    *oeSel0  &= (uint8)~SPIp__CS__MASK;
-    *oeSel1  &= (uint8)~SPIp__CS__MASK;
-    *byp     |= SPIp__CS__MASK;
+    *dr      |= SD_CS_MASK;
+    *outSel0 &= (uint8)~SD_CS_MASK;
+    *outSel1 &= (uint8)~SD_CS_MASK;
+    *oeSel0  &= (uint8)~SD_CS_MASK;
+    *oeSel1  &= (uint8)~SD_CS_MASK;
+    *byp     |= SD_CS_MASK;
     CyExitCriticalSection(saved);
     CyPins_SetPinDriveMode(SPIp_CS, CY_PINS_DM_STRONG);
 }
 
 static void sd_cs_write(uint8 value)
 {
-    reg8 *dr = (reg8 *)SPIp__DR;
+    reg8 *dr = (reg8 *)SD_CS_DR;
     uint8 saved = CyEnterCriticalSection();
     if (value) {
-        *dr |= SPIp__CS__MASK;
+        *dr |= SD_CS_MASK;
     } else {
-        *dr &= (uint8)~SPIp__CS__MASK;
+        *dr &= (uint8)~SD_CS_MASK;
     }
     CyExitCriticalSection(saved);
 }

@@ -14,6 +14,14 @@
     #else
         #define PSOC_PGAVDAC_DEFAULT_CODE 0u
     #endif
+    /* PGAout: etapa de salida agregada al pipeline GEO en la placa nueva.
+     * Va después del sumador y antes del LPF de entrada al ADC, así que su
+     * ganancia se configura por separado de PGAgain. */
+    #if defined(PGAout_DEFAULT_GAIN)
+        #define PSOC_PGAOUT_DEFAULT_CODE PGAout_DEFAULT_GAIN
+    #else
+        #define PSOC_PGAOUT_DEFAULT_CODE 0u
+    #endif
 #elif defined(PGA_DEFAULT_GAIN)
     #define PSOC_HW_CLASS PSOC_HW_HAMMER
     #define PSOC_PGA_DEFAULT_CODE PGA_DEFAULT_GAIN
@@ -22,9 +30,47 @@
     #else
         #define PSOC_PGAVDAC_DEFAULT_CODE 0u
     #endif
+    /* HAMMER no tiene PGAout: el código igual existe para que el protocolo
+     * sea uno solo, pero psoc_hw_set_pgaout() no toca hardware. */
+    #define PSOC_PGAOUT_DEFAULT_CODE 0u
 #else
     #error "Hardware no reconocido: el TopDesign debe tener PGAgain (GEO) o PGA (HAMMER)."
 #endif
+
+/* ==========================================================================
+ * Referencias de calibración: IDAC8 + resistencia a Vref (placa nueva)
+ * --------------------------------------------------------------------------
+ * Los cuatro DAC de calibración (VDAC_ref_PGA / VDAC_ref_LP / VDAC_ref_BP /
+ * VDAC_Ref_Sum — nombres heredados, ver TopDesign) dejaron de ser VDAC8 y
+ * ahora son IDAC8. Se usan como DAC de tensión inyectando la corriente sobre
+ * una resistencia referida a Vref:
+ *
+ *     I(code) = code * (I_fondo_escala / 255)
+ *     V(code) = Vref + I(code) * R
+ *
+ * Con los valores actuales de placa (R = 30 kΩ, Vref = 2.048 V,
+ * I = 0 .. 31.875 µA) el LSB es 125 nA -> 3.75 mV y el rango útil va de
+ * 2.048 V a 3.004 V. Si cambia la resistencia o la referencia de la placa,
+ * alcanza con tocar las tres globales de abajo (o pisarlas en runtime):
+ * las tablas de calibración y los helpers derivan todo de ellas.
+ * ========================================================================== */
+#define PSOC_IDAC_RSET_OHM_DEFAULT      30000u      /* R de conversión I->V  */
+#define PSOC_IDAC_VREF_UV_DEFAULT       2048000u    /* 2.048 V en µV         */
+#define PSOC_IDAC_FULLSCALE_NA_DEFAULT  31875u      /* 31.875 µA en nA       */
+#define PSOC_IDAC_CODE_MAX              255u
+
+extern uint32 g_psoc_idac_rset_ohm;
+extern uint32 g_psoc_idac_vref_uv;
+extern uint32 g_psoc_idac_fullscale_na;
+
+/* Corriente inyectada por el IDAC para un código dado, en nA. */
+uint32 psoc_idac_code_to_na(uint8 code);
+/* Tensión que ve la etapa analógica para un código dado, en µV. */
+uint32 psoc_idac_code_to_uv(uint8 code);
+/* Código IDAC más cercano a una tensión pedida en µV (saturado al rango). */
+uint8  psoc_idac_uv_to_code(uint32 uv);
+/* Paso del DAC en µV (LSB). Útil para deadbands de la calibración. */
+uint32 psoc_idac_lsb_uv(void);
 
 #define PSOC_IDLE      0u
 #define PSOC_ARMED     1u
@@ -101,6 +147,7 @@
 
 #define PSOC_CMD_STATUS         0xA5u
 #define PSOC_CMD_PGA            0xA6u
+#define PSOC_CMD_PGAOUT         0xA8u  /* GEO: ganancia de la etapa PGAout (código 0-8) */
 #define PSOC_CMD_PGAVDAC        0xA9u
 #define PSOC_CMD_VDAC           0xAAu
 #define PSOC_CMD_SETN           0xA3u
@@ -127,11 +174,36 @@
 #define PSOC_CMD_SD_READ_BATCH  0xBFu  /* 2 params: índice uint16 LE. Éxito: frame normal con
                                           seq=índice; fallo: CFG_ACK(BF,0), sin datos falsos. */
 
-void psoc_hw_start_analog(uint8 pga_code, uint8 pgavdac_code);
+void psoc_hw_start_analog(uint8 pga_code, uint8 pgavdac_code, uint8 pgaout_code);
 void psoc_hw_set_pga(uint8 code);
 void psoc_hw_set_pgavdac(uint8 code);
+void psoc_hw_set_pgaout(uint8 code);
 uint8 psoc_hw_get_pga_code(void);
+uint8 psoc_hw_get_pgaout_code(void);
 uint16 psoc_hw_pga_gain_x1000(void);
+uint16 psoc_hw_pgaout_gain_x1000(void);
+
+/* ==========================================================================
+ * Enlace PSoC -> ESP32 (I2C maestro)
+ * --------------------------------------------------------------------------
+ * En la placa nueva la UART quedó SOLO como RX: el ESP manda comandos por
+ * UART y el PSoC contesta/streamea por I2C, donde el PSoC es maestro y el
+ * ESP esclavo. Se hizo así porque la UART a 115200 era el cuello de botella
+ * del stream de muestras.
+ *
+ * Toda la salida del firmware (pings, acks, diagnóstico y frames de captura)
+ * pasa por psoc_link_put_array(), que reemplaza al viejo UART_PutArray().
+ * ========================================================================== */
+#ifndef PSOC_LINK_I2C_ADDR
+#define PSOC_LINK_I2C_ADDR      0x42u   /* dirección del ESP32 como esclavo I2C */
+#endif
+/* Frame más largo del protocolo: 4 cabecera + 30*3 muestras + 1 CRC. */
+#define PSOC_LINK_MAX_FRAME     95u
+
+void  psoc_link_start(void);
+void  psoc_link_put_array(const uint8 *buf, uint16 len);
+void  psoc_link_wait_idle(void);
+uint8 psoc_link_last_ok(void);
 
 /* Compatibilidad para el servo legacy de calibracion. La calibracion activa
  * usa Timer_1 (modo CAL_TICK, nunca concurrente con los pings) y los helpers
