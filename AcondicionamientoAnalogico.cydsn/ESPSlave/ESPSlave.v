@@ -12,10 +12,11 @@
 // ========================================
 `include "cypress.v"
 //`#end` -- edit above this line, do not edit this line
-// Generated on 07/22/2026 at 08:58
+// Generated on 08/03/2026 at 13:45
 // Component: ESPSlave
 module ESPSlave (
-	inout   RX,
+	inout   SCL,
+	inout   SDA,
 	inout   Sync,
 	inout   TX
 );
