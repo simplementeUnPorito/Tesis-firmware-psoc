@@ -48,14 +48,32 @@
  *     I(code) = code * (I_fondo_escala / 255)
  *     V(code) = Vref + I(code) * R
  *
- * Con los valores actuales de placa (R = 30 kΩ, Vref = 2.048 V,
+ * Con los valores actuales de placa (R = 30 kΩ, Vref ≈ 2.062 V,
  * I = 0 .. 31.875 µA) el LSB es 125 nA -> 3.75 mV y el rango útil va de
- * 2.048 V a 3.004 V. Si cambia la resistencia o la referencia de la placa,
- * alcanza con tocar las tres globales de abajo (o pisarlas en runtime):
+ * Vref a Vref + 0.956 V. Si cambia la resistencia o la referencia de la placa,
+ * alcanza con tocar las constantes de abajo (o pisar las globales en runtime):
  * las tablas de calibración y los helpers derivan todo de ellas.
+ *
+ * Vref NO es un número fijo: lo genera un AMS1117-ADJ en la placa y se calcula
+ * a partir de su divisor, así que cambiar un resistor es cambiar un #define.
+ * Hoja de datos UMW AMS1117, Figura 2 (Typical Adjustable Output Voltage):
+ *
+ *     VOUT = VREF * (1 + R2/R1) + IADJ * R2
+ *
+ * con R1 entre VOUT y ADJ (R22 en la placa) y R2 entre ADJ y GND (R23).
+ * Ojo con la convención: es R2/R1, no R1/R2.
  * ========================================================================== */
+#define PSOC_AMS1117_R1_OHM             1000u       /* R22: VOUT -> ADJ      */
+#define PSOC_AMS1117_R2_OHM             620u        /* R23: ADJ  -> GND      */
+#define PSOC_AMS1117_VREF_UV            1250000u    /* 1.250 V typ           */
+#define PSOC_AMS1117_IADJ_NA            60000u      /* 60 µA typ             */
+
 #define PSOC_IDAC_RSET_OHM_DEFAULT      30000u      /* R de conversión I->V  */
-#define PSOC_IDAC_VREF_UV_DEFAULT       2048000u    /* 2.048 V en µV         */
+/* 1250000 + (1250000/1000)*620 + (60000*620)/1000 = 2062200 µV = 2.0622 V */
+#define PSOC_IDAC_VREF_UV_DEFAULT                                              \
+    (PSOC_AMS1117_VREF_UV                                                      \
+     + (PSOC_AMS1117_VREF_UV / PSOC_AMS1117_R1_OHM) * PSOC_AMS1117_R2_OHM      \
+     + (PSOC_AMS1117_IADJ_NA * PSOC_AMS1117_R2_OHM) / 1000u)
 #define PSOC_IDAC_FULLSCALE_NA_DEFAULT  31875u      /* 31.875 µA en nA       */
 #define PSOC_IDAC_CODE_MAX              255u
 
