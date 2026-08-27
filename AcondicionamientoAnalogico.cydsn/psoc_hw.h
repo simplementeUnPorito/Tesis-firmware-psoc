@@ -6,6 +6,13 @@
 #define PSOC_HW_GEO    0u
 #define PSOC_HW_HAMMER 1u
 
+/* TODO(metadata-hw-revision): definir una revisión de circuito y un número de
+ * placa estables, independientes de PSOC_HW_CLASS y de la versión de firmware.
+ * Reportarlos al ESP mediante el protocolo PSoC->ESP y hacer que el ESP los
+ * persista en los metadatos de cada captura junto con ganancia y calibración.
+ * Esto debe permitir distinguir prototipos universales, placa planchada/ácido
+ * y futuras PCB fabricadas, sin inferir la revisión analógica desde el código. */
+
 #if defined(PGAgain_DEFAULT_GAIN)
     #define PSOC_HW_CLASS PSOC_HW_GEO
     #define PSOC_PGA_DEFAULT_CODE PGAgain_DEFAULT_GAIN
