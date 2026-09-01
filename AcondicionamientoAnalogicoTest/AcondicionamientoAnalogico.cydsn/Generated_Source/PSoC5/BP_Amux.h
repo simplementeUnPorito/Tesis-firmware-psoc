@@ -1,0 +1,165 @@
+/*******************************************************************************
+* File Name: BP_Amux.h  
+* Version 2.20
+*
+* Description:
+*  This file contains Pin function prototypes and register defines
+*
+* Note:
+*
+********************************************************************************
+* Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+* You may use this file only in accordance with the license, terms, conditions, 
+* disclaimers, and limitations in the end user license agreement accompanying 
+* the software package with which this file was provided.
+*******************************************************************************/
+
+#if !defined(CY_PINS_BP_Amux_H) /* Pins BP_Amux_H */
+#define CY_PINS_BP_Amux_H
+
+#include "cytypes.h"
+#include "cyfitter.h"
+#include "cypins.h"
+#include "BP_Amux_aliases.h"
+
+/* APIs are not generated for P15[7:6] */
+#if !(CY_PSOC5A &&\
+	 BP_Amux__PORT == 15 && ((BP_Amux__MASK & 0xC0) != 0))
+
+
+/***************************************
+*        Function Prototypes             
+***************************************/    
+
+/**
+* \addtogroup group_general
+* @{
+*/
+void    BP_Amux_Write(uint8 value);
+void    BP_Amux_SetDriveMode(uint8 mode);
+uint8   BP_Amux_ReadDataReg(void);
+uint8   BP_Amux_Read(void);
+void    BP_Amux_SetInterruptMode(uint16 position, uint16 mode);
+uint8   BP_Amux_ClearInterrupt(void);
+/** @} general */
+
+/***************************************
+*           API Constants        
+***************************************/
+/**
+* \addtogroup group_constants
+* @{
+*/
+    /** \addtogroup driveMode Drive mode constants
+     * \brief Constants to be passed as "mode" parameter in the BP_Amux_SetDriveMode() function.
+     *  @{
+     */
+        #define BP_Amux_DM_ALG_HIZ         PIN_DM_ALG_HIZ
+        #define BP_Amux_DM_DIG_HIZ         PIN_DM_DIG_HIZ
+        #define BP_Amux_DM_RES_UP          PIN_DM_RES_UP
+        #define BP_Amux_DM_RES_DWN         PIN_DM_RES_DWN
+        #define BP_Amux_DM_OD_LO           PIN_DM_OD_LO
+        #define BP_Amux_DM_OD_HI           PIN_DM_OD_HI
+        #define BP_Amux_DM_STRONG          PIN_DM_STRONG
+        #define BP_Amux_DM_RES_UPDWN       PIN_DM_RES_UPDWN
+    /** @} driveMode */
+/** @} group_constants */
+    
+/* Digital Port Constants */
+#define BP_Amux_MASK               BP_Amux__MASK
+#define BP_Amux_SHIFT              BP_Amux__SHIFT
+#define BP_Amux_WIDTH              1u
+
+/* Interrupt constants */
+#if defined(BP_Amux__INTSTAT)
+/**
+* \addtogroup group_constants
+* @{
+*/
+    /** \addtogroup intrMode Interrupt constants
+     * \brief Constants to be passed as "mode" parameter in BP_Amux_SetInterruptMode() function.
+     *  @{
+     */
+        #define BP_Amux_INTR_NONE      (uint16)(0x0000u)
+        #define BP_Amux_INTR_RISING    (uint16)(0x0001u)
+        #define BP_Amux_INTR_FALLING   (uint16)(0x0002u)
+        #define BP_Amux_INTR_BOTH      (uint16)(0x0003u) 
+    /** @} intrMode */
+/** @} group_constants */
+
+    #define BP_Amux_INTR_MASK      (0x01u) 
+#endif /* (BP_Amux__INTSTAT) */
+
+
+/***************************************
+*             Registers        
+***************************************/
+
+/* Main Port Registers */
+/* Pin State */
+#define BP_Amux_PS                     (* (reg8 *) BP_Amux__PS)
+/* Data Register */
+#define BP_Amux_DR                     (* (reg8 *) BP_Amux__DR)
+/* Port Number */
+#define BP_Amux_PRT_NUM                (* (reg8 *) BP_Amux__PRT) 
+/* Connect to Analog Globals */                                                  
+#define BP_Amux_AG                     (* (reg8 *) BP_Amux__AG)                       
+/* Analog MUX bux enable */
+#define BP_Amux_AMUX                   (* (reg8 *) BP_Amux__AMUX) 
+/* Bidirectional Enable */                                                        
+#define BP_Amux_BIE                    (* (reg8 *) BP_Amux__BIE)
+/* Bit-mask for Aliased Register Access */
+#define BP_Amux_BIT_MASK               (* (reg8 *) BP_Amux__BIT_MASK)
+/* Bypass Enable */
+#define BP_Amux_BYP                    (* (reg8 *) BP_Amux__BYP)
+/* Port wide control signals */                                                   
+#define BP_Amux_CTL                    (* (reg8 *) BP_Amux__CTL)
+/* Drive Modes */
+#define BP_Amux_DM0                    (* (reg8 *) BP_Amux__DM0) 
+#define BP_Amux_DM1                    (* (reg8 *) BP_Amux__DM1)
+#define BP_Amux_DM2                    (* (reg8 *) BP_Amux__DM2) 
+/* Input Buffer Disable Override */
+#define BP_Amux_INP_DIS                (* (reg8 *) BP_Amux__INP_DIS)
+/* LCD Common or Segment Drive */
+#define BP_Amux_LCD_COM_SEG            (* (reg8 *) BP_Amux__LCD_COM_SEG)
+/* Enable Segment LCD */
+#define BP_Amux_LCD_EN                 (* (reg8 *) BP_Amux__LCD_EN)
+/* Slew Rate Control */
+#define BP_Amux_SLW                    (* (reg8 *) BP_Amux__SLW)
+
+/* DSI Port Registers */
+/* Global DSI Select Register */
+#define BP_Amux_PRTDSI__CAPS_SEL       (* (reg8 *) BP_Amux__PRTDSI__CAPS_SEL) 
+/* Double Sync Enable */
+#define BP_Amux_PRTDSI__DBL_SYNC_IN    (* (reg8 *) BP_Amux__PRTDSI__DBL_SYNC_IN) 
+/* Output Enable Select Drive Strength */
+#define BP_Amux_PRTDSI__OE_SEL0        (* (reg8 *) BP_Amux__PRTDSI__OE_SEL0) 
+#define BP_Amux_PRTDSI__OE_SEL1        (* (reg8 *) BP_Amux__PRTDSI__OE_SEL1) 
+/* Port Pin Output Select Registers */
+#define BP_Amux_PRTDSI__OUT_SEL0       (* (reg8 *) BP_Amux__PRTDSI__OUT_SEL0) 
+#define BP_Amux_PRTDSI__OUT_SEL1       (* (reg8 *) BP_Amux__PRTDSI__OUT_SEL1) 
+/* Sync Output Enable Registers */
+#define BP_Amux_PRTDSI__SYNC_OUT       (* (reg8 *) BP_Amux__PRTDSI__SYNC_OUT) 
+
+/* SIO registers */
+#if defined(BP_Amux__SIO_CFG)
+    #define BP_Amux_SIO_HYST_EN        (* (reg8 *) BP_Amux__SIO_HYST_EN)
+    #define BP_Amux_SIO_REG_HIFREQ     (* (reg8 *) BP_Amux__SIO_REG_HIFREQ)
+    #define BP_Amux_SIO_CFG            (* (reg8 *) BP_Amux__SIO_CFG)
+    #define BP_Amux_SIO_DIFF           (* (reg8 *) BP_Amux__SIO_DIFF)
+#endif /* (BP_Amux__SIO_CFG) */
+
+/* Interrupt Registers */
+#if defined(BP_Amux__INTSTAT)
+    #define BP_Amux_INTSTAT            (* (reg8 *) BP_Amux__INTSTAT)
+    #define BP_Amux_SNAP               (* (reg8 *) BP_Amux__SNAP)
+    
+	#define BP_Amux_0_INTTYPE_REG 		(* (reg8 *) BP_Amux__0__INTTYPE)
+#endif /* (BP_Amux__INTSTAT) */
+
+#endif /* CY_PSOC5A... */
+
+#endif /*  CY_PINS_BP_Amux_H */
+
+
+/* [] END OF FILE */
