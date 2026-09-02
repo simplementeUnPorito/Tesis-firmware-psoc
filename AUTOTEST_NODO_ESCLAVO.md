@@ -6,7 +6,7 @@ Este autotest valida que una placa recién armada del nodo esclavo esté bien ar
 
 No valida el sistema completo ni el protocolo desde una computadora personal (PC). No reemplaza los runners E1–E19 de `docs/plan_pruebas_precampo.md`; esos runners prueban el sistema y el protocolo desde la PC. Este autotest prueba la placa local.
 
-La fase automática corre al arrancar el firmware `slaveTest`. La fase interactiva se inicia por la consola serie y requiere que el operador pulse botones o golpee junto al geófono.
+Al arrancar, `slaveTest` espera comandos. `b` y `c` ejecutan solamente los grupos digitales; `run` conserva la corrida completa, incluida la parte analógica. La fase interactiva se inicia por la consola serie y requiere que el operador pulse botones o golpee junto al geófono.
 
 ### Siglas y convenciones
 
@@ -121,7 +121,7 @@ El mapeo efectivo no se duplica en `psoc_selftest.h`: sale de la tabla de calibr
 
 ```text
 PC
-│ USB, 115200 bit/s, COM12
+│ USB, 115200 bit/s, COM8
 ▼
 ESP32
 ├── GPIO26, UART TX ───────────────────────────────► PSoC UART RX, P15[0]
@@ -140,7 +140,7 @@ PSoC: botón de calibración en P2[2], incorporado en el CY8CKIT-059
 
 El pin `GPIO25`, antes usado como recepción UART del ESP32, queda sin conectar por diseño porque el PSoC nuevo no tiene transmisión UART. Toda la subida PSoC→ESP32 se hace por I2C.
 
-Hay una discrepancia dentro de las fuentes: `main_selftest.cpp`, que implementa y rotula los tests B2 y B3, usa `P15[0]` para UART RX y `P0[4]` para `SYNC_IN`; los comentarios generales de `platformio.ini` y `BUILD_PROGRAM_PSOC.md` todavía consignan `P2[0]` y `P1[5]`. El diagrama anterior sigue el pinout que declara el autotest implementado. Antes de usar las notas generales para cablear otra variante, hay que resolver esa diferencia contra el bloqueo de pines del proyecto.
+El pinout vigente está verificado en los dos `Generated_Source/PSoC5/cyfitter.h`: `Rx__PORT=15`, `Rx__SHIFT=0`, `SYNC_IN__PORT=0` y `SYNC_IN__SHIFT=4`. Es decir, UART RX está en `P15[0]` y SYNC en `P0[4]`. Las referencias antiguas a `P2[0]` y `P1[5]` pertenecían a una versión previa de la carrier.
 
 ## 4. Protocolo del autotest
 
@@ -256,12 +256,21 @@ Los criterios de esta sección son los que aplica `main_selftest.cpp`. La column
 
 | Código | Qué prueba | Criterio implementado | Qué falla física implica un `FAIL` |
 |---|---|---|---|
+| B0 | Niveles de reposo de SDA y SCL, medidos como GPIO antes de iniciar I2C. | Toma 50 lecturas por línea, separadas 1 ms, y considera alta una línea con al menos 45 lecturas altas. Las dos altas dan `PASS`; las dos bajas dan `FAIL`. Si sólo una queda baja, repite 30 lecturas con el *pull-up* interno: 27 o más altas indican que falta el *pull-up* externo; menos de 27 indican que la línea sigue retenida. Si la medición no se hizo, da `SKIP`. | Falta de uno o ambos *pull-ups* externos, falta de alimentación en el otro extremo, corto a masa o un dispositivo trabado reteniendo la línea. |
+| B0b | Actividad del reloj SCL al arranque. | Cuenta por interrupción, en ambos flancos, durante 3 s. Uno o más flancos dan `PASS`; cero da `FAIL`. | El PSoC no está transmitiendo: revisar si arrancó, si tiene el firmware de autotest y si su I2C está configurado como maestro. B0 separa este caso de una falla eléctrica del bus. |
+| B0c | Lecturas crudas de los *pull-ups* externos. | Siempre da `INFO`. Informa, para SDA y SCL, cuántas lecturas altas hubo con el pin flotante sobre 50 muestras, con *pull-up* interno sobre 30 y con *pull-down* interno sobre 30. | No produce `FAIL`; deja la evidencia eléctrica para diagnóstico. |
+| B0d | Llegada del *pull-up* externo de SCL hasta GPIO22. | Conecta el *pull-down* interno del ESP32, de unos 45 kΩ. Si SDA queda alta en al menos 27 de 30 lecturas y SCL en menos de 3, da `FAIL`; si SCL queda alta en al menos 27, da `PASS`. En los casos intermedios el código no emite este ítem. | La resistencia puede estar montada, pero GPIO22 no la ve: revisar continuidad desde el pin, soldadura, pista y llegada del otro extremo a 3V3. |
 | B1 | Subida por I2C desde el PSoC maestro al ESP32 esclavo `0x42`. | Observa 1,5 s. Si llegan bytes, da `PASS`, o `WARN` si hubo desbordamientos. Ante silencio total aplica el perfil del PSoC: AUSENTE da `SKIP`, AUTO da `WARN` y PRESENTE da `FAIL`. | Resistencias de polarización de `SDA`/`SCL`, cableado I2C, masa común o PSoC que no arrancó. |
 | B2 | Bajada UART ESP32→PSoC y retorno por I2C. | Envía `STATUS` y exige que aumente la cuenta de diagnósticos antes de 800 ms. | Cable o soldadura desde GPIO26 a UART RX del PSoC. La vuelta I2C también participa, aunque B1 ya verificó actividad de subida. |
+| B2a | Que el ESP32 realmente esté transmitiendo por su UART. | Cuenta flancos por interrupción en `PSOC_UART_TX` (GPIO26) mientras manda cinco comandos `STATUS`. `PASS` con al menos un flanco. | Sirve para **descartar el propio lado antes de acusar al cable**: si no hay flancos, la falla es la UART del ESP32; si hay flancos y B2 igual falla, la falla está entre GPIO26 y `Rx` = P15[0] del PSoC. En el bring-up de esta placa dio `PASS` con 131 flancos mientras B2 fallaba, lo que aisló la falla al cable. |
 | B3 | Línea de sincronismo. | Arma el contador, genera diez ciclos y acepta 20 flancos si la interrupción cuenta ambos, o 10 si cuenta uno. Falta de armado, lectura o cuenta distinta da `FAIL`. | Cable o soldadura entre GPIO27 y `SYNC_IN` del PSoC. |
 | B4 | Integridad de trama durante toda la corrida. | `PASS` si `bBad == 0` y `badLen == 0`. Si nunca llegó un byte, `SKIP`. `drop` es informativo y no participa. | Corrupción del enlace o de las tramas; el test no localiza una soldadura concreta. |
 
-Si B1 falla, B2 y B3 quedan en `SKIP`, y los grupos C y D no corren. B4 se ejecuta al cierre de la corrida automática, después de C y D.
+Si B1 falla, B2 y B3 quedan en `SKIP`, y los grupos C y D no corren. B4 se ejecuta al cierre de la corrida solicitada, después de C y D.
+
+La medición eléctrica de B0, B0b, B0c y B0d tiene que ejecutarse en `setup()` **antes** de `psoc.begin()` y, por lo tanto, antes de `Wire.begin()`. Una vez que `TwoWire` arrancó como esclavo, otra llamada a `begin()` retorna temprano con `Bus already started in Slave Mode` y no reasigna los pines al periférico. Medir el bus como GPIO después de iniciarlo le roba los pines a I2C, rompe el enlace y hace que el propio test se sabotee.
+
+La frecuencia del esclavo I2C del ESP32 tampoco puede quedar en cero. El *core* reemplaza cero por 100 kHz y configura el filtro de *glitch* y los umbrales de FIFO para esa velocidad. El maestro PSoC trabaja a 1 MHz: su `I2C.h` define `I2C_DATA_RATE` como `1000` kbit/s. `PSOC_I2C_FREQ_HZ` queda por eso en `1000000UL`; maestro y esclavo tienen que coincidir o el ESP32 puede medir flancos en SCL sin que `onReceive` reciba un solo byte.
 
 ### Grupo C — infraestructura del PSoC
 
@@ -289,7 +298,7 @@ C5 no usa la rampa de depuración. En `superMaquina`, la rampa (`CE_CFG_SRC_DEBU
 | D4 | Cociente de ganancia `PGAout` entre 1× y 4×, solamente en GEO. | Si se puede medir, exige un cociente dentro de 4,0 ±25 %, es decir, entre 3,0 y 5,0. Sin pendiente medible a 1× da `FAIL`. Saturación da `SKIP`; HAMMER da `SKIP`. | Camino o selección de ganancia de `PGAout` sin respuesta o con cociente incorrecto. |
 | D6.0…D6.3 | Piso de ruido de cada tap y componente de 50 Hz. | `FAIL` con RMS menor que 2 uV, mayor que 200 000 uV o sin medición. Más de 100 000 uV a 50 Hz da `WARN`. En los demás casos da `PASS`. | RMS menor que 2 uV sugiere ADC congelado; mayor que 200 000 uV, etapa oscilando. Captación alta de red sólo produce advertencia. |
 | D6b | Carga que el geófono impone a la entrada. | Siempre `INFO`. Informa el valor eficaz (RMS) y la componente de 50 Hz del tap `ch0`. | No produce `FAIL`. El geófono no se puede detectar con un test digital, pero sí se puede medir su efecto: la bobina son unos 375 Ω en paralelo con la red de polarización de 50 kΩ, así que cargar la entrada baja de forma marcada el ruido de `ch0`; con la entrada abierta ese mismo tap levanta mucho más ruido y más captación de red. No se fija un umbral inventado: corriendo el autotest una vez con el geófono y otra sin él, la diferencia queda a la vista y ese sí es un discriminador confiable para esta placa. |
-| D8 | Autocalibración y margen de los IDAC. | Debe terminar antes de 180 s. Cada etapa debe responder con `ST_OK` y código IDAC final entre 1 y 254. | Código 0 o 255 indica que no se pudo anular el desplazamiento de esa etapa y que hay una falla en ella. |
+| D8 | Autocalibración y margen de los IDAC. | Está desactivado con `ST_D8_HABILITADO = 0` y da `SKIP`. La máquina de calibración viene de las referencias VDAC8; su modelo de planta, objetivos y ganancias PI todavía no están portados a IDAC8, por lo que hoy su veredicto no sería válido. | No produce `FAIL` mientras esté desactivado. Cuando se complete el port, se reactiva cambiando esa única definición a `1`. |
 | D5 | Coherencia entre las cuatro configuraciones del ADC. | Tras inyectar una excursión, exige cuatro medidas, amplitud de al menos 20 000 uV y dispersión no mayor que 8 %. Si no puede inyectar, si supera ±0,45 V o si la excursión es insuficiente, da `SKIP`. Menos de cuatro medidas o dispersión mayor que 8 % da `FAIL`. | Incoherencia del ADC o de sus rangos; el ítem no localiza un componente físico único. |
 
 El orden real es:
@@ -298,7 +307,7 @@ El orden real es:
 D1 → D2 → D3 → D4 → D6 → D8 → D5
 ```
 
-D8 va después de D1–D6 porque esos tests necesitan observar la placa sin calibrar. D5 va después de D8 porque necesita un punto conocido y acotado. La calibración deja el último tap cerca de cero; D5 desplaza el IDAC de la última etapa en 40 códigos, restaura el código calibrado al terminar y mantiene la prueba por debajo de ±0,45 V para no recortar la configuración 2, cuyo rango es ±0,512 V.
+D8 conserva su lugar después de D1–D6, pero con `ST_D8_HABILITADO = 0` sólo informa `SKIP`. D5 corre igual y se autolimita si el tap no entra en el rango útil. Cuando se porte la calibración a IDAC8 y se habilite D8, la calibración volverá a dejar el último tap cerca de cero antes de D5; D5 desplaza el IDAC de la última etapa en 40 códigos, restaura el código anterior al terminar y mantiene la prueba por debajo de ±0,45 V para no recortar la configuración 2, cuyo rango es ±0,512 V.
 
 ### Fase interactiva E
 
@@ -340,106 +349,48 @@ El archivo generado está en:
 AcondicionamientoAnalogicoTest\AcondicionamientoAnalogico.cydsn\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.hex
 ```
 
-Para este firmware de autotest:
-
-```text
-Flash usada = 66680 bytes
-lastRow     = ceil(66680 / 256) - 1 = 260
-filas       = 0..260
-```
-
-Antes de grabar, ejecutar `GetPorts` mediante un archivo de comandos con `quit`; `ppcli.exe GetPorts` directo puede quedar esperando en modo interactivo. El nombre de KitProg puede cambiar, así que no hay que reutilizarlo sin consultar:
+Para compilar y grabar de forma reproducible se usa el script del repositorio:
 
 ```powershell
-$script = Join-Path $env:TEMP 'psoc_getports.cli'
-@('GetPorts', 'quit') | Set-Content -LiteralPath $script -Encoding ASCII
-Push-Location 'C:\Program Files (x86)\Cypress\Programmer'
-try {
-  & .\ppcli.exe "--runfile $($script -replace '\\','/')"
-} finally {
-  Pop-Location
-}
+Set-Location 'C:\Github\Tesis\src\firmware\psoc'
+.\program_psoc.ps1 -SelfTest
 ```
 
-Para grabar, reemplazar `$port` por el nombre exacto que devolvió `GetPorts`:
+El script detecta los dos formatos conocidos del KitProg (`KitProg/1D1...` y
+`KitProg (CMSIS-DAP/...)`), valida la identidad del proyecto y la frecuencia de
+las cuatro configuraciones ADC, y programa **las cuatro matrices de 256 filas**
+con ECC. No hay que optimizar la grabación hasta la última fila ocupada por
+código: en PSoC 5LP el ruteo y la configuración UDB viven en el espacio ECC de
+las filas aparentemente vacías. Grabar sólo `0..260` deja el firmware sin parte
+de su configuración digital y puede impedir el arranque.
 
-```powershell
-$timestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
-$log = Join-Path $env:TEMP "psoc_program_selftest_$timestamp.log"
-$hex = (Resolve-Path 'C:\Github\Tesis\src\firmware\psoc\AcondicionamientoAnalogicoTest\AcondicionamientoAnalogico.cydsn\CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.hex').Path.Replace('\', '/')
-$port = 'KitProg (CMSIS-DAP/236111)'
-$programmer = 'C:/Program Files (x86)/Cypress/Programmer/'
-$lastRow = 260
-
-$cmds = New-Object System.Collections.Generic.List[string]
-$cmds.Add(('OpenPort "{0}" "{1}"' -f $port, $programmer))
-$cmds.Add('SetAcquireMode Reset')
-$cmds.Add('SetProtocol 8')
-$cmds.Add('SetProtocolConnector 1')
-$cmds.Add('SetProtocolClock 152')
-$cmds.Add(('HEX_ReadFile "{0}"' -f $hex))
-$cmds.Add('DAP_Acquire')
-$cmds.Add('PSoC3_GetJtagID')
-$cmds.Add('PSoC3_EraseAll')
-0..$lastRow | ForEach-Object {
-  $cmds.Add(('PSoC3_ProgramRowFromHex 0x00 {0} 0x01' -f $_))
-  $cmds.Add(('PSoC3_VerifyRowFromHex 0x00 {0} 0x01' -f $_))
-}
-$cmds.Add('PSoC3_ProtectAll')
-$cmds.Add('PSoC3_VerifyProtect')
-$cmds.Add('DAP_ReleaseChip')
-$cmds.Add('ClosePort')
-$cmds.Add('quit')
-
-$script = Join-Path $env:TEMP "psoc_program_selftest_$timestamp.cli"
-$cmds | Set-Content -LiteralPath $script -Encoding ASCII
-Push-Location 'C:\Program Files (x86)\Cypress\Programmer'
-try {
-  & .\ppcli.exe "--runfile $($script -replace '\\','/')" |
-    Tee-Object -FilePath $log
-} finally {
-  Pop-Location
-}
-```
-
-Una grabación correcta devuelve `0 OK` para cada fila y termina con `0 OK` en `PSoC3_ProtectAll`, `PSoC3_VerifyProtect`, `DAP_ReleaseChip` y `ClosePort`.
+Si ya existe un build vigente puede usarse `-SkipBuild`. Una grabación correcta
+verifica `4×256` filas y termina con éxito en `PSoC3_ProtectAll`,
+`PSoC3_VerifyProtect`, `DAP_ReleaseChip` y `ClosePort`.
 
 ### ESP32
+
+> **Puertos de esta placa (verificado 2026-09-01):** `COM8` es el CP210x del ESP32 y es el que se usa para grabar y monitorear. `COM3` es el `KitProg USB-UART`, que pertenece al PSoC. Para **grabar** el PSoC no se usa un COM sino el DAP del KitProg por `ppcli` (`GetPorts` lo lista como `KitProg (CMSIS-DAP/...)`).
 
 Desde la carpeta del esclavo:
 
 ```powershell
 Set-Location 'C:\Github\Tesis\src\firmware\esp32\Nodo comunicación\slave'
 pio run -e slaveTest -t upload
-pio device monitor -p COM12 -b 115200
+pio device monitor -p COM8 -b 115200
 ```
 
-El entorno `slaveTest` usa `COM12`, excluye `main.cpp`, incluye `main_selftest.cpp`, define `SLAVE_SELFTEST=1`, conserva `NODE_ID=2` y desactiva la autocalibración al arranque porque D8 debe ejecutarla en su lugar.
+El entorno `slaveTest` usa `COM8`, excluye `main.cpp`, incluye `main_selftest.cpp`, define `SLAVE_SELFTEST=1`, conserva `NODE_ID=2` y desactiva la autocalibración al arranque para que D1–D6 observen la placa sin calibrar. D8 también queda desactivado hasta que su máquina se porte de VDAC8 a IDAC8.
 
-Regrabar el ESP32 cuelga al PSoC. Después de cada `upload` hay que ejecutar `ToggleReset` sobre el PSoC mediante KitProg. Reemplazar el nombre de puerto por el que devolvió `GetPorts`:
+Regrabar el ESP32 puede dejar detenido al PSoC. Después de cada `upload` se usa el script que detecta el KitProg y ejecuta `ToggleReset`:
 
 ```powershell
-$script = Join-Path $env:TEMP 'psoc_reset.cli'
-@(
-  'OpenPort "KitProg (CMSIS-DAP/236111)" "C:\Program Files (x86)\Cypress\Programmer\"',
-  'SetProtocol 8',
-  'SetProtocolClock 152',
-  'SetProtocolConnector 1',
-  'ToggleReset 0 100',
-  'ClosePort',
-  'quit'
-) | Set-Content -LiteralPath $script -Encoding ASCII
-Push-Location 'C:\Program Files (x86)\Cypress\Programmer'
-try {
-  & .\ppcli.exe "--runfile $($script -replace '\\','/')"
-} finally {
-  Pop-Location
-}
+& 'C:\Github\Tesis\src\firmware\psoc\reset_psoc.ps1'
 ```
 
 ## 8. Lectura de la salida
 
-La salida USB del ESP32 usa 115200 bit/s. Al arrancar, espera al PSoC, prueba el enlace y ejecuta la corrida automática. El resultado aparece de tres maneras:
+La salida USB del ESP32 usa 115200 bit/s. Al arrancar, espera al PSoC y luego queda listo para recibir `b`, `c`, `botones`, `boton` o `run`. Cada corrida aparece de tres maneras:
 
 - checklist por USB, con código, nombre, veredicto y detalle medido;
 - una línea prefijada con `#JSON` para consumo automático;
@@ -451,7 +402,7 @@ Ejemplo del contenido del checklist, usando los textos y campos definidos en `ma
 [A1] Arranque ESP32                         PASS  POWERON, heap <valor> KB, flash <valor> MB
 [B3] Linea SYNC GPIO27 -> P0[4]             PASS  20 flancos en 10 ciclos (ambos flancos)
 [D4] Ganancia PGAout 1x vs 4x               PASS  cociente 4.00 (nominal 4.00, tol 25%)
-[D8] Auto-calibracion                        PASS  IDAC <códigos por etapa>, 0 etapa(s) al riel, 0 fallada(s), <tiempo> s
+[D8] Auto-calibracion                        SKIP  desactivada: la maquina de calibracion todavia no esta portada de VDAC8 a IDAC8, su veredicto no seria valido
 ```
 
 Los valores entre `<...>` dependen de la placa y de la corrida. El runner reconoce los ítems por el código entre corchetes y parsea la línea `#JSON` como un objeto JSON. También cruza sus conteos y su lista de fallas con el checklist. La forma esperada es:
@@ -466,12 +417,17 @@ Comandos disponibles por la consola USB:
 |---|---|
 | `run` o `test` | Repite toda la fase automática. |
 | `a`, `b`, `c`, `d` | Ejecuta solamente ese grupo. |
+| `botones` | Prueba los cuatro botones del ESP32, de a uno. `btn` es alias. |
+| `boton` | Prueba el botón del PSoC. `botonpsoc` es alias. |
 | `tap` o `golpe` | Ejecuta solamente D7. |
 | `e` o `inter` | Ejecuta botones y golpe al geófono. |
 | `probe` | Informa el estado del enlace con el PSoC. |
 | `hw` | Muestra el perfil de hardware presente. |
 | `hw <parte> <0|1|2>` | Cambia una parte del perfil y la guarda en NVS. |
 | `oled si` o `oled no` | Registra la confirmación visual del OLED. |
+| `diag on` o `diag off` | Enciende o apaga el eco por USB de los eventos de diagnóstico que manda el PSoC. |
+| `pin N` | Genera durante 20 s una cuadrada de 1 Hz en el GPIO `N`, entre 0 y 39, para ubicarlo con el tester. Al terminar hay que reiniciar el ESP32 para devolverle al pin su función normal. |
+| `sync` | Genera durante 20 s una cuadrada de 1 Hz en GPIO27 para medir continuidad hasta `P0[4]` del PSoC. |
 | `help` o `?` | Lista los comandos. |
 
 ## 9. Diagnóstico
@@ -506,7 +462,7 @@ DIAGNOSTICO — donde mirar:
 | D5 | Referencia del ADC o el escalado de rangos. |
 | D6 | Ruido: RMS casi nulo es ADC congelado; RMS enorme es una etapa oscilando. Mucho 50 Hz es masa o apantallamiento. |
 | D7 | Geofono: bornera, continuidad de la bobina y polaridad del par. |
-| D8 | Calibracion: un IDAC contra el riel significa que el offset de esa etapa no se puede anular. Mirar la resistencia de 30 k de esa referencia y su etapa. |
+| D8 | Esta pista queda inactiva mientras `ST_D8_HABILITADO = 0`. Cuando se porte y reactive la calibracion, un IDAC contra el riel indicará que el offset de esa etapa no se puede anular; habrá que revisar la resistencia de 30 k de esa referencia y su etapa. |
 | E1 | Pulsadores del ESP y sus pull-ups. |
 | E2 | Pulsador del PSoC. |
 
@@ -520,12 +476,12 @@ Opciones:
 
 | Opción | Acción |
 |---|---|
-| `--self-test` | Ejecuta 23 comprobaciones offline del parser y del *gate*. No importa `pyserial`, no abre un puerto COM y no requiere `--output`. |
+| `--self-test` | Ejecuta 28 comprobaciones offline del parser y del *gate*. No importa `pyserial`, no abre un puerto COM y no requiere `--output`. |
 | `--from-file <captura>` | Evalúa una captura existente en vez de abrir el puerto serie. |
-| `--port <COM>` | Selecciona el puerto USB del esclavo; el valor predeterminado es `COM12`. |
+| `--port <COM>` | Selecciona el puerto USB del esclavo; el valor predeterminado es `COM8`. |
 | `--output <archivo.json>` | Escribe la evidencia JSON. Es obligatorio salvo con `--self-test`. |
 | `--timeout <segundos>` | Fija el tiempo máximo de recolección. El valor predeterminado es 900 s. |
-| `--no-trigger` | No manda `run`; se engancha a la corrida automática iniciada durante el arranque. |
+| `--no-trigger` | No manda `run`; escucha una corrida iniciada manualmente desde otra consola. |
 
 Códigos de salida:
 
@@ -545,14 +501,56 @@ Todas las esperas del autotest están acotadas con `millis()`. Los topes que pro
 |---|---:|
 | El PSoC llega a `ARMED` antes de una captura. | 2 s |
 | Respuesta al comando `STATUS`. | 800 ms |
-| Autocalibración D8. | 180 s |
+| Autocalibración D8, solamente si `ST_D8_HABILITADO` vuelve a `1`. | 180 s |
 | Cada pulsación de la fase interactiva. | 10 s |
 | Soltar cada botón del ESP32 después de pulsarlo. | 3 s |
 | Escaneo WiFi asíncrono. | 6 s |
 
 Si un botón sigue en bajo después de 3 s, el firmware lo reporta como pin pegado en vez de esperar indefinidamente. El escaneo WiFi usa la modalidad asíncrona y, si no termina dentro de 6 s, se cancela y la corrida continúa.
 
-También imprime una línea al entrar en cada grupo. Durante D2 informa qué etapa está barriendo y, al comenzar D8, avisa que está calibrando y recuerda el tope de 180 s. D2 y D8 son los tramos largos, por lo que esas líneas permiten distinguir trabajo en curso de un cuelgue.
+También imprime una línea al entrar en cada grupo. Durante D2 informa qué etapa está barriendo. Si D8 vuelve a habilitarse, al comenzar avisa que está calibrando y recuerda el tope de 180 s. Con la configuración actual D8 da `SKIP` de inmediato.
+
+## Watchdog de ARMED
+
+**Pedido por Elías el 2026-09-01, tras diagnosticarlo en la placa.**
+
+Cuando el PSoC entra en `PSOC_ARMED` queda **mudo a propósito**: su
+`service_runtime()` corta UART, I2C, LED y pings para no meter ruido en la
+ventana crítica. Si el flanco de arranque no llega, un watchdog de 60 s ahora
+detiene ADC y motor de captura, limpia el estado, vuelve a `PSOC_IDLE`, reactiva
+el enlace y emite `PSOC_EVT_ARMED_TIMEOUT` (`0x4B`). La protección está en el
+firmware normal y en el de autotest.
+
+Eso fue exactamente lo que pasó en el bring-up de esta placa. La línea de SYNC
+tenía un falso contacto, el PSoC quedó armado, y a partir de ahí **doce ítems
+del autotest fallaron en cascada** (C5, C6, C7, D1, D2, D8...) sin tener nada
+que ver entre sí ni con la falla real. El diagnóstico correcto estaba en un solo
+ítem, B3, y quedaba enterrado bajo once fallos falsos.
+
+El autotest además lo evita por el otro lado: **no arma el PSoC si B3
+no pasó** (`stCapture()` devuelve false de entrada si `g_syncOk` es falso), y
+C4/C5 dan `SKIP` diciendo por qué. Esa barrera evita la cascada durante el test;
+el watchdog cubre también cualquier captura normal que pierda el flanco.
+
+## Bring-up de la primera placa (2026-09-01)
+
+El autotest encontró, en este orden, tres contactos marginales distintos del mismo tipo:
+
+1. El *pull-up* de SCL estaba montado, pero no llegaba al pin GPIO22 del ESP32.
+2. La línea de SYNC no tenía continuidad confiable entre GPIO27 y `P0[4]` del PSoC.
+3. La bajada UART no tenía continuidad confiable entre GPIO26 y `Rx P15[0]` del PSoC.
+
+La falla de SCL se aisló sin inferir a partir del tráfico. B0 midió primero el nivel de reposo de SDA y SCL como GPIO. B0d conectó el *pull-down* interno del ESP32, de unos 45 kΩ, contra el *pull-up* externo de 10 kΩ: con la resistencia realmente visible desde el pin, el divisor queda alrededor de 2,7 V y se lee alto; sin continuidad hasta la resistencia, el *pull-down* se impone y se lee bajo. B0b contó por interrupción los flancos de SCL durante 3 s para separar un PSoC que sí estaba transmitiendo de uno que no había arrancado o no tenía el I2C como maestro.
+
+Después de corregir los tres contactos quedó validado lo digital que faltaba cerrar en la placa real:
+
+- la tarjeta SD con el ruteo nuevo de SPIp, que era el ítem explícitamente pendiente de validación;
+- el botón del PSoC;
+- los cuatro botones del ESP32;
+- I2C, UART, SYNC y la captura digital extremo a extremo.
+
+La cadena analógica, su calibración, ganancias y ruido quedaron expresamente
+fuera de alcance para la sesión siguiente.
 
 ## 12. Limitaciones conocidas
 

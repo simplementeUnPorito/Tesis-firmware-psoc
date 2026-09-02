@@ -2,9 +2,47 @@
 
 Flujo actual para `AcondicionamientoAnalogico.cydsn` en Windows con PSoC Creator 4.4.
 
-## Rama `cambios-hardware` (2026-08-03) — placa nueva
+## Flujo vigente (verificado 2026-09-01)
 
-Todo lo de esta sección vive en la rama `cambios-hardware`, no en `main`.
+Usar los scripts del repositorio; las recetas manuales más abajo quedan como
+historial de diagnóstico:
+
+```powershell
+Set-Location 'C:\Github\Tesis\src\firmware\psoc'
+
+# Firmware normal de campo
+.\program_psoc.ps1
+
+# Firmware de autotest de placa
+.\program_psoc.ps1 -SelfTest
+
+# Reset después de volver a grabar el ESP32
+.\reset_psoc.ps1
+```
+
+`program_psoc.ps1` compila, valida que sea el proyecto GEO+SPI, comprueba las
+cuatro frecuencias ADC, detecta el KitProg y programa las **4 matrices × 256
+filas con ECC**. Esto es obligatorio aunque el código use menos flash: la
+configuración digital y el ruteo UDB del PSoC 5LP están en el espacio ECC. El
+intento de programar solamente `0..lastRow` fue reproducido el 2026-09-01 y dejó
+el PSoC sin arranque digital correcto.
+
+El pinout efectivo se toma de `Generated_Source/PSoC5/cyfitter.h`, idéntico en
+los proyectos normal y de autotest:
+
+```text
+ESP GPIO26 -> PSoC Rx P15[0]
+ESP GPIO27 -> PSoC SYNC_IN P0[4]
+PSoC I2C maestro -> ESP SDA GPIO21 / SCL GPIO22, dirección 0x42
+```
+
+> No copiar el ejemplo histórico que calcula `lastRow`: se conserva sólo para
+> entender builds antiguos y no es un procedimiento válido de programación.
+
+## Migración `cambios-hardware` (2026-08-03) — placa nueva
+
+Esta migración se desarrolló en `cambios-hardware` y se integró a `main` tras
+la puesta en marcha digital del 2026-09-01.
 Build verificado: **Flash 60400 B / SRAM 51928 B**, `Build Succeeded`.
 
 Cambios de TopDesign y lo que hubo que tocar en firmware:
@@ -18,8 +56,9 @@ Cambios de TopDesign y lo que hubo que tocar en firmware:
 | Los pines de `SPIp` quedaron repartidos en varios puertos | el fitter dejó de emitir los macros agregados (`SPIp__DR`, `SPIp__BYP`, `SPIp__PRTDSI__*`); el CS de la SD ahora usa los del pin 0 |
 | El pin **LED desapareció** del TopDesign | se quitó el `#include "LED.h"` de `main.c` para que los guards `CY_PINS_LED_H` hagan efecto; sin eso el link falla con `undefined reference to LED_Write` |
 
-Pendiente de placa: la SD sigue compilando pero su CS depende del ruteo nuevo
-de `SPIp`; hay que revalidarla cuando esté el hardware.
+La SD con el ruteo nuevo de `SPIp` quedó validada en hardware el 2026-09-01:
+FAT montado, escritura/lectura correctas, R1 `0x00`, los cuatro pads SPI
+observaron niveles bajo y alto y los flags de error quedaron en cero.
 
 ## Estado del build actual (2026-07-07, 4 configs de ADC)
 
@@ -271,9 +310,9 @@ Resultado validado (PSoC recién programado, calibración asentada):
 En `cambios-hardware` el enlace es **asimétrico**:
 
 ```
-ESP → PSoC : UART   ESP GPIO26 (PSOC_UART_TX) → PSoC Rx = P2[0]
+ESP → PSoC : UART   ESP GPIO26 (PSOC_UART_TX) → PSoC Rx = P15[0]
 PSoC → ESP : I2C    PSoC maestro (SCL/SDA) → ESP GPIO22/GPIO21, esclavo 0x42
-Sync       :        ESP GPIO27 (SYNC_TO_PSOC_PIN) → PSoC SYNC_IN = P1[5]
+Sync       :        ESP GPIO27 (SYNC_TO_PSOC_PIN) → PSoC SYNC_IN = P0[4]
 GND común
 ```
 

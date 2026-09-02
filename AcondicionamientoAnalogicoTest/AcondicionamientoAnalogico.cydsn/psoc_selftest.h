@@ -75,7 +75,7 @@
 #define ST_ID_IDENTITY   0x01u  /* v0=clase HW, v1=Fs nativa */
 #define ST_ID_EEPROM     0x02u  /* v0=slots validos, v1=mascara de slots */
 #define ST_ID_SYNC       0x03u  /* v0=flancos contados, v1=nivel actual */
-#define ST_ID_SD         0x04u  /* v0=byte de estado SD, v1=flags de error */
+#define ST_ID_SD         0x04u  /* v0=estado; v1=[stage][R1][pads][errores] */
 #define ST_ID_ADCCFG     0x05u  /* v0=config 1-4, v1=decimacion */
 #define ST_ID_STAGES     0x06u  /* v0=cantidad de etapas, v1=canales del AMux */
 #define ST_ID_IRQTRAP    0x07u  /* v0=IRQ inesperadas, v1=hardfaults */

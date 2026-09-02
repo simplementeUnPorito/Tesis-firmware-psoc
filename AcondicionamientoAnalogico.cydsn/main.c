@@ -203,6 +203,9 @@
 #define PSOC_DIAG_ENABLE      1
 #endif
 
+/* Un SYNC perdido no puede dejar el equipo armado y sordo indefinidamente. */
+#define ARMED_WATCHDOG_MS 60000u
+
 #ifndef PSOC_RAMP_DEBUG_ENABLE
 #define PSOC_RAMP_DEBUG_ENABLE 1
 #endif
@@ -2243,6 +2246,8 @@ static void psoc_arm(void)
     capture_engine_clear_flags();
     capture_engine_pulse(CE_CTRL_ARM);
     ADC_StartConvert();
+    g_capture_wd_due = 0u;
+    timer3_arm_ms(ARMED_WATCHDOG_MS);
     uart_send_diag(PSOC_EVT_ARMED, diag_u16_sat(total_target));
 }
 
@@ -2890,7 +2895,30 @@ static void service_runtime(void)
     }
 
     if (g_state == PSOC_ARMED) {
-        return;   /* HOT_WAIT silencioso: sin UART RX/TX, LED ni pings. */
+        uint8 saved;
+        if (!g_capture_wd_due) {
+            return;   /* HOT_WAIT silencioso: sin UART RX/TX, LED ni pings. */
+        }
+
+        /* No llego el flanco de SYNC. Desarmar completamente antes de volver
+         * a atender el enlace para no encadenar fallos falsos en el ESP. */
+        g_capture_wd_due = 0u;
+        ADC_StopConvert();
+        capture_watchdog_stop();
+        g_sm_sample_handler = sm_sample_noop;
+        capture_engine_pulse(CE_CTRL_STOP);
+        capture_engine_set_enabled(0u, 0u);
+        capture_engine_clear_flags();
+        saved = CyEnterCriticalSection();
+        capture_reset_locked(capture_target_batches());
+        g_chain_active = 0u;
+        g_total_target = 0u;
+        g_total_sent = 0u;
+        g_state = PSOC_IDLE;
+        CyExitCriticalSection(saved);
+        idle_ping_schedule();
+        uart_send_diag(PSOC_EVT_ARMED_TIMEOUT, 0u);
+        return;
     }
 
     if (g_state == PSOC_SAMPLING) {
