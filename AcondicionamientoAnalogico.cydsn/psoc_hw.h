@@ -84,14 +84,52 @@
 #define PSOC_IDAC_FULLSCALE_NA_DEFAULT  31875u      /* 31.875 µA en nA       */
 #define PSOC_IDAC_CODE_MAX              255u
 
+/* ------------------------------------------------------------------
+ * Referencias con signo
+ * ------------------------------------------------------------------
+ * Cada IDAC8 tiene una entrada `ipolarity` cableada a un bit del Control
+ * Register `polarity_reg` del TopDesign. Con eso la referencia no queda de
+ * un solo lado de Vref: vale Vref +- R*Idac. El codigo 0 pasa a ser
+ * exactamente Vref, que es el punto natural para arrancar a calibrar.
+ *
+ * EL RANGO ES +-255, o sea el IDAC entero para cada lado: +-478 mV en la
+ * referencia. Una version anterior lo acotaba a +-127 para que el codigo con
+ * signo entrara sesgado en el uint8 que ya tenia el slot de EEPROM, pero ese
+ * apano quedo obsoleto cuando psoc_nv.c paso a guardar MAGNITUD MAS UNA
+ * MASCARA DE SIGNOS en un byte que estaba libre de la misma fila: con eso
+ * entran magnitudes de hasta 255 sin tocar el layout ni el CRC.
+ *
+ * El 127 sobrevivio al cambio y tiraba a la basura la mitad de la autoridad de
+ * control sin que nada lo dijera: todo barrido mas alla de +-127 devolvia el
+ * mismo valor, y eso se leia como si la etapa estuviera saturando.
+ *
+ * OJO: que el bit en 1 signifique sumidero (por debajo de Vref) esta por
+ * confirmar en banco. Si sale al reves, alcanza con dar vuelta
+ * PSOC_IDAC_POLARITY_NEGATIVE_BIT. */
+#define PSOC_IDAC_SIGNED_MAX            255
+#define PSOC_IDAC_POLARITY_NEGATIVE_BIT 1u
+
+
 extern uint32 g_psoc_idac_rset_ohm;
 extern uint32 g_psoc_idac_vref_uv;
 extern uint32 g_psoc_idac_fullscale_na;
+
+/* Fija la polaridad de la etapa segun el signo y devuelve la magnitud que
+ * hay que escribirle al IDAC. Se llama ANTES de escribir la magnitud. */
+uint8 psoc_hw_idac_apply_polarity(uint8 stage, int16 code);
+/* Satura un codigo con signo al rango util. */
+int16 psoc_hw_idac_clamp_signed(int16 code);
+/* Deja las cuatro referencias en polaridad positiva. */
+void  psoc_hw_idac_polarity_reset(void);
+uint8 psoc_hw_idac_polarity_mask(void);
 
 /* Corriente inyectada por el IDAC para un código dado, en nA. */
 uint32 psoc_idac_code_to_na(uint8 code);
 /* Tensión que ve la etapa analógica para un código dado, en µV. */
 uint32 psoc_idac_code_to_uv(uint8 code);
+/* Igual pero con signo: devuelve la DESVIACION respecto de Vref, en µV, que
+ * es lo que tiene sentido informar ahora que el codigo 0 es Vref. */
+int32 psoc_idac_code_to_uv_signed(int16 code);
 /* Código IDAC más cercano a una tensión pedida en µV (saturado al rango). */
 uint8  psoc_idac_uv_to_code(uint32 uv);
 /* Paso del DAC en µV (LSB). Útil para deadbands de la calibración. */

@@ -26,15 +26,18 @@
  * Retorna 1 si éxito, 0 si error de escritura.
  * Llama EEPROM_UpdateTemperature() internamente.
  */
-uint8 psoc_nv_save(const uint8 *cal_dac, uint8 cal_count);
-uint8 psoc_nv_save_for_gain(uint8 pga_code, const uint8 *cal_dac, uint8 cal_count);
+/* Los codigos son CON SIGNO (-255..+255). La magnitud va al byte por etapa
+ * que ya existia y los cuatro signos entran en un byte que estaba libre en
+ * la misma fila, asi que el tamano de la fila y el CRC no cambian. */
+uint8 psoc_nv_save(const int16 *cal_dac, uint8 cal_count);
+uint8 psoc_nv_save_for_gain(uint8 pga_code, const int16 *cal_dac, uint8 cal_count);
 
 /*
  * Lee y verifica el CRC de la EEPROM.
  * Si magic y CRC son válidos, llena cal_dac[cal_count] y retorna 1.
  * Retorna 0 si EEPROM en blanco, CRC inválido o magic incorrecto.
  */
-uint8 psoc_nv_load(uint8 *cal_dac, uint8 cal_count);
-uint8 psoc_nv_load_for_gain(uint8 pga_code, uint8 *cal_dac, uint8 cal_count);
+uint8 psoc_nv_load(int16 *cal_dac, uint8 cal_count);
+uint8 psoc_nv_load_for_gain(uint8 pga_code, int16 *cal_dac, uint8 cal_count);
 
 #endif /* PSOC_NV_H */

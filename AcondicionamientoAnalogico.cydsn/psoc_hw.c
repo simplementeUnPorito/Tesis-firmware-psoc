@@ -6,6 +6,73 @@ static uint8 g_psoc_hw_pgaout_code = PSOC_PGAOUT_DEFAULT_CODE;
 
 /* Parámetros de la red IDAC->tensión de la placa. Globales (no macros) para
  * poder ajustarlas si cambia la resistencia sin recompilar las tablas. */
+/* Espejo del Control Register: bit i = etapa i en modo sumidero. Se lleva en
+ * RAM porque el registro es de solo escritura desde el punto de vista del
+ * firmware y hay que poder tocar un bit sin pisar los otros tres. */
+static uint8 g_psoc_idac_polarity = 0u;
+
+int32 psoc_idac_code_to_uv_signed(int16 code)
+{
+    int32 magnitude = (code < 0) ? -(int32)code : (int32)code;
+    int32 uv = (int32)(((int64)magnitude * (int64)g_psoc_idac_fullscale_na
+                        * (int64)g_psoc_idac_rset_ohm)
+                       / ((int64)PSOC_IDAC_CODE_MAX * 1000LL));
+
+    return (code < 0) ? -uv : uv;
+}
+
+int16 psoc_hw_idac_clamp_signed(int16 code)
+{
+    if (code >  PSOC_IDAC_SIGNED_MAX) { return  (int16)PSOC_IDAC_SIGNED_MAX; }
+    if (code < -PSOC_IDAC_SIGNED_MAX) { return (int16)(-PSOC_IDAC_SIGNED_MAX); }
+    return code;
+}
+
+uint8 psoc_hw_idac_apply_polarity(uint8 stage, int16 code)
+{
+    int16 magnitude = psoc_hw_idac_clamp_signed(code);
+    uint8 bit = (uint8)(1u << (stage & 0x03u));
+
+    if (magnitude < 0) {
+#if PSOC_IDAC_POLARITY_NEGATIVE_BIT
+        g_psoc_idac_polarity |= bit;
+#else
+        g_psoc_idac_polarity = (uint8)(g_psoc_idac_polarity & (uint8)~bit);
+#endif
+        magnitude = (int16)(-magnitude);
+    } else {
+#if PSOC_IDAC_POLARITY_NEGATIVE_BIT
+        g_psoc_idac_polarity = (uint8)(g_psoc_idac_polarity & (uint8)~bit);
+#else
+        g_psoc_idac_polarity |= bit;
+#endif
+    }
+#if defined(CY_CONTROL_REG_polarity_reg_H)
+    /* La polaridad se escribe ANTES que la magnitud: si se hiciera al reves,
+     * un cambio de signo pasaria un instante por la magnitud nueva con el
+     * signo viejo, que es el doble del escalon pedido. */
+    polarity_reg_Write(g_psoc_idac_polarity);
+#endif
+    return (uint8)magnitude;
+}
+
+void psoc_hw_idac_polarity_reset(void)
+{
+#if PSOC_IDAC_POLARITY_NEGATIVE_BIT
+    g_psoc_idac_polarity = 0u;
+#else
+    g_psoc_idac_polarity = 0x0Fu;
+#endif
+#if defined(CY_CONTROL_REG_polarity_reg_H)
+    polarity_reg_Write(g_psoc_idac_polarity);
+#endif
+}
+
+uint8 psoc_hw_idac_polarity_mask(void)
+{
+    return g_psoc_idac_polarity;
+}
+
 uint32 g_psoc_idac_rset_ohm      = PSOC_IDAC_RSET_OHM_DEFAULT;
 uint32 g_psoc_idac_vref_uv       = PSOC_IDAC_VREF_UV_DEFAULT;
 uint32 g_psoc_idac_fullscale_na  = PSOC_IDAC_FULLSCALE_NA_DEFAULT;
@@ -257,6 +324,10 @@ static uint8  g_sd_spi_started   = 0u;
 static uint16 g_sd_fast_divider  = 0u;
 static uint32 g_sd_sector_count  = 0u;
 static uint8  g_sd_scratch[SD_BLOCK_BYTES];
+static uint8  g_sd_diag_stage    = 0u;
+static uint8  g_sd_diag_last_r1  = 0xFFu;
+static uint8  g_sd_diag_pins     = 0u;
+static uint8  g_sd_diag_timeout  = 0u;
 
 /* CS (P2.3) quedó ruteado al `ss` de hardware del BSPIM, que deassertea entre
  * bytes. Se lo desengancha del DSI con el bypass del puerto (patrón calcado de
@@ -316,18 +387,42 @@ static void sd_cs_write(uint8 value)
     CyExitCriticalSection(saved);
 }
 
+/* Muestrea los PADS, no los data registers. Durante una transferencia el lazo
+ * de espera corre muchas veces por bit y alcanza a observar ambos niveles de
+ * SCK/MOSI; MISO revela enseguida una linea clavada o flotante. */
+static void sd_diag_sample_pins(void)
+{
+    uint8 ps;
+    ps = CY_GET_REG8((reg8 *)SPIp__MISO__PS);
+    g_sd_diag_pins |= ((ps & SPIp__MISO__MASK) != 0u) ?
+                      SD_DIAG_MISO_HIGH : SD_DIAG_MISO_LOW;
+    ps = CY_GET_REG8((reg8 *)SPIp__SCK__PS);
+    g_sd_diag_pins |= ((ps & SPIp__SCK__MASK) != 0u) ?
+                      SD_DIAG_SCK_HIGH : SD_DIAG_SCK_LOW;
+    ps = CY_GET_REG8((reg8 *)SPIp__MOSI__PS);
+    g_sd_diag_pins |= ((ps & SPIp__MOSI__MASK) != 0u) ?
+                      SD_DIAG_MOSI_HIGH : SD_DIAG_MOSI_LOW;
+    ps = CY_GET_REG8((reg8 *)SPIp__CS__PS);
+    g_sd_diag_pins |= ((ps & SPIp__CS__MASK) != 0u) ?
+                      SD_DIAG_CS_HIGH : SD_DIAG_CS_LOW;
+}
+
 /* Un byte full-duplex. Lazo acotado: a 187.5 kbps un byte tarda ~43 us; el
  * guard de 60000 vueltas es órdenes de magnitud más que eso y evita colgar el
  * main loop si el clock/SPI quedara en un estado imposible. */
 static uint8 sd_xfer(uint8 v)
 {
     uint16 guard = 60000u;
+    sd_diag_sample_pins();
     SPI_WriteTxData(v);
     while (0u == (SPI_ReadRxStatus() & SPI_STS_RX_FIFO_NOT_EMPTY)) {
+        sd_diag_sample_pins();
         if (--guard == 0u) {
+            g_sd_diag_timeout = 1u;
             return 0xFFu;
         }
     }
+    sd_diag_sample_pins();
     return SPI_ReadRxData();
 }
 
@@ -375,6 +470,7 @@ static uint8 sd_cmd(uint8 cmd, uint32 arg, uint8 crc)
             break;
         }
     }
+    g_sd_diag_last_r1 = r1;
     return r1;
 }
 
@@ -450,6 +546,10 @@ uint8 sd_spi_init(void)
     g_sd_type = SD_TYPE_NONE;
     g_sd_selftest_ok = 0u;
     g_sd_sector_count = 0u;
+    g_sd_diag_stage = 1u;
+    g_sd_diag_last_r1 = 0xFFu;
+    g_sd_diag_pins = 0u;
+    g_sd_diag_timeout = 0u;
 
     if (!g_sd_spi_started) {
         sd_cs_detach_dsi();
@@ -466,6 +566,7 @@ uint8 sd_spi_init(void)
     }
 
     sd_cs_write(0u);
+    g_sd_diag_stage = 2u;
     r1 = 0xFFu;
     for (i = 0u; i < SD_CMD_RETRY; i++) {
         r1 = sd_cmd(0u, 0u, 0x95u);
@@ -477,6 +578,7 @@ uint8 sd_spi_init(void)
         goto done;   /* sin tarjeta (o no responde): present=0 */
     }
 
+    g_sd_diag_stage = 3u;
     r1 = sd_cmd(8u, 0x000001AAu, 0x87u);
     if (r1 == SD_R1_IDLE) {
         /* SD v2: leer R7 y verificar echo del patrón. */
@@ -486,6 +588,7 @@ uint8 sd_spi_init(void)
         if ((ocr[2] != 0x01u) || (ocr[3] != 0xAAu)) {
             goto done;
         }
+        g_sd_diag_stage = 4u;
         for (tries = 0u; tries < 1000u; tries++) {
             r1 = sd_acmd(41u, 0x40000000u);   /* HCS=1 */
             if (r1 == 0x00u) {
@@ -496,6 +599,7 @@ uint8 sd_spi_init(void)
         if (r1 != 0x00u) {
             goto done;
         }
+        g_sd_diag_stage = 5u;
         r1 = sd_cmd(58u, 0u, 0xFFu);
         if (r1 != 0x00u) {
             goto done;
@@ -506,6 +610,7 @@ uint8 sd_spi_init(void)
         g_sd_type = ((ocr[0] & 0x40u) != 0u) ? SD_TYPE_SDHC : SD_TYPE_SD2;
     } else {
         /* SD v1 (o MMC): ACMD41 sin HCS, fallback CMD1. */
+        g_sd_diag_stage = 4u;
         for (tries = 0u; tries < 1000u; tries++) {
             r1 = sd_acmd(41u, 0u);
             if (r1 == 0x00u) {
@@ -526,20 +631,24 @@ uint8 sd_spi_init(void)
     }
 
     if (g_sd_type != SD_TYPE_SDHC) {
+        g_sd_diag_stage = 6u;
         if (sd_cmd(16u, (uint32)SD_BLOCK_BYTES, 0xFFu) != 0x00u) {
             g_sd_type = SD_TYPE_NONE;
             goto done;
         }
     }
+    g_sd_diag_stage = 7u;
     if (!sd_read_register(9u, g_sd_scratch)) {
         g_sd_type = SD_TYPE_NONE;
         goto done;
     }
+    g_sd_diag_stage = 8u;
     g_sd_sector_count = sd_sector_count_from_csd(g_sd_scratch);
     if (g_sd_sector_count == 0u) {
         g_sd_type = SD_TYPE_NONE;
         goto done;
     }
+    g_sd_diag_stage = 9u;
     ok = 1u;
 
 done:
@@ -575,6 +684,21 @@ uint8 sd_spi_status_byte(void)
         st |= 0x08u;
     }
     return st;
+}
+
+uint8 sd_spi_diag_stage(void)
+{
+    return (uint8)(g_sd_diag_stage | (g_sd_diag_timeout ? 0x80u : 0u));
+}
+
+uint8 sd_spi_diag_last_r1(void)
+{
+    return g_sd_diag_last_r1;
+}
+
+uint8 sd_spi_diag_pin_flags(void)
+{
+    return g_sd_diag_pins;
 }
 
 uint8 sd_spi_read_block(uint32 lba, uint8 *dst)

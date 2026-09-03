@@ -4,6 +4,9 @@
 
 #define NV_ROW_FOR_GAIN(gain) ((uint8)(gain))
 #define NV_CRC_OFFSET 14u
+/* Byte que estaba sin usar en la fila; guarda el signo de las cuatro etapas,
+ * un bit por etapa, 1 = referencia por debajo de Vref. Queda dentro del CRC. */
+#define NV_SIGN_OFFSET 10u
 
 static uint8 nv_gain_valid(uint8 pga_code)
 {
@@ -15,19 +18,19 @@ static uint16 nv_row_base(uint8 row)
     return ((uint16)row * (uint16)PSOC_NV_ROW_SIZE);
 }
 
-uint8 psoc_nv_save(const uint8 *cal_dac, uint8 cal_count)
+uint8 psoc_nv_save(const int16 *cal_dac, uint8 cal_count)
 {
     return psoc_nv_save_for_gain(psoc_hw_get_pga_code(), cal_dac, cal_count);
 }
 
-uint8 psoc_nv_save_for_gain(uint8 pga_code, const uint8 *cal_dac, uint8 cal_count)
+uint8 psoc_nv_save_for_gain(uint8 pga_code, const int16 *cal_dac, uint8 cal_count)
 {
     uint8 row0[PSOC_NV_ROW_SIZE];
     uint16 crc;
     uint8 i;
     uint8 valid_mask = 0u;
 
-    if (!nv_gain_valid(pga_code) || cal_dac == (const uint8 *)0) { return 0u; }
+    if (!nv_gain_valid(pga_code) || cal_dac == (const int16 *)0) { return 0u; }
     if (cal_count == 0u || cal_count > PSOC_NV_CAL_STAGES) { return 0u; }
 
     for (i = 0u; i < PSOC_NV_ROW_SIZE; i++) { row0[i] = 0u; }
@@ -36,9 +39,18 @@ uint8 psoc_nv_save_for_gain(uint8 pga_code, const uint8 *cal_dac, uint8 cal_coun
     row0[2] = PSOC_HW_CLASS;
     row0[3] = pga_code;
     row0[4] = cal_count;
-    for (i = 0u; i < cal_count && i < PSOC_NV_CAL_STAGES; i++) {
-        valid_mask |= (uint8)(1u << i);
-        row0[6u + i] = cal_dac[i];
+    {
+        uint8 sign_mask = 0u;
+        for (i = 0u; i < cal_count && i < PSOC_NV_CAL_STAGES; i++) {
+            int16 code = psoc_hw_idac_clamp_signed(cal_dac[i]);
+            valid_mask |= (uint8)(1u << i);
+            if (code < 0) {
+                sign_mask |= (uint8)(1u << i);
+                code = (int16)(-code);
+            }
+            row0[6u + i] = (uint8)code;
+        }
+        row0[NV_SIGN_OFFSET] = sign_mask;
     }
     row0[5] = valid_mask;
 
@@ -51,12 +63,12 @@ uint8 psoc_nv_save_for_gain(uint8 pga_code, const uint8 *cal_dac, uint8 cal_coun
     return 1u;
 }
 
-uint8 psoc_nv_load(uint8 *cal_dac, uint8 cal_count)
+uint8 psoc_nv_load(int16 *cal_dac, uint8 cal_count)
 {
     return psoc_nv_load_for_gain(psoc_hw_get_pga_code(), cal_dac, cal_count);
 }
 
-uint8 psoc_nv_load_for_gain(uint8 pga_code, uint8 *cal_dac, uint8 cal_count)
+uint8 psoc_nv_load_for_gain(uint8 pga_code, int16 *cal_dac, uint8 cal_count)
 {
     uint8 row0[PSOC_NV_ROW_SIZE];
     uint16 crc_stored;
@@ -65,7 +77,7 @@ uint8 psoc_nv_load_for_gain(uint8 pga_code, uint8 *cal_dac, uint8 cal_count)
     uint16 base;
     uint8 valid_mask;
 
-    if (!nv_gain_valid(pga_code) || cal_dac == (uint8 *)0) { return 0u; }
+    if (!nv_gain_valid(pga_code) || cal_dac == (int16 *)0) { return 0u; }
     if (cal_count == 0u || cal_count > PSOC_NV_CAL_STAGES) { return 0u; }
 
     base = nv_row_base(NV_ROW_FOR_GAIN(pga_code));
@@ -90,8 +102,15 @@ uint8 psoc_nv_load_for_gain(uint8 pga_code, uint8 *cal_dac, uint8 cal_count)
         return 0u;
     }
 
-    for (i = 0u; i < cal_count && i < PSOC_NV_CAL_STAGES; i++) {
-        cal_dac[i] = row0[6u + i];
+    {
+        uint8 sign_mask = row0[NV_SIGN_OFFSET];
+        for (i = 0u; i < cal_count && i < PSOC_NV_CAL_STAGES; i++) {
+            int16 code = (int16)row0[6u + i];
+            if (sign_mask & (uint8)(1u << i)) {
+                code = (int16)(-code);
+            }
+            cal_dac[i] = code;
+        }
     }
     return 1u;
 }

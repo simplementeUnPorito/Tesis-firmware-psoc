@@ -27,10 +27,11 @@
 *
 * RX UART — comandos con checksum XOR:
 *   1 param : [0xAB][cmd][param][cmd^param]
-*       0xA5 status/probe   0xA6 set PGA (0-8)       0xA9 legacy ACK
-*       0xAA legacy ACK     0xB1 arm (espera SYNC)   0xB3 debug rampa (0/1)
-*       0xB4 start-now      0xB5 calibrar refs       0xC1 pong
-*   2 param : [0xAB][0xA3][n_lo][n_hi][0xA3^n_lo^n_hi]   (set N lotes)
+ *       0xA5 status/probe   0xA6 set PGA (0-8)       0xA9 legacy ACK
+ *       0xB1 arm (espera SYNC)   0xB3 debug rampa (0/1)
+ *       0xB4 start-now      0xB5 calibrar refs       0xC1 pong
+ *   2 param : [0xAB][0xA3][n_lo][n_hi][0xA3^n_lo^n_hi]   (set N lotes)
+ *             [0xAB][0xAA][signo|etapa][magnitud][xor]   (IDAC manual)
 *
 * Detección PSoC ↔ ESP:
 *   PSoC → ESP : [0xAB][0xC0][0x00][0xC0]             (ping)
@@ -69,8 +70,6 @@
 #include "FIR_adquisition.h"
 #include "psoc_debug.h"
 /* -------------------------------------------------------------------------- */
-#define LEGACY_VDAC_SHADOW_INIT 0x9Cu
-
 #if defined(CY_STATUS_REG_tmr_event_H)
 #define timer_event_Read tmr_event_Read
 #endif
@@ -259,8 +258,6 @@ static volatile uint8  g_capture_done     = 0u;
 static uint8  g_pga_code     = PSOC_PGA_DEFAULT_CODE;
 static uint8  g_pgavdac_code = PSOC_PGAVDAC_DEFAULT_CODE;
 static uint8  g_pgaout_code  = PSOC_PGAOUT_DEFAULT_CODE;
-
-static uint8  g_vdac_val     = LEGACY_VDAC_SHADOW_INIT;
 
 static volatile uint8  g_state        = PSOC_IDLE;
 static          uint16 g_n_batches    = 0u;
@@ -1113,7 +1110,6 @@ static uint8 capture_engine_source_from_stream(uint8 use_filter)
 
 static void psoc_prepare_capture_path(void)
 {
-    psoc_calibration_servo_abort();
     ADC_StopConvert();
     psoc_adc_select_capture_config();
     psoc_calibration_restore_capture_path();
@@ -2113,7 +2109,10 @@ void dma_route_select(uint8 use_filter)
 
 static uint8 psoc_seed_calibration_from_nv(uint8 reset_defaults_if_missing)
 {
-    uint8 nv_dac[PSOC_NV_CAL_STAGES];
+    /* CON SIGNO: el codigo 0 es Vref y los negativos ponen la referencia por
+     * debajo. psoc_nv.c guarda magnitud mas mascara de signos en la fila, asi
+     * que lo que sale de ahi ya viene con su signo puesto. */
+    int16 nv_dac[PSOC_NV_CAL_STAGES];
     uint8 stage_count = psoc_calibration_stage_count();
 
     if (!g_nv_ready || stage_count == 0u || stage_count > PSOC_NV_CAL_STAGES) {
@@ -2328,7 +2327,6 @@ static uint8 psoc_start_calibration_if_idle(uint8 send_ack)
     g_total_target = 0u;
     g_total_sent = 0u;
     g_last_calibration_ok = 0u;
-    psoc_calibration_servo_abort();
     idle_ping_stop();
     comm_led_stop();
     capture_engine_set_enabled(0u, 0u);
@@ -2374,7 +2372,6 @@ static void psoc_report_adc_snapshot_if_idle(void)
         return;
     }
 
-    psoc_calibration_servo_abort();
     capture_engine_set_enabled(0u, 0u);
     capture_engine_clear_flags();
     uart_send_cfg_ack(PSOC_CMD_ADC_SNAPSHOT, 1u);
@@ -2487,7 +2484,7 @@ static void uart_service(void)
                 switch (rx)
                 {
                     case 0xA5u: case 0xA6u: case PSOC_CMD_PGAOUT:
-                    case 0xA9u: case 0xAAu:
+                    case 0xA9u:
                     case 0xB1u: case 0xB3u: case 0xB4u: case PSOC_CMD_CALIBRATE:
                     case PSOC_CMD_SAVE_EEPROM: case PSOC_CMD_SELECT_STREAM:
                     case PSOC_CMD_ADC_SNAPSHOT: case PSOC_CMD_ADC_CONFIG:
@@ -2497,7 +2494,7 @@ static void uart_service(void)
                     case PSOC_CMD_BLINK_LED:
                     case PSOC_CMD_PONG:
                         rx_cmd = rx; rx_state = 2u; break;
-                    case 0xA3u: case PSOC_CMD_SD_READ_BATCH:
+                    case 0xA3u: case PSOC_CMD_SD_READ_BATCH: case 0xAAu:
                         rx_cmd = rx; rx_state = 4u; break;
                     default:
                         rx_watchdog_stop(); rx_state = 0u; break;
@@ -2593,9 +2590,27 @@ static void uart_service(void)
                         uart_send_cfg_ack(0xA9u, g_pgavdac_code);
                         led_toggle(); break;
                     case 0xAAu:
-                        /* Legacy command: hardware now uses the four VDAC_ref_* refs. */
-                        g_vdac_val = rx_p1;
-                        uart_send_cfg_ack(0xAAu, g_vdac_val);
+                        /* Ajuste manual de una referencia, con el mismo
+                         * convenio que 0xA2 en el firmware de autotest:
+                         * bit 7 del primer parametro = signo negativo;
+                         * bits 0..3 = etapa; segundo parametro = magnitud. */
+                        {
+                            uint8 stage = (uint8)(rx_p1 & 0x0Fu);
+                            int16 code = (int16)rx_p2;
+                            uint8 ok;
+
+                            if (rx_p1 & 0x80u) {
+                                code = (int16)(-code);
+                            }
+                            ok = psoc_calibration_set_stage_dac(stage, code);
+                            if (ok) {
+                                /* Mover una referencia invalida la ultima
+                                 * verificacion: no guardarla como calibracion
+                                 * buena sin volver a ejecutar el PI. */
+                                g_last_calibration_ok = 0u;
+                            }
+                            uart_send_cfg_ack(0xAAu, ok ? rx_p1 : 0xFFu);
+                        }
                         led_toggle(); break;
                     case 0xA3u:
                         g_n_batches = (uint16)rx_p1 | ((uint16)rx_p2 << 8u);
@@ -2648,7 +2663,7 @@ static void uart_service(void)
                          * — con ese tope fijo HAMMER nunca guardaba nada).
                          * No se pisa el slot si alguna etapa quedó ok=0. */
                         {
-                            uint8 dac_snap[PSOC_NV_CAL_STAGES];
+                            int16 dac_snap[PSOC_NV_CAL_STAGES];
                             uint8 ok_snap = 0u;
                             uint8 stage_count = psoc_calibration_stage_count();
                             uint8 k;
@@ -3308,7 +3323,6 @@ int main(void)
 
     /* ── Loop de arranque: busca el ESP sin bloquear UART/ADC ───────────── */
     wait_for_esp();
-    psoc_calibration_servo_enable(0u);
     
     /* ── 5 parpadeos rápidos al conectar ─────────────────────────────────── */
     for (i = 0u; i < 5u; i++)
@@ -3332,7 +3346,6 @@ int main(void)
         }
 
         if (g_state == PSOC_IDLE && !capture_dump_pending()) {
-            (void)psoc_calibration_servo_service();
             idle_ping_service();
         } else {
             idle_ping_stop();

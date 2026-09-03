@@ -36,6 +36,27 @@ uint32 sd_spi_sector_count(void);
  * bit0 = presente, bits1-2 = tipo (SD_TYPE_*), bit3 = self-test OK previo. */
 uint8 sd_spi_status_byte(void);
 
+/* Diagnostico de la ultima inicializacion. Permite separar por software una
+ * SD muda de un SPI que ni siquiera conmuta sus pads.
+ *
+ * stage: 1=relojes iniciales, 2=CMD0, 3=CMD8, 4=ACMD41/CMD1,
+ *        5=CMD58, 6=CMD16, 7=CSD, 8=capacidad, 9=lista.
+ *        bit7 indica timeout interno del RX FIFO.
+ * last_r1: ultima respuesta R1 observada.
+ * pin_flags: niveles fisicos vistos mientras el SPI estaba trabajando. */
+#define SD_DIAG_MISO_LOW   0x01u
+#define SD_DIAG_MISO_HIGH  0x02u
+#define SD_DIAG_SCK_LOW    0x04u
+#define SD_DIAG_SCK_HIGH   0x08u
+#define SD_DIAG_MOSI_LOW   0x10u
+#define SD_DIAG_MOSI_HIGH  0x20u
+#define SD_DIAG_CS_LOW     0x40u
+#define SD_DIAG_CS_HIGH    0x80u
+
+uint8 sd_spi_diag_stage(void);
+uint8 sd_spi_diag_last_r1(void);
+uint8 sd_spi_diag_pin_flags(void);
+
 /* Lectura/escritura de un bloque de 512 bytes. lba es índice de bloque
  * (independiente del tipo de tarjeta; la conversión a byte-address para SDSC
  * se hace adentro). Devuelven 1 en éxito. */
