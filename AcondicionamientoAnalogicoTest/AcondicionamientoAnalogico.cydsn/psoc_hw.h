@@ -92,20 +92,22 @@
  * un solo lado de Vref: vale Vref +- R*Idac. El codigo 0 pasa a ser
  * exactamente Vref, que es el punto natural para arrancar a calibrar.
  *
- * El rango se acota a +-127 y no a +-255 por una razon concreta: el slot de
- * EEPROM guarda un uint8 por etapa, y +-127 entra sesgado por 128 sin tocar
- * el layout ni el CRC. En codigos de esta placa son +-238 mV en la
- * referencia, de sobra para anular los offsets medidos (el peor es el del
- * pasabajos, que necesita unos 84 codigos).
+ * EL RANGO ES +-255, o sea el IDAC entero para cada lado: +-478 mV en la
+ * referencia. Una version anterior lo acotaba a +-127 para que el codigo con
+ * signo entrara sesgado en el uint8 que ya tenia el slot de EEPROM, pero ese
+ * apano quedo obsoleto cuando psoc_nv.c paso a guardar MAGNITUD MAS UNA
+ * MASCARA DE SIGNOS en un byte que estaba libre de la misma fila: con eso
+ * entran magnitudes de hasta 255 sin tocar el layout ni el CRC.
+ *
+ * El 127 sobrevivio al cambio y tiraba a la basura la mitad de la autoridad de
+ * control sin que nada lo dijera: todo barrido mas alla de +-127 devolvia el
+ * mismo valor, y eso se leia como si la etapa estuviera saturando.
  *
  * OJO: que el bit en 1 signifique sumidero (por debajo de Vref) esta por
  * confirmar en banco. Si sale al reves, alcanza con dar vuelta
  * PSOC_IDAC_POLARITY_NEGATIVE_BIT. */
-#define PSOC_IDAC_SIGNED_MAX            127
+#define PSOC_IDAC_SIGNED_MAX            255
 #define PSOC_IDAC_POLARITY_NEGATIVE_BIT 1u
-
-/* Sesgo con el que un codigo con signo entra en un uint8 de EEPROM. */
-#define PSOC_IDAC_EEPROM_BIAS           128
 
 
 extern uint32 g_psoc_idac_rset_ohm;
