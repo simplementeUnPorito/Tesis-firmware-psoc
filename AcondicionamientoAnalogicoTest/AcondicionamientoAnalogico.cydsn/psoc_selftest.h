@@ -197,7 +197,7 @@ static void st_report_identity(void)
  * slots, y eso no es una falla. */
 static void st_report_eeprom(void)
 {
-    uint8 dac[PSOC_NV_CAL_STAGES];
+    int16 dac[PSOC_NV_CAL_STAGES];   /* codigos CON SIGNO: 0 = referencia en Vref */
     uint8 slot;
     uint8 valid = 0u;
     uint16 mask = 0u;

@@ -1125,7 +1125,6 @@ static uint8 capture_engine_source_from_stream(uint8 use_filter)
 
 static void psoc_prepare_capture_path(void)
 {
-    psoc_calibration_servo_abort();
     ADC_StopConvert();
     psoc_adc_select_capture_config();
     psoc_calibration_restore_capture_path();
@@ -2128,7 +2127,7 @@ void dma_route_select(uint8 use_filter)
 
 static uint8 psoc_seed_calibration_from_nv(uint8 reset_defaults_if_missing)
 {
-    uint8 nv_dac[PSOC_NV_CAL_STAGES];
+    int16 nv_dac[PSOC_NV_CAL_STAGES];
     uint8 stage_count = psoc_calibration_stage_count();
 
     if (!g_nv_ready || stage_count == 0u || stage_count > PSOC_NV_CAL_STAGES) {
@@ -2343,7 +2342,6 @@ static uint8 psoc_start_calibration_if_idle(uint8 send_ack)
     g_total_target = 0u;
     g_total_sent = 0u;
     g_last_calibration_ok = 0u;
-    psoc_calibration_servo_abort();
     idle_ping_stop();
     comm_led_stop();
     capture_engine_set_enabled(0u, 0u);
@@ -2389,7 +2387,6 @@ static void psoc_report_adc_snapshot_if_idle(void)
         return;
     }
 
-    psoc_calibration_servo_abort();
     capture_engine_set_enabled(0u, 0u);
     capture_engine_clear_flags();
     uart_send_cfg_ack(PSOC_CMD_ADC_SNAPSHOT, 1u);
@@ -2731,12 +2728,12 @@ static void uart_service(void)
                          * — con ese tope fijo HAMMER nunca guardaba nada).
                          * No se pisa el slot si alguna etapa quedó ok=0. */
                         {
-                            uint8 dac_snap[PSOC_NV_CAL_STAGES];
+                            int16 dac_snap[PSOC_NV_CAL_STAGES];
                             uint8 ok_snap = 0u;
                             uint8 stage_count = psoc_calibration_stage_count();
                             uint8 k;
                             for (k = 0u; k < PSOC_NV_CAL_STAGES; k++) {
-                                dac_snap[k] = 0u;
+                                dac_snap[k] = 0;
                             }
                             for (k = 0u; k < PSOC_NV_CAL_STAGES && k < stage_count; k++) {
                                 dac_snap[k] = g_psoc_cal_results[k].final_dac;
@@ -3391,7 +3388,6 @@ int main(void)
 
     /* ── Loop de arranque: busca el ESP sin bloquear UART/ADC ───────────── */
     wait_for_esp();
-    psoc_calibration_servo_enable(0u);
     
     /* ── 5 parpadeos rápidos al conectar ─────────────────────────────────── */
     for (i = 0u; i < 5u; i++)
@@ -3415,7 +3411,6 @@ int main(void)
         }
 
         if (g_state == PSOC_IDLE && !capture_dump_pending()) {
-            (void)psoc_calibration_servo_service();
             idle_ping_service();
         } else {
             idle_ping_stop();

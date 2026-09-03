@@ -6,6 +6,63 @@ static uint8 g_psoc_hw_pgaout_code = PSOC_PGAOUT_DEFAULT_CODE;
 
 /* Parámetros de la red IDAC->tensión de la placa. Globales (no macros) para
  * poder ajustarlas si cambia la resistencia sin recompilar las tablas. */
+/* Espejo del Control Register: bit i = etapa i en modo sumidero. Se lleva en
+ * RAM porque el registro es de solo escritura desde el punto de vista del
+ * firmware y hay que poder tocar un bit sin pisar los otros tres. */
+static uint8 g_psoc_idac_polarity = 0u;
+
+int16 psoc_hw_idac_clamp_signed(int16 code)
+{
+    if (code >  PSOC_IDAC_SIGNED_MAX) { return  (int16)PSOC_IDAC_SIGNED_MAX; }
+    if (code < -PSOC_IDAC_SIGNED_MAX) { return (int16)(-PSOC_IDAC_SIGNED_MAX); }
+    return code;
+}
+
+uint8 psoc_hw_idac_apply_polarity(uint8 stage, int16 code)
+{
+    int16 magnitude = psoc_hw_idac_clamp_signed(code);
+    uint8 bit = (uint8)(1u << (stage & 0x03u));
+
+    if (magnitude < 0) {
+#if PSOC_IDAC_POLARITY_NEGATIVE_BIT
+        g_psoc_idac_polarity |= bit;
+#else
+        g_psoc_idac_polarity = (uint8)(g_psoc_idac_polarity & (uint8)~bit);
+#endif
+        magnitude = (int16)(-magnitude);
+    } else {
+#if PSOC_IDAC_POLARITY_NEGATIVE_BIT
+        g_psoc_idac_polarity = (uint8)(g_psoc_idac_polarity & (uint8)~bit);
+#else
+        g_psoc_idac_polarity |= bit;
+#endif
+    }
+#if defined(CY_CONTROL_REG_polarity_reg_H)
+    /* La polaridad se escribe ANTES que la magnitud: si se hiciera al reves,
+     * un cambio de signo pasaria un instante por la magnitud nueva con el
+     * signo viejo, que es el doble del escalon pedido. */
+    polarity_reg_Write(g_psoc_idac_polarity);
+#endif
+    return (uint8)magnitude;
+}
+
+void psoc_hw_idac_polarity_reset(void)
+{
+#if PSOC_IDAC_POLARITY_NEGATIVE_BIT
+    g_psoc_idac_polarity = 0u;
+#else
+    g_psoc_idac_polarity = 0x0Fu;
+#endif
+#if defined(CY_CONTROL_REG_polarity_reg_H)
+    polarity_reg_Write(g_psoc_idac_polarity);
+#endif
+}
+
+uint8 psoc_hw_idac_polarity_mask(void)
+{
+    return g_psoc_idac_polarity;
+}
+
 uint32 g_psoc_idac_rset_ohm      = PSOC_IDAC_RSET_OHM_DEFAULT;
 uint32 g_psoc_idac_vref_uv       = PSOC_IDAC_VREF_UV_DEFAULT;
 uint32 g_psoc_idac_fullscale_na  = PSOC_IDAC_FULLSCALE_NA_DEFAULT;

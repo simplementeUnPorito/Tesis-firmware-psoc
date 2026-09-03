@@ -3,6 +3,8 @@ param(
     [string]$Port,
     [switch]$SkipBuild,
     [switch]$SelfTest,
+    # Graba las 1024 filas como hacia la version que rompio. Solo para probar.
+    [switch]$AllRows,
     [ValidateRange(1, 100000)]
     [int]$ExpectedSampleRate = 2604
 )
@@ -105,12 +107,36 @@ if ($flashUsed -lt 1 -or $flashUsed -gt 262144) {
     throw "Uso de flash fuera de rango para CY8C5888LTI-LP097: $flashUsed bytes."
 }
 
-# En PSoC 5LP la configuración UDB/ruteo está guardada en el espacio ECC de
-# las filas Flash. Por eso hay que grabar las 4 matrices completas aunque el
-# código ocupe poco más de una: omitir las filas aparentemente vacías deja el
-# dispositivo sin su configuración digital y el firmware no arranca bien.
-$flashArrays = 0..3
+# Cuántas filas grabar.
+#
+# HISTORIA, porque esto ya rompió una vez: la versión que grababa las cuatro
+# matrices completas (4x256 = 1024 filas) verificaba todas las filas con 0 OK,
+# cerraba con ProtectAll/VerifyProtect en 0 OK... y dejaba el chip SIN ARRANCAR.
+# Cero flancos en SCL, silencio total en el I2C de subida, y ni dos ToggleReset
+# lo recuperaban; regrabando el mismo proyecto desde PSoC Creator volvía al
+# instante. Medido el 2026-09-02.
+#
+# El flujo que sí está validado contra hardware (2026-07-07, log en
+# BUILD_PROGRAM_PSOC.md) grababa solamente las filas que el HEX ocupa. Eso es
+# lo que se hace acá: se derivan de 'Flash used' con un margen, y no se tocan
+# las filas que el firmware no usa.
+#
+# En PSoC 5LP la configuración UDB/ruteo vive en el espacio ECC de las filas de
+# Flash, así que hay que grabar ECC (opción 0x01) en todas las filas ocupadas;
+# de ahí viene la confusión que llevó a grabarlas todas. Grabar ECC de las
+# filas ocupadas sí hace falta; grabar las filas vacías no.
+#
+# -AllRows fuerza el comportamiento viejo, solo para experimentar.
 $rowsPerArray = 256
+$rowBytes = 256
+$rowsNeeded = [Math]::Ceiling($flashUsed / $rowBytes) + 8   # margen de 8 filas
+if ($AllRows) {
+    $rowsNeeded = 4 * $rowsPerArray
+    Write-Warning "-AllRows: se graban las 1024 filas. Esto dejó el chip sin arrancar el 2026-09-02."
+}
+if ($rowsNeeded -gt (4 * $rowsPerArray)) { $rowsNeeded = 4 * $rowsPerArray }
+$lastArray = [Math]::Floor(($rowsNeeded - 1) / $rowsPerArray)
+$flashArrays = 0..$lastArray
 
 if ([string]::IsNullOrWhiteSpace($Port)) {
     $portsScript = Join-Path $env:TEMP 'psoc_getports_codex.cli'
@@ -153,11 +179,14 @@ $commands.Add(('HEX_ReadFile "{0}"' -f $hexPosix))
 $commands.Add('DAP_Acquire')
 $commands.Add('PSoC3_GetJtagID')
 $commands.Add('PSoC3_EraseAll')
+$rowsWritten = 0
 foreach ($array in $flashArrays) {
-    0..($rowsPerArray - 1) | ForEach-Object {
+    $inThisArray = [Math]::Min($rowsPerArray, $rowsNeeded - ($array * $rowsPerArray))
+    0..($inThisArray - 1) | ForEach-Object {
         $commands.Add(('PSoC3_ProgramRowFromHex 0x{0:X2} {1} 0x01' -f $array, $_))
         $commands.Add(('PSoC3_VerifyRowFromHex 0x{0:X2} {1} 0x01' -f $array, $_))
     }
+    $rowsWritten += $inThisArray
 }
 $commands.Add('PSoC3_ProtectAll')
 $commands.Add('PSoC3_VerifyProtect')
@@ -166,7 +195,7 @@ $commands.Add('ClosePort')
 $commands.Add('quit')
 $commands | Set-Content -LiteralPath $programScript -Encoding ASCII
 
-Write-Host "[PSoC] Programando $firmwareKind en ${Port}: $flashUsed bytes usados, 4x256 filas con ECC/config, Fs 4x$ExpectedSampleRate Hz..."
+Write-Host "[PSoC] Programando $firmwareKind en ${Port}: $flashUsed bytes usados, $rowsWritten filas con ECC/config (matrices 0..$lastArray), Fs 4x$ExpectedSampleRate Hz..."
 Push-Location $ProgrammerDir
 try {
     $programOutput = & $Ppcli "--runfile $($programScript -replace '\\','/')" 2>&1
@@ -187,5 +216,5 @@ foreach ($requiredSuccess in @('PSoC3_ProtectAll', 'PSoC3_VerifyProtect', 'DAP_R
     }
 }
 
-Write-Host "[PSoC] OK: $firmwareKind+SPI, Fs=$ExpectedSampleRate Hz, 4x256 filas verificadas."
+Write-Host "[PSoC] OK: $firmwareKind+SPI, Fs=$ExpectedSampleRate Hz, $rowsWritten filas verificadas."
 Write-Host "[PSoC] Log: $programLog"

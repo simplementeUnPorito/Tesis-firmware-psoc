@@ -5,9 +5,8 @@
 #include "FIR_adquisition.h"
 #include "FIR_calibration.h"
 
-#ifndef CAL_ALGO_SERVO_ENABLE
-#define CAL_ALGO_SERVO_ENABLE 0
-#endif
+/* El servo lento y la busqueda binaria se borraron. El PI es el unico
+ * algoritmo de calibracion; no hay selector ni ramas apagadas. */
 
 /* Canal AMux_ADC del capacitor de filtrado (100nF a Vss, pin AMuxCapacitor en
  * TopDesign). AMux_ADC esta configurado en "All Modes" (AMux_ADC_ATMOSTONE=0,
@@ -236,20 +235,20 @@ static void cal_diag_sweep_stage(const PsocCalStage *stage)
 }
 #endif
 
-static uint8 cal_stage_min_dac(const PsocCalStage *stage)
+static int16 cal_stage_min_dac(const PsocCalStage *stage)
 {
     return (stage->dac_center > stage->dac_max_change)
         ? (uint8)(stage->dac_center - stage->dac_max_change)
         : 0u;
 }
 
-static uint8 cal_stage_max_dac(const PsocCalStage *stage)
+static int16 cal_stage_max_dac(const PsocCalStage *stage)
 {
     uint16 max_dac = (uint16)stage->dac_center + (uint16)stage->dac_max_change;
     return (max_dac > 255u) ? 255u : (uint8)max_dac;
 }
 
-static uint8 cal_stage_clamp_dac(const PsocCalStage *stage, uint8 dac)
+static int16 cal_stage_clamp_dac(const PsocCalStage *stage, int16 dac)
 {
     uint8 lo = cal_stage_min_dac(stage);
     uint8 hi = cal_stage_max_dac(stage);
@@ -258,7 +257,7 @@ static uint8 cal_stage_clamp_dac(const PsocCalStage *stage, uint8 dac)
     return dac;
 }
 
-static uint8 cal_stage_center_dac(const PsocCalStage *stage)
+static int16 cal_stage_center_dac(const PsocCalStage *stage)
 {
     return cal_stage_clamp_dac(stage, stage->dac_center);
 }
@@ -320,100 +319,10 @@ typedef struct {
 
 static PsocCalAsync g_cal_async = { CAL_ASYNC_IDLE };
 
-#if CAL_ALGO_SERVO_ENABLE /* servo lento legacy -- comentado a pedido del usuario, ver
-       * stubs no-op de psoc_calibration_servo_* mas abajo */
-typedef enum {
-    CAL_SERVO_IDLE = 0u,
-    CAL_SERVO_MEASURE
-} PsocCalServoState;
 
-typedef struct {
-    uint8 enabled;
-    PsocCalServoState state;
-    uint8 stage_index;
-    uint8 dac;
-    int32 acc;
-    int32 cum_sum;
-    int32 cum_count;
-    int32 prev_avg;
-    uint16 avg_count;
-    uint16 discard_count;
-    uint8 settle_windows;
-    uint8 have_prev_avg;
-    uint32 empty_polls;
-    uint32 next_due_ticks;
 
-    uint8 have_last[PSOC_CAL_MAX_STAGES];
-    uint8 last_dac[PSOC_CAL_MAX_STAGES];
-    int32 last_measured[PSOC_CAL_MAX_STAGES];
-    uint8 have_slope[PSOC_CAL_MAX_STAGES];
-    uint8 increasing[PSOC_CAL_MAX_STAGES];
-    uint8 trial_active[PSOC_CAL_MAX_STAGES];
-    uint8 prev_dac[PSOC_CAL_MAX_STAGES];
-    int32 prev_abs_error[PSOC_CAL_MAX_STAGES];
-    int8 last_dir[PSOC_CAL_MAX_STAGES];
-    int32 integral[PSOC_CAL_MAX_STAGES];
-} PsocCalServo;
 
-typedef struct {
-    int32 kp_num;
-    int32 ki_num;
-    int32 ki_div;
-    int32 deadband_counts;
-    uint8 fine_step;
-    uint8 recovery_step;
-} PsocCalServoTune;
-
-static PsocCalServo g_cal_servo = { CAL_SERVO_ENABLE_DEFAULT };
-
-static const PsocCalServoTune g_cal_servo_tune[PSOC_CAL_STAGE_COUNT] = {
-#if PSOC_HW_CLASS == PSOC_HW_GEO
-    { CAL_SERVO_KP_NUM_GEO_PGA,   CAL_SERVO_KI_NUM_GEO_PGA,   CAL_SERVO_KI_DIV_GEO_PGA,   CAL_SERVO_DEADBAND_GEO_PGA,   CAL_SERVO_FINE_STEP_GEO_PGA,   CAL_SERVO_RECOVERY_STEP_GEO_PGA },
-#if defined(VDAC_ref_BP_DEFAULT_DATA) || defined(CY_DVDAC_VDAC_ref_BP_H)
-    { CAL_SERVO_KP_NUM_GEO_BP,    CAL_SERVO_KI_NUM_GEO_BP,    CAL_SERVO_KI_DIV_GEO_BP,    CAL_SERVO_DEADBAND_GEO_BP,    CAL_SERVO_FINE_STEP_GEO_BP,    CAL_SERVO_RECOVERY_STEP_GEO_BP },
-#endif
-    { CAL_SERVO_KP_NUM_GEO_SUM,   CAL_SERVO_KI_NUM_GEO_SUM,   CAL_SERVO_KI_DIV_GEO_SUM,   CAL_SERVO_DEADBAND_GEO_SUM,   CAL_SERVO_FINE_STEP_GEO_SUM,   CAL_SERVO_RECOVERY_STEP_GEO_SUM },
-    { CAL_SERVO_KP_NUM_GEO_LP,    CAL_SERVO_KI_NUM_GEO_LP,    CAL_SERVO_KI_DIV_GEO_LP,    CAL_SERVO_DEADBAND_GEO_LP,    CAL_SERVO_FINE_STEP_GEO_LP,    CAL_SERVO_RECOVERY_STEP_GEO_LP },
-#else
-    { CAL_SERVO_KP_NUM_HAMMER_PGA, CAL_SERVO_KI_NUM_HAMMER_PGA, CAL_SERVO_KI_DIV_HAMMER_PGA, CAL_SERVO_DEADBAND_HAMMER_PGA, CAL_SERVO_FINE_STEP_HAMMER_PGA, CAL_SERVO_RECOVERY_STEP_HAMMER_PGA },
-    { CAL_SERVO_KP_NUM_HAMMER_LP,  CAL_SERVO_KI_NUM_HAMMER_LP,  CAL_SERVO_KI_DIV_HAMMER_LP,  CAL_SERVO_DEADBAND_HAMMER_LP,  CAL_SERVO_FINE_STEP_HAMMER_LP,  CAL_SERVO_RECOVERY_STEP_HAMMER_LP },
-#endif
-};
-#endif /* #if 0 -- servo lento legacy */
-
-#if CAL_ALGO_SERVO_ENABLE
-static int32 cal_servo_clip_integral(int32 value)
-{
-    if (value > CAL_SERVO_INTEGRAL_LIMIT) { return CAL_SERVO_INTEGRAL_LIMIT; }
-    if (value < -CAL_SERVO_INTEGRAL_LIMIT) { return -CAL_SERVO_INTEGRAL_LIMIT; }
-    return value;
-}
-#endif
-
-#if CAL_ALGO_SERVO_ENABLE /* servo lento legacy -- ver nota junto a CAL_SERVO_IDLE mas arriba */
-static uint16 cal_servo_settle_samples(uint8 stage_index)
-{
-#if PSOC_HW_CLASS == PSOC_HW_GEO
-    switch (stage_index) {
-        case 0u: return CAL_SERVO_SETTLE_SAMPLES_GEO_PGA;
-#if defined(VDAC_ref_BP_DEFAULT_DATA) || defined(CY_DVDAC_VDAC_ref_BP_H)
-        case 1u: return CAL_SERVO_SETTLE_SAMPLES_GEO_BP;
-        case 2u: return CAL_SERVO_SETTLE_SAMPLES_GEO_SUM;
-#else
-        case 1u: return CAL_SERVO_SETTLE_SAMPLES_GEO_SUM;
-#endif
-        default: return CAL_SERVO_SETTLE_SAMPLES_GEO_LP;
-    }
-#else
-    switch (stage_index) {
-        case 0u: return CAL_SERVO_SETTLE_SAMPLES_HAMMER_PGA;
-        default: return CAL_SERVO_SETTLE_SAMPLES_HAMMER_LP;
-    }
-#endif
-}
-#endif /* #if 0 -- servo lento legacy */
-
-static uint8 cal_stage_current_dac(uint8 stage_index)
+static int16 cal_stage_current_dac(uint8 stage_index)
 {
     if (stage_index >= g_psoc_cal_result_count) {
         return cal_stage_center_dac(&g_psoc_cal_stages[stage_index]);
@@ -422,7 +331,7 @@ static uint8 cal_stage_current_dac(uint8 stage_index)
                                g_psoc_cal_results[stage_index].final_dac);
 }
 
-static void cal_stage_write_result(uint8 stage_index, uint8 dac)
+static void cal_stage_write_result(uint8 stage_index, int16 dac)
 {
     if (stage_index < PSOC_CAL_STAGE_COUNT) {
         uint8 clamped = cal_stage_clamp_dac(&g_psoc_cal_stages[stage_index], dac);
@@ -439,9 +348,10 @@ uint8 psoc_calibration_stage_count(void)
     return PSOC_CAL_STAGE_COUNT;
 }
 
-void psoc_calibration_seed_dac(const uint8 *dac_values, uint8 count)
+void psoc_calibration_seed_dac(const int16 *dac_values, uint8 count)
 {
     uint8 i;
+
     for (i = 0u; i < count && i < PSOC_CAL_STAGE_COUNT; i++) {
         cal_stage_write_result(i, dac_values[i]);
     }
@@ -480,220 +390,6 @@ void psoc_calibration_report_adc_snapshot(void)
     psoc_calibration_restore_capture_path();
 }
 
-#if CAL_ALGO_SERVO_ENABLE /* servo lento legacy -- ver nota junto a CAL_SERVO_IDLE mas arriba.
-       * psoc_calibration_servo_enable/enabled/abort/service (API publica,
-       * llamada desde main.c) tienen stubs no-op mas abajo; sus cuerpos
-       * reales (que usaban estas funciones) tambien quedaron comentados,
-       * ver el segundo bloque "#if 0 -- servo lento legacy". */
-static uint8 cal_servo_apply_measurement(uint8 stage_index, uint8 dac, int32 measured)
-{
-    const PsocCalStage *stage = &g_psoc_cal_stages[stage_index];
-    const PsocCalServoTune *tune = &g_cal_servo_tune[stage_index];
-    PsocCalResult *result = &g_psoc_cal_results[stage_index];
-    int32 error = stage->target_counts - measured;
-    int32 abs_error = abs_counts(error);
-    int8 dir;
-    uint8 step;
-    int16 next;
-    uint8 slope_increasing;
-
-    result->final_measured = measured;
-    result->ok = (abs_error <= stage->tolerance_counts) ? 1u : 0u;
-
-    if (g_cal_servo.have_last[stage_index] &&
-        g_cal_servo.last_dac[stage_index] != dac &&
-        g_cal_servo.last_measured[stage_index] != measured) {
-        slope_increasing =
-            ((measured > g_cal_servo.last_measured[stage_index]) ==
-             (dac > g_cal_servo.last_dac[stage_index])) ? 1u : 0u;
-        g_cal_servo.increasing[stage_index] = slope_increasing;
-        g_cal_servo.have_slope[stage_index] = 1u;
-    }
-
-    if (abs_error <= tune->deadband_counts) {
-        g_cal_servo.integral[stage_index] /= 2L;
-        g_cal_servo.trial_active[stage_index] = 0u;
-        g_cal_servo.have_last[stage_index] = 1u;
-        g_cal_servo.last_dac[stage_index] = dac;
-        g_cal_servo.last_measured[stage_index] = measured;
-        return 1u;
-    }
-
-    if (g_cal_servo.trial_active[stage_index] &&
-        abs_error > (g_cal_servo.prev_abs_error[stage_index] +
-                     CAL_SERVO_WORSE_HYST_COUNTS) &&
-        g_cal_servo.last_dir[stage_index] != 0) {
-        uint8 restore_dac = g_cal_servo.last_dac[stage_index];
-        cal_stage_write_result(stage_index, restore_dac);
-        result->final_measured = g_cal_servo.last_measured[stage_index];
-        result->ok = (g_cal_servo.prev_abs_error[stage_index] <=
-                      stage->tolerance_counts) ? 1u : 0u;
-        g_cal_servo.integral[stage_index] = 0L;
-        g_cal_servo.trial_active[stage_index] = 0u;
-        cal_diag(PSOC_EVT_CAL_LOOP, restore_dac);
-        return 1u;
-    } else {
-        int32 control;
-        uint8 assume_increasing;
-
-        g_cal_servo.integral[stage_index] =
-            cal_servo_clip_integral(g_cal_servo.integral[stage_index] + error);
-        control = (error * tune->kp_num) +
-            ((g_cal_servo.integral[stage_index] * tune->ki_num) /
-             ((tune->ki_div == 0L) ? 1L : tune->ki_div));
-        if (control == 0L) {
-            control = error;
-        }
-
-        assume_increasing = g_cal_servo.have_slope[stage_index]
-            ? g_cal_servo.increasing[stage_index]
-            : ((stage->direction >= 0) ? 1u : 0u);
-        if (assume_increasing) {
-            dir = (control > 0L) ? 1 : -1;
-        } else {
-            dir = (control > 0L) ? -1 : 1;
-        }
-    }
-
-    step = (abs_error > CAL_OPERATING_RANGE_COUNTS)
-        ? tune->recovery_step
-        : tune->fine_step;
-    next = (int16)dac + (int16)((int16)dir * (int16)step);
-    if (next < (int16)cal_stage_min_dac(stage)) {
-        next = (int16)cal_stage_min_dac(stage);
-    }
-    if (next > (int16)cal_stage_max_dac(stage)) {
-        next = (int16)cal_stage_max_dac(stage);
-    }
-
-    g_cal_servo.have_last[stage_index] = 1u;
-    g_cal_servo.last_dac[stage_index] = dac;
-    g_cal_servo.last_measured[stage_index] = measured;
-
-    if ((uint8)next != dac) {
-        if (g_cal_servo.trial_active[stage_index] &&
-            (uint8)next == g_cal_servo.prev_dac[stage_index]) {
-            g_cal_servo.integral[stage_index] = 0L;
-            g_cal_servo.trial_active[stage_index] = 0u;
-            cal_diag(PSOC_EVT_CAL_LOOP, (uint8)next);
-            return 1u;
-        }
-        g_cal_servo.prev_dac[stage_index] = dac;
-        g_cal_servo.prev_abs_error[stage_index] = abs_error;
-        g_cal_servo.last_dir[stage_index] = dir;
-        g_cal_servo.trial_active[stage_index] = 1u;
-        cal_stage_write_result(stage_index, (uint8)next);
-        cal_diag(PSOC_EVT_SERVO_STEP, (uint8)next);
-        return 0u;
-    } else {
-        g_cal_servo.trial_active[stage_index] = 0u;
-        return 1u;
-    }
-}
-
-static void cal_servo_measure_begin(uint8 stage_index)
-{
-    const PsocCalStage *stage = &g_psoc_cal_stages[stage_index];
-
-    g_cal_servo.stage_index = stage_index;
-    g_cal_servo.dac = cal_stage_current_dac(stage_index);
-    g_cal_servo.acc = 0L;
-    g_cal_servo.cum_sum = 0L;
-    g_cal_servo.cum_count = 0L;
-    g_cal_servo.prev_avg = 0L;
-    g_cal_servo.avg_count = 0u;
-    g_cal_servo.discard_count = cal_servo_settle_samples(stage_index);
-    g_cal_servo.settle_windows = 0u;
-    g_cal_servo.have_prev_avg = 0u;
-    g_cal_servo.empty_polls = 0UL;
-
-    ADC_Stop();
-    CAL_AMUX_ADC_SELECT_STAGE(stage->adc_channel);
-    cal_diag(PSOC_EVT_CAL_AMUX_IN, stage->adc_channel);
-#if CAL_AMUX_HAS_CAP_CHANNEL
-    cal_diag(PSOC_EVT_CAL_AMUX_CAP, CAL_AMUX_CAP_CHANNEL);
-#endif
-    ADC_Start();
-#ifdef CY_ISR_isr_DMA_DelSig_RAM_H
-    isr_DMA_DelSig_RAM_ClearPending();
-#endif
-    psoc_adc_clear_isr_sample();
-    ADC_StartConvert();
-    cal_diag(PSOC_EVT_SERVO_STAGE, stage_index);
-    g_cal_servo.state = CAL_SERVO_MEASURE;
-}
-
-static uint8 cal_servo_measure_service(void)
-{
-    int32 sample;
-    int32 cum_avg;
-    uint8 stage_index = g_cal_servo.stage_index;
-
-    if (!psoc_adc_take_isr_sample(&sample)) {
-        g_cal_servo.empty_polls++;
-        if (g_cal_servo.empty_polls >= CAL_ASYNC_EMPTY_POLL_LIMIT) {
-            g_cal_servo.state = CAL_SERVO_IDLE;
-            psoc_calibration_restore_capture_path();
-            return 1u;
-        }
-        return 0u;
-    }
-
-    g_cal_servo.empty_polls = 0UL;
-    if (g_cal_servo.discard_count > 0u) {
-        g_cal_servo.discard_count--;
-        return 0u;
-    }
-
-    g_cal_servo.acc += sample;
-    g_cal_servo.avg_count++;
-    if (g_cal_servo.avg_count < CAL_SERVO_AVG_N) {
-        return 0u;
-    }
-
-    g_cal_servo.cum_sum += g_cal_servo.acc;
-    g_cal_servo.cum_count += (int32)CAL_SERVO_AVG_N;
-    g_cal_servo.acc = 0L;
-    g_cal_servo.avg_count = 0u;
-
-    cum_avg = g_cal_servo.cum_sum / g_cal_servo.cum_count;
-    if (g_cal_servo.have_prev_avg &&
-        abs_counts(cum_avg - g_cal_servo.prev_avg) <= CAL_SERVO_SETTLE_TOL_COUNTS) {
-        uint8 locked;
-        cal_diag(PSOC_EVT_CAL_STAGE_DAC, g_cal_servo.dac);
-        cal_diag_i16(PSOC_EVT_CAL_STAGE_MEAS, cum_avg);
-        cal_diag_i32(PSOC_EVT_CAL_STAGE_MEAS32, cum_avg);
-        locked = cal_servo_apply_measurement(stage_index, g_cal_servo.dac, cum_avg);
-        psoc_calibration_restore_capture_path();
-        if (locked) {
-            g_cal_servo.stage_index = (uint8)((stage_index + 1u) % PSOC_CAL_STAGE_COUNT);
-        }
-        g_cal_servo.next_due_ticks = psoc_now_ticks() + CAL_SERVO_PERIOD_TICKS;
-        g_cal_servo.state = CAL_SERVO_IDLE;
-        return 1u;
-    }
-
-    g_cal_servo.prev_avg = cum_avg;
-    g_cal_servo.have_prev_avg = 1u;
-    g_cal_servo.settle_windows++;
-    if (g_cal_servo.settle_windows >= CAL_SERVO_SETTLE_MAX_WINDOWS) {
-        uint8 locked;
-        cal_diag(PSOC_EVT_CAL_STAGE_DAC, g_cal_servo.dac);
-        cal_diag_i16(PSOC_EVT_CAL_STAGE_MEAS, cum_avg);
-        cal_diag_i32(PSOC_EVT_CAL_STAGE_MEAS32, cum_avg);
-        locked = cal_servo_apply_measurement(stage_index, g_cal_servo.dac, cum_avg);
-        psoc_calibration_restore_capture_path();
-        if (locked) {
-            g_cal_servo.stage_index = (uint8)((stage_index + 1u) % PSOC_CAL_STAGE_COUNT);
-        }
-        g_cal_servo.next_due_ticks = psoc_now_ticks() + CAL_SERVO_PERIOD_TICKS;
-        g_cal_servo.state = CAL_SERVO_IDLE;
-        return 1u;
-    }
-
-    return 0u;
-}
-#endif /* #if 0 -- servo lento legacy */
 
 void psoc_calibration_start_references(void)
 {
@@ -768,74 +464,10 @@ void psoc_calibration_seed_default_dac(void)
     g_psoc_cal_result_count = PSOC_CAL_STAGE_COUNT;
 }
 
-#if CAL_ALGO_SERVO_ENABLE /* servo lento legacy -- comentado a pedido del usuario (calibracion
-       * pasa a ser PI-only, ver bloque "Controlador PI de calibracion" mas
-       * abajo). Stubs no-op de la API publica justo despues de este bloque. */
-void psoc_calibration_servo_enable(uint8 enable)
-{
-    g_cal_servo.enabled = enable ? 1u : 0u;
-    if (!g_cal_servo.enabled) {
-        psoc_calibration_servo_abort();
-    } else {
-        g_cal_servo.next_due_ticks = psoc_now_ticks();
-    }
-}
-
-uint8 psoc_calibration_servo_enabled(void)
-{
-    return g_cal_servo.enabled;
-}
-
-void psoc_calibration_servo_abort(void)
-{
-    if (g_cal_servo.state == CAL_SERVO_MEASURE) {
-        ADC_StopConvert();
-        psoc_calibration_restore_capture_path();
-    }
-    g_cal_servo.state = CAL_SERVO_IDLE;
-    g_cal_servo.next_due_ticks = psoc_now_ticks() + CAL_SERVO_PERIOD_TICKS;
-}
-
-uint8 psoc_calibration_servo_service(void)
-{
-    if (!g_cal_servo.enabled || g_cal_async.busy) {
-        return 0u;
-    }
-
-    if (g_cal_servo.state == CAL_SERVO_IDLE) {
-        uint32 now = psoc_now_ticks();
-        if ((int32)(now - g_cal_servo.next_due_ticks) >= 0) {
-            cal_servo_measure_begin(g_cal_servo.stage_index);
-        }
-        return 0u;
-    }
-
-    return cal_servo_measure_service();
-}
-#endif /* #if 0 -- servo lento legacy */
 
 /* Stubs no-op: el servo lento de mantenimiento esta comentado (arriba) a
  * pedido del usuario -- calibracion es 100% PI ahora. Se mantiene la firma
  * publica porque main.c los llama incondicionalmente. */
-void psoc_calibration_servo_enable(uint8 enable)
-{
-    (void)enable;
-}
-
-uint8 psoc_calibration_servo_enabled(void)
-{
-    return 0u;
-}
-
-void psoc_calibration_servo_abort(void)
-{
-}
-
-uint8 psoc_calibration_servo_service(void)
-{
-    return 0u;
-}
-
 /* Compartido con cal_pi_finish_stage -- cierra la corrida de calibracion
  * (restaura AMux/captura, re-habilita isr_SyncIn) sin importar que
  * controlador la corrio. */
@@ -933,13 +565,13 @@ typedef struct {
     uint16 settle_remaining;
     int32 refine_base_measured;
     int32 refine_base_abs_error;
-    uint8 refine_base_dac;
-    uint8 refine_trial_dac;
+    int16 refine_base_dac;
+    int16 refine_trial_dac;
     uint8 refine_ok;
     uint8 have_last_error;
-    uint8 last_dac_target;
-    uint8 base_dac;
-    uint8 dac_current;
+    int16 last_dac_target;
+    int16 base_dac;
+    int16 dac_current;
     uint32 empty_polls;
 } PsocCalPi;
 
@@ -983,19 +615,37 @@ static const PsocCalPiCfg g_cal_pi_cfg[PSOC_CAL_STAGE_COUNT] = {
 };
 #endif
 
+/* counts de ADC -> codigos de IDAC. Entero puro, en int64, y sin precalcular
+ * el cociente: son 98,304 counts por codigo y redondear eso a 98 mete un error
+ * sistematico del 0,3 % en todo el lazo. */
 static int32 cal_counts_error_to_dac_scale(int32 error_counts)
 {
-    return cal_round_div_i64((int64)error_counts * (int64)CAL_ADC_SPAN_MV * (int64)CAL_VDAC_LEVELS,
-                             (int64)CAL_ADC_LEVELS * (int64)CAL_VDAC_QUANT_SPAN_MV);
+    return cal_round_div_i64((int64)error_counts * (int64)CAL_COUNTS_PER_IDAC_CODE_DEN,
+                             (int64)CAL_COUNTS_PER_IDAC_CODE_NUM);
 }
 
+/* Ganancia fisica de la etapa, referencia -> tap, x1000.
+ *
+ * La etapa 0 es la unica que NO tiene ganancia fija: su tap es la salida del
+ * PGA de entrada, asi que lo que la referencia mueve alla escala con la
+ * ganancia que tenga puesto el PGA. Medido en la placa: 57,7 / 108,7 / 220,2 /
+ * 448,7 uV por codigo para 1x / 2x / 4x / 8x, o sea proporcional. Sin esto el
+ * PI usaba la ganancia de 1x para todas y a 8x pedia un esfuerzo ocho veces
+ * mayor que el necesario.
+ *
+ * Que la etapa 0 tenga la ganancia mas chica es justamente lo que la hace
+ * calibrable con precision: 57,7 uV por codigo es el paso mas fino de las
+ * cuatro etapas. */
 static int32 cal_pi_stage_gain_x1000(uint8 stage_index)
 {
     int32 configured_gain = g_cal_pi_cfg[stage_index].gain_x1000;
 
-    if (configured_gain == 0L && stage_index == 0u) {
-        int32 pga_gain = (int32)psoc_hw_pga_gain_x1000();
-        return 1000L - pga_gain;
+    if (stage_index == 0u && configured_gain > 0L) {
+        int32 pga_gain_x1000 = (int32)psoc_hw_pga_gain_x1000();
+        if (pga_gain_x1000 > 0L) {
+            return cal_round_div_i64((int64)configured_gain * (int64)pga_gain_x1000,
+                                     1000LL);
+        }
     }
     return configured_gain;
 }
@@ -1048,7 +698,7 @@ static uint8 cal_pi_measurement_valid(int32 measured)
             measured <= CAL_ADC_SIGNED_MAX_COUNTS) ? 1u : 0u;
 }
 
-static uint8 cal_stage_measure_current(uint8 stage_index, uint8 dac, int32 *measured)
+static uint8 cal_stage_measure_current(uint8 stage_index, int16 dac, int32 *measured)
 {
     const PsocCalStage *stage = &g_psoc_cal_stages[stage_index];
 
@@ -1156,7 +806,7 @@ static int8 cal_pi_effort_delta_sign(int32 control_error, int8 direction, int32 
     return sign;
 }
 
-static uint8 cal_pi_finalize_stage(uint8 ok, uint8 final_dac, int32 final_measured)
+static uint8 cal_pi_finalize_stage(uint8 ok, int16 final_dac, int32 final_measured)
 {
     const PsocCalStage *stage = &g_psoc_cal_stages[g_cal_async.stage_index];
     PsocCalResult *result = &g_psoc_cal_results[g_cal_async.stage_index];
@@ -1406,11 +1056,11 @@ static uint8 cal_pi_run_service(void)
     int32 dac_max_step_down;
     uint16 sample_index;
     uint16 lock_n;
-    uint8 dac_sample;
-    uint8 dac_lo;
-    uint8 dac_hi;
-    uint8 dac_target;
-    uint8 dac_step;
+    int16 dac_sample;
+    int16 dac_lo;
+    int16 dac_hi;
+    int16 dac_target;
+    int16 dac_step;
     uint8 can_integrate;
     uint8 dac_changed;
     int8 effort_delta_sign;
@@ -1465,20 +1115,24 @@ static uint8 cal_pi_run_service(void)
         dac_target = dac_hi;
         can_integrate = (effort_delta_sign < 0) ? 1u : 0u;
     } else {
-        dac_target = (uint8)effort;
+        dac_target = (int16)effort;
         can_integrate = 1u;
     }
 
-    dac_step = (uint8)CAL_PI_MAX_DAC_STEP_PER_SAMPLE;
-    if (dac_step == 0u) {
-        dac_step = 1u;
-    }
-    dac_max_step_up = (int32)dac_sample + (int32)dac_step;
-    dac_max_step_down = (int32)dac_sample - (int32)dac_step;
-    if ((int32)dac_target > dac_max_step_up) {
-        dac_target = (dac_max_step_up > 255L) ? 255u : (uint8)dac_max_step_up;
-    } else if ((int32)dac_target < dac_max_step_down) {
-        dac_target = (dac_max_step_down < 0L) ? 0u : (uint8)dac_max_step_down;
+    /* Limitador de pendiente: con la macro en 0 no se limita nada y manda la
+     * ley del PI, que es lo correcto. Estaba fijo en 1 codigo por muestra y eso
+     * no protegia de nada: solo impedia que el PI aplicara su propio esfuerzo,
+     * y una etapa que necesitaba 84 codigos tardaba 84 muestras como piso. */
+    dac_step = (int16)CAL_PI_MAX_DAC_STEP_PER_SAMPLE;
+    if (dac_step > 0) {
+        dac_max_step_up = (int32)dac_sample + (int32)dac_step;
+        dac_max_step_down = (int32)dac_sample - (int32)dac_step;
+        if ((int32)dac_target > dac_max_step_up) {
+            dac_target = (int16)dac_max_step_up;
+        } else if ((int32)dac_target < dac_max_step_down) {
+            dac_target = (int16)dac_max_step_down;
+        }
+        dac_target = cal_stage_clamp_dac(stage, dac_target);
     }
     dac_changed = (dac_target != dac_sample) ? 1u : 0u;
 
@@ -1510,7 +1164,7 @@ static uint8 cal_pi_run_service(void)
     sample_index = (uint16)(g_cal_pi.samples_taken + 1u);
     g_cal_pi.samples_taken = sample_index;
     if (sample_index == 1u || (sample_index % CAL_PI_TELEM_PERIOD) == 0u) {
-        cal_diag(PSOC_EVT_CAL_STAGE_DAC, dac_sample);
+        cal_diag_i16(PSOC_EVT_CAL_STAGE_DAC, (int32)dac_sample);
         cal_diag_i32(PSOC_EVT_CAL_STAGE_MEAS32, g_cal_pi.last_fir_output);
         cal_diag_i32(PSOC_EVT_CAL_PI_ERROR32, error_dac);
         cal_diag_i32(PSOC_EVT_CAL_PI_BUCKET32, error_bucket);

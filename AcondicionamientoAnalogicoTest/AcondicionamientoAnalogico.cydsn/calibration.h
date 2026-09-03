@@ -6,7 +6,8 @@
 
 #define PSOC_CAL_MAX_STAGES 4u
 
-typedef void (*PsocCalVdacWrite)(uint8 value);
+/* Codigo CON SIGNO: la magnitud va al IDAC y el signo a polarity_reg. */
+typedef void (*PsocCalVdacWrite)(int16 value);
 typedef void (*PsocCalDiagHook)(uint8 event, uint8 value);
 
 typedef struct {
@@ -14,15 +15,15 @@ typedef struct {
     uint8 adc_channel;      /* Canal AMux_ADC que mide esta etapa. */
     int32 target_counts;    /* Objetivo ADC; en GEO normalmente 0 counts diferencial. */
     int8 direction;         /* Signo del esfuerzo PI respecto del VDAC. */
-    uint8 dac_center;       /* Adelanto/feedforward inicial en codigos VDAC. */
-    uint8 dac_max_change;   /* Rango permitido: [center-max_change, center+max_change]. */
-    PsocCalVdacWrite write; /* Funcion que escribe el VDAC fisico de la etapa. */
+    int16 dac_center;       /* Arranque en codigos de IDAC con signo; 0 = Vref. */
+    int16 dac_max_change;   /* Rango permitido: [center-max_change, center+max_change]. */
+    PsocCalVdacWrite write; /* Funcion que escribe el IDAC fisico de la etapa. */
 } PsocCalStage;
 
 /* Resultado por etapa para telemetria post-calibracion (ver uart_send_diag
  * en main.c, eventos PSOC_EVT_CAL_STAGE_DAC / PSOC_EVT_CAL_STAGE_MEAS). */
 typedef struct {
-    uint8 final_dac;
+    int16 final_dac;        /* Con signo: negativo = referencia por debajo de Vref. */
     int32 final_measured;
     uint8 ok;
 } PsocCalResult;
@@ -40,7 +41,15 @@ void psoc_calibration_seed_default_dac(void);
  * escribe cada DAC al hardware y puebla g_psoc_cal_results.
  * Llamar después de psoc_calibration_start_references() para arrancar
  * desde los valores guardados en EEPROM en vez de los defaults. */
-void psoc_calibration_seed_dac(const uint8 *dac_values, uint8 count);
+/* Los valores vienen SESGADOS por PSOC_IDAC_EEPROM_BIAS: el byte 128 es el
+ * codigo 0, o sea la referencia justo en Vref. Asi un codigo con signo entra
+ * en el uint8 del slot de EEPROM sin cambiar el layout ni el CRC. */
+/* Los codigos son CON SIGNO: negativo = referencia por debajo de Vref. El 0 es
+ * exactamente Vref, que es de donde conviene arrancar a calibrar. */
+void psoc_calibration_seed_dac(const int16 *dac_values, uint8 count);
+/* Convierten entre el codigo con signo y el byte sesgado de la EEPROM. */
+uint8 psoc_calibration_dac_to_eeprom(int16 code);
+int16 psoc_calibration_dac_from_eeprom(uint8 stored);
 void psoc_calibration_report_adc_snapshot(void);
 
 /* Etapas reales de la cascada activa (2 en HAMMER, 3-4 en GEO segun
@@ -56,10 +65,8 @@ uint8 psoc_calibration_start_async(void);
 uint8 psoc_calibration_service_async(void);
 uint8 psoc_calibration_async_busy(void);
 uint8 psoc_calibration_async_result_ok(void);
-void psoc_calibration_servo_enable(uint8 enable);
-uint8 psoc_calibration_servo_enabled(void);
-void psoc_calibration_servo_abort(void);
-uint8 psoc_calibration_servo_service(void);
+/* El servo lento se borro. Su unica API que main.c todavia necesitaba era
+ * abortar una corrida en curso, que ya la cubre el PI asincrono. */
 
 /* ==========================================================================
  * Autotest (solo en el proyecto AcondicionamientoAnalogicoTest)

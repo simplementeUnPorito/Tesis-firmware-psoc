@@ -16,18 +16,24 @@
 #ifndef CAL_ADELANTO_GEO_PGA_MV
 #define CAL_ADELANTO_GEO_PGA_MV 2500L
 #endif
-#define CAL_DAC_CENTER_GEO_PGA ((uint8)(CAL_ADELANTO_GEO_PGA_MV / CAL_VDAC8_MV_PER_LSB))
+/* Arranca en 0, que con polaridad es exactamente Vref: el punto natural
+ * para empezar a anular un offset, y el unico desde el que se puede ir
+ * para los dos lados. Antes era un adelanto fijo en mV sobre el LSB del
+ * VDAC, que no tiene sentido en un IDAC con signo. */
+#define CAL_DAC_CENTER_GEO_PGA 0
 
-#define CAL_DAC_MAX_CHANGE_GEO_PGA 255u
+#define CAL_DAC_MAX_CHANGE_GEO_PGA CAL_IDAC_SIGNED_MAX
 
 #ifndef CAL_PI_GAIN_GEO_PGA_X1000
-#define CAL_PI_GAIN_GEO_PGA_X1000 1000L
+/* Ganancia fisica referencia -> tap, medida en la placa el 2026-09-02
+ * con el barrido de D2, dividida por el escalon real de 1875 uV. */
+#define CAL_PI_GAIN_GEO_PGA_X1000 31L
 #endif
 
 /* Delta_PGA del firmware actual. La corrida experimental documentada en el
  * manuscrito uso deliberadamente Delta_PGA=18. */
 #ifndef CAL_PI_DEADBAND_GEO_PGA_DAC_CODES
-#define CAL_PI_DEADBAND_GEO_PGA_DAC_CODES 3L
+#define CAL_PI_DEADBAND_GEO_PGA_DAC_CODES 1L
 #endif
 
 /* P=1e-3, I=300e-6. */

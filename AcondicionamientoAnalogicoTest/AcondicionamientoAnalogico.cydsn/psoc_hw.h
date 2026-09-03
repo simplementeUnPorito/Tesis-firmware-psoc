@@ -84,9 +84,42 @@
 #define PSOC_IDAC_FULLSCALE_NA_DEFAULT  31875u      /* 31.875 µA en nA       */
 #define PSOC_IDAC_CODE_MAX              255u
 
+/* ------------------------------------------------------------------
+ * Referencias con signo
+ * ------------------------------------------------------------------
+ * Cada IDAC8 tiene una entrada `ipolarity` cableada a un bit del Control
+ * Register `polarity_reg` del TopDesign. Con eso la referencia no queda de
+ * un solo lado de Vref: vale Vref +- R*Idac. El codigo 0 pasa a ser
+ * exactamente Vref, que es el punto natural para arrancar a calibrar.
+ *
+ * El rango se acota a +-127 y no a +-255 por una razon concreta: el slot de
+ * EEPROM guarda un uint8 por etapa, y +-127 entra sesgado por 128 sin tocar
+ * el layout ni el CRC. En codigos de esta placa son +-238 mV en la
+ * referencia, de sobra para anular los offsets medidos (el peor es el del
+ * pasabajos, que necesita unos 84 codigos).
+ *
+ * OJO: que el bit en 1 signifique sumidero (por debajo de Vref) esta por
+ * confirmar en banco. Si sale al reves, alcanza con dar vuelta
+ * PSOC_IDAC_POLARITY_NEGATIVE_BIT. */
+#define PSOC_IDAC_SIGNED_MAX            127
+#define PSOC_IDAC_POLARITY_NEGATIVE_BIT 1u
+
+/* Sesgo con el que un codigo con signo entra en un uint8 de EEPROM. */
+#define PSOC_IDAC_EEPROM_BIAS           128
+
+
 extern uint32 g_psoc_idac_rset_ohm;
 extern uint32 g_psoc_idac_vref_uv;
 extern uint32 g_psoc_idac_fullscale_na;
+
+/* Fija la polaridad de la etapa segun el signo y devuelve la magnitud que
+ * hay que escribirle al IDAC. Se llama ANTES de escribir la magnitud. */
+uint8 psoc_hw_idac_apply_polarity(uint8 stage, int16 code);
+/* Satura un codigo con signo al rango util. */
+int16 psoc_hw_idac_clamp_signed(int16 code);
+/* Deja las cuatro referencias en polaridad positiva. */
+void  psoc_hw_idac_polarity_reset(void);
+uint8 psoc_hw_idac_polarity_mask(void);
 
 /* Corriente inyectada por el IDAC para un código dado, en nA. */
 uint32 psoc_idac_code_to_na(uint8 code);
