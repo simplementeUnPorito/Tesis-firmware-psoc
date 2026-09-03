@@ -11,6 +11,16 @@ static uint8 g_psoc_hw_pgaout_code = PSOC_PGAOUT_DEFAULT_CODE;
  * firmware y hay que poder tocar un bit sin pisar los otros tres. */
 static uint8 g_psoc_idac_polarity = 0u;
 
+int32 psoc_idac_code_to_uv_signed(int16 code)
+{
+    int32 magnitude = (code < 0) ? -(int32)code : (int32)code;
+    int32 uv = (int32)(((int64)magnitude * (int64)g_psoc_idac_fullscale_na
+                        * (int64)g_psoc_idac_rset_ohm)
+                       / ((int64)PSOC_IDAC_CODE_MAX * 1000LL));
+
+    return (code < 0) ? -uv : uv;
+}
+
 int16 psoc_hw_idac_clamp_signed(int16 code)
 {
     if (code >  PSOC_IDAC_SIGNED_MAX) { return  (int16)PSOC_IDAC_SIGNED_MAX; }

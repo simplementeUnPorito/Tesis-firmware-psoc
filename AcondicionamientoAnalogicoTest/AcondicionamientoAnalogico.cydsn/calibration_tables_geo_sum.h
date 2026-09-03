@@ -31,11 +31,16 @@
 #define CAL_PI_DEADBAND_GEO_SUM_DAC_CODES 1L
 #endif
 
-/* P=100e-6, I=500e-6. */
-#define CAL_PI_KP_NUM_GEO_SUM 1L
-#define CAL_PI_KP_DIV_GEO_SUM 10000L
+/* Kp y Ki de la simulacion Monte Carlo del lazo
+ * (calculos_modelados/python/calibracion_pi). El barrido de robustez
+ * contra tau no discrimina esta etapa porque su banda muerta es ancha y
+ * arranca adentro, asi que manda la grilla con perturbacion real, donde
+ * este par converge el 100 % con p95 de 122 a 1089 muestras segun la
+ * etapa. Igual quedo marcado como robusto para todos los tau probados. */
+#define CAL_PI_KP_NUM_GEO_SUM 2L
+#define CAL_PI_KP_DIV_GEO_SUM 1L
 #define CAL_PI_KI_NUM_GEO_SUM 1L
-#define CAL_PI_KI_DIV_GEO_SUM 2000L
+#define CAL_PI_KI_DIV_GEO_SUM 1L
 
 #ifndef CAL_PI_LOCK_SAMPLES_GEO_SUM
 #define CAL_PI_LOCK_SAMPLES_GEO_SUM 512u

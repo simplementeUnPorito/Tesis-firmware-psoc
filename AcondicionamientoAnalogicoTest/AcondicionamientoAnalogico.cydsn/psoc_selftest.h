@@ -55,7 +55,11 @@
  * ------------------------------------------------------------------------- */
 #define PSOC_CMD_ST_REPORT   0xA0u  /* 1 param: que reporte emitir (ver ST_REP_*) */
 #define PSOC_CMD_ST_SYNC     0xA1u  /* 1 param: 1=armar contador de flancos, 0=leer */
-#define PSOC_CMD_ST_SET_IDAC 0xA2u  /* 2 params: [etapa 0-3][codigo 0-255] */
+#define PSOC_CMD_ST_SET_IDAC 0xA2u  /* 2 params: [signo<<7 | etapa 0-3][magnitud 0-255]
+                                     * El bit 7 del primer byte es el SIGNO: en 1, la
+                                     * referencia va por debajo de Vref. Rango util
+                                     * -255..+255; una trama vieja (bit 7 en cero)
+                                     * sigue significando lo mismo que antes. */
 #define PSOC_CMD_ST_MEAS_DC  0xA4u  /* 1 param: [settle_sel<<4 | canal] */
 #define PSOC_CMD_ST_MEAS_AC  0xA7u  /* 1 param: [n_sel<<4 | canal] */
 
@@ -220,7 +224,8 @@ static void st_report_cal(void)
     uint8 i;
 
     for (i = 0u; i < n; i++) {
-        uint8 dac = 0u, ok = 0u;
+        int16 dac = 0;
+        uint8 ok = 0u;
         int32 meas = 0;
         if (psoc_selftest_stage_result(i, &dac, &meas, &ok)) {
             st_send_result((uint8)(ST_ID_CAL_BASE | i), ok ? ST_OK : ST_ERR,
@@ -300,15 +305,27 @@ static void st_handle_sync(uint8 arm)
  * Devuelve el codigo aplicado y la tension nominal que le corresponde, para
  * que el ESP pueda contrastar lo medido contra lo pedido.
  * ------------------------------------------------------------------------- */
-static void st_handle_set_idac(uint8 stage, uint8 code)
-{
-    uint8 id = (uint8)(ST_ID_IDAC_BASE | (stage & 0x0Fu));
+/* El comando 0xA2 manda dos bytes, etapa y codigo, y el codigo ahora tiene que
+ * poder ser negativo. En vez de cambiar la trama se usa el BIT 7 DEL BYTE DE
+ * ETAPA como signo: la etapa entra en dos bits, asi que ese bit estaba libre.
+ * Magnitud 0..255 en el otro byte, de modo que el rango util es -255..+255
+ * entero y las tramas viejas (bit 7 en cero) siguen significando lo mismo. */
+#define ST_IDAC_SIGN_BIT 0x80u
 
+static void st_handle_set_idac(uint8 stage_and_sign, uint8 magnitude)
+{
+    uint8 stage = (uint8)(stage_and_sign & 0x0Fu);
+    uint8 id = (uint8)(ST_ID_IDAC_BASE | stage);
+    int16 code = (int16)magnitude;
+
+    if (stage_and_sign & ST_IDAC_SIGN_BIT) {
+        code = (int16)(-code);
+    }
     if (!psoc_selftest_write_stage_dac(stage, code)) {
         st_send_result(id, ST_ERR, (int32)stage, (int32)code);
         return;
     }
-    st_send_result(id, ST_OK, (int32)code, (int32)psoc_idac_code_to_uv(code));
+    st_send_result(id, ST_OK, (int32)code, psoc_idac_code_to_uv_signed(code));
 }
 
 /* -------------------------------------------------------------------------

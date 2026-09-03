@@ -37,19 +37,16 @@ void psoc_calibration_restore_capture_path(void);
 void psoc_calibration_reset_references(void);
 void psoc_calibration_seed_default_dac(void);
 
-/* Aplica dac_values[count] como punto de inicio de calibración:
- * escribe cada DAC al hardware y puebla g_psoc_cal_results.
- * Llamar después de psoc_calibration_start_references() para arrancar
- * desde los valores guardados en EEPROM en vez de los defaults. */
-/* Los valores vienen SESGADOS por PSOC_IDAC_EEPROM_BIAS: el byte 128 es el
- * codigo 0, o sea la referencia justo en Vref. Asi un codigo con signo entra
- * en el uint8 del slot de EEPROM sin cambiar el layout ni el CRC. */
-/* Los codigos son CON SIGNO: negativo = referencia por debajo de Vref. El 0 es
- * exactamente Vref, que es de donde conviene arrancar a calibrar. */
+/* Aplica dac_values[count] como punto de inicio de calibración: escribe cada
+ * IDAC al hardware y puebla g_psoc_cal_results. Llamar después de
+ * psoc_calibration_start_references() para arrancar desde los valores
+ * guardados en EEPROM en vez de los defaults.
+ *
+ * Los códigos son CON SIGNO: negativo = referencia por debajo de Vref, y el 0
+ * es Vref exacto, que es de donde conviene arrancar a calibrar. La conversión
+ * a los bytes del slot de EEPROM (magnitud + máscara de signos) la hace
+ * psoc_nv.c, que es quien conoce el layout de la fila. */
 void psoc_calibration_seed_dac(const int16 *dac_values, uint8 count);
-/* Convierten entre el codigo con signo y el byte sesgado de la EEPROM. */
-uint8 psoc_calibration_dac_to_eeprom(int16 code);
-int16 psoc_calibration_dac_from_eeprom(uint8 stored);
 void psoc_calibration_report_adc_snapshot(void);
 
 /* Etapas reales de la cascada activa (2 en HAMMER, 3-4 en GEO segun
@@ -82,9 +79,10 @@ int32 psoc_selftest_counts_to_uv(int32 counts);
 uint8 psoc_selftest_stage_count(void);
 uint8 psoc_selftest_stage_channel(uint8 stage, uint8 *out_channel);
 uint8 psoc_selftest_amux_channel_count(void);
-uint8 psoc_selftest_write_stage_dac(uint8 stage, uint8 code);
-uint8 psoc_selftest_current_stage_dac(uint8 stage, uint8 *out_code);
-uint8 psoc_selftest_stage_result(uint8 stage, uint8 *out_dac, int32 *out_meas, uint8 *out_ok);
+/* Codigos CON SIGNO en las tres: negativo = referencia por debajo de Vref. */
+uint8 psoc_selftest_write_stage_dac(uint8 stage, int16 code);
+uint8 psoc_selftest_current_stage_dac(uint8 stage, int16 *out_code);
+uint8 psoc_selftest_stage_result(uint8 stage, int16 *out_dac, int32 *out_meas, uint8 *out_ok);
 void  psoc_selftest_select_channel(uint8 channel, uint8 with_cap);
 void  psoc_selftest_restore(void);
 uint8 psoc_selftest_measure_dc(uint8 channel, uint16 settle_ms, uint16 n,

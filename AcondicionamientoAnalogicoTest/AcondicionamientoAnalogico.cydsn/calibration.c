@@ -223,35 +223,49 @@ static int32 cal_pi_compare_counts(int32 measured)
 #if CAL_DIAG_SWEEP_ENABLE
 static void cal_diag_sweep_stage(const PsocCalStage *stage)
 {
-    static const uint8 sweep_dac[3] = { 0u, 128u, 255u };
+    /* Los tres puntos del barrido de diagnostico ahora recorren el rango con
+     * signo: un extremo, el centro (que es Vref) y el otro extremo. */
+    static const int16 sweep_dac[3] = { -PSOC_IDAC_SIGNED_MAX, 0, PSOC_IDAC_SIGNED_MAX };
     uint8 i;
 
     for (i = 0u; i < 3u; i++) {
         stage->write(sweep_dac[i]);
         CyDelay(CAL_DIAG_SWEEP_SETTLE_MS);
-        cal_diag(PSOC_EVT_CAL_SWEEP_DAC, sweep_dac[i]);
+        cal_diag_i16(PSOC_EVT_CAL_SWEEP_DAC, (int32)sweep_dac[i]);
         cal_diag_i32(PSOC_EVT_CAL_SWEEP_MEAS32, cal_adc_read_direct_counts());
     }
 }
 #endif
 
+/* Rango de la etapa, EN CODIGOS CON SIGNO. El piso puede ser negativo: con
+ * dac_center = 0 y dac_max_change = 255 el rango es -255..+255, que es todo el
+ * punto de haber cableado polarity_reg. Con la version sin signo el piso daba 0
+ * y la mitad negativa quedaba muerta sin que nada lo dijera. */
 static int16 cal_stage_min_dac(const PsocCalStage *stage)
 {
-    return (stage->dac_center > stage->dac_max_change)
-        ? (uint8)(stage->dac_center - stage->dac_max_change)
-        : 0u;
+    int32 lo = (int32)stage->dac_center - (int32)stage->dac_max_change;
+
+    if (lo < -(int32)PSOC_IDAC_SIGNED_MAX) {
+        lo = -(int32)PSOC_IDAC_SIGNED_MAX;
+    }
+    return (int16)lo;
 }
 
 static int16 cal_stage_max_dac(const PsocCalStage *stage)
 {
-    uint16 max_dac = (uint16)stage->dac_center + (uint16)stage->dac_max_change;
-    return (max_dac > 255u) ? 255u : (uint8)max_dac;
+    int32 hi = (int32)stage->dac_center + (int32)stage->dac_max_change;
+
+    if (hi > (int32)PSOC_IDAC_SIGNED_MAX) {
+        hi = (int32)PSOC_IDAC_SIGNED_MAX;
+    }
+    return (int16)hi;
 }
 
 static int16 cal_stage_clamp_dac(const PsocCalStage *stage, int16 dac)
 {
-    uint8 lo = cal_stage_min_dac(stage);
-    uint8 hi = cal_stage_max_dac(stage);
+    int16 lo = cal_stage_min_dac(stage);
+    int16 hi = cal_stage_max_dac(stage);
+
     if (dac < lo) { return lo; }
     if (dac > hi) { return hi; }
     return dac;
@@ -334,7 +348,7 @@ static int16 cal_stage_current_dac(uint8 stage_index)
 static void cal_stage_write_result(uint8 stage_index, int16 dac)
 {
     if (stage_index < PSOC_CAL_STAGE_COUNT) {
-        uint8 clamped = cal_stage_clamp_dac(&g_psoc_cal_stages[stage_index], dac);
+        int16 clamped = cal_stage_clamp_dac(&g_psoc_cal_stages[stage_index], dac);
         g_psoc_cal_stages[stage_index].write(clamped);
         g_psoc_cal_results[stage_index].final_dac = clamped;
         if (g_psoc_cal_result_count < PSOC_CAL_STAGE_COUNT) {
@@ -365,7 +379,7 @@ void psoc_calibration_report_adc_snapshot(void)
 
     for (i = 0u; i < PSOC_CAL_STAGE_COUNT; i++) {
         const PsocCalStage *stage = &g_psoc_cal_stages[i];
-        uint8 saved_dac = cal_stage_current_dac(i);
+        int16 saved_dac = cal_stage_current_dac(i);
 
         ADC_Stop();
         CAL_AMUX_ADC_SELECT(stage->adc_channel);
@@ -414,7 +428,7 @@ void psoc_calibration_start_references(void)
 #endif
 
     for (i = 0u; i < PSOC_CAL_STAGE_COUNT; i++) {
-        uint8 center = cal_stage_center_dac(&g_psoc_cal_stages[i]);
+        int16 center = cal_stage_center_dac(&g_psoc_cal_stages[i]);
         g_psoc_cal_stages[i].write(center);
         g_psoc_cal_results[i].final_dac = center;
         g_psoc_cal_results[i].final_measured = 0L;
@@ -440,7 +454,7 @@ void psoc_calibration_reset_references(void)
 
     ADC_Stop();
     for (i = 0u; i < PSOC_CAL_STAGE_COUNT; i++) {
-        uint8 center = cal_stage_center_dac(&g_psoc_cal_stages[i]);
+        int16 center = cal_stage_center_dac(&g_psoc_cal_stages[i]);
         g_psoc_cal_stages[i].write(center);
         g_psoc_cal_results[i].final_dac = center;
         g_psoc_cal_results[i].final_measured = 0L;
@@ -455,7 +469,7 @@ void psoc_calibration_seed_default_dac(void)
     uint8 i;
 
     for (i = 0u; i < PSOC_CAL_STAGE_COUNT; i++) {
-        uint8 center = cal_stage_center_dac(&g_psoc_cal_stages[i]);
+        int16 center = cal_stage_center_dac(&g_psoc_cal_stages[i]);
         g_psoc_cal_stages[i].write(center);
         g_psoc_cal_results[i].final_dac = center;
         g_psoc_cal_results[i].final_measured = 0L;
@@ -501,7 +515,7 @@ static void cal_async_abort_watchdog(void)
     uint8 i;
 
     for (i = g_cal_async.stage_index; i < PSOC_CAL_STAGE_COUNT; i++) {
-        uint8 center = cal_stage_center_dac(&g_psoc_cal_stages[i]);
+        int16 center = cal_stage_center_dac(&g_psoc_cal_stages[i]);
         g_psoc_cal_stages[i].write(center);
         g_psoc_cal_results[i].final_dac = center;
         g_psoc_cal_results[i].final_measured = 0L;
@@ -736,7 +750,7 @@ static uint8 cal_verify_seeded_values(void)
     for (i = 0u; i < PSOC_CAL_STAGE_COUNT; i++) {
         const PsocCalStage *stage = &g_psoc_cal_stages[i];
         PsocCalResult *result = &g_psoc_cal_results[i];
-        uint8 dac = cal_stage_current_dac(i);
+        int16 dac = cal_stage_current_dac(i);
         int32 measured = 0L;
         uint8 ok;
 
@@ -853,9 +867,9 @@ static uint8 cal_pi_finish_stage(uint8 ok)
     int32 control_sample;
     int32 error_counts;
     int8 step_sign;
-    uint8 dac_lo;
-    uint8 dac_hi;
-    uint8 trial_dac;
+    int16 dac_lo;
+    int16 dac_hi;
+    int16 trial_dac;
 
     if (!cfg->refine_enable || !ok || !cal_pi_measurement_valid(g_cal_pi.last_fir_output)) {
         return cal_pi_finalize_stage(ok, g_cal_pi.dac_current, g_cal_pi.last_fir_output);
@@ -879,12 +893,12 @@ static uint8 cal_pi_finish_stage(uint8 ok)
         if (g_cal_pi.dac_current >= dac_hi) {
             return cal_pi_finalize_stage(ok, g_cal_pi.dac_current, g_cal_pi.last_fir_output);
         }
-        trial_dac = (uint8)(g_cal_pi.dac_current + 1u);
+        trial_dac = (int16)(g_cal_pi.dac_current + 1);
     } else {
         if (g_cal_pi.dac_current <= dac_lo) {
             return cal_pi_finalize_stage(ok, g_cal_pi.dac_current, g_cal_pi.last_fir_output);
         }
-        trial_dac = (uint8)(g_cal_pi.dac_current - 1u);
+        trial_dac = (int16)(g_cal_pi.dac_current - 1);
     }
 
     g_cal_pi.refine_ok = ok;
@@ -1222,7 +1236,7 @@ uint8 psoc_calibration_start_async(void)
 {
     uint8 i;
     uint8 verify_ok;
-    uint8 seed_dac[PSOC_CAL_MAX_STAGES];
+    int16 seed_dac[PSOC_CAL_MAX_STAGES];
 
     if (g_cal_async.busy) {
         return 0u;
@@ -1477,25 +1491,25 @@ uint8 psoc_selftest_amux_channel_count(void)
 }
 
 /* Escribe el IDAC de la etapa SIN clamp: el barrido del autotest necesita
- * poder recorrer 0..255 completo, no el rango acotado que usa el PI. */
-uint8 psoc_selftest_write_stage_dac(uint8 stage, uint8 code)
+ * poder recorrer el rango entero, -255..+255, no el acotado que usa el PI. */
+uint8 psoc_selftest_write_stage_dac(uint8 stage, int16 code)
 {
     if (stage >= PSOC_CAL_STAGE_COUNT) { return 0u; }
-    g_psoc_cal_stages[stage].write(code);
+    g_psoc_cal_stages[stage].write(psoc_hw_idac_clamp_signed(code));
     return 1u;
 }
 
-uint8 psoc_selftest_current_stage_dac(uint8 stage, uint8 *out_code)
+uint8 psoc_selftest_current_stage_dac(uint8 stage, int16 *out_code)
 {
-    if (stage >= PSOC_CAL_STAGE_COUNT || out_code == (uint8 *)0) { return 0u; }
+    if (stage >= PSOC_CAL_STAGE_COUNT || out_code == (int16 *)0) { return 0u; }
     *out_code = cal_stage_current_dac(stage);
     return 1u;
 }
 
-uint8 psoc_selftest_stage_result(uint8 stage, uint8 *out_dac, int32 *out_meas, uint8 *out_ok)
+uint8 psoc_selftest_stage_result(uint8 stage, int16 *out_dac, int32 *out_meas, uint8 *out_ok)
 {
     if (stage >= PSOC_CAL_STAGE_COUNT || stage >= g_psoc_cal_result_count) { return 0u; }
-    if (out_dac  != (uint8 *)0) { *out_dac  = g_psoc_cal_results[stage].final_dac; }
+    if (out_dac  != (int16 *)0) { *out_dac  = g_psoc_cal_results[stage].final_dac; }
     if (out_meas != (int32 *)0) { *out_meas = g_psoc_cal_results[stage].final_measured; }
     if (out_ok   != (uint8 *)0) { *out_ok   = g_psoc_cal_results[stage].ok; }
     return 1u;

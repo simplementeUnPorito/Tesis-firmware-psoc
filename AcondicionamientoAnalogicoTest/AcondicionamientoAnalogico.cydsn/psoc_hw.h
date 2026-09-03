@@ -125,6 +125,9 @@ uint8 psoc_hw_idac_polarity_mask(void);
 uint32 psoc_idac_code_to_na(uint8 code);
 /* Tensión que ve la etapa analógica para un código dado, en µV. */
 uint32 psoc_idac_code_to_uv(uint8 code);
+/* Igual pero con signo: devuelve la DESVIACION respecto de Vref, en µV, que
+ * es lo que tiene sentido informar ahora que el codigo 0 es Vref. */
+int32 psoc_idac_code_to_uv_signed(int16 code);
 /* Código IDAC más cercano a una tensión pedida en µV (saturado al rango). */
 uint8  psoc_idac_uv_to_code(uint32 uv);
 /* Paso del DAC en µV (LSB). Útil para deadbands de la calibración. */

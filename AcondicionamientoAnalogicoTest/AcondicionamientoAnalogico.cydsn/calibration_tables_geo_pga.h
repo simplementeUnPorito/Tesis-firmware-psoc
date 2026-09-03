@@ -36,11 +36,18 @@
 #define CAL_PI_DEADBAND_GEO_PGA_DAC_CODES 1L
 #endif
 
-/* P=1e-3, I=300e-6. */
-#define CAL_PI_KP_NUM_GEO_PGA 1L
-#define CAL_PI_KP_DIV_GEO_PGA 1000L
-#define CAL_PI_KI_NUM_GEO_PGA 3L
-#define CAL_PI_KI_DIV_GEO_PGA 10000L
+/* Kp y Ki de la simulacion Monte Carlo del lazo
+ * (calculos_modelados/python/calibracion_pi). 500 corridas por punto sobre
+ * 120 pares Kp-Ki, con la planta medida de esta placa, el offset de entrada
+ * de los operacionales sorteado en +-2 mV (maximo del datasheet del
+ * CY8C58LP) y deriva termica. Verificado ademas contra la constante de
+ * tiempo del filtro, que es la suposicion mas debil del modelo: converge el
+ * 100 % de las corridas con tau entre 10 y 300 muestras, y es la sintonia
+ * mas rapida en el peor tau (mediana 577-648 muestras). */
+#define CAL_PI_KP_NUM_GEO_PGA 4L
+#define CAL_PI_KP_DIV_GEO_PGA 1L
+#define CAL_PI_KI_NUM_GEO_PGA 1L
+#define CAL_PI_KI_DIV_GEO_PGA 2L
 
 #ifndef CAL_PI_LOCK_SAMPLES_GEO_PGA
 #define CAL_PI_LOCK_SAMPLES_GEO_PGA 512u
