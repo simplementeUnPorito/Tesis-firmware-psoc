@@ -19,7 +19,26 @@
  * VDAC, que no tiene sentido en un IDAC con signo. */
 #define CAL_DAC_CENTER_GEO_SUM 0
 
-#define CAL_DAC_MAX_CHANGE_GEO_SUM CAL_IDAC_SIGNED_MAX
+/* ACOTADO POR MEDICION el 2026-09-04, antes era el rango completo (255).
+ *
+ * El barrido de la curva mostro que esta etapa SATURA, y no poco: su pendiente
+ * local va de 1963 uV/codigo en el centro a 0,4 uV/codigo en los extremos, un
+ * factor 5000. El rango donde la pendiente supera el 30 % de su mediana es
+ * -178 .. +128, o sea que el 40 % del recorrido nominal no sirve para nada.
+ * Fuera de ahi el lazo empuja sin efecto y termina contra el riel.
+ *
+ * OJO, la curva en S es REAL. En el handoff del 2026-09-03 quedo escrito que
+ * era un limitador de firmware y no recorte de la etapa. Eran DOS efectos: el
+ * limitador existia y se saco, y debajo estaba esta saturacion, que tapaba.
+ *
+ * Se usa 128 y no 178 porque el clamp de calibration.c es SIMETRICO respecto de
+ * dac_center, asi que hay que tomar el lado que ata. Se pierde el tramo
+ * -178..-128, que si es util. Soportar limites asimetricos seria mejor y es un
+ * cambio chico, pero toca la estructura y todos los inicializadores; queda
+ * anotado como mejora, no se hace a las apuradas.
+ *
+ * Ver docs/MEDICIONES_2026-09-04.md, seccion 3. */
+#define CAL_DAC_MAX_CHANGE_GEO_SUM 128
 
 #ifndef CAL_PI_GAIN_GEO_SUM_X1000
 /* Ganancia fisica referencia -> tap, medida en la placa el 2026-09-02
