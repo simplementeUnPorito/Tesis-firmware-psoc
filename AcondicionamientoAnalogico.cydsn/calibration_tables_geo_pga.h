@@ -32,8 +32,11 @@
 
 /* Delta_PGA del firmware actual. La corrida experimental documentada en el
  * manuscrito uso deliberadamente Delta_PGA=18. */
-#ifndef CAL_PI_DEADBAND_GEO_PGA_DAC_CODES
-#define CAL_PI_DEADBAND_GEO_PGA_DAC_CODES 1L
+#ifndef CAL_PI_DEADBAND_GEO_PGA_1X_COUNTS
+#define CAL_PI_DEADBAND_GEO_PGA_1X_COUNTS 5L
+#define CAL_PI_DEADBAND_GEO_PGA_2X_COUNTS 7L
+#define CAL_PI_DEADBAND_GEO_PGA_4X_COUNTS 10L
+#define CAL_PI_DEADBAND_GEO_PGA_8X_COUNTS 17L
 #endif
 
 /* Kp y Ki de la simulacion Monte Carlo del lazo
@@ -44,17 +47,24 @@
  * tiempo del filtro, que es la suposicion mas debil del modelo: converge el
  * 100 % de las corridas con tau entre 10 y 300 muestras, y es la sintonia
  * mas rapida en el peor tau (mediana 577-648 muestras). */
-#define CAL_PI_KP_NUM_GEO_PGA 4L
+#define CAL_PI_KP_NUM_GEO_PGA 1L
 #define CAL_PI_KP_DIV_GEO_PGA 1L
-#define CAL_PI_KI_NUM_GEO_PGA 1L
-#define CAL_PI_KI_DIV_GEO_PGA 2L
+#define CAL_PI_KI_NUM_GEO_PGA 0L
+#define CAL_PI_KI_DIV_GEO_PGA 1L
 
 #ifndef CAL_PI_LOCK_SAMPLES_GEO_PGA
-#define CAL_PI_LOCK_SAMPLES_GEO_PGA 512u
+#define CAL_PI_LOCK_SAMPLES_GEO_PGA 3u
 #endif
 
 #ifndef CAL_PI_SETTLE_SAMPLES_GEO_PGA
-#define CAL_PI_SETTLE_SAMPLES_GEO_PGA 512u
+#define CAL_PI_SETTLE_SAMPLES_GEO_PGA CAL_PI_FIR_SETTLE_SAMPLES
+#endif
+
+/* Espera de la planta para esta etapa. Ver el bloque de
+ * CAL_PI_PLANT_SETTLE_* en calibration_tables.h: es un concepto distinto
+ * del vaciado del FIR de arriba, y hoy vale cero a proposito. */
+#ifndef CAL_PI_PLANT_SETTLE_SAMPLES_GEO_PGA
+#define CAL_PI_PLANT_SETTLE_SAMPLES_GEO_PGA CAL_PI_PLANT_SETTLE_SAMPLES_DEFAULT
 #endif
 
 #ifndef CAL_PI_TIMEOUT_SAMPLES_GEO_PGA
@@ -66,7 +76,7 @@
 #endif
 
 #ifndef CAL_PI_REFINE_SETTLE_SAMPLES_GEO_PGA
-#define CAL_PI_REFINE_SETTLE_SAMPLES_GEO_PGA 1024u
+#define CAL_PI_REFINE_SETTLE_SAMPLES_GEO_PGA CAL_PI_FIR_SETTLE_SAMPLES
 #endif
 
 #endif

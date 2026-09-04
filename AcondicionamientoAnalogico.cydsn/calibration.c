@@ -183,32 +183,51 @@ static int32 abs_counts(int32 value)
 #define CAL_DIAG_SWEEP_SETTLE_MS 30u
 #endif
 
-#ifndef CAL_ADC_DIRECT_WAIT_POLLS
-#define CAL_ADC_DIRECT_WAIT_POLLS 60000u
+#ifndef CAL_ADC_DIRECT_CONVERSION_MS
+/* El ADC DelSig entrega a 2604 Sa/s en la configuracion de calibracion. La
+ * ISR de la ruta filtrada tambien lee el status de fin de conversion, por lo
+ * que hacer polling de ADC_IsEndConversion(RETURN_STATUS) desde foreground
+ * tiene una carrera: la ISR puede consumir todos los flags y el viejo helper
+ * terminaba devolviendo un cero inventado. El Delta-Sigma conserva memoria
+ * de su propio filtro decimador al cambiar AMux: 2 ms alcanzaban para obtener
+ * un dato nuevo, pero no uno asentado (el error era especialmente visible al
+ * pasar de SUM a LP). Treinta milisegundos dejan unas 78 conversiones reales
+ * y solo agregan ~120 ms al precheck completo de cuatro etapas. */
+#define CAL_ADC_DIRECT_CONVERSION_MS 30u
+#endif
+
+/* El servo de offset necesita el valor DC del tap, no la ruta DMA/DFB que se
+ * reconfigura al entrar y salir de adquisicion. En banco el ADC directo dio
+ * medidas repetibles, mientras el ultimo valor del DFB podia corresponder al
+ * transitorio de la ruta anterior y cerraba falsamente cerca del target. */
+#ifndef CAL_PI_USE_DIRECT_ADC
+#define CAL_PI_USE_DIRECT_ADC 1u
 #endif
 
 static int32 cal_adc_read_direct_counts(void)
 {
     int32 sample;
-    uint16 guard;
-    uint8 ready = 0u;
 
     ADC_StopConvert();
     ADC_StartConvert();
-    for (guard = 0u; guard < (uint16)CAL_ADC_DIRECT_WAIT_POLLS; guard++) {
-        if (ADC_IsEndConversion(ADC_RETURN_STATUS)) {
-            ready = 1u;
-            break;
-        }
-    }
-    if (!ready) {
-        ADC_StopConvert();
-        return 0L;
-    }
+    CyDelay(CAL_ADC_DIRECT_CONVERSION_MS);
     sample = ADC_GetResult32();
     ADC_StopConvert();
 
     return psoc_adc_counts_right_aligned(sample);
+}
+
+static uint8 cal_pi_take_control_sample(int32 *sample)
+{
+#if CAL_PI_USE_DIRECT_ADC
+    if (sample == (int32 *)0) {
+        return 0u;
+    }
+    *sample = cal_adc_read_direct_counts();
+    return 1u;
+#else
+    return psoc_adc_take_isr_filtered_sample(sample);
+#endif
 }
 
 static int32 cal_pi_compare_counts(int32 measured)
@@ -216,7 +235,13 @@ static int32 cal_pi_compare_counts(int32 measured)
 #if PSOC_HW_CLASS == PSOC_HW_HAMMER
     return abs_counts(measured);
 #else
-    return measured;
+    /* Los taps GEO descansan fisicamente sobre Vref ~= 1 V; el cero que se
+     * calibra es la componente diferencial alrededor de ese modo comun. El
+     * ADC entrega el nivel absoluto (unas 52429 cuentas/V en CF_2V5), por lo
+     * que centrar aqui mantiene los targets de las tablas expresados en el
+     * dominio correcto: 0 counts == tap exactamente en Vref. La telemetria
+     * conserva `measured` crudo y expone `cmp` ya centrado. */
+    return measured - CAL_TARGET_1V_COUNTS;
 #endif
 }
 
@@ -574,13 +599,41 @@ typedef struct {
     int32 ki_num;
     int32 ki_div;
     int32 gain_x1000;       /* ganancia fija VDAC->medida; 0 = dinamica por etapa */
-    int32 deadband_dac;     /* Delta_i usado; 0 = derivar del piso fisico */
+    int32 deadband_counts;  /* banda fisica del tap, en counts del ADC */
     uint16 lock_samples;    /* M muestras en la misma celda de error */
-    uint16 settle_samples;  /* espera inicial del FIR al cambiar AMux/VDAC */
-    uint16 timeout_samples; /* techo de muestras de PI para esta etapa */
+    /* POR QUE ESTOS TRES SON uint32 Y NO uint16
+     * La planta tarda tau ~ 31 s en asentarse (R4*C1 = 43k x 680 uF = 29,2 s
+     * del esquematico, 31,3 s medidos el 2026-09-03). A 2604 Hz, 5 tau son
+     * 407.526 muestras. En uint16 el techo es 65.535 = 25,2 s: no entra ni UN
+     * tau. Y el modo de falla es el peor posible, porque no avisa: 407.526
+     * truncado a 16 bits da 14.310 muestras = 5,5 s. Compila limpio, corre, y
+     * espera veintiocho veces menos de lo pedido. */
+    uint32 settle_samples;  /* espera del FIR al cambiar AMux/VDAC: 128 muestras */
+    uint32 plant_settle_samples; /* espera de la PLANTA, ver abajo */
+    uint32 timeout_samples; /* techo de muestras de PI para esta etapa */
     uint8 refine_enable;    /* prueba final de +/-1 codigo VDAC */
-    uint16 refine_settle_samples;
+    uint32 refine_settle_samples;
 } PsocCalPiCfg;
+
+/* SETTLE vs PLANT_SETTLE: son dos esperas distintas que estaban colapsadas en
+ * una sola constante, y esa confusion es la causa de fondo del problema.
+ *
+ *   settle_samples       vacia el FIR. Son exactamente FILTER_FIR_NTAPS = 128
+ *                        muestras (49 ms), porque el filtro tiene ganancia DC
+ *                        uno y ese es el tiempo que tarda su ventana en
+ *                        contener solo muestras posteriores al cambio. Este
+ *                        numero SIEMPRE estuvo bien.
+ *
+ *   plant_settle_samples espera a que la CADENA ANALOGICA se asiente despues de
+ *                        que una etapa de aguas arriba movio su referencia. Es
+ *                        un multiplo de tau, del orden de 10^5 muestras. Este
+ *                        numero NO EXISTIA: no es que estuviera mal calculado,
+ *                        es que el concepto faltaba.
+ *
+ * Sin el segundo, cada etapa medía su tap mientras todavía se movía por lo que
+ * acababa de hacer la anterior, y el lazo anulaba perfectamente un valor
+ * equivocado. De ahi los tres sintomas: oscila, el watchdog aborta, y lo que
+ * consigue no se sostiene. */
 
 typedef struct {
     PsocCalPiState state;
@@ -588,9 +641,12 @@ typedef struct {
     int32 last_fir_output;
     int32 last_error_dac;
     int32 last_error_bucket;
-    uint16 samples_taken;
+    /* uint32 por el mismo motivo que en PsocCalPiCfg: con la espera de planta
+     * estos contadores pasan de 10^5, y en uint16 daban la vuelta en silencio. */
+    uint32 samples_taken;
     uint16 stable_count;
-    uint16 settle_remaining;
+    uint32 settle_remaining;
+    uint32 control_hold_remaining; /* memoria FIR pendiente tras mover el DAC */
     int32 refine_base_measured;
     int32 refine_base_abs_error;
     int16 refine_base_dac;
@@ -629,17 +685,17 @@ static int32 cal_pi_clip_integral(int32 value)
 
 #if PSOC_HW_CLASS == PSOC_HW_GEO
 static const PsocCalPiCfg g_cal_pi_cfg[PSOC_CAL_STAGE_COUNT] = {
-    { CAL_PI_KP_NUM_GEO_PGA, CAL_PI_KP_DIV_GEO_PGA, CAL_PI_KI_NUM_GEO_PGA, CAL_PI_KI_DIV_GEO_PGA, CAL_PI_GAIN_GEO_PGA_X1000, CAL_PI_DEADBAND_GEO_PGA_DAC_CODES, CAL_PI_LOCK_SAMPLES_GEO_PGA, CAL_PI_SETTLE_SAMPLES_GEO_PGA, CAL_PI_TIMEOUT_SAMPLES_GEO_PGA, CAL_PI_REFINE_ENABLE_GEO_PGA, CAL_PI_REFINE_SETTLE_SAMPLES_GEO_PGA },
+    { CAL_PI_KP_NUM_GEO_PGA, CAL_PI_KP_DIV_GEO_PGA, CAL_PI_KI_NUM_GEO_PGA, CAL_PI_KI_DIV_GEO_PGA, CAL_PI_GAIN_GEO_PGA_X1000, CAL_PI_DEADBAND_GEO_PGA_1X_COUNTS, CAL_PI_LOCK_SAMPLES_GEO_PGA, CAL_PI_SETTLE_SAMPLES_GEO_PGA, CAL_PI_PLANT_SETTLE_SAMPLES_GEO_PGA, CAL_PI_TIMEOUT_SAMPLES_GEO_PGA, CAL_PI_REFINE_ENABLE_GEO_PGA, CAL_PI_REFINE_SETTLE_SAMPLES_GEO_PGA },
 #if defined(VDAC_ref_BP_DEFAULT_DATA) || defined(CY_DVDAC_VDAC_ref_BP_H)
-    { CAL_PI_KP_NUM_GEO_BP, CAL_PI_KP_DIV_GEO_BP, CAL_PI_KI_NUM_GEO_BP, CAL_PI_KI_DIV_GEO_BP, CAL_PI_GAIN_GEO_BP_X1000, CAL_PI_DEADBAND_GEO_BP_DAC_CODES, CAL_PI_LOCK_SAMPLES_GEO_BP, CAL_PI_SETTLE_SAMPLES_GEO_BP, CAL_PI_TIMEOUT_SAMPLES_GEO_BP, CAL_PI_REFINE_ENABLE_GEO_BP, CAL_PI_REFINE_SETTLE_SAMPLES_GEO_BP },
+    { CAL_PI_KP_NUM_GEO_BP, CAL_PI_KP_DIV_GEO_BP, CAL_PI_KI_NUM_GEO_BP, CAL_PI_KI_DIV_GEO_BP, CAL_PI_GAIN_GEO_BP_X1000, CAL_PI_DEADBAND_GEO_BP_COUNTS, CAL_PI_LOCK_SAMPLES_GEO_BP, CAL_PI_SETTLE_SAMPLES_GEO_BP, CAL_PI_PLANT_SETTLE_SAMPLES_GEO_BP, CAL_PI_TIMEOUT_SAMPLES_GEO_BP, CAL_PI_REFINE_ENABLE_GEO_BP, CAL_PI_REFINE_SETTLE_SAMPLES_GEO_BP },
 #endif
-    { CAL_PI_KP_NUM_GEO_SUM, CAL_PI_KP_DIV_GEO_SUM, CAL_PI_KI_NUM_GEO_SUM, CAL_PI_KI_DIV_GEO_SUM, CAL_PI_GAIN_GEO_SUM_X1000, CAL_PI_DEADBAND_GEO_SUM_DAC_CODES, CAL_PI_LOCK_SAMPLES_GEO_SUM, CAL_PI_SETTLE_SAMPLES_GEO_SUM, CAL_PI_TIMEOUT_SAMPLES_GEO_SUM, CAL_PI_REFINE_ENABLE_GEO_SUM, CAL_PI_REFINE_SETTLE_SAMPLES_GEO_SUM },
-    { CAL_PI_KP_NUM_GEO_LP, CAL_PI_KP_DIV_GEO_LP, CAL_PI_KI_NUM_GEO_LP, CAL_PI_KI_DIV_GEO_LP, CAL_PI_GAIN_GEO_LP_X1000, CAL_PI_DEADBAND_GEO_LP_DAC_CODES, CAL_PI_LOCK_SAMPLES_GEO_LP, CAL_PI_SETTLE_SAMPLES_GEO_LP, CAL_PI_TIMEOUT_SAMPLES_GEO_LP, CAL_PI_REFINE_ENABLE_GEO_LP, CAL_PI_REFINE_SETTLE_SAMPLES_GEO_LP },
+    { CAL_PI_KP_NUM_GEO_SUM, CAL_PI_KP_DIV_GEO_SUM, CAL_PI_KI_NUM_GEO_SUM, CAL_PI_KI_DIV_GEO_SUM, CAL_PI_GAIN_GEO_SUM_X1000, CAL_PI_DEADBAND_GEO_SUM_COUNTS, CAL_PI_LOCK_SAMPLES_GEO_SUM, CAL_PI_SETTLE_SAMPLES_GEO_SUM, CAL_PI_PLANT_SETTLE_SAMPLES_GEO_SUM, CAL_PI_TIMEOUT_SAMPLES_GEO_SUM, CAL_PI_REFINE_ENABLE_GEO_SUM, CAL_PI_REFINE_SETTLE_SAMPLES_GEO_SUM },
+    { CAL_PI_KP_NUM_GEO_LP, CAL_PI_KP_DIV_GEO_LP, CAL_PI_KI_NUM_GEO_LP, CAL_PI_KI_DIV_GEO_LP, CAL_PI_GAIN_GEO_LP_X1000, CAL_PI_DEADBAND_GEO_LP_COUNTS, CAL_PI_LOCK_SAMPLES_GEO_LP, CAL_PI_SETTLE_SAMPLES_GEO_LP, CAL_PI_PLANT_SETTLE_SAMPLES_GEO_LP, CAL_PI_TIMEOUT_SAMPLES_GEO_LP, CAL_PI_REFINE_ENABLE_GEO_LP, CAL_PI_REFINE_SETTLE_SAMPLES_GEO_LP },
 };
 #else
 static const PsocCalPiCfg g_cal_pi_cfg[PSOC_CAL_STAGE_COUNT] = {
-    { CAL_PI_KP_NUM_HAMMER_PGA, CAL_PI_KP_DIV_HAMMER_PGA, CAL_PI_KI_NUM_HAMMER_PGA, CAL_PI_KI_DIV_HAMMER_PGA, CAL_PI_GAIN_HAMMER_PGA_X1000, CAL_PI_DEADBAND_HAMMER_PGA_DAC_CODES, CAL_PI_LOCK_SAMPLES_HAMMER_PGA, CAL_PI_SETTLE_SAMPLES_HAMMER_PGA, CAL_PI_TIMEOUT_SAMPLES_HAMMER_PGA, CAL_PI_REFINE_ENABLE_HAMMER_PGA, CAL_PI_REFINE_SETTLE_SAMPLES_HAMMER_PGA },
-    { CAL_PI_KP_NUM_HAMMER_LP, CAL_PI_KP_DIV_HAMMER_LP, CAL_PI_KI_NUM_HAMMER_LP, CAL_PI_KI_DIV_HAMMER_LP, CAL_PI_GAIN_HAMMER_LP_X1000, CAL_PI_DEADBAND_HAMMER_LP_DAC_CODES, CAL_PI_LOCK_SAMPLES_HAMMER_LP, CAL_PI_SETTLE_SAMPLES_HAMMER_LP, CAL_PI_TIMEOUT_SAMPLES_HAMMER_LP, CAL_PI_REFINE_ENABLE_HAMMER_LP, CAL_PI_REFINE_SETTLE_SAMPLES_HAMMER_LP },
+    { CAL_PI_KP_NUM_HAMMER_PGA, CAL_PI_KP_DIV_HAMMER_PGA, CAL_PI_KI_NUM_HAMMER_PGA, CAL_PI_KI_DIV_HAMMER_PGA, CAL_PI_GAIN_HAMMER_PGA_X1000, CAL_PI_DEADBAND_HAMMER_PGA_COUNTS, CAL_PI_LOCK_SAMPLES_HAMMER_PGA, CAL_PI_SETTLE_SAMPLES_HAMMER_PGA, CAL_PI_PLANT_SETTLE_SAMPLES_HAMMER_PGA, CAL_PI_TIMEOUT_SAMPLES_HAMMER_PGA, CAL_PI_REFINE_ENABLE_HAMMER_PGA, CAL_PI_REFINE_SETTLE_SAMPLES_HAMMER_PGA },
+    { CAL_PI_KP_NUM_HAMMER_LP, CAL_PI_KP_DIV_HAMMER_LP, CAL_PI_KI_NUM_HAMMER_LP, CAL_PI_KI_DIV_HAMMER_LP, CAL_PI_GAIN_HAMMER_LP_X1000, CAL_PI_DEADBAND_HAMMER_LP_COUNTS, CAL_PI_LOCK_SAMPLES_HAMMER_LP, CAL_PI_SETTLE_SAMPLES_HAMMER_LP, CAL_PI_PLANT_SETTLE_SAMPLES_HAMMER_LP, CAL_PI_TIMEOUT_SAMPLES_HAMMER_LP, CAL_PI_REFINE_ENABLE_HAMMER_LP, CAL_PI_REFINE_SETTLE_SAMPLES_HAMMER_LP },
 };
 #endif
 
@@ -678,46 +734,48 @@ static int32 cal_pi_stage_gain_x1000(uint8 stage_index)
     return configured_gain;
 }
 
-static int32 cal_pi_deadband_dac_codes(uint8 stage_index)
+static int32 cal_pi_deadband_counts(uint8 stage_index)
 {
 #ifdef CAL_PI_FORCE_MIN_DEADBAND
     (void)stage_index;
-    return CAL_PI_DEADBAND_MIN_DAC_CODES;
+    return CAL_PI_DEADBAND_MIN_COUNTS;
 #else
-    int32 deadband = g_cal_pi_cfg[stage_index].deadband_dac;
-    int32 gain_x1000;
-    int64 num;
-    int64 den;
+    int32 deadband = g_cal_pi_cfg[stage_index].deadband_counts;
 
-    if (deadband <= 0L) {
-        gain_x1000 = cal_pi_stage_gain_x1000(stage_index);
-        if (gain_x1000 < 0L) {
-            gain_x1000 = -gain_x1000;
+#if PSOC_HW_CLASS == PSOC_HW_GEO
+    if (stage_index == 0u) {
+        uint16 gain_x1000 = psoc_hw_pga_gain_x1000();
+        if (gain_x1000 >= 6000u) {
+            deadband = CAL_PI_DEADBAND_GEO_PGA_8X_COUNTS;
+        } else if (gain_x1000 >= 3000u) {
+            deadband = CAL_PI_DEADBAND_GEO_PGA_4X_COUNTS;
+        } else if (gain_x1000 >= 1500u) {
+            deadband = CAL_PI_DEADBAND_GEO_PGA_2X_COUNTS;
+        } else {
+            deadband = CAL_PI_DEADBAND_GEO_PGA_1X_COUNTS;
         }
-        num = (int64)gain_x1000 * (int64)CAL_PI_DEADBAND_MARGIN_NUM;
-        den = 1000LL * (int64)CAL_PI_DEADBAND_MARGIN_DEN;
-        deadband = (int32)((num + den - 1LL) / den);
     }
-    if (deadband < CAL_PI_DEADBAND_MIN_DAC_CODES) {
-        deadband = CAL_PI_DEADBAND_MIN_DAC_CODES;
+#endif
+    if (deadband < CAL_PI_DEADBAND_MIN_COUNTS) {
+        deadband = CAL_PI_DEADBAND_MIN_COUNTS;
     }
     return deadband;
 #endif
 }
 
-static int32 cal_pi_error_bucket(int32 error_dac, int32 deadband_dac)
+static int32 cal_pi_error_bucket(int32 error_counts, int32 deadband_counts)
 {
     int32 abs_error;
     int32 span;
     int32 bucket;
 
-    span = (deadband_dac <= 0L) ? 1L : deadband_dac;
-    abs_error = abs_counts(error_dac);
+    span = (deadband_counts <= 0L) ? 1L : deadband_counts;
+    abs_error = abs_counts(error_counts);
     if (abs_error <= span) {
         return 0L;
     }
     bucket = 1L + ((abs_error - span - 1L) / span);
-    return (error_dac < 0L) ? -bucket : bucket;
+    return (error_counts < 0L) ? -bucket : bucket;
 }
 
 static uint8 cal_pi_measurement_valid(int32 measured)
@@ -746,10 +804,9 @@ static uint8 cal_stage_value_in_tolerance(uint8 stage_index, int32 measured)
     const PsocCalStage *stage = &g_psoc_cal_stages[stage_index];
     int32 control_sample = cal_pi_compare_counts(measured);
     int32 error_counts = stage->target_counts - control_sample;
-    int32 error_dac = cal_counts_error_to_dac_scale(error_counts);
-    int32 deadband_dac = cal_pi_deadband_dac_codes(stage_index);
+    int32 deadband_counts = cal_pi_deadband_counts(stage_index);
 
-    return (abs_counts(error_dac) <= deadband_dac &&
+    return (abs_counts(error_counts) <= deadband_counts &&
             cal_pi_measurement_valid(measured)) ? 1u : 0u;
 }
 
@@ -812,9 +869,79 @@ static int32 cal_pi_gain_scaled_term(int32 value, int32 num, int32 div, int32 ga
     if (gain_x1000 == 0L) {
         gain_x1000 = 1000L;
     }
-    return sign * cal_round_div_i64((int64)value * (int64)num * 1000LL,
-                                    (int64)div * (int64)gain_x1000);
+    /* value permanece en counts hasta esta division. La version anterior lo
+     * redondeaba primero a un codigo IDAC entero y recien despues dividia por
+     * la ganancia: en GEO_PGA eso descartaba correcciones reales de varios
+     * LSB del actuador. Esta expresion encadena counts->uV->IDAC->etapa en un
+     * unico cociente int64 y conserva toda la resolucion. */
+    return sign * cal_round_div_i64(
+        (int64)value * (int64)num * (int64)CAL_ADC_SPAN_UV * 1000LL,
+        (int64)div * (int64)CAL_ADC_LEVELS *
+        (int64)CAL_IDAC_UV_PER_LSB * (int64)gain_x1000);
 }
+
+#if PSOC_HW_CLASS == PSOC_HW_GEO
+/* Transferencia firmada Vref_LP -> tap, medida en la placa el 2026-09-03.
+ * Los valores son delta-counts respecto del codigo cero. Se usa solamente la
+ * pendiente de cuerda entre el seed y el esfuerzo candidato: el PI sigue
+ * cerrando el lazo con la medida, pero deja de suponer que la ganancia es
+ * constante cuando en la mitad negativa cambia por un factor 2,6. */
+static const int16 g_cal_geo_lp_codes[] = {
+    -255, -224, -192, -160, -128, -96, -64, 0,
+      32,   64,   96,  128,  160, 192, 224, 255
+};
+static const int16 g_cal_geo_lp_delta_counts[] = {
+    -13367, -12582, -10319, -7995, -5761, -3649, -1870, 0,
+       930,   1813,   2706,  3578,  4424,  5279,  6132, 6367
+};
+#define CAL_GEO_LP_CURVE_POINTS \
+    ((uint8)(sizeof(g_cal_geo_lp_codes) / sizeof(g_cal_geo_lp_codes[0])))
+
+static int32 cal_pi_geo_lp_response_counts(int16 code)
+{
+    uint8 i;
+
+    if (code <= g_cal_geo_lp_codes[0]) {
+        return (int32)g_cal_geo_lp_delta_counts[0];
+    }
+    for (i = 1u; i < CAL_GEO_LP_CURVE_POINTS; i++) {
+        int16 x1 = g_cal_geo_lp_codes[i];
+        if (code <= x1) {
+            int16 x0 = g_cal_geo_lp_codes[i - 1u];
+            int32 y0 = (int32)g_cal_geo_lp_delta_counts[i - 1u];
+            int32 y1 = (int32)g_cal_geo_lp_delta_counts[i];
+            return y0 + cal_round_div_i64((int64)(code - x0) * (int64)(y1 - y0),
+                                          (int64)(x1 - x0));
+        }
+    }
+    return (int32)g_cal_geo_lp_delta_counts[CAL_GEO_LP_CURVE_POINTS - 1u];
+}
+
+static int32 cal_pi_geo_lp_chord_gain_x1000(int16 base_dac, int16 target_dac)
+{
+    int32 delta_counts;
+    int32 delta_code;
+    int32 gain;
+
+    if (target_dac == base_dac) {
+        if (target_dac < PSOC_IDAC_SIGNED_MAX) {
+            target_dac++;
+        } else {
+            target_dac--;
+        }
+    }
+    delta_counts = cal_pi_geo_lp_response_counts(target_dac) -
+                   cal_pi_geo_lp_response_counts(base_dac);
+    delta_code = (int32)target_dac - (int32)base_dac;
+    gain = abs_counts(cal_round_div_i64(
+        (int64)delta_counts * (int64)CAL_ADC_SPAN_UV * 1000LL,
+        (int64)delta_code * (int64)CAL_ADC_LEVELS *
+        (int64)CAL_IDAC_UV_PER_LSB));
+    if (gain < 200L) { gain = 200L; }
+    if (gain > 850L) { gain = 850L; }
+    return gain;
+}
+#endif
 
 static int8 cal_pi_effort_delta_sign(int32 control_error, int8 direction, int32 gain_x1000)
 {
@@ -920,7 +1047,11 @@ static uint8 cal_pi_finish_stage(uint8 ok)
     g_cal_pi.refine_trial_dac = trial_dac;
     g_cal_pi.refine_base_measured = g_cal_pi.last_fir_output;
     g_cal_pi.refine_base_abs_error = cal_pi_abs_error_counts(stage, g_cal_pi.last_fir_output);
+#if CAL_PI_USE_DIRECT_ADC
+    g_cal_pi.settle_remaining = 1u;
+#else
     g_cal_pi.settle_remaining = cfg->refine_settle_samples;
+#endif
     g_cal_pi.empty_polls = 0UL;
     g_cal_pi.dac_current = trial_dac;
     stage->write(trial_dac);
@@ -933,15 +1064,19 @@ static void cal_pi_stage_begin(void)
     const PsocCalStage *stage = &g_psoc_cal_stages[g_cal_async.stage_index];
     const PsocCalPiCfg *cfg = &g_cal_pi_cfg[g_cal_async.stage_index];
     int32 stage_gain_x1000;
-    int32 deadband_dac;
+    int32 deadband_counts;
+
+#if CAL_PI_USE_DIRECT_ADC
+    (void)cfg;
+#endif
 
     cal_diag(PSOC_EVT_CAL_STAGE_BEGIN, g_cal_async.stage_index);
     cal_diag_i32(PSOC_EVT_CAL_STAGE_TARGET32, stage->target_counts);
     stage_gain_x1000 = cal_pi_stage_gain_x1000(g_cal_async.stage_index);
-    deadband_dac = cal_pi_deadband_dac_codes(g_cal_async.stage_index);
+    deadband_counts = cal_pi_deadband_counts(g_cal_async.stage_index);
     cal_diag_i32(PSOC_EVT_CAL_PI_GAIN32, stage_gain_x1000);
     cal_diag(PSOC_EVT_CAL_PI_DEADBAND,
-             (deadband_dac > 255L) ? 255u : (uint8)deadband_dac);
+             (deadband_counts > 255L) ? 255u : (uint8)deadband_counts);
 
     g_cal_pi.integral = 0L;
     g_cal_pi.samples_taken = 0u;
@@ -952,7 +1087,14 @@ static void cal_pi_stage_begin(void)
     g_cal_pi.last_dac_target = 0u;
     g_cal_pi.last_fir_output = 0L;
     g_cal_pi.empty_polls = 0UL;
-    g_cal_pi.settle_remaining = cfg->settle_samples;
+#if CAL_PI_USE_DIRECT_ADC
+    /* Una lectura descartada despues de seleccionar AMux. Cada lectura
+     * directa ya mantiene conversiones durante CAL_ADC_DIRECT_CONVERSION_MS. */
+    g_cal_pi.settle_remaining = 1u;
+#else
+    g_cal_pi.settle_remaining = cfg->settle_samples + cfg->plant_settle_samples;
+#endif
+    g_cal_pi.control_hold_remaining = 0u;
     g_cal_pi.refine_base_measured = 0L;
     g_cal_pi.refine_base_abs_error = 0L;
     g_cal_pi.refine_base_dac = 0u;
@@ -972,11 +1114,20 @@ static void cal_pi_stage_begin(void)
 
     stage->write(g_cal_pi.dac_current);
 
+    /* Al cambiar de AMux, la linea de retardo contiene otra etapa. Borrarla
+     * permite que el settle sea exactamente la longitud del FIR, no un margen
+     * empirico de 512 muestras. */
+    psoc_filter_reset_history();
+
     /* El PI no promedia/EMA en software: extrae el DC con el FIR de hardware
      * (Canal A del Filter, coeficientes de FIR_calibration.h cargados en
      * cal_pi_start) -- ADC -> Filter_STAGEA -> DMA_Filter_RAM, leido muestra
      * a muestra en cal_pi_run_service. */
+#if CAL_PI_USE_DIRECT_ADC
+    dma_route_select(0u);
+#else
     dma_route_select(1u);
+#endif
     psoc_filter_reset_history();
     psoc_adc_clear_isr_filtered_sample();
 #ifdef CY_ISR_isr_DMA_Filter_RAM_H
@@ -991,7 +1142,7 @@ static uint8 cal_pi_settle_service(void)
 {
     int32 sample;
 
-    if (!psoc_adc_take_isr_filtered_sample(&sample)) {
+    if (!cal_pi_take_control_sample(&sample)) {
         g_cal_pi.empty_polls++;
         if (g_cal_pi.empty_polls >= CAL_ASYNC_EMPTY_POLL_LIMIT) {
             return cal_pi_finish_stage(0u);
@@ -1025,7 +1176,7 @@ static uint8 cal_pi_refine_service(void)
     int32 sample;
     int32 trial_abs_error;
 
-    if (!psoc_adc_take_isr_filtered_sample(&sample)) {
+    if (!cal_pi_take_control_sample(&sample)) {
         g_cal_pi.empty_polls++;
         if (g_cal_pi.empty_polls >= CAL_ASYNC_EMPTY_POLL_LIMIT) {
             stage->write(g_cal_pi.refine_base_dac);
@@ -1078,11 +1229,15 @@ static uint8 cal_pi_run_service(void)
     int32 p_term;
     int32 i_term;
     int32 stage_gain_x1000;
-    int32 deadband_dac;
+    int32 deadband_counts;
     int32 error_bucket;
     int32 dac_max_step_up;
     int32 dac_max_step_down;
-    uint16 sample_index;
+    /* uint32 igual que samples_taken: si se queda en uint16 vuelve a
+     * truncar justo lo que se acaba de ensanchar. Hoy no se nota porque
+     * el contador se resetea al terminar el settle y el timeout es 45000,
+     * pero es la misma trampa esperando a que alguien suba el techo. */
+    uint32 sample_index;
     uint16 lock_n;
     int16 dac_sample;
     int16 dac_lo;
@@ -1092,8 +1247,12 @@ static uint8 cal_pi_run_service(void)
     uint8 can_integrate;
     uint8 dac_changed;
     int8 effort_delta_sign;
+#if PSOC_HW_CLASS == PSOC_HW_GEO
+    uint8 gain_iteration;
+    int16 gain_probe_dac;
+#endif
 
-    if (!psoc_adc_take_isr_filtered_sample(&sample)) {
+    if (!cal_pi_take_control_sample(&sample)) {
         g_cal_pi.empty_polls++;
         if (g_cal_pi.empty_polls >= CAL_ASYNC_EMPTY_POLL_LIMIT) {
             return cal_pi_finish_stage(0u);
@@ -1108,11 +1267,29 @@ static uint8 cal_pi_run_service(void)
     g_cal_pi.last_fir_output = sample;
     control_sample = cal_pi_compare_counts(g_cal_pi.last_fir_output);
     error_counts = stage->target_counts - control_sample;
+    sample_index = g_cal_pi.samples_taken + 1UL;
+    g_cal_pi.samples_taken = sample_index;
+
+    /* Cada salida del FIR mezcla 128 entradas. Despues de mover el DAC se
+     * retiene el siguiente ajuste hasta que todas correspondan al codigo
+     * nuevo; sin esto el PI persigue una medida vieja y llega a los rieles. */
+    if (g_cal_pi.control_hold_remaining > 0u) {
+        g_cal_pi.control_hold_remaining--;
+        if (g_cal_pi.control_hold_remaining > 0u) {
+            if (g_cal_pi.samples_taken >= cfg->timeout_samples) {
+                return cal_pi_finish_stage(0u);
+            }
+            return 0u;
+        }
+    }
+
+    /* error_dac se conserva solo para telemetria compatible. El control y la
+     * banda trabajan en counts para no perder la parte fraccionaria. */
     error_dac = cal_counts_error_to_dac_scale(error_counts);
     stage_gain_x1000 = cal_pi_stage_gain_x1000(g_cal_async.stage_index);
-    deadband_dac = cal_pi_deadband_dac_codes(g_cal_async.stage_index);
-    control_error = (abs_counts(error_dac) <= deadband_dac) ? 0L : error_dac;
-    error_bucket = cal_pi_error_bucket(error_dac, deadband_dac);
+    deadband_counts = cal_pi_deadband_counts(g_cal_async.stage_index);
+    control_error = (abs_counts(error_counts) <= deadband_counts) ? 0L : error_counts;
+    error_bucket = cal_pi_error_bucket(error_counts, deadband_counts);
     dac_sample = g_cal_pi.dac_current;
 
     dac_lo = cal_stage_min_dac(stage);
@@ -1132,6 +1309,42 @@ static uint8 cal_pi_run_service(void)
         p_term = cal_pi_gain_scaled_term(control_error, cfg->kp_num, cfg->kp_div, stage_gain_x1000);
         i_term = cal_pi_gain_scaled_term(g_cal_pi.integral, cfg->ki_num, cfg->ki_div, stage_gain_x1000);
         effort = (int32)g_cal_pi.base_dac + (int32)stage->direction * (p_term + i_term);
+#if CAL_PI_USE_DIRECT_ADC
+        /* Con una observacion DC ya asentada, aplicar la correccion sobre el
+         * codigo actual es un paso de Newton. El PI posicional basado siempre
+         * en base_dac necesitaba cargar integral durante cientos de lecturas y
+         * terminaba siguiendo el polo de BP en vez del error local. */
+        effort = (int32)dac_sample + (int32)stage->direction * p_term;
+#endif
+#if PSOC_HW_CLASS == PSOC_HW_GEO
+        if (stage->adc_channel == 3u) {
+            for (gain_iteration = 0u; gain_iteration < 2u; gain_iteration++) {
+                if (effort < (int32)cal_stage_min_dac(stage)) {
+                    gain_probe_dac = cal_stage_min_dac(stage);
+                } else if (effort > (int32)cal_stage_max_dac(stage)) {
+                    gain_probe_dac = cal_stage_max_dac(stage);
+                } else {
+                    gain_probe_dac = (int16)effort;
+                }
+                stage_gain_x1000 = cal_pi_geo_lp_chord_gain_x1000(
+#if CAL_PI_USE_DIRECT_ADC
+                    dac_sample, gain_probe_dac);
+#else
+                    g_cal_pi.base_dac, gain_probe_dac);
+#endif
+                p_term = cal_pi_gain_scaled_term(control_error, cfg->kp_num,
+                                                  cfg->kp_div, stage_gain_x1000);
+                i_term = cal_pi_gain_scaled_term(g_cal_pi.integral, cfg->ki_num,
+                                                  cfg->ki_div, stage_gain_x1000);
+                effort = (int32)g_cal_pi.base_dac +
+                         (int32)stage->direction * (p_term + i_term);
+#if CAL_PI_USE_DIRECT_ADC
+                effort = (int32)dac_sample +
+                         (int32)stage->direction * p_term;
+#endif
+            }
+        }
+#endif
     }
 
     effort_delta_sign = cal_pi_effort_delta_sign(control_error, stage->direction, stage_gain_x1000);
@@ -1189,8 +1402,6 @@ static uint8 cal_pi_run_service(void)
     g_cal_pi.last_error_bucket = error_bucket;
     g_cal_pi.last_dac_target = dac_target;
 
-    sample_index = (uint16)(g_cal_pi.samples_taken + 1u);
-    g_cal_pi.samples_taken = sample_index;
     if (sample_index == 1u || (sample_index % CAL_PI_TELEM_PERIOD) == 0u) {
         cal_diag_i16(PSOC_EVT_CAL_STAGE_DAC, (int32)dac_sample);
         cal_diag_i32(PSOC_EVT_CAL_STAGE_MEAS32, g_cal_pi.last_fir_output);
@@ -1202,6 +1413,14 @@ static uint8 cal_pi_run_service(void)
 
     g_cal_pi.dac_current = dac_target;
     stage->write(g_cal_pi.dac_current);
+    if (dac_changed) {
+#if CAL_PI_USE_DIRECT_ADC
+        /* La siguiente lectura directa ya integra 30 ms de conversiones. */
+        g_cal_pi.control_hold_remaining = 0u;
+#else
+        g_cal_pi.control_hold_remaining = cfg->settle_samples;
+#endif
+    }
 
     if (g_cal_pi.stable_count >= lock_n) {
         if (error_bucket == 0L && cal_pi_measurement_valid(g_cal_pi.last_fir_output)) {

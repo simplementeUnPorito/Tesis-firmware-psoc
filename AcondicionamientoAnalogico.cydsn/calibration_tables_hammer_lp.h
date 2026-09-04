@@ -28,8 +28,8 @@
 #endif
 
 /* 0 conserva la seleccion automatica a partir de la ganancia fisica. */
-#ifndef CAL_PI_DEADBAND_HAMMER_LP_DAC_CODES
-#define CAL_PI_DEADBAND_HAMMER_LP_DAC_CODES 1L
+#ifndef CAL_PI_DEADBAND_HAMMER_LP_COUNTS
+#define CAL_PI_DEADBAND_HAMMER_LP_COUNTS 39L
 #endif
 
 /* Kp y Ki de la simulacion Monte Carlo del lazo
@@ -38,17 +38,24 @@
  * arranca adentro, asi que manda la grilla con perturbacion real, donde
  * este par converge el 100 % con p95 de 122 a 1089 muestras segun la
  * etapa. Igual quedo marcado como robusto para todos los tau probados. */
-#define CAL_PI_KP_NUM_HAMMER_LP 2L
-#define CAL_PI_KP_DIV_HAMMER_LP 1L
+#define CAL_PI_KP_NUM_HAMMER_LP 1L
+#define CAL_PI_KP_DIV_HAMMER_LP 2L
 #define CAL_PI_KI_NUM_HAMMER_LP 1L
-#define CAL_PI_KI_DIV_HAMMER_LP 1L
+#define CAL_PI_KI_DIV_HAMMER_LP 2L
 
 #ifndef CAL_PI_LOCK_SAMPLES_HAMMER_LP
-#define CAL_PI_LOCK_SAMPLES_HAMMER_LP 1024u
+#define CAL_PI_LOCK_SAMPLES_HAMMER_LP 32u
 #endif
 
 #ifndef CAL_PI_SETTLE_SAMPLES_HAMMER_LP
-#define CAL_PI_SETTLE_SAMPLES_HAMMER_LP 512u
+#define CAL_PI_SETTLE_SAMPLES_HAMMER_LP CAL_PI_FIR_SETTLE_SAMPLES
+#endif
+
+/* Espera de la planta para esta etapa. Ver el bloque de
+ * CAL_PI_PLANT_SETTLE_* en calibration_tables.h: es un concepto distinto
+ * del vaciado del FIR de arriba, y hoy vale cero a proposito. */
+#ifndef CAL_PI_PLANT_SETTLE_SAMPLES_HAMMER_LP
+#define CAL_PI_PLANT_SETTLE_SAMPLES_HAMMER_LP CAL_PI_PLANT_SETTLE_SAMPLES_DEFAULT
 #endif
 
 #ifndef CAL_PI_TIMEOUT_SAMPLES_HAMMER_LP
@@ -60,7 +67,7 @@
 #endif
 
 #ifndef CAL_PI_REFINE_SETTLE_SAMPLES_HAMMER_LP
-#define CAL_PI_REFINE_SETTLE_SAMPLES_HAMMER_LP 2048u
+#define CAL_PI_REFINE_SETTLE_SAMPLES_HAMMER_LP CAL_PI_FIR_SETTLE_SAMPLES
 #endif
 
 #endif

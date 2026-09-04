@@ -28,8 +28,8 @@
 #define CAL_PI_GAIN_HAMMER_PGA_X1000 31L
 
 /* 0 conserva la seleccion automatica a partir de la ganancia fisica. */
-#ifndef CAL_PI_DEADBAND_HAMMER_PGA_DAC_CODES
-#define CAL_PI_DEADBAND_HAMMER_PGA_DAC_CODES 1L
+#ifndef CAL_PI_DEADBAND_HAMMER_PGA_COUNTS
+#define CAL_PI_DEADBAND_HAMMER_PGA_COUNTS 5L
 #endif
 
 /* Kp y Ki de la simulacion Monte Carlo del lazo
@@ -40,17 +40,24 @@
  * tiempo del filtro, que es la suposicion mas debil del modelo: converge el
  * 100 % de las corridas con tau entre 10 y 300 muestras, y es la sintonia
  * mas rapida en el peor tau (mediana 577-648 muestras). */
-#define CAL_PI_KP_NUM_HAMMER_PGA 4L
-#define CAL_PI_KP_DIV_HAMMER_PGA 1L
+#define CAL_PI_KP_NUM_HAMMER_PGA 1L
+#define CAL_PI_KP_DIV_HAMMER_PGA 2L
 #define CAL_PI_KI_NUM_HAMMER_PGA 1L
 #define CAL_PI_KI_DIV_HAMMER_PGA 2L
 
 #ifndef CAL_PI_LOCK_SAMPLES_HAMMER_PGA
-#define CAL_PI_LOCK_SAMPLES_HAMMER_PGA 512u
+#define CAL_PI_LOCK_SAMPLES_HAMMER_PGA 32u
 #endif
 
 #ifndef CAL_PI_SETTLE_SAMPLES_HAMMER_PGA
-#define CAL_PI_SETTLE_SAMPLES_HAMMER_PGA 512u
+#define CAL_PI_SETTLE_SAMPLES_HAMMER_PGA CAL_PI_FIR_SETTLE_SAMPLES
+#endif
+
+/* Espera de la planta para esta etapa. Ver el bloque de
+ * CAL_PI_PLANT_SETTLE_* en calibration_tables.h: es un concepto distinto
+ * del vaciado del FIR de arriba, y hoy vale cero a proposito. */
+#ifndef CAL_PI_PLANT_SETTLE_SAMPLES_HAMMER_PGA
+#define CAL_PI_PLANT_SETTLE_SAMPLES_HAMMER_PGA CAL_PI_PLANT_SETTLE_SAMPLES_DEFAULT
 #endif
 
 #ifndef CAL_PI_TIMEOUT_SAMPLES_HAMMER_PGA
@@ -62,7 +69,7 @@
 #endif
 
 #ifndef CAL_PI_REFINE_SETTLE_SAMPLES_HAMMER_PGA
-#define CAL_PI_REFINE_SETTLE_SAMPLES_HAMMER_PGA 1024u
+#define CAL_PI_REFINE_SETTLE_SAMPLES_HAMMER_PGA CAL_PI_FIR_SETTLE_SAMPLES
 #endif
 
 #endif

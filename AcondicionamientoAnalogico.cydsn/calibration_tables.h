@@ -2,6 +2,7 @@
 #define CALIBRATION_TABLES_H
 
 #include "calibration.h"
+#include "filter_coeffs.h"
 
 /* Agregador de calibracion activo.
  *
@@ -86,16 +87,16 @@
  * Dejar comentado en builds normales. */
 /* #define CAL_PI_FORCE_MIN_DEADBAND */
 
-#ifndef CAL_PI_DEADBAND_MARGIN_NUM
-#define CAL_PI_DEADBAND_MARGIN_NUM 6L
+#ifndef CAL_PI_DEADBAND_MIN_COUNTS
+#define CAL_PI_DEADBAND_MIN_COUNTS 1L
 #endif
 
-#ifndef CAL_PI_DEADBAND_MARGIN_DEN
-#define CAL_PI_DEADBAND_MARGIN_DEN 5L
-#endif
-
-#ifndef CAL_PI_DEADBAND_MIN_DAC_CODES
-#define CAL_PI_DEADBAND_MIN_DAC_CODES 1L
+/* El FIR de calibracion tiene ganancia DC uno y 128 taps. Tras cambiar AMux o
+ * DAC hacen falta exactamente N muestras nuevas antes de realimentar otra
+ * correccion. Esperar 512/2048 muestras solo repetia informacion ya asentada;
+ * corregir antes de N mezcla dos codigos distintos y vuelve oscilatorio al PI. */
+#ifndef CAL_PI_FIR_SETTLE_SAMPLES
+#define CAL_PI_FIR_SETTLE_SAMPLES FILTER_FIR_NTAPS
 #endif
 
 /* Limitador de pendiente del PI, en codigos por muestra. CERO = sin limite,
@@ -113,6 +114,45 @@
 
 #ifndef CAL_PI_INTEGRAL_LIMIT
 #define CAL_PI_INTEGRAL_LIMIT 8000000L
+#endif
+
+/* -------------------------------------------------------------------------
+ * ESPERA DE LA PLANTA. Concepto nuevo, no es un ajuste de CAL_PI_SETTLE_*.
+ *
+ * CAL_PI_SETTLE_SAMPLES_* vacia el FIR y son 128 muestras: ese numero siempre
+ * estuvo BIEN. Lo que faltaba es esperar a que la CADENA ANALOGICA se asiente
+ * despues de que una etapa de aguas arriba movio su referencia.
+ *
+ * El polo lento tiene nombre: C1 = 680 uF contra R4 = 43 k en la entrada del
+ * pasabanda. tau = 29,2 s del esquematico, 31,3 s medidos en la placa el
+ * 2026-09-03 (docs/hardware_recuperacion_saturacion_2026-09-03.txt). A 2604 Hz
+ * eso son ~81.500 muestras, que es por lo que los campos tuvieron que pasar de
+ * uint16 a uint32: en 16 bits no entra ni un tau. */
+#ifndef CAL_PI_TAU_SAMPLES
+#define CAL_PI_TAU_SAMPLES 81500UL      /* 31,3 s x 2604 Hz, MEDIDO */
+#endif
+
+/* Multiplicador de tau, en decimas, para poder pedir 0,5 tau o 2,5 tau sin
+ * flotante. CERO = comportamiento actual, sin espera de planta.
+ *
+ * SE DEJA EN CERO A PROPOSITO. El modelo de cadena
+ * (calculos_modelados/python/calibracion_pi/modelo_cadena.py) recomienda 20
+ * (2 tau): da 4,7 mV de error asentado en 254 s, que entra en el presupuesto
+ * de 5 minutos, y de 5 tau en adelante no mejora nada. Pero ese numero sale de
+ * una SIMULACION cuyo acoplamiento entre etapas todavia no esta medido: el tau
+ * de 31 s esta medido en la SALIDA, y falta el transitorio cruzado en los taps
+ * intermedios. Ponerlo antes de medir seria adivinar, que es justo lo que no
+ * hay que hacer con constantes de control.
+ *
+ * Cuando corra `medir_planta.py escalon` sale el tau real de cada par
+ * (etapa, tap) y ahi se fija este numero con dato. */
+#ifndef CAL_PI_PLANT_SETTLE_TAU_X10
+#define CAL_PI_PLANT_SETTLE_TAU_X10 0UL
+#endif
+
+#ifndef CAL_PI_PLANT_SETTLE_SAMPLES_DEFAULT
+#define CAL_PI_PLANT_SETTLE_SAMPLES_DEFAULT \
+    ((CAL_PI_TAU_SAMPLES / 10UL) * CAL_PI_PLANT_SETTLE_TAU_X10)
 #endif
 
 #ifndef CAL_PI_LOCK_N_MAX
