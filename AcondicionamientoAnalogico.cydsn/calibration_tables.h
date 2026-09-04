@@ -129,25 +129,33 @@
  * eso son ~81.500 muestras, que es por lo que los campos tuvieron que pasar de
  * uint16 a uint32: en 16 bits no entra ni un tau. */
 #ifndef CAL_PI_TAU_SAMPLES
-#define CAL_PI_TAU_SAMPLES 81500UL      /* 31,3 s x 2604 Hz, MEDIDO */
+/* 29,5 s x 2604 Hz. El tau salio de TRES medidas independientes que coinciden:
+ * R4*C1 = 29,2 s del esquematico, 31,3 s del decaimiento tras saturar
+ * (2026-09-03), y 26-33 s con media 29,5 s en los seis pares (etapa, tap) de la
+ * matriz de acople (2026-09-04). Se usa el de la matriz por ser el mas directo.
+ * Ver docs/MEDICIONES_2026-09-04.md */
+#define CAL_PI_TAU_SAMPLES 76818UL      /* 29,5 s x 2604 Hz, MEDIDO */
 #endif
 
 /* Multiplicador de tau, en decimas, para poder pedir 0,5 tau o 2,5 tau sin
- * flotante. CERO = comportamiento actual, sin espera de planta.
- *
- * SE DEJA EN CERO A PROPOSITO. El modelo de cadena
- * (calculos_modelados/python/calibracion_pi/modelo_cadena.py) recomienda 20
- * (2 tau): da 4,7 mV de error asentado en 254 s, que entra en el presupuesto
- * de 5 minutos, y de 5 tau en adelante no mejora nada. Pero ese numero sale de
- * una SIMULACION cuyo acoplamiento entre etapas todavia no esta medido: el tau
- * de 31 s esta medido en la SALIDA, y falta el transitorio cruzado en los taps
- * intermedios. Ponerlo antes de medir seria adivinar, que es justo lo que no
- * hay que hacer con constantes de control.
- *
- * Cuando corra `medir_planta.py escalon` sale el tau real de cada par
- * (etapa, tap) y ahi se fija este numero con dato. */
+ * flotante. CERO = sin espera de planta, que era el comportamiento hasta hoy. */
 #ifndef CAL_PI_PLANT_SETTLE_TAU_X10
-#define CAL_PI_PLANT_SETTLE_TAU_X10 0UL
+/* PUESTO EN 10 (= 1 tau) EL 2026-09-04, ya con la matriz de acople medida.
+ * Antes valia 0 -sin espera- porque el numero era una suposicion; ahora sale de
+ * dato. El modelo, recalibrado contra la placa, da:
+ *
+ *     sin esperar  17,5 mV en 2 s      <- reproduce los -18 mV observados
+ *     1 tau         2,09 mV en 119 s
+ *     2 tau         0,47 mV en 237 s
+ *
+ * Se elige 1 tau porque ya cumple el objetivo de 20 mV con margen de 10x en dos
+ * minutos. Subir a 2 tau es un cambio de una linea si se quiere mas margen; la
+ * recalibracion es por umbral y no en cada arranque, asi que el tiempo sobra.
+ *
+ * OJO PARA CAMPO: este tau es de banco. C1 es un electrolitico y con 5-45 C el
+ * peor caso es ~40 s, no 29,5. Para una espera fija conservadora hay que
+ * dimensionar con 40 s. */
+#define CAL_PI_PLANT_SETTLE_TAU_X10 10UL
 #endif
 
 #ifndef CAL_PI_PLANT_SETTLE_SAMPLES_DEFAULT
