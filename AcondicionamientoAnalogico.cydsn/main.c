@@ -3200,12 +3200,53 @@ static void dma_adc_init(void)
     dma_route_select(0u);
 }
 
+/* Firma de arranque por LED. Existe para contestar UNA pregunta que por
+ * software no se puede: si el PSoC esta EJECUTANDO.
+ *
+ * Grabar y ejecutar no son lo mismo -el KitProg graba con el chip detenido- y
+ * cuando el enlace I2C esta caido no queda ningun otro canal para saberlo. El
+ * parpadeo normal del firmware no sirve de testigo porque es de 600 ms
+ * encendido / 100 ms apagado a 1,4 Hz, y ademas vive DENTRO del lazo principal:
+ * si el arranque se cuelga antes de llegar ahi, no se ve nada.
+ *
+ * Esta firma va antes que todo lo demas y es deliberadamente lenta y asimetrica
+ * -tres pulsos de 300 ms separados por 700 ms, y despues 1,5 s apagado- para
+ * que no se confunda con el parpadeo de operacion ni con un LED "atenuado".
+ *
+ * Como leerlo:
+ *   se ven los 3 pulsos y despues el parpadeo rapido -> el PSoC arranca Y llega
+ *       al lazo principal; el problema esta en el camino I2C.
+ *   se ven los 3 pulsos y despues NADA o el LED fijo -> arranca pero se cuelga
+ *       en la inicializacion; el problema esta entre main() y el lazo.
+ *   no se ve nada -> no ejecuta: mirar alimentacion y grabado, no el bus.
+ */
+#ifndef PSOC_BOOT_LED_SIGNATURE
+#define PSOC_BOOT_LED_SIGNATURE 1
+#endif
+
+static void boot_led_signature(void)
+{
+#if PSOC_BOOT_LED_SIGNATURE && defined(CY_PINS_LED_H)
+    uint8 k;
+    for (k = 0u; k < 3u; k++) {
+        LED_Write(1u);
+        CyDelay(300u);
+        LED_Write(0u);
+        CyDelay(700u);
+    }
+    CyDelay(1500u);
+#endif
+}
+
 int main(void)
 {
     CyDelay(1000);
     uint8 i;
 
     CyGlobalIntEnable;
+
+    /* Lo primero, para que sirva de testigo aunque lo que sigue se cuelgue. */
+    boot_led_signature();
 
 #if PSOC_TX1_GPIO_TEST
     tx1_gpio_detach_dsi();
