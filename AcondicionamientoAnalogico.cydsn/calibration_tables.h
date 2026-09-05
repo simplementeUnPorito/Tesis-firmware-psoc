@@ -3,6 +3,9 @@
 
 #include "calibration.h"
 #include "filter_coeffs.h"
+/* PSOC_ADC_NATIVE_FS_HZ: la espera de planta se pide en milisegundos y se
+ * convierte a muestras, asi que hace falta la Fs. */
+#include "psoc_adc.h"
 
 /* Agregador de calibracion activo.
  *
@@ -128,39 +131,65 @@
  * 2026-09-03 (docs/hardware_recuperacion_saturacion_2026-09-03.txt). A 2604 Hz
  * eso son ~81.500 muestras, que es por lo que los campos tuvieron que pasar de
  * uint16 a uint32: en 16 bits no entra ni un tau. */
-#ifndef CAL_PI_TAU_SAMPLES
-/* 29,5 s x 2604 Hz. El tau salio de TRES medidas independientes que coinciden:
- * R4*C1 = 29,2 s del esquematico, 31,3 s del decaimiento tras saturar
- * (2026-09-03), y 26-33 s con media 29,5 s en los seis pares (etapa, tap) de la
- * matriz de acople (2026-09-04). Se usa el de la matriz por ser el mas directo.
- * Ver docs/MEDICIONES_2026-09-04.md */
-#define CAL_PI_TAU_SAMPLES 76818UL      /* 29,5 s x 2604 Hz, MEDIDO */
+/* --- LOS DOS NUMEROS QUE ELIAS PIDIO PODER CAMBIAR, LOS DOS uint16 ---------
+ *
+ * Pedido textual del 2026-09-05: "Deja el codigo para que pueda cambiar la tau
+ * como un define un unsigned uint16, pero por ahora usa 2 tau".
+ *
+ * Por eso tau se expresa en MILISEGUNDOS y no en muestras: 29.500 ms entra
+ * comodo en uint16 (techo 65.535), mientras que en muestras son 76.818 y no
+ * entra. Las muestras se calculan en uint32 en tiempo de ejecucion, que es
+ * donde tienen que estar. */
+
+#ifndef CAL_PI_TAU_MS
+/* 29,5 s MEDIDOS. El tau salio de TRES caminos independientes que coinciden:
+ *   R4*C1 = 43k x 680 uF = 29,2 s del esquematico;
+ *   31,3 s del decaimiento tras saturar (2026-09-03);
+ *   26,4 a 33,4 s, media 29,5 s, en los seis pares (etapa, tap) de la matriz de
+ *   acople (2026-09-04).
+ * Se usa el de la matriz por ser el mas directo. Ver docs/MEDICIONES_2026-09-04.md
+ *
+ * OJO: es el tau de BANCO, a ~19 C. C1 es un electrolitico y en campo la
+ * temperatura va de 8 a 32 C en la misma semana (medido con Open-Meteo el
+ * 2026-09-05), asi que este numero NO sirve como constante fija de campo. Por
+ * eso existe la automedicion: el nodo mide su propio tau y pisa esta variable.
+ * La decision de Elias fue explicita: NO corregir por temperatura, sino medir
+ * tau y ajustar con lo medido. */
+#define CAL_PI_TAU_MS 29500u
 #endif
 
-/* Multiplicador de tau, en decimas, para poder pedir 0,5 tau o 2,5 tau sin
- * flotante. CERO = sin espera de planta, que era el comportamiento hasta hoy. */
 #ifndef CAL_PI_PLANT_SETTLE_TAU_X10
-/* PUESTO EN 10 (= 1 tau) EL 2026-09-04, ya con la matriz de acople medida.
- * Antes valia 0 -sin espera- porque el numero era una suposicion; ahora sale de
- * dato. El modelo, recalibrado contra la placa, da:
+/* Multiplicador de tau, en decimas, para poder pedir 0,5 tau o 2,5 tau sin
+ * flotante. CERO = sin espera de planta, que era el comportamiento hasta el
+ * 2026-09-04.
  *
+ * EN 20 (= 2 tau) POR DECISION DE ELIAS del 2026-09-05: "2tau y 20mV es lo
+ * maximo que aceptamos pero si llegamos a mejores rangos maravilloso". O sea
+ * que 2 tau es el TECHO del presupuesto de tiempo, no un objetivo; si una
+ * estrategia consigue el error pedido con menos, mejor.
+ *
+ * Lo que da el modelo ya calibrado contra la placa, con el lazo secuencial:
  *     sin esperar  17,5 mV en 2 s      <- reproduce los -18 mV observados
  *     1 tau         2,09 mV en 119 s
  *     2 tau         0,47 mV en 237 s
- *
- * Se elige 1 tau porque ya cumple el objetivo de 20 mV con margen de 10x en dos
- * minutos. Subir a 2 tau es un cambio de una linea si se quiere mas margen; la
- * recalibracion es por umbral y no en cada arranque, asi que el tiempo sobra.
- *
- * OJO PARA CAMPO: este tau es de banco. C1 es un electrolitico y con 5-45 C el
- * peor caso es ~40 s, no 29,5. Para una espera fija conservadora hay que
- * dimensionar con 40 s. */
-#define CAL_PI_PLANT_SETTLE_TAU_X10 10UL
+ * De 2 tau en adelante no mejora. */
+#define CAL_PI_PLANT_SETTLE_TAU_X10 20u
+#endif
+
+/* Muestras que dura un tau, derivadas del tau en ms. En uint32 porque a 2604 Hz
+ * un tau son ~76.818 muestras y en uint16 no entra: ese fue exactamente el bug
+ * silencioso que se arreglo el 2026-09-04. */
+#define CAL_PI_TAU_SAMPLES_FROM_MS(ms)     (((uint32)(ms) * (uint32)PSOC_ADC_NATIVE_FS_HZ) / 1000UL)
+
+#ifndef CAL_PI_TAU_SAMPLES
+#define CAL_PI_TAU_SAMPLES CAL_PI_TAU_SAMPLES_FROM_MS(CAL_PI_TAU_MS)
 #endif
 
 #ifndef CAL_PI_PLANT_SETTLE_SAMPLES_DEFAULT
-#define CAL_PI_PLANT_SETTLE_SAMPLES_DEFAULT \
-    ((CAL_PI_TAU_SAMPLES / 10UL) * CAL_PI_PLANT_SETTLE_TAU_X10)
+/* Se divide ANTES de multiplicar para no desbordar: 76.818/10 x 20 = 153.636.
+ * Al reves serian 1,5 millones, que entra igual, pero la forma dividida es la
+ * que sigue entrando si alguien sube el multiplicador a 10 tau. */
+#define CAL_PI_PLANT_SETTLE_SAMPLES_DEFAULT     ((CAL_PI_TAU_SAMPLES / 10UL) * (uint32)CAL_PI_PLANT_SETTLE_TAU_X10)
 #endif
 
 #ifndef CAL_PI_LOCK_N_MAX

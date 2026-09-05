@@ -2,6 +2,48 @@
 
 Flujo actual para `AcondicionamientoAnalogico.cydsn` en Windows con PSoC Creator 4.4.
 
+## Grabado por PPCLI: VERIFICADO 2026-09-05
+
+`program_psoc.ps1` **graba bien y el chip arranca**. Queda cerrado el tema, que
+estuvo mal diagnosticado entre el 2026-09-02 y el 2026-09-04.
+
+Evidencia de la corrida del 2026-09-05 (proyecto de autotest, `-SkipBuild`,
+mismo HEX que ya estaba en el chip):
+
+- `PSoC3_EraseAll` + 272 filas `ProgramRowFromHex`/`VerifyRowFromHex` con ECC
+  (`0x01`), todas `0 OK` y `verResult = 1`;
+- `ProtectAll`, `VerifyProtect`, `DAP_ReleaseChip`, `ClosePort` en `0 OK`;
+- **después de grabar**, el PSoC contesta I2C: `taps` da los cuatro canales en
+  1001,3 / 1001,5 / 1001,5 / 1000,8 mV, y el autotest completo repite el mismo
+  veredicto que antes de grabar (22 PASS, 3 FAIL conocidos, 1 WARN, 83,9 s).
+
+Lo que rompía era `-AllRows` (las 1024 filas), no la falta de PSoC Creator.
+
+**Hipótesis descartada — NV latches.** Se sospechaba que al script le faltaba
+escribir las NVL. No es eso:
+
+- `PSoC3_EraseAll` no borra las NVL, así que las que dejó Creator siguen ahí;
+- `PSoC3_GetEccStatus` sobre el chip devuelve `0`, coherente con el HEX
+  (`nvlUserSize=4`, user `00 00 40 05`, WO `bc 90 ac af`) y con
+  `CYDEV_ECC_ENABLE=False` del `.cydwr`;
+- `PSoC3_ReadNvlArray` falla con `0x80004005` y por eso no se pueden comparar
+  directamente, pero `PSoC3_WriteNvlArray` existe si alguna vez hiciera falta.
+
+**Por qué alcanza con las filas ocupadas.** El `.cydwr` tiene
+`CYDEV_CONFIGURATION_ECC=True` con `CYDEV_ECC_ENABLE=False`: la configuración
+del fabric se guarda en el espacio ECC. Parseando el HEX, esa configuración es
+no nula **sólo en las filas 0..150** (region `0x80000000`, 32 B por fila). El
+código ocupa 264 filas y el script graba 272, así que cubre las dos cosas.
+
+**Trampas prácticas.**
+
+- El nombre del KitProg cambia entre sesiones: se vieron
+  `KitProg (CMSIS-DAP/236111)` y `KitProg (CMSIS-DAP/246475)`. El script lo
+  autodetecta; para forzarlo, `-Port`.
+- PPCLI escribe ~1100 líneas por corrida: redirigir a archivo.
+- `DAP_Acquire` + `DAP_ReleaseChip` sin grabar **no** perturba al PSoC: se
+  comprobó que sigue contestando después.
+
 ## Flujo vigente (verificado 2026-09-01)
 
 Usar los scripts del repositorio; las recetas manuales más abajo quedan como

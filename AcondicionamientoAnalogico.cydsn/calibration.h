@@ -65,6 +65,17 @@ uint8 psoc_calibration_start_async(void);
 uint8 psoc_calibration_service_async(void);
 uint8 psoc_calibration_async_busy(void);
 uint8 psoc_calibration_async_result_ok(void);
+
+/* --- Tau de la planta, ajustable en tiempo de ejecucion ---------------------
+ * Existen porque tau depende de la temperatura y el nodo lo mide solo, en vez
+ * de corregir por temperatura. Ver el bloque en calibration.c. */
+uint32 psoc_cal_plant_settle_samples(void);
+uint16 psoc_cal_get_tau_ms(void);
+/* Devuelve 0 si el valor esta fuera de 1000..60000 ms y no lo aplica. */
+uint8  psoc_cal_set_tau_ms(uint16 tau_ms);
+uint16 psoc_cal_get_plant_tau_x10(void);
+/* Multiplicador de tau en decimas. 0 = sin espera. Devuelve 0 si supera 100. */
+uint8  psoc_cal_set_plant_tau_x10(uint16 x10);
 /* El servo lento se borro. Su unica API que main.c todavia necesitaba era
  * abortar una corrida en curso, que ya la cubre el PI asincrono. */
 

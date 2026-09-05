@@ -116,6 +116,18 @@ if ($flashUsed -lt 1 -or $flashUsed -gt 262144) {
 # lo recuperaban; regrabando el mismo proyecto desde PSoC Creator volvía al
 # instante. Medido el 2026-09-02.
 #
+# VERIFICADO EL 2026-09-05 que ESTA versión (la acotada) SÍ deja el chip
+# arrancando: erase completo + 272 filas + verify, y después el PSoC contesta
+# I2C y el autotest completo da el mismo resultado que antes de grabar. O sea
+# que el culpable era grabar de más, no grabar de menos, y no hacen falta ni
+# PSoC Creator ni escribir las NV latches. La sospecha de las NVL quedó
+# descartada: EraseAll no las toca, y PSoC3_GetEccStatus da 0 en el chip,
+# coherente con el HEX (nvlUserSize=4, user 00 00 40 05).
+#
+# El dato que lo explica: la configuración del fabric ocupa el espacio ECC de
+# las filas 0..150 solamente (CYDEV_CONFIGURATION_ECC=True con
+# CYDEV_ECC_ENABLE=False). Las 272 filas que se graban acá la cubren entera.
+#
 # El flujo que sí está validado contra hardware (2026-07-07, log en
 # BUILD_PROGRAM_PSOC.md) grababa solamente las filas que el HEX ocupa. Eso es
 # lo que se hace acá: se derivan de 'Flash used' con un margen, y no se tocan

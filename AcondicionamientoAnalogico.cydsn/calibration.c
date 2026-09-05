@@ -720,6 +720,71 @@ static int32 cal_counts_error_to_dac_scale(int32 error_counts)
  * Que la etapa 0 tenga la ganancia mas chica es justamente lo que la hace
  * calibrable con precision: 57,7 uV por codigo es el paso mas fino de las
  * cuatro etapas. */
+/* --------------------------------------------------------------------------
+ * TAU DE LA PLANTA EN TIEMPO DE EJECUCION
+ *
+ * Estos dos son variables y no constantes por una razon medida, no por gusto:
+ * tau depende de la temperatura -C1 es un electrolitico- y en la ubicacion del
+ * nodo la temperatura va de 8 a 32 C en la misma semana. Una constante de banco
+ * tomada a 19 C no cubre eso.
+ *
+ * La decision de Elias fue NO corregir por temperatura sino MEDIR tau en el
+ * propio nodo y dimensionar la espera con lo medido. Estas variables son el
+ * lugar donde aterriza esa medicion.
+ *
+ * Son uint16 por pedido explicito, y por eso tau esta en ms y no en muestras.
+ * -------------------------------------------------------------------------- */
+static uint16 g_cal_tau_ms          = CAL_PI_TAU_MS;
+static uint16 g_cal_plant_tau_x10   = CAL_PI_PLANT_SETTLE_TAU_X10;
+
+/* POR QUE NO HAY UNA ESPERA POR ETAPA. Habia un campo plant_settle_samples por
+ * etapa, y sobra: la matriz de acople del 2026-09-04 midio tau en los SEIS
+ * pares (etapa, tap) con senal util y dio 26,4 a 33,4 s, media 29,5. Es UN SOLO
+ * polo -C1 contra R4- visto desde distintos lugares, no uno por etapa. Cuatro
+ * constantes para un solo polo son cuatro oportunidades de que se
+ * desincronicen. */
+uint32 psoc_cal_plant_settle_samples(void)
+{
+    uint32 tau_muestras = CAL_PI_TAU_SAMPLES_FROM_MS(g_cal_tau_ms);
+    /* Dividir antes de multiplicar: asi sigue entrando en uint32 aunque alguien
+     * pida 10 tau. */
+    return (tau_muestras / 10UL) * (uint32)g_cal_plant_tau_x10;
+}
+
+uint16 psoc_cal_get_tau_ms(void)
+{
+    return g_cal_tau_ms;
+}
+
+/* Devuelve 0 si el valor pedido es absurdo, para que un tau mal medido no pueda
+ * dejar la calibracion esperando un tiempo ridiculo. Los limites son anchos a
+ * proposito: 1 s a 60 s cubre el rango de temperatura de campo con margen
+ * grande, y lo que se quiere atajar es un error de medicion, no afinar. */
+uint8 psoc_cal_set_tau_ms(uint16 tau_ms)
+{
+    if (tau_ms < 1000u || tau_ms > 60000u) {
+        return 0u;
+    }
+    g_cal_tau_ms = tau_ms;
+    return 1u;
+}
+
+uint16 psoc_cal_get_plant_tau_x10(void)
+{
+    return g_cal_plant_tau_x10;
+}
+
+/* 0 = sin espera de planta (comportamiento viejo, util para comparar).
+ * El techo de 100 son 10 tau, muy por encima de los 2 tau que fijo Elias. */
+uint8 psoc_cal_set_plant_tau_x10(uint16 x10)
+{
+    if (x10 > 100u) {
+        return 0u;
+    }
+    g_cal_plant_tau_x10 = x10;
+    return 1u;
+}
+
 static int32 cal_pi_stage_gain_x1000(uint8 stage_index)
 {
     int32 configured_gain = g_cal_pi_cfg[stage_index].gain_x1000;
@@ -1092,7 +1157,9 @@ static void cal_pi_stage_begin(void)
      * directa ya mantiene conversiones durante CAL_ADC_DIRECT_CONVERSION_MS. */
     g_cal_pi.settle_remaining = 1u;
 #else
-    g_cal_pi.settle_remaining = cfg->settle_samples + cfg->plant_settle_samples;
+    /* La espera de planta sale de la variable de ejecucion, no de la tabla:
+     * asi la automedicion de tau tiene efecto sin recompilar. */
+    g_cal_pi.settle_remaining = cfg->settle_samples + psoc_cal_plant_settle_samples();
 #endif
     g_cal_pi.control_hold_remaining = 0u;
     g_cal_pi.refine_base_measured = 0L;
