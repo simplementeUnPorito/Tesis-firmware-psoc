@@ -1526,6 +1526,28 @@ void psoc_selftest_select_channel(uint8 channel, uint8 with_cap)
 #if CAL_AMUX_HAS_CAP_CHANNEL
     if (channel == CAL_AMUX_CAP_CHANNEL) { with_cap = 0u; }
 #endif
+
+    /* RECUPERAR EL ADC ANTES DE USARLO, Y NO DESPUES DE QUE FALLE.
+     *
+     * Observado el 2026-09-05: despues de correr una calibracion, TODAS las
+     * medidas de continua del banco empezaron a devolver ok=0, y el unico modo
+     * de recuperarlas era un ToggleReset por KitProg. El enlace con el PSoC
+     * seguia arriba: lo que quedaba tomado era el camino del ADC.
+     *
+     * La causa es que la calibracion se apropia del ADC y del ruteo de DMA, y
+     * solo los devuelve en cal_async_complete(). Si la corrida ABORTA -y ese
+     * dia aborto: contesto ok=0 a los 60 s- ese camino no se recorre y el ADC
+     * queda configurado para la calibracion.
+     *
+     * psoc_selftest_measure_dc() ya llamaba a psoc_selftest_restore(), pero
+     * DESPUES de que la lectura fallara, o sea que la primera medida se perdia
+     * siempre y, si el estado no se arreglaba solo, las siguientes tambien.
+     *
+     * Restaurar aca es preventivo y es barato: reclamar el ADC antes de cada
+     * seleccion de canal cuesta lo mismo que hacerlo despues de fallar, y evita
+     * que una calibracion abortada deje al banco mudo sin explicacion. */
+    psoc_calibration_restore_capture_path();
+
     ADC_Stop();
     psoc_amux_select_exclusive(channel, with_cap);
     ADC_Start();

@@ -13,16 +13,46 @@ static uint8 g_psoc_adc_decimation = 1u;
 
 int32 psoc_adc_counts_right_aligned(int32 adc_counts)
 {
-    /* Solo ADC_CF_2V5 es left-aligned (ALIGNMENT=1, DEC_DIV=32); las demás
-     * configs entregan counts right-aligned (DEC_DIV=0). Se consulta
-     * ADC_Config (variable del componente, mantenida por
-     * ADC_SelectConfiguration) y no g_psoc_adc_config, porque durante la
-     * calibración el override puede tener aplicada una config distinta. */
-#if (ADC_CF_2V5_DEC_DIV != 0)
-    if (ADC_Config == ADC_CF_2V5) {
-        adc_counts /= ADC_CF_2V5_DEC_DIV;
-    }
+    /* NORMALIZA LAS CUENTAS DE CUALQUIER CONFIGURACION A LA MISMA ESCALA.
+     *
+     * Antes esto miraba SOLO ADC_CF_2V5, porque era la unica configuracion
+     * left-aligned con DEC_DIV distinto de cero. Esa suposicion estaba
+     * horneada en el codigo y se rompe apenas alguien cambia el alineamiento
+     * de otra configuracion desde el customizer, que es exactamente lo que
+     * paso el 2026-09-05: al poner las cuatro a la izquierda, las otras tres
+     * habrian quedado sin dividir, o sea mal por un factor de hasta 32, y
+     * SIN QUE NADA LO AVISE. Las medidas habrian salido treinta veces mas
+     * grandes y todo lo demas habria seguido compilando y corriendo.
+     *
+     * Ahora se usa el DEC_DIV de la configuracion ACTIVA, leido de los
+     * defines que genera el propio customizer. Si manana se cambia cualquier
+     * alineamiento, esto sigue estando bien sin tocar una linea.
+     *
+     * Se consulta ADC_Config -variable del componente, mantenida por
+     * ADC_SelectConfiguration- y no g_psoc_adc_config, porque durante la
+     * calibracion el override puede tener aplicada una config distinta de la
+     * que el usuario pidio. */
+    int32 div = 1;
+
+    switch (ADC_Config) {
+#if defined(ADC_CF_2V5) && (ADC_CF_2V5_DEC_DIV != 0)
+        case ADC_CF_2V5:   div = (int32)ADC_CF_2V5_DEC_DIV;   break;
 #endif
+#if defined(ADC_CF_0V512) && (ADC_CF_0V512_DEC_DIV != 0)
+        case ADC_CF_0V512: div = (int32)ADC_CF_0V512_DEC_DIV; break;
+#endif
+#if defined(ADC_CF_1V024) && (ADC_CF_1V024_DEC_DIV != 0)
+        case ADC_CF_1V024: div = (int32)ADC_CF_1V024_DEC_DIV; break;
+#endif
+#if defined(ADC_CF_0V625) && (ADC_CF_0V625_DEC_DIV != 0)
+        case ADC_CF_0V625: div = (int32)ADC_CF_0V625_DEC_DIV; break;
+#endif
+        default: div = 1; break;
+    }
+
+    if (div > 1) {
+        adc_counts /= div;
+    }
     return adc_counts;
 }
 
