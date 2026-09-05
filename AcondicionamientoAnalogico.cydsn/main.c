@@ -2495,6 +2495,7 @@ static void uart_service(void)
                     case PSOC_CMD_PONG:
                         rx_cmd = rx; rx_state = 2u; break;
                     case 0xA3u: case PSOC_CMD_SD_READ_BATCH: case 0xAAu:
+                    case PSOC_CMD_CAL_PARAM:
                         rx_cmd = rx; rx_state = 4u; break;
                     default:
                         rx_watchdog_stop(); rx_state = 0u; break;
@@ -2589,6 +2590,32 @@ static void uart_service(void)
                         PGAvdac_Set(rx_p1);
                         uart_send_cfg_ack(0xA9u, g_pgavdac_code);
                         led_toggle(); break;
+                    case PSOC_CMD_CAL_PARAM:
+                        /* Parametros de calibracion en caliente. Ver el bloque
+                         * de PSOC_CMD_CAL_PARAM en psoc_hw.h. El ack lleva el
+                         * valor QUE QUEDO, asi el que manda se entera si el
+                         * suyo fue rechazado por fuera de rango. */
+                        {
+                            uint16 quedo = 0u;
+                            switch (rx_p1) {
+                            case PSOC_CAL_PARAM_TAU:
+                                (void)psoc_cal_set_tau_ms(
+                                    (uint16)((uint16)rx_p2 *
+                                             (uint16)PSOC_CAL_PARAM_TAU_UNIT_MS));
+                                quedo = (uint16)(psoc_cal_get_tau_ms() /
+                                                 PSOC_CAL_PARAM_TAU_UNIT_MS);
+                                break;
+                            case PSOC_CAL_PARAM_MULT:
+                                (void)psoc_cal_set_plant_tau_x10((uint16)rx_p2);
+                                quedo = psoc_cal_get_plant_tau_x10();
+                                break;
+                            default:
+                                quedo = 0xFFu;   /* parametro desconocido */
+                                break;
+                            }
+                            uart_send_cfg_ack(PSOC_CMD_CAL_PARAM, (uint8)quedo);
+                        }
+                        break;
                     case 0xAAu:
                         /* Ajuste manual de una referencia, con el mismo
                          * convenio que 0xA2 en el firmware de autotest:

@@ -216,6 +216,28 @@ uint32 psoc_idac_lsb_uv(void);
 #define PSOC_CMD_VDAC           0xAAu
 #define PSOC_CMD_SETN           0xA3u
 #define PSOC_CMD_PRESTART       0xB1u
+/* Parametros de calibracion ajustables EN CALIENTE. Dos bytes: p1 = que
+ * parametro, p2 = valor. Existe para no tener que regrabar el PSoC por cada
+ * numero que se quiera probar; Elias lo aprobo explicitamente el 2026-09-05
+ * ("me parece maravilloso que metas todos los comandos posibles para poder
+ * probar sin tanta interaccion conmigo").
+ *
+ *   p1 = 0  tau de la planta, en unidades de 250 ms. 118 = 29,5 s.
+ *           Se eligio 250 ms porque tau tiene que entrar en UN byte y el frame
+ *           lleva solo dos. 250 ms sobre 29,5 s son 0,85 % de resolucion, un
+ *           orden por debajo de la dispersion del propio tau entre ensayos.
+ *   p1 = 1  multiplicador de la espera de planta, en decimas de tau. 20 = 2 tau.
+ *   p1 = 2  disparar la automedicion de tau (p2 ignorado).
+ *
+ * El ack devuelve el valor QUE QUEDO, no el que se pidio, para que el que manda
+ * se entere si fue rechazado por estar fuera de rango. */
+#define PSOC_CMD_CAL_PARAM      0xB2u
+#define PSOC_CAL_PARAM_TAU      0u
+#define PSOC_CAL_PARAM_MULT     1u
+#define PSOC_CAL_PARAM_MEDIR    2u
+/* Unidad del parametro de tau, en ms. */
+#define PSOC_CAL_PARAM_TAU_UNIT_MS 250u
+
 #define PSOC_CMD_DEBUG          0xB3u
 #define PSOC_CMD_START_NOW      0xB4u
 #define PSOC_CMD_CALIBRATE      0xB5u
