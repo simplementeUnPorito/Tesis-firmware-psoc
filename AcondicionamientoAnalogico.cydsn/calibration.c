@@ -266,6 +266,82 @@ static void cal_diag_sweep_stage(const PsocCalStage *stage)
  * dac_center = 0 y dac_max_change = 255 el rango es -255..+255, que es todo el
  * punto de haber cableado polarity_reg. Con la version sin signo el piso daba 0
  * y la mitad negativa quedaba muerta sin que nada lo dijera. */
+/* --------------------------------------------------------------------------
+ * RANGO UTIL DE LA ETAPA 0, QUE NO ES SU RANGO DE CODIGOS
+ *
+ * Medido el 2026-09-05 (EXP1): la pendiente del IDAC de la etapa 0 sobre su
+ * propio tap escala con la ganancia del PGA, porque inyecta ANTES de amplificar.
+ *
+ *     PGA        x1      x8     x16     x32     x50
+ *     uV/codigo  62,0   460,5   927,5  1774    2688
+ *
+ * Eso es una buena noticia -el offset de entrada y la autoridad para corregirlo
+ * crecen juntos, asi que la razon es constante y x50 se puede calibrar- pero
+ * tiene una consecuencia que el firmware no contemplaba: la EXCURSION del tap no
+ * crece. Los rieles medidos son 759,4 y 1114,4 mV, o sea 355 mV, y a x50 eso son
+ *
+ *     355 mV / 2688 uV por codigo = 132 codigos, +-66 alrededor del centro.
+ *
+ * Las otras dos terceras partes del rango del IDAC no existen: son riel. Y
+ * contra el riel la pendiente es CERO, asi que el lazo empuja sin efecto, la
+ * integral se enrolla y el DAC termina en el extremo. Es el modo de falla que
+ * mas veces se observo.
+ *
+ * Por eso el clamp de la etapa 0 escala con 1/ganancia. El numero sale del
+ * cociente entre la excursion medida y la pendiente medida, no de un margen
+ * elegido a ojo:
+ *
+ *     codigos utiles = excursion_uV / (uV_por_codigo_a_x1 * ganancia)
+ *
+ * Se deja un 20 % de margen porque la excursion depende de donde este parado el
+ * offset, que es justo lo que la calibracion todavia no sabe cuando arranca.
+ * -------------------------------------------------------------------------- */
+
+/* Excursion medida del tap de la etapa 0, en uV: 1114,4 - 759,4 mV. */
+#ifndef CAL_STAGE0_EXCURSION_UV
+#define CAL_STAGE0_EXCURSION_UV 355000L
+#endif
+/* Pendiente del IDAC de la etapa 0 sobre su tap a PGA x1, en uV por codigo. */
+#ifndef CAL_STAGE0_UV_POR_CODIGO_X1
+#define CAL_STAGE0_UV_POR_CODIGO_X1 62L
+#endif
+
+static int16 cal_stage0_max_change(void)
+{
+    int32 pga_x1000 = (int32)psoc_hw_pga_gain_x1000();
+    int32 utiles;
+
+    if (pga_x1000 <= 0L) {
+        return (int16)PSOC_IDAC_SIGNED_MAX;
+    }
+    /* (excursion / 2) / (uV_por_codigo * ganancia), con el 20 % de margen.
+     * Todo en int64 para que no desborde con ganancias chicas. */
+    utiles = (int32)(((int64)CAL_STAGE0_EXCURSION_UV * 1000LL * 4LL) /
+                     ((int64)CAL_STAGE0_UV_POR_CODIGO_X1 * (int64)pga_x1000 * 2LL * 5LL));
+    if (utiles > (int32)PSOC_IDAC_SIGNED_MAX) {
+        utiles = (int32)PSOC_IDAC_SIGNED_MAX;
+    }
+    /* Nunca menos de 24 codigos: por debajo de eso la etapa no podria corregir
+     * ni su propio offset y el lazo abortaria por una cota que puso el firmware,
+     * que es peor que abortar por el hardware. A x50 la cuenta da 105, asi que
+     * este piso no se activa en ningun caso real; esta como red. */
+    if (utiles < 24L) {
+        utiles = 24L;
+    }
+    return (int16)utiles;
+}
+
+/* Cuanto puede moverse esta etapa respecto de su centro. Para la etapa 0 sale
+ * de la cuenta de arriba; para las demas, de su tabla. */
+static int16 cal_stage_max_change(const PsocCalStage *stage)
+{
+    if (stage->adc_channel == 0u) {
+        int16 medido = cal_stage0_max_change();
+        return (medido < stage->dac_max_change) ? medido : stage->dac_max_change;
+    }
+    return stage->dac_max_change;
+}
+
 static int16 cal_stage_min_dac(const PsocCalStage *stage)
 {
     int32 lo = (int32)stage->dac_center - (int32)stage->dac_max_change;
@@ -278,7 +354,7 @@ static int16 cal_stage_min_dac(const PsocCalStage *stage)
 
 static int16 cal_stage_max_dac(const PsocCalStage *stage)
 {
-    int32 hi = (int32)stage->dac_center + (int32)stage->dac_max_change;
+    int32 hi = (int32)stage->dac_center + (int32)cal_stage_max_change(stage);
 
     if (hi > (int32)PSOC_IDAC_SIGNED_MAX) {
         hi = (int32)PSOC_IDAC_SIGNED_MAX;
