@@ -37,6 +37,56 @@ if ($SelfTest -and -not (Test-Path -LiteralPath (Join-Path $ProjectDir 'psoc_sel
     throw "El proyecto seleccionado no contiene el protocolo de autotest: $ProjectDir"
 }
 
+# ---------------------------------------------------------------------------
+# EL AUTOTEST NO PUEDE VOLVER A TENER SU PROPIA COPIA DE NADA
+#
+# Hasta el 2026-09-05 el proyecto de autotest era un fork del de campo: 28
+# fuentes duplicadas, 21 mantenidas iguales a mano y 7 ya divergidas. Las 7
+# costaron cuatro fallas silenciosas en un solo día, incluida una calibración
+# que corría con el cero corrido y otra que nunca esperaba a que la cadena se
+# asentara. Ahora cada fuente compartida existe una sola vez y el test la
+# incluye.
+#
+# Esto se verifica ACÁ, en el grabador, y no en un test aparte, porque el
+# momento en que importa es justo antes de escribir el firmware en la placa:
+# si alguien vuelve a copiar un archivo, el chip no se programa. Es la
+# diferencia entre una regla y un hábito.
+# ---------------------------------------------------------------------------
+if ($SelfTest) {
+    $TestDir = $ProjectDir
+    $Compartidos = @(
+        'calibration.h',
+        'calibration_conjunta.h', 'calibration_tau.h',
+        'calibration_tables.h', 'calibration_tables_geo_bp.h',
+        'calibration_tables_geo_lp.h', 'calibration_tables_geo_pga.h',
+        'calibration_tables_geo_sum.h', 'calibration_tables_hammer_lp.h',
+        'calibration_tables_hammer_pga.h',
+        'FIR_adquisition.c', 'FIR_adquisition.h', 'FIR_calibration.c',
+        'FIR_calibration.h', 'crc.c', 'crc.h', 'cyapicallbacks.h',
+        'filter_coeffs.c', 'filter_coeffs.h', 'psoc_adc.c', 'psoc_adc.h',
+        'psoc_debug.c', 'psoc_debug.h', 'psoc_hw.c', 'psoc_hw.h',
+        'psoc_nv.c', 'psoc_nv.h', 'sd_spi.h'
+    )
+    # calibration.c va aparte: además del include lleva el de las primitivas.
+    $duplicados = @()
+    foreach ($f in @('calibration.c') + $Compartidos) {
+        $ruta = Join-Path $TestDir $f
+        if (-not (Test-Path -LiteralPath $ruta)) { continue }
+        $esperado = '#include "../../AcondicionamientoAnalogico.cydsn/' + $f + '"'
+        if (-not (Select-String -LiteralPath $ruta -SimpleMatch -Pattern $esperado -Quiet)) {
+            $duplicados += $f
+        }
+    }
+    if ($duplicados.Count -gt 0) {
+        throw ("El proyecto de autotest volvió a tener copia propia de: " +
+               ($duplicados -join ', ') + ". Cada una de esas fuentes tiene que ser " +
+               "un #include del proyecto de campo; ver el comentario largo en " +
+               "AcondicionamientoAnalogicoTest\AcondicionamientoAnalogico.cydsn\calibration.c. " +
+               "No se programa nada hasta que eso se arregle.")
+    }
+    Write-Host "[PSoC] Sincronía OK: el autotest no tiene copias propias ($($Compartidos.Count + 1) fuentes compartidas)."
+}
+
 if (-not $SkipBuild) {
     Write-Host "[PSoC] Compilando proyecto $firmwareKind..."
     Push-Location $ProjectDir

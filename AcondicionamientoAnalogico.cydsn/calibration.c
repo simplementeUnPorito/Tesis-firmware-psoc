@@ -204,6 +204,51 @@ static int32 abs_counts(int32 value)
 #define CAL_PI_USE_DIRECT_ADC 1u
 #endif
 
+/* ==========================================================================
+ * UNA ITERACION DEL LAZO NO ES UNA MUESTRA DEL ADC
+ *
+ * Todas las esperas de las tablas estan en MUESTRAS del ADC a su velocidad
+ * nativa, y esa unidad es la correcta: lo que se espera es tiempo fisico -tau
+ * de la planta, el techo del watchdog- y muestras a 2604 Hz es como se
+ * expresa el tiempo en el resto del firmware.
+ *
+ * Pero el lazo NO corre a 2604 Hz. Con el lector directo, cada iteracion para
+ * el ADC, lo arranca de nuevo y espera CAL_ADC_DIRECT_CONVERSION_MS = 30 ms a
+ * que el decimador del Delta-Sigma se asiente. Una iteracion son 30 ms, no
+ * 0,384 ms: 78 veces mas lenta.
+ *
+ * Los contadores se decrementan por ITERACION, asi que sin esta conversion el
+ * error es de ese factor y va en las dos direcciones:
+ *   - la espera de planta de 2 tau (153.620 muestras = 59 s) se volveria de
+ *     77 minutos;
+ *   - el techo de 30.000 muestras (11,5 s) se volveria de 15 minutos, o sea
+ *     que el watchdog dejaria de proteger nada.
+ *
+ * Por eso toda espera se declara en muestras -que es tiempo- y se convierte a
+ * iteraciones en el punto de uso.
+ * ========================================================================== */
+#if CAL_PI_USE_DIRECT_ADC
+/* Cuantas muestras nativas dura una iteracion: 2604 Hz x 30 ms = 78. */
+#define CAL_PI_SAMPLES_PER_ITER \
+    (((uint32)PSOC_ADC_NATIVE_FS_HZ * (uint32)CAL_ADC_DIRECT_CONVERSION_MS) / 1000UL)
+#else
+/* Por la ruta del FIR el lazo si consume una muestra por iteracion. */
+#define CAL_PI_SAMPLES_PER_ITER 1UL
+#endif
+
+static uint32 cal_pi_samples_to_iters(uint32 samples)
+{
+    uint32 iters;
+
+    if (samples == 0UL) {
+        return 0UL;
+    }
+    iters = samples / CAL_PI_SAMPLES_PER_ITER;
+    /* Una espera pedida distinta de cero nunca se convierte en ninguna: eso
+     * seria saltearse un settle porque la division quedo corta. */
+    return (iters == 0UL) ? 1UL : iters;
+}
+
 static int32 cal_adc_read_direct_counts(void)
 {
     int32 sample;
@@ -437,6 +482,21 @@ static PsocCalAsync g_cal_async = { CAL_ASYNC_IDLE };
 
 
 
+/* Primera etapa desde `desde` que efectivamente se calibra, o PSOC_CAL_STAGE_COUNT
+ * si no queda ninguna. Las que estan fuera de la secuencia existen para el
+ * instrumento -que necesita escribir sus IDAC- pero el lazo no las recorre. */
+static uint8 cal_siguiente_etapa(uint8 desde)
+{
+    uint8 i;
+
+    for (i = desde; i < PSOC_CAL_STAGE_COUNT; i++) {
+        if (g_psoc_cal_stages[i].en_secuencia) {
+            return i;
+        }
+    }
+    return PSOC_CAL_STAGE_COUNT;
+}
+
 static int16 cal_stage_current_dac(uint8 stage_index)
 {
     if (stage_index >= g_psoc_cal_result_count) {
@@ -630,7 +690,13 @@ static void cal_async_abort_watchdog(void)
     uint8 i;
 
     for (i = g_cal_async.stage_index; i < PSOC_CAL_STAGE_COUNT; i++) {
-        int16 center = cal_stage_center_dac(&g_psoc_cal_stages[i]);
+        int16 center;
+        /* Las etapas fuera de la secuencia no se tocan: devolverlas a su centro
+         * seria pisar un ajuste que la calibracion nunca hizo. */
+        if (!g_psoc_cal_stages[i].en_secuencia) {
+            continue;
+        }
+        center = cal_stage_center_dac(&g_psoc_cal_stages[i]);
         g_psoc_cal_stages[i].write(center);
         g_psoc_cal_results[i].final_dac = center;
         g_psoc_cal_results[i].final_measured = 0L;
@@ -761,6 +827,14 @@ static int32 cal_pi_clip_integral(int32 value)
 
 #if PSOC_HW_CLASS == PSOC_HW_GEO
 static const PsocCalPiCfg g_cal_pi_cfg[PSOC_CAL_STAGE_COUNT] = {
+    /* GEO_PGA y GEO_BP estan fuera de la secuencia (en_secuencia = 0) y estas
+     * dos filas no llegan a usarse nunca. Existen porque el arreglo se indexa
+     * por etapa y las etapas siguen siendo cuatro: el instrumento las necesita
+     * para poder escribir sus IDAC. */
+    { CAL_PI_KP_NUM_GEO_PGA, CAL_PI_KP_DIV_GEO_PGA, CAL_PI_KI_NUM_GEO_PGA, CAL_PI_KI_DIV_GEO_PGA, CAL_PI_GAIN_GEO_PGA_X1000, CAL_PI_DEADBAND_GEO_PGA_1X_COUNTS, CAL_PI_LOCK_SAMPLES_GEO_PGA, CAL_PI_SETTLE_SAMPLES_GEO_PGA, CAL_PI_PLANT_SETTLE_SAMPLES_GEO_PGA, CAL_PI_TIMEOUT_SAMPLES_GEO_PGA, CAL_PI_REFINE_ENABLE_GEO_PGA, CAL_PI_REFINE_SETTLE_SAMPLES_GEO_PGA },
+#if defined(VDAC_ref_BP_DEFAULT_DATA) || defined(CY_DVDAC_VDAC_ref_BP_H)
+    { CAL_PI_KP_NUM_GEO_BP, CAL_PI_KP_DIV_GEO_BP, CAL_PI_KI_NUM_GEO_BP, CAL_PI_KI_DIV_GEO_BP, CAL_PI_GAIN_GEO_BP_X1000, CAL_PI_DEADBAND_GEO_BP_COUNTS, CAL_PI_LOCK_SAMPLES_GEO_BP, CAL_PI_SETTLE_SAMPLES_GEO_BP, CAL_PI_PLANT_SETTLE_SAMPLES_GEO_BP, CAL_PI_TIMEOUT_SAMPLES_GEO_BP, CAL_PI_REFINE_ENABLE_GEO_BP, CAL_PI_REFINE_SETTLE_SAMPLES_GEO_BP },
+#endif
     /* GEO_SUM_LP: el ADDER visto desde ch3. La ganancia NO es la de su propio
      * tap (411) sino la que tiene sobre ch3: 3823 uV/codigo medidos, sobre un
      * escalon de 1875 uV en la referencia, dan 2039. El signo es NEGATIVO
@@ -971,6 +1045,16 @@ static uint8 cal_verify_seeded_values(void)
         int32 measured = 0L;
         uint8 ok;
 
+        /* Sin este salto el precheck nunca daria por buena la cadena: juzgaria
+         * al PGA contra su objetivo nominal, que a x50 no se cumple ni se
+         * pretende cumplir, y obligaria a recalibrar siempre. */
+        if (!stage->en_secuencia) {
+            result->final_dac = dac;
+            result->final_measured = 0L;
+            result->ok = 1u;
+            continue;
+        }
+
         cal_diag(PSOC_EVT_CAL_STAGE_BEGIN, i);
         cal_diag_i32(PSOC_EVT_CAL_STAGE_TARGET32, stage->target_counts);
 
@@ -1128,11 +1212,11 @@ static uint8 cal_pi_finalize_stage(uint8 ok, int16 final_dac, int32 final_measur
     cal_diag_i32(PSOC_EVT_CAL_STAGE_MEAS32, result->final_measured);
     cal_diag(PSOC_EVT_CAL_STAGE_OK, result->ok);
 
-    g_cal_async.stage_index++;
+    g_cal_async.stage_index = cal_siguiente_etapa(g_cal_async.stage_index + 1u);
     if (g_cal_async.stage_index >= PSOC_CAL_STAGE_COUNT) {
         if (!final_pass) {
             g_cal_async.pass_index++;
-            g_cal_async.stage_index = 0u;
+            g_cal_async.stage_index = cal_siguiente_etapa(0u);
             g_cal_pi.state = CAL_PI_STAGE_BEGIN;
             return 0u;
         }
@@ -1193,11 +1277,11 @@ static uint8 cal_pi_finish_stage(uint8 ok)
     g_cal_pi.refine_trial_dac = trial_dac;
     g_cal_pi.refine_base_measured = g_cal_pi.last_fir_output;
     g_cal_pi.refine_base_abs_error = cal_pi_abs_error_counts(stage, g_cal_pi.last_fir_output);
-#if CAL_PI_USE_DIRECT_ADC
-    g_cal_pi.settle_remaining = 1u;
-#else
-    g_cal_pi.settle_remaining = cfg->refine_settle_samples;
-#endif
+    /* El refinamiento mueve UN codigo, asi que aca la espera de planta no
+     * corresponde: el salto que provoca es del orden del LSB del actuador y no
+     * excita el polo lento de forma apreciable. Lo unico que hay que esperar es
+     * la memoria del camino de medida, que es lo que dice la tabla. */
+    g_cal_pi.settle_remaining = cal_pi_samples_to_iters(cfg->refine_settle_samples);
     g_cal_pi.empty_polls = 0UL;
     g_cal_pi.dac_current = trial_dac;
     stage->write(trial_dac);
@@ -1211,10 +1295,6 @@ static void cal_pi_stage_begin(void)
     const PsocCalPiCfg *cfg = &g_cal_pi_cfg[g_cal_async.stage_index];
     int32 stage_gain_x1000;
     int32 deadband_counts;
-
-#if CAL_PI_USE_DIRECT_ADC
-    (void)cfg;
-#endif
 
     cal_diag(PSOC_EVT_CAL_STAGE_BEGIN, g_cal_async.stage_index);
     cal_diag_i32(PSOC_EVT_CAL_STAGE_TARGET32, stage->target_counts);
@@ -1233,15 +1313,26 @@ static void cal_pi_stage_begin(void)
     g_cal_pi.last_dac_target = 0u;
     g_cal_pi.last_fir_output = 0L;
     g_cal_pi.empty_polls = 0UL;
-#if CAL_PI_USE_DIRECT_ADC
-    /* Una lectura descartada despues de seleccionar AMux. Cada lectura
-     * directa ya mantiene conversiones durante CAL_ADC_DIRECT_CONVERSION_MS. */
-    g_cal_pi.settle_remaining = 1u;
-#else
-    /* La espera de planta sale de la variable de ejecucion, no de la tabla:
-     * asi la automedicion de tau tiene efecto sin recompilar. */
-    g_cal_pi.settle_remaining = cfg->settle_samples + psoc_cal_plant_settle_samples();
-#endif
+    /* LA ESPERA DE PLANTA VALE PARA LAS DOS RUTAS DE LECTURA.
+     *
+     * Hasta el 2026-09-05 esta linea estaba partida en un #if y la rama del
+     * lector directo -que es la que compila por defecto, y por lo tanto la que
+     * corre en la placa- ponia simplemente 1. O sea que psoc_cal_plant_settle_
+     * samples(), el parametro tau ajustable en caliente y todo el trabajo del
+     * 2026-09-04 eran codigo muerto: la calibracion del nodo nunca esperaba a
+     * que la cadena se asentara.
+     *
+     * El razonamiento que justificaba el 1 era que cada lectura directa ya
+     * espera CAL_ADC_DIRECT_CONVERSION_MS, y es cierto: 30 ms alcanzan para que
+     * se asiente el DECIMADOR DEL ADC. Pero lo que hay que esperar es otra cosa
+     * y es cuatro ordenes de magnitud mas lenta: el polo de C1 contra R4, con
+     * tau ~ 29,5 s. Son dos transitorios distintos que quedaron confundidos en
+     * la misma constante.
+     *
+     * La espera sale de la variable de ejecucion y no de la tabla, para que la
+     * automedicion de tau tenga efecto sin recompilar. */
+    g_cal_pi.settle_remaining = cal_pi_samples_to_iters(
+        (uint32)cfg->settle_samples + psoc_cal_plant_settle_samples());
     g_cal_pi.control_hold_remaining = 0u;
     g_cal_pi.refine_base_measured = 0L;
     g_cal_pi.refine_base_abs_error = 0L;
@@ -1424,7 +1515,7 @@ static uint8 cal_pi_run_service(void)
     if (g_cal_pi.control_hold_remaining > 0u) {
         g_cal_pi.control_hold_remaining--;
         if (g_cal_pi.control_hold_remaining > 0u) {
-            if (g_cal_pi.samples_taken >= cfg->timeout_samples) {
+            if (g_cal_pi.samples_taken >= cal_pi_samples_to_iters(cfg->timeout_samples)) {
                 return cal_pi_finish_stage(0u);
             }
             return 0u;
@@ -1579,7 +1670,10 @@ static uint8 cal_pi_run_service(void)
         }
     }
 
-    if (g_cal_pi.samples_taken >= cfg->timeout_samples) {
+    /* El techo esta declarado en muestras porque es un tiempo -11,5 s para las
+     * etapas cortas, 17,3 s para las lentas- y aca se lo pasa a iteraciones del
+     * lazo, que con el lector directo duran 30 ms cada una. */
+    if (g_cal_pi.samples_taken >= cal_pi_samples_to_iters(cfg->timeout_samples)) {
         return cal_pi_finish_stage((error_bucket == 0L &&
                                     cal_pi_measurement_valid(g_cal_pi.last_fir_output)) ? 1u : 0u);
     }
@@ -1646,7 +1740,7 @@ uint8 psoc_calibration_start_async(void)
     g_cal_async.busy = 1u;
     g_cal_async.done = 0u;
     g_cal_async.ok = 1u;
-    g_cal_async.stage_index = 0u;
+    g_cal_async.stage_index = cal_siguiente_etapa(0u);
     g_cal_async.pass_index = 0u;
     psoc_cal_timer_start(CAL_PROGRESS_PERIOD_MS, CAL_WATCHDOG_MS);
     for (i = 0u; i < PSOC_CAL_STAGE_COUNT; i++) {

@@ -109,7 +109,7 @@ con el BOM de la portadora (`bom/bom.json`). Coinciden salvo donde se indica.
 
 | Bloque | Elementos |
 |---|---|
-| Polarización de entrada | `R2 = R3 = 50 k` entre `IN_P`/`IN_N` y `VREF`; el geófono (J4) va en paralelo entre `IN_P` e `IN_N` |
+| Polarización de entrada | `R2 = R3 = 47 k` entre `IN_P`/`IN_N` y `VREF`. **El TopDesign y el BOM de la portadora dicen 50 k, pero lo montado es 47 k**: no se consiguieron de 50 k. El par en serie da 94 k, no 100 k. El geófono (J4) va en paralelo entre `IN_P` e `IN_N` |
 | Pasa-banda | `R4 = 43 k` desde `SEo`; `C1 = 680 µF` a `BPm`; realimentación `R5 = 47 k` ∥ `C2 = 27 pF` ∥ `C17 = 150 pF` entre `BPm` y `BPo` |
 | Sumador | `R6 = 6.8 k` de `SEo` a `SUMm`; `R7 = 6.8 k` de `BPo` al trimmer; `RV1` (Bourns 3296W, cursor y un extremo unidos a `SUMm`); realimentación `R8 = 27 k` ∥ `C3 = 15 nF` |
 | Pasa-bajos | `R15 = 30 k` de `PGAo` al nodo interno; `C4 = 47 nF` de ese nodo a `VREF`; `R10 = 150 k` a `LPo`; `R9 = 12 k` a `LPm`; `C5 = 3.3 nF` entre `LPm` y `LPo` |

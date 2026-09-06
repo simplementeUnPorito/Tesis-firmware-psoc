@@ -1408,7 +1408,9 @@
   </block>
   <block name="LPo" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="C_8" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="REF30E" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="polarity_reg" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
+    <register name="polarity_reg_CONTROL_REG" address="0x40006471" bitWidth="8" desc="" hidden="false" />
+  </block>
   <block name="LPm" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="OPAsum" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
     <block name="ABuf" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
@@ -1478,7 +1480,6 @@
   <block name="R_11" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="R_2" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="C_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="INn" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="SPI" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
     <block name="VirtualMux_2" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="VirtualMux_3" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
@@ -1487,13 +1488,13 @@
     <block name="IntClock" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="BSPIM" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   </block>
-  <block name="GND_10" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="ESPMaster_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="Debouncer" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="Button" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="Phone_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="Wifi_2" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="ESPMaster_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="ESPSlave_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="Wifi_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="Phone_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="Clock_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="GND_11" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="R_13" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
@@ -1505,7 +1506,6 @@
   </block>
   <block name="R_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="R_12" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="C_16" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="PGAp" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
     <block name="ZeroTerminal_3" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="SC" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
@@ -1641,10 +1641,6 @@
       </field>
     </register>
   </block>
-  <block name="C_17" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="C_10" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="R_4" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="INp" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="PGAn" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
     <block name="ZeroTerminal_3" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="SC" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
@@ -1780,20 +1776,25 @@
       </field>
     </register>
   </block>
+  <block name="C_10" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="C_16" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="INp" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="INn" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="R_3" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="C_18" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="GND_17" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="R_4" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="C_17" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="GND_16" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="ESPSlave_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="PGAo" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="GND_13" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="C_19" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="GND_15" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="PGAo" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="GND_17" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="C_19" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="C_18" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="GND_14" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="GND_13" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="state" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
-    <register name="state_STATUS_REG" address="0x40006467" bitWidth="8" desc="" hidden="false" />
-    <register name="state_MASK_REG" address="0x40006487" bitWidth="8" desc="" hidden="false" />
-    <register name="state_STATUS_AUX_CTL_REG" address="0x40006497" bitWidth="8" desc="" hidden="false">
+    <register name="state_STATUS_REG" address="0x40006460" bitWidth="8" desc="" hidden="false" />
+    <register name="state_MASK_REG" address="0x40006480" bitWidth="8" desc="" hidden="false" />
+    <register name="state_STATUS_AUX_CTL_REG" address="0x40006490" bitWidth="8" desc="" hidden="false">
       <field name="FIFO0" from="5" to="5" access="RW" resetVal="" desc="FIFO0 clear" hidden="false">
         <value name="ENABLED" value="1" desc="Enable counter" />
         <value name="DISABLED" value="0" desc="Disable counter" />
@@ -1822,9 +1823,9 @@
   </block>
   <block name="isr_SuperMaquina" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="status" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
-    <register name="status_STATUS_REG" address="0x4000646A" bitWidth="8" desc="" hidden="false" />
-    <register name="status_MASK_REG" address="0x4000648A" bitWidth="8" desc="" hidden="false" />
-    <register name="status_STATUS_AUX_CTL_REG" address="0x4000649A" bitWidth="8" desc="" hidden="false">
+    <register name="status_STATUS_REG" address="0x4000656B" bitWidth="8" desc="" hidden="false" />
+    <register name="status_MASK_REG" address="0x4000658B" bitWidth="8" desc="" hidden="false" />
+    <register name="status_STATUS_AUX_CTL_REG" address="0x4000659B" bitWidth="8" desc="" hidden="false">
       <field name="FIFO0" from="5" to="5" access="RW" resetVal="" desc="FIFO0 clear" hidden="false">
         <value name="ENABLED" value="1" desc="Enable counter" />
         <value name="DISABLED" value="0" desc="Disable counter" />
@@ -1852,9 +1853,9 @@
     </register>
   </block>
   <block name="error" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
-    <register name="error_STATUS_REG" address="0x40006460" bitWidth="8" desc="" hidden="false" />
-    <register name="error_MASK_REG" address="0x40006480" bitWidth="8" desc="" hidden="false" />
-    <register name="error_STATUS_AUX_CTL_REG" address="0x40006490" bitWidth="8" desc="" hidden="false">
+    <register name="error_STATUS_REG" address="0x4000646C" bitWidth="8" desc="" hidden="false" />
+    <register name="error_MASK_REG" address="0x4000648C" bitWidth="8" desc="" hidden="false" />
+    <register name="error_STATUS_AUX_CTL_REG" address="0x4000649C" bitWidth="8" desc="" hidden="false">
       <field name="FIFO0" from="5" to="5" access="RW" resetVal="" desc="FIFO0 clear" hidden="false">
         <value name="ENABLED" value="1" desc="Enable counter" />
         <value name="DISABLED" value="0" desc="Disable counter" />
@@ -1942,7 +1943,7 @@
     <register name="Tmr_UartRxWatchdog_COUNTER" address="0x40004F2A" bitWidth="16" desc="TMRx.CNT_CMP0 - Current Down Counter Value" hidden="false" />
   </block>
   <block name="reset" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
-    <register name="reset_CONTROL_REG" address="0x4000657A" bitWidth="8" desc="" hidden="false" />
+    <register name="reset_CONTROL_REG" address="0x4000647B" bitWidth="8" desc="" hidden="false" />
   </block>
   <block name="Tmr_PingCalTick" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
     <block name="VirtualMux_2" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
@@ -2117,10 +2118,10 @@
   </block>
   <block name="ZeroTerminal_3" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="ctrl" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
-    <register name="ctrl_CONTROL_REG" address="0x40006473" bitWidth="8" desc="" hidden="false" />
+    <register name="ctrl_CONTROL_REG" address="0x4000647A" bitWidth="8" desc="" hidden="false" />
   </block>
   <block name="cfg" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
-    <register name="cfg_CONTROL_REG" address="0x40006574" bitWidth="8" desc="" hidden="false" />
+    <register name="cfg_CONTROL_REG" address="0x40006478" bitWidth="8" desc="" hidden="false" />
   </block>
   <block name="SignalController" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="timer_clock_2" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
@@ -2399,10 +2400,10 @@
     <block name="RXInternalInterrupt" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="BUART" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="VirtualMux_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-    <register name="RX_UART_RX_ADDRESS1" address="0x40006525" bitWidth="8" desc="RX Address1 Register" hidden="false" />
-    <register name="RX_UART_RX_ADDRESS2" address="0x40006535" bitWidth="8" desc="RX Address2 Register" hidden="false" />
-    <register name="RX_UART_RX_DATA" address="0x40006545" bitWidth="8" desc="RX Data Register" hidden="false" />
-    <register name="RX_UART_RX_STATUS" address="0x40006565" bitWidth="8" desc="RX status register" hidden="false">
+    <register name="RX_UART_RX_ADDRESS1" address="0x40006527" bitWidth="8" desc="RX Address1 Register" hidden="false" />
+    <register name="RX_UART_RX_ADDRESS2" address="0x40006537" bitWidth="8" desc="RX Address2 Register" hidden="false" />
+    <register name="RX_UART_RX_DATA" address="0x40006547" bitWidth="8" desc="RX Data Register" hidden="false" />
+    <register name="RX_UART_RX_STATUS" address="0x40006567" bitWidth="8" desc="RX status register" hidden="false">
       <field name="UART_RX_STS_MRKSPC" from="0" to="0" access="R" resetVal="" desc="" hidden="false" />
       <field name="UART_RX_STS_BREAK" from="1" to="1" access="R" resetVal="" desc="" hidden="false" />
       <field name="UART_RX_STS_PAR_ERROR" from="2" to="2" access="R" resetVal="" desc="" hidden="false" />
@@ -2498,7 +2499,6 @@
       <field name="timeout_period_highnibble" from="3" to="0" access="RW" resetVal="" desc="The configuration of this register along with that in register TMOUT_CFG1 to define the number units before SCL or SDA stuck low timeout triggers the I2C interrupt. The one unit is equal to SYSCLK/1024. The TMOUT_CFG1 defines higher octet of the period." hidden="false" />
     </register>
   </block>
-  <block name="clock_2" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="Vref_ADDER" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="R_32" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="GND_12" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
@@ -2884,15 +2884,14 @@
   </block>
   <block name="C_9" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="AMux_ADC" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="Button_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="R_31" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="C_6" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="GND_5" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="R_7" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="C_15" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="Button_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="tmr_event" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
-    <register name="tmr_event_STATUS_REG" address="0x4000656A" bitWidth="8" desc="" hidden="false" />
-    <register name="tmr_event_MASK_REG" address="0x4000658A" bitWidth="8" desc="" hidden="false" />
-    <register name="tmr_event_STATUS_AUX_CTL_REG" address="0x4000659A" bitWidth="8" desc="" hidden="false">
+    <register name="tmr_event_STATUS_REG" address="0x40006465" bitWidth="8" desc="" hidden="false" />
+    <register name="tmr_event_MASK_REG" address="0x40006485" bitWidth="8" desc="" hidden="false" />
+    <register name="tmr_event_STATUS_AUX_CTL_REG" address="0x40006495" bitWidth="8" desc="" hidden="false">
       <field name="FIFO0" from="5" to="5" access="RW" resetVal="" desc="FIFO0 clear" hidden="false">
         <value name="ENABLED" value="1" desc="Enable counter" />
         <value name="DISABLED" value="0" desc="Disable counter" />
@@ -2919,15 +2918,16 @@
       </field>
     </register>
   </block>
-  <block name="GND_5" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="clock_2" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="GND_8" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="R_8" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="C_15" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="C_6" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="Vref_BP" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="C_12" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="Vref_PGA" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="C_2" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="GND_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="R_9" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="R_8" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="GND_9" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="C_13" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
 </blockRegMap>

@@ -564,335 +564,6 @@
       </registers>
     </peripheral>
     <peripheral>
-      <name>OPAlp</name>
-      <description>No description available</description>
-      <baseAddress>0x0</baseAddress>
-      <addressBlock>
-        <offset>0</offset>
-        <size>0x0</size>
-        <usage>registers</usage>
-      </addressBlock>
-      <registers>
-        <register>
-          <name>PM_ACT_CFG4</name>
-          <description>Active Power Mode Configuration Register 4</description>
-          <addressOffset>0x400043A4</addressOffset>
-          <size>8</size>
-          <access>read-write</access>
-          <resetValue>0</resetValue>
-          <resetMask>0</resetMask>
-          <fields>
-            <field>
-              <name>EN_OPAMP</name>
-              <description>Enables subsystems during active power mode</description>
-              <lsb>0</lsb>
-              <msb>3</msb>
-              <access>read-write</access>
-              <enumeratedValues>
-                <enumeratedValue>
-                  <name>Blk_0</name>
-                  <description>Enables analog linear output buffer for Opamp block 0</description>
-                  <value>0</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>Blk_1</name>
-                  <description>Enables analog linear output buffer for Opamp block 1</description>
-                  <value>2</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>Blk_2</name>
-                  <description>Enables analog linear output buffer for Opamp block 2</description>
-                  <value>4</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>Blk_3</name>
-                  <description>Enables analog linear output buffer for Opamp block 3</description>
-                  <value>8</value>
-                </enumeratedValue>
-              </enumeratedValues>
-            </field>
-          </fields>
-        </register>
-        <register>
-          <name>PM_STBY_CFG4</name>
-          <description>Standby Power Mode Configuration Register 4</description>
-          <addressOffset>0x400043B4</addressOffset>
-          <size>8</size>
-          <access>read-write</access>
-          <resetValue>0</resetValue>
-          <resetMask>0</resetMask>
-          <fields>
-            <field>
-              <name>EN_OPAMP</name>
-              <description>Enables subsystems during standby power mode</description>
-              <lsb>0</lsb>
-              <msb>3</msb>
-              <access>read-write</access>
-              <enumeratedValues>
-                <enumeratedValue>
-                  <name>Blk_0</name>
-                  <description>Enables analog linear output buffer for Opamp block 0</description>
-                  <value>0</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>Blk_1</name>
-                  <description>Enables analog linear output buffer for Opamp block 1</description>
-                  <value>2</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>Blk_2</name>
-                  <description>Enables analog linear output buffer for Opamp block 2</description>
-                  <value>4</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>Blk_3</name>
-                  <description>Enables analog linear output buffer for Opamp block 3</description>
-                  <value>8</value>
-                </enumeratedValue>
-              </enumeratedValues>
-            </field>
-          </fields>
-        </register>
-        <register>
-          <name>OPAMP__TR0</name>
-          <description>Analog Output Buffer Trim Register 0</description>
-          <addressOffset>0x40004620</addressOffset>
-          <size>8</size>
-          <access>read-write</access>
-          <resetValue>0</resetValue>
-          <resetMask>0</resetMask>
-          <fields>
-            <field>
-              <name>offset_trim</name>
-              <description>Offset Trim: 420uV typical step size; +/- 6.8mV offset trimmable range</description>
-              <lsb>0</lsb>
-              <msb>4</msb>
-              <access>read-write</access>
-            </field>
-          </fields>
-        </register>
-        <register>
-          <name>OPAMP__TR1</name>
-          <description>Analog Output Buffer Trim Register 1</description>
-          <addressOffset>0x40004621</addressOffset>
-          <size>8</size>
-          <access>read-write</access>
-          <resetValue>0</resetValue>
-          <resetMask>0</resetMask>
-          <fields>
-            <field>
-              <name>RSVD</name>
-              <description>RSVD</description>
-              <lsb>0</lsb>
-              <msb>7</msb>
-              <access>read-write</access>
-            </field>
-          </fields>
-        </register>
-        <register>
-          <name>OPAMP__CR</name>
-          <description>Analog Output Buffer Configuration Register</description>
-          <addressOffset>0x40005858</addressOffset>
-          <size>8</size>
-          <access>read-write</access>
-          <resetValue>0</resetValue>
-          <resetMask>0</resetMask>
-          <fields>
-            <field>
-              <name>pwr_mode</name>
-              <description>Power Mode</description>
-              <lsb>0</lsb>
-              <msb>1</msb>
-              <access>read-write</access>
-              <enumeratedValues>
-                <enumeratedValue>
-                  <name>Default_Fast</name>
-                  <description>Default Power mode Fast</description>
-                  <value>0</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>Slow</name>
-                  <description>Power Mode Slow</description>
-                  <value>1</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>Medium</name>
-                  <description>Power Mode Medium</description>
-                  <value>2</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>Fast</name>
-                  <description>Power Mode Fast</description>
-                  <value>3</value>
-                </enumeratedValue>
-              </enumeratedValues>
-            </field>
-          </fields>
-        </register>
-        <register>
-          <name>OPAMP__MX</name>
-          <description>Analog Buffer Input Selection Register</description>
-          <addressOffset>0x40005B40</addressOffset>
-          <size>8</size>
-          <access>read-write</access>
-          <resetValue>0</resetValue>
-          <resetMask>0</resetMask>
-          <fields>
-            <field>
-              <name>MX_VP_ENUM</name>
-              <description>MUX select VP (Positive terminal input)</description>
-              <lsb>0</lsb>
-              <msb>3</msb>
-              <access>read-write</access>
-              <enumeratedValues>
-                <enumeratedValue>
-                  <name>OPAMP0_MX_VP_DEFAULT</name>
-                  <description>Default - Not Connected (NC)</description>
-                  <value>0</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>OPAMP0_MX_VP_AG4</name>
-                  <description>MUX Selection AGL(4)</description>
-                  <value>1</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>OPAMP0_MX_VP_AG5</name>
-                  <description>MUX Selection AGL(5)</description>
-                  <value>2</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>OPAMP0_MX_VP_AG6</name>
-                  <description>MUX Selection AGL(6)</description>
-                  <value>3</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>OPAMP0_MX_VP_AG7</name>
-                  <description>MUX Selection AGL(7)</description>
-                  <value>4</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>OPAMP0_MX_VP_ABUS0</name>
-                  <description>MUX Selection ABUSL(0)</description>
-                  <value>5</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>OPAMP0_MX_VP_ABUS1</name>
-                  <description>MUX Selection ABUSL(1)</description>
-                  <value>6</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>OPAMP0_MX_VP_ABUS2</name>
-                  <description>MUX Selection ABUSL(2)</description>
-                  <value>7</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>OPAMP0_MX_VP_ABUS3</name>
-                  <description>MUX Selection ABUSL(3)</description>
-                  <value>8</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>OPAMP0_MX_VP_VREF</name>
-                  <description>MUX Selection: OPAMP Voltage Reference</description>
-                  <value>9</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>OPAMP0_MX_VP_H_0xA</name>
-                  <description>Reserved (NC)</description>
-                  <value>10</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>OPAMP0_MX_VP_H_0xB</name>
-                  <description>Reserved (NC)</description>
-                  <value>11</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>OPAMP0_MX_VP_H_0xC</name>
-                  <description>Reserved (NC)</description>
-                  <value>12</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>OPAMP0_MX_VP_H_0xD</name>
-                  <description>Reserved (NC)</description>
-                  <value>13</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>OPAMP0_MX_VP_H_0xE</name>
-                  <description>Reserved (NC)</description>
-                  <value>14</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>OPAMP0_MX_VP_H_0xF</name>
-                  <description>Reserved (NC)</description>
-                  <value>15</value>
-                </enumeratedValue>
-              </enumeratedValues>
-            </field>
-            <field>
-              <name>MX_VN_ENUM</name>
-              <description>MUX select VN (Negative terminal input)</description>
-              <lsb>4</lsb>
-              <msb>5</msb>
-              <access>read-write</access>
-              <enumeratedValues>
-                <enumeratedValue>
-                  <name>OPAMP0_MX_VN_DEFAULT</name>
-                  <description>Default - Not Connected (NC)</description>
-                  <value>0</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>OPAMP0_MX_VN_AG4</name>
-                  <description>MUX Selection AGL(4)</description>
-                  <value>1</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>OPAMP0_MX_VN_AG6</name>
-                  <description>MUX Selection AGL(6)</description>
-                  <value>2</value>
-                </enumeratedValue>
-                <enumeratedValue>
-                  <name>OPAMP0_MX_VN_0x3</name>
-                  <description>Reserved (NC)</description>
-                  <value>3</value>
-                </enumeratedValue>
-              </enumeratedValues>
-            </field>
-          </fields>
-        </register>
-        <register>
-          <name>OPAMP__SW</name>
-          <description>Analog Buffer Routing Switch Register</description>
-          <addressOffset>0x40005B41</addressOffset>
-          <size>8</size>
-          <access>read-write</access>
-          <resetValue>0</resetValue>
-          <resetMask>0</resetMask>
-          <fields>
-            <field>
-              <name>swfol</name>
-              <description>Switch Enable Follow</description>
-              <lsb>0</lsb>
-              <msb>0</msb>
-              <access>read-write</access>
-            </field>
-            <field>
-              <name>swinn</name>
-              <description>Switch Enable Negative Input</description>
-              <lsb>1</lsb>
-              <msb>1</msb>
-              <access>read-write</access>
-            </field>
-            <field>
-              <name>swinp</name>
-              <description>Switch Enable Positive Input</description>
-              <lsb>2</lsb>
-              <msb>2</msb>
-              <access>read-write</access>
-            </field>
-          </fields>
-        </register>
-      </registers>
-    </peripheral>
-    <peripheral>
       <name>OPAbp</name>
       <description>No description available</description>
       <baseAddress>0x0</baseAddress>
@@ -6765,6 +6436,335 @@
       </registers>
     </peripheral>
     <peripheral>
+      <name>OPAlp</name>
+      <description>No description available</description>
+      <baseAddress>0x0</baseAddress>
+      <addressBlock>
+        <offset>0</offset>
+        <size>0x0</size>
+        <usage>registers</usage>
+      </addressBlock>
+      <registers>
+        <register>
+          <name>PM_ACT_CFG4</name>
+          <description>Active Power Mode Configuration Register 4</description>
+          <addressOffset>0x400043A4</addressOffset>
+          <size>8</size>
+          <access>read-write</access>
+          <resetValue>0</resetValue>
+          <resetMask>0</resetMask>
+          <fields>
+            <field>
+              <name>EN_OPAMP</name>
+              <description>Enables subsystems during active power mode</description>
+              <lsb>0</lsb>
+              <msb>3</msb>
+              <access>read-write</access>
+              <enumeratedValues>
+                <enumeratedValue>
+                  <name>Blk_0</name>
+                  <description>Enables analog linear output buffer for Opamp block 0</description>
+                  <value>0</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>Blk_1</name>
+                  <description>Enables analog linear output buffer for Opamp block 1</description>
+                  <value>2</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>Blk_2</name>
+                  <description>Enables analog linear output buffer for Opamp block 2</description>
+                  <value>4</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>Blk_3</name>
+                  <description>Enables analog linear output buffer for Opamp block 3</description>
+                  <value>8</value>
+                </enumeratedValue>
+              </enumeratedValues>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PM_STBY_CFG4</name>
+          <description>Standby Power Mode Configuration Register 4</description>
+          <addressOffset>0x400043B4</addressOffset>
+          <size>8</size>
+          <access>read-write</access>
+          <resetValue>0</resetValue>
+          <resetMask>0</resetMask>
+          <fields>
+            <field>
+              <name>EN_OPAMP</name>
+              <description>Enables subsystems during standby power mode</description>
+              <lsb>0</lsb>
+              <msb>3</msb>
+              <access>read-write</access>
+              <enumeratedValues>
+                <enumeratedValue>
+                  <name>Blk_0</name>
+                  <description>Enables analog linear output buffer for Opamp block 0</description>
+                  <value>0</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>Blk_1</name>
+                  <description>Enables analog linear output buffer for Opamp block 1</description>
+                  <value>2</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>Blk_2</name>
+                  <description>Enables analog linear output buffer for Opamp block 2</description>
+                  <value>4</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>Blk_3</name>
+                  <description>Enables analog linear output buffer for Opamp block 3</description>
+                  <value>8</value>
+                </enumeratedValue>
+              </enumeratedValues>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>OPAMP__TR0</name>
+          <description>Analog Output Buffer Trim Register 0</description>
+          <addressOffset>0x40004620</addressOffset>
+          <size>8</size>
+          <access>read-write</access>
+          <resetValue>0</resetValue>
+          <resetMask>0</resetMask>
+          <fields>
+            <field>
+              <name>offset_trim</name>
+              <description>Offset Trim: 420uV typical step size; +/- 6.8mV offset trimmable range</description>
+              <lsb>0</lsb>
+              <msb>4</msb>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>OPAMP__TR1</name>
+          <description>Analog Output Buffer Trim Register 1</description>
+          <addressOffset>0x40004621</addressOffset>
+          <size>8</size>
+          <access>read-write</access>
+          <resetValue>0</resetValue>
+          <resetMask>0</resetMask>
+          <fields>
+            <field>
+              <name>RSVD</name>
+              <description>RSVD</description>
+              <lsb>0</lsb>
+              <msb>7</msb>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>OPAMP__CR</name>
+          <description>Analog Output Buffer Configuration Register</description>
+          <addressOffset>0x40005858</addressOffset>
+          <size>8</size>
+          <access>read-write</access>
+          <resetValue>0</resetValue>
+          <resetMask>0</resetMask>
+          <fields>
+            <field>
+              <name>pwr_mode</name>
+              <description>Power Mode</description>
+              <lsb>0</lsb>
+              <msb>1</msb>
+              <access>read-write</access>
+              <enumeratedValues>
+                <enumeratedValue>
+                  <name>Default_Fast</name>
+                  <description>Default Power mode Fast</description>
+                  <value>0</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>Slow</name>
+                  <description>Power Mode Slow</description>
+                  <value>1</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>Medium</name>
+                  <description>Power Mode Medium</description>
+                  <value>2</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>Fast</name>
+                  <description>Power Mode Fast</description>
+                  <value>3</value>
+                </enumeratedValue>
+              </enumeratedValues>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>OPAMP__MX</name>
+          <description>Analog Buffer Input Selection Register</description>
+          <addressOffset>0x40005B40</addressOffset>
+          <size>8</size>
+          <access>read-write</access>
+          <resetValue>0</resetValue>
+          <resetMask>0</resetMask>
+          <fields>
+            <field>
+              <name>MX_VP_ENUM</name>
+              <description>MUX select VP (Positive terminal input)</description>
+              <lsb>0</lsb>
+              <msb>3</msb>
+              <access>read-write</access>
+              <enumeratedValues>
+                <enumeratedValue>
+                  <name>OPAMP0_MX_VP_DEFAULT</name>
+                  <description>Default - Not Connected (NC)</description>
+                  <value>0</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>OPAMP0_MX_VP_AG4</name>
+                  <description>MUX Selection AGL(4)</description>
+                  <value>1</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>OPAMP0_MX_VP_AG5</name>
+                  <description>MUX Selection AGL(5)</description>
+                  <value>2</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>OPAMP0_MX_VP_AG6</name>
+                  <description>MUX Selection AGL(6)</description>
+                  <value>3</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>OPAMP0_MX_VP_AG7</name>
+                  <description>MUX Selection AGL(7)</description>
+                  <value>4</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>OPAMP0_MX_VP_ABUS0</name>
+                  <description>MUX Selection ABUSL(0)</description>
+                  <value>5</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>OPAMP0_MX_VP_ABUS1</name>
+                  <description>MUX Selection ABUSL(1)</description>
+                  <value>6</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>OPAMP0_MX_VP_ABUS2</name>
+                  <description>MUX Selection ABUSL(2)</description>
+                  <value>7</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>OPAMP0_MX_VP_ABUS3</name>
+                  <description>MUX Selection ABUSL(3)</description>
+                  <value>8</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>OPAMP0_MX_VP_VREF</name>
+                  <description>MUX Selection: OPAMP Voltage Reference</description>
+                  <value>9</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>OPAMP0_MX_VP_H_0xA</name>
+                  <description>Reserved (NC)</description>
+                  <value>10</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>OPAMP0_MX_VP_H_0xB</name>
+                  <description>Reserved (NC)</description>
+                  <value>11</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>OPAMP0_MX_VP_H_0xC</name>
+                  <description>Reserved (NC)</description>
+                  <value>12</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>OPAMP0_MX_VP_H_0xD</name>
+                  <description>Reserved (NC)</description>
+                  <value>13</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>OPAMP0_MX_VP_H_0xE</name>
+                  <description>Reserved (NC)</description>
+                  <value>14</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>OPAMP0_MX_VP_H_0xF</name>
+                  <description>Reserved (NC)</description>
+                  <value>15</value>
+                </enumeratedValue>
+              </enumeratedValues>
+            </field>
+            <field>
+              <name>MX_VN_ENUM</name>
+              <description>MUX select VN (Negative terminal input)</description>
+              <lsb>4</lsb>
+              <msb>5</msb>
+              <access>read-write</access>
+              <enumeratedValues>
+                <enumeratedValue>
+                  <name>OPAMP0_MX_VN_DEFAULT</name>
+                  <description>Default - Not Connected (NC)</description>
+                  <value>0</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>OPAMP0_MX_VN_AG4</name>
+                  <description>MUX Selection AGL(4)</description>
+                  <value>1</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>OPAMP0_MX_VN_AG6</name>
+                  <description>MUX Selection AGL(6)</description>
+                  <value>2</value>
+                </enumeratedValue>
+                <enumeratedValue>
+                  <name>OPAMP0_MX_VN_0x3</name>
+                  <description>Reserved (NC)</description>
+                  <value>3</value>
+                </enumeratedValue>
+              </enumeratedValues>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>OPAMP__SW</name>
+          <description>Analog Buffer Routing Switch Register</description>
+          <addressOffset>0x40005B41</addressOffset>
+          <size>8</size>
+          <access>read-write</access>
+          <resetValue>0</resetValue>
+          <resetMask>0</resetMask>
+          <fields>
+            <field>
+              <name>swfol</name>
+              <description>Switch Enable Follow</description>
+              <lsb>0</lsb>
+              <msb>0</msb>
+              <access>read-write</access>
+            </field>
+            <field>
+              <name>swinn</name>
+              <description>Switch Enable Negative Input</description>
+              <lsb>1</lsb>
+              <msb>1</msb>
+              <access>read-write</access>
+            </field>
+            <field>
+              <name>swinp</name>
+              <description>Switch Enable Positive Input</description>
+              <lsb>2</lsb>
+              <msb>2</msb>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+      </registers>
+    </peripheral>
+    <peripheral>
       <name>OPAsum</name>
       <description>No description available</description>
       <baseAddress>0x0</baseAddress>
@@ -7090,6 +7090,27 @@
               <access>read-write</access>
             </field>
           </fields>
+        </register>
+      </registers>
+    </peripheral>
+    <peripheral>
+      <name>polarity_reg</name>
+      <description>No description available</description>
+      <baseAddress>0x0</baseAddress>
+      <addressBlock>
+        <offset>0</offset>
+        <size>0x0</size>
+        <usage>registers</usage>
+      </addressBlock>
+      <registers>
+        <register>
+          <name>polarity_reg_CONTROL_REG</name>
+          <description>No description available</description>
+          <addressOffset>0x40006471</addressOffset>
+          <size>8</size>
+          <access>read-write</access>
+          <resetValue>0</resetValue>
+          <resetMask>0</resetMask>
         </register>
       </registers>
     </peripheral>
@@ -8366,7 +8387,7 @@
         <register>
           <name>state_STATUS_REG</name>
           <description>No description available</description>
-          <addressOffset>0x40006467</addressOffset>
+          <addressOffset>0x40006460</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -8375,7 +8396,7 @@
         <register>
           <name>state_MASK_REG</name>
           <description>No description available</description>
-          <addressOffset>0x40006487</addressOffset>
+          <addressOffset>0x40006480</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -8384,7 +8405,7 @@
         <register>
           <name>state_STATUS_AUX_CTL_REG</name>
           <description>No description available</description>
-          <addressOffset>0x40006497</addressOffset>
+          <addressOffset>0x40006490</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -8521,7 +8542,7 @@
         <register>
           <name>status_STATUS_REG</name>
           <description>No description available</description>
-          <addressOffset>0x4000646A</addressOffset>
+          <addressOffset>0x4000656B</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -8530,7 +8551,7 @@
         <register>
           <name>status_MASK_REG</name>
           <description>No description available</description>
-          <addressOffset>0x4000648A</addressOffset>
+          <addressOffset>0x4000658B</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -8539,7 +8560,7 @@
         <register>
           <name>status_STATUS_AUX_CTL_REG</name>
           <description>No description available</description>
-          <addressOffset>0x4000649A</addressOffset>
+          <addressOffset>0x4000659B</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -8676,7 +8697,7 @@
         <register>
           <name>error_STATUS_REG</name>
           <description>No description available</description>
-          <addressOffset>0x40006460</addressOffset>
+          <addressOffset>0x4000646C</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -8685,7 +8706,7 @@
         <register>
           <name>error_MASK_REG</name>
           <description>No description available</description>
-          <addressOffset>0x40006480</addressOffset>
+          <addressOffset>0x4000648C</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -8694,7 +8715,7 @@
         <register>
           <name>error_STATUS_AUX_CTL_REG</name>
           <description>No description available</description>
-          <addressOffset>0x40006490</addressOffset>
+          <addressOffset>0x4000649C</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -9123,7 +9144,7 @@
         <register>
           <name>reset_CONTROL_REG</name>
           <description>No description available</description>
-          <addressOffset>0x4000657A</addressOffset>
+          <addressOffset>0x4000647B</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -10020,7 +10041,7 @@
         <register>
           <name>ctrl_CONTROL_REG</name>
           <description>No description available</description>
-          <addressOffset>0x40006473</addressOffset>
+          <addressOffset>0x4000647A</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -10041,7 +10062,7 @@
         <register>
           <name>cfg_CONTROL_REG</name>
           <description>No description available</description>
-          <addressOffset>0x40006574</addressOffset>
+          <addressOffset>0x40006478</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -11342,7 +11363,7 @@
         <register>
           <name>RX_UART_RX_ADDRESS1</name>
           <description>RX Address1 Register</description>
-          <addressOffset>0x40006525</addressOffset>
+          <addressOffset>0x40006527</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -11351,7 +11372,7 @@
         <register>
           <name>RX_UART_RX_ADDRESS2</name>
           <description>RX Address2 Register</description>
-          <addressOffset>0x40006535</addressOffset>
+          <addressOffset>0x40006537</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -11360,7 +11381,7 @@
         <register>
           <name>RX_UART_RX_DATA</name>
           <description>RX Data Register</description>
-          <addressOffset>0x40006545</addressOffset>
+          <addressOffset>0x40006547</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -11369,7 +11390,7 @@
         <register>
           <name>RX_UART_RX_STATUS</name>
           <description>RX status register</description>
-          <addressOffset>0x40006565</addressOffset>
+          <addressOffset>0x40006567</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -13595,7 +13616,7 @@
         <register>
           <name>tmr_event_STATUS_REG</name>
           <description>No description available</description>
-          <addressOffset>0x4000656A</addressOffset>
+          <addressOffset>0x40006465</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -13604,7 +13625,7 @@
         <register>
           <name>tmr_event_MASK_REG</name>
           <description>No description available</description>
-          <addressOffset>0x4000658A</addressOffset>
+          <addressOffset>0x40006485</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>
@@ -13613,7 +13634,7 @@
         <register>
           <name>tmr_event_STATUS_AUX_CTL_REG</name>
           <description>No description available</description>
-          <addressOffset>0x4000659A</addressOffset>
+          <addressOffset>0x40006495</addressOffset>
           <size>8</size>
           <access>read-write</access>
           <resetValue>0</resetValue>

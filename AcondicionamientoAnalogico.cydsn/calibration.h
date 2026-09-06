@@ -18,6 +18,22 @@ typedef struct {
     int16 dac_center;       /* Arranque en codigos de IDAC con signo; 0 = Vref. */
     int16 dac_max_change;   /* Rango permitido: [center-max_change, center+max_change]. */
     PsocCalVdacWrite write; /* Funcion que escribe el IDAC fisico de la etapa. */
+    /* SI ESTA ETAPA SE CALIBRA O SOLO EXISTE.
+     *
+     * Esta tabla cumple dos papeles que hasta el 2026-09-05 estaban colapsados:
+     * es la SECUENCIA de calibracion y es tambien el MAPA DE ACTUADORES que usa
+     * el instrumento de laboratorio para direccionar cada IDAC.
+     *
+     * Al pasar la calibracion a dos actuadores se recorto la tabla a dos filas,
+     * y con eso el autotest perdio la capacidad de escribir los IDAC del PGA y
+     * del BP: `set_idac 2` y `set_idac 3` empezaron a fallar EN SILENCIO, y la
+     * cadena arrancaba cada ensayo desde un estado distinto. Se noto porque dos
+     * corridas seguidas del mismo experimento partieron de taps casi opuestos.
+     *
+     * Ahora las cuatro etapas siguen existiendo -el instrumento las ve todas- y
+     * este campo dice cuales recorre la calibracion. 0 = presente pero no se
+     * calibra. */
+    uint8 en_secuencia;
 } PsocCalStage;
 
 /* Resultado por etapa para telemetria post-calibracion (ver uart_send_diag

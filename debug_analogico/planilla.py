@@ -14,6 +14,7 @@ Se usa desde red_analogica.py; no se ejecuta solo.
 """
 
 from openpyxl import Workbook, load_workbook
+from openpyxl.workbook.defined_name import DefinedName
 from openpyxl.formatting.rule import CellIsRule
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
@@ -26,8 +27,8 @@ _AMBAR = PatternFill("solid", fgColor="FFEB9C")
 _BORDE = Border(bottom=Side(style="thin", color="BFBFBF"))
 
 # Indices (base 0) de las celdas que completa el usuario, por hoja.
-_ANOTADAS_R = {"medido_inicial": 7, "espera_s": 8, "medido": 9,
-               "esperado_corregido": 11, "notas_medicion": 12}
+_ANOTADAS_R = {"medido_inicial": 8, "espera_s": 9, "medido": 10,
+               "esperado_corregido": 12, "notas_medicion": 13}
 _ANOTADAS_C = {"medido_inicial": 7, "espera_s": 8, "medido": 9,
                "notas_medicion": 11}
 
@@ -79,9 +80,10 @@ def _hoja_resistencia(wb, filas, previo, es_base):
     ws = wb.create_sheet("Resistencia")
     _encabezar(ws,
                ["base", "par", "esperado kohm", "min kohm", "max kohm",
-                "camino", "arranca kohm", "1a lectura kohm", "espera s",
-                "medido kohm", "ok", "esperado corregido", "notas"],
-               [6, 34, 12, 10, 10, 22, 11, 12, 9, 12, 10, 14, 30])
+                "camino", "arranca kohm", "observaciones", "1a lectura kohm",
+                "espera s", "medido kohm", "ok", "esperado corregido",
+                "notas"],
+               [6, 34, 12, 10, 10, 22, 11, 44, 12, 9, 12, 10, 14, 30])
 
     for f in filas:
         r = ws.max_row + 1
@@ -93,31 +95,36 @@ def _hoja_resistencia(wb, filas, previo, es_base):
         ws.cell(r, 3, "abierto" if abierto
                 else round(float(f["esperado_ohm"]) / 1e3, 3))
         if not abierto:
-            ws.cell(r, 4, round(float(f["min_ohm"]) / 1e3, 3))
-            ws.cell(r, 5, round(float(f["max_ohm"]) / 1e3, 3))
+            # Calculados en la planilla: cambiar TOL_R recalcula las 34 filas.
+            ws.cell(r, 4, "=C{r}*(1-TOL_R)".format(r=r))
+            ws.cell(r, 5, "=C{r}*(1+TOL_R)".format(r=r))
+            ws.cell(r, 4).number_format = "0.000"
+            ws.cell(r, 5).number_format = "0.000"
         ws.cell(r, 6, f["camino"])
         if f["lectura_inicial"]:
             ws.cell(r, 7, float(f["lectura_inicial"].replace("k", "").strip()))
-        ws.cell(r, 8, guardado.get("medido_inicial", ""))
-        ws.cell(r, 9, guardado.get("espera_s", ""))
-        ws.cell(r, 10, guardado.get("medido", ""))
+        ws.cell(r, 8, f["nota"])          # generada, se recalcula siempre
+        ws.cell(r, 9, guardado.get("medido_inicial", ""))
+        ws.cell(r, 10, guardado.get("espera_s", ""))
+        ws.cell(r, 11, guardado.get("medido", ""))
 
         # Con rango: dentro o fuera. Sin rango (abierto): un numero es corto.
         # Si la fila tiene transitorio y se espero poco, avisa antes de
         # declarar la medida mala.
-        ws.cell(r, 11, (
-            '=IF(J{r}="","",'
-            'IF(D{r}="",IF(ISNUMBER(J{r}),"CORTO?","OK"),'
-            'IF(AND(J{r}>=D{r},J{r}<=E{r}),"OK",'
-            'IF(AND(G{r}<>"",I{r}<>"",I{r}<60),"ESPERAR","FUERA"))))'
+        ws.cell(r, 12, (
+            '=IF(K{r}="","",'
+            'IF(D{r}="",IF(ISNUMBER(K{r}),"CORTO?","OK"),'
+            'IF(AND(K{r}>=D{r},K{r}<=E{r}),"OK",'
+            'IF(AND(G{r}<>"",J{r}<>"",J{r}<60),"ESPERAR","FUERA"))))'
         ).format(r=r))
-        ws.cell(r, 12, guardado.get("esperado_corregido", ""))
-        ws.cell(r, 13, guardado.get("notas_medicion", "") or f["nota"])
+        ws.cell(r, 13, guardado.get("esperado_corregido", ""))
+        ws.cell(r, 14, guardado.get("notas_medicion", ""))
 
-        _marcar_entrada(ws, r, (8, 9, 10, 12, 13), 13, 11)
+        ws.cell(r, 8).alignment = Alignment(wrap_text=True, vertical="top")
+        _marcar_entrada(ws, r, (9, 10, 11, 13, 14), 14, 12)
 
-    _pintar_ok(ws, "K", ws.max_row)
-    ws.auto_filter.ref = "A1:M%d" % ws.max_row
+    _pintar_ok(ws, "L", ws.max_row)
+    ws.auto_filter.ref = "A1:N%d" % ws.max_row
     return ws
 
 
@@ -139,8 +146,10 @@ def _hoja_capacitancia(wb, caps, previo, faradios):
         ws.cell(r, 2, c["componentes"])
         ws.cell(r, 3, unidad)
         ws.cell(r, 4, round(total / escala, 4))
-        ws.cell(r, 5, round(total * 0.8 / escala, 4))
-        ws.cell(r, 6, round(total * 1.2 / escala, 4))
+        ws.cell(r, 5, "=D{r}*(1-TOL_C)".format(r=r))
+        ws.cell(r, 6, "=D{r}*(1+TOL_C)".format(r=r))
+        ws.cell(r, 5).number_format = "0.000"
+        ws.cell(r, 6).number_format = "0.000"
         ws.cell(r, 7, "nada: lectura limpia" if c["shunt"] is None
                 else "%.1f kohm: lectura dudosa" % (c["shunt"] / 1e3))
         ws.cell(r, 8, guardado.get("medido_inicial", ""))
@@ -156,9 +165,29 @@ def _hoja_capacitancia(wb, caps, previo, faradios):
     return ws
 
 
-def _hoja_instrucciones(wb, rv1_pct):
+def _hoja_instrucciones(wb, rv1_pct, tol_r, tol_c):
     ws = wb.create_sheet("Antes de medir", 0)
     ws.column_dimensions["A"].width = 100
+    ws.column_dimensions["B"].width = 26
+    ws.column_dimensions["C"].width = 10
+
+    # Las columnas min/max de las otras hojas son formulas contra estas dos
+    # celdas: cambiarlas aca recalcula toda la planilla.
+    ws["B1"] = "Tolerancias"
+    ws["B1"].font = Font(bold=True, size=12, color="1F3864")
+    for fila, etiqueta, valor, nombre in (
+            (2, "resistencias", tol_r, "TOL_R"),
+            (3, "capacitores", tol_c, "TOL_C")):
+        ws.cell(fila, 2, etiqueta)
+        c = ws.cell(fila, 3, valor)
+        c.fill = _ENTRADA
+        c.number_format = "0.0%"
+        wb.defined_names.add(DefinedName(
+            nombre, attr_text="'Antes de medir'!$C$%d" % fila))
+    ws["B4"] = "Cambialas y se recalculan"
+    ws["B5"] = "los min/max de las dos hojas."
+    for f in (4, 5):
+        ws.cell(f, 2).font = Font(italic=True, size=9)
     lineas = [
         ("Como usar esta planilla", True),
         ("", False),
@@ -168,6 +197,13 @@ def _hoja_instrucciones(wb, rv1_pct):
          "comparar a mano.", False),
         ("Las resistencias van en kohm y los capacitores en la unidad que "
          "indica su fila.", False),
+        ("Si el multimetro no cierra, escribi OL en vez de dejar la celda "
+         "vacia: vacio quiere", False),
+        ("decir 'todavia no lo medi' y OL quiere decir 'lo medi y esta "
+         "abierto'. diagnostico.py", False),
+        ("necesita la diferencia; en las filas que deben dar abierto es la "
+         "unica forma de", False),
+        ("declararlas verificadas.", False),
         ("En la hoja Resistencia, un * marca los doce chequeos base: si "
          "queres hacer solo esos,", False),
         ("segui los asteriscos.", False),
@@ -218,6 +254,16 @@ def _hoja_instrucciones(wb, rv1_pct):
         ("Regenerar la planilla NO borra lo anotado: el script relee el "
          "archivo y arrastra", False),
         ("las celdas amarillas.", False),
+        ("", False),
+        ("Cuando algo no de", True),
+        ("", False),
+        ("Correr 'python diagnostico.py'. Lee esta planilla, le mete una "
+         "falla por vez al", False),
+        ("modelo de la red y dice cual la reproduce, cuales no se pueden "
+         "distinguir entre si", False),
+        ("y cual es la proxima medicion que mas conviene hacer. Anda con la "
+         "planilla a medio", False),
+        ("llenar.", False),
     ]
     for i, (texto, titulo) in enumerate(lineas, start=1):
         c = ws.cell(i, 1, texto)
@@ -257,14 +303,42 @@ def leer_anotaciones(ruta):
     return previo
 
 
-def escribir(ruta, filas_r, caps, es_base, faradios, rv1_pct):
+# Hojas que no las genera este modulo sino diagnostico.py. El libro se
+# reconstruye entero en cada corrida, asi que hay que rescatarlas o se
+# pierden las mediciones anotadas ahi.
+_AJENAS = ("Remedir", "Medido", "Diagnostico")
+
+
+def _rescatar_ajenas(ruta):
+    """Guarda el contenido crudo de las hojas de diagnostico."""
+    try:
+        wb = load_workbook(ruta, data_only=False)
+    except (FileNotFoundError, OSError, KeyError):
+        return {}
+    return {h: [list(f) for f in wb[h].iter_rows(values_only=True)]
+            for h in _AJENAS if h in wb.sheetnames}
+
+
+def _reponer_ajenas(wb, guardadas):
+    """Las vuelve a escribir como tabla plana; el formato lo rehace
+    `diagnostico.py --excel`, que es quien las genera de verdad."""
+    for nombre, filas in guardadas.items():
+        ws = wb.create_sheet(nombre)
+        for fila in filas:
+            ws.append(fila)
+
+
+def escribir(ruta, filas_r, caps, es_base, faradios, rv1_pct,
+            tol_r=0.01, tol_c=0.20):
     """Genera el .xlsx completo. Devuelve cuantas filas traian anotacion."""
     previo = leer_anotaciones(ruta)
+    ajenas = _rescatar_ajenas(ruta)
     wb = Workbook()
     wb.remove(wb.active)
-    _hoja_instrucciones(wb, rv1_pct)
+    _hoja_instrucciones(wb, rv1_pct, tol_r, tol_c)
     _hoja_resistencia(wb, filas_r, previo, es_base)
     _hoja_capacitancia(wb, caps, previo, faradios)
+    _reponer_ajenas(wb, ajenas)
     wb.active = 1
     wb.save(ruta)
     return len(previo)

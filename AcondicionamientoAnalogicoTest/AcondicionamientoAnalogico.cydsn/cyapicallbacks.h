@@ -1,21 +1,8 @@
-/* ========================================
+/* Este archivo vive en el proyecto de campo. Aca solo se lo incluye.
  *
- * Copyright YOUR COMPANY, THE YEAR
- * All Rights Reserved
- * UNPUBLISHED, LICENSED SOFTWARE.
- *
- * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
- *
- * ========================================
-*/
-#ifndef CYAPICALLBACKS_H
-#define CYAPICALLBACKS_H
-    
-
-    /*Define your macro callbacks here */
-    /*For more information, refer to the Writing Code topic in the PSoC Creator Help.*/
-
-    
-#endif /* CYAPICALLBACKS_H */   
-/* [] */
+ * Desde el 2026-09-05 el proyecto de autotest no guarda copias: cada fuente
+ * compartida existe UNA sola vez, en AcondicionamientoAnalogico.cydsn. Antes
+ * eran copias mantenidas a mano y la calibracion llego a divergir en silencio.
+ * Ver el comentario largo en calibration.c.
+ */
+#include "../../AcondicionamientoAnalogico.cydsn/cyapicallbacks.h"

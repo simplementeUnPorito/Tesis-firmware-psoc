@@ -99,6 +99,7 @@
 #include "Button.h"
 #include "Clock_1.h"
 #include "LPF_2.h"
+#include "polarity_reg.h"
 #include "UART_IntClock.h"
 #include "ADC_Ext_CP_Clk.h"
 #include "ADC_IRQ.h"

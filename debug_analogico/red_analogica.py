@@ -89,8 +89,11 @@ PIN_A_NODO = {
 # Valores. EDITAR ACA si la implementacion difiere.
 # ---------------------------------------------------------------------------
 VALORES = {
-    "R2": 50e3,     # INp   -> Vref
-    "R3": 50e3,     # Vref  -> INn
+    # El diseno pedia 50k. La nota vieja decia "montada 47k porque no habia
+    # de 50k", pero era al reves: son de 51k. Ocho lecturas estabilizadas lo
+    # dan en 50.5k y el cuerpo del componente lo confirma.
+    "R2": 51e3,     # INp   -> Vref  (51k, E24, en vez de los 50k del diseno)
+    "R3": 51e3,     # Vref  -> INn  (51k, E24, en vez de los 50k del diseno)
     "R4": 43e3,     # SEo   -> C1 (entrada del pasabanda)
     "R5": 47e3,     # BPm   -> BPo (realimentacion del pasabanda)
     "R6": 6.8e3,    # SEo   -> SUMm
@@ -105,8 +108,14 @@ VALORES = {
     "R14": 15e3,    # Vref_LP     -> Vref
 }
 
-# Trimmer del sumador: en la portadora el cursor y un extremo estan unidos,
-# asi que lo que se mide es la fraccion del recorrido, no el valor nominal.
+# Trimmer del sumador. EN LA PLACA NO HAY TRIMMER: no se consiguio el
+# preset, asi que va un resistor fijo de 680 ohm en su lugar. Mientras
+# RV1_FIJO no sea None, la ganancia del sumador no se puede ajustar y no hay
+# ningun cursor que despejar de las mediciones.
+RV1_FIJO = 680.0
+# Solo se usan si se monta el trimmer de verdad (RV1_FIJO = None). En la
+# portadora el cursor y un extremo estan unidos, asi que lo que se mide es la
+# fraccion del recorrido, no el valor nominal.
 RV1_TOTAL = 2000.0
 RV1_FRACCION = 0.317   # posicion guardada en el TopDesign; medirla en la placa
 
@@ -178,7 +187,7 @@ def aplicar_portadora():
 # ---------------------------------------------------------------------------
 def valor(ref):
     if ref == "RV1":
-        return RV1_TOTAL * RV1_FRACCION
+        return RV1_FIJO if RV1_FIJO is not None else RV1_TOTAL * RV1_FRACCION
     return VALORES[ref]
 
 
@@ -284,6 +293,8 @@ def etiqueta(pin, senal):
 def vr(ref):
     """Valor de un resistor tal como se rotula en el esquematico."""
     if ref == "RV1":
+        if RV1_FIJO is not None:
+            return "%s fijo" % compacto(RV1_FIJO)
         return "%s@%.1f%%" % (compacto(RV1_TOTAL), RV1_FRACCION * 100)
     return compacto(VALORES[ref])
 
@@ -719,7 +730,7 @@ def main():
             salida,
             [f for f in filas if f["tipo"] == "R"],
             pares_capacitivos(),
-            es_base, faradios, RV1_FRACCION * 100)
+            es_base, faradios, RV1_FRACCION * 100, TOL_R, TOL_C)
         res = [f for f in filas if f["tipo"] == "R"]
         con = sum(1 for f in res if f["esperado"] != "abierto")
         msg = ("%s\n  hoja Resistencia: %d pares (%d con valor, %d abiertos)"

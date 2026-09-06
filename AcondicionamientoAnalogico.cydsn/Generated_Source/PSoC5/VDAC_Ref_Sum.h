@@ -79,11 +79,11 @@ void VDAC_Ref_Sum_Wakeup(void)                   ;
 ***************************************/
 
 #define VDAC_Ref_Sum_DEFAULT_RANGE     0u                                   /* Default DAC range */
-#define VDAC_Ref_Sum_DEFAULT_SPEED     ((uint8)(((0u != 0u) ? 1u : 0u) << 1u))   /* Default DAC speed */
+#define VDAC_Ref_Sum_DEFAULT_SPEED     ((uint8)(((2u != 0u) ? 1u : 0u) << 1u))   /* Default DAC speed */
 #define VDAC_Ref_Sum_DEFAULT_CNTL      0x00u                                            /* Default Control */
 #define VDAC_Ref_Sum_DEFAULT_STRB     0u                                   /* Default Strobe mode */
 #define VDAC_Ref_Sum_DEFAULT_DATA     120u                                 /* Initial DAC value */
-#define VDAC_Ref_Sum_DEFAULT_POLARITY 0u                                      /* Default Sink or Source */
+#define VDAC_Ref_Sum_DEFAULT_POLARITY 2u                                      /* Default Sink or Source */
 #define VDAC_Ref_Sum_DEFAULT_DATA_SRC 0u                                   /* Default Data Source */   
 #define VDAC_Ref_Sum_HARDWARE_ENABLE  0u                               /*Hardware Enable */
 

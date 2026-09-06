@@ -1,86 +1,20 @@
-#ifndef CALIBRATION_H
-#define CALIBRATION_H
-
-#include "project.h"
-#include "psoc_hw.h"
-
-#define PSOC_CAL_MAX_STAGES 4u
-
-/* Codigo CON SIGNO: la magnitud va al IDAC y el signo a polarity_reg. */
-typedef void (*PsocCalVdacWrite)(int16 value);
-typedef void (*PsocCalDiagHook)(uint8 event, uint8 value);
-
-typedef struct {
-    const char *name;       /* Nombre para logs. */
-    uint8 adc_channel;      /* Canal AMux_ADC que mide esta etapa. */
-    int32 target_counts;    /* Objetivo ADC; en GEO normalmente 0 counts diferencial. */
-    int8 direction;         /* Signo del esfuerzo PI respecto del VDAC. */
-    int16 dac_center;       /* Arranque en codigos de IDAC con signo; 0 = Vref. */
-    int16 dac_max_change;   /* Rango permitido: [center-max_change, center+max_change]. */
-    PsocCalVdacWrite write; /* Funcion que escribe el IDAC fisico de la etapa. */
-} PsocCalStage;
-
-/* Resultado por etapa para telemetria post-calibracion (ver uart_send_diag
- * en main.c, eventos PSOC_EVT_CAL_STAGE_DAC / PSOC_EVT_CAL_STAGE_MEAS). */
-typedef struct {
-    int16 final_dac;        /* Con signo: negativo = referencia por debajo de Vref. */
-    int32 final_measured;
-    uint8 ok;
-} PsocCalResult;
-
-extern PsocCalResult g_psoc_cal_results[PSOC_CAL_MAX_STAGES];
-extern uint8 g_psoc_cal_result_count;
-
-void psoc_calibration_set_diag_hook(PsocCalDiagHook hook);
-void psoc_calibration_start_references(void);
-void psoc_calibration_restore_capture_path(void);
-void psoc_calibration_reset_references(void);
-void psoc_calibration_seed_default_dac(void);
-
-/* Aplica dac_values[count] como punto de inicio de calibración: escribe cada
- * IDAC al hardware y puebla g_psoc_cal_results. Llamar después de
- * psoc_calibration_start_references() para arrancar desde los valores
- * guardados en EEPROM en vez de los defaults.
+/* Este archivo vive en el proyecto de campo. Aca solo se lo incluye.
  *
- * Los códigos son CON SIGNO: negativo = referencia por debajo de Vref, y el 0
- * es Vref exacto, que es de donde conviene arrancar a calibrar. La conversión
- * a los bytes del slot de EEPROM (magnitud + máscara de signos) la hace
- * psoc_nv.c, que es quien conoce el layout de la fila. */
-void psoc_calibration_seed_dac(const int16 *dac_values, uint8 count);
-void psoc_calibration_report_adc_snapshot(void);
-
-/* Etapas reales de la cascada activa (2 en HAMMER, 3-4 en GEO segun
- * VDAC_ref_BP). main.c no incluye calibration_tables.h (donde vive
- * PSOC_CAL_STAGE_COUNT), así que lo necesita vía este accessor — p.ej. para
- * el gate de PSOC_CMD_SAVE_EEPROM contra el conteo real de etapas, no contra
- * el tope fijo PSOC_NV_CAL_STAGES del layout EEPROM. */
-uint8 psoc_calibration_stage_count(void);
-
-/* Retorna: 0=no arranco, 1=calibracion completa en curso,
- * 2=verificacion previa OK; no hizo falta mover DACs. */
-uint8 psoc_calibration_start_async(void);
-uint8 psoc_calibration_service_async(void);
-uint8 psoc_calibration_async_busy(void);
-uint8 psoc_calibration_async_result_ok(void);
-
-/* Tau de la planta, ajustable en ejecucion. Portado del proyecto de campo el
- * 2026-09-05, junto con la espera de planta que faltaba aca. */
-uint32 psoc_cal_plant_settle_samples(void);
-uint16 psoc_cal_get_tau_ms(void);
-uint8  psoc_cal_set_tau_ms(uint16 tau_ms);
-uint16 psoc_cal_get_plant_tau_x10(void);
-uint8  psoc_cal_set_plant_tau_x10(uint16 x10);
-/* El servo lento se borro. Su unica API que main.c todavia necesitaba era
- * abortar una corrida en curso, que ya la cubre el PI asincrono. */
+ * Desde el 2026-09-05 el proyecto de autotest no guarda copias: cada fuente
+ * compartida existe UNA sola vez, en AcondicionamientoAnalogico.cydsn. Antes
+ * eran copias mantenidas a mano y la calibracion llego a divergir en silencio.
+ * Ver el comentario largo en calibration.c.
+ */
+#include "../../AcondicionamientoAnalogico.cydsn/calibration.h"
 
 /* ==========================================================================
- * Autotest (solo en el proyecto AcondicionamientoAnalogicoTest)
+ * Autotest: lo unico que este proyecto agrega a la calibracion.
  * --------------------------------------------------------------------------
  * El AMux y el lector directo del ADC son static en calibration.c. El
  * secuenciador de autotest vive en psoc_selftest.h (incluido desde main.c) y
  * necesita esas primitivas para barrer cada IDAC contra cada tap del AMux.
  * Se exponen aca en vez de duplicar el manejo del AMux: la exclusion mutua
- * entre canales de señal tiene que seguir viviendo en un solo lugar.
+ * entre canales de senal tiene que seguir viviendo en un solo lugar.
  * ========================================================================== */
 
 int32 psoc_selftest_counts_to_uv(int32 counts);
@@ -99,5 +33,3 @@ uint8 psoc_selftest_measure_series(uint8 channel, uint16 settle_ms, uint16 n,
                                    uint8 with_cap, uint16 tone_hz,
                                    int32 *out_mean, int32 *out_rms,
                                    int32 *out_pp, int32 *out_tone);
-
-#endif

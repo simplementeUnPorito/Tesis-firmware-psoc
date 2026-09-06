@@ -281,12 +281,24 @@ static void cal_vdac_geo_lp(int16 value)
  * pueda nomás, no debe saturar y listo".
  *
  * Ver docs/MEDICIONES_2026-09-05.md, secciones 9 y 12.
+ *
+ * LAS CUATRO ETAPAS SIGUEN EN LA TABLA AUNQUE SOLO DOS SE CALIBREN. La tabla es
+ * tambien el mapa de actuadores del instrumento de laboratorio: recortarla a dos
+ * filas dejo al autotest sin poder escribir los IDAC del PGA y del BP, en
+ * silencio, y cada ensayo empezaba desde un estado distinto. El campo
+ * `en_secuencia` es lo que distingue "existe" de "se calibra".
  */
 static const PsocCalStage g_psoc_cal_stages[] = {
+    /* Presentes para el instrumento, FUERA de la secuencia: a x50 un solo
+     * codigo de estas mueve el LP mas de un volt. */
+    { "GEO_PGA",    0u, CAL_TARGET_COUNTS_GEO_PGA, CAL_DIRECTION_GEO_PGA, CAL_DAC_CENTER_GEO_PGA, CAL_DAC_MAX_CHANGE_GEO_PGA, cal_vdac_geo_pga, 0u },
+#if defined(VDAC_ref_BP_DEFAULT_DATA) || defined(CY_DVDAC_VDAC_ref_BP_H)
+    { "GEO_BP",     1u, CAL_TARGET_COUNTS_GEO_BP,  CAL_DIRECTION_GEO_BP,  CAL_DAC_CENTER_GEO_BP,  CAL_DAC_MAX_CHANGE_GEO_BP,  cal_vdac_geo_bp,  0u },
+#endif
     /* GRUESO: el ADDER, mirando el tap del LP (canal 3, no el 2). */
-    { "GEO_SUM_LP", 3u, CAL_TARGET_COUNTS_GEO_LP, CAL_DIRECTION_GEO_SUM, CAL_DAC_CENTER_GEO_SUM, CAL_DAC_MAX_CHANGE_GEO_SUM, cal_vdac_geo_sum },
+    { "GEO_SUM_LP", 3u, CAL_TARGET_COUNTS_GEO_LP,  CAL_DIRECTION_GEO_SUM, CAL_DAC_CENTER_GEO_SUM, CAL_DAC_MAX_CHANGE_GEO_SUM, cal_vdac_geo_sum, 1u },
     /* FINO: el LP sobre su propio tap. */
-    { "GEO_LP",     3u, CAL_TARGET_COUNTS_GEO_LP, CAL_DIRECTION_GEO_LP,  CAL_DAC_CENTER_GEO_LP,  CAL_DAC_MAX_CHANGE_GEO_LP,  cal_vdac_geo_lp },
+    { "GEO_LP",     3u, CAL_TARGET_COUNTS_GEO_LP,  CAL_DIRECTION_GEO_LP,  CAL_DAC_CENTER_GEO_LP,  CAL_DAC_MAX_CHANGE_GEO_LP,  cal_vdac_geo_lp,  1u },
 };
 
 #define PSOC_CAL_STAGE_COUNT ((uint8)(sizeof(g_psoc_cal_stages) / sizeof(g_psoc_cal_stages[0])))
@@ -314,8 +326,10 @@ static void cal_vdac_hammer_lp(int16 value)
 }
 
 static const PsocCalStage g_psoc_cal_stages[] = {
-    { "HAMMER_PGA", 0u, CAL_TARGET_HAMMER_PGA_COUNTS, CAL_DIRECTION_HAMMER_PGA, CAL_DAC_CENTER_HAMMER_PGA, CAL_DAC_MAX_CHANGE_HAMMER_PGA, cal_vdac_hammer_pga },
-    { "HAMMER_LP",  1u, CAL_TARGET_HAMMER_LP_COUNTS,  CAL_DIRECTION_HAMMER_LP,  CAL_DAC_CENTER_HAMMER_LP,  CAL_DAC_MAX_CHANGE_HAMMER_LP,  cal_vdac_hammer_lp },
+    /* HAMMER calibra sus dos etapas: aca la diagonal si es el emparejamiento
+     * correcto, porque no hay un acople dominante como el del ADDER sobre el LP. */
+    { "HAMMER_PGA", 0u, CAL_TARGET_HAMMER_PGA_COUNTS, CAL_DIRECTION_HAMMER_PGA, CAL_DAC_CENTER_HAMMER_PGA, CAL_DAC_MAX_CHANGE_HAMMER_PGA, cal_vdac_hammer_pga, 1u },
+    { "HAMMER_LP",  1u, CAL_TARGET_HAMMER_LP_COUNTS,  CAL_DIRECTION_HAMMER_LP,  CAL_DAC_CENTER_HAMMER_LP,  CAL_DAC_MAX_CHANGE_HAMMER_LP,  cal_vdac_hammer_lp,  1u },
 };
 
 #define PSOC_CAL_STAGE_COUNT ((uint8)(sizeof(g_psoc_cal_stages) / sizeof(g_psoc_cal_stages[0])))

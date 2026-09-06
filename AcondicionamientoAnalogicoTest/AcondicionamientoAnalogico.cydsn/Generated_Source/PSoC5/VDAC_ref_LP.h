@@ -83,7 +83,7 @@ void VDAC_ref_LP_Wakeup(void)                   ;
 #define VDAC_ref_LP_DEFAULT_CNTL      0x00u                                            /* Default Control */
 #define VDAC_ref_LP_DEFAULT_STRB     0u                                   /* Default Strobe mode */
 #define VDAC_ref_LP_DEFAULT_DATA     120u                                 /* Initial DAC value */
-#define VDAC_ref_LP_DEFAULT_POLARITY 0u                                      /* Default Sink or Source */
+#define VDAC_ref_LP_DEFAULT_POLARITY 2u                                      /* Default Sink or Source */
 #define VDAC_ref_LP_DEFAULT_DATA_SRC 0u                                   /* Default Data Source */   
 #define VDAC_ref_LP_HARDWARE_ENABLE  0u                               /*Hardware Enable */
 

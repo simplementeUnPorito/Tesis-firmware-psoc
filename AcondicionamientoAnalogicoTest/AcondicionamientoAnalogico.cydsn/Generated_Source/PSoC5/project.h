@@ -69,6 +69,7 @@
 #include "LPo.h"
 #include "LPm_aliases.h"
 #include "LPm.h"
+#include "polarity_reg.h"
 #include "OPAlp.h"
 #include "Vref_LP_aliases.h"
 #include "Vref_LP.h"

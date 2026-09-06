@@ -1,4 +1,8 @@
-#include "FIR_adquisition.h"
-
-const uint8 CYCODE g_fir_adquisition_coeffs_q23[Filter_FIR_A_SIZE] =
-    FIR_ADQUISITION_COEFFS_Q23_BYTES;
+/* Este archivo vive en el proyecto de campo. Aca solo se lo incluye.
+ *
+ * Desde el 2026-09-05 el proyecto de autotest no guarda copias: cada fuente
+ * compartida existe UNA sola vez, en AcondicionamientoAnalogico.cydsn. Antes
+ * eran copias mantenidas a mano y la calibracion llego a divergir en silencio.
+ * Ver el comentario largo en calibration.c.
+ */
+#include "../../AcondicionamientoAnalogico.cydsn/FIR_adquisition.c"
