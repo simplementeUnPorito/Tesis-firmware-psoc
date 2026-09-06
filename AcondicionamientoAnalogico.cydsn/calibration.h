@@ -16,7 +16,23 @@ typedef struct {
     int32 target_counts;    /* Objetivo ADC; en GEO normalmente 0 counts diferencial. */
     int8 direction;         /* Signo del esfuerzo PI respecto del VDAC. */
     int16 dac_center;       /* Arranque en codigos de IDAC con signo; 0 = Vref. */
-    int16 dac_max_change;   /* Rango permitido: [center-max_change, center+max_change]. */
+    /* CUANTO PUEDE SUBIR la referencia respecto de dac_center. */
+    int16 dac_max_change;
+    /* Y CUANTO PUEDE BAJAR, que NO tiene por que ser lo mismo.
+     *
+     * Era un solo numero y el rango salia simetrico, [center-N, center+N]. Eso
+     * costo caro: la curva del ADDER es util entre -178 y +128 codigos, asi que
+     * con un limite simetrico habia que quedarse con 128 -el lado que ata- y
+     * tirar el tramo -178..-128. Estaba escrito en la tabla, con la nota de que
+     * soportar limites asimetricos seria mejor.
+     *
+     * Y ese tramo tirado es justo el que hace falta: medido el 2026-09-06, con
+     * PGA x50 la cadena arranca contra el riel y el ADDER no la saca ni con -128
+     * -su propio tap recorre 1,73 V y el del LP no se mueve nada-, mientras que
+     * el procedimiento desde la PC, que SI centra la cadena, usa -191. El
+     * firmware se quedaba 63 codigos corto de lo que necesitaba, por una
+     * simetria que nadie habia pedido. */
+    int16 dac_max_change_neg;
     PsocCalVdacWrite write; /* Funcion que escribe el IDAC fisico de la etapa. */
     /* SI ESTA ETAPA SE CALIBRA O SOLO EXISTE.
      *

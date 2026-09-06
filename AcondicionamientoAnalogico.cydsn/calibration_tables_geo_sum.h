@@ -40,6 +40,21 @@
  * Ver docs/MEDICIONES_2026-09-04.md, seccion 3. */
 #define CAL_DAC_MAX_CHANGE_GEO_SUM 128
 
+/* Y EL LADO NEGATIVO, que es otro numero desde que el clamp dejo de ser
+ * simetrico. La curva es util hasta -178, pero se permite todo el recorrido:
+ *
+ *   - el procedimiento desde la PC, que SI centra la cadena a PGA x50, usa -191,
+ *     o sea que mas alla de -178 la etapa todavia sirve aunque su pendiente sea
+ *     chica; el criterio del 30 % de la mediana era conservador;
+ *   - medido el 2026-09-06, con -128 el tap del LP no se mueve NADA -el propio
+ *     tap del ADDER recorre 1,73 V- y el LP a rango completo tampoco lo saca:
+ *     el unico camino conocido para rescatar la cadena pasa por aca;
+ *   - en la region de pendiente chica el lazo no hace pasos de Newton grandes al
+ *     vacio: el rescate en lazo abierto avanza a saltos fijos, y el PI recien
+ *     toma el control cuando la medida vuelve a significar algo.
+ */
+#define CAL_DAC_MAX_CHANGE_NEG_GEO_SUM 255
+
 #ifndef CAL_PI_GAIN_GEO_SUM_X1000
 /* Ganancia fisica referencia -> tap, medida en la placa el 2026-09-02
  * con el barrido de D2, dividida por el escalon real de 1875 uV. */

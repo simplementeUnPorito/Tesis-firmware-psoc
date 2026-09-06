@@ -346,19 +346,38 @@ static void cal_vdac_geo_lp(int16 value)
 static const PsocCalStage g_psoc_cal_stages[] = {
     /* Presentes para el instrumento, FUERA de la secuencia: a x50 un solo
      * codigo de estas mueve el LP mas de un volt. */
-    { "GEO_PGA",    0u, CAL_TARGET_COUNTS_GEO_PGA, CAL_DIRECTION_GEO_PGA, CAL_DAC_CENTER_GEO_PGA, CAL_DAC_MAX_CHANGE_GEO_PGA, cal_vdac_geo_pga, 0u, 0u },
+    { "GEO_PGA",    0u, CAL_TARGET_COUNTS_GEO_PGA, CAL_DIRECTION_GEO_PGA, CAL_DAC_CENTER_GEO_PGA, CAL_DAC_MAX_CHANGE_GEO_PGA, CAL_DAC_MAX_CHANGE_NEG_GEO_PGA, cal_vdac_geo_pga, 0u, 0u },
 #if defined(VDAC_ref_BP_DEFAULT_DATA) || defined(CY_DVDAC_VDAC_ref_BP_H)
-    { "GEO_BP",     1u, CAL_TARGET_COUNTS_GEO_BP,  CAL_DIRECTION_GEO_BP,  CAL_DAC_CENTER_GEO_BP,  CAL_DAC_MAX_CHANGE_GEO_BP,  cal_vdac_geo_bp,  0u, 0u },
+    { "GEO_BP",     1u, CAL_TARGET_COUNTS_GEO_BP,  CAL_DIRECTION_GEO_BP,  CAL_DAC_CENTER_GEO_BP,  CAL_DAC_MAX_CHANGE_GEO_BP, CAL_DAC_MAX_CHANGE_NEG_GEO_BP,  cal_vdac_geo_bp,  0u, 0u },
 #endif
-    /* EL LP VA PRIMERO, y el orden importa mas que la sintonia.
+    /* EL ADDER PRIMERO, y ahora se sabe por que puede.
      *
-     * Con la cadena contra el riel, 42 pasos del ADDER movieron su propio tap
-     * 1,5 V y el del LP CERO: la saturacion del LP corta el camino y solo su
-     * propia referencia lo saca. Recien con el LP fuera de saturacion el ADDER
-     * recupera su autoridad. Con dos pasadas (CAL_PI_PASS_COUNT = 2) esto da
-     * LP-rescate, ADDER-grueso, LP-fino, ADDER-ajuste. */
-    { "GEO_LP",     3u, CAL_TARGET_COUNTS_GEO_LP,  CAL_DIRECTION_GEO_LP,  CAL_DAC_CENTER_GEO_LP,  CAL_DAC_MAX_CHANGE_GEO_LP,  cal_vdac_geo_lp,  1u, 1u },
-    { "GEO_SUM_LP", 3u, CAL_TARGET_COUNTS_GEO_LP,  CAL_DIRECTION_GEO_SUM, CAL_DAC_CENTER_GEO_SUM, CAL_DAC_MAX_CHANGE_GEO_SUM, cal_vdac_geo_sum, 1u, 0u },
+     * Estuvo un rato al reves, sobre una conclusion mia equivocada. La historia
+     * completa vale la pena porque el error fue de metodo, no de calculo:
+     *
+     *   1. La trayectoria del lazo mostro 42 pasos del ADDER sin que el tap del
+     *      LP se moviera, y conclui que la saturacion del LP cortaba el camino.
+     *   2. Un ensayo en lazo abierto lo confirmo hasta -128: el propio tap del
+     *      ADDER recorrio 1,73 V y el del LP no se movio nada. Y el LP a rango
+     *      completo, +255, tampoco se sacaba a si mismo.
+     *   3. Pero -128 no era un limite fisico: era CAL_DAC_MAX_CHANGE_GEO_SUM.
+     *      Extendiendo el barrido, a -144 el tap del LP se movio por primera
+     *      vez -de 748,0 a 765,6 de banco-, y el procedimiento desde la PC que
+     *      SI centra la cadena usa -191.
+     *
+     * O sea: el LP esta saturado y NO responde nada hasta que la contribucion
+     * del ADDER cruza un umbral cerca de -135 codigos; de ahi en adelante
+     * responde. El firmware se quedaba un paso corto de ese umbral por un clamp
+     * simetrico que nadie habia pedido. La leccion es la de siempre en este
+     * proyecto: un limite del instrumento se estaba leyendo como un limite del
+     * mundo.
+     *
+     * Con el lado negativo abierto y el rescate en lazo abierto, el orden
+     * natural vuelve a ser el correcto: el ADDER recorre la excursion y el LP
+     * hace los ultimos milivolts, donde su resolucion de 525 uV por codigo sirve
+     * y los 3823 del ADDER no alcanzarian. */
+    { "GEO_SUM_LP", 3u, CAL_TARGET_COUNTS_GEO_LP,  CAL_DIRECTION_GEO_SUM, CAL_DAC_CENTER_GEO_SUM, CAL_DAC_MAX_CHANGE_GEO_SUM, CAL_DAC_MAX_CHANGE_NEG_GEO_SUM, cal_vdac_geo_sum, 1u, 0u },
+    { "GEO_LP",     3u, CAL_TARGET_COUNTS_GEO_LP,  CAL_DIRECTION_GEO_LP,  CAL_DAC_CENTER_GEO_LP,  CAL_DAC_MAX_CHANGE_GEO_LP, CAL_DAC_MAX_CHANGE_NEG_GEO_LP,  cal_vdac_geo_lp,  1u, 1u },
 };
 
 #define PSOC_CAL_STAGE_COUNT ((uint8)(sizeof(g_psoc_cal_stages) / sizeof(g_psoc_cal_stages[0])))
@@ -388,8 +407,8 @@ static void cal_vdac_hammer_lp(int16 value)
 static const PsocCalStage g_psoc_cal_stages[] = {
     /* HAMMER calibra sus dos etapas: aca la diagonal si es el emparejamiento
      * correcto, porque no hay un acople dominante como el del ADDER sobre el LP. */
-    { "HAMMER_PGA", 0u, CAL_TARGET_HAMMER_PGA_COUNTS, CAL_DIRECTION_HAMMER_PGA, CAL_DAC_CENTER_HAMMER_PGA, CAL_DAC_MAX_CHANGE_HAMMER_PGA, cal_vdac_hammer_pga, 1u, 0u },
-    { "HAMMER_LP",  1u, CAL_TARGET_HAMMER_LP_COUNTS,  CAL_DIRECTION_HAMMER_LP,  CAL_DAC_CENTER_HAMMER_LP,  CAL_DAC_MAX_CHANGE_HAMMER_LP,  cal_vdac_hammer_lp,  1u, 0u },
+    { "HAMMER_PGA", 0u, CAL_TARGET_HAMMER_PGA_COUNTS, CAL_DIRECTION_HAMMER_PGA, CAL_DAC_CENTER_HAMMER_PGA, CAL_DAC_MAX_CHANGE_HAMMER_PGA, CAL_DAC_MAX_CHANGE_NEG_HAMMER_PGA, cal_vdac_hammer_pga, 1u, 0u },
+    { "HAMMER_LP",  1u, CAL_TARGET_HAMMER_LP_COUNTS,  CAL_DIRECTION_HAMMER_LP,  CAL_DAC_CENTER_HAMMER_LP,  CAL_DAC_MAX_CHANGE_HAMMER_LP, CAL_DAC_MAX_CHANGE_NEG_HAMMER_LP,  cal_vdac_hammer_lp,  1u, 0u },
 };
 
 #define PSOC_CAL_STAGE_COUNT ((uint8)(sizeof(g_psoc_cal_stages) / sizeof(g_psoc_cal_stages[0])))

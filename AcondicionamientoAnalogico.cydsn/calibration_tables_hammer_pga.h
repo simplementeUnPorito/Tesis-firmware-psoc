@@ -21,6 +21,9 @@
 #define CAL_DAC_CENTER_HAMMER_PGA 0
 
 #define CAL_DAC_MAX_CHANGE_HAMMER_PGA CAL_IDAC_SIGNED_MAX
+/* Simetrica: no hay razon medida para tratar los dos lados distinto en esta
+ * etapa. El campo existe porque el ADDER si la necesita. */
+#define CAL_DAC_MAX_CHANGE_NEG_HAMMER_PGA CAL_IDAC_SIGNED_MAX
 
 /* 0 = ganancia dinamica 1 - GainDirecta. */
 /* Ganancia fisica referencia -> tap, medida en la placa el 2026-09-02

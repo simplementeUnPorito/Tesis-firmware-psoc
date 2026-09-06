@@ -20,6 +20,9 @@
 #define CAL_DAC_CENTER_HAMMER_LP 0
 
 #define CAL_DAC_MAX_CHANGE_HAMMER_LP CAL_IDAC_SIGNED_MAX
+/* Simetrica: no hay razon medida para tratar los dos lados distinto en esta
+ * etapa. El campo existe porque el ADDER si la necesita. */
+#define CAL_DAC_MAX_CHANGE_NEG_HAMMER_LP CAL_IDAC_SIGNED_MAX
 
 #ifndef CAL_PI_GAIN_HAMMER_LP_X1000
 /* Ganancia fisica referencia -> tap, medida en la placa el 2026-09-02
