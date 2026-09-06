@@ -58,7 +58,12 @@
 #endif
 
 #ifndef CAL_PI_TIMEOUT_SAMPLES_GEO_LP
-#define CAL_PI_TIMEOUT_SAMPLES_GEO_LP 45000u
+/* 400.000 muestras a 2604 Hz son 154 s: cinco pasos de 1 tau mas margen.
+ * Estaba en un valor pensado para un lazo que corregia cada 0,4 ms, y con
+ * la espera de un tau por paso ese techo cortaba la etapa al segundo paso.
+ * El numero esta en muestras porque es TIEMPO; se pasa a iteraciones del
+ * lazo en el punto de uso (cal_pi_samples_to_iters). */
+#define CAL_PI_TIMEOUT_SAMPLES_GEO_LP 400000u
 #endif
 
 #ifndef CAL_PI_REFINE_ENABLE_GEO_LP

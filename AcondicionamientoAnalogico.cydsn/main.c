@@ -2609,6 +2609,10 @@ static void uart_service(void)
                                 (void)psoc_cal_set_plant_tau_x10((uint16)rx_p2);
                                 quedo = psoc_cal_get_plant_tau_x10();
                                 break;
+                            case PSOC_CAL_PARAM_PASO:
+                                (void)psoc_cal_set_step_tau_x10((uint16)rx_p2);
+                                quedo = psoc_cal_get_step_tau_x10();
+                                break;
                             default:
                                 quedo = 0xFFu;   /* parametro desconocido */
                                 break;

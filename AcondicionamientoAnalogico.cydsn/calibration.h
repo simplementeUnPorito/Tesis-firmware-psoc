@@ -34,6 +34,24 @@ typedef struct {
      * este campo dice cuales recorre la calibracion. 0 = presente pero no se
      * calibra. */
     uint8 en_secuencia;
+    /* SI EL LAZO USA LA CURVA MEDIDA DEL LP EN VEZ DE UNA GANANCIA CONSTANTE.
+     *
+     * La referencia del LP tiene una transferencia claramente no lineal -entre
+     * la mitad negativa y la positiva la pendiente cambia por un factor 2,6- y
+     * por eso su etapa usa la pendiente de cuerda de una tabla medida en vez de
+     * una constante.
+     *
+     * Este campo existe porque la condicion estaba escrita como
+     * `stage->adc_channel == 3u`, o sea "la etapa que mira el tap del LP". Eso
+     * fue cierto mientras cada etapa miraba su propio tap. Al pasar a dos
+     * actuadores el ADDER tambien mira el canal 3, y quedo tomando la curva del
+     * LP como si fuera la suya: una ganancia POSITIVA en un lazo cuya ganancia
+     * real es NEGATIVA. Realimentacion positiva, y el lazo se iba al riel a toda
+     * velocidad. Medido: se le entrego la cadena con los cuatro taps a menos de
+     * 100 mV de Vref y la dejo con el LP en el riel de arriba.
+     *
+     * La condicion correcta no es que tap mira sino QUE ACTUADOR MUEVE. */
+    uint8 usa_curva_lp;
 } PsocCalStage;
 
 /* Resultado por etapa para telemetria post-calibracion (ver uart_send_diag
@@ -90,6 +108,11 @@ uint16 psoc_cal_get_tau_ms(void);
 /* Devuelve 0 si el valor esta fuera de 1000..60000 ms y no lo aplica. */
 uint8  psoc_cal_set_tau_ms(uint16 tau_ms);
 uint16 psoc_cal_get_plant_tau_x10(void);
+/* Espera despues de CADA paso del lazo, en decimas de tau. Es la otra espera y
+ * no la misma: sin ella el lazo mide antes de que la cadena conteste. */
+uint32 psoc_cal_step_settle_samples(void);
+uint16 psoc_cal_get_step_tau_x10(void);
+uint8  psoc_cal_set_step_tau_x10(uint16 x10);
 /* Multiplicador de tau en decimas. 0 = sin espera. Devuelve 0 si supera 100. */
 uint8  psoc_cal_set_plant_tau_x10(uint16 x10);
 /* El servo lento se borro. Su unica API que main.c todavia necesitaba era

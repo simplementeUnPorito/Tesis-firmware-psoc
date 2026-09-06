@@ -235,6 +235,11 @@ uint32 psoc_idac_lsb_uv(void);
 #define PSOC_CAL_PARAM_TAU      0u
 #define PSOC_CAL_PARAM_MULT     1u
 #define PSOC_CAL_PARAM_MEDIR    2u
+/*   p1 = 3  espera despues de CADA paso del lazo, en decimas de tau. 10 = 1 tau.
+ *           Es distinta de la de arriba: aquella se paga al entrar a la etapa,
+ *           esta despues de cada movimiento de la referencia. Sin ella el lazo
+ *           mide antes de que la cadena conteste y se va al riel. */
+#define PSOC_CAL_PARAM_PASO     3u
 /* Unidad del parametro de tau, en ms. */
 #define PSOC_CAL_PARAM_TAU_UNIT_MS 250u
 

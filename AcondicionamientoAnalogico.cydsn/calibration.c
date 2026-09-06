@@ -428,9 +428,16 @@ uint8 g_psoc_cal_result_count = 0u;
 #define CAL_ASYNC_EMPTY_POLL_LIMIT 2000000UL
 
 /* Watchdog global expresado como ticks legacy de 10 ms para mantener la escala
- * de configuracion anterior; en runtime lo ejecuta Timer_3 como one-shot. */
+ * de configuracion anterior; en runtime lo ejecuta Timer_3 como one-shot.
+ *
+ * 90.000 ticks son 900 s. Estaba en 400 s, y con las esperas correctas eso ya
+ * no alcanza: una calibracion honesta de esta cadena son dos etapas por
+ * (2 tau de entrada + hasta 5 pasos de 1 tau) = 412 s nominales. El watchdog
+ * tiene que atajar una calibracion COLGADA, no una que esta esperando lo que
+ * la fisica pide. Con tau = 30 s no hay forma de calibrar esto en menos de
+ * varios minutos, y eso es un resultado, no un defecto. */
 #ifndef CAL_WATCHDOG_TICKS
-#define CAL_WATCHDOG_TICKS 40000UL
+#define CAL_WATCHDOG_TICKS 90000UL
 #endif
 
 /* Periodo de telemetria de progreso (ticks legacy de 10 ms => ~500 ms). */
@@ -891,6 +898,9 @@ static int32 cal_counts_error_to_dac_scale(int32 error_counts)
  * -------------------------------------------------------------------------- */
 static uint16 g_cal_tau_ms          = CAL_PI_TAU_MS;
 static uint16 g_cal_plant_tau_x10   = CAL_PI_PLANT_SETTLE_TAU_X10;
+/* Espera despues de cada paso del lazo, en decimas de tau. 10 = 1 tau. Ver el
+ * bloque largo en psoc_cal_step_settle_samples(). */
+static uint16 g_cal_step_tau_x10    = CAL_PI_STEP_SETTLE_TAU_X10;
 
 /* POR QUE NO HAY UNA ESPERA POR ETAPA. Habia un campo plant_settle_samples por
  * etapa, y sobra: la matriz de acople del 2026-09-04 midio tau en los SEIS
@@ -904,6 +914,56 @@ uint32 psoc_cal_plant_settle_samples(void)
     /* Dividir antes de multiplicar: asi sigue entrando en uint32 aunque alguien
      * pida 10 tau. */
     return (tau_muestras / 10UL) * (uint32)g_cal_plant_tau_x10;
+}
+
+/* ==========================================================================
+ * LA ESPERA DESPUES DE CADA PASO, que no es la misma que la de entrada
+ *
+ * psoc_cal_plant_settle_samples() se paga UNA vez al entrar a la etapa: espera
+ * a que se asiente lo que dejo la etapa anterior. Esta se paga despues de CADA
+ * movimiento del DAC, y sin ella el lazo no puede funcionar: mueve la
+ * referencia, vuelve a medir 30 ms despues -cuando la cadena todavia no
+ * reacciono, porque tarda tau- y concluye que no paso nada. Entonces vuelve a
+ * mover. Es un integrador cargando contra una planta que todavia no contesto, y
+ * termina siempre igual: en el riel.
+ *
+ * Medido el 2026-09-05 con el canal de diagnostico: en toda una etapa la medida
+ * paso de 39.191 a 39.190 cuentas mientras el lazo movia la referencia. No es
+ * que corrigiera mal; es que estaba mirando el pasado.
+ *
+ * Lo que habia era `control_hold_remaining = 0` con este comentario: "la
+ * siguiente lectura directa ya integra 30 ms de conversiones". Es cierto y es
+ * irrelevante: 30 ms es lo que tarda el DECIMADOR DEL ADC, no la cadena. Es el
+ * mismo error de razonamiento que dejo la espera de planta en una rama muerta,
+ * y es la tercera vez que aparece: en todos lados donde entro el lector directo
+ * se sustituyo el tiempo de la planta por el del ADC.
+ *
+ * Un tau por paso deja el 37 % del transitorio sin ver, y eso esta bien: el
+ * paso siguiente lo mide y lo corrige, que es justamente lo que hace un lazo.
+ * Lo que no se puede es no esperar nada. Es tambien lo que hace el
+ * procedimiento desde la PC, que si converge: 30 s de espera por paso grueso y
+ * 59 s por paso fino.
+ * ========================================================================== */
+uint32 psoc_cal_step_settle_samples(void)
+{
+    uint32 tau_muestras = CAL_PI_TAU_SAMPLES_FROM_MS(g_cal_tau_ms);
+    return (tau_muestras / 10UL) * (uint32)g_cal_step_tau_x10;
+}
+
+uint16 psoc_cal_get_step_tau_x10(void)
+{
+    return g_cal_step_tau_x10;
+}
+
+/* Mismo criterio que el multiplicador de planta: se rechaza lo absurdo en vez
+ * de aceptarlo y quedarse esperando un tiempo ridiculo. */
+uint8 psoc_cal_set_step_tau_x10(uint16 x10)
+{
+    if (x10 > 100u) {
+        return 0u;
+    }
+    g_cal_step_tau_x10 = x10;
+    return 1u;
 }
 
 uint16 psoc_cal_get_tau_ms(void)
@@ -1556,7 +1616,10 @@ static uint8 cal_pi_run_service(void)
         effort = (int32)dac_sample + (int32)stage->direction * p_term;
 #endif
 #if PSOC_HW_CLASS == PSOC_HW_GEO
-        if (stage->adc_channel == 3u) {
+        /* La curva medida es la del IDAC DEL LP, asi que solo vale cuando el
+         * actuador es el LP. Antes esto preguntaba por el canal -y andaba, por
+         * casualidad, mientras cada etapa miraba su propio tap-. */
+        if (stage->usa_curva_lp) {
             for (gain_iteration = 0u; gain_iteration < 2u; gain_iteration++) {
                 if (effort < (int32)cal_stage_min_dac(stage)) {
                     gain_probe_dac = cal_stage_min_dac(stage);
@@ -1653,12 +1716,12 @@ static uint8 cal_pi_run_service(void)
     g_cal_pi.dac_current = dac_target;
     stage->write(g_cal_pi.dac_current);
     if (dac_changed) {
-#if CAL_PI_USE_DIRECT_ADC
-        /* La siguiente lectura directa ya integra 30 ms de conversiones. */
-        g_cal_pi.control_hold_remaining = 0u;
-#else
-        g_cal_pi.control_hold_remaining = cfg->settle_samples;
-#endif
+        /* HAY QUE ESPERAR A LA CADENA, NO AL ADC. Ver psoc_cal_step_settle_
+         * samples(): sin esto el lazo vuelve a medir antes de que la planta
+         * conteste, concluye que su correccion no hizo nada, y sigue empujando
+         * hasta el riel. */
+        g_cal_pi.control_hold_remaining = cal_pi_samples_to_iters(
+            (uint32)cfg->settle_samples + psoc_cal_step_settle_samples());
     }
 
     if (g_cal_pi.stable_count >= lock_n) {

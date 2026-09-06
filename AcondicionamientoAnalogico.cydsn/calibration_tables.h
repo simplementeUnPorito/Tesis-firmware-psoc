@@ -179,6 +179,20 @@
 /* Muestras que dura un tau, derivadas del tau en ms. En uint32 porque a 2604 Hz
  * un tau son ~76.818 muestras y en uint16 no entra: ese fue exactamente el bug
  * silencioso que se arreglo el 2026-09-04. */
+#ifndef CAL_PI_STEP_SETTLE_TAU_X10
+/* ESPERA DESPUES DE CADA PASO DEL LAZO, en decimas de tau. 10 = 1 tau.
+ *
+ * Es distinta de CAL_PI_PLANT_SETTLE_TAU_X10: aquella se paga una vez al entrar
+ * a la etapa, esta despues de cada movimiento de la referencia. Sin ella el
+ * lazo vuelve a medir 30 ms despues de mover -cuando la cadena todavia no
+ * reacciono- y se va al riel; medido el 2026-09-05.
+ *
+ * Un tau deja el 37 % del transitorio sin ver, y esta bien: lo ve el paso
+ * siguiente. Es lo mismo que hace el procedimiento desde la PC, que converge.
+ */
+#define CAL_PI_STEP_SETTLE_TAU_X10 10u
+#endif
+
 #define CAL_PI_TAU_SAMPLES_FROM_MS(ms)     (((uint32)(ms) * (uint32)PSOC_ADC_NATIVE_FS_HZ) / 1000UL)
 
 #ifndef CAL_PI_TAU_SAMPLES
@@ -201,9 +215,15 @@
 #endif
 
 /* 10 ms/tick; se deja alto para que el timeout real lo maneje el PI por etapa
- * y no el watchdog global del firmware. */
+ * y no el watchdog global del firmware.
+ *
+ * 90.000 ticks = 900 s. Estaba en 400 s y con las esperas correctas ya no
+ * alcanza: dos etapas por (2 tau de entrada + hasta 5 pasos de 1 tau) son 412 s
+ * nominales. Este watchdog tiene que atajar una calibracion COLGADA, no una que
+ * espera lo que la fisica pide. Con tau = 30 s esta cadena no se puede calibrar
+ * en menos de varios minutos: es un resultado, no un defecto. */
 #ifndef CAL_WATCHDOG_TICKS
-#define CAL_WATCHDOG_TICKS 40000UL
+#define CAL_WATCHDOG_TICKS 90000UL
 #endif
 
 #include "calibration_tables_hammer_pga.h"
@@ -291,14 +311,14 @@ static void cal_vdac_geo_lp(int16 value)
 static const PsocCalStage g_psoc_cal_stages[] = {
     /* Presentes para el instrumento, FUERA de la secuencia: a x50 un solo
      * codigo de estas mueve el LP mas de un volt. */
-    { "GEO_PGA",    0u, CAL_TARGET_COUNTS_GEO_PGA, CAL_DIRECTION_GEO_PGA, CAL_DAC_CENTER_GEO_PGA, CAL_DAC_MAX_CHANGE_GEO_PGA, cal_vdac_geo_pga, 0u },
+    { "GEO_PGA",    0u, CAL_TARGET_COUNTS_GEO_PGA, CAL_DIRECTION_GEO_PGA, CAL_DAC_CENTER_GEO_PGA, CAL_DAC_MAX_CHANGE_GEO_PGA, cal_vdac_geo_pga, 0u, 0u },
 #if defined(VDAC_ref_BP_DEFAULT_DATA) || defined(CY_DVDAC_VDAC_ref_BP_H)
-    { "GEO_BP",     1u, CAL_TARGET_COUNTS_GEO_BP,  CAL_DIRECTION_GEO_BP,  CAL_DAC_CENTER_GEO_BP,  CAL_DAC_MAX_CHANGE_GEO_BP,  cal_vdac_geo_bp,  0u },
+    { "GEO_BP",     1u, CAL_TARGET_COUNTS_GEO_BP,  CAL_DIRECTION_GEO_BP,  CAL_DAC_CENTER_GEO_BP,  CAL_DAC_MAX_CHANGE_GEO_BP,  cal_vdac_geo_bp,  0u, 0u },
 #endif
     /* GRUESO: el ADDER, mirando el tap del LP (canal 3, no el 2). */
-    { "GEO_SUM_LP", 3u, CAL_TARGET_COUNTS_GEO_LP,  CAL_DIRECTION_GEO_SUM, CAL_DAC_CENTER_GEO_SUM, CAL_DAC_MAX_CHANGE_GEO_SUM, cal_vdac_geo_sum, 1u },
+    { "GEO_SUM_LP", 3u, CAL_TARGET_COUNTS_GEO_LP,  CAL_DIRECTION_GEO_SUM, CAL_DAC_CENTER_GEO_SUM, CAL_DAC_MAX_CHANGE_GEO_SUM, cal_vdac_geo_sum, 1u, 0u },
     /* FINO: el LP sobre su propio tap. */
-    { "GEO_LP",     3u, CAL_TARGET_COUNTS_GEO_LP,  CAL_DIRECTION_GEO_LP,  CAL_DAC_CENTER_GEO_LP,  CAL_DAC_MAX_CHANGE_GEO_LP,  cal_vdac_geo_lp,  1u },
+    { "GEO_LP",     3u, CAL_TARGET_COUNTS_GEO_LP,  CAL_DIRECTION_GEO_LP,  CAL_DAC_CENTER_GEO_LP,  CAL_DAC_MAX_CHANGE_GEO_LP,  cal_vdac_geo_lp,  1u, 1u },
 };
 
 #define PSOC_CAL_STAGE_COUNT ((uint8)(sizeof(g_psoc_cal_stages) / sizeof(g_psoc_cal_stages[0])))
@@ -328,8 +348,8 @@ static void cal_vdac_hammer_lp(int16 value)
 static const PsocCalStage g_psoc_cal_stages[] = {
     /* HAMMER calibra sus dos etapas: aca la diagonal si es el emparejamiento
      * correcto, porque no hay un acople dominante como el del ADDER sobre el LP. */
-    { "HAMMER_PGA", 0u, CAL_TARGET_HAMMER_PGA_COUNTS, CAL_DIRECTION_HAMMER_PGA, CAL_DAC_CENTER_HAMMER_PGA, CAL_DAC_MAX_CHANGE_HAMMER_PGA, cal_vdac_hammer_pga, 1u },
-    { "HAMMER_LP",  1u, CAL_TARGET_HAMMER_LP_COUNTS,  CAL_DIRECTION_HAMMER_LP,  CAL_DAC_CENTER_HAMMER_LP,  CAL_DAC_MAX_CHANGE_HAMMER_LP,  cal_vdac_hammer_lp,  1u },
+    { "HAMMER_PGA", 0u, CAL_TARGET_HAMMER_PGA_COUNTS, CAL_DIRECTION_HAMMER_PGA, CAL_DAC_CENTER_HAMMER_PGA, CAL_DAC_MAX_CHANGE_HAMMER_PGA, cal_vdac_hammer_pga, 1u, 0u },
+    { "HAMMER_LP",  1u, CAL_TARGET_HAMMER_LP_COUNTS,  CAL_DIRECTION_HAMMER_LP,  CAL_DAC_CENTER_HAMMER_LP,  CAL_DAC_MAX_CHANGE_HAMMER_LP,  cal_vdac_hammer_lp,  1u, 0u },
 };
 
 #define PSOC_CAL_STAGE_COUNT ((uint8)(sizeof(g_psoc_cal_stages) / sizeof(g_psoc_cal_stages[0])))
