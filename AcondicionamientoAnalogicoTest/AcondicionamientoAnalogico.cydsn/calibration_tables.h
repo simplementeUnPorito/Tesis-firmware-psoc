@@ -115,6 +115,50 @@
 #define CAL_PI_INTEGRAL_LIMIT 8000000L
 #endif
 
+
+/* ==========================================================================
+ * ESPERA DE LA PLANTA — portado del proyecto de campo el 2026-09-05
+ *
+ * Este proyecto NO la tenia, y eso explica el sintoma que se venia
+ * investigando: la calibracion contestaba ok=0 a los 59,7 s. Los cuatro
+ * timeouts (30.000 + 45.000 + 30.000 + 45.000 muestras a 2604 Hz) suman
+ * 57,6 s, o sea que la corrida entera terminaba SIN HABER ESPERADO NUNCA a que
+ * la cadena se asentara. No estaba rota: le faltaba el ingrediente.
+ *
+ * CAL_PI_SETTLE_SAMPLES_* vacia el FIR y son 128 muestras: ese numero siempre
+ * estuvo bien. Esto es otra cosa: el polo lento de C1 = 680 uF contra
+ * R4 = 43 k, con tau ~29,5 s medido por tres caminos independientes.
+ *
+ * Los dos numeros van en uint16 por pedido de Elias, y por eso tau esta en
+ * MILISEGUNDOS: 29.500 entra comodo, mientras que las 76.818 muestras
+ * equivalentes no. Las muestras se derivan en uint32 en tiempo de ejecucion.
+ * ========================================================================== */
+
+#include "psoc_adc.h"
+
+#ifndef CAL_PI_TAU_MS
+#define CAL_PI_TAU_MS 29500u
+#endif
+
+#ifndef CAL_PI_PLANT_SETTLE_TAU_X10
+/* 20 = 2 tau. Techo fijado por Elias: "2tau y 20mV es lo maximo que aceptamos". */
+#define CAL_PI_PLANT_SETTLE_TAU_X10 20u
+#endif
+
+#define CAL_PI_TAU_SAMPLES_FROM_MS(ms) \
+    (((uint32)(ms) * (uint32)PSOC_ADC_NATIVE_FS_HZ) / 1000UL)
+
+#ifndef CAL_PI_TAU_SAMPLES
+#define CAL_PI_TAU_SAMPLES CAL_PI_TAU_SAMPLES_FROM_MS(CAL_PI_TAU_MS)
+#endif
+
+#ifndef CAL_PI_PLANT_SETTLE_SAMPLES_DEFAULT
+/* Se divide ANTES de multiplicar para que siga entrando en uint32 aunque
+ * alguien pida 10 tau. */
+#define CAL_PI_PLANT_SETTLE_SAMPLES_DEFAULT \
+    ((CAL_PI_TAU_SAMPLES / 10UL) * (uint32)CAL_PI_PLANT_SETTLE_TAU_X10)
+#endif
+
 #ifndef CAL_PI_LOCK_N_MAX
 #define CAL_PI_LOCK_N_MAX 4096u
 #endif
@@ -177,13 +221,34 @@ static void cal_vdac_geo_lp(int16 value)
     VDAC_ref_LP_SetValue(psoc_hw_idac_apply_polarity(3u, value));
 }
 
+/* DOS ACTUADORES SOBRE EL MISMO TAP, y el emparejamiento NO es la diagonal.
+ *
+ * Medido en la placa el 2026-09-05, en uV por codigo sobre ch3, que es el tap
+ * que se captura y el unico cuyo error importa:
+ *
+ *     ADDER -> ch3   3823        <- GRUESO: recorre toda la excursion
+ *     LP    -> ch3    525        <- FINO: los ultimos milivoltios
+ *     BP    -> ch3   1002        }  no son actuadores del LP:
+ *     PGA   -> ch3   1026 x gan  }  son PERTURBACIONES
+ *
+ * El LP NO se puede centrar con su propia referencia: a PGA x50 quedaba contra
+ * el riel y ni -255 ni +255 lo sacaban, porque el ADDER le mete 7,3 veces mas
+ * de lo que el propio LP puede compensar. Hay que centrarlo DESDE el ADDER.
+ *
+ * Y las de aguas arriba hay que dejarlas quietas: a x50 un solo codigo del PGA
+ * mueve el LP mas de un volt. Perseguir el objetivo nominal en ch0 costo 718 mV
+ * en el LP y lo mando al riel; la corrida del firmware del 2026-09-05 termino
+ * con ch0 en -2,47 V y ch2 contra el riel por exactamente eso.
+ *
+ * El costo de no tocarlas: ch0 queda ~865 mV de Vref a x50. No es saturacion
+ * -le quedan 1,55 V hasta masa- y Elias lo acepto explicitamente: "conseguí lo
+ * mejor que se pueda nomás, no debe saturar y listo".
+ */
 static const PsocCalStage g_psoc_cal_stages[] = {
-    { "GEO_PGA",   0u, CAL_TARGET_COUNTS_GEO_PGA,   CAL_DIRECTION_GEO_PGA,   CAL_DAC_CENTER_GEO_PGA,   CAL_DAC_MAX_CHANGE_GEO_PGA,   cal_vdac_geo_pga },
-#if defined(VDAC_ref_BP_DEFAULT_DATA) || defined(CY_DVDAC_VDAC_ref_BP_H)
-    { "GEO_BP",    1u, CAL_TARGET_COUNTS_GEO_BP,    CAL_DIRECTION_GEO_BP,    CAL_DAC_CENTER_GEO_BP,    CAL_DAC_MAX_CHANGE_GEO_BP,    cal_vdac_geo_bp },
-#endif
-    { "GEO_SUM",   2u, CAL_TARGET_COUNTS_GEO_SUM,   CAL_DIRECTION_GEO_SUM,   CAL_DAC_CENTER_GEO_SUM,   CAL_DAC_MAX_CHANGE_GEO_SUM,   cal_vdac_geo_sum },
-    { "GEO_LP",    3u, CAL_TARGET_COUNTS_GEO_LP,    CAL_DIRECTION_GEO_LP,    CAL_DAC_CENTER_GEO_LP,    CAL_DAC_MAX_CHANGE_GEO_LP,    cal_vdac_geo_lp },
+    /* GRUESO: el ADDER, mirando el tap del LP (canal 3, no el 2). */
+    { "GEO_SUM_LP", 3u, CAL_TARGET_COUNTS_GEO_LP, CAL_DIRECTION_GEO_SUM, CAL_DAC_CENTER_GEO_SUM, CAL_DAC_MAX_CHANGE_GEO_SUM, cal_vdac_geo_sum },
+    /* FINO: el LP sobre su propio tap. */
+    { "GEO_LP",     3u, CAL_TARGET_COUNTS_GEO_LP, CAL_DIRECTION_GEO_LP,  CAL_DAC_CENTER_GEO_LP,  CAL_DAC_MAX_CHANGE_GEO_LP,  cal_vdac_geo_lp },
 };
 
 #define PSOC_CAL_STAGE_COUNT ((uint8)(sizeof(g_psoc_cal_stages) / sizeof(g_psoc_cal_stages[0])))

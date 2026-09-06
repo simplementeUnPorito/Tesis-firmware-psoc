@@ -62,6 +62,14 @@ uint8 psoc_calibration_start_async(void);
 uint8 psoc_calibration_service_async(void);
 uint8 psoc_calibration_async_busy(void);
 uint8 psoc_calibration_async_result_ok(void);
+
+/* Tau de la planta, ajustable en ejecucion. Portado del proyecto de campo el
+ * 2026-09-05, junto con la espera de planta que faltaba aca. */
+uint32 psoc_cal_plant_settle_samples(void);
+uint16 psoc_cal_get_tau_ms(void);
+uint8  psoc_cal_set_tau_ms(uint16 tau_ms);
+uint16 psoc_cal_get_plant_tau_x10(void);
+uint8  psoc_cal_set_plant_tau_x10(uint16 x10);
 /* El servo lento se borro. Su unica API que main.c todavia necesitaba era
  * abortar una corrida en curso, que ya la cubre el PI asincrono. */
 

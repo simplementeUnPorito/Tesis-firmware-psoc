@@ -254,13 +254,39 @@ static void cal_vdac_geo_lp(int16 value)
     VDAC_ref_LP_SetValue(psoc_hw_idac_apply_polarity(3u, value));
 }
 
+/* DOS ACTUADORES SOBRE EL MISMO TAP, y el emparejamiento NO es la diagonal.
+ *
+ * Medido en la placa el 2026-09-05, en uV por codigo sobre ch3, que es el tap
+ * que se captura y el unico cuyo error importa:
+ *
+ *     ADDER -> ch3   3823        <- GRUESO: recorre toda la excursion
+ *     LP    -> ch3    525        <- FINO: los ultimos milivoltios
+ *     BP    -> ch3   1002        }  no son actuadores del LP:
+ *     PGA   -> ch3   1026 x gan  }  son PERTURBACIONES
+ *
+ * EL LP NO SE PUEDE CENTRAR CON SU PROPIA REFERENCIA. A PGA x50 quedaba contra
+ * el riel y ni -255 ni +255 lo sacaban de ahi, porque el ADDER le mete 7,3
+ * veces mas de lo que el propio LP puede compensar. Hay que centrarlo DESDE el
+ * ADDER y dejarle al LP el ajuste fino, que es donde su resolucion sirve y la
+ * del ADDER -3,8 mV por codigo- no alcanzaria.
+ *
+ * Y LAS DE AGUAS ARRIBA HAY QUE DEJARLAS QUIETAS. A x50 un solo codigo del PGA
+ * mueve el LP mas de un volt: no son actuadores, son perturbaciones. Perseguir
+ * el objetivo nominal en ch0 costo 718 mV en el LP y lo mando al riel, y la
+ * corrida del firmware del 2026-09-05 termino con ch0 en -2,47 V y ch2 contra
+ * el riel por exactamente eso.
+ *
+ * El costo de no tocarlas: ch0 queda ~865 mV de Vref a x50. NO es saturacion
+ * -le quedan 1,55 V hasta masa- y Elias lo acepto: "conseguí lo mejor que se
+ * pueda nomás, no debe saturar y listo".
+ *
+ * Ver docs/MEDICIONES_2026-09-05.md, secciones 9 y 12.
+ */
 static const PsocCalStage g_psoc_cal_stages[] = {
-    { "GEO_PGA",   0u, CAL_TARGET_COUNTS_GEO_PGA,   CAL_DIRECTION_GEO_PGA,   CAL_DAC_CENTER_GEO_PGA,   CAL_DAC_MAX_CHANGE_GEO_PGA,   cal_vdac_geo_pga },
-#if defined(VDAC_ref_BP_DEFAULT_DATA) || defined(CY_DVDAC_VDAC_ref_BP_H)
-    { "GEO_BP",    1u, CAL_TARGET_COUNTS_GEO_BP,    CAL_DIRECTION_GEO_BP,    CAL_DAC_CENTER_GEO_BP,    CAL_DAC_MAX_CHANGE_GEO_BP,    cal_vdac_geo_bp },
-#endif
-    { "GEO_SUM",   2u, CAL_TARGET_COUNTS_GEO_SUM,   CAL_DIRECTION_GEO_SUM,   CAL_DAC_CENTER_GEO_SUM,   CAL_DAC_MAX_CHANGE_GEO_SUM,   cal_vdac_geo_sum },
-    { "GEO_LP",    3u, CAL_TARGET_COUNTS_GEO_LP,    CAL_DIRECTION_GEO_LP,    CAL_DAC_CENTER_GEO_LP,    CAL_DAC_MAX_CHANGE_GEO_LP,    cal_vdac_geo_lp },
+    /* GRUESO: el ADDER, mirando el tap del LP (canal 3, no el 2). */
+    { "GEO_SUM_LP", 3u, CAL_TARGET_COUNTS_GEO_LP, CAL_DIRECTION_GEO_SUM, CAL_DAC_CENTER_GEO_SUM, CAL_DAC_MAX_CHANGE_GEO_SUM, cal_vdac_geo_sum },
+    /* FINO: el LP sobre su propio tap. */
+    { "GEO_LP",     3u, CAL_TARGET_COUNTS_GEO_LP, CAL_DIRECTION_GEO_LP,  CAL_DAC_CENTER_GEO_LP,  CAL_DAC_MAX_CHANGE_GEO_LP,  cal_vdac_geo_lp },
 };
 
 #define PSOC_CAL_STAGE_COUNT ((uint8)(sizeof(g_psoc_cal_stages) / sizeof(g_psoc_cal_stages[0])))

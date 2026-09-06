@@ -563,7 +563,12 @@ typedef struct {
     int32 deadband_dac;     /* Delta_i usado; 0 = derivar del piso fisico */
     uint16 lock_samples;    /* M muestras en la misma celda de error */
     uint16 settle_samples;  /* espera inicial del FIR al cambiar AMux/VDAC */
-    uint16 timeout_samples; /* techo de muestras de PI para esta etapa */
+    /* uint32 Y NO uint16. Con la espera de planta en 2 tau son 153.620
+     * muestras a 2604 Hz, y el techo de uint16 es 65.535: da la vuelta EN
+     * SILENCIO y espera 8,7 s en vez de 59. Se arreglo en el proyecto de campo
+     * el 2026-09-04 y este quedo sin arreglar, que es exactamente el problema
+     * de tener la calibracion duplicada. */
+    uint32 timeout_samples; /* techo de muestras de PI para esta etapa */
     uint8 refine_enable;    /* prueba final de +/-1 codigo VDAC */
     uint16 refine_settle_samples;
 } PsocCalPiCfg;
@@ -574,9 +579,9 @@ typedef struct {
     int32 last_fir_output;
     int32 last_error_dac;
     int32 last_error_bucket;
-    uint16 samples_taken;
+    uint32 samples_taken;
     uint16 stable_count;
-    uint16 settle_remaining;
+    uint32 settle_remaining;
     int32 refine_base_measured;
     int32 refine_base_abs_error;
     int16 refine_base_dac;
@@ -615,12 +620,14 @@ static int32 cal_pi_clip_integral(int32 value)
 
 #if PSOC_HW_CLASS == PSOC_HW_GEO
 static const PsocCalPiCfg g_cal_pi_cfg[PSOC_CAL_STAGE_COUNT] = {
-    { CAL_PI_KP_NUM_GEO_PGA, CAL_PI_KP_DIV_GEO_PGA, CAL_PI_KI_NUM_GEO_PGA, CAL_PI_KI_DIV_GEO_PGA, CAL_PI_GAIN_GEO_PGA_X1000, CAL_PI_DEADBAND_GEO_PGA_DAC_CODES, CAL_PI_LOCK_SAMPLES_GEO_PGA, CAL_PI_SETTLE_SAMPLES_GEO_PGA, CAL_PI_TIMEOUT_SAMPLES_GEO_PGA, CAL_PI_REFINE_ENABLE_GEO_PGA, CAL_PI_REFINE_SETTLE_SAMPLES_GEO_PGA },
-#if defined(VDAC_ref_BP_DEFAULT_DATA) || defined(CY_DVDAC_VDAC_ref_BP_H)
-    { CAL_PI_KP_NUM_GEO_BP, CAL_PI_KP_DIV_GEO_BP, CAL_PI_KI_NUM_GEO_BP, CAL_PI_KI_DIV_GEO_BP, CAL_PI_GAIN_GEO_BP_X1000, CAL_PI_DEADBAND_GEO_BP_DAC_CODES, CAL_PI_LOCK_SAMPLES_GEO_BP, CAL_PI_SETTLE_SAMPLES_GEO_BP, CAL_PI_TIMEOUT_SAMPLES_GEO_BP, CAL_PI_REFINE_ENABLE_GEO_BP, CAL_PI_REFINE_SETTLE_SAMPLES_GEO_BP },
-#endif
-    { CAL_PI_KP_NUM_GEO_SUM, CAL_PI_KP_DIV_GEO_SUM, CAL_PI_KI_NUM_GEO_SUM, CAL_PI_KI_DIV_GEO_SUM, CAL_PI_GAIN_GEO_SUM_X1000, CAL_PI_DEADBAND_GEO_SUM_DAC_CODES, CAL_PI_LOCK_SAMPLES_GEO_SUM, CAL_PI_SETTLE_SAMPLES_GEO_SUM, CAL_PI_TIMEOUT_SAMPLES_GEO_SUM, CAL_PI_REFINE_ENABLE_GEO_SUM, CAL_PI_REFINE_SETTLE_SAMPLES_GEO_SUM },
-    { CAL_PI_KP_NUM_GEO_LP, CAL_PI_KP_DIV_GEO_LP, CAL_PI_KI_NUM_GEO_LP, CAL_PI_KI_DIV_GEO_LP, CAL_PI_GAIN_GEO_LP_X1000, CAL_PI_DEADBAND_GEO_LP_DAC_CODES, CAL_PI_LOCK_SAMPLES_GEO_LP, CAL_PI_SETTLE_SAMPLES_GEO_LP, CAL_PI_TIMEOUT_SAMPLES_GEO_LP, CAL_PI_REFINE_ENABLE_GEO_LP, CAL_PI_REFINE_SETTLE_SAMPLES_GEO_LP },
+    /* GEO_SUM_LP: el ADDER visto desde ch3. La ganancia NO es la de su propio
+     * tap (411) sino la que tiene sobre ch3: 3823 uV/codigo medidos sobre un
+     * escalon de 1875 uV en la referencia dan 2039, y el signo es NEGATIVO
+     * porque subir la referencia del ADDER baja la salida del LP. */
+    { CAL_PI_KP_NUM_GEO_SUM, CAL_PI_KP_DIV_GEO_SUM, CAL_PI_KI_NUM_GEO_SUM, CAL_PI_KI_DIV_GEO_SUM, -2039L, CAL_PI_DEADBAND_GEO_SUM_DAC_CODES, CAL_PI_LOCK_SAMPLES_GEO_SUM, CAL_PI_SETTLE_SAMPLES_GEO_SUM, CAL_PI_TIMEOUT_SAMPLES_GEO_SUM, CAL_PI_REFINE_ENABLE_GEO_SUM, CAL_PI_REFINE_SETTLE_SAMPLES_GEO_SUM },
+    /* GEO_LP: 525 uV/codigo sobre 1875 dan 280. El 651 que habia era del
+     * proyecto viejo y ya estaba marcado como incorrecto. */
+    { CAL_PI_KP_NUM_GEO_LP, CAL_PI_KP_DIV_GEO_LP, CAL_PI_KI_NUM_GEO_LP, CAL_PI_KI_DIV_GEO_LP, 280L, CAL_PI_DEADBAND_GEO_LP_DAC_CODES, CAL_PI_LOCK_SAMPLES_GEO_LP, CAL_PI_SETTLE_SAMPLES_GEO_LP, CAL_PI_TIMEOUT_SAMPLES_GEO_LP, CAL_PI_REFINE_ENABLE_GEO_LP, CAL_PI_REFINE_SETTLE_SAMPLES_GEO_LP },
 };
 #else
 static const PsocCalPiCfg g_cal_pi_cfg[PSOC_CAL_STAGE_COUNT] = {
@@ -650,6 +657,41 @@ static int32 cal_counts_error_to_dac_scale(int32 error_counts)
  * Que la etapa 0 tenga la ganancia mas chica es justamente lo que la hace
  * calibrable con precision: 57,7 uV por codigo es el paso mas fino de las
  * cuatro etapas. */
+/* --------------------------------------------------------------------------
+ * TAU DE LA PLANTA EN TIEMPO DE EJECUCION
+ *
+ * Portado del proyecto de campo el 2026-09-05. Este proyecto NO tenia espera de
+ * planta, y eso explica por que la calibracion contestaba ok=0 a los 59,7 s:
+ * los cuatro timeouts (30.000 + 45.000 + 30.000 + 45.000 muestras) suman 57,6 s,
+ * o sea que corria entera sin esperar nunca a que la cadena se asentara. No
+ * estaba rota: estaba corriendo sin el ingrediente que le faltaba.
+ * -------------------------------------------------------------------------- */
+static uint16 g_cal_tau_ms        = CAL_PI_TAU_MS;
+static uint16 g_cal_plant_tau_x10 = CAL_PI_PLANT_SETTLE_TAU_X10;
+
+uint32 psoc_cal_plant_settle_samples(void)
+{
+    uint32 tau_muestras = CAL_PI_TAU_SAMPLES_FROM_MS(g_cal_tau_ms);
+    return (tau_muestras / 10UL) * (uint32)g_cal_plant_tau_x10;
+}
+
+uint16 psoc_cal_get_tau_ms(void)            { return g_cal_tau_ms; }
+uint16 psoc_cal_get_plant_tau_x10(void)     { return g_cal_plant_tau_x10; }
+
+uint8 psoc_cal_set_tau_ms(uint16 tau_ms)
+{
+    if (tau_ms < 1000u || tau_ms > 60000u) { return 0u; }
+    g_cal_tau_ms = tau_ms;
+    return 1u;
+}
+
+uint8 psoc_cal_set_plant_tau_x10(uint16 x10)
+{
+    if (x10 > 100u) { return 0u; }
+    g_cal_plant_tau_x10 = x10;
+    return 1u;
+}
+
 static int32 cal_pi_stage_gain_x1000(uint8 stage_index)
 {
     int32 configured_gain = g_cal_pi_cfg[stage_index].gain_x1000;
@@ -938,7 +980,11 @@ static void cal_pi_stage_begin(void)
     g_cal_pi.last_dac_target = 0u;
     g_cal_pi.last_fir_output = 0L;
     g_cal_pi.empty_polls = 0UL;
-    g_cal_pi.settle_remaining = cfg->settle_samples;
+    /* La espera de la etapa son DOS cosas: vaciar el FIR (128 muestras, que
+     * siempre estuvo bien) y esperar a que la CADENA ANALOGICA se asiente
+     * despues de que la etapa anterior movio su referencia. Lo segundo faltaba
+     * en este proyecto. */
+    g_cal_pi.settle_remaining = cfg->settle_samples + psoc_cal_plant_settle_samples();
     g_cal_pi.refine_base_measured = 0L;
     g_cal_pi.refine_base_abs_error = 0L;
     g_cal_pi.refine_base_dac = 0u;
