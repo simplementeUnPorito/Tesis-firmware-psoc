@@ -77,21 +77,16 @@
 #endif
 
 #ifndef CAL_PI_TIMEOUT_SAMPLES_GEO_SUM
-/* EL ADDER NECESITA MAS PASOS QUE EL LP, y no por ser peor sino por venir de
- * mas lejos. Es el actuador con autoridad: cuando la cadena arranca contra el
- * riel, es el unico que puede sacarla, y desde el riel la medida esta saturada,
- * asi que el error que ve el lazo es una COTA INFERIOR del real. Cada paso de
- * Newton corrige lo que ve, que es menos que lo que hay, y por eso los primeros
- * pasos avanzan de a poco. Recien cuando el tap sale del riel la medida vuelve
- * a ser fiel y la convergencia se vuelve rapida.
+/* OCHO PASOS. El ADDER ya no arranca desde el riel: ahora corre DESPUES del LP,
+ * que es quien saca la cadena de saturacion, asi que empieza en una region donde
+ * su medida es fiel y cada paso de Newton vale lo que dice.
  *
- * Medido el 2026-09-05 con cinco pasos: el LP paso de -2,645 V a 0,091 V, o sea
- * salio del riel y recorrio 2,7 V, pero se quedo sin presupuesto a 2,3 V del
- * objetivo. Doce pasos dan margen de sobra para los dos tramos.
+ * Antes tenia doce porque tenia que hacer el rescate, y medido el 2026-09-05 no
+ * podia: 42 pasos suyos movieron su propio tap 1,5 V y el del LP cero. La
+ * saturacion del LP corta el camino y solo su propia referencia lo saca.
  *
- * 950.000 muestras a 2604 Hz son 365 s: doce pasos de 1 tau mas margen. En
- * muestras porque es TIEMPO; se pasa a iteraciones en el punto de uso. */
-#define CAL_PI_TIMEOUT_SAMPLES_GEO_SUM 950000u
+ * 620.000 muestras a 2604 Hz son 238 s: ocho pasos de 1 tau mas margen. */
+#define CAL_PI_TIMEOUT_SAMPLES_GEO_SUM 620000u
 #endif
 
 #ifndef CAL_PI_REFINE_ENABLE_GEO_SUM

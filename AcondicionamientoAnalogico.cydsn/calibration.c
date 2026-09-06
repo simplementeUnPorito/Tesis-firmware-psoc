@@ -437,7 +437,7 @@ uint8 g_psoc_cal_result_count = 0u;
  * la fisica pide. Con tau = 30 s no hay forma de calibrar esto en menos de
  * varios minutos, y eso es un resultado, no un defecto. */
 #ifndef CAL_WATCHDOG_TICKS
-#define CAL_WATCHDOG_TICKS 90000UL
+#define CAL_WATCHDOG_TICKS 150000UL
 #endif
 
 /* Periodo de telemetria de progreso (ticks legacy de 10 ms => ~500 ms). */
@@ -459,7 +459,33 @@ uint8 g_psoc_cal_result_count = 0u;
 #if PSOC_HW_CLASS == PSOC_HW_HAMMER
 #define CAL_PI_PASS_COUNT CAL_PI_HAMMER_PASS_COUNT
 #else
-#define CAL_PI_PASS_COUNT 1u
+/* DOS PASADAS EN GEO, Y NO POR PRUDENCIA: la secuencia que hace falta es
+ * LP, ADDER, LP, y con una sola pasada sobre dos etapas no se puede escribir.
+ *
+ * Medido el 2026-09-05 con el canal de diagnostico, arrancando con la cadena
+ * contra el riel de abajo:
+ *
+ *   42 pasos del ADDER movieron su PROPIO tap 1,5 V y el tap del LP CERO.
+ *   La medida de ch3 quedo en 39.182..39.199 cuentas, que es ruido.
+ *   El primer movimiento del LP lo saco de ahi de un salto, +153 mV de banco.
+ *
+ * O sea: cuando el LP esta saturado, el ADDER NO PUEDE RESCATARLO. La
+ * saturacion del propio LP corta el camino, y lo unico que lo mueve es su
+ * propia referencia, que actua adentro de la etapa. Recien con el LP fuera de
+ * saturacion el ADDER recupera la autoridad que la matriz de acople le midio.
+ *
+ * Esto CORRIGE la conclusion del 2026-09-05 -"el LP no se centra con su propio
+ * IDAC sino desde el ADDER"-, que se saco midiendo en un punto donde el LP NO
+ * estaba saturado. Sigue siendo cierta ahi; no lo es cuando hay que rescatarlo.
+ *
+ * Con la tabla en orden LP, ADDER, dos pasadas dan:
+ *   LP     rescate: sacarlo de saturacion con su propia referencia
+ *   ADDER  grueso : recorrer la excursion, que es donde tiene autoridad
+ *   LP     fino   : los ultimos milivoltios, donde su resolucion de 525 uV por
+ *                   codigo sirve y los 3823 del ADDER no alcanzarian
+ *   ADDER  ajuste : lo que sobre
+ */
+#define CAL_PI_PASS_COUNT 2u
 #endif
 
 #ifndef CAL_DIAG_SWEEP_ENABLE
@@ -842,6 +868,8 @@ static const PsocCalPiCfg g_cal_pi_cfg[PSOC_CAL_STAGE_COUNT] = {
 #if defined(VDAC_ref_BP_DEFAULT_DATA) || defined(CY_DVDAC_VDAC_ref_BP_H)
     { CAL_PI_KP_NUM_GEO_BP, CAL_PI_KP_DIV_GEO_BP, CAL_PI_KI_NUM_GEO_BP, CAL_PI_KI_DIV_GEO_BP, CAL_PI_GAIN_GEO_BP_X1000, CAL_PI_DEADBAND_GEO_BP_COUNTS, CAL_PI_LOCK_SAMPLES_GEO_BP, CAL_PI_SETTLE_SAMPLES_GEO_BP, CAL_PI_PLANT_SETTLE_SAMPLES_GEO_BP, CAL_PI_TIMEOUT_SAMPLES_GEO_BP, CAL_PI_REFINE_ENABLE_GEO_BP, CAL_PI_REFINE_SETTLE_SAMPLES_GEO_BP },
 #endif
+    /* GEO_LP: 525 uV/codigo sobre 1875 dan 280. */
+    { CAL_PI_KP_NUM_GEO_LP, CAL_PI_KP_DIV_GEO_LP, CAL_PI_KI_NUM_GEO_LP, CAL_PI_KI_DIV_GEO_LP, 280L, CAL_PI_DEADBAND_GEO_LP_COUNTS, CAL_PI_LOCK_SAMPLES_GEO_LP, CAL_PI_SETTLE_SAMPLES_GEO_LP, CAL_PI_PLANT_SETTLE_SAMPLES_GEO_LP, CAL_PI_TIMEOUT_SAMPLES_GEO_LP, CAL_PI_REFINE_ENABLE_GEO_LP, CAL_PI_REFINE_SETTLE_SAMPLES_GEO_LP },
     /* GEO_SUM_LP: el ADDER visto desde ch3. La ganancia NO es la de su propio
      * tap (411) sino la que tiene sobre ch3: 3823 uV/codigo medidos, sobre un
      * escalon de 1875 uV en la referencia, dan 2039. El signo es NEGATIVO
@@ -851,8 +879,6 @@ static const PsocCalPiCfg g_cal_pi_cfg[PSOC_CAL_STAGE_COUNT] = {
      * medido con un escalon de +120 codigos que metia al LP contra el riel, asi
      * que la exponencial se ajusto sobre una respuesta recortada. */
     { CAL_PI_KP_NUM_GEO_SUM, CAL_PI_KP_DIV_GEO_SUM, CAL_PI_KI_NUM_GEO_SUM, CAL_PI_KI_DIV_GEO_SUM, -2039L, CAL_PI_DEADBAND_GEO_SUM_COUNTS, CAL_PI_LOCK_SAMPLES_GEO_SUM, CAL_PI_SETTLE_SAMPLES_GEO_SUM, CAL_PI_PLANT_SETTLE_SAMPLES_GEO_SUM, CAL_PI_TIMEOUT_SAMPLES_GEO_SUM, CAL_PI_REFINE_ENABLE_GEO_SUM, CAL_PI_REFINE_SETTLE_SAMPLES_GEO_SUM },
-    /* GEO_LP: 525 uV/codigo sobre 1875 dan 280. */
-    { CAL_PI_KP_NUM_GEO_LP, CAL_PI_KP_DIV_GEO_LP, CAL_PI_KI_NUM_GEO_LP, CAL_PI_KI_DIV_GEO_LP, 280L, CAL_PI_DEADBAND_GEO_LP_COUNTS, CAL_PI_LOCK_SAMPLES_GEO_LP, CAL_PI_SETTLE_SAMPLES_GEO_LP, CAL_PI_PLANT_SETTLE_SAMPLES_GEO_LP, CAL_PI_TIMEOUT_SAMPLES_GEO_LP, CAL_PI_REFINE_ENABLE_GEO_LP, CAL_PI_REFINE_SETTLE_SAMPLES_GEO_LP },
 };
 #else
 static const PsocCalPiCfg g_cal_pi_cfg[PSOC_CAL_STAGE_COUNT] = {
@@ -1391,8 +1417,16 @@ static void cal_pi_stage_begin(void)
      *
      * La espera sale de la variable de ejecucion y no de la tabla, para que la
      * automedicion de tau tenga efecto sin recompilar. */
+    /* LA ESPERA COMPLETA SE PAGA UNA VEZ. En la primera pasada la cadena puede
+     * estar en cualquier lado -incluso saturada- y hay que darle los 2 tau
+     * enteros. En las siguientes ya viene de la pasada anterior, cerca de su
+     * punto, y lo que falta asentar es lo que movio la etapa previa: con 1 tau
+     * alcanza. Sin esta distincion la segunda pasada duplicaba el tiempo de
+     * calibracion sin agregar informacion. */
     g_cal_pi.settle_remaining = cal_pi_samples_to_iters(
-        (uint32)cfg->settle_samples + psoc_cal_plant_settle_samples());
+        (uint32)cfg->settle_samples +
+        ((g_cal_async.pass_index == 0u) ? psoc_cal_plant_settle_samples()
+                                        : psoc_cal_step_settle_samples()));
     g_cal_pi.control_hold_remaining = 0u;
     g_cal_pi.refine_base_measured = 0L;
     g_cal_pi.refine_base_abs_error = 0L;

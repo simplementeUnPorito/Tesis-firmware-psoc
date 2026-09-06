@@ -217,13 +217,12 @@
 /* 10 ms/tick; se deja alto para que el timeout real lo maneje el PI por etapa
  * y no el watchdog global del firmware.
  *
- * 90.000 ticks = 900 s. Estaba en 400 s y con las esperas correctas ya no
- * alcanza: dos etapas por (2 tau de entrada + hasta 5 pasos de 1 tau) son 412 s
- * nominales. Este watchdog tiene que atajar una calibracion COLGADA, no una que
+ * 150.000 ticks = 1500 s. Con las esperas correctas y las dos pasadas que pide
+ * la secuencia LP-ADDER-LP, una calibracion honesta son ~950 s nominales. Este watchdog tiene que atajar una calibracion COLGADA, no una que
  * espera lo que la fisica pide. Con tau = 30 s esta cadena no se puede calibrar
  * en menos de varios minutos: es un resultado, no un defecto. */
 #ifndef CAL_WATCHDOG_TICKS
-#define CAL_WATCHDOG_TICKS 90000UL
+#define CAL_WATCHDOG_TICKS 150000UL
 #endif
 
 #include "calibration_tables_hammer_pga.h"
@@ -315,10 +314,15 @@ static const PsocCalStage g_psoc_cal_stages[] = {
 #if defined(VDAC_ref_BP_DEFAULT_DATA) || defined(CY_DVDAC_VDAC_ref_BP_H)
     { "GEO_BP",     1u, CAL_TARGET_COUNTS_GEO_BP,  CAL_DIRECTION_GEO_BP,  CAL_DAC_CENTER_GEO_BP,  CAL_DAC_MAX_CHANGE_GEO_BP,  cal_vdac_geo_bp,  0u, 0u },
 #endif
-    /* GRUESO: el ADDER, mirando el tap del LP (canal 3, no el 2). */
-    { "GEO_SUM_LP", 3u, CAL_TARGET_COUNTS_GEO_LP,  CAL_DIRECTION_GEO_SUM, CAL_DAC_CENTER_GEO_SUM, CAL_DAC_MAX_CHANGE_GEO_SUM, cal_vdac_geo_sum, 1u, 0u },
-    /* FINO: el LP sobre su propio tap. */
+    /* EL LP VA PRIMERO, y el orden importa mas que la sintonia.
+     *
+     * Con la cadena contra el riel, 42 pasos del ADDER movieron su propio tap
+     * 1,5 V y el del LP CERO: la saturacion del LP corta el camino y solo su
+     * propia referencia lo saca. Recien con el LP fuera de saturacion el ADDER
+     * recupera su autoridad. Con dos pasadas (CAL_PI_PASS_COUNT = 2) esto da
+     * LP-rescate, ADDER-grueso, LP-fino, ADDER-ajuste. */
     { "GEO_LP",     3u, CAL_TARGET_COUNTS_GEO_LP,  CAL_DIRECTION_GEO_LP,  CAL_DAC_CENTER_GEO_LP,  CAL_DAC_MAX_CHANGE_GEO_LP,  cal_vdac_geo_lp,  1u, 1u },
+    { "GEO_SUM_LP", 3u, CAL_TARGET_COUNTS_GEO_LP,  CAL_DIRECTION_GEO_SUM, CAL_DAC_CENTER_GEO_SUM, CAL_DAC_MAX_CHANGE_GEO_SUM, cal_vdac_geo_sum, 1u, 0u },
 };
 
 #define PSOC_CAL_STAGE_COUNT ((uint8)(sizeof(g_psoc_cal_stages) / sizeof(g_psoc_cal_stages[0])))
