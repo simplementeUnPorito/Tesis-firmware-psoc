@@ -27,6 +27,42 @@
 #define CAL_TARGET_1V_COUNTS 52429L
 #endif
 
+/* ==========================================================================
+ * LA VENTANA DONDE LA LECTURA ES DE VERDAD UNA MEDIDA DEL TAP
+ *
+ * El ADC no avisa cuando lo que devuelve no significa nada. Medido el
+ * 2026-09-05: con la cadena contra el riel de abajo, ch3 informaba 39.190
+ * cuentas de forma estable, y esas cuentas equivalen a -2,6 V contra masa, que
+ * es imposible. El ADC NO estaba saturado -39.190 de 131.072 es el 30 % de su
+ * rango-, asi que ningun chequeo de rango numerico lo detecta. Lo mas probable
+ * es que se este violando el rango de modo comun del buffer de entrada.
+ *
+ * Consecuencia para el lazo: por fuera de esta ventana la realimentacion no
+ * puede funcionar, no porque el actuador no tenga autoridad sino porque la
+ * medida no depende del tap. Un PI ahi adentro empuja contra un numero fijo.
+ * Se vio: 42 pasos del ADDER con la lectura clavada en 39.182..39.199.
+ *
+ * Los limites salen de la recta banco->real verificada con tester, en el unico
+ * lugar donde esa recta esta anclada: 0 V contra masa y Vdda.
+ *
+ *     0 V   -> 880,4 mV de banco -> 880,4 mV / 19,0735 uV por cuenta = 46.158
+ *     Vdda  -> 1122,7 mV de banco                                    = 58.862
+ *     Vref  -> 1001,5 mV de banco                                    = 52.507
+ *
+ * El margen deja afuera los bordes, donde la etapa ya no transmite aunque la
+ * lectura todavia signifique algo.
+ * ========================================================================== */
+#ifndef CAL_VENTANA_MIN_COUNTS
+#define CAL_VENTANA_MIN_COUNTS 46158L
+#endif
+#ifndef CAL_VENTANA_MAX_COUNTS
+#define CAL_VENTANA_MAX_COUNTS 58862L
+#endif
+/* 25 mV de banco, el mismo margen que usa el banco desde Python. */
+#ifndef CAL_VENTANA_MARGEN_COUNTS
+#define CAL_VENTANA_MARGEN_COUNTS 1311L
+#endif
+
 #ifndef CAL_TARGET_1V5_COUNTS
 #define CAL_TARGET_1V5_COUNTS 78644L
 #endif

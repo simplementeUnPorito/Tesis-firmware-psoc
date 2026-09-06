@@ -1090,6 +1090,36 @@ static uint8 cal_pi_measurement_valid(int32 measured)
             measured <= CAL_ADC_SIGNED_MAX_COUNTS) ? 1u : 0u;
 }
 
+/* ==========================================================================
+ * MEDIDA CREIBLE vs MEDIDA VALIDA
+ *
+ * cal_pi_measurement_valid() de arriba solo pregunta si el numero entra en el
+ * rango del ADC, y por eso nunca dice que no: 39.190 cuentas de 131.072 entran
+ * comodas. Pero esas 39.190 cuentas equivalen a -2,6 V contra masa, que es
+ * imposible, y se mantuvieron clavadas mientras el lazo movia la referencia 42
+ * veces. Fuera de la ventana observable el ADC devuelve algo que NO DEPENDE DEL
+ * TAP, y un lazo cerrado sobre eso no puede converger: empuja contra un numero
+ * fijo hasta el riel.
+ *
+ * Esta es la pregunta que hacia falta y no existia.
+ * ========================================================================== */
+static uint8 cal_medida_en_ventana(int32 measured)
+{
+    return (measured >= (CAL_VENTANA_MIN_COUNTS + CAL_VENTANA_MARGEN_COUNTS) &&
+            measured <= (CAL_VENTANA_MAX_COUNTS - CAL_VENTANA_MARGEN_COUNTS))
+           ? 1u : 0u;
+}
+
+/* Salto del rescate en lazo abierto, en codigos. Se deriva del recorrido que la
+ * propia etapa declara, asi que escala sola: un octavo del recorrido da ocho
+ * intentos antes de agotar el actuador, que es un compromiso razonable entre
+ * tardar y pasarse de largo. Nunca menos de uno. */
+static int16 cal_paso_rescate(const PsocCalStage *stage)
+{
+    int16 paso = (int16)(cal_stage_max_change(stage) / 8);
+    return (paso < 1) ? (int16)1 : paso;
+}
+
 static uint8 cal_stage_measure_current(uint8 stage_index, int16 dac, int32 *measured)
 {
     const PsocCalStage *stage = &g_psoc_cal_stages[stage_index];
@@ -1602,6 +1632,59 @@ static uint8 cal_pi_run_service(void)
     error_counts = stage->target_counts - control_sample;
     sample_index = g_cal_pi.samples_taken + 1UL;
     g_cal_pi.samples_taken = sample_index;
+
+    /* ----------------------------------------------------------------------
+     * RESCATE EN LAZO ABIERTO. Antes de dejar que el PI mire este numero, hay
+     * que preguntarse si el numero significa algo. Si el tap esta fuera de la
+     * ventana observable la lectura no depende del tap, asi que no se puede
+     * realimentar: lo unico sensato es empujar a ciegas en la direccion que se
+     * sabe correcta y volver a mirar despues de que la planta conteste.
+     *
+     * La direccion se sabe sin medir nada: si la lectura esta por DEBAJO de la
+     * ventana hay que SUBIR el tap, y para eso el codigo se mueve al reves del
+     * signo de la ganancia de la etapa -en el ADDER, subir la referencia baja
+     * la salida del LP, de ahi que su ganancia sea negativa-.
+     *
+     * Esto no reemplaza al lazo: lo habilita. Sin la ventana, el PI no tenia
+     * forma de distinguir "estoy lejos" de "no estoy viendo", y trataba lo
+     * segundo como lo primero.
+     * ---------------------------------------------------------------------- */
+    if (!cal_medida_en_ventana(g_cal_pi.last_fir_output)) {
+        int32 gain_rescate = cal_pi_stage_gain_x1000(g_cal_async.stage_index);
+        int16 paso = cal_paso_rescate(stage);
+        int32 destino;
+
+        if (g_cal_pi.last_fir_output < CAL_VENTANA_MIN_COUNTS) {
+            /* Hay que subir el tap. */
+            paso = (gain_rescate < 0L) ? (int16)(-paso) : paso;
+        } else {
+            paso = (gain_rescate < 0L) ? paso : (int16)(-paso);
+        }
+        destino = (int32)g_cal_pi.dac_current + (int32)paso;
+        if (destino < (int32)cal_stage_min_dac(stage)) {
+            destino = (int32)cal_stage_min_dac(stage);
+        } else if (destino > (int32)cal_stage_max_dac(stage)) {
+            destino = (int32)cal_stage_max_dac(stage);
+        }
+
+        if ((int16)destino == g_cal_pi.dac_current) {
+            /* El actuador ya esta en su extremo y el tap sigue sin verse: esta
+             * etapa no puede hacer mas. Se cierra con ok=0, que es la verdad, y
+             * se le deja el turno a la siguiente en vez de gastar el timeout. */
+            return cal_pi_finish_stage(0u);
+        }
+
+        g_cal_pi.dac_current = (int16)destino;
+        stage->write(g_cal_pi.dac_current);
+        g_cal_pi.integral = 0L;          /* nada de lo acumulado a ciegas sirve */
+        g_cal_pi.stable_count = 0u;
+        g_cal_pi.control_hold_remaining = cal_pi_samples_to_iters(
+            (uint32)cfg->settle_samples + psoc_cal_step_settle_samples());
+        if (g_cal_pi.samples_taken >= cal_pi_samples_to_iters(cfg->timeout_samples)) {
+            return cal_pi_finish_stage(0u);
+        }
+        return 0u;
+    }
 
     /* Cada salida del FIR mezcla 128 entradas. Despues de mover el DAC se
      * retiene el siguiente ajuste hasta que todas correspondan al codigo
