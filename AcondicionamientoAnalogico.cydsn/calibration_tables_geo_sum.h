@@ -77,12 +77,21 @@
 #endif
 
 #ifndef CAL_PI_TIMEOUT_SAMPLES_GEO_SUM
-/* 400.000 muestras a 2604 Hz son 154 s: cinco pasos de 1 tau mas margen.
- * Estaba en un valor pensado para un lazo que corregia cada 0,4 ms, y con
- * la espera de un tau por paso ese techo cortaba la etapa al segundo paso.
- * El numero esta en muestras porque es TIEMPO; se pasa a iteraciones del
- * lazo en el punto de uso (cal_pi_samples_to_iters). */
-#define CAL_PI_TIMEOUT_SAMPLES_GEO_SUM 400000u
+/* EL ADDER NECESITA MAS PASOS QUE EL LP, y no por ser peor sino por venir de
+ * mas lejos. Es el actuador con autoridad: cuando la cadena arranca contra el
+ * riel, es el unico que puede sacarla, y desde el riel la medida esta saturada,
+ * asi que el error que ve el lazo es una COTA INFERIOR del real. Cada paso de
+ * Newton corrige lo que ve, que es menos que lo que hay, y por eso los primeros
+ * pasos avanzan de a poco. Recien cuando el tap sale del riel la medida vuelve
+ * a ser fiel y la convergencia se vuelve rapida.
+ *
+ * Medido el 2026-09-05 con cinco pasos: el LP paso de -2,645 V a 0,091 V, o sea
+ * salio del riel y recorrio 2,7 V, pero se quedo sin presupuesto a 2,3 V del
+ * objetivo. Doce pasos dan margen de sobra para los dos tramos.
+ *
+ * 950.000 muestras a 2604 Hz son 365 s: doce pasos de 1 tau mas margen. En
+ * muestras porque es TIEMPO; se pasa a iteraciones en el punto de uso. */
+#define CAL_PI_TIMEOUT_SAMPLES_GEO_SUM 950000u
 #endif
 
 #ifndef CAL_PI_REFINE_ENABLE_GEO_SUM

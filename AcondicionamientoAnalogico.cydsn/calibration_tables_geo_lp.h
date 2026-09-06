@@ -58,11 +58,13 @@
 #endif
 
 #ifndef CAL_PI_TIMEOUT_SAMPLES_GEO_LP
-/* 400.000 muestras a 2604 Hz son 154 s: cinco pasos de 1 tau mas margen.
- * Estaba en un valor pensado para un lazo que corregia cada 0,4 ms, y con
- * la espera de un tau por paso ese techo cortaba la etapa al segundo paso.
- * El numero esta en muestras porque es TIEMPO; se pasa a iteraciones del
- * lazo en el punto de uso (cal_pi_samples_to_iters). */
+/* Al LP le alcanza con pocos pasos: llega despues del ADDER, o sea con el tap ya
+ * cerca, y su trabajo es el ajuste fino. Su autoridad sobre ch3 son 525 uV por
+ * codigo por 255 codigos = 134 mV, asi que tampoco podria hacer mas: si al
+ * llegar su turno todavia faltan volts, el problema es del ADDER y darle mas
+ * tiempo al LP solo alarga la calibracion sin arreglar nada.
+ *
+ * 400.000 muestras a 2604 Hz son 154 s: cinco pasos de 1 tau mas margen. */
 #define CAL_PI_TIMEOUT_SAMPLES_GEO_LP 400000u
 #endif
 
