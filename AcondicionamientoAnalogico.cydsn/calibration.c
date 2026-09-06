@@ -1631,6 +1631,27 @@ static uint8 cal_pi_run_service(void)
     sample_index = g_cal_pi.samples_taken + 1UL;
     g_cal_pi.samples_taken = sample_index;
 
+
+
+    /* Cada salida del FIR mezcla 128 entradas. Despues de mover el DAC se
+     * retiene el siguiente ajuste hasta que todas correspondan al codigo
+     * nuevo; sin esto el PI persigue una medida vieja y llega a los rieles. */
+    if (g_cal_pi.control_hold_remaining > 0u) {
+        g_cal_pi.control_hold_remaining--;
+        if (g_cal_pi.control_hold_remaining > 0u) {
+            if (g_cal_pi.samples_taken >= cal_pi_samples_to_iters(cfg->timeout_samples)) {
+                return cal_pi_finish_stage(0u);
+            }
+            return 0u;
+        }
+    }
+
+    /* EL RESCATE VA DESPUES DE LA ESPERA, no antes. Estuvo un rato antes y el
+     * efecto fue inmediato y total: el bloque se disparaba en CADA iteracion
+     * del lazo -una cada 30 ms- en vez de una vez por tau, asi que empujaba al
+     * actuador 31 codigos cada 30 ms y lo llevaba al extremo en menos de un
+     * segundo. La calibracion entera duraba 121 s, que es lo que suman las dos
+     * esperas de entrada y nada mas. Medido el 2026-09-06. */
     /* ----------------------------------------------------------------------
      * RESCATE EN LAZO ABIERTO. Antes de dejar que el PI mire este numero, hay
      * que preguntarse si el numero significa algo. Si el tap esta fuera de la
@@ -1682,19 +1703,6 @@ static uint8 cal_pi_run_service(void)
             return cal_pi_finish_stage(0u);
         }
         return 0u;
-    }
-
-    /* Cada salida del FIR mezcla 128 entradas. Despues de mover el DAC se
-     * retiene el siguiente ajuste hasta que todas correspondan al codigo
-     * nuevo; sin esto el PI persigue una medida vieja y llega a los rieles. */
-    if (g_cal_pi.control_hold_remaining > 0u) {
-        g_cal_pi.control_hold_remaining--;
-        if (g_cal_pi.control_hold_remaining > 0u) {
-            if (g_cal_pi.samples_taken >= cal_pi_samples_to_iters(cfg->timeout_samples)) {
-                return cal_pi_finish_stage(0u);
-            }
-            return 0u;
-        }
     }
 
     /* error_dac se conserva solo para telemetria compatible. El control y la

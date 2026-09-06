@@ -92,16 +92,23 @@
 #endif
 
 #ifndef CAL_PI_TIMEOUT_SAMPLES_GEO_SUM
-/* OCHO PASOS. El ADDER ya no arranca desde el riel: ahora corre DESPUES del LP,
- * que es quien saca la cadena de saturacion, asi que empieza en una region donde
- * su medida es fiel y cada paso de Newton vale lo que dice.
+/* CATORCE PASOS, y el numero sale de una cuenta, no de un margen elegido a ojo.
  *
- * Antes tenia doce porque tenia que hacer el rescate, y medido el 2026-09-05 no
- * podia: 42 pasos suyos movieron su propio tap 1,5 V y el del LP cero. La
- * saturacion del LP corta el camino y solo su propia referencia lo saca.
+ * El ADDER tiene que hacer dos trabajos distintos en la misma etapa:
  *
- * 620.000 muestras a 2604 Hz son 238 s: ocho pasos de 1 tau mas margen. */
-#define CAL_PI_TIMEOUT_SAMPLES_GEO_SUM 620000u
+ *   1. EL RESCATE. Con la cadena contra el riel, el tap del LP no se ve y no se
+ *      puede realimentar: hay que empujar a ciegas. El rescate avanza de a
+ *      recorrido/8 = 31 codigos, y el tap entra en la ventana observable recien
+ *      pasando -176 (medido el 2026-09-06). Son 0, -31, -62, -93, -124, -155,
+ *      -186: SIETE pasos antes de que el lazo pueda hacer algo.
+ *   2. EL LAZO. Desde ahi, con la medida ya fiel, converge en pocos pasos.
+ *
+ * Siete mas siete dan catorce, con margen. Cada paso espera 1 tau porque eso es
+ * lo que tarda la cadena en contestar.
+ *
+ * 1.100.000 muestras a 2604 Hz son 422 s. En muestras porque es TIEMPO; se pasa
+ * a iteraciones del lazo en el punto de uso. */
+#define CAL_PI_TIMEOUT_SAMPLES_GEO_SUM 1100000u
 #endif
 
 #ifndef CAL_PI_REFINE_ENABLE_GEO_SUM
