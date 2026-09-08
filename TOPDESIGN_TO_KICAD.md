@@ -117,6 +117,20 @@ con el BOM de la portadora (`bom/bom.json`). Coinciden salvo donde se indica.
 | Referencia externa | **Sólo en la portadora**, no en la placa actual: `U1` AMS1117-ADJ, `R22 = 1.0 k` (VOUT→ADJ), `R23 = 620` (ADJ→GND), `C18 = 22 µF`, `C19 = 10 µF` |
 | `VREF` (P3[6]) | `C6 = 1 µF` + `C7 = 100 nF` a masa, y la guarda del conector de geófono. Lo excita el buffer interno `OPAref`; no lo alimenta el regulador |
 | AMux | `C16 = 100 nF` a masa en P15[3] |
+
+### Orden de AMux_ADC (GEO, desde 2026-09-07)
+
+| Canal | Señal | Punto de la cadena |
+|---:|---|---|
+| 0 | `PGAgain_mux` | salida de PGAgain |
+| 1 | `BPo_mux` | salida del pasabanda |
+| 2 | `OPA_SUMo` | sumador antes de PGAout |
+| 3 | `SUMo_mux` | salida después de PGAout |
+| 4 | `LPo_mux` | salida del pasabajos |
+| 5 | `AMuxCapacitor` | capacitor auxiliar de 100 nF a Vss |
+
+El código usa los símbolos `PSOC_AMUX_CH_*` de `psoc_hw.h`; no deben volver a
+aparecer números de canal sueltos en las tablas de calibración.
 | I2C | `R1 = R17 = 4.7 k` a +3V3 en SDA y SCL |
 | Interfaz de usuario | `SW2..SW5` con `R18..R21 = 10 k`, y OLED `A3`, todos sobre el ESP32 |
 

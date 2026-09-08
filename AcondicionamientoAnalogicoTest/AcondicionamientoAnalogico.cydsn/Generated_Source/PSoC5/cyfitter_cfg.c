@@ -399,17 +399,19 @@ void SetAnalogRoutingPumps(uint8 enabled)
 
 
 #define CY_AMUX_UNUSED CYREG_BOOST_SR
-static uint8 CYXDATA * const CYCODE AMux_ADC__outerAddr[5] = {
+static uint8 CYXDATA * const CYCODE AMux_ADC__outerAddr[6] = {
 	(uint8 CYXDATA *)CYREG_PRT2_AMUX, 
 	(uint8 CYXDATA *)CYREG_PRT3_AMUX, 
+	(uint8 CYXDATA *)CYREG_PRT0_AMUX, 
 	(uint8 CYXDATA *)CYREG_PRT2_AMUX, 
 	(uint8 CYXDATA *)CYREG_PRT0_AMUX, 
 	(uint8 CYXDATA *)CYREG_PRT15_AMUX, 
 };
 
-static const uint8 CYCODE AMux_ADC__outerMask[5] = {
+static const uint8 CYCODE AMux_ADC__outerMask[6] = {
 	0x80u, 
 	0x80u, 
+	0x01u, 
 	0x40u, 
 	0x02u, 
 	0x08u, 
@@ -423,7 +425,8 @@ static const uint8 CYCODE AMux_ADC__innerMask[1] = {
 	0x02u, 
 };
 
-static const uint8 CYCODE AMux_ADC__innerMap[5] = {
+static const uint8 CYCODE AMux_ADC__innerMap[6] = {
+	0u, 
 	0u, 
 	0u, 
 	0u, 
@@ -451,7 +454,7 @@ void AMux_ADC_Set(uint8 channel)
 {
 	uint8 i;
 	uint8 channelMask = (1UL << channel);
-	if ((channel < 5u) && ((AMux_ADC__armsEnabled & channelMask) == ((uint32)0u)))
+	if ((channel < 6u) && ((AMux_ADC__armsEnabled & channelMask) == ((uint32)0u)))
 	{
 		AMux_ADC__armsEnabled |= channelMask;
 		*AMux_ADC__outerAddr[channel] |= AMux_ADC__outerMask[channel];
@@ -482,7 +485,7 @@ void AMux_ADC_Unset(uint8 channel)
 {
 	uint8 i;
 	uint8 channelMask = (1UL << channel);
-	if ((channel < 5u) && ((AMux_ADC__armsEnabled & channelMask) != ((uint32)0u)))
+	if ((channel < 6u) && ((AMux_ADC__armsEnabled & channelMask) != ((uint32)0u)))
 	{
 		AMux_ADC__armsEnabled &= (uint8)~channelMask;
 		*AMux_ADC__outerAddr[channel] &= (uint8)~AMux_ADC__outerMask[channel];

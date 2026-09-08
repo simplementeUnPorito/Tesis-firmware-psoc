@@ -44,6 +44,36 @@
     #error "Hardware no reconocido: el TopDesign debe tener PGAgain (GEO) o PGA (HAMMER)."
 #endif
 
+/* ===========================================================================
+ * Mapa fisico de AMux_ADC
+ * --------------------------------------------------------------------------
+ * No usar literales de canal fuera de este bloque. Desde 2026-09-07 GEO tiene
+ * dos puntos distintos alrededor de PGAout: OPA_SUMo es el sumador ANTES de
+ * PGAout y SUMo es la salida DESPUES de PGAout. Agregar OPA_SUMo desplazo LP y
+ * el capacitor una posicion.
+ *
+ * El canal OPA_SUM queda disponible como observacion/guarda de saturacion. La
+ * calibracion actual todavia regula contra LPo; la futura estrategia conjunta
+ * BP -> OPA_SUM -> SUM debe implementarse sin volver a cambiar este mapa.
+ * ========================================================================== */
+#if PSOC_HW_CLASS == PSOC_HW_GEO
+    #define PSOC_AMUX_CH_PGA             0u
+    #define PSOC_AMUX_CH_BP              1u
+    #define PSOC_AMUX_CH_OPA_SUM         2u
+    #define PSOC_AMUX_CH_SUM             3u
+    #define PSOC_AMUX_CH_LP              4u
+    /* El TopDesign de campo tiene sólo los cinco taps. La variante de
+     * laboratorio agrega el capacitor como sexto canal; calibration.c lo
+     * detecta por AMux_ADC_CHANNELS y no presupone que exista. */
+    #define PSOC_AMUX_CH_CAP             5u
+    #define PSOC_AMUX_SIGNAL_CHANNEL_COUNT 5u
+    #define PSOC_AMUX_REQUIRED_CHANNELS    5u
+#else
+    /* HAMMER conserva su TopDesign historico: dos taps de señal y, si existe,
+     * un ultimo canal auxiliar que calibration.c detecta por el conteo. */
+    #define PSOC_AMUX_SIGNAL_CHANNEL_COUNT 2u
+#endif
+
 /* ==========================================================================
  * Referencias de calibración: IDAC8 + resistencia a Vref (placa nueva)
  * --------------------------------------------------------------------------
@@ -82,7 +112,12 @@
      + (PSOC_AMS1117_VREF_UV / PSOC_AMS1117_R1_OHM) * PSOC_AMS1117_R2_OHM      \
      + (PSOC_AMS1117_IADJ_NA * PSOC_AMS1117_R2_OHM) / 1000u)
 #define PSOC_IDAC_FULLSCALE_NA_DEFAULT  31875u      /* 31.875 µA en nA       */
+#define PSOC_IDAC_PGAOUT_FULLSCALE_NA   31875u      /* IDAC2: 0,125 µA/bit */
 #define PSOC_IDAC_CODE_MAX              255u
+#define PSOC_IDAC_PGA_RSET_OHM          15000u
+#define PSOC_IDAC_BP_RSET_OHM           15000u
+#define PSOC_IDAC_PGAOUT_RSET_OHM       1500u
+#define PSOC_IDAC_LP_RSET_OHM           10000u
 
 /* ------------------------------------------------------------------
  * Referencias con signo
@@ -130,6 +165,7 @@ uint32 psoc_idac_code_to_uv(uint8 code);
 /* Igual pero con signo: devuelve la DESVIACION respecto de Vref, en µV, que
  * es lo que tiene sentido informar ahora que el codigo 0 es Vref. */
 int32 psoc_idac_code_to_uv_signed(int16 code);
+int32 psoc_idac_stage_code_to_uv_signed(uint8 stage, int16 code);
 /* Código IDAC más cercano a una tensión pedida en µV (saturado al rango). */
 uint8  psoc_idac_uv_to_code(uint32 uv);
 /* Paso del DAC en µV (LSB). Útil para deadbands de la calibración. */
@@ -216,6 +252,8 @@ uint32 psoc_idac_lsb_uv(void);
 #define PSOC_CMD_VDAC           0xAAu
 #define PSOC_CMD_SETN           0xA3u
 #define PSOC_CMD_PRESTART       0xB1u
+#define PSOC_CMD_ACCEPT_EXTERNAL_CAL 0xB0u
+#define PSOC_ACCEPT_EXTERNAL_CAL_MAGIC 0xC7u
 /* Parametros de calibracion ajustables EN CALIENTE. Dos bytes: p1 = que
  * parametro, p2 = valor. Existe para no tener que regrabar el PSoC por cada
  * numero que se quiera probar; Elias lo aprobo explicitamente el 2026-09-05

@@ -2113,13 +2113,17 @@ static uint8 psoc_seed_calibration_from_nv(uint8 reset_defaults_if_missing)
      * debajo. psoc_nv.c guarda magnitud mas mascara de signos en la fila, asi
      * que lo que sale de ahi ya viene con su signo puesto. */
     int16 nv_dac[PSOC_NV_CAL_STAGES];
+    uint8 nv_pgaout;
     uint8 stage_count = psoc_calibration_stage_count();
 
     if (!g_nv_ready || stage_count == 0u || stage_count > PSOC_NV_CAL_STAGES) {
         return 0u;
     }
 
-    if (psoc_nv_load_for_gain(g_pga_code, nv_dac, stage_count)) {
+    if (psoc_nv_load_for_gain(g_pga_code, nv_dac, stage_count) &&
+        psoc_nv_load_pgaout_for_gain(g_pga_code, &nv_pgaout, stage_count)) {
+        g_pgaout_code = nv_pgaout;
+        psoc_hw_set_pgaout(g_pgaout_code);
         psoc_calibration_seed_dac(nv_dac, stage_count);
         return 1u;
     }
@@ -2485,6 +2489,7 @@ static void uart_service(void)
                 {
                     case 0xA5u: case 0xA6u: case PSOC_CMD_PGAOUT:
                     case 0xA9u:
+                    case PSOC_CMD_ACCEPT_EXTERNAL_CAL:
                     case 0xB1u: case 0xB3u: case 0xB4u: case PSOC_CMD_CALIBRATE:
                     case PSOC_CMD_SAVE_EEPROM: case PSOC_CMD_SELECT_STREAM:
                     case PSOC_CMD_ADC_SNAPSHOT: case PSOC_CMD_ADC_CONFIG:
@@ -2552,6 +2557,7 @@ static void uart_service(void)
                             uart_send_cfg_ack(PSOC_CMD_ADC_SNAPSHOT, 0u);
                             break;
                         case 0xA6u: case PSOC_CMD_PGAOUT: case 0xA9u: case 0xAAu:
+                        case PSOC_CMD_ACCEPT_EXTERNAL_CAL:
                         case 0xB1u: case 0xB3u: case 0xB4u:
                         case PSOC_CMD_ADC_CONFIG:
                         case PSOC_CMD_SET_DECIMATION:
@@ -2643,6 +2649,17 @@ static void uart_service(void)
                             uart_send_cfg_ack(0xAAu, ok ? rx_p1 : 0xFFu);
                         }
                         led_toggle(); break;
+                    case PSOC_CMD_ACCEPT_EXTERNAL_CAL:
+                        {
+                            uint8 accepted = 0u;
+                            if (rx_p1 == PSOC_ACCEPT_EXTERNAL_CAL_MAGIC) {
+                                accepted = psoc_calibration_accept_external_result();
+                            }
+                            if (accepted) { g_last_calibration_ok = 1u; }
+                            uart_send_cfg_ack(PSOC_CMD_ACCEPT_EXTERNAL_CAL,
+                                              accepted);
+                        }
+                        break;
                     case 0xA3u:
                         g_n_batches = (uint16)rx_p1 | ((uint16)rx_p2 << 8u);
                         uart_send_diag(PSOC_EVT_SETN, diag_u16_sat(g_n_batches));
@@ -3328,6 +3345,13 @@ int main(void)
 
     EEPROM_Start();
     g_nv_ready = 1u;
+
+#if PSOC_LOAD_NV_CAL_ON_BOOT
+    /* La ganancia forma parte del punto operativo persistido. Se recupera
+     * antes de arrancar PGAout; v2 se rechaza por versión y queda x1 seguro. */
+    (void)psoc_nv_load_pgaout_for_gain(g_pga_code, &g_pgaout_code,
+                                      psoc_calibration_stage_count());
+#endif
 
     psoc_hw_start_analog(g_pga_code, g_pgavdac_code, g_pgaout_code);
     /* Arranca todos los VDAC de calibracion en su adelanto/feedforward de

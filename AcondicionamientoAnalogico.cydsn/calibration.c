@@ -25,10 +25,14 @@
  * las señales reales. En HAMMER actual AMux_ADC tiene solo dos señales
  * (PGA/LP); tratar el ultimo canal como capacitor mezclaba la etapa LP con
  * la PGA durante calibracion. */
+#define CAL_AMUX_SIGNAL_CHANNEL_COUNT PSOC_AMUX_SIGNAL_CHANNEL_COUNT
+
 #if PSOC_HW_CLASS == PSOC_HW_GEO
-#define CAL_AMUX_SIGNAL_CHANNEL_COUNT 4u
-#else
-#define CAL_AMUX_SIGNAL_CHANNEL_COUNT 2u
+/* Los cinco taps son obligatorios. Un sexto canal de capacitor es opcional y
+ * se detecta abajo; nunca se interpreta LPo como capacitor. */
+#if AMux_ADC_CHANNELS < PSOC_AMUX_REQUIRED_CHANNELS
+#error "AMux_ADC GEO debe tener 5 taps: PGA, BP, OPA_SUM, SUM y LP."
+#endif
 #endif
 
 #ifndef CAL_AMUX_HAS_CAP_CHANNEL
@@ -40,7 +44,11 @@
 #endif
 
 #ifndef CAL_AMUX_CAP_CHANNEL
+#if PSOC_HW_CLASS == PSOC_HW_GEO
+#define CAL_AMUX_CAP_CHANNEL ((uint8)PSOC_AMUX_CH_CAP)
+#else
 #define CAL_AMUX_CAP_CHANNEL ((uint8)(AMux_ADC_CHANNELS - 1u))
+#endif
 #endif
 
 #ifndef CAL_AMUX_CAP_CLEANUP_MS
@@ -86,7 +94,7 @@ static void psoc_amux_select_exclusive(uint8 channel, uint8 with_cap)
 
 static void psoc_amux_start(void)
 {
-    AMux_ADC_Start();   /* desconecta TODO (0..4), estado inicial conocido */
+    AMux_ADC_Start();   /* desconecta todos los canales, estado inicial conocido */
     g_amux_active_channel = AMux_ADC_NULL_CHANNEL;
     g_amux_cap_connected = 0u;
 }
@@ -571,6 +579,29 @@ uint8 psoc_calibration_set_stage_dac(uint8 stage_index, int16 dac)
     return 1u;
 }
 
+uint8 psoc_calibration_accept_external_result(void)
+{
+    uint8 i;
+
+    if (g_psoc_cal_result_count < PSOC_CAL_STAGE_COUNT ||
+        psoc_calibration_async_busy()) {
+        return 0u;
+    }
+    for (i = 0u; i < PSOC_CAL_STAGE_COUNT; i++) {
+        int16 code = cal_stage_current_dac(i);
+        if (code != cal_stage_clamp_dac(&g_psoc_cal_stages[i], code)) {
+            return 0u;
+        }
+    }
+    for (i = 0u; i < PSOC_CAL_STAGE_COUNT; i++) {
+        g_psoc_cal_results[i].final_dac = cal_stage_current_dac(i);
+        g_psoc_cal_results[i].final_measured =
+            g_psoc_cal_stages[i].target_counts;
+        g_psoc_cal_results[i].ok = 1u;
+    }
+    return 1u;
+}
+
 void psoc_calibration_report_adc_snapshot(void)
 {
     uint8 i;
@@ -621,6 +652,10 @@ void psoc_calibration_start_references(void)
     VDAC_ref_BP_Start();
 #endif
     VDAC_Ref_Sum_Start();
+    /* Mantener el rango fino configurado en el componente: 31,875 uA,
+     * 0,125 uA/bit. Con R=1,5 kOhm son 187,5 uV/bit en la referencia.
+     * Forzar 255 uA acá multiplicaba por ocho el salto y era innecesariamente
+     * riesgoso en PGAout x24/x50. */
     VDAC_ref_LP_Start();
 #else
     VDAC_PGA_Start();
