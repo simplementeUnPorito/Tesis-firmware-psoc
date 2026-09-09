@@ -112,11 +112,11 @@
      + (PSOC_AMS1117_VREF_UV / PSOC_AMS1117_R1_OHM) * PSOC_AMS1117_R2_OHM      \
      + (PSOC_AMS1117_IADJ_NA * PSOC_AMS1117_R2_OHM) / 1000u)
 #define PSOC_IDAC_FULLSCALE_NA_DEFAULT  31875u      /* 31.875 µA en nA       */
-#define PSOC_IDAC_PGAOUT_FULLSCALE_NA   31875u      /* IDAC2: 0,125 µA/bit */
+#define PSOC_IDAC_OPASUM_FULLSCALE_NA   31875u      /* IDAC2: 0,125 µA/bit */
 #define PSOC_IDAC_CODE_MAX              255u
 #define PSOC_IDAC_PGA_RSET_OHM          15000u
 #define PSOC_IDAC_BP_RSET_OHM           15000u
-#define PSOC_IDAC_PGAOUT_RSET_OHM       1500u
+#define PSOC_IDAC_OPASUM_RSET_OHM       5100u
 #define PSOC_IDAC_LP_RSET_OHM           10000u
 
 /* ------------------------------------------------------------------

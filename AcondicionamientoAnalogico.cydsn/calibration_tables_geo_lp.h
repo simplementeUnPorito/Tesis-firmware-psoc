@@ -21,9 +21,9 @@
 
 /* La PC validó semillas hasta +120. Se deja margen acotado hasta 160, no el
  * fondo de escala heredado, para impedir saltos grandes ante ruido de 50 Hz. */
-#define CAL_DAC_MAX_CHANGE_GEO_LP 160
+#define CAL_DAC_MAX_CHANGE_GEO_LP PSOC_IDAC_SIGNED_MAX
 /* Simétrica dentro del límite de seguridad de software. */
-#define CAL_DAC_MAX_CHANGE_NEG_GEO_LP 160
+#define CAL_DAC_MAX_CHANGE_NEG_GEO_LP PSOC_IDAC_SIGNED_MAX
 
 #ifndef CAL_PI_GAIN_GEO_LP_X1000
 /* Ganancia fisica referencia -> tap, medida en la placa el 2026-09-02

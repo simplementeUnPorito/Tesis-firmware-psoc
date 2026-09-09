@@ -37,10 +37,10 @@
  * puedan reutilizar accidentalmente los limites de la escala anterior.
  *
  * Ver docs/MEDICIONES_2026-09-04.md, seccion 3. */
-#define CAL_DAC_MAX_CHANGE_GEO_SUM 48
+#define CAL_DAC_MAX_CHANGE_GEO_SUM PSOC_IDAC_SIGNED_MAX
 
 /* Mismo limite en el lado negativo: electrica y algorítmicamente conservador. */
-#define CAL_DAC_MAX_CHANGE_NEG_GEO_SUM 48
+#define CAL_DAC_MAX_CHANGE_NEG_GEO_SUM PSOC_IDAC_SIGNED_MAX
 
 #ifndef CAL_PI_GAIN_GEO_SUM_X1000
 /* Ganancia fisica referencia -> tap, medida en la placa el 2026-09-02

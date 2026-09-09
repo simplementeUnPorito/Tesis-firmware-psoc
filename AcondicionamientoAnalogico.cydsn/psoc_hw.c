@@ -25,13 +25,13 @@ int32 psoc_idac_stage_code_to_uv_signed(uint8 stage, int16 code)
 {
     int32 magnitude = (code < 0) ? -(int32)code : (int32)code;
     uint32 fullscale_na = (stage == 2u)
-                        ? PSOC_IDAC_PGAOUT_FULLSCALE_NA
+                        ? PSOC_IDAC_OPASUM_FULLSCALE_NA
                         : g_psoc_idac_fullscale_na;
     uint32 rset_ohm;
     switch (stage) {
         case 0u: rset_ohm = PSOC_IDAC_PGA_RSET_OHM; break;
         case 1u: rset_ohm = PSOC_IDAC_BP_RSET_OHM; break;
-        case 2u: rset_ohm = PSOC_IDAC_PGAOUT_RSET_OHM; break;
+        case 2u: rset_ohm = PSOC_IDAC_OPASUM_RSET_OHM; break;
         case 3u: rset_ohm = PSOC_IDAC_LP_RSET_OHM; break;
         default: rset_ohm = g_psoc_idac_rset_ohm; break;
     }

@@ -208,9 +208,28 @@ uint8 psoc_selftest_amux_channel_count(void)
  * poder recorrer el rango entero, -255..+255, no el acotado que usa el PI. */
 uint8 psoc_selftest_write_stage_dac(uint8 stage, int16 code)
 {
+    uint8 magnitude;
+    uint8 expected_negative;
+    uint8 polarity_bit;
+
     if (stage >= PSOC_CAL_STAGE_COUNT) { return 0u; }
-    g_psoc_cal_stages[stage].write(psoc_hw_idac_clamp_signed(code));
-    return 1u;
+    code = psoc_hw_idac_clamp_signed(code);
+    magnitude = (uint8)((code < 0) ? -code : code);
+    expected_negative = (code < 0) ? 1u : 0u;
+    g_psoc_cal_stages[stage].write(code);
+
+    /* Readback inmediato: el ACK solo es OK si la magnitud y el bit de
+     * polaridad realmente quedaron escritos en el PSoC. Esto separa una
+     * falla de software/registros de una falla en la ruta analogica. */
+    polarity_bit = (uint8)((psoc_hw_idac_polarity_mask() >> stage) & 1u);
+    if (polarity_bit != expected_negative) { return 0u; }
+    switch (stage) {
+        case 0u: return (VDAC_ref_PGA_Data_REG == magnitude) ? 1u : 0u;
+        case 1u: return (VDAC_ref_BP_Data_REG == magnitude) ? 1u : 0u;
+        case 2u: return (VDAC_Ref_Sum_Data_REG == magnitude) ? 1u : 0u;
+        case 3u: return (VDAC_ref_LP_Data_REG == magnitude) ? 1u : 0u;
+        default: return 0u;
+    }
 }
 
 uint8 psoc_selftest_current_stage_dac(uint8 stage, int16 *out_code)

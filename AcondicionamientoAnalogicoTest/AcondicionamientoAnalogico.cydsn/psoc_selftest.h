@@ -345,8 +345,11 @@ static void st_handle_meas_dc(uint8 param)
         st_send_result(id, ST_ERR, 0, 0);
         return;
     }
+    /* El capacitor auxiliar altera los nodos de alta impedancia y produjo
+     * lecturas que parecían válidas aun con OPA_SUM/SUM en el riel. La medida
+     * manual debe observar la planta, no excitarla. */
     if (!psoc_selftest_measure_dc(ch, g_st_settle_ms[sel], ST_DC_AVG_SAMPLES,
-                                  1u, &mean, &pp)) {
+                                  0u, &mean, &pp)) {
         st_send_result(id, ST_ERR, 0, 0);
         return;
     }

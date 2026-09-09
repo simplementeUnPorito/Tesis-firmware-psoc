@@ -132,11 +132,16 @@ static void psoc_amux_capacitor_cleanup(void)
 #define CAL_AMUX_ADC_SELECT(channel) psoc_amux_select_exclusive((channel), 0u)
 #endif
 
-/* Selección de canal para MEDIR una etapa durante calibración: agrega el
- * capacitor de filtrado (AMux_ADC_CHANNELS-1) en paralelo al canal de la
- * etapa, pedido por el usuario para atenuar ruido chico durante la medición. */
+/* Selección de canal para MEDIR una etapa durante calibración.
+ *
+ * El capacitor auxiliar NO se conecta. En la placa del 2026-09-09 se verificó
+ * que no era una carga transparente: con OPA_SUM/SUM realmente fuera de rango
+ * bajo (~732/738 mV de banco), conectarlo los arrastraba hasta ~920 mV y creaba
+ * una falsa deriva de varios minutos. Un lazo cerrado sobre esa lectura
+ * calibra el capacitor, no el tap. El FIR digital ya filtra el ruido sin cargar
+ * la planta y es la única vía de filtrado válida para el servo. */
 #ifndef CAL_AMUX_ADC_SELECT_STAGE
-#define CAL_AMUX_ADC_SELECT_STAGE(channel) psoc_amux_select_exclusive((channel), 1u)
+#define CAL_AMUX_ADC_SELECT_STAGE(channel) psoc_amux_select_exclusive((channel), 0u)
 #endif
 
 static PsocCalDiagHook g_cal_diag_hook = (PsocCalDiagHook)0;
@@ -652,11 +657,30 @@ void psoc_calibration_start_references(void)
     VDAC_ref_BP_Start();
 #endif
     VDAC_Ref_Sum_Start();
-    /* Mantener el rango fino configurado en el componente: 31,875 uA,
-     * 0,125 uA/bit. Con R=1,5 kOhm son 187,5 uV/bit en la referencia.
-     * Forzar 255 uA acá multiplicaba por ocho el salto y era innecesariamente
-     * riesgoso en PGAout x24/x50. */
     VDAC_ref_LP_Start();
+
+    /* Estado electrico determinista para los cuatro actuadores. No confiar en
+     * el valor previo de CR0/CR1 ni en el valor inicial del componente: todos
+     * trabajan en el rango fino nativo (31,875 uA, 0,125 uA/bit), baja
+     * velocidad y polaridad gobernada por polarity_reg. */
+    VDAC_ref_PGA_SetRange(VDAC_ref_PGA_RANGE_32uA);
+    VDAC_ref_PGA_SetSpeed(VDAC_ref_PGA_LOWSPEED);
+#if defined(VDAC_ref_BP_DEFAULT_DATA) || defined(CY_DVDAC_VDAC_ref_BP_H)
+    VDAC_ref_BP_SetRange(VDAC_ref_BP_RANGE_32uA);
+    VDAC_ref_BP_SetSpeed(VDAC_ref_BP_LOWSPEED);
+#endif
+    VDAC_Ref_Sum_SetRange(VDAC_Ref_Sum_RANGE_32uA);
+    VDAC_Ref_Sum_SetSpeed(VDAC_Ref_Sum_LOWSPEED);
+    VDAC_ref_LP_SetRange(VDAC_ref_LP_RANGE_32uA);
+    VDAC_ref_LP_SetSpeed(VDAC_ref_LP_LOWSPEED);
+
+    /* El modo hardware-controlled forma parte de la configuracion generada.
+     * Su API SetPolarity se elimina deliberadamente al generar ese modo, por
+     * eso el signo se gobierna exclusivamente con polarity_reg. */
+
+    /* 0 = fuente (por encima de Vref); el bit i se pone en 1 solamente para
+     * un codigo negativo de la etapa i. */
+    psoc_hw_idac_polarity_reset();
 #else
     VDAC_PGA_Start();
     VDAC_LP_Start();
