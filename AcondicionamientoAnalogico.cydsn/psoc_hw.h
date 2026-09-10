@@ -116,6 +116,8 @@
 #define PSOC_IDAC_CODE_MAX              255u
 #define PSOC_IDAC_PGA_RSET_OHM          15000u
 #define PSOC_IDAC_BP_RSET_OHM           15000u
+/* 5,1 kOhm verificado por inspeccion fisica el 2026-09-10. Solo afecta
+ * telemetria y calculos nominales: NO se regraba firmware por esto. */
 #define PSOC_IDAC_OPASUM_RSET_OHM       5100u
 #define PSOC_IDAC_LP_RSET_OHM           10000u
 
