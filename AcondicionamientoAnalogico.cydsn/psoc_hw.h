@@ -119,9 +119,14 @@
 /* 5,1 kOhm verificado por inspeccion fisica el 2026-09-10. Solo afecta
  * telemetria y calculos nominales: NO se regraba firmware por esto. */
 #define PSOC_IDAC_OPASUM_RSET_OHM       5100u
-/* 1 kOhm desde el 2026-09-10 por la noche, con zocalo para cambiarla.
+/* 10 kOhm. Estuvo en 1 kOhm el 2026-09-10 por la noche y se volvio a 10 k por
+ * el zocalo; este #define se habia quedado con el valor viejo y el 2026-09-13
+ * hizo calcular mal la autoridad de IDAC3. Con 10 k los numeros cierran: el
+ * nodo de referencia del LP se mueve 1,25 mV por codigo (+-319 mV en total) y
+ * LPo se mueve 6,68 mV por codigo medidos, o sea que la etapa amplifica x5,3
+ * desde su referencia. Con 1 k habria que creerle un x53.
  * Solo afecta telemetria: NO se regraba firmware por esto. */
-#define PSOC_IDAC_LP_RSET_OHM           1000u
+#define PSOC_IDAC_LP_RSET_OHM           10000u
 
 /* ------------------------------------------------------------------
  * Referencias con signo
