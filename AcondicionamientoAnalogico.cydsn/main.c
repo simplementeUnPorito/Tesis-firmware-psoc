@@ -46,6 +46,10 @@
 #include "fatfs/ff.h"
 #include "calibration.h"
 #include "psoc_nv.h"
+#include "control_runtime.h"
+#if defined(PSOC_TEST) && PSOC_TEST
+#include "psoc_selftest.h"
+#endif
 /* LED.h a propósito NO se incluye directo: la placa nueva no tiene el pin LED
  * en el TopDesign. project.h lo trae solo si el pin existe, y led_write() /
  * led_toggle() ya están guardados por CY_PINS_LED_H. Incluirlo a mano hacía
@@ -260,6 +264,13 @@ static uint8  g_pgavdac_code = PSOC_PGAVDAC_DEFAULT_CODE;
 static uint8  g_pgaout_code  = PSOC_PGAOUT_DEFAULT_CODE;
 
 static volatile uint8  g_state        = PSOC_IDLE;
+static uint8 g_control_capture_paused;
+#if defined(PSOC_TEST) && PSOC_TEST
+/* A laboratory self-test deliberately owns the analog chain across several
+ * commands.  Normal capture completion must not silently restart the servo
+ * between two measurements; CONTROL_RESUME releases this ownership. */
+static uint8 g_control_test_owned;
+#endif
 static          uint16 g_n_batches    = 0u;
 static volatile uint16 g_batches_sent = 0u;
 
@@ -286,7 +297,7 @@ static volatile uint8  g_chain_active  = 0u; /* 1 = captura multi-corrida en cur
 #define PSOC_SD_MAX_BATCHES  60000u
 #define SD_CAPTURE_PATH      "0:/GEOLAST.BIN"
 #define SD_TEST_PATH         "0:/GEOTEST.BIN"
-#define SD_HEADER_VERSION    1u
+#define SD_HEADER_VERSION    2u
 #define SD_HEADER_INPROGRESS 1u
 #define SD_HEADER_COMPLETE   2u
 #define SD_HEADER_CRC_OFFSET 508u
@@ -695,6 +706,7 @@ static void sd_header_build(uint8 state, uint16 target, uint16 captured,
     g_sd_blk[15] = g_stream_mode;
     g_sd_blk[16] = psoc_adc_get_config();
     g_sd_blk[17] = psoc_adc_get_decimation();
+    control_copy_capture_metadata(&g_sd_blk[64]);
     sd_put_le16(&g_sd_blk[18], (uint16)PSOC_ADC_NATIVE_FS_HZ);
     sd_put_le16(&g_sd_blk[20], psoc_adc_effective_fs_hz());
     sd_put_le16(&g_sd_blk[22], target);
@@ -1113,6 +1125,7 @@ static void psoc_prepare_capture_path(void)
     ADC_StopConvert();
     psoc_adc_select_capture_config();
     psoc_calibration_restore_capture_path();
+    control_select_capture_path();
 }
 
 static uint32 timer_ms_to_counts(uint32 ms)
@@ -1619,8 +1632,9 @@ static void sm_sample_cal_raw(void)
 
 static void sm_sample_cal_filt(void)
 {
-    psoc_adc_note_isr_filtered_sample(
-        psoc_adc_counts_right_aligned(dma_buf_to_i24(g_dma_filt_buf)));
+    int32 sample=psoc_adc_counts_right_aligned(dma_buf_to_i24(g_dma_filt_buf));
+    psoc_adc_note_isr_filtered_sample(sample);
+    control_on_filtered_sample(sample);
 }
 
 static volatile sm_sample_handler_t g_sm_sample_handler = sm_sample_noop;
@@ -1901,6 +1915,9 @@ CY_ISR(isr_Timer_3)
 CY_ISR(isr_SyncIn)
 {
     uint8 saved;
+#if defined(PSOC_TEST) && PSOC_TEST
+    st_sync_note_edge();
+#endif
 #if defined(SYNC_IN_INTSTAT)
     (void)SYNC_IN_ClearInterrupt();
 #endif
@@ -2031,6 +2048,9 @@ CY_ISR(unexpected_irq_trap)
 
 CY_ISR(hardfault_trap)
 {
+#if defined(PSOC_TEST) && PSOC_TEST
+    ++g_st_hardfaults;
+#endif
     uart_send_diag(0x7Fu, 0u);
     for (;;)
     {
@@ -2093,7 +2113,7 @@ static void idle_ping_service(void)
 
 uint32 psoc_now_ticks(void)
 {
-    return 0u; /* Compatibilidad para el servo legacy, hoy compilado apagado. */
+    return control_millis();
 }
 
 /* Selecciona la ruta en superMaquina. Con ENGINE_ENABLE=0 actúa como bypass
@@ -2180,6 +2200,8 @@ static void psoc_arm(void)
     uint16 discard = 0u;
     uint8 use_sd = 0u;
 
+    control_prepare_capture();
+    g_control_capture_paused=1;
     runtime_timers_stop_for_quiet_window();
     psoc_prepare_capture_path();
     source = capture_engine_source_from_stream(g_stream_mode);
@@ -2256,6 +2278,8 @@ static void psoc_arm(void)
 
 static void psoc_start_now(void)
 {
+    control_prepare_capture();
+    g_control_capture_paused=1;
     psoc_prepare_capture_path();
     psoc_enter_sampling(0u);
 }
@@ -2498,9 +2522,18 @@ static void uart_service(void)
                     case PSOC_CMD_SD_CAPTURE:
                     case PSOC_CMD_BLINK_LED:
                     case PSOC_CMD_PONG:
+#if defined(PSOC_TEST) && PSOC_TEST
+                    case PSOC_CMD_ST_REPORT: case PSOC_CMD_ST_SYNC:
+                    case PSOC_CMD_ST_MEAS_DC: case PSOC_CMD_ST_MEAS_AC:
+#endif
                         rx_cmd = rx; rx_state = 2u; break;
                     case 0xA3u: case PSOC_CMD_SD_READ_BATCH: case 0xAAu:
                     case PSOC_CMD_CAL_PARAM:
+#if defined(PSOC_TEST) && PSOC_TEST
+                    case PSOC_CMD_ST_SET_IDAC:
+#endif
+                    case 0xD0u: case 0xD1u: case 0xD2u: case 0xD3u:
+                    case 0xD4u: case 0xD5u: case 0xD6u: case 0xD7u:
                         rx_cmd = rx; rx_state = 4u; break;
                     default:
                         rx_watchdog_stop(); rx_state = 0u; break;
@@ -2522,6 +2555,36 @@ static void uart_service(void)
             case 3u:
                 rx_watchdog_stop(); rx_state = 0u;
                 if (rx != (uint8)(rx_cmd ^ rx_p1 ^ rx_p2)) { break; }
+#if defined(PSOC_TEST) && PSOC_TEST
+                if(rx_cmd==PSOC_CMD_ST_REPORT || rx_cmd==PSOC_CMD_ST_SYNC ||
+                   rx_cmd==PSOC_CMD_ST_MEAS_DC || rx_cmd==PSOC_CMD_ST_MEAS_AC || rx_cmd==PSOC_CMD_ST_SET_IDAC) {
+                    if(g_state!=PSOC_IDLE || capture_dump_pending()) {
+                        st_send_result(ST_ID_IDENTITY,ST_REJECTED,rx_cmd,g_state);break;
+                    }
+                    /* Explicit laboratory ownership; resume is a separate
+                     * command so an active servo cannot undo manual steps. */
+                    g_control_test_owned=1u;
+                    (void)control_command(0xD6,CONTROL_PAUSE,0);
+                    switch(rx_cmd) {
+                    case PSOC_CMD_ST_REPORT: st_handle_report(rx_p1);break;
+                    case PSOC_CMD_ST_SYNC: st_handle_sync(rx_p1);break;
+                    case PSOC_CMD_ST_MEAS_DC: st_handle_meas_dc(rx_p1);break;
+                    case PSOC_CMD_ST_MEAS_AC: st_handle_meas_ac(rx_p1);break;
+                    case PSOC_CMD_ST_SET_IDAC: st_handle_set_idac(rx_p1,rx_p2);break;
+                    }
+                    break;
+                }
+#endif
+
+                if(rx_cmd>=CONTROL_CMD_FIRST && rx_cmd<=CONTROL_CMD_LAST) {
+                    uint8 ok=0;
+#if defined(PSOC_TEST) && PSOC_TEST
+                    if(rx_cmd==0xD6u && rx_p1==CONTROL_RESUME)g_control_test_owned=0u;
+#endif
+                    if(g_state==PSOC_IDLE && !capture_dump_pending())ok=control_command(rx_cmd,rx_p1,rx_p2);
+                    uart_send_cfg_ack(rx_cmd,ok);
+                    break;
+                }
 
                 if (!g_esp_connected) {
                     /* Durante reset/upload del ESP, el TX hacia el PSoC puede
@@ -2701,7 +2764,7 @@ static void uart_service(void)
 #endif
                         break;
                     case PSOC_CMD_CALIBRATE:
-                        (void)psoc_start_calibration_if_idle(1u);
+                        uart_send_cfg_ack(PSOC_CMD_CALIBRATE,control_command(0xD6,CONTROL_LEARN,0));
                         led_toggle();
                         break;
                     case PSOC_CMD_SAVE_EEPROM:
@@ -3346,7 +3409,7 @@ int main(void)
     EEPROM_Start();
     g_nv_ready = 1u;
 
-#if PSOC_LOAD_NV_CAL_ON_BOOT
+#if 0 /* Legacy per-gain slots are not an authorized learned profile. */
     /* La ganancia forma parte del punto operativo persistido. Se recupera
      * antes de arrancar PGAout; v2 se rechaza por versión y queda x1 seguro. */
     (void)psoc_nv_load_pgaout_for_gain(g_pga_code, &g_pgaout_code,
@@ -3361,7 +3424,7 @@ int main(void)
 
     /* Siempre arranca con el ultimo slot EEPROM de la ganancia actual.
      * Si no hay slot valido, deja explicitamente los adelantos nominales. */
-#if PSOC_LOAD_NV_CAL_ON_BOOT
+#if 0 /* New versioned configuration/profile owns startup. */
     (void)psoc_seed_calibration_from_nv(1u);
 #endif
 
@@ -3429,11 +3492,12 @@ int main(void)
     idle_ping_schedule();
     
     /* ── Loop principal ─────────────────────────────────────────────────── */
+    control_init();
+    g_pga_code=psoc_hw_get_pga_code();
+    g_pgaout_code=psoc_hw_get_pgaout_code();
     for (;;)
     {
-        if (service_button_calibration()) {
-            continue;
-        }
+        /* Learning requires an explicit slave command, never a local button. */
         service_runtime();
 
         if (g_state == PSOC_ARMED || g_state == PSOC_SAMPLING || capture_dump_pending()) {
@@ -3442,6 +3506,15 @@ int main(void)
         }
 
         if (g_state == PSOC_IDLE && !capture_dump_pending()) {
+            if(g_control_capture_paused){
+                g_control_capture_paused=0;
+#if defined(PSOC_TEST) && PSOC_TEST
+                if(!g_control_test_owned)control_resume();
+#else
+                control_resume();
+#endif
+            }
+            control_service();
             idle_ping_service();
         } else {
             idle_ping_stop();

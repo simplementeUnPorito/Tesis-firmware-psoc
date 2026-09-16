@@ -138,4 +138,17 @@ uint8  psoc_cal_set_plant_tau_x10(uint16 x10);
 /* El servo lento se borro. Su unica API que main.c todavia necesitaba era
  * abortar una corrida en curso, que ya la cubre el PI asincrono. */
 
+#if defined(PSOC_TEST) && PSOC_TEST
+int32 psoc_selftest_counts_to_uv(int32 counts);
+uint8 psoc_selftest_stage_count(void);
+uint8 psoc_selftest_stage_channel(uint8 stage,uint8 *channel);
+uint8 psoc_selftest_amux_channel_count(void);
+uint8 psoc_selftest_write_stage_dac(uint8 stage,int16 code);
+uint8 psoc_selftest_current_stage_dac(uint8 stage,int16 *code);
+uint8 psoc_selftest_stage_result(uint8 stage,int16 *dac,int32 *meas,uint8 *ok);
+void psoc_selftest_select_channel(uint8 channel,uint8 with_cap);
+void psoc_selftest_restore(void);
+uint8 psoc_selftest_measure_dc(uint8 channel,uint16 settle_ms,uint16 n,uint8 with_cap,int32 *mean,int32 *pp);
+uint8 psoc_selftest_measure_series(uint8 channel,uint16 settle_ms,uint16 n,uint8 with_cap,uint16 tone_hz,int32 *mean,int32 *rms,int32 *pp,int32 *tone);
+#endif
 #endif

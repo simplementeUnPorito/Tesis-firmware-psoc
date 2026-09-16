@@ -11,14 +11,11 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$ProjectDir = if ($SelfTest) {
-    Join-Path $PSScriptRoot 'AcondicionamientoAnalogicoTest\AcondicionamientoAnalogico.cydsn'
-} else {
-    Join-Path $PSScriptRoot 'AcondicionamientoAnalogico.cydsn'
-}
+$ProjectDir = Join-Path $PSScriptRoot 'AcondicionamientoAnalogico.cydsn'
 $firmwareKind = if ($SelfTest) { 'GEO+AUTOTEST' } else { 'GEO' }
+$BuildConfig = if ($SelfTest) { 'Debug' } else { 'Release' }
 $Workspace = Join-Path $ProjectDir 'AcondicionamientoAnalogico.cywrk'
-$Hex = Join-Path $ProjectDir 'CortexM3\ARM_GCC_541\Debug\AcondicionamientoAnalogico.hex'
+$Hex = Join-Path $ProjectDir "CortexM3\ARM_GCC_541\$BuildConfig\AcondicionamientoAnalogico.hex"
 $BuildLog = Join-Path $ProjectDir 'BUILD.log'
 $RebuildLog = Join-Path $ProjectDir 'REBUILD.log'
 $Creator = 'C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\bin\cyprjmgr.exe'
@@ -53,38 +50,12 @@ if ($SelfTest -and -not (Test-Path -LiteralPath (Join-Path $ProjectDir 'psoc_sel
 # diferencia entre una regla y un hábito.
 # ---------------------------------------------------------------------------
 if ($SelfTest) {
-    $TestDir = $ProjectDir
-    $Compartidos = @(
-        'calibration.h',
-        'calibration_conjunta.h', 'calibration_tau.h',
-        'calibration_tables.h', 'calibration_tables_geo_bp.h',
-        'calibration_tables_geo_lp.h', 'calibration_tables_geo_pga.h',
-        'calibration_tables_geo_sum.h', 'calibration_tables_hammer_lp.h',
-        'calibration_tables_hammer_pga.h',
-        'FIR_adquisition.c', 'FIR_adquisition.h', 'FIR_calibration.c',
-        'FIR_calibration.h', 'crc.c', 'crc.h', 'cyapicallbacks.h',
-        'filter_coeffs.c', 'filter_coeffs.h', 'psoc_adc.c', 'psoc_adc.h',
-        'psoc_debug.c', 'psoc_debug.h', 'psoc_hw.c', 'psoc_hw.h',
-        'psoc_nv.c', 'psoc_nv.h', 'sd_spi.h'
-    )
-    # calibration.c va aparte: además del include lleva el de las primitivas.
-    $duplicados = @()
-    foreach ($f in @('calibration.c') + $Compartidos) {
-        $ruta = Join-Path $TestDir $f
-        if (-not (Test-Path -LiteralPath $ruta)) { continue }
-        $esperado = '#include "../../AcondicionamientoAnalogico.cydsn/' + $f + '"'
-        if (-not (Select-String -LiteralPath $ruta -SimpleMatch -Pattern $esperado -Quiet)) {
-            $duplicados += $f
+    foreach ($requiredTest in @('psoc_selftest.h', 'psoc_selftest_primitivas.inc')) {
+        if (-not (Test-Path -LiteralPath (Join-Path $ProjectDir $requiredTest))) {
+            throw "Falta módulo de autotest unificado: $requiredTest"
         }
     }
-    if ($duplicados.Count -gt 0) {
-        throw ("El proyecto de autotest volvió a tener copia propia de: " +
-               ($duplicados -join ', ') + ". Cada una de esas fuentes tiene que ser " +
-               "un #include del proyecto de campo; ver el comentario largo en " +
-               "AcondicionamientoAnalogicoTest\AcondicionamientoAnalogico.cydsn\calibration.c. " +
-               "No se programa nada hasta que eso se arregle.")
-    }
-    Write-Host "[PSoC] Sincronía OK: el autotest no tiene copias propias ($($Compartidos.Count + 1) fuentes compartidas)."
+    Write-Host '[PSoC] Autotest integrado en el proyecto único (Debug, PSOC_TEST=1).'
 }
 
 if (-not $SkipBuild) {
@@ -93,7 +64,7 @@ if (-not $SkipBuild) {
     try {
         # -m vuelve determinista el customizer: no depende del último valor
         # guardado por la GUI y fuerza 2604 Hz en las cuatro configuraciones.
-        $buildOutput = & $Creator -wrk (Split-Path -Leaf $Workspace) -rebuild -m (Split-Path -Leaf $AdcParams) 2>&1
+        $buildOutput = & $Creator -wrk (Split-Path -Leaf $Workspace) -rebuild -c $BuildConfig -m (Split-Path -Leaf $AdcParams) 2>&1
         $buildExit = $LASTEXITCODE
         $buildOutput | Write-Host
     }

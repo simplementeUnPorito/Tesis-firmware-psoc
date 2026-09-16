@@ -1,6 +1,0 @@
-#ifndef INCLUDED_CYDISABLEDSHEETS_H
-#define INCLUDED_CYDISABLEDSHEETS_H
-
-#define AnalogHammer__DISABLED 1u /* AnalogHammer */
-
-#endif /* INCLUDED_CYDISABLEDSHEETS_H */

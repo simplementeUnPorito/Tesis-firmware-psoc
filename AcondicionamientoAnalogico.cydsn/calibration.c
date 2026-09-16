@@ -4,6 +4,7 @@
 #include "filter_coeffs.h"
 #include "FIR_adquisition.h"
 #include "FIR_calibration.h"
+#include "control_runtime.h"
 
 /* El servo lento y la busqueda binaria se borraron. El PI es el unico
  * algoritmo de calibracion; no hay selector ni ramas apagadas. */
@@ -2022,5 +2023,10 @@ uint8 psoc_calibration_service_async(void)
         cal_diag(PSOC_EVT_CAL_PROGRESS, g_cal_async.stage_index);
     }
 
-    return cal_pi_service();   /* unico camino de calibracion */
+    return cal_pi_service();   /* legacy laboratory controller */
 }
+
+#include "control_runtime.inc"
+#if defined(PSOC_TEST) && PSOC_TEST
+#include "psoc_selftest_primitivas.inc"
+#endif
