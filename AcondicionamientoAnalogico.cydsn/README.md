@@ -5,6 +5,20 @@ de hardware se selecciona automáticamente en tiempo de compilación según los
 componentes del TopDesign (`PGAgain` → GEO, `PGA` → HAMMER). No hay que tocar
 `main.c` al cambiar entre proyectos.
 
+> **Estado al 2026-09-16 — partes de este README describen la placa y el
+> firmware anteriores.** Lo que cambió y dónde está documentado:
+>
+> | tema | antes (abajo) | ahora |
+> |---|---|---|
+> | Proyecto | variantes `...Test` y `...Field5Test` | **proyecto único**; el autotest se compila con `PSOC_TEST=1` (`program_psoc.ps1 -SelfTest`, Debug) |
+> | Subida PSoC→ESP | UART TX | **I2C** (PSoC maestro, `psoc_link_put_array`); UART solo RX. Cada ráfaga I2C perturba la cadena analógica ~0,5 s (ver `lab/PI_FIRMWARE_TICKS_Y_MODO_ESTABLE_2026-09-16.md`) |
+> | Referencias | VDAC | **IDAC con signo** (`polarity_reg`), rango 32 µA, R de conversión en `psoc_hw.h` |
+> | Calibración | PI por etapa al pedido (`0xB5`) | aprendizaje lento IDAC0/IDAC1 autorizado (`ctl learn`) + **PI permanente** IDAC2/IDAC3 fuera de captura: `CONTROL_UNIFICADO.md` |
+> | Configuración | constantes y `calibration_tables_*` | 45 parámetros en ejecución, EEPROM propia con dos imágenes alternadas y CRC (`control_config.h/.c`, `control_runtime.inc`); comandos `0xD0..0xD7`, telemetría `[0xAB][0xC6]` clave/valor |
+> | Muestreo | 1020 Hz | ADC nativo **2604 Hz**, decimación configurable |
+> | Metadatos de captura | — | snapshot de control (`CT`, 320 bytes) en el bloque SD y en la telemetría con `capture=1` |
+> | Pruebas | — | `../tests/control_test.c` (host, planta simulada) |
+
 ## Rol en la cadena
 
 ```

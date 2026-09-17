@@ -4,9 +4,16 @@ Este repositorio contiene el firmware y los diseños PSoC 5LP del sistema de adq
 
 ## Contenido
 
-- `AcondicionamientoAnalogico.cydsn/`: firmware activo para nodos GEO y HAMMER.
-- `AcondicionamientoAnalogicoTest/AcondicionamientoAnalogico.cydsn/`: variante
-  de banco para el autotest de placa; no es el firmware de campo.
+- `AcondicionamientoAnalogico.cydsn/`: **único** firmware activo para nodos GEO
+  y HAMMER. El autotest de placa se compila del mismo proyecto con
+  `PSOC_TEST=1` (Debug). Control y calibración: `CONTROL_UNIFICADO.md`.
+- `tests/`: pruebas en PC del controlador (`control_test.c`, planta simulada).
+- `debug_analogico/`: diagnóstico de la red analógica en Python
+  (`HALLAZGOS_ANALOGICO.md`).
+- `AcondicionamientoAnalogicoTest/`, `AcondicionamientoAnalogicoField5Test.cydsn/`:
+  si aparecen en disco son **restos sin versionar** (compilaciones y
+  preferencias `.elias`) de los proyectos absorbidos el 2026-09-16; se pueden
+  borrar.
 - `Analog_LPF_v1_0.cylib/` y `Component Libraries/`: componentes reutilizables.
 - `shared/`: código compartido.
 - `BUILD_PROGRAM_PSOC.md`: compilación y programación con PSoC Creator 4.4.
