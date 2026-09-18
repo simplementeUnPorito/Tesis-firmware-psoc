@@ -304,6 +304,16 @@ static volatile uint8  g_chain_active  = 0u; /* 1 = captura multi-corrida en cur
 #define SD_SYNC_BLOCKS       32u
 
 static volatile uint8  g_sd_cap_en         = 0u; /* config (0xBE), pedida por el ESP */
+/* Marcas de escritura a SD. No se puede escribir la SD sin ruido ni cortar el
+ * ADC, así que se deja constancia: antes de cada f_write/f_sync el lazo
+ * principal deja una marca pendiente y la ISR la pega a la PRÓXIMA muestra que
+ * guarda, que es donde empieza la interferencia. Viaja en los bits 21-22 del
+ * int24 (el ADC es de 18 bits: ahí solo hay extensión de signo), XOR contra el
+ * signo; el ESP la decodifica, restaura el valor y la pasa al byte flags. */
+#define SD_MARK_WRITE        0x01u
+#define SD_MARK_SYNC         0x02u
+#define SD_MARK_SHIFT        21u
+static volatile uint8  g_sd_mark_pending   = 0u;
 static volatile uint8  g_sd_cap_active     = 0u; /* esta captura/dump usa SD */
 static volatile uint32 g_sd_ring_samples   = 0u; /* muestras decimadas escritas (solo ISR) */
 static volatile uint32 g_sd_ring_drained   = 0u; /* main escribe; ISR consulta overrun */
@@ -837,6 +847,13 @@ static uint8 sd_session_begin(uint16 target_batches)
  * captura: escribe también el bloque parcial que quede en staging. El buffer
  * ring mide un múltiplo exacto de lotes (512×90 B), así que un lote nunca se
  * parte en el wrap. */
+static void sd_mark(uint8 kind)
+{
+    uint8 saved = CyEnterCriticalSection();
+    g_sd_mark_pending |= kind;
+    CyExitCriticalSection(saved);
+}
+
 static void sd_capture_drain(uint8 flush)
 {
     if (g_sd_write_failed || !g_sd_file_open) { return; }
@@ -861,6 +878,7 @@ static void sd_capture_drain(uint8 flush)
             for (i = g_sd_blk_fill; i < SD_BLOCK_BYTES; i++) {
                 g_sd_blk[i] = 0u;
             }
+            sd_mark(SD_MARK_WRITE);
             if (f_write(&g_sd_file, g_sd_blk, SD_BLOCK_BYTES, &nwritten) != FR_OK ||
                 nwritten != SD_BLOCK_BYTES) {
                 g_sd_err_flags |= 0x01u;
@@ -870,6 +888,9 @@ static void sd_capture_drain(uint8 flush)
             }
             g_sd_blocks_written++;
             g_sd_blk_fill = 0u;
+            if ((g_sd_blocks_written % SD_SYNC_BLOCKS) == 0u) {
+                sd_mark(SD_MARK_SYNC);
+            }
             if ((g_sd_blocks_written % SD_SYNC_BLOCKS) == 0u &&
                 f_sync(&g_sd_file) != FR_OK) {
                 g_sd_err_flags |= 0x01u;
@@ -1432,6 +1453,7 @@ static void capture_reset_locked(uint16 stored_batches)
     g_sd_dump_blk_cached = 0xFFFFFFFFu;
     g_sd_err_flags      = 0u;
     g_sd_write_failed   = 0u;
+    g_sd_mark_pending   = 0u;
 }
 
 static int32 sign_extend_bits(uint32 value, uint8 bits)
@@ -1567,6 +1589,10 @@ static void sd_ring_store(int32 val)
     /* El archivo es independiente de la config ADC activa: guarda siempre el
      * mismo int24 right-aligned que se transmite por UART. */
     val = psoc_adc_counts_right_aligned(val);
+    if (g_sd_mark_pending != 0u) {
+        val ^= (int32)((uint32)(g_sd_mark_pending & 0x03u) << SD_MARK_SHIFT);
+        g_sd_mark_pending = 0u;
+    }
     capture_store_decoded(dst, val);
     written++;
     g_sd_ring_samples = written;
@@ -1684,7 +1710,8 @@ static void psoc_enter_sampling(uint8 debugMode)
 #if PSOC_RAMP_DEBUG_ENABLE
     if (debugMode) { source = CE_CFG_SRC_DEBUG; }
 #endif
-    if (g_sd_cap_en
+    /* Misma regla que psoc_arm(): SD solo si no entra en RAM. */
+    if (g_sd_cap_en && total_target > PSOC_CAPTURE_MAX_BATCHES
 #if PSOC_RAMP_DEBUG_ENABLE
         && (source != CE_CFG_SRC_DEBUG)
 #endif
@@ -1993,6 +2020,33 @@ CY_ISR(isr_SuperMaquina_Handler)
     {
         /* La última muestra del último lote llega junto con DONE. */
         g_sm_sample_handler();
+
+        /* Encadenado continuo: el contador de lotes de superMaquina es de 9
+         * bits (512 lotes crudos por corrida). Si la captura necesita más, se
+         * carga el objetivo siguiente y se pulsa START_NOW acá mismo: desde
+         * ST_DONE pasa directo a ST_SAMPLING (superMaquina.v, rama ST_DONE),
+         * mucho antes de la próxima muestra (384 µs a 2604 Hz). El ADC nunca
+         * se detiene, no se pierde ninguna muestra y no hay tráfico con el
+         * ESP a mitad de captura. Antes esto lo hacía el lazo principal con
+         * ADC_StopConvert/ADC_StartConvert y un diag CHAIN_NEXT por I2C, lo
+         * que dejaba un corte y un transitorio cada ~5,9 s. */
+        if (g_state == PSOC_SAMPLING && g_chain_active && g_capture_done == 0u &&
+            g_ce_error == 0u && !capture_target_samples_reached())
+        {
+            uint16 decim = (uint16)g_capture_decim_factor;
+            if (decim == 0u) {
+                decim = 1u;
+            }
+#if PSOC_RAMP_DEBUG_ENABLE
+            if (g_debug_psoc) {
+                decim = 1u;
+            }
+#endif
+            capture_engine_configure_target(capture_next_hw_target(g_total_target, decim, 0u));
+            capture_engine_pulse(CE_CTRL_START_NOW);
+            return;
+        }
+
         g_sm_sample_handler = sm_sample_noop;
         if (g_state == PSOC_ARMED) {
             g_state = PSOC_SAMPLING;
@@ -2226,15 +2280,21 @@ static void psoc_arm(void)
 
     /* Captura a SD: la decisión y la lectura del directorio (I/O SPI, puede
      * tardar ms) van ANTES de la sección crítica. Si la SD está pedida pero no
-     * disponible, se degrada a RAM-only re-clampeando el target. */
-    if (g_sd_cap_en && sd_spi_present()
+     * disponible, se degrada a RAM-only re-clampeando el target.
+     *
+     * La SD solo se usa si la captura NO entra en RAM: su drenaje escribe un
+     * sector cada 150 muestras (57,6 ms a 2604 Hz) mientras se muestrea, y
+     * cada escritura se ve como una espiga en la señal. Una captura que entra
+     * en los 512 lotes de RAM se hace en silencio aunque la SD esté habilitada.
+     * El ESP aplica la misma regla en allocStore(). */
+    if (g_sd_cap_en && total_target > PSOC_CAPTURE_MAX_BATCHES && sd_spi_present()
 #if PSOC_RAMP_DEBUG_ENABLE
         && (source != CE_CFG_SRC_DEBUG)
 #endif
        ) {
         use_sd = sd_session_begin(total_target);
     }
-    if (g_sd_cap_en && !use_sd
+    if (g_sd_cap_en && total_target > PSOC_CAPTURE_MAX_BATCHES && !use_sd
 #if PSOC_RAMP_DEBUG_ENABLE
         && (source != CE_CFG_SRC_DEBUG)
 #endif
@@ -3495,6 +3555,10 @@ int main(void)
     control_init();
     g_pga_code=psoc_hw_get_pga_code();
     g_pgaout_code=psoc_hw_get_pgaout_code();
+    /* control_init aplicó las ganancias del perfil (x4/x24 de fábrica) DESPUÉS
+     * del saludo con el ESP, que se había llevado el x1 del TopDesign. */
+    uart_send_cfg_ack(0xA6u, g_pga_code);
+    uart_send_cfg_ack(PSOC_CMD_PGAOUT, g_pgaout_code);
     for (;;)
     {
         /* Learning requires an explicit slave command, never a local button. */

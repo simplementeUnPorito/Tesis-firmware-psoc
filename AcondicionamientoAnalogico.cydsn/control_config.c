@@ -12,16 +12,26 @@ void control_config_defaults(ControlConfig *c)
          * PGAout x24, 2026-09-16: LPo reads +-3 mV of noise, SUMo +-6 mV, and
          * one IDAC2 code moves LPo about -150 mV (the whole valid window) and one
          * IDAC3 code only about +0.25 mV (-149 codes moved LPo -28 mV in closed
-         * loop).  IDAC3's whole range (+-64 mV) is smaller than one IDAC2 code. */
+         * loop).  IDAC3's whole range (+-64 mV) is smaller than one IDAC2 code.
+         *
+         * 2026-09-17: ese 0.25 mV/codigo estaba medido con la etapa CONTRA EL
+         * RIEL y subestima 10x.  Medido en transiciones limpias del propio
+         * lazo: -120 codigos llevaron LPo de +89 mV a -216 mV, o sea
+         * 2.5 mV/codigo.  Con el valor viejo cada rescate de 100 codigos
+         * cruzaba la ventana entera (+-95 mV) y LPo rebotaba entre los dos
+         * rieles sin aterrizar nunca.  RESCUE_STEP baja a 25 (~63 mV). */
         2, 5, 54, 1, 3000, 9000, 1, 4,
         /* DEADBAND is the outer band: inside it a held controller stays
-         * still.  It must be narrower than the valid window (+-97 mV). */
-        20000, 1000,
-        40, 100, 10000,
+         * still.  It must be narrower than the valid window (+-97 mV).
+         * 2026-09-17: 20 mV era mas angosto que la patada que cada rafaga de
+         * telemetria I2C le da a LPo, asi que el lazo corregia el golpe y no
+         * la senal, y a veces lo mandaba al riel ya estando calibrado. */
+        45000, 1000,
+        40, 25, 10000,
         /* SUMo band is a rail guard, not a target: IDAC3 absorbs a SUMo
          * offset of tens of mV, and a band inside SUMo's noise made IDAC2
          * chase noise forever, kicking LPo across its window each time. */
-        60000, 1, 250, -150000,
+        60000, 1, 2500, -150000,
         /* Slow slopes: measured from the accepted 0 -> (1,-2) learning
          * transition in the same bank domain. */
         600, 400, 43700, 0, 500000, 1200000,
@@ -35,12 +45,21 @@ void control_config_defaults(ControlConfig *c)
          * QUIET_MS: every telemetry burst to the ESP (I2C) kicks LPo by
          * +47/-54 mV starting ~20 ms later and settling in ~0.5 s (PSoC
          * trace, 2026-09-16); readings inside that window are discarded. */
-        6000, 240, 45000, 800,
+        /* 2026-09-17: HOLD sube a 25 mV y QUIET a 1.5 s, por lo mismo:
+         * quedarse quieto dentro de una banda comoda y no medir mientras la
+         * cadena todavia repica despues de una trama. */
+        25000, 240, 45000, 1500,
         /* Settled: the scan (every ~2 s) and the reports (every 5 s) are the
          * ticks left on the oscilloscope on 2026-09-16 16:34.  Once LPo has
          * been quiet for a minute they slow to 20 s / 30 s, and the loop only
-         * wakes on 3 consecutive readings (9 s) beyond +-35 mV. */
-        60000, 35000, 3, 20000, 30000
+         * wakes on 3 consecutive readings (9 s) beyond +-35 mV.
+         * 2026-09-17: ya calibrado, despierta solo con 5 lecturas seguidas
+         * fuera de +-60 mV, no por un golpe suelto. */
+        60000, 60000, 5, 20000, 30000,
+        /* Recentrado lento: si lleva 5 min congelado con |LPo| pasado 15 mV,
+         * un solo codigo hacia el centro.  Es la unica forma de que la deriva
+         * no lo deje pegado a un borde de la banda. */
+        15000, 300000
     };
     memcpy(c->value, defaults, sizeof defaults);
 }
@@ -52,7 +71,9 @@ int control_config_valid(const ControlConfig *c, unsigned channels, unsigned has
         -10000000,-10000000,-1000000,-1000000,1000,-2000000,1000,10000,
         1000,100,0,128,-5000000,1000,0,-255,-255,100,1000,1,1,
         500,1,1000,0,
-        0,1000,1,1000,1000
+        0,1000,1,1000,1000,
+        /* v5: recentrado lento (umbral y periodo; 0 = apagado). */
+        0,0
     };
     static const int32_t high[CP_COUNT] = {
         8,8,4096,1,60000,600000,100,100,1000000,60000,255,255,600000,
@@ -60,7 +81,8 @@ int control_config_valid(const ControlConfig *c, unsigned channels, unsigned has
         1000000,3600000,600000,60000,4,26040,-1000,5000000,2000000,
         255,255,100000,120000,255,255,
         1000000,255,600000,10000,
-        3600000,1000000,20,600000,600000
+        3600000,1000000,20,600000,600000,
+        1000000,3600000
     };
     for (i=0; i<CP_COUNT; ++i)
         if(c->value[i]<low[i] || c->value[i]>high[i]) return 0;
@@ -165,12 +187,26 @@ void control_pi_step(ControlPI *p,const ControlConfig *c,uint32_t now,
         }
         return;
     }
-    /* 2. LPo on a rail: its magnitude is meaningless, walk IDAC3 by sign.
-     * IDAC3 is local to the LP stage, so its cooldown is short. */
+    /* 2. LPo contra un riel: su magnitud no dice nada, solo el signo.  El
+     * rescate es una BISECCION: se camina IDAC3 en el sentido del signo y cada
+     * vez que el signo se da vuelta (o sea que se cruzo la ventana) el paso se
+     * parte al medio.  Asi no depende de la pendiente, que en esta cadena
+     * cambia de 0.8 a 5.8 mV/codigo segun donde este parada (medido el
+     * 2026-09-17): con paso fijo el lazo rebotaba entre los dos rieles para
+     * siempre.  CP_RESCUE_STEP es solo el primer paso. */
     if(!valid) {
+        int dir;
         pi_forget(p); p->holding=0;
         if(!p->has_rescue || now-p->rescue_ms >= (uint32_t)v[CP_RESCUE_MS]) {
-            step=((e>0)==(v[CP_FINE_SLOPE_UV]>0)) ? v[CP_RESCUE_STEP] : -v[CP_RESCUE_STEP];
+            dir=((e>0)==(v[CP_FINE_SLOPE_UV]>0)) ? 1 : -1;
+            if(!p->has_rescue || p->rescue_step<=0) {
+                p->rescue_step=(int16_t)v[CP_RESCUE_STEP];
+                p->rescue_dir=0;
+            } else if(p->rescue_dir!=0 && dir!=p->rescue_dir && p->rescue_step>1) {
+                p->rescue_step=(int16_t)(p->rescue_step/2);
+            }
+            p->rescue_dir=(int8_t)dir;
+            step=dir*p->rescue_step;
             if((p->fine>=v[CP_FINE_LIMIT] && step>0)||(p->fine<=-v[CP_FINE_LIMIT] && step<0)) {
                 if(coarse_ready(p,v,now)) {
                     move_coarse_bumpless(p,v,((e>0)==(v[CP_COARSE_SLOPE_UV]>0)) ? 1 : -1);
@@ -181,6 +217,7 @@ void control_pi_step(ControlPI *p,const ControlConfig *c,uint32_t now,
         }
         return;
     }
+    p->has_rescue=0; p->rescue_step=0; p->rescue_dir=0;
     /* 3. Hysteresis.  Once LPo is inside HOLD the loop freezes and ignores
      * every sample until LPo leaves DEADBAND.  Without it the integer loop
      * chased +-3 mV of ADC noise and never stopped moving. */
@@ -188,7 +225,20 @@ void control_pi_step(ControlPI *p,const ControlConfig *c,uint32_t now,
         int settled=control_pi_settled(p,c,now);
         int32_t band=settled ? v[CP_SETTLED_BAND_UV] : v[CP_DEADBAND_UV];
         pi_forget(p);
-        if(magnitude(lp)<=band) { p->wake_count=0; return; }
+        if(magnitude(lp)<=band) {
+            p->wake_count=0;
+            /* Recentrado lento: un codigo, y sigue congelado.  Sin esto la
+             * deriva deja a LPo pegado al borde de la banda y la proxima
+             * correccion sale de golpe desde ahi. */
+            if(v[CP_RECENTER_MS]>0 && magnitude(lp)>v[CP_RECENTER_UV] &&
+               now-p->hold_ms>=(uint32_t)v[CP_RECENTER_MS] &&
+               now-p->recenter_ms>=(uint32_t)v[CP_RECENTER_MS]) {
+                int32_t paso=((-lp>0)==(v[CP_FINE_SLOPE_UV]>0)) ? 1 : -1;
+                p->fine=(int16_t)bounded(p->fine+paso,-v[CP_FINE_LIMIT],v[CP_FINE_LIMIT]);
+                p->recenter_ms=now;
+            }
+            return;
+        }
         /* Settled: a lone reading outside is a glitch, not drift. */
         if(settled && ++p->wake_count < (uint8_t)v[CP_WAKE_COUNT]) return;
         p->holding=0; p->wake_count=0;

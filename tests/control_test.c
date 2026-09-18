@@ -54,7 +54,7 @@ static SimResult simulate(const ControlConfig *c, double fine_mv_true, double st
 }
 int main(void)
 {
-    ControlConfig c,d;ControlPI p={0};uint8_t bytes[CONTROL_CONFIG_BYTES];unsigned i;
+    ControlConfig c,d;ControlPI p={0};uint8_t bytes[CONTROL_CONFIG_BYTES];unsigned i;int16_t paso,contra;int32_t hold,banda,bandaq;uint32_t t;
     setvbuf(stdout,NULL,_IONBF,0);
     control_config_defaults(&c);
     assert(control_config_valid(&c,5,1));
@@ -78,29 +78,41 @@ int main(void)
     d=c;d.value[CP_FINE_SLOPE_UV]=900;d.value[CP_PERIOD_MS]=20;assert(control_config_profile_compatible(&c,&d));
     d.value[CP_CAPACITOR]=0;assert(!control_config_profile_compatible(&c,&d));
 
-    /* Hysteresis: hold at 5 mV, stay still up to the 20 mV deadband, wake past it. */
+    /* Histeresis: se congela dentro de HOLD, se queda quieto hasta DEADBAND y
+     * despierta pasado eso.  Los umbrales salen de la config: se afinaron el
+     * 2026-09-17 porque las rafagas de telemetria I2C entraban dentro de la
+     * banda vieja y el lazo corregia el golpe, no la senal. */
+    hold=c.value[CP_HOLD_UV]; banda=c.value[CP_DEADBAND_UV]; bandaq=c.value[CP_SETTLED_BAND_UV];
     memset(&p,0,sizeof p);p.fine=12;p.coarse=-4;
-    control_pi_step(&p,&c,3000,5000,1,0,1);assert(p.holding&&p.fine==12);
-    control_pi_step(&p,&c,6000,-18000,1,0,1);assert(p.holding&&p.fine==12);
-    control_pi_step(&p,&c,9000,19000,1,0,1);assert(p.holding&&p.fine==12);
-    control_pi_step(&p,&c,12000,-40000,1,0,1);assert(!p.holding&&p.fine>12);
-    /* Active hold (< SETTLED_MS): one reading past 20 mV wakes the loop. */
+    control_pi_step(&p,&c,3000,hold/2,1,0,1);assert(p.holding&&p.fine==12);
+    control_pi_step(&p,&c,6000,-(banda-2000),1,0,1);assert(p.holding&&p.fine==12);
+    control_pi_step(&p,&c,9000,banda-1000,1,0,1);assert(p.holding&&p.fine==12);
+    control_pi_step(&p,&c,12000,-2*banda,1,0,1);assert(!p.holding&&p.fine>12);
+    /* Hold activo (< SETTLED_MS): una sola lectura pasada DEADBAND despierta. */
     memset(&p,0,sizeof p);
-    control_pi_step(&p,&c,3000,4000,1,0,1);assert(p.holding&&!control_pi_settled(&p,&c,30000));
-    control_pi_step(&p,&c,30000,25000,1,0,1);assert(!p.holding);
-    /* Settled (>= 60 s frozen): +-35 mV band, and 3 readings in a row. */
+    control_pi_step(&p,&c,3000,hold/2,1,0,1);assert(p.holding&&!control_pi_settled(&p,&c,30000));
+    control_pi_step(&p,&c,30000,banda+5000,1,0,1);assert(!p.holding);
+    /* Modo estable (>= SETTLED_MS congelado): banda mas ancha y WAKE_COUNT
+     * lecturas seguidas afuera; uina lectura adentro reinicia la cuenta. */
     memset(&p,0,sizeof p);
-    control_pi_step(&p,&c,3000,4000,1,0,1);assert(control_pi_settled(&p,&c,63000));
-    control_pi_step(&p,&c,63000,30000,1,0,1);assert(p.holding&&p.fine==0);
-    control_pi_step(&p,&c,66000,50000,1,0,1);assert(p.holding);
-    control_pi_step(&p,&c,69000,10000,1,0,1);assert(p.holding&&p.wake_count==0);
-    control_pi_step(&p,&c,72000,50000,1,0,1);assert(p.holding);
-    control_pi_step(&p,&c,75000,50000,1,0,1);assert(p.holding&&p.fine==0);
-    control_pi_step(&p,&c,78000,50000,1,0,1);assert(!p.holding&&p.fine<0);
+    control_pi_step(&p,&c,3000,hold/2,1,0,1);assert(control_pi_settled(&p,&c,63000));
+    t=63000;
+    for(i=1;i<(unsigned)c.value[CP_WAKE_COUNT];++i) {
+        control_pi_step(&p,&c,t,bandaq+10000,1,0,1);assert(p.holding&&p.fine==0);
+        t+=3000;
+    }
+    control_pi_step(&p,&c,t,hold/2,1,0,1);assert(p.holding&&p.wake_count==0);
+    t+=3000;
+    for(i=1;i<(unsigned)c.value[CP_WAKE_COUNT];++i) {
+        control_pi_step(&p,&c,t,bandaq+10000,1,0,1);assert(p.holding);
+        t+=3000;
+    }
+    control_pi_step(&p,&c,t,bandaq+10000,1,0,1);assert(!p.holding);
     /* A rail is never filtered by the settled mode. */
     memset(&p,0,sizeof p);
     control_pi_step(&p,&c,3000,4000,1,0,1);
-    control_pi_step(&p,&c,90000,112000,0,0,1);assert(!p.holding&&p.fine==-100);
+    control_pi_step(&p,&c,90000,112000,0,0,1);
+    assert(!p.holding&&p.fine==-c.value[CP_RESCUE_STEP]);
     /* SUMo inside its guard never touches IDAC2, however noisy. */
     memset(&p,0,sizeof p);p.coarse=-4;
     for(i=1;i<=100;++i)control_pi_step(&p,&c,i*3000,(i&1)?-30000:30000,1,(i&1)?-12000:12000,1);
@@ -110,28 +122,81 @@ int main(void)
     control_pi_step(&p,&c,1000,0,1,70000,1);assert(p.coarse==-5);
     control_pi_step(&p,&c,20000,0,1,70000,1);assert(p.coarse==-5);
     control_pi_step(&p,&c,47000,0,1,70000,1);assert(p.coarse==-6);
-    /* LPo on its positive rail: IDAC3 walks down by RESCUE_STEP, 10 s apart. */
+    /* LPo on its positive rail: IDAC3 walks down by RESCUE_STEP, 10 s apart.
+     * El paso sale de la config: con los 100 codigos de antes (y la pendiente
+     * subestimada) el rescate cruzaba la ventana y rebotaba entre rieles. */
     memset(&p,0,sizeof p);p.fine=80;
-    control_pi_step(&p,&c,1000,112000,0,0,1);assert(p.fine==-20);
-    control_pi_step(&p,&c,5000,112000,0,0,1);assert(p.fine==-20);
-    control_pi_step(&p,&c,11000,112000,0,0,1);assert(p.fine==-120);
-    /* Fine at its limit on a rail: IDAC2 takes one code (-150 mV on LPo) and
-     * IDAC3 swings to its other end (+64 mV), the smallest jump available. */
+    paso=(int16_t)c.value[CP_RESCUE_STEP];
+    control_pi_step(&p,&c,1000,112000,0,0,1);assert(p.fine==80-paso);
+    control_pi_step(&p,&c,5000,112000,0,0,1);assert(p.fine==80-paso);
+    control_pi_step(&p,&c,11000,112000,0,0,1);assert(p.fine==80-2*paso);
+    /* Fine at its limit on a rail: IDAC2 toma un codigo (-150 mV en LPo) y el
+     * contramovimiento de IDAC3 son 150/2.5 = 60 codigos, no todo su rango. */
     memset(&p,0,sizeof p);p.fine=-255;p.coarse=0;
     control_pi_step(&p,&c,1000,112000,0,0,1);
-    assert(p.coarse==1&&p.fine==255);
-    /* Mid-ranging only while the error pushes IDAC3 further out... */
+    contra=(int16_t)((-c.value[CP_COARSE_SLOPE_UV]+c.value[CP_FINE_SLOPE_UV]/2)/c.value[CP_FINE_SLOPE_UV]);
+    assert(p.coarse==1&&p.fine==-255+contra);
+    /* Mid-ranging con el vernier sano: el contramovimiento de IDAC3 cancela al
+     * codigo de IDAC2, asi que la prediccion lo rechaza y corrige con IDAC3. */
     memset(&p,0,sizeof p);p.fine=250;p.coarse=0;
     control_pi_step(&p,&c,1000,-50000,1,0,1);
-    assert(p.coarse==-1&&p.fine==-255);
+    assert(p.coarse==0&&p.fine>250);
     /* ...never when the error itself brings IDAC3 back. */
     memset(&p,0,sizeof p);p.fine=250;p.coarse=0;
     control_pi_step(&p,&c,1000,50000,1,0,1);
     assert(p.coarse==0&&p.fine<250);
 
+    /* Recentrado lento: congelado y pegado a un borde, mueve UN codigo hacia
+     * el centro cada CP_RECENTER_MS y sigue congelado.  Sin esto la deriva lo
+     * deja en el borde y la proxima correccion sale de golpe. */
+    memset(&p,0,sizeof p);
+    control_pi_step(&p,&c,3000,hold/2,1,0,1);assert(p.holding&&p.fine==0);
+    t=3000+(uint32_t)c.value[CP_RECENTER_MS];
+    control_pi_step(&p,&c,t,-(c.value[CP_RECENTER_UV]+3000),1,0,1);
+    assert(p.holding&&p.fine>0);        /* un codigo hacia el centro */
+    contra=p.fine;
+    control_pi_step(&p,&c,t+3000,-(c.value[CP_RECENTER_UV]+3000),1,0,1);
+    assert(p.holding&&p.fine==contra);  /* y espera otro periodo entero */
+    /* Dentro del umbral no toca nada. */
+    memset(&p,0,sizeof p);
+    control_pi_step(&p,&c,3000,hold/2,1,0,1);
+    control_pi_step(&p,&c,3000+(uint32_t)c.value[CP_RECENTER_MS],c.value[CP_RECENTER_UV]/2,1,0,1);
+    assert(p.holding&&p.fine==0);
+
+    /* Rescate por biseccion: arranca contra el riel y tiene que aterrizar
+     * dentro de la ventana SIN saber la pendiente.  En esta cadena va de 0.8 a
+     * 5.8 mV/codigo segun el punto de trabajo (medido 2026-09-17); con paso
+     * fijo el lazo cruzaba la ventana entera y rebotaba entre rieles. */
+    {
+        static const double pend[]={0.5,1.0,2.5,5.8,8.0};
+        unsigned j;
+        for(j=0;j<sizeof pend/sizeof pend[0];++j) {
+            double offset=400000.0;          /* uV: bien pasado el riel */
+            uint32_t ahora=1000;
+            int adentro=0;
+            memset(&p,0,sizeof p);
+            for(i=0;i<60 && !adentro;++i) {
+                double real=offset+p.fine*pend[j]*1000.0
+                            +p.coarse*(double)c.value[CP_COARSE_SLOPE_UV];
+                int32_t medido=(int32_t)(real>130000.0?130000.0:(real<-130000.0?-130000.0:real));
+                int val=control_measurement_valid(&c,medido);
+                control_pi_step(&p,&c,ahora,medido,val,0,1);
+                ahora+=(uint32_t)c.value[CP_RESCUE_MS];
+                real=offset+p.fine*pend[j]*1000.0
+                     +p.coarse*(double)c.value[CP_COARSE_SLOPE_UV];
+                adentro=(real>-(double)c.value[CP_DEADBAND_UV] &&
+                         real<(double)c.value[CP_DEADBAND_UV]);
+            }
+            printf("biseccion %.1f mV/codigo: %s en %u pasos (fine=%d)\n",
+                   pend[j], adentro ? "adentro" : "NO ENTRO", i, p.fine);
+            assert(adentro);
+        }
+    }
+
     /* Closed loop against the plant: converge, then stay quiet. */
     {
-        static const double slopes[]={0.18,0.25,0.5};
+        /* Pendientes reales de IDAC3 medidas en placa, con dispersion. */
+        static const double slopes[]={1.5,2.5,4.0};
         static const double starts[]={40.0,-40.0,100.0};
         for(i=0;i<3;++i) {
             unsigned j;

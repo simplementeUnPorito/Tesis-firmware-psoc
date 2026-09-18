@@ -98,7 +98,7 @@ void PGAout_Enable(void)                ;
 *       Initialization Values
 ***************************************/
 
-#define PGAout_DEFAULT_GAIN             (0u)
+#define PGAout_DEFAULT_GAIN             (5u)
 #define PGAout_VREF_MODE                ((1u != 0x00u) ? (0x00u) : PGAout_GNDVREF_E)
 #define PGAout_DEFAULT_POWER            (3u)
 

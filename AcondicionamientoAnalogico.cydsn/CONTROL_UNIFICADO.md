@@ -107,3 +107,81 @@ esas condiciones viajan como advertencia y metadatos para que decida el maestro.
 
 La captura espera el evento real `ARMED` antes de producir SYNC; nunca debe
 inferir que el PSoC esta listo a partir de una demora fija.
+
+## Lazo: hallazgos del 2026-09-17 (geo-01)
+
+Toda la tarde el lazo rebotó entre los dos rieles de LPo y la cadena quedaba
+saturada. Las causas, en orden de importancia:
+
+1. **La escala de IDAC3 estaba mal por un factor grande.** El firmware usaba
+   `FINE_SLOPE_UV` = 250 µV/código, medido con la etapa contra el riel. Medido
+   con el lazo pausado y esperando 90 s por punto, alrededor del centro son
+   **~15 mV/código**: IDAC3 0 → LPo 947 mV, 3 → 1008, 7 → 1052, 15 → 1083,
+   31 y más → 1112 (riel). La ventana válida entera (±95 mV) son unos **13
+   códigos**. Con pasos de 25 o 100 códigos, cualquier rescate cruzaba de un
+   riel al otro y no aterrizaba nunca.
+2. **La pendiente no es única**: cambia con el punto de trabajo y con la
+   historia (la cola de ~34 s del acople de 680 µF). Estimándola de
+   transiciones del propio lazo salían 0,8, 2,5 y 5,8 mV/código. Por eso el
+   rescate ahora es una **bisección de signo**: camina en el sentido del signo
+   y parte el paso al medio cada vez que cruza, sin depender de la pendiente.
+   Probado en `tests/control_test.c` de 0,5 a 8 mV/código: entra en 2 a 17 pasos.
+3. **El lazo corregía sobre su propio transitorio**: `TAU_MS` valía 9 s cuando
+   la planta tiene ~34 s.
+4. **Las bandas eran más angostas que la perturbación**: cada ráfaga de
+   telemetría I2C mueve LPo decenas de mV, y con HOLD de 6 mV y DEADBAND de
+   20 mV el lazo corregía el golpe y no la señal. Ahora HOLD 25 mV,
+   DEADBAND 45 mV, banda de modo estable 60 mV con 5 lecturas seguidas y
+   QUIET 1,5 s.
+5. **Nada lo devolvía al centro**: congelado dentro de la banda, la deriva lo
+   dejaba pegado a un borde. Se agregó el **recentrado lento** (`CP_RECENTER_UV`
+   y `CP_RECENTER_MS`, v5 de la imagen NV): si lleva 5 min congelado con |LPo|
+   pasado 15 mV, mueve UN código hacia el centro y se vuelve a congelar.
+6. **Guardado automático del punto de trabajo**: `ctl_autosave()` en
+   `control_service()` persiste los códigos cuando el lazo está en banda,
+   congelado en modo estable, los códigos cambiaron y pasaron 10 minutos del
+   último guardado. Así un arranque en frío parte del último punto bueno.
+
+**Trampa de laboratorio, ya cara dos veces**: medir la pendiente con la etapa
+en el riel subestima muchísimo. Centrar primero (bisección con el lazo
+pausado), medir después.
+
+**Falla de hardware del mismo día**: al re-sintetizar el TopDesign, el fitter
+movió `I2Cp SDA` de P2[1] a P2[2] y el SPI de la SD. El PSoC quedó hablando
+contra pines sin conectar: mudo, y la cadena sin lazo, clavada al riel. Los
+pines correctos están en el esquemático y en `BUILD_PROGRAM_PSOC.md`; hay que
+fijarlos (Lock) en el `.cydwr` después de cada re-síntesis.
+
+**A vigilar del guardado automático**: `ctl_store()` escribe 16 filas de EEPROM
+y eso bloquea el lazo principal unos cientos de ms, además de ser un consumo
+extra. Solo corre con el PSoC en IDLE, en banda y congelado, y como mucho cada
+10 minutos, pero si aparece un golpe en LPo con esa cadencia, el sospechoso es
+ese. La telemetría emite la clave 0x109 con el número de guardados.
+
+## Quién patea a LPo: radio vs SD (medido 2026-09-17, noche)
+
+Dos experimentos con el lazo corriendo y sin capturar.
+
+**Grueso** (lecturas de telemetría cada 10 s, 5 min por condición): reposo
+−13/+98 mV con una lectura inválida; radio ESP-NOW a 4 Hz −8/+7 mV; `sdtest`
+repetido −26/+44 mV. A esta resolución los golpes no se ven: lo que domina es
+la deriva lenta.
+
+**Fino** (traza del PSoC, 127 muestras de ~20 ms, `ctl get 255`, provocando el
+evento justo antes):
+
+| Condición | Desvío máximo de LPo | Sentido |
+|---|---|---|
+| Reposo | 5 a 11 mV | ruido de fondo |
+| Ráfaga ESP-NOW de 1 s | 44 a 62 mV | siempre negativo |
+| `sdtest` (escritura FatFs) | 69 a 76 mV | siempre positivo |
+
+Conclusión: **los dos acoplan, con signos opuestos y tamaños parecidos**, entre
+5 y 15 veces el ruido de reposo. Solos no cruzan la ventana de ±95 mV, pero
+sumados a la deriva sí, y de ahí las idas al riel sin causa aparente. La
+mediana de 5 y la ventana de silencio del lazo los filtran en régimen; lo que
+no filtran es la deriva.
+
+Para bajarlos hace falta trabajo de placa: desacoplar la alimentación del ESP
+(los picos de corriente de TX) y la de la SD, y revisar por dónde vuelven esas
+corrientes a masa.

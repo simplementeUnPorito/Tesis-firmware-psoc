@@ -16,6 +16,8 @@ static uint32 ctl_word, ctl_last_report, ctl_last_scan, ctl_last_pi;
 static uint32 ctl_learning_start, ctl_phase_start, ctl_stable_start, ctl_enter_start;
 static uint32 ctl_revision, ctl_generation;
 static int16 ctl_codes[4], ctl_saved_codes[4], ctl_learning_restore[4];
+static uint32 ctl_autosave_ms;
+static uint16 ctl_autosave_n;
 static int32 ctl_dc[5], ctl_anchor[5];
 static uint32 ctl_stamp[5];
 static uint8 ctl_valid[5], ctl_seen[5];
@@ -31,6 +33,10 @@ static uint8 ctl_capture_metadata[CONTROL_CAPTURE_METADATA_BYTES];
 /* LPo trace: every fresh LPo average (~20 ms) with its timestamp, to find
  * periodic disturbances without an oscilloscope.  `ctl get 255` dumps it. */
 #define CTL_TRACE_LEN 127u
+/* Minimo entre guardados automaticos del punto de trabajo.  Con 10 min el peor
+ * caso son 144 escrituras por dia, alternando las dos ranuras: la EEPROM del
+ * PSoC5 aguanta 1e6 ciclos por fila, o sea decadas. */
+#define CTL_AUTOSAVE_MIN_MS 600000u
 static int32 ctl_trace_v[CTL_TRACE_LEN];
 static uint32 ctl_trace_ms[CTL_TRACE_LEN];
 static uint8 ctl_trace_head, ctl_trace_full;
@@ -62,7 +68,8 @@ static uint8 ctl_load_slot(uint8 slot)
     uint16 i,base=(uint16)(256u+256u*slot);
     for(i=0;i<256;++i) ctl_image[i]=EEPROM_ReadByte(base+i);
     return ctl_image[0]==0x47 && ctl_image[1]==0x43 &&
-        (ctl_image[2]==3u || ctl_image[2]==CONTROL_NV_VERSION) && ctl_image[3]==PSOC_HW_CLASS &&
+        (ctl_image[2]==3u || ctl_image[2]==4u || ctl_image[2]==CONTROL_NV_VERSION) &&
+        ctl_image[3]==PSOC_HW_CLASS &&
         control_crc(ctl_image,254)==((uint16)ctl_image[254]|((uint16)ctl_image[255]<<8));
 }
 static uint8 ctl_store(void)
@@ -216,7 +223,10 @@ void control_init(void)
     ctl_nv_slot=(b && (!a || (int32)(gb-ga)>0))?1:0;
     if((a||b) && ctl_load_slot(ctl_nv_slot)) {
         uint8 legacy=ctl_image[2]==3u;
-        uint16 count=legacy?CONTROL_CONFIG_COUNT_V3:CP_COUNT;
+        /* Cada version guardo su propia cantidad de parametros; los que no
+         * estan en la imagen quedan con el valor de fabrica. */
+        uint16 count=legacy?CONTROL_CONFIG_COUNT_V3:
+                     (ctl_image[2]==4u?CONTROL_CONFIG_COUNT_V4:CP_COUNT);
         control_config_decode_n(&ctl_staged,ctl_image+8,count);
         if(legacy) {
             /* v3 stored a fast-loop tuning in the wrong domain.  Keep what
@@ -384,6 +394,38 @@ static void ctl_learning(uint32 now)
         }
     }
 }
+/* Guardado automatico del punto de trabajo.  Sin esto, un arranque en frio
+ * parte de los codigos del ultimo APRENDIZAJE (o de cero) y el integrador tiene
+ * que recorrer toda la cadena otra vez; con LPo fuera de ventana eso es el
+ * rescate a ciegas.  Criterio, todo a la vez:
+ *   - el lazo corre, con perfil valido y SE DECLARA EN BANDA,
+ *   - esta congelado en modo estable (control_pi_settled): no es un paso al
+ *     vuelo sino un punto que ya se sostuvo,
+ *   - los codigos cambiaron respecto de lo guardado,
+ *   - y paso CTL_AUTOSAVE_MIN_MS desde el ultimo guardado.
+ * Corre en el lazo principal (control_service), nunca en ISR ni durante una
+ * captura: el control esta pausado ahi.  Si la escritura falla se restaura lo
+ * que habia, para que EEPROM y RAM no queden diciendo cosas distintas. */
+static void ctl_autosave(uint32 now)
+{
+    int16 previos[4];
+    uint8 i, cambio=0;
+
+    if(ctl_state!=CONTROL_RUNNING || !ctl_band || !ctl_profile) return;
+    if(!control_pi_settled(&ctl_pi,&ctl_config,now)) return;
+    if(ctl_autosave_n && (now-ctl_autosave_ms)<CTL_AUTOSAVE_MIN_MS) return;
+    for(i=0;i<4;++i) if(ctl_codes[i]!=ctl_saved_codes[i]) cambio=1;
+    if(!cambio) return;
+
+    for(i=0;i<4;++i){previos[i]=ctl_saved_codes[i];ctl_saved_codes[i]=ctl_codes[i];}
+    if(ctl_store()) {
+        ctl_autosave_ms=now;
+        ctl_emit(0x109,(int32)(++ctl_autosave_n),0);
+    } else {
+        for(i=0;i<4;++i) ctl_saved_codes[i]=previos[i];
+    }
+}
+
 void control_service(void)
 {
     uint32 now=ctl_ms;int32 counts;uint8 ready,saved;
@@ -430,6 +472,7 @@ void control_service(void)
             else{ctl_scan=0;ctl_last_scan=now;}
         }
     }
+    ctl_autosave(now);
     if(!ctl_scan && now-ctl_last_scan>=ctl_scan_ms(now)){ctl_scan=1;ctl_select(0);}
     if(ctl_state==CONTROL_LEARNING)ctl_learning(now);
     if(now-ctl_last_report>=(uint32)ctl_config.value[ctl_settled(now)?CP_REPORT_SETTLED_MS:CP_REPORT_MS]){ctl_report_start=ctl_ms;control_emit_snapshot(0);ctl_last_report=ctl_ms;}

@@ -21,13 +21,19 @@ enum ControlParameter {
     /* Settled mode: after SETTLED_MS frozen, a wider wake band that must be
      * exceeded WAKE_COUNT readings in a row, and slower scan and reports. */
     CP_SETTLED_MS, CP_SETTLED_BAND_UV, CP_WAKE_COUNT,
-    CP_SCAN_SETTLED_MS, CP_REPORT_SETTLED_MS, CP_COUNT
+    CP_SCAN_SETTLED_MS, CP_REPORT_SETTLED_MS,
+    /* v5: recentrado lento.  Congelado dentro de la banda, el lazo no vuelve
+     * al centro nunca: la deriva lo deja pegado a un borde y la siguiente
+     * correccion sale de golpe.  Si lleva RECENTER_MS con |LPo| pasado
+     * RECENTER_UV, mueve UN codigo hacia el centro y se vuelve a congelar. */
+    CP_RECENTER_UV, CP_RECENTER_MS, CP_COUNT
 };
 /* Telemetry frame version stays 3 (ESP accepts 1..3; keys are generic).
  * The persistent image carries its own layout version. */
 #define CONTROL_CONFIG_VERSION 3u
-#define CONTROL_NV_VERSION 4u
+#define CONTROL_NV_VERSION 5u
 #define CONTROL_CONFIG_COUNT_V3 36u
+#define CONTROL_CONFIG_COUNT_V4 45u
 #define CONTROL_CONFIG_BYTES (CP_COUNT * 4u)
 typedef struct { int32_t value[CP_COUNT]; } ControlConfig;
 void control_config_defaults(ControlConfig *c);
@@ -48,8 +54,11 @@ typedef struct {
     int32_t previous_error;
     int64_t fraction;
     uint32_t previous_ms, rescue_ms;
-    uint32_t coarse_ms, hold_ms;
+    uint32_t coarse_ms, hold_ms, recenter_ms;
     uint8_t has_previous, has_rescue, has_coarse, holding, wake_count;
+    /* Biseccion del rescate: paso vigente y signo del ultimo movimiento. */
+    int16_t rescue_step;
+    int8_t rescue_dir;
 } ControlPI;
 /* True once the loop has stayed frozen for SETTLED_MS. */
 int control_pi_settled(const ControlPI *p, const ControlConfig *c, uint32_t now);
