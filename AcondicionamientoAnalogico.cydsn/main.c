@@ -2217,6 +2217,7 @@ static void PGAgain_Set(uint8 code)
         if (changed) {
             g_last_calibration_ok = 0u;
             (void)psoc_seed_calibration_from_nv(1u);
+            control_on_gain_change(g_pga_code, g_pgaout_code, 1u);
         }
     }
 }
@@ -2235,8 +2236,14 @@ static void PGAvdac_Set(uint8 code)
 static void PGAout_Set(uint8 code)
 {
     if (code <= 8u) {
+        uint8 changed = (g_pgaout_code != code) ? 1u : 0u;
         g_pgaout_code = code;
         psoc_hw_set_pgaout(code);
+        /* PGAout no invalida las referencias, pero SI mueve el punto de
+         * trabajo de LPo por su factor: el lazo tiene que rehacerlo igual. */
+        if (changed) {
+            control_on_gain_change(g_pga_code, g_pgaout_code, 0u);
+        }
     }
 }
 
@@ -2578,6 +2585,8 @@ static void uart_service(void)
                     case PSOC_CMD_SAVE_EEPROM: case PSOC_CMD_SELECT_STREAM:
                     case PSOC_CMD_ADC_SNAPSHOT: case PSOC_CMD_ADC_CONFIG:
                     case PSOC_CMD_SET_DECIMATION:
+                    case PSOC_CMD_VIEW_CHANNEL:
+                    case PSOC_CMD_FORCE_PI:
                     case PSOC_CMD_SD_STATUS: case PSOC_CMD_SD_TEST:
                     case PSOC_CMD_SD_CAPTURE:
                     case PSOC_CMD_BLINK_LED:
@@ -2684,6 +2693,8 @@ static void uart_service(void)
                         case 0xB1u: case 0xB3u: case 0xB4u:
                         case PSOC_CMD_ADC_CONFIG:
                         case PSOC_CMD_SET_DECIMATION:
+                        case PSOC_CMD_VIEW_CHANNEL:
+                        case PSOC_CMD_FORCE_PI:
                         case PSOC_CMD_SD_STATUS:
                         case PSOC_CMD_SD_TEST:
                         case PSOC_CMD_SD_CAPTURE:
@@ -2898,6 +2909,35 @@ static void uart_service(void)
                             uart_send_fs_report();
                         } else {
                             uart_send_cfg_ack(PSOC_CMD_SET_DECIMATION, 0u);
+                        }
+                        led_toggle();
+                        break;
+                    case PSOC_CMD_FORCE_PI:
+                        /* Forzar el PI: que corrija a fondo un rato en vez de
+                         * quedarse congelado por histeresis. No toca ganancias
+                         * ni referencias: es el mismo lazo, sin freno. */
+                        if ((g_state == PSOC_IDLE) &&
+                            control_force_pi(rx_p1 ? rx_p1 : 60u)) {
+                            uart_send_cfg_ack(PSOC_CMD_FORCE_PI, rx_p1);
+                        } else {
+                            uart_send_cfg_ack(PSOC_CMD_FORCE_PI, 0xEEu);
+                        }
+                        led_toggle();
+                        break;
+                    case PSOC_CMD_VIEW_CHANNEL:
+                        /* Vista de diagnóstico: mueve el AMux de la captura a
+                         * otra etapa de la cadena. El lazo NO se entera — sigue
+                         * regulando sobre su propio canal en su barrido — y esto
+                         * no se guarda en EEPROM, así que un arranque en frío
+                         * vuelve solo a la señal. Solo en IDLE: con la captura
+                         * andando, cambiar el mux partiría la señal al medio. */
+                        if ((g_state == PSOC_IDLE) && control_set_view_channel(rx_p1)) {
+                            /* Eco del valor PEDIDO: el esclavo valida el ack
+                             * comparandolo con lo que mando, y con 0xFF el
+                             * canal efectivo (4) no coincidiria nunca. */
+                            uart_send_cfg_ack(PSOC_CMD_VIEW_CHANNEL, rx_p1);
+                        } else {
+                            uart_send_cfg_ack(PSOC_CMD_VIEW_CHANNEL, 0xEEu);
                         }
                         led_toggle();
                         break;

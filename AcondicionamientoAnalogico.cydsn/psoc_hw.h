@@ -309,6 +309,21 @@ uint32 psoc_idac_lsb_uv(void);
 #define PSOC_CMD_SD_CAPTURE     0xBEu  /* Param: 1=capturar a SD (ring RAM->SD, permite N>512),
                                           0=modo RAM-only clásico. Solo IDLE. Ack: 0/1=aplicado,
                                           0xEE=rechazado (sin SD o estado ocupado). */
+/* Param: canal del AMux que se digitaliza en la captura y en el stream
+ * (0=PGA/SEo, 1=BP, 2=OPA_SUM, 3=SUM, 4=LP = la senal de siempre).
+ * Es una VISTA de diagnostico: no toca el lazo de control, que sigue
+ * regulando sobre su propio canal, y no se guarda en EEPROM. 0xFF
+ * vuelve al canal de captura configurado. Solo se acepta en IDLE. */
+/* Param: segundos de FORZADO del lazo PI (1..255, 0 = cancelar). Durante esa
+ * ventana el lazo no se congela por histeresis: corrige a fondo y recien
+ * despues vuelve a su operacion normal. Es lo que hay que usar para obligarlo
+ * a rehacer el punto de trabajo (cambio de ganancia, toqueteo manual); NO es
+ * la calibracion legacy por etapas (PSOC_CMD_CALIBRATE). Solo en IDLE. */
+#define PSOC_CMD_FORCE_PI       0xABu
+
+#define PSOC_CMD_VIEW_CHANNEL   0xACu
+#define PSOC_VIEW_CHANNEL_NONE  0xFFu
+
 #define PSOC_CMD_SD_READ_BATCH  0xBFu  /* 2 params: índice uint16 LE. Éxito: frame normal con
                                           seq=índice; fallo: CFG_ACK(BF,0), sin datos falsos. */
 

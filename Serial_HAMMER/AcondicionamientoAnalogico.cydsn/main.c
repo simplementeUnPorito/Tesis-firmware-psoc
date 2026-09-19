@@ -2541,6 +2541,7 @@ static void uart_service(void)
                     case PSOC_CMD_SAVE_EEPROM: case PSOC_CMD_SELECT_STREAM:
                     case PSOC_CMD_ADC_SNAPSHOT: case PSOC_CMD_ADC_CONFIG:
                     case PSOC_CMD_SET_DECIMATION:
+                    case PSOC_CMD_VIEW_CHANNEL:
                     case PSOC_CMD_SD_STATUS: case PSOC_CMD_SD_TEST:
                     case PSOC_CMD_SD_CAPTURE:
                     case PSOC_CMD_BLINK_LED:
@@ -2606,6 +2607,7 @@ static void uart_service(void)
                         case 0xB1u: case 0xB3u: case 0xB4u:
                         case PSOC_CMD_ADC_CONFIG:
                         case PSOC_CMD_SET_DECIMATION:
+                        case PSOC_CMD_VIEW_CHANNEL:
                         case PSOC_CMD_SD_STATUS:
                         case PSOC_CMD_SD_TEST:
                         case PSOC_CMD_SD_CAPTURE:
@@ -2757,6 +2759,19 @@ static void uart_service(void)
                             uart_send_fs_report();
                         } else {
                             uart_send_cfg_ack(PSOC_CMD_SET_DECIMATION, 0u);
+                        }
+                        led_toggle();
+                        break;
+                    case PSOC_CMD_VIEW_CHANNEL:
+                        /* Vista de diagnostico: mueve el AMux de la captura a otra
+                         * etapa. No toca la calibracion ni se guarda en EEPROM.
+                         * Solo en IDLE: con la captura andando, cambiar el mux
+                         * partiria la senal al medio. */
+                        if ((g_state == PSOC_IDLE) && psoc_calibration_set_view_channel(rx_p1)) {
+                            /* Eco del valor PEDIDO (ver nota en el proyecto I2C). */
+                            uart_send_cfg_ack(PSOC_CMD_VIEW_CHANNEL, rx_p1);
+                        } else {
+                            uart_send_cfg_ack(PSOC_CMD_VIEW_CHANNEL, 0xEEu);
                         }
                         led_toggle();
                         break;

@@ -5,6 +5,8 @@
 #include <string.h>
 #include "../AcondicionamientoAnalogico.cydsn/control_config.h"
 
+#define ABS16(x) ((x)<0?-(x):(x))
+
 /* Plant in the ADC-bank domain, shaped after the 2026-09-16 hardware log
  * (geo-01, PGA x4, PGAout x24): IDAC3 is local to the LP stage (fast),
  * IDAC2 gives -80 mV at once and another -70 mV through the slow band-pass
@@ -127,9 +129,21 @@ int main(void)
      * subestimada) el rescate cruzaba la ventana y rebotaba entre rieles. */
     memset(&p,0,sizeof p);p.fine=80;
     paso=(int16_t)c.value[CP_RESCUE_STEP];
-    control_pi_step(&p,&c,1000,112000,0,0,1);assert(p.fine==80-paso);
-    control_pi_step(&p,&c,5000,112000,0,0,1);assert(p.fine==80-paso);
-    control_pi_step(&p,&c,11000,112000,0,0,1);assert(p.fine==80-2*paso);
+    /* Los tiempos salen de CP_RESCUE_MS y no de constantes: asi la prueba
+     * sigue valiendo cuando se retoca la cadencia. */
+    t=1000;
+    control_pi_step(&p,&c,t,112000,0,0,1);assert(p.fine==80-paso);
+    t+=(uint32_t)c.value[CP_RESCUE_MS]/3;
+    control_pi_step(&p,&c,t,112000,0,0,1);assert(p.fine==80-paso);   /* muy pronto */
+    /* 2026-09-18: el paso DUPLICA mientras el signo no cambie.  Con paso fijo,
+     * salir de un riel de 270 mV eran nueve minutos. */
+    t=1000+(uint32_t)c.value[CP_RESCUE_MS]+100;
+    control_pi_step(&p,&c,t,112000,0,0,1);assert(p.fine==80-3*paso);
+    t+=(uint32_t)c.value[CP_RESCUE_MS]+100;
+    control_pi_step(&p,&c,t,112000,0,0,1);assert(p.fine==80-7*paso);
+    /* Cruza al otro riel: el paso se parte al medio y cambia de sentido. */
+    t+=(uint32_t)c.value[CP_RESCUE_MS]+100;
+    control_pi_step(&p,&c,t,-262000,0,0,1);assert(p.fine==80-7*paso+2*paso);
     /* Fine at its limit on a rail: IDAC2 toma un codigo (-150 mV en LPo) y el
      * contramovimiento de IDAC3 son 150/2.5 = 60 codigos, no todo su rango. */
     memset(&p,0,sizeof p);p.fine=-255;p.coarse=0;
@@ -137,13 +151,15 @@ int main(void)
     contra=(int16_t)((-c.value[CP_COARSE_SLOPE_UV]+c.value[CP_FINE_SLOPE_UV]/2)/c.value[CP_FINE_SLOPE_UV]);
     assert(p.coarse==1&&p.fine==-255+contra);
     /* Mid-ranging con el vernier sano: el contramovimiento de IDAC3 cancela al
-     * codigo de IDAC2, asi que la prediccion lo rechaza y corrige con IDAC3. */
+     * codigo de IDAC2, asi que la prediccion lo rechaza y corrige con IDAC3.
+     * El error va DENTRO de DEADBAND: pasado ese umbral ya no corrige el PI
+     * sino la biseccion (2026-09-18), que es otro camino. */
     memset(&p,0,sizeof p);p.fine=250;p.coarse=0;
-    control_pi_step(&p,&c,1000,-50000,1,0,1);
+    control_pi_step(&p,&c,1000,-30000,1,0,1);
     assert(p.coarse==0&&p.fine>250);
     /* ...never when the error itself brings IDAC3 back. */
     memset(&p,0,sizeof p);p.fine=250;p.coarse=0;
-    control_pi_step(&p,&c,1000,50000,1,0,1);
+    control_pi_step(&p,&c,1000,30000,1,0,1);
     assert(p.coarse==0&&p.fine<250);
 
     /* Recentrado lento: congelado y pegado a un borde, mueve UN codigo hacia
@@ -193,6 +209,41 @@ int main(void)
         }
     }
 
+    /* Ciclo limite de riel a riel (2026-09-19, medido a x50/x1).  Con una
+     * pendiente MUY empinada un solo paso del rescate cruza la ventana entera:
+     * LPo pasa por "valido" un instante en el medio y aterriza en el riel
+     * opuesto.  Si el bracket de la biseccion se borra en ese instante, el
+     * rescate vuelve a empezar con el paso inicial y lo cruza de nuevo: periodo
+     * de ~280 s y amplitud constante, para siempre.  El bracket ahora solo se
+     * borra al entrar en HOLD. */
+    {
+        double offset=-300000.0;        /* uV: arranca pasado el riel negativo */
+        double pend=30.0;               /* mV/codigo: un paso cruza la ventana */
+        uint32_t ahora=1000;
+        unsigned cruces=0;
+        int signo_previo=0,adentro=0;
+        memset(&p,0,sizeof p);
+        for(i=0;i<80 && !adentro;++i) {
+            double real=offset+p.fine*pend*1000.0;
+            int32_t medido=(int32_t)(real>130000.0?130000.0:(real<-130000.0?-130000.0:real));
+            int val=control_measurement_valid(&c,medido);
+            int signo=real>0?1:-1;
+            if(signo_previo && signo!=signo_previo)++cruces;
+            signo_previo=signo;
+            control_pi_step(&p,&c,ahora,medido,val,0,1);
+            ahora+=(uint32_t)c.value[CP_RESCUE_MS];
+            real=offset+p.fine*pend*1000.0;
+            adentro=(real>-(double)c.value[CP_DEADBAND_UV] &&
+                     real<(double)c.value[CP_DEADBAND_UV]);
+        }
+        printf("ciclo limite %.0f mV/codigo: %s en %u pasos, %u cruces\n",
+               pend, adentro?"adentro":"NO ENTRO", i, cruces);
+        assert(adentro);
+        /* Converger cruzando es normal en una biseccion; lo que no puede pasar
+         * es cruzar una y otra vez sin achicar el paso. */
+        assert(cruces<=6);
+    }
+
     /* Closed loop against the plant: converge, then stay quiet. */
     {
         /* Pendientes reales de IDAC3 medidas en placa, con dispersion. */
@@ -214,6 +265,76 @@ int main(void)
             }
         }
     }
-    puts("control_test PASS: serialization, v3 migration, hysteresis, settled mode, SUMo guard, rescue, mid-ranging, closed loop");
+    /* Descargue del vernier EN BANDA (2026-09-18).  El nodo 2 quedo quieto,
+     * en banda y con IDAC3=248 contra FINE_MID=240: sostenia el punto sin
+     * autoridad para un lado y cualquier perturbacion lo mandaba al riel.
+     * Congelado en hold el lazo tiene que poder descargar al grueso. */
+    {
+        int16_t fine0;
+        memset(&p,0,sizeof p);
+        p.fine=(int16_t)(c.value[CP_FINE_MID]+8); p.coarse=-4;
+        /* Entra en hold con LPo bien centrado. */
+        control_pi_step(&p,&c,1000,0,1,0,1);
+        assert(p.holding);
+        fine0=p.fine;
+        /* coarse_ready() exige CP_COARSE_MS desde el ultimo movimiento. */
+        t=1000u+(uint32_t)c.value[CP_COARSE_MS]+1000u;
+        control_pi_step(&p,&c,t,0,1,0,1);
+        assert(p.holding);                       /* no despierta al lazo */
+        assert(ABS16(p.fine)<ABS16(fine0));      /* recupero autoridad */
+        assert(p.coarse!=-4);                    /* la paso al grueso */
+    }
+    /* Y con el vernier lejos de su tope no toca nada: el descargue no debe
+     * inventarse movimientos de IDAC2 cuando no hacen falta. */
+    {
+        memset(&p,0,sizeof p);
+        p.fine=10; p.coarse=-4;
+        control_pi_step(&p,&c,1000,0,1,0,1);
+        t=1000u+(uint32_t)c.value[CP_COARSE_MS]+1000u;
+        control_pi_step(&p,&c,t,0,1,0,1);
+        assert(p.holding && p.fine==10 && p.coarse==-4);
+    }
+    /* Ventana de forzado (2026-09-18): congelado en hold, forzar tiene que
+     * hacer que el lazo vuelva a corregir, y al vencer la ventana que se
+     * congele de nuevo. Es lo que usa el boton de la web y el cambio de
+     * ganancia. */
+    {
+        int16_t f0;
+        memset(&p,0,sizeof p);
+        control_pi_step(&p,&c,1000,hold/2,1,0,1);
+        assert(p.holding);
+        f0=p.fine;
+        /* Sin forzar, un error dentro de DEADBAND no lo despierta. */
+        control_pi_step(&p,&c,4000,banda-1000,1,0,1);
+        assert(p.holding && p.fine==f0);
+        /* Forzado: la misma lectura ahora si mueve el vernier. */
+        control_pi_force(&p,5000,30000);
+        assert(!p.holding);
+        control_pi_step(&p,&c,8000,banda-1000,1,0,1);
+        assert(!p.holding && p.fine!=f0);
+        /* Vencida la ventana, vuelve a congelarse dentro de HOLD. */
+        control_pi_step(&p,&c,40000,hold/2,1,0,1);
+        assert(p.holding && p.force_until_ms==0);
+    }
+    /* Forzar con 0 cancela la ventana. */
+    {
+        memset(&p,0,sizeof p);
+        control_pi_force(&p,1000,30000);
+        assert(p.force_until_ms!=0);
+        control_pi_force(&p,1000,0);
+        assert(p.force_until_ms==0);
+    }
+    /* Lejos del objetivo corrige la BISECCION y no el PI (2026-09-18): el PI
+     * confia en CP_FINE_SLOPE_UV, que en esta cadena se equivoca hasta 25x
+     * segun el punto de trabajo, y por eso tardaba minutos en cruzar la
+     * ventana.  Un paso de biseccion mueve CP_RESCUE_STEP, no el incremento
+     * fraccionario del PI. */
+    {
+        memset(&p,0,sizeof p);
+        p.fine=0;p.coarse=0;
+        control_pi_step(&p,&c,1000,bandaq+20000,1,0,1);   /* bien afuera */
+        assert(!p.holding && ABS16(p.fine)==c.value[CP_RESCUE_STEP]);
+    }
+    puts("control_test PASS: serialization, v3 migration, hysteresis, settled mode, SUMo guard, rescue, mid-ranging, descargue en banda, forzado, biseccion lejos, ciclo limite, closed loop");
     return 0;
 }

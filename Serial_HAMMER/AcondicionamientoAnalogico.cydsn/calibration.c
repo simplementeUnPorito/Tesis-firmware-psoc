@@ -719,10 +719,36 @@ void psoc_calibration_start_references(void)
 /* Deja el AMux_ADC en el canal de captura (GEO_LP): este es el estado IDLE,
  * en el que el ADC queda mirando GEO_LP para poder verificar en cualquier
  * momento si el front-end sigue calibrado. */
+/* Canal de VISTA (diagnostico): permite mirar otra etapa de la cadena por la
+ * misma ruta de captura. No se persiste en ningun lado — un arranque en frio
+ * vuelve a CAL_ADC_CAPTURE_CHANNEL, que es la senal de siempre. */
+static uint8 cal_view_channel = PSOC_VIEW_CHANNEL_NONE;
+
+static uint8 cal_capture_channel(void)
+{
+    if (cal_view_channel != PSOC_VIEW_CHANNEL_NONE) {
+        return cal_view_channel;
+    }
+    return (uint8)CAL_ADC_CAPTURE_CHANNEL;
+}
+
+uint8 psoc_calibration_set_view_channel(uint8 channel)
+{
+    if (channel != PSOC_VIEW_CHANNEL_NONE &&
+        channel >= (uint8)CAL_AMUX_SIGNAL_CHANNEL_COUNT) {
+        return 0u;
+    }
+    cal_view_channel = channel;
+    psoc_calibration_restore_capture_path();
+    return 1u;
+}
+
+uint8 psoc_calibration_view_channel(void) { return cal_capture_channel(); }
+
 void psoc_calibration_restore_capture_path(void)
 {
     ADC_Stop();
-    CAL_AMUX_ADC_SELECT(CAL_ADC_CAPTURE_CHANNEL);
+    CAL_AMUX_ADC_SELECT(cal_capture_channel());
     ADC_Start();
     ADC_StopConvert();
 }

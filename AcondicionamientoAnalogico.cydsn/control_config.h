@@ -59,9 +59,31 @@ typedef struct {
     /* Biseccion del rescate: paso vigente y signo del ultimo movimiento. */
     int16_t rescue_step;
     int8_t rescue_dir;
+    /* 1 cuando la biseccion ya vio un cambio de signo: desde ahi el paso
+     * solo se parte al medio, nunca se vuelve a expandir. */
+    uint8_t rescue_bracket;
+    /* Codigos de IDAC2 por paso cuando el vernier esta en su tope: expande
+     * como el vernier y se parte al medio cuando hay bracket. */
+    int8_t coarse_run;
+    /* Forzado: hasta este instante el lazo NO se congela por histeresis y
+     * corrige a fondo. Es para obligarlo a rehacer el punto de trabajo
+     * (cambio de ganancia, toqueteo manual) sin esperar a que la deriva lo
+     * despierte sola. 0 = sin forzado. */
+    uint32_t force_until_ms;
+    /* Pendiente de IDAC3 MEDIDA sobre la marcha (uV por codigo, con signo).
+     * 0 = todavia no hay medicion y se usa la de la config.  Hace falta
+     * porque la de la config se equivoca hasta 25x segun el punto de
+     * trabajo (0,6 a 15 mV/codigo, medido 2026-09-18) y el PI multiplica
+     * el error por ella. */
+    int32_t slope_uv;
+    int16_t slope_fine0;
+    int32_t slope_lp0;
+    uint8_t slope_armed;
 } ControlPI;
 /* True once the loop has stayed frozen for SETTLED_MS. */
 int control_pi_settled(const ControlPI *p, const ControlConfig *c, uint32_t now);
+/* Abre la ventana de forzado: `ms` sin histeresis. 0 la cierra. */
+void control_pi_force(ControlPI *p, uint32_t now, uint32_t ms);
 /* One call per fresh measurement. Outputs are absolute signed IDAC codes. */
 void control_pi_step(ControlPI *p, const ControlConfig *c, uint32_t now,
                      int32_t lp_uv, int lp_valid, int32_t sum_uv, int sum_valid);

@@ -33,6 +33,11 @@ extern uint8 g_psoc_cal_result_count;
 void psoc_calibration_set_diag_hook(PsocCalDiagHook hook);
 void psoc_calibration_start_references(void);
 void psoc_calibration_restore_capture_path(void);
+/* Vista de diagnostico: canal del AMux que se digitaliza en la captura.
+ * PSOC_VIEW_CHANNEL_NONE (0xFF) vuelve al de siempre. Devuelve 0 si el canal
+ * no existe en esta placa (GEO tiene 4, HAMMER solo 2). */
+uint8 psoc_calibration_set_view_channel(uint8 channel);
+uint8 psoc_calibration_view_channel(void);
 void psoc_calibration_reset_references(void);
 void psoc_calibration_seed_default_dac(void);
 

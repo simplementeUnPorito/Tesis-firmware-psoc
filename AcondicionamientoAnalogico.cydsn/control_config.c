@@ -27,7 +27,10 @@ void control_config_defaults(ControlConfig *c)
          * telemetria I2C le da a LPo, asi que el lazo corregia el golpe y no
          * la senal, y a veces lo mandaba al riel ya estando calibrado. */
         45000, 1000,
-        40, 25, 10000,
+        /* RESCUE_MS baja de 60 s a 15: con paso expansivo + biseccion el
+         * lazo se frena solo al acercarse, asi que esperar un minuto entre
+         * pasos solo agrega demora (x4/x8 tardo 330 s por esto). */
+        40, 25, 15000,
         /* SUMo band is a rail guard, not a target: IDAC3 absorbs a SUMo
          * offset of tens of mV, and a band inside SUMo's noise made IDAC2
          * chase noise forever, kicking LPo across its window each time. */
@@ -163,10 +166,134 @@ static void move_coarse_bumpless(ControlPI *p,const int32_t *v,int32_t step)
 static void pi_forget(ControlPI *p) { p->has_previous=0; p->fraction=0; }
 int control_pi_settled(const ControlPI *p,const ControlConfig *c,uint32_t now)
 { return p->holding && now-p->hold_ms >= (uint32_t)c->value[CP_SETTLED_MS]; }
+/* Aprende la pendiente real de IDAC3 mirando lo que consiguio el ultimo
+ * movimiento: uV de LPo por codigo, con signo.  Se descartan los pasos
+ * chicos (ruido) y los saltos absurdos (lecturas contra el riel). */
+static void slope_observe(ControlPI *p,const int32_t *v,int32_t lp)
+{
+    int32_t dfine,dlp,est;
+    if(p->slope_armed) {
+        dfine=(int32_t)p->fine-(int32_t)p->slope_fine0;
+        dlp=lp-p->slope_lp0;
+        /* 2 codigos alcanza: con 4 el observador no aprendia nunca durante
+         * el PI, que mueve de a uno, y el lazo se quedaba con la pendiente
+         * de la config justo en la franja fina donde mas duele. */
+        if(dfine>=2 || dfine<=-2) {
+            est=dlp/dfine;
+            if(est<0)est=-est;
+            if(est>=100 && est<=10*magnitude(v[CP_FINE_SLOPE_UV]))
+                p->slope_uv=(v[CP_FINE_SLOPE_UV]<0)?-est:est;
+        }
+    }
+    p->slope_fine0=p->fine;p->slope_lp0=lp;p->slope_armed=1;
+}
+static int32_t slope_now(const ControlPI *p,const int32_t *v)
+{ return p->slope_uv ? p->slope_uv : v[CP_FINE_SLOPE_UV]; }
+static int forcing(const ControlPI *p,uint32_t now)
+{ return p->force_until_ms && (int32_t)(now-p->force_until_ms)<0; }
+/* Ritmo de los actuadores mientras se fuerza. No sale de tau sino de lo que
+ * hay que recorrer: medido el 2026-09-18, tras un cambio de ganancia LPo
+ * queda contra un riel a ~270 mV del centro, o sea unos nueve pasos de
+ * rescate. A 60 s el paso eso son nueve minutos; a 10 s, minuto y medio, que
+ * entra holgado en la ventana de forzado. La biseccion sigue partiendo el
+ * paso al medio cada vez que se pasa, asi que ir mas rapido no lo vuelve
+ * agresivo cerca del centro: solo deja de ser lento cuando esta lejos. */
+#define CTL_FORCED_STEP_MS 10000u
+/* Tope del paso del rescate.  64 codigos son ~1 V en LPo: mas que la ventana
+ * entera, asi que no hace falta mas, y con la biseccion de vuelta no se
+ * vuelve agresivo cerca del centro. */
+#define CTL_RESCUE_STEP_MAX 64
+/* Tope de codigos de IDAC2 por paso cuando el vernier ya esta saturado. */
+#define CTL_COARSE_RUN_MAX  16
+/* El enfriamiento del grueso NO se acorta ni forzando, y esto costo una
+ * corrida entera de aprenderlo: IDAC2 arrastra la cola lenta del pasabanda
+ * (tau ~34 s medidos) y su contramovimiento 'bumpless' solo cancela la parte
+ * INSTANTANEA.  Con el grueso caminando cada 10 s las colas se apilan y
+ * llegan juntas decenas de segundos despues: medido el 2026-09-18 a x8/x8,
+ * LPo se quedaba plano en -269 mV cien segundos y despues cruzaba la ventana
+ * entera hasta el riel opuesto en treinta.  Al actuador que arrastra una cola
+ * de 34 s no se lo puede apurar; el que si puede ir rapido es el vernier. */
 static int coarse_ready(const ControlPI *p,const int32_t *v,uint32_t now)
 { return !p->has_coarse || now-p->coarse_ms >= (uint32_t)v[CP_COARSE_MS]; }
 static void coarse_moved(ControlPI *p,uint32_t now)
 { p->coarse_ms=now; p->has_coarse=1; }
+/* Un paso de BISECCION sobre el vernier: expande mientras el signo no
+ * cambia y parte al medio cuando cambia.  Solo usa el SIGNO del error, y
+ * por eso anda con cualquier pendiente — que en esta cadena varia 25x
+ * segun el punto de trabajo (0,6 a 15 mV/codigo, medido 2026-09-18). */
+static void bisect_fine(ControlPI *p,const int32_t *v,uint32_t now,int32_t e)
+{
+    int32_t step=0;
+    int dir;
+    uint32_t espera_rescate=(uint32_t)v[CP_RESCUE_MS];
+    {
+        if(forcing(p,now) && CTL_FORCED_STEP_MS<espera_rescate)
+            espera_rescate=CTL_FORCED_STEP_MS;
+        if(!p->has_rescue || now-p->rescue_ms >= espera_rescate) {
+            dir=((e>0)==(v[CP_FINE_SLOPE_UV]>0)) ? 1 : -1;
+            if(!p->has_rescue || p->rescue_step<=0) {
+                p->rescue_step=(int16_t)v[CP_RESCUE_STEP];
+                p->rescue_dir=0;
+                p->rescue_bracket=0;
+                p->coarse_run=0;
+            } else if(p->rescue_dir!=0 && dir!=p->rescue_dir) {
+                /* Cambio de signo: se cruzo la ventana.  Termina la fase de
+                 * EXPANSION para siempre —ya hay bracket— y de aca en mas el
+                 * paso solo se parte al medio.  Sin esta bandera el rescate
+                 * partia el paso al cruzar y lo volvia a DUPLICAR en cuanto el
+                 * sentido coincidia dos veces seguidas, asi que nunca achicaba
+                 * de verdad: medido el 2026-09-19 a x50/x1, ciclo limite de
+                 * riel a riel con periodo de ~280 s y amplitud constante. */
+                p->rescue_bracket=1;
+                if(p->rescue_step>1)p->rescue_step=(int16_t)(p->rescue_step/2);
+            } else if(!p->rescue_bracket && p->rescue_dir==dir &&
+                      p->rescue_step<CTL_RESCUE_STEP_MAX) {
+                /* MISMO sentido: sigue lejos y el paso se queda corto.  Sin
+                 * esto el rescate camina de a CP_RESCUE_STEP para siempre:
+                 * medido el 2026-09-18, salir de un riel de 270 mV a dos
+                 * codigos por vuelta son nueve minutos.  Duplicando se llega
+                 * en tres o cuatro vueltas, y el paso se parte al medio
+                 * apenas se cruza — expansion + biseccion, sin depender de
+                 * ninguna pendiente. */
+                p->rescue_step=(int16_t)(p->rescue_step*2);
+            }
+            p->rescue_dir=(int8_t)dir;
+            step=dir*p->rescue_step;
+            /* Escalar al grueso en FINE_MID y no en el limite duro: con el
+             * vernier en 225 de 255 el rescate seguia caminando de a dos
+             * codigos y tardaba 15 min en llegar al tope antes de tocar
+             * IDAC2, con LPo contra el riel todo ese tiempo (medido a
+             * x50/x1 y x8/x8 el 2026-09-18). */
+            if((p->fine>=v[CP_FINE_MID] && step>0)||(p->fine<=-v[CP_FINE_MID] && step<0)) {
+                if(coarse_ready(p,v,now)) {
+                    /* UN codigo por enfriamiento, y nada mas.  El 2026-09-19
+                     * probe expandir aca tambien —duplicando mientras el signo
+                     * no cambiara, como hace el vernier— para que IDAC2 saliera
+                     * mas rapido del riel a PGAout x1.  REGRESIONO x8/x8, que
+                     * venia pasando: el corte de la expansion depende de ver el
+                     * cambio de signo, y el efecto de IDAC2 tarda los ~44 s de
+                     * la cola del pasabanda en llegar, asi que duplica a ciegas
+                     * varios enfriamientos y se pasa de largo.  Expandir un
+                     * actuador cuyo efecto llega mas tarde que el proximo paso
+                     * no se puede hacer a lazo cerrado sobre la lectura
+                     * instantanea. */
+                    move_coarse_bumpless(p,v,((e>0)==(v[CP_COARSE_SLOPE_UV]>0)) ? 1 : -1);
+                    coarse_moved(p,now);
+                }
+            } else p->fine=(int16_t)bounded(p->fine+step,-v[CP_FINE_LIMIT],v[CP_FINE_LIMIT]);
+            p->rescue_ms=now; p->has_rescue=1;
+        }
+    }
+}
+
+void control_pi_force(ControlPI *p,uint32_t now,uint32_t ms)
+{
+    if(ms==0u){p->force_until_ms=0;return;}
+    p->force_until_ms=now+ms;
+    if(p->force_until_ms==0u)p->force_until_ms=1u;   /* 0 significa 'sin forzado' */
+    p->holding=0;p->wake_count=0;p->has_previous=0;p->fraction=0;
+}
+
 void control_pi_step(ControlPI *p,const ControlConfig *c,uint32_t now,
                      int32_t lp,int valid,int32_t sum,int sum_valid)
 {
@@ -185,6 +312,14 @@ void control_pi_step(ControlPI *p,const ControlConfig *c,uint32_t now,
             p->coarse=(int16_t)bounded(p->coarse+step,-v[CP_COARSE_LIMIT],v[CP_COARSE_LIMIT]);
             coarse_moved(p,now);
         }
+        /* La guardia NO puede dejar al vernier sin correr.  Hacia `return`
+         * siempre, y con SUMo fuera de banda el rescate de LPo no se ejecutaba
+         * nunca: medido el 2026-09-19 a x50/x1, LPo estuvo 200 s contra el riel
+         * moviendose UN codigo de IDAC2 cada 24 s mientras IDAC3 no se movio
+         * ni una vez.  El rescate de LPo es una biseccion que no mira SUMo
+         * para nada —IDAC3 esta aguas abajo—, asi que dejarlo correr es seguro
+         * y es la unica forma de salir del riel a tiempo. */
+        if(!valid) { bisect_fine(p,v,now,e); }
         return;
     }
     /* 2. LPo contra un riel: su magnitud no dice nada, solo el signo.  El
@@ -194,30 +329,39 @@ void control_pi_step(ControlPI *p,const ControlConfig *c,uint32_t now,
      * cambia de 0.8 a 5.8 mV/codigo segun donde este parada (medido el
      * 2026-09-17): con paso fijo el lazo rebotaba entre los dos rieles para
      * siempre.  CP_RESCUE_STEP es solo el primer paso. */
+    /* Lejos del objetivo se usa BISECCION, no PI.  La pendiente de IDAC3 no es
+     * unica: medida 6,68 mV/codigo a x1/x1, ~15 a x4/x24 y 0,6 el 2026-09-18 en
+     * otro punto del mismo par — 25 veces menos que lo que dice la config.  El
+     * PI multiplica el error por esa pendiente, asi que con ese error de modelo
+     * corrige 25 veces de menos y tarda una eternidad.  La biseccion solo mira
+     * el SIGNO y converge igual con cualquier pendiente; el PI queda para el
+     * ajuste fino dentro de DEADBAND, donde el error ya es chico. */
+    if(valid)slope_observe(p,v,lp);
+    /* 2. LPo contra un riel: la biseccion nunca se filtra por histeresis,
+     * un riel es un riel. */
     if(!valid) {
-        int dir;
         pi_forget(p); p->holding=0;
-        if(!p->has_rescue || now-p->rescue_ms >= (uint32_t)v[CP_RESCUE_MS]) {
-            dir=((e>0)==(v[CP_FINE_SLOPE_UV]>0)) ? 1 : -1;
-            if(!p->has_rescue || p->rescue_step<=0) {
-                p->rescue_step=(int16_t)v[CP_RESCUE_STEP];
-                p->rescue_dir=0;
-            } else if(p->rescue_dir!=0 && dir!=p->rescue_dir && p->rescue_step>1) {
-                p->rescue_step=(int16_t)(p->rescue_step/2);
-            }
-            p->rescue_dir=(int8_t)dir;
-            step=dir*p->rescue_step;
-            if((p->fine>=v[CP_FINE_LIMIT] && step>0)||(p->fine<=-v[CP_FINE_LIMIT] && step<0)) {
-                if(coarse_ready(p,v,now)) {
-                    move_coarse_bumpless(p,v,((e>0)==(v[CP_COARSE_SLOPE_UV]>0)) ? 1 : -1);
-                    coarse_moved(p,now);
-                }
-            } else p->fine=(int16_t)bounded(p->fine+step,-v[CP_FINE_LIMIT],v[CP_FINE_LIMIT]);
-            p->rescue_ms=now; p->has_rescue=1;
-        }
+        bisect_fine(p,v,now,e);
         return;
     }
-    p->has_rescue=0; p->rescue_step=0; p->rescue_dir=0;
+    /* OJO: el bracket de la biseccion NO se borra por el solo hecho de que
+     * LPo haya vuelto a ser medible.  Se borraba aca, y eso era lo que
+     * impedia que la biseccion partiera el paso: con un paso grande LPo cruza
+     * la ventana entera en un salto, pasa por "valido" un instante en el
+     * medio, y al llegar al riel opuesto el rescate arrancaba de cero otra vez
+     * con el paso inicial y lo volvia a cruzar.  El resultado es un ciclo
+     * limite de riel a riel que no converge nunca — medido el 2026-09-19 a
+     * x50/x1: periodo de ~280 s, amplitud constante, horas asi.
+     *
+     * El bracket se borra cuando el lazo realmente se planta (entra en HOLD):
+     * ahi si la busqueda termino y la proxima empieza limpia. */
+    /* 2.b Ventana de forzado: mientras dura, el lazo no se congela. No es un
+     * modo aparte — solo se saltea la histeresis, todo lo demas (banda de
+     * validez, rescate, mid-ranging, PI) sigue igual. */
+    if(p->force_until_ms) {
+        if(forcing(p,now)) { p->holding=0; p->wake_count=0; }
+        else p->force_until_ms=0;
+    }
     /* 3. Hysteresis.  Once LPo is inside HOLD the loop freezes and ignores
      * every sample until LPo leaves DEADBAND.  Without it the integer loop
      * chased +-3 mV of ADC noise and never stopped moving. */
@@ -237,13 +381,39 @@ void control_pi_step(ControlPI *p,const ControlConfig *c,uint32_t now,
                 p->fine=(int16_t)bounded(p->fine+paso,-v[CP_FINE_LIMIT],v[CP_FINE_LIMIT]);
                 p->recenter_ms=now;
             }
+            /* Descargue del vernier EN BANDA.  El mid-ranging del paso 4 solo
+             * corre con el lazo despierto, asi que un nodo que entro en banda
+             * con IDAC3 contra su tope se quedaba ahi: sostiene el punto pero
+             * sin autoridad para el lado ya agotado, y la primera perturbacion
+             * lo manda al riel (visto 2026-09-18: IDAC3=248 con FINE_MID=240,
+             * quieto y en banda durante minutos).  Se descarga sin despertar
+             * el lazo y solo si el movimiento bumpless predice quedarse dentro
+             * de la banda de hold: si no, se deja como esta, que no es peor
+             * que hoy. */
+            if(magnitude(p->fine)>=v[CP_FINE_MID] && coarse_ready(p,v,now)) {
+                int32_t dir=p->fine>0 ? 1 : -1;
+                int32_t moved=((v[CP_COARSE_SLOPE_UV]>0)==(v[CP_FINE_SLOPE_UV]>0)) ? dir : -dir;
+                ControlPI trial=*p;
+                int64_t lp_after;
+                move_coarse_bumpless(&trial,v,moved);
+                lp_after=(int64_t)lp+(int64_t)(trial.coarse-p->coarse)*v[CP_COARSE_SLOPE_UV]
+                         +(int64_t)(trial.fine-p->fine)*v[CP_FINE_SLOPE_UV];
+                if(magnitude(trial.fine)<magnitude(p->fine) &&
+                   magnitude((int32_t)lp_after)<=v[CP_HOLD_UV]) {
+                    p->coarse=trial.coarse; p->fine=trial.fine;
+                    coarse_moved(p,now); pi_forget(p);
+                }
+            }
             return;
         }
         /* Settled: a lone reading outside is a glitch, not drift. */
         if(settled && ++p->wake_count < (uint8_t)v[CP_WAKE_COUNT]) return;
         p->holding=0; p->wake_count=0;
     } else if(magnitude(lp)<=v[CP_HOLD_UV]) {
-        p->holding=1; p->hold_ms=now; p->wake_count=0; pi_forget(p); return;
+        p->holding=1; p->hold_ms=now; p->wake_count=0; pi_forget(p);
+        p->has_rescue=0; p->rescue_step=0; p->rescue_dir=0;
+        p->rescue_bracket=0; p->coarse_run=0;
+        return;
     }
     /* 4. Mid-ranging: IDAC3 is at the end of its range and the error still
      * asks for more in that direction.  One IDAC2 code is larger than all of
@@ -270,15 +440,33 @@ void control_pi_step(ControlPI *p,const ControlConfig *c,uint32_t now,
             return;
         }
     }
+    /* 4.b Lejos del objetivo: biseccion en vez de PI.  El PI multiplica el
+     * error por CP_FINE_SLOPE_UV, y con ese modelo errado 25x corrige 25
+     * veces de menos: medido el 2026-09-18, LPo tardo 300 s en bajar de
+     * +113 a +23 mV.  Aca ya paso el filtro de histeresis, asi que esto no
+     * reacciona a golpes sueltos de telemetria.
+     * 2026-09-18, segunda medicion: con el umbral en DEADBAND (45 mV) el
+     * lazo se plantaba a -36 mV en x16/x4 y nunca llegaba a los +-25 que
+     * hacen falta para declarar banda, porque esa franja la corregia el PI
+     * con la pendiente errada.  El umbral baja a HOLD: si el lazo decidio
+     * actuar, actua por biseccion. */
+    if(magnitude(lp)>v[CP_DEADBAND_UV]) { bisect_fine(p,v,now,e); return; }
     /* 5. PI toward zero, in fractional codes.  alpha=T/tau of the error per
      * period plus Kp on its change; tolerates ~1/alpha of slope error. */
     if(dt>(uint32_t)v[CP_PERIOD_MS]*2u) dt=(uint32_t)v[CP_PERIOD_MS];
-    denom=(int64_t)v[CP_TAU_MS]*v[CP_FINE_SLOPE_UV];
+    denom=(int64_t)v[CP_TAU_MS]*slope_now(p,v);
     increment=((int64_t)e+(p->has_previous?p->previous_error:e))*dt*32768/denom;
     increment+=(int64_t)(e-(p->has_previous?p->previous_error:0))*v[CP_PERIOD_MS]*65536/denom*v[CP_KP_NUM]/v[CP_KP_DEN];
     p->fraction+=increment;
     step=(int32_t)(p->fraction/65536);
     step=bounded(step,-v[CP_FINE_STEP],v[CP_FINE_STEP]);
+    /* Piso de un codigo: si el incremento fraccionario se trunca a cero pero
+     * LPo esta fuera de HOLD, hay que moverse igual.  Sin esto el lazo se
+     * plantaba a -32 mV y nunca llegaba a los +-25 que declaran banda (medido
+     * 2026-09-18 en x16/x4): el modelo de pendiente hacia el incremento tan
+     * chico que truncaba a cero una y otra vez. */
+    if(step==0 && magnitude(lp)>v[CP_HOLD_UV])
+        step=((e>0)==(slope_now(p,v)>0)) ? 1 : -1;
     if(step!=0) {
         int32_t next=bounded(p->fine+step,-v[CP_FINE_LIMIT],v[CP_FINE_LIMIT]);
         p->fraction-=((int64_t)(next-p->fine))*65536;
