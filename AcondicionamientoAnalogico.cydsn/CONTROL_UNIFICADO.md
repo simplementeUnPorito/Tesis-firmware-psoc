@@ -960,3 +960,78 @@ en su borde, verificar de quién es el borde.*
 
 Pendiente: estas son visitas únicas. Los tres mejores se revalidan con dos
 vueltas antes de darlos por buenos — una corrida es una corrida.
+
+---
+
+# RETRACTACIÓN (2026-09-19, misma tarde): el eje PGAout de todo lo anterior es falso
+
+**Todo lo que este documento dice hoy sobre pares de ganancia lleva mal la
+columna de PGAout.** El eje del PGA es real; el de PGAout no.
+
+Causa, en `slave/src/main.cpp`, `requestPsocGainFromUsb()`:
+
+```c
+if (subCmd == PSOC_CMD_PGA) { psoc.setPga(param); }
+else                        { psoc.setPgavdac(param); }   // tapaba PGAOUT
+```
+
+`setPgaout()` manda `PSOC_CMD_PGAOUT` y `setPgavdac()` manda `PSOC_CMD_PGAVDAC`.
+El `else` mandaba el segundo también para PGAOUT, y después esperaba el ACK de
+un comando que nunca se había enviado. O sea que **`pgaout N` por consola USB no
+cambió nunca la ganancia de PGAout**: cambiaba la referencia del VDAC.
+
+La ruta web / ESP-NOW (`main.cpp` ~2923) siempre estuvo bien. El bug era sólo de
+la consola USB — que es exactamente la que usa el banco `lab/banco_pi.py`.
+
+### Cómo apareció
+
+Barriendo las 81 combinaciones: el firmware reportaba `PGAOUT=0` en todas las
+visitas, y **LPo quedaba en ~24,5 mV tanto a ganancia 1 como a ganancia 1152**,
+con IDAC0/IDAC1 clavados en (14, 10). Eso es imposible si la ganancia cambiara.
+
+### Qué se cae y qué se sostiene
+
+**Se cae:**
+
+- La tabla de pares estables y todos los tiempos por par: el PGAout real era el
+  que hubiera quedado de antes, no el de la etiqueta.
+- **El techo de 384.** `x16/x24` era en realidad x16 con el PGAout sin tocar. No
+  hay ninguna medición que sostenga 384, ni tampoco 192 ni 768.
+- Los pares "x50/x1", "x8/x8", "x4/x24" etc. de todo el día: el primer número es
+  correcto, el segundo no.
+
+**Se sostiene**, porque no depende de la etiqueta de ganancia sino de lo que se
+midió en los taps y en los IDAC:
+
+- Los seis bugs del lazo y sus arreglos: el criterio de quietud que devolvía
+  cero, la expansión que no terminaba y producía el ciclo límite (reproducido en
+  host), la guardia que dejaba al vernier sin correr, la condición de cierre
+  imposible, el atajo de reconocer el objetivo, y la tabla de puntos que nunca
+  se escribía.
+- La geometría medida del pasabajos: ganancia ≈ −6,6 desde SUMo y cero en
+  SUMo ≈ −19 mV.
+- Que expandir el actuador grueso regresiona, por la cola de 44 s.
+
+Lo que hay que rehacer es **la medición de los pares**, con el bug arreglado.
+
+### Lección
+
+Es la tercera vez en este proyecto: *reproducibilidad no es validez*. El banco
+daba resultados consistentes y ordenados durante horas, y estaba midiendo una
+variable que no se movía. Lo que lo delató no fue una inconsistencia sino un
+número **demasiado bueno** — ganancia 1152 con LPo centrado. Cuando un resultado
+es mejor de lo que la física permite, el error está en el instrumento.
+
+## `FIR_adquisition.h`: los coeficientes nuevos son intencionales (2026-09-19)
+
+Confirmado por Elías. Los 128 taps que hay en el archivo son un cambio querido,
+no un accidente.
+
+Lo único que se tocó del lado del asistente fue **reparar las continuaciones de
+macro** (`\` seguidas de espacios antes del salto de línea), que estaban rotas y
+no compilaban. Los coeficientes quedaron intactos y en orden: verificado tap por
+tap del 0 al 127 al momento de la reparación, y hoy el archivo no tiene ninguna
+continuación rota.
+
+Queda anotado para que ninguna sesión futura lo tome por un pegado accidental y
+lo "arregle" volviendo atrás.
