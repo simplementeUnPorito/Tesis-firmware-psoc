@@ -227,7 +227,11 @@
 #endif
 
 #ifndef PSOC_BUTTON_CAL_ENABLE
-#define PSOC_BUTTON_CAL_ENABLE 1
+/* En la placa GEO el bit BUTTON del status queda espurio al arrancar. Eso
+ * iniciaba una calibracion manual antes de que el ESP pudiera configurar el
+ * nodo y bloqueaba ctl/PGA hasta el watchdog de 25 minutos. El barrido y el
+ * operador usan el comando UART de calibracion, que permanece disponible. */
+#define PSOC_BUTTON_CAL_ENABLE 0
 #endif
 
 /* -------------------------------------------------------------------------- */
