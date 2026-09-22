@@ -73,6 +73,7 @@
 #include "filter_coeffs.h"
 #include "FIR_adquisition.h"
 #include "psoc_debug.h"
+#include "isr_matate.h"
 /* -------------------------------------------------------------------------- */
 #if defined(CY_STATUS_REG_tmr_event_H)
 #define timer_event_Read tmr_event_Read
@@ -3449,11 +3450,20 @@ static void boot_led_signature(void)
 #endif
 }
 
+/* esp_reset es activo en bajo. En TopDesign pasa por un inversor, de modo que
+ * isr_matate recibe un flanco ascendente cuando el ESP baja P1[4]. */
+CY_ISR(isr_esp_reset_handler)
+{
+    CySoftwareReset();
+}
+
+
 int main(void)
 {
-    CyDelay(1000);
     uint8 i;
 
+    isr_matate_ClearPending();
+    isr_matate_StartEx(isr_esp_reset_handler);
     CyGlobalIntEnable;
 
     /* Lo primero, para que sirva de testigo aunque lo que sigue se cuelgue. */
