@@ -26,14 +26,29 @@ enum ControlParameter {
      * al centro nunca: la deriva lo deja pegado a un borde y la siguiente
      * correccion sale de golpe.  Si lleva RECENTER_MS con |LPo| pasado
      * RECENTER_UV, mueve UN codigo hacia el centro y se vuelve a congelar. */
-    CP_RECENTER_UV, CP_RECENTER_MS, CP_COUNT
+    CP_RECENTER_UV, CP_RECENTER_MS,
+    /* v6: memoria de puntos de trabajo.  POLICY elige de donde sale la
+     * CONDICION INICIAL al cambiar de ganancia; no cambia el lazo.  El lazo
+     * corrige igual despues de restaurar, que es lo que deja al nodo
+     * afrontar temperatura y deriva no modeladas.
+     *   0 = OFF          comportamiento anterior (brazo de control)
+     *   1 = UNICO        el punto validado de la EEPROM
+     *   2 = VECINO       el candidato de contexto mas parecido (RAM)
+     *   3 = INTERPOLADO  recta entre dos candidatos asentados; nunca extrapola
+     * ARG es una palabra de trabajo para los comandos de la tabla de puntos:
+     * se deja con `ctl set` y la consume la accion CONTROL_PUNTO_*. */
+    CP_PUNTO_POLICY, CP_PUNTO_ARG, CP_COUNT
 };
 /* Telemetry frame version stays 3 (ESP accepts 1..3; keys are generic).
  * The persistent image carries its own layout version. */
 #define CONTROL_CONFIG_VERSION 3u
-#define CONTROL_NV_VERSION 5u
+#define CONTROL_NV_VERSION 6u
 #define CONTROL_CONFIG_COUNT_V3 36u
 #define CONTROL_CONFIG_COUNT_V4 45u
+/* Cantidad de parametros de la v5 (antes de la memoria de puntos).  Sin esto
+ * una imagen v5 se decodificaria con el CP_COUNT nuevo y leeria basura en los
+ * dos parametros que esa imagen no tiene. */
+#define CONTROL_CONFIG_COUNT_V5 47u
 #define CONTROL_CONFIG_BYTES (CP_COUNT * 4u)
 typedef struct { int32_t value[CP_COUNT]; } ControlConfig;
 void control_config_defaults(ControlConfig *c);

@@ -11,7 +11,15 @@ enum { CONTROL_NEEDS_LEARNING, CONTROL_LEARNING, CONTROL_RUNNING,
 #define CONTROL_CMD_FIRST 0xD0u
 #define CONTROL_CMD_LAST  0xD7u
 enum { CONTROL_APPLY=1, CONTROL_SAVE, CONTROL_DEFAULTS, CONTROL_LEARN,
-       CONTROL_PAUSE, CONTROL_RESUME, CONTROL_REPORT };
+       CONTROL_PAUSE, CONTROL_RESUME, CONTROL_REPORT,
+       /* Memoria de puntos.  PUNTO_SET consume la palabra dejada en
+        * CP_PUNTO_ARG con `ctl set`, porque `ctl set` solo STAGEA y el valor
+        * recien se aplicaria con un APPLY, que reinicia el lazo.  DUMP y
+        * CLEAR toman el par en p2 (0xFF = todos).  POL cambia la politica en
+        * caliente, tambien sin APPLY: cambiar de brazo experimental no tiene
+        * por que reiniciar el nodo. */
+       CONTROL_PUNTO_SET, CONTROL_PUNTO_DUMP, CONTROL_PUNTO_CLEAR,
+       CONTROL_PUNTO_POL };
 void control_init(void);
 void control_service(void);
 void control_on_filtered_sample(int32 counts);

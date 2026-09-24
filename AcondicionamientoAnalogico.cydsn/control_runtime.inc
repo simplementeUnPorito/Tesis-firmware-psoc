@@ -147,6 +147,9 @@ static void ctl_emit_trace(void)
         ctl_emit((uint16)(0x180+i),(int32)((dt<<20)|((uint32)mv10&0xFFFFFu)),0);
     }
 }
+/* Definida mas abajo, junto a la tabla de puntos: el snapshot vive antes que
+ * ella en este archivo y en C hay que declararla primero. */
+static void ctl_punto_emitir(uint8 capture);
 void control_emit_snapshot(uint8 capture)
 {
     uint16 i;uint32 now=ctl_ms;
@@ -160,6 +163,10 @@ void control_emit_snapshot(uint8 capture)
     ctl_emit(0x106,CONTROL_CONFIG_VERSION,capture);
     ctl_emit(0x107,control_crc((const uint8 *)(__DATE__ " " __TIME__),sizeof(__DATE__ " " __TIME__)-1),capture);
     if(with_config)for(i=0;i<CP_COUNT;++i)ctl_emit(i,ctl_config.value[i],capture);
+    /* Igual que la config: NO va en cada reporte.  Cada trama es una patada de
+     * +-50 mV a LPo (medido 2026-09-16), y el origen del punto solo cambia en
+     * un cambio de ganancia, donde ctl_punto_aplicar() lo emite como evento. */
+    if(with_config)ctl_punto_emitir(capture);
     for(i=0;i<4;++i)ctl_emit((uint16)(0x110+i),ctl_codes[i],capture);
     for(i=0;i<5;++i) {
         int32 margin=ctl_dc[i]-(ctl_config.value[CP_VALID_LOW_UV]+ctl_config.value[CP_MARGIN_UV]);
@@ -222,118 +229,447 @@ uint8 control_capture_channel(void)
 /* Forzado del arranque en frio: alcanza con menos que el de cambio de
  * ganancia porque el punto guardado suele estar cerca. */
 #define CTL_BOOT_FORCE_S 90u
-/* ── Memoria de puntos de trabajo por par de ganancias ─────────────────────
+/* -- Memoria de puntos de trabajo por par de ganancias ---------------------
  * Cambiar de ganancia deja de ser una busqueda a ciegas.  Cada par que llego a
  * banda deja sus cuatro codigos guardados; al volver a ese par se salta
  * directamente ahi y el lazo solo ajusta, en vez de rescatar desde un riel.
  * Medido el 2026-09-18: un cambio de ganancia sin esto tardaba de 30 s a 8 min
- * segun de donde viniera, y a PGA alto ni siquiera llegaba. */
+ * segun de donde viniera, y a PGA alto ni siquiera llegaba.
+ *
+ * INVARIANTE, y no se toca: el punto guardado es una CONDICION INICIAL, nunca
+ * un reemplazo del control.  control_on_gain_change() abre la ventana de
+ * forzado ANTES de restaurar, asi que el punto entra con el lazo corrigiendo a
+ * fondo.  Nada de lo que hay aca congela el lazo ni lo deja sin corregir: eso
+ * es lo que permite al nodo absorber temperatura, envejecimiento y deriva del
+ * acople, que no estan modelados en ninguna tabla.
+ *
+ * Medido sobre 191 visitas de banco (2026-09-22/23): de los 90 PASA, los que
+ * restauraron un punto entraron en 2,0 s y los que aprendieron de cero
+ * tardaron de 57 a 959 s.  Rapido y bueno son el mismo caso. */
 /* Codigo de PGA (x16) a partir del cual la busqueda a ciegas del par lento
  * ya no encuentra la ventana de SUMo y hay que sembrar desde un vecino. */
 #define CTL_PGA_SIEMBRA 4u
-#define CTL_PUNTOS 8u
-static struct { uint8 pga, pgaout, valido; int16 codes[4]; } ctl_punto[CTL_PUNTOS];
-static uint8 ctl_punto_sig;
-static uint8 ctl_punto_sucio;
-static uint8 ctl_pga_prev=0xFFu, ctl_pgaout_prev=0xFFu;
 
-static void ctl_punto_guardar(uint8 pga,uint8 pgaout)
-{
-    uint8 i,j,libre=CTL_PUNTOS;
-    for(i=0;i<CTL_PUNTOS;++i) {
-        if(ctl_punto[i].valido && ctl_punto[i].pga==pga && ctl_punto[i].pgaout==pgaout)break;
-        if(!ctl_punto[i].valido && libre==CTL_PUNTOS)libre=i;
-    }
-    if(i==CTL_PUNTOS) {
-        i=(libre<CTL_PUNTOS)?libre:ctl_punto_sig;
-        ctl_punto_sig=(uint8)((ctl_punto_sig+1u)%CTL_PUNTOS);
-    }
-    ctl_punto[i].pga=pga;ctl_punto[i].pgaout=pgaout;ctl_punto[i].valido=1u;
-    for(j=0;j<4;++j)ctl_punto[i].codes[j]=ctl_codes[j];
-    ctl_punto_sucio=1u;
-}
+/* De donde salio el punto de trabajo vigente.  Sin esto es IMPOSIBLE
+ * distinguir "la semilla sirvio" de "venia bien encaminado", y una campania
+ * entera no produce evidencia. */
+enum { CTL_ORIGEN_NADA=0u, CTL_ORIGEN_APRENDIZAJE, CTL_ORIGEN_EEPROM,
+       CTL_ORIGEN_VECINO, CTL_ORIGEN_INTERPOLADO, CTL_ORIGEN_SIEMBRA,
+       CTL_ORIGEN_PERFIL };
+/* Politica de CP_PUNTO_POLICY.  Cada nivel cae al siguiente. */
+enum { CTL_POL_OFF=0u, CTL_POL_UNICO, CTL_POL_VECINO, CTL_POL_INTERPOLADO };
 
-/* La tabla de puntos vivia SOLO en RAM: cada reset obligaba a re-aprender de
- * cero todos los pares menos el ultimo (que es el que guarda el perfil), y ese
- * re-aprendizaje es justo lo que hace lento el arranque — minutos a PGA alto.
- * Se persiste en un area propia de la EEPROM (filas 48..52, bytes 768..847),
- * separada de los dos slots del perfil (filas 16..47) y con su propio CRC. No
- * necesita doble buffer: si no valida se arranca con la tabla vacia, que es
- * exactamente el comportamiento anterior. */
+static uint8 ctl_punto_origen;
+/* Codigos con los que arranco el par: la base del RESIDUO de correccion
+ * (cuanto hubo que corregir desde el valor modelado).  El host lo resta
+ * contra los codigos finales y con eso se mide si el modelo sirve, de que
+ * depende el error y cuanto deriva la placa entre dias. */
+static int16 ctl_punto_semilla[4];
+
+/* ---- Tabla persistente: un registro por par, los 81 ----------------------
+ * La tabla vivia en RAM con OCHO lugares y rotacion circular: nueve de cada
+ * diez pares perdian su punto antes de volver a visitarlos.  Ahora entra
+ * entera y se indexa directo, sin buscar.
+ *
+ * Mapa de EEPROM (2 KiB = 128 filas de 16 B): 0..8 psoc_nv por codigo de PGA,
+ * 16..47 el perfil (dos slots), 48..52 la tabla VIEJA de ocho (solo lectura,
+ * para migrar), 53..123 esta tabla, 124 su cabecera.
+ *
+ * El CRC es POR REGISTRO y no global: guardar toca una o dos filas (~40 ms)
+ * en vez de las cinco de antes (~100 ms), y un corte de luz corrompe un
+ * registro, no la tabla entera. */
+#define CTL_PT_N        81u
+#define CTL_PT_REC      14u
+#define CTL_PT_ROW0     53u
+#define CTL_PT_BASE     ((uint16)CTL_PT_ROW0*16u)
+#define CTL_PT_HDR_ROW  124u
+#define CTL_PT_MAGIC0   0x47u
+#define CTL_PT_MAGIC1   0x54u
+#define CTL_PT_VER      2u
+/* Region de la tabla vieja de ocho, de la que se migra una sola vez. */
 #define CTL_PUNTO_ROW0   48u
 #define CTL_PUNTO_ROWS    5u
 #define CTL_PUNTO_BYTES  (CTL_PUNTO_ROWS*16u)
+/* Un IDAC pasado esto esta contra su tope: el punto puede estar en banda y
+ * aun asi no tener con que corregir.  Medido 2026-09-23: el 28 % de los
+ * puntos "buenos" del historico tenian IDAC3 pasado 200. */
+#define CTL_PT_TOPE     200
+/* Fallos seguidos antes de tirar un punto.  No se tira al primero: el mismo
+ * punto puede fallar por venir de otro contexto y servir desde otro. */
+#define CTL_PT_FALLOS_MAX 3u
 
-static void ctl_punto_store(void)
+typedef struct {
+    int16 codes[4];
+    int16 lpo_mv;
+    /* b0 valido, b1 promovido, b2..b4 aciertos (0..7), b5..b7 fallos (0..7) */
+    uint8 estado;
+    /* Residuo de correccion, saturado: lo que el lazo tuvo que mover desde la
+     * semilla.  Deja que el PROPIO nodo pre-compense la proxima siembra, sin
+     * depender del analisis en la PC. */
+    int8  res_slow, res_fast;
+} CtlPunto;
+static CtlPunto ctl_pt[CTL_PT_N];
+/* Indice del registro pendiente de bajar a EEPROM (0xFF = ninguno). */
+static uint8 ctl_punto_sucio=0xFFu;
+static uint8 ctl_pga_prev=0xFFu, ctl_pgaout_prev=0xFFu;
+
+/* ---- Pool de candidatos con CONTEXTO, en RAM ----------------------------
+ * La EEPROM da para UN punto por par.  Pero los cuatro codigos no definen el
+ * punto de trabajo: el acople de 680 uF y su absorcion dielectrica hacen que
+ * los mismos codigos aterricen distinto segun de donde se venga (medido el
+ * 2026-09-19 a x50/x1).  O sea que el punto bueno depende del ESTADO FISICO
+ * de entrada, no del par anterior.
+ *
+ * Por eso el contexto es {SUMo medido al entrar, codigos del par lento}, que
+ * es el proxy de la carga del acople, y NO un indice de "de que par venis":
+ * eso ultimo serian 81x81 casos y se sobreajustaria al orden del barrido.
+ *
+ * Vive en RAM y no en EEPROM porque despues de un reset se viene de UN solo
+ * contexto -el frio- y ahi alcanza con el punto persistente. */
+#define CTL_CAND_N 96u
+typedef struct {
+    uint8 par;              /* 0xFF = libre */
+    uint8 usos;
+    int16 codes[4];
+    int16 ctx_sum_mv, ctx_i0, ctx_i1;
+    int16 lpo_mv;
+} CtlCand;
+static CtlCand ctl_cand[CTL_CAND_N];
+static uint8 ctl_cand_sig;
+/* Contexto con el que se ENTRO al par vigente. */
+static int16 ctl_ctx_sum_mv, ctl_ctx_i0, ctl_ctx_i1;
+
+#define CTL_PT_IDX(pga,pgaout) ((uint8)((uint8)(pga)*9u+(uint8)(pgaout)))
+static uint8 ctl_pt_valido(const CtlPunto *q){return (uint8)(q->estado&1u);}
+static uint8 ctl_pt_aciertos(const CtlPunto *q){return (uint8)((q->estado>>2)&7u);}
+static uint8 ctl_pt_fallos(const CtlPunto *q){return (uint8)((q->estado>>5)&7u);}
+static void ctl_pt_set_aciertos(CtlPunto *q,uint8 n)
+{ if(n>7u)n=7u; q->estado=(uint8)((q->estado&(uint8)(~(7u<<2)))|(uint8)(n<<2)); }
+static void ctl_pt_set_fallos(CtlPunto *q,uint8 n)
+{ if(n>7u)n=7u; q->estado=(uint8)((q->estado&(uint8)(~(7u<<5)))|(uint8)(n<<5)); }
+
+/* Puntuacion de un punto: MENOR es mejor.  No alcanza con |LPo|: un punto
+ * centrado pero con IDAC3 contra el tope esta en banda y sin autoridad, y al
+ * primer cambio de temperatura se cae.  Guardar por "mejor |LPo|" propagaba
+ * justamente esos. */
+static int32 ctl_punto_score(const int16 *codes,int16 lpo_mv)
 {
-    uint8 buf[CTL_PUNTO_BYTES];
-    uint16 crc;uint8 i,j,p=4;
-    memset(buf,0,sizeof buf);
-    buf[0]=0x47;buf[1]=0x50;buf[2]=1u;buf[3]=PSOC_HW_CLASS;
-    for(i=0;i<CTL_PUNTOS;++i) {
-        buf[p++]=ctl_punto[i].valido ?
-            (uint8)(((ctl_punto[i].pga&0x0Fu)<<4)|(ctl_punto[i].pgaout&0x0Fu)) : 0xFFu;
-        for(j=0;j<4;++j) {
-            buf[p++]=(uint8)ctl_punto[i].codes[j];
-            buf[p++]=(uint8)((uint16)ctl_punto[i].codes[j]>>8);
-        }
-    }
-    crc=control_crc(buf,CTL_PUNTO_BYTES-2u);
-    buf[CTL_PUNTO_BYTES-2u]=(uint8)crc;buf[CTL_PUNTO_BYTES-1u]=(uint8)(crc>>8);
-    EEPROM_UpdateTemperature();
-    for(i=0;i<CTL_PUNTO_ROWS;++i)
-        if(EEPROM_Write(buf+16u*i,(uint8)(CTL_PUNTO_ROW0+i))!=CYRET_SUCCESS)return;
-    ctl_punto_sucio=0u;
+    int32 s=2*magnitude((int32)lpo_mv);
+    int32 a2=magnitude((int32)codes[2]), a3=magnitude((int32)codes[3]);
+    if(a3>CTL_PT_TOPE)s+=(a3-CTL_PT_TOPE)*5;
+    if(a2>CTL_PT_TOPE)s+=(a2-CTL_PT_TOPE)*5;
+    return s;
 }
 
-static void ctl_punto_load(void)
+static uint8 ctl_pt_crc(const uint8 *b,uint8 idx)
+{
+    uint16 c=control_crc(b,(unsigned)(CTL_PT_REC-1u));
+    c=(uint16)(c^((uint16)idx*0x101u));
+    return (uint8)(c^(c>>8));
+}
+static void ctl_pt_pack(uint8 i,uint8 *b)
+{
+    const CtlPunto *q=&ctl_pt[i];uint8 j,p=0;
+    for(j=0;j<4;++j){b[p++]=(uint8)q->codes[j];b[p++]=(uint8)((uint16)q->codes[j]>>8);}
+    b[p++]=(uint8)q->lpo_mv;b[p++]=(uint8)((uint16)q->lpo_mv>>8);
+    b[p++]=q->estado;b[p++]=(uint8)q->res_slow;b[p++]=(uint8)q->res_fast;
+    b[p]=ctl_pt_crc(b,i);
+}
+static uint8 ctl_pt_unpack(uint8 i,const uint8 *b)
+{
+    CtlPunto *q=&ctl_pt[i];uint8 j,p=0;int16 c[4];
+    if(b[CTL_PT_REC-1u]!=ctl_pt_crc(b,i))return 0u;
+    for(j=0;j<4;++j){
+        c[j]=(int16)((uint16)b[p]|((uint16)b[p+1]<<8));p=(uint8)(p+2u);
+        if(c[j]<-255||c[j]>255)return 0u;
+    }
+    for(j=0;j<4;++j)q->codes[j]=c[j];
+    q->lpo_mv=(int16)((uint16)b[p]|((uint16)b[p+1]<<8));p=(uint8)(p+2u);
+    q->estado=b[p++];q->res_slow=(int8)b[p++];q->res_fast=(int8)b[p];
+    return 1u;
+}
+/* Baja UN registro: lee las una o dos filas que lo contienen, le pisa sus
+ * catorce bytes y las devuelve.  Nunca reescribe la tabla entera. */
+static void ctl_pt_store_one(uint8 i)
+{
+    uint8 rec[CTL_PT_REC],buf[32];
+    uint16 off;
+    uint8 row0,row1,r,k,filas,desp;
+    if(i>=CTL_PT_N)return;
+    off=(uint16)(CTL_PT_BASE+(uint16)CTL_PT_REC*(uint16)i);
+    row0=(uint8)(off/16u);row1=(uint8)((off+CTL_PT_REC-1u)/16u);
+    filas=(uint8)(row1-row0+1u);desp=(uint8)(off-(uint16)row0*16u);
+    ctl_pt_pack(i,rec);
+    for(k=0;k<(uint8)(16u*filas);++k)
+        buf[k]=EEPROM_ReadByte((uint16)((uint16)row0*16u+k));
+    for(k=0;k<CTL_PT_REC;++k)buf[desp+k]=rec[k];
+    EEPROM_UpdateTemperature();
+    for(r=0;r<filas;++r)
+        if(EEPROM_Write(buf+16u*r,(uint8)(row0+r))!=CYRET_SUCCESS)return;
+}
+static void ctl_pt_store_hdr(void)
+{
+    uint8 b[16],i;uint16 c;
+    for(i=0;i<16u;++i)b[i]=0u;
+    b[0]=CTL_PT_MAGIC0;b[1]=CTL_PT_MAGIC1;b[2]=CTL_PT_VER;b[3]=PSOC_HW_CLASS;
+    c=control_crc(b,14u);b[14]=(uint8)c;b[15]=(uint8)(c>>8);
+    EEPROM_UpdateTemperature();
+    (void)EEPROM_Write(b,CTL_PT_HDR_ROW);
+}
+static uint8 ctl_pt_hdr_ok(void)
+{
+    uint8 b[16],i;uint16 c;
+    for(i=0;i<16u;++i)b[i]=EEPROM_ReadByte((uint16)((uint16)CTL_PT_HDR_ROW*16u+i));
+    if(b[0]!=CTL_PT_MAGIC0||b[1]!=CTL_PT_MAGIC1||b[2]!=CTL_PT_VER||
+       b[3]!=PSOC_HW_CLASS)return 0u;
+    c=control_crc(b,14u);
+    return (uint8)((b[14]==(uint8)c && b[15]==(uint8)(c>>8))?1u:0u);
+}
+/* Migracion desde la tabla vieja de ocho lugares.  Corre una sola vez, cuando
+ * la region nueva todavia no tiene cabecera: sin esto el primer arranque con
+ * el firmware nuevo tiraria los ocho puntos que ya costaron horas. */
+static void ctl_pt_migrar_de_v1(void)
 {
     uint8 buf[CTL_PUNTO_BYTES];
-    uint16 i;uint8 j,p=4;
+    uint16 i;uint8 j,p=4u;
     for(i=0;i<CTL_PUNTO_BYTES;++i)
-        buf[i]=EEPROM_ReadByte((uint16)(CTL_PUNTO_ROW0*16u+i));
-    if(buf[0]!=0x47||buf[1]!=0x50||buf[2]!=1u||buf[3]!=PSOC_HW_CLASS)return;
+        buf[i]=EEPROM_ReadByte((uint16)((uint16)CTL_PUNTO_ROW0*16u+i));
+    if(buf[0]!=0x47u||buf[1]!=0x50u||buf[2]!=1u||buf[3]!=PSOC_HW_CLASS)return;
     if(control_crc(buf,CTL_PUNTO_BYTES-2u)!=
        ((uint16)buf[CTL_PUNTO_BYTES-2u]|((uint16)buf[CTL_PUNTO_BYTES-1u]<<8)))return;
-    for(i=0;i<CTL_PUNTOS;++i) {
-        uint8 g=buf[p++],malo=0;
+    for(i=0;i<8u;++i) {
+        uint8 g=buf[p++],malo=0u,idx;
         int16 c[4];
         for(j=0;j<4;++j) {
-            c[j]=(int16)((uint16)buf[p]|((uint16)buf[p+1]<<8));p+=2;
+            c[j]=(int16)((uint16)buf[p]|((uint16)buf[p+1]<<8));p=(uint8)(p+2u);
             if(c[j]<-255||c[j]>255)malo=1u;
         }
-        /* Un codigo fuera de rango o una ganancia imposible descarta la
-         * entrada sola, no la tabla: el resto sigue sirviendo. */
-        if(g==0xFFu||malo||(g>>4)>8u||(g&0x0Fu)>8u){ctl_punto[i].valido=0;continue;}
-        ctl_punto[i].pga=(uint8)(g>>4);ctl_punto[i].pgaout=(uint8)(g&0x0Fu);
-        ctl_punto[i].valido=1u;
-        for(j=0;j<4;++j)ctl_punto[i].codes[j]=c[j];
+        if(g==0xFFu||malo||(g>>4)>8u||(g&0x0Fu)>8u)continue;
+        idx=CTL_PT_IDX(g>>4,g&0x0Fu);
+        for(j=0;j<4;++j)ctl_pt[idx].codes[j]=c[j];
+        ctl_pt[idx].lpo_mv=0;ctl_pt[idx].estado=1u;
+        ctl_pt[idx].res_slow=0;ctl_pt[idx].res_fast=0;
+        ctl_pt_store_one(idx);
     }
 }
+static void ctl_punto_load(void)
+{
+    uint8 i,j,rec[CTL_PT_REC];
+    for(i=0;i<CTL_PT_N;++i) {
+        for(j=0;j<4;++j)ctl_pt[i].codes[j]=0;
+        ctl_pt[i].lpo_mv=0;ctl_pt[i].estado=0u;
+        ctl_pt[i].res_slow=0;ctl_pt[i].res_fast=0;
+    }
+    for(i=0;i<CTL_CAND_N;++i)ctl_cand[i].par=0xFFu;
+    if(!ctl_pt_hdr_ok()) {
+        /* Region virgen: se estrena y se migra lo que haya de la tabla vieja.
+         * Si algo de esto falla se arranca con la tabla vacia, que es
+         * exactamente el comportamiento anterior. */
+        ctl_pt_store_hdr();
+        ctl_pt_migrar_de_v1();
+        return;
+    }
+    for(i=0;i<CTL_PT_N;++i) {
+        uint16 off=(uint16)(CTL_PT_BASE+(uint16)CTL_PT_REC*(uint16)i);
+        for(j=0;j<CTL_PT_REC;++j)rec[j]=EEPROM_ReadByte((uint16)(off+j));
+        /* Un registro con CRC malo o codigos imposibles se descarta SOLO;
+         * el resto de la tabla sigue sirviendo. */
+        if(!ctl_pt_unpack(i,rec))ctl_pt[i].estado=0u;
+    }
+}
+static void ctl_punto_store(void)
+{
+    if(ctl_punto_sucio>=CTL_PT_N)return;
+    ctl_pt_store_one(ctl_punto_sucio);
+    ctl_punto_sucio=0xFFu;
+}
 
-/* Un punto guardado que NO reprodujo el punto de trabajo hay que tirarlo, o se
- * vuelve a restaurar cada vez y cada vez hay que re-aprender.  Pasa porque los
- * cuatro codigos no definen el estado: el acople de 680 uF y su absorcion
- * dielectrica hacen que el mismo par de codigos aterrice distinto segun de
- * donde se venga.  Medido el 2026-09-19 a x50/x1: el punto guardado tenia el
- * par lento en 0/0 —lo habia dejado ahi un rescate, no un aprendizaje— y al
- * volver desde x24/x4 SUMo se planto en +100 mV, fuera de ventana. */
+/* ---- API de la tabla, con los mismos nombres de siempre ----------------- */
+
+static void ctl_ctx_tomar(void)
+{
+    ctl_ctx_sum_mv=(int16)((ctl_seen[3]&&ctl_valid[3])?ctl_dc[3]/1000:0);
+    ctl_ctx_i0=ctl_codes[0];ctl_ctx_i1=ctl_codes[1];
+}
+/* Anota el punto ACTUAL como candidato del par, con el contexto de entrada.
+ * Solo se llama con el lazo ASENTADO (mismo criterio que el autosave): una
+ * muestra en transitorio mentiria.  Medido: esperar 1,5 s sobre una planta de
+ * tau=34 s da 18,8 mV/codigo cuando en regimen son 12,3. */
+static void ctl_cand_anotar(uint8 par)
+{
+    uint8 i,libre=CTL_CAND_N,j;
+    int16 lpo=(int16)(ctl_dc[4]/1000);
+    for(i=0;i<CTL_CAND_N;++i) {
+        if(ctl_cand[i].par==par &&
+           magnitude((int32)ctl_cand[i].ctx_sum_mv-(int32)ctl_ctx_sum_mv)<=5)break;
+        if(ctl_cand[i].par==0xFFu && libre==CTL_CAND_N)libre=i;
+    }
+    if(i==CTL_CAND_N) {
+        i=(libre<CTL_CAND_N)?libre:ctl_cand_sig;
+        ctl_cand_sig=(uint8)((ctl_cand_sig+1u)%CTL_CAND_N);
+        ctl_cand[i].usos=0u;
+    } else if(ctl_cand[i].usos<255u)++ctl_cand[i].usos;
+    ctl_cand[i].par=par;
+    for(j=0;j<4;++j)ctl_cand[i].codes[j]=ctl_codes[j];
+    ctl_cand[i].ctx_sum_mv=ctl_ctx_sum_mv;
+    ctl_cand[i].ctx_i0=ctl_ctx_i0;ctl_cand[i].ctx_i1=ctl_ctx_i1;
+    ctl_cand[i].lpo_mv=lpo;
+}
+static uint8 ctl_cand_n_par(uint8 par)
+{
+    uint8 i,n=0u;
+    for(i=0;i<CTL_CAND_N;++i)if(ctl_cand[i].par==par)++n;
+    return n;
+}
+/* Nivel 2: el candidato cuyo contexto se parece mas al de ahora.  SUMo pesa
+ * cuatro veces mas que un codigo porque es la medicion DIRECTA del estado del
+ * acople; los codigos del par lento solo lo acompanian. */
+static uint8 ctl_cand_vecino(uint8 par,uint8 *out)
+{
+    uint8 i,best=0xFFu;int32 bd=INT32_MAX;
+    for(i=0;i<CTL_CAND_N;++i) {
+        int32 d;
+        if(ctl_cand[i].par!=par)continue;
+        d=4*magnitude((int32)ctl_cand[i].ctx_sum_mv-(int32)ctl_ctx_sum_mv)
+          + magnitude((int32)ctl_cand[i].ctx_i0-(int32)ctl_ctx_i0)
+          + magnitude((int32)ctl_cand[i].ctx_i1-(int32)ctl_ctx_i1);
+        if(d<bd){bd=d;best=i;}
+    }
+    if(best>=CTL_CAND_N)return 0u;
+    *out=best;return 1u;
+}
+/* Nivel 3: recta entre los dos candidatos que ENCIERRAN el contexto actual.
+ * INTERPOLA, nunca extrapola: si no hay uno de cada lado devuelve 0 y se cae
+ * al vecino.  Con pocos puntos una recta extrapolada se va contra el riel. */
+static uint8 ctl_cand_interp(uint8 par,int16 *out)
+{
+    uint8 i,lo=0xFFu,hi=0xFFu,j;
+    int32 dlo=INT32_MAX,dhi=INT32_MAX,x0,x1,dx;
+    for(i=0;i<CTL_CAND_N;++i) {
+        int32 d;
+        if(ctl_cand[i].par!=par)continue;
+        d=(int32)ctl_cand[i].ctx_sum_mv-(int32)ctl_ctx_sum_mv;
+        if(d<=0 && -d<dlo){dlo=-d;lo=i;}
+        if(d>=0 &&  d<dhi){dhi= d;hi=i;}
+    }
+    if(lo>=CTL_CAND_N||hi>=CTL_CAND_N||lo==hi)return 0u;
+    x0=(int32)ctl_cand[lo].ctx_sum_mv;x1=(int32)ctl_cand[hi].ctx_sum_mv;
+    dx=x1-x0;
+    if(dx==0)return 0u;
+    for(j=0;j<4;++j) {
+        int32 y0=(int32)ctl_cand[lo].codes[j],y1=(int32)ctl_cand[hi].codes[j];
+        out[j]=(int16)bounded((int)(y0+((y1-y0)*((int32)ctl_ctx_sum_mv-x0))/dx),-255,255);
+    }
+    return 1u;
+}
+
+/* Guarda el punto del par, quedandose con el MEJOR y no con el ultimo.  Si el
+ * guardado puntua mejor, solo se le anota el acierto: esa es la diferencia
+ * entre acumular evidencia y pisarla. */
+static void ctl_punto_guardar(uint8 pga,uint8 pgaout)
+{
+    uint8 idx,j;
+    int16 lpo;
+    CtlPunto *q;
+    if(pga>8u||pgaout>8u)return;
+    idx=CTL_PT_IDX(pga,pgaout);q=&ctl_pt[idx];
+    lpo=(int16)(ctl_dc[4]/1000);
+    if(ctl_pt_valido(q) &&
+       ctl_punto_score(q->codes,q->lpo_mv)<=ctl_punto_score(ctl_codes,lpo)) {
+        ctl_pt_set_aciertos(q,(uint8)(ctl_pt_aciertos(q)+1u));
+        ctl_pt_set_fallos(q,0u);
+        ctl_punto_sucio=idx;
+        return;
+    }
+    for(j=0;j<4;++j)q->codes[j]=ctl_codes[j];
+    q->lpo_mv=lpo;
+    q->estado=(uint8)(1u|(q->estado&(uint8)(7u<<2)));
+    ctl_pt_set_aciertos(q,(uint8)(ctl_pt_aciertos(q)+1u));
+    ctl_pt_set_fallos(q,0u);
+    /* Residuo: cuanto hubo que corregir desde el valor modelado.  Solo tiene
+     * sentido si de verdad se partio de una semilla. */
+    if(ctl_punto_origen==CTL_ORIGEN_EEPROM||ctl_punto_origen==CTL_ORIGEN_VECINO||
+       ctl_punto_origen==CTL_ORIGEN_INTERPOLADO||ctl_punto_origen==CTL_ORIGEN_SIEMBRA) {
+        q->res_slow=(int8)bounded((int)((int32)ctl_codes[0]-(int32)ctl_punto_semilla[0]),-127,127);
+        q->res_fast=(int8)bounded((int)((int32)ctl_codes[3]-(int32)ctl_punto_semilla[3]),-127,127);
+    }
+    ctl_punto_sucio=idx;
+}
+
+/* Un punto guardado que NO reprodujo el punto de trabajo no se puede
+ * restaurar eternamente, o cada vez hay que re-aprender.  Pero tampoco se
+ * tira al primer fallo: los cuatro codigos no definen el estado -el acople de
+ * 680 uF y su absorcion dielectrica hacen que el mismo par aterrice distinto
+ * segun de donde se venga (medido 2026-09-19 a x50/x1)-, asi que un punto
+ * puede fallar desde un contexto y servir desde otro.  Se DEGRADA, y recien
+ * al tercer fallo se invalida. */
 static void ctl_punto_olvidar(uint8 pga,uint8 pgaout)
 {
-    uint8 i;
-    for(i=0;i<CTL_PUNTOS;++i)
-        if(ctl_punto[i].valido && ctl_punto[i].pga==pga && ctl_punto[i].pgaout==pgaout) {
-            ctl_punto[i].valido=0;ctl_punto_sucio=1u;
-        }
+    uint8 idx,i;
+    CtlPunto *q;
+    if(pga>8u||pgaout>8u)return;
+    idx=CTL_PT_IDX(pga,pgaout);q=&ctl_pt[idx];
+    if(!ctl_pt_valido(q))return;
+    ctl_pt_set_fallos(q,(uint8)(ctl_pt_fallos(q)+1u));
+    if(ctl_pt_fallos(q)>=CTL_PT_FALLOS_MAX)q->estado=0u;
+    ctl_punto_sucio=idx;
+    /* El candidato de RAM que se acaba de usar tambien se cae: si el punto no
+     * reprodujo desde ESTE contexto, es este contexto el que sobra. */
+    for(i=0;i<CTL_CAND_N;++i)
+        if(ctl_cand[i].par==idx &&
+           magnitude((int32)ctl_cand[i].ctx_sum_mv-(int32)ctl_ctx_sum_mv)<=5)
+            ctl_cand[i].par=0xFFu;
 }
 
 static uint8 ctl_punto_tiene(uint8 pga,uint8 pgaout)
 {
-    uint8 i;
-    for(i=0;i<CTL_PUNTOS;++i)
-        if(ctl_punto[i].valido && ctl_punto[i].pga==pga && ctl_punto[i].pgaout==pgaout)
-            return 1u;
-    return 0u;
+    if(pga>8u||pgaout>8u)return 0u;
+    return ctl_pt_valido(&ctl_pt[CTL_PT_IDX(pga,pgaout)]);
+}
+
+/* Aplica cuatro codigos como condicion inicial y deja el lazo listo para
+ * corregir desde ahi.  NO congela nada: el forzado que abrio
+ * control_on_gain_change sigue vigente, asi que el PI arranca enseguida. */
+static void ctl_punto_aplicar(const int16 *codes,uint8 origen)
+{
+    uint8 j;
+    for(j=0;j<4;++j){ctl_write(j,codes[j]);ctl_punto_semilla[j]=codes[j];}
+    ctl_pi.fine=ctl_codes[3];ctl_pi.coarse=ctl_codes[2];
+    ctl_pi.has_previous=0;ctl_pi.fraction=0;ctl_pi.slope_armed=0;
+    ctl_punto_origen=origen;
+    /* Evento, no reporte periodico: el host necesita el origen y la semilla al
+     * PRINCIPIO de la visita.  El residuo de correccion que mide si el modelo
+     * sirve es codigos_finales - esta semilla. */
+    ctl_emit(0x140,(int32)origen,0);
+    for(j=0;j<4;++j)ctl_emit((uint16)(0x148+j),(int32)codes[j],0);
+}
+
+static uint8 ctl_punto_restaurar(uint8 pga,uint8 pgaout)
+{
+    uint8 idx;
+    if(pga>8u||pgaout>8u)return 0u;
+    idx=CTL_PT_IDX(pga,pgaout);
+    if(!ctl_pt_valido(&ctl_pt[idx]))return 0u;
+    ctl_punto_aplicar(ctl_pt[idx].codes,CTL_ORIGEN_EEPROM);
+    return 1u;
+}
+
+/* Cascada de seleccion.  Cada nivel cae al siguiente, y el nivel 0 deja el
+ * comportamiento anterior intacto: es el brazo de control del experimento. */
+static uint8 ctl_punto_elegir(uint8 pga,uint8 pgaout)
+{
+    int32 pol=ctl_config.value[CP_PUNTO_POLICY];
+    uint8 par,k;int16 pred[4];
+    if(pol<=(int32)CTL_POL_OFF)return 0u;
+    if(pga>8u||pgaout>8u)return 0u;
+    par=CTL_PT_IDX(pga,pgaout);
+    if(pol>=(int32)CTL_POL_INTERPOLADO && ctl_cand_interp(par,pred)) {
+        ctl_punto_aplicar(pred,CTL_ORIGEN_INTERPOLADO);return 1u;
+    }
+    if(pol>=(int32)CTL_POL_VECINO && ctl_cand_vecino(par,&k)) {
+        ctl_punto_aplicar(ctl_cand[k].codes,CTL_ORIGEN_VECINO);return 1u;
+    }
+    return ctl_punto_restaurar(pga,pgaout);
 }
 
 /* Anotar el par ACTUAL y bajarlo a la EEPROM en el acto.  Se llama al terminar
@@ -344,22 +680,59 @@ static uint8 ctl_punto_tiene(uint8 pga,uint8 pgaout)
  * reiniciar el nodo volvio a aprender de cero. */
 static void ctl_punto_fijar_actual(void)
 {
-    ctl_punto_guardar((uint8)ctl_config.value[CP_PGA],
-                      (uint8)ctl_config.value[CP_PGAOUT]);
-    if(ctl_punto_sucio)ctl_punto_store();
+    uint8 pga=(uint8)ctl_config.value[CP_PGA];
+    uint8 pgaout=(uint8)ctl_config.value[CP_PGAOUT];
+    ctl_punto_guardar(pga,pgaout);
+    if(ctl_punto_sucio<CTL_PT_N)ctl_punto_store();
+    /* Al pool SOLO entran puntos con el lazo declarandose en banda.  Una
+     * muestra en transitorio contaminaria la recta del nivel 3: en esta
+     * planta la pendiente instantanea da 18,8 mV/codigo donde en regimen son
+     * 12,3, y una recta ajustada con eso corrige de menos siempre. */
+    if(ctl_band && pga<=8u && pgaout<=8u)ctl_cand_anotar(CTL_PT_IDX(pga,pgaout));
 }
 
-static uint8 ctl_punto_restaurar(uint8 pga,uint8 pgaout)
+static void ctl_punto_emitir(uint8 capture)
 {
-    uint8 i,j;
-    for(i=0;i<CTL_PUNTOS;++i) {
-        if(!ctl_punto[i].valido || ctl_punto[i].pga!=pga || ctl_punto[i].pgaout!=pgaout)continue;
-        for(j=0;j<4;++j)ctl_write(j,ctl_punto[i].codes[j]);
-        ctl_pi.fine=ctl_codes[3];ctl_pi.coarse=ctl_codes[2];
-        ctl_pi.has_previous=0;ctl_pi.fraction=0;ctl_pi.slope_armed=0;
-        return 1u;
-    }
-    return 0u;
+    uint8 pga=(uint8)ctl_config.value[CP_PGA];
+    uint8 pgaout=(uint8)ctl_config.value[CP_PGAOUT];
+    uint8 par,k;uint16 n=0;
+    if(pga>8u||pgaout>8u)return;
+    par=CTL_PT_IDX(pga,pgaout);
+    for(k=0;k<CTL_PT_N;++k)if(ctl_pt_valido(&ctl_pt[k]))++n;
+    ctl_emit(0x140,(int32)ctl_punto_origen,capture);
+    ctl_emit(0x141,(int32)ctl_pt_aciertos(&ctl_pt[par]),capture);
+    ctl_emit(0x142,(int32)ctl_pt_fallos(&ctl_pt[par]),capture);
+    ctl_emit(0x143,(int32)ctl_cand_n_par(par),capture);
+    ctl_emit(0x144,ctl_config.value[CP_PUNTO_POLICY],capture);
+    ctl_emit(0x145,(int32)ctl_ctx_sum_mv,capture);
+    ctl_emit(0x146,(int32)n,capture);
+    for(k=0;k<4;++k)ctl_emit((uint16)(0x148+k),(int32)ctl_punto_semilla[k],capture);
+    ctl_emit(0x14C,(int32)ctl_pt[par].res_slow,capture);
+    ctl_emit(0x14D,(int32)ctl_pt[par].res_fast,capture);
+}
+
+/* Volcado de la tabla: dos tramas por par valido.  Se pide a mano, nunca sale
+ * solo, porque son hasta 162 tramas y cada una patea la cadena. */
+static void ctl_punto_volcar_uno(uint8 i)
+{
+    const CtlPunto *q=&ctl_pt[i];
+    uint32 a,b;
+    if(!ctl_pt_valido(q))return;
+    a=((uint32)(q->codes[0]+512)&0x3FFu)
+      |(((uint32)(q->codes[1]+512)&0x3FFu)<<10)
+      |(((uint32)(q->codes[2]+512)&0x3FFu)<<20);
+    b=((uint32)(q->codes[3]+512)&0x3FFu)
+      |((uint32)q->estado<<10)
+      |((uint32)(uint8)q->res_slow<<18)
+      |((uint32)(uint8)q->res_fast<<26);
+    ctl_emit((uint16)(0x300+i),(int32)a,0);
+    ctl_emit((uint16)(0x400+i),(int32)b,0);
+}
+static void ctl_punto_dump(uint8 par)
+{
+    uint8 i;
+    if(par<CTL_PT_N){ctl_punto_volcar_uno(par);return;}
+    for(i=0;i<CTL_PT_N;++i)ctl_punto_volcar_uno(i);
 }
 
 void control_on_gain_change(uint8 pga_code, uint8 pgaout_code, uint8 pga_changed)
@@ -372,8 +745,13 @@ void control_on_gain_change(uint8 pga_code, uint8 pgaout_code, uint8 pga_changed
      * raro y son cinco filas: la EEPROM aguanta 1e6 ciclos por fila. */
     if(ctl_pga_prev!=0xFFu && ctl_band) {
         ctl_punto_guardar(ctl_pga_prev,ctl_pgaout_prev);
-        if(ctl_punto_sucio)ctl_punto_store();
+        ctl_punto_store();
+        ctl_cand_anotar(CTL_PT_IDX(ctl_pga_prev,ctl_pgaout_prev));
     }
+    /* Contexto de ENTRADA al par nuevo, antes de tocar un solo codigo: SUMo
+     * medido mas el par lento son el proxy de la carga del acople de 680 uF,
+     * que es lo que decide donde aterrizan unos mismos codigos. */
+    ctl_ctx_tomar();
     /* La config tiene que seguir a la placa: si no, un APPLY o un arranque en
      * frio volverian a la ganancia vieja y el perfil guardado mentiria sobre
      * con que ganancia fue aprendido. */
@@ -395,8 +773,15 @@ void control_on_gain_change(uint8 pga_code, uint8 pgaout_code, uint8 pga_changed
     ctl_med_n=0;ctl_med_i=0;
     if(!ctl_scan){ctl_scan=1;ctl_select(0);}
     /* Si ya estuvimos en este par, saltar a sus codigos: ni rescate a ciegas
-     * ni aprendizaje. El forzado de arriba alcanza para el ajuste fino. */
-    if(ctl_punto_restaurar(pga_code,pgaout_code))return;
+     * ni aprendizaje. El forzado de arriba alcanza para el ajuste fino.
+     * OJO: aca se RETORNABA sin actualizar ctl_pga_prev, asi que el par
+     * anterior quedaba con el valor viejo y el proximo cambio de ganancia
+     * guardaba los codigos de ESTE par bajo la entrada de OTRO, corrompiendola.
+     * La rama de siembra de mas abajo ya lo actualizaba; esta se lo perdia. */
+    if(ctl_punto_elegir(pga_code,pgaout_code)) {
+        ctl_pga_prev=pga_code;ctl_pgaout_prev=pgaout_code;
+        return;
+    }
     /* Par nuevo: sembrar con el punto del par ANTERIOR en vez de buscar
      * desde cero.  Medido el 2026-09-19: a PGA x24 la busqueda a ciegas
      * nunca encuentra la ventana — un codigo del par lento mueve SUMo
@@ -410,6 +795,7 @@ void control_on_gain_change(uint8 pga_code, uint8 pgaout_code, uint8 pga_changed
      * forma de llegar. */
     if(pga_code>=CTL_PGA_SIEMBRA && ctl_pga_prev!=0xFFu &&
        ctl_punto_restaurar(ctl_pga_prev,ctl_pgaout_prev)) {
+        ctl_punto_origen=CTL_ORIGEN_SIEMBRA;
         ctl_pga_prev=pga_code;ctl_pgaout_prev=pgaout_code;
         return;
     }
@@ -549,10 +935,15 @@ void control_init(void)
      * de barrido consumidos re-aprendiendo algo que ya estaba guardado).  Solo
      * se siembra si la tabla no traia ya una entrada para ese par, que seria
      * mas nueva. */
+    ctl_punto_origen=ctl_profile?CTL_ORIGEN_PERFIL:CTL_ORIGEN_NADA;
+    for(i=0;i<4;++i)ctl_punto_semilla[i]=ctl_codes[i];
     if(ctl_profile && !ctl_punto_tiene((uint8)ctl_config.value[CP_PGA],
-                                       (uint8)ctl_config.value[CP_PGAOUT]))
+                                       (uint8)ctl_config.value[CP_PGAOUT])) {
         ctl_punto_guardar((uint8)ctl_config.value[CP_PGA],
                           (uint8)ctl_config.value[CP_PGAOUT]);
+        ctl_punto_store();
+    }
+    ctl_ctx_tomar();
     ctl_initialized=1;CySysTickStart();CySysTickSetCallback(0,control_tick);
     control_resume();
     /* Arranque en frio FORZADO: sin esto el lazo sale de la EEPROM, y si el
@@ -1098,7 +1489,6 @@ uint8 control_command(uint8 cmd,uint8 p1,uint8 p2)
     if(cmd==0xD7 && p1==0xFF){ctl_emit_trace();return 1;}
     if(cmd==0xD7){if(p1>=CP_COUNT)return 0;ctl_emit(p1,ctl_config.value[p1],0);return 1;}
     if(cmd!=0xD6)return 0;
-    (void)p2;
     switch(p1) {
     case CONTROL_APPLY:
         if(ctl_state==CONTROL_LEARNING || !control_config_valid(&ctl_staged,PSOC_AMUX_SIGNAL_CHANNEL_COUNT,CAL_AMUX_HAS_CAP_CHANNEL))return 0;
@@ -1113,6 +1503,7 @@ uint8 control_command(uint8 cmd,uint8 p1,uint8 p2)
         if(ctl_state==CONTROL_LEARNING)return 0;
         ctl_learning_had_profile=ctl_profile;
         for(i=0;i<4;++i)ctl_learning_restore[i]=ctl_codes[i];
+        ctl_punto_origen=CTL_ORIGEN_APRENDIZAJE;
         ctl_state=CONTROL_LEARNING;ctl_phase=0;ctl_learning_refinements=0;
         ctl_learning_slow_step=0;ctl_learning_have_pos=ctl_learning_have_neg=0;
         ctl_learning_start=ctl_phase_start=ctl_ms;
@@ -1125,6 +1516,48 @@ uint8 control_command(uint8 cmd,uint8 p1,uint8 p2)
     case CONTROL_PAUSE: control_prepare_capture();return 1;
     case CONTROL_RESUME: control_resume();return 1;
     case CONTROL_REPORT: ctl_report_count=0;control_emit_snapshot(0);return 1;
+    /* Siembra de la tabla de puntos.  El dato NO viene en p1/p2 -sobran dos
+     * bytes- sino en la palabra que quedo en CP_PUNTO_ARG con `ctl set`: esa
+     * es la unica forma de meter 32 bits sin un APPLY, y un APPLY reinicia el
+     * lazo en medio de un experimento. */
+    case CONTROL_PUNTO_SET: {
+        uint32 w=(uint32)ctl_staged.value[CP_PUNTO_ARG];
+        uint8 par=(uint8)(w&0x7Fu), cual=(uint8)((w>>7)&1u);
+        int16 a=(int16)((int32)((w>>8)&0x3FFu)-512);
+        int16 b=(int16)((int32)((w>>18)&0x3FFu)-512);
+        if(par>=CTL_PT_N||a<-255||a>255||b<-255||b>255)return 0;
+        ctl_pt[par].codes[cual?2u:0u]=a;
+        ctl_pt[par].codes[cual?3u:1u]=b;
+        /* El commit viene en la SEGUNDA palabra: hasta que no estan los cuatro
+         * codigos el registro no se marca valido ni se baja a la EEPROM. */
+        if(w&0x10000000UL) {
+            ctl_pt[par].estado=(uint8)(ctl_pt[par].estado|1u);
+            ctl_pt_set_fallos(&ctl_pt[par],0u);
+            ctl_pt[par].res_slow=0;ctl_pt[par].res_fast=0;
+            ctl_pt_store_one(par);
+        }
+        return 1;
+    }
+    case CONTROL_PUNTO_DUMP: ctl_punto_dump(p2); return 1;
+    case CONTROL_PUNTO_CLEAR:
+        if(p2<CTL_PT_N) {
+            if(ctl_pt_valido(&ctl_pt[p2])){ctl_pt[p2].estado=0u;ctl_pt_store_one(p2);}
+        } else if(p2==0xFFu) {
+            /* Solo se reescribe lo que estaba valido: borrar los 81 a ciegas
+             * son 162 filas de EEPROM y varios segundos con el lazo parado. */
+            for(i=0;i<CTL_PT_N;++i)
+                if(ctl_pt_valido(&ctl_pt[i])){ctl_pt[i].estado=0u;ctl_pt_store_one(i);}
+            for(i=0;i<CTL_CAND_N;++i)ctl_cand[i].par=0xFFu;
+        } else return 0;
+        return 1;
+    /* La politica se cambia EN CALIENTE, sin APPLY: pasar de un brazo
+     * experimental a otro no tiene por que reiniciar el nodo ni tirar el
+     * punto de trabajo que ya estaba. */
+    case CONTROL_PUNTO_POL:
+        if(p2>(uint8)CTL_POL_INTERPOLADO)return 0;
+        ctl_config.value[CP_PUNTO_POLICY]=(int32)p2;
+        ctl_staged.value[CP_PUNTO_POLICY]=(int32)p2;
+        return 1;
     default:return 0;
     }
 }

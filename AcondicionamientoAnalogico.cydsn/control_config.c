@@ -62,7 +62,10 @@ void control_config_defaults(ControlConfig *c)
         /* Recentrado lento: si lleva 5 min congelado con |LPo| pasado 15 mV,
          * un solo codigo hacia el centro.  Es la unica forma de que la deriva
          * no lo deje pegado a un borde de la banda. */
-        15000, 300000
+        15000, 300000,
+        /* Memoria de puntos: VECINO por omision.  Elige la condicion inicial
+         * al cambiar de ganancia; el lazo corrige igual despues. */
+        2, 0
     };
     memcpy(c->value, defaults, sizeof defaults);
 }
@@ -76,7 +79,9 @@ int control_config_valid(const ControlConfig *c, unsigned channels, unsigned has
         500,1,1000,0,
         0,1000,1,1000,1000,
         /* v5: recentrado lento (umbral y periodo; 0 = apagado). */
-        0,0
+        0,0,
+        /* v6: politica de memoria de puntos y palabra de trabajo. */
+        0,-2000000000
     };
     static const int32_t high[CP_COUNT] = {
         8,8,4096,1,60000,600000,100,100,1000000,60000,255,255,600000,
@@ -85,7 +90,8 @@ int control_config_valid(const ControlConfig *c, unsigned channels, unsigned has
         255,255,100000,120000,255,255,
         1000000,255,600000,10000,
         3600000,1000000,20,600000,600000,
-        1000000,3600000
+        1000000,3600000,
+        3,2000000000
     };
     for (i=0; i<CP_COUNT; ++i)
         if(c->value[i]<low[i] || c->value[i]>high[i]) return 0;
