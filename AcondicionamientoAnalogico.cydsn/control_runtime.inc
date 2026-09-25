@@ -21,6 +21,9 @@ static uint32 ctl_learning_prev_ms;
  * ctl_lp_sum_neg guardan con que SUMo quedo LPo de cada lado. */
 static int32 ctl_learn_target, ctl_lp_sum_pos, ctl_lp_sum_neg;
 static uint8 ctl_lp_have_pos, ctl_lp_have_neg, ctl_target_libre;
+/* Paso de la EXPANSION del objetivo de SUMo, que se duplica hasta que LPo
+ * cambia de signo.  0 = todavia no se expandio. */
+static int32 ctl_target_paso;
 /* Mejor |LPo| alcanzado en la visita actual a la fase 2. */
 static int32 ctl_lp_mejor;
 /* Correccion MEDIDA del modelo de pendiente del par lento, en milesimas.
@@ -93,7 +96,12 @@ static uint8 ctl_load_slot(uint8 slot)
     uint16 i,base=(uint16)(256u+256u*slot);
     for(i=0;i<256;++i) ctl_image[i]=EEPROM_ReadByte(base+i);
     return ctl_image[0]==0x47 && ctl_image[1]==0x43 &&
-        (ctl_image[2]==3u || ctl_image[2]==4u || ctl_image[2]==CONTROL_NV_VERSION) &&
+        /* Toda version conocida se acepta y se decodifica con SU cantidad de
+         * parametros (ver control_init).  Si aca solo se aceptara la version
+         * vigente, cada vez que se agrega un parametro el nodo tiraria el
+         * perfil aprendido y arrancaria en FALTA_APRENDER. */
+        (ctl_image[2]==3u || ctl_image[2]==4u || ctl_image[2]==5u ||
+         ctl_image[2]==CONTROL_NV_VERSION) &&
         ctl_image[3]==PSOC_HW_CLASS &&
         control_crc(ctl_image,254)==((uint16)ctl_image[254]|((uint16)ctl_image[255]<<8));
 }
@@ -348,6 +356,18 @@ static void ctl_pt_set_aciertos(CtlPunto *q,uint8 n)
 static void ctl_pt_set_fallos(CtlPunto *q,uint8 n)
 { if(n>7u)n=7u; q->estado=(uint8)((q->estado&(uint8)(~(7u<<5)))|(uint8)(n<<5)); }
 
+/* Con la politica en OFF la memoria de puntos queda COMPLETAMENTE inerte: no
+ * restaura, no guarda, no anota candidatos y no degrada entradas.  La guarda
+ * va DENTRO de cada funcion y no en los sitios de llamada, porque los sitios
+ * son once y alcanza con olvidarse de uno.
+ *
+ * Que no guarde es tan importante como que no restaure: si el brazo de
+ * CONTROL de un experimento sigue escribiendo la tabla, esta alimentando la
+ * memoria que el brazo de MEMORIA va a usar despues, y los dos brazos dejan
+ * de ser independientes.  Medido el 2026-09-25. */
+static uint8 ctl_punto_activa(void)
+{ return (uint8)(ctl_config.value[CP_PUNTO_POLICY]>(int32)CTL_POL_OFF); }
+
 /* Puntuacion de un punto: MENOR es mejor.  No alcanza con |LPo|: un punto
  * centrado pero con IDAC3 contra el tope esta en banda y sin autoridad, y al
  * primer cambio de temperatura se cae.  Guardar por "mejor |LPo|" propagaba
@@ -497,6 +517,7 @@ static void ctl_ctx_tomar(void)
  * tau=34 s da 18,8 mV/codigo cuando en regimen son 12,3. */
 static void ctl_cand_anotar(uint8 par)
 {
+    if(!ctl_punto_activa())return;
     uint8 i,libre=CTL_CAND_N,j;
     int16 lpo=(int16)(ctl_dc[4]/1000);
     for(i=0;i<CTL_CAND_N;++i) {
@@ -568,6 +589,7 @@ static uint8 ctl_cand_interp(uint8 par,int16 *out)
  * entre acumular evidencia y pisarla. */
 static void ctl_punto_guardar(uint8 pga,uint8 pgaout)
 {
+    if(!ctl_punto_activa())return;
     uint8 idx,j;
     int16 lpo;
     CtlPunto *q;
@@ -605,6 +627,7 @@ static void ctl_punto_guardar(uint8 pga,uint8 pgaout)
  * al tercer fallo se invalida. */
 static void ctl_punto_olvidar(uint8 pga,uint8 pgaout)
 {
+    if(!ctl_punto_activa())return;
     uint8 idx,i;
     CtlPunto *q;
     if(pga>8u||pgaout>8u)return;
@@ -699,34 +722,53 @@ static void ctl_punto_emitir(uint8 capture)
     if(pga>8u||pgaout>8u)return;
     par=CTL_PT_IDX(pga,pgaout);
     for(k=0;k<CTL_PT_N;++k)if(ctl_pt_valido(&ctl_pt[k]))++n;
-    ctl_emit(0x140,(int32)ctl_punto_origen,capture);
+    /* El ORIGEN y la SEMILLA NO se reemiten aca.  Son propiedad de la visita
+     * y solo salen como EVENTO (al cambiar de ganancia y al aplicar un
+     * punto).  Reemitirlos cada 30 reportes era el vector por el que una
+     * visita que no aplico ningun punto terminaba reportando el origen de la
+     * anterior: el host limpia la clave al empezar, pero el snapshot se la
+     * volvia a mandar.  Medido el 2026-09-24 en el brazo de CONTROL. */
     ctl_emit(0x141,(int32)ctl_pt_aciertos(&ctl_pt[par]),capture);
     ctl_emit(0x142,(int32)ctl_pt_fallos(&ctl_pt[par]),capture);
     ctl_emit(0x143,(int32)ctl_cand_n_par(par),capture);
     ctl_emit(0x144,ctl_config.value[CP_PUNTO_POLICY],capture);
     ctl_emit(0x145,(int32)ctl_ctx_sum_mv,capture);
     ctl_emit(0x146,(int32)n,capture);
-    for(k=0;k<4;++k)ctl_emit((uint16)(0x148+k),(int32)ctl_punto_semilla[k],capture);
     ctl_emit(0x14C,(int32)ctl_pt[par].res_slow,capture);
     ctl_emit(0x14D,(int32)ctl_pt[par].res_fast,capture);
 }
 
-/* Volcado de la tabla: dos tramas por par valido.  Se pide a mano, nunca sale
- * solo, porque son hasta 162 tramas y cada una patea la cadena. */
+/* Volcado de la tabla: TRES tramas por par valido, con claves FIJAS que se
+ * repiten en secuencia (par, luego sus dos palabras).
+ *
+ * No se usa una clave por par -0x300+i, que seria lo natural- porque el ESP
+ * DESCARTA toda clave >= 512: `if(key>=512){++_badLen;return;}` en
+ * psoc_uart.cpp.  Con 0x300 y 0x400 el volcado salia del PSoC y moria en el
+ * ESP sin dejar rastro, y la tabla parecia vacia aunque tuviera entradas.
+ *
+ * Como el ESP imprime CADA trama que recibe, el host las lee en orden y
+ * arma los tripletes; que `_controlLive[key]` se pise no importa. */
+#define CTL_PT_K_PAR 0x150u
+#define CTL_PT_K_A   0x151u
+#define CTL_PT_K_B   0x152u
 static void ctl_punto_volcar_uno(uint8 i)
 {
     const CtlPunto *q=&ctl_pt[i];
-    uint32 a,b;
+    uint32 a,b,cab;
     if(!ctl_pt_valido(q))return;
+    /* Los residuos viajan en la palabra del par: metidos en la de abajo se
+     * pasaban de 32 bits y res_fast perdia sus dos bits altos. */
+    cab=(uint32)i
+        |((uint32)(uint8)q->res_slow<<8)
+        |((uint32)(uint8)q->res_fast<<16);
     a=((uint32)(q->codes[0]+512)&0x3FFu)
       |(((uint32)(q->codes[1]+512)&0x3FFu)<<10)
       |(((uint32)(q->codes[2]+512)&0x3FFu)<<20);
     b=((uint32)(q->codes[3]+512)&0x3FFu)
-      |((uint32)q->estado<<10)
-      |((uint32)(uint8)q->res_slow<<18)
-      |((uint32)(uint8)q->res_fast<<26);
-    ctl_emit((uint16)(0x300+i),(int32)a,0);
-    ctl_emit((uint16)(0x400+i),(int32)b,0);
+      |((uint32)q->estado<<10);
+    ctl_emit(CTL_PT_K_PAR,(int32)cab,0);
+    ctl_emit(CTL_PT_K_A,(int32)a,0);
+    ctl_emit(CTL_PT_K_B,(int32)b,0);
 }
 static void ctl_punto_dump(uint8 par)
 {
@@ -752,6 +794,17 @@ void control_on_gain_change(uint8 pga_code, uint8 pgaout_code, uint8 pga_changed
      * medido mas el par lento son el proxy de la carga del acople de 680 uF,
      * que es lo que decide donde aterrizan unos mismos codigos. */
     ctl_ctx_tomar();
+    /* El origen y la semilla son GLOBALES PEGAJOSOS: si esta visita no aplica
+     * ningun punto (politica 0, o aprendizaje), sin esto el firmware seguiria
+     * reportando los de la visita ANTERIOR y el host calcularia un residuo
+     * contra una semilla que nunca se uso.  Medido el 2026-09-24: el brazo de
+     * CONTROL salia con el mismo origen y el mismo residuo que el brazo de
+     * MEMORIA que corrio justo antes, o sea que la referencia del experimento
+     * estaba copiando a lo que tenia que medir.
+     * Se emite como evento para que el host lo vea al principio de la visita. */
+    ctl_punto_origen=CTL_ORIGEN_NADA;
+    ctl_emit(0x140,(int32)CTL_ORIGEN_NADA,0);
+    ctl_emit(0x144,ctl_config.value[CP_PUNTO_POLICY],0);
     /* La config tiene que seguir a la placa: si no, un APPLY o un arranque en
      * frio volverian a la ganancia vieja y el perfil guardado mentiria sobre
      * con que ganancia fue aprendido. */
@@ -793,7 +846,14 @@ void control_on_gain_change(uint8 pga_code, uint8 pgaout_code, uint8 pga_changed
      * un par lejano la empeoro a 350 s; recien de x16 para arriba la
      * busqueda a ciegas no encuentra la ventana y la siembra es la unica
      * forma de llegar. */
-    if(pga_code>=CTL_PGA_SIEMBRA && ctl_pga_prev!=0xFFu &&
+    /* La siembra desde el vecino TAMBIEN es reutilizar un punto guardado, asi
+     * que tiene que respetar la politica.  Sin esta guarda el brazo de CONTROL
+     * del experimento recibe un punto igual que el de MEMORIA en cuanto el PGA
+     * llega a x16, y los dos brazos se parecen por construccion: el
+     * experimento mediria "no hay diferencia" porque no hay control.
+     * Medido el 2026-09-25 al entrar en x50/x48/x32. */
+    if(ctl_config.value[CP_PUNTO_POLICY]>(int32)CTL_POL_OFF &&
+       pga_code>=CTL_PGA_SIEMBRA && ctl_pga_prev!=0xFFu &&
        ctl_punto_restaurar(ctl_pga_prev,ctl_pgaout_prev)) {
         ctl_punto_origen=CTL_ORIGEN_SIEMBRA;
         ctl_pga_prev=pga_code;ctl_pgaout_prev=pgaout_code;
@@ -902,8 +962,16 @@ void control_init(void)
         uint8 legacy=ctl_image[2]==3u;
         /* Cada version guardo su propia cantidad de parametros; los que no
          * estan en la imagen quedan con el valor de fabrica. */
+        /* Cada version guardo SU cantidad de parametros.  Sin la rama de la v5
+         * una imagen v5 se decodifica con el CP_COUNT nuevo (49) sobre 47
+         * guardados: lee ocho bytes de mas -que son el perfil y sus codigos-,
+         * los mete en CP_PUNTO_POLICY/ARG, control_config_valid() falla y el
+         * PERFIL APRENDIDO SE TIRA.  Visto el 2026-09-24 al grabar: el nodo
+         * arranco en FALTA_APRENDER con un perfil perfectamente bueno en la
+         * EEPROM. */
         uint16 count=legacy?CONTROL_CONFIG_COUNT_V3:
-                     (ctl_image[2]==4u?CONTROL_CONFIG_COUNT_V4:CP_COUNT);
+                     (ctl_image[2]==4u?CONTROL_CONFIG_COUNT_V4:
+                      (ctl_image[2]==5u?CONTROL_CONFIG_COUNT_V5:CP_COUNT));
         control_config_decode_n(&ctl_staged,ctl_image+8,count);
         if(legacy) {
             /* v3 stored a fast-loop tuning in the wrong domain.  Keep what
@@ -1267,6 +1335,58 @@ static void ctl_learning(uint32 now)
          * como el resto del lazo.  Si el objetivo de fabrica ya deja a LPo
          * adentro esto no se activa nunca y los pares que ya andaban no
          * cambian. */
+        /* Un solo lado visto: EXPANDIR el objetivo por SIGNO hasta cruzar.
+         *
+         * La biseccion de abajo necesita LPo de los dos lados, y con LPo
+         * clavado en un riel nunca cruza: el bracket no se arma nunca y el
+         * objetivo se queda en el de fabrica.  Medido el 2026-09-25 a x4/x16
+         * (ganancia 64): SUMo centrado en +34 mV y LPo pegado en -265 mV
+         * mientras IDAC3 recorria 69 codigos sin mover LPo un milivoltio.
+         *
+         * El cero de LPo NO esta en SUMo=0 y ADEMAS se mueve con la ganancia:
+         * a x50/x1 se anula en SUMo ~-19 mV y a x4/x16 en ~+7 mV.  Un objetivo
+         * fijo aterriza afuera por construccion.  Lo unico confiable con un
+         * tap saturado es su SIGNO, asi que se camina el objetivo en el
+         * sentido que reduce |LPo| -la etapa invierte: LPo baja cuando SUMo
+         * sube- duplicando el paso hasta que LPo cambia de signo.  Ahi se
+         * arma el bracket y manda la biseccion. */
+        /* El disparador NO puede ser solo "LPo afuera".  Medido el 2026-09-25
+         * a x4/x16: el par lento se planto en SUMo +17 mV cuando el cero de
+         * LPo estaba en +7, y esos 10 mV por la ganancia de -6,2 de la etapa
+         * son ~62 mV que IDAC3 absorbio GASTANDO TODO SU RANGO, de 39 a 255.
+         * LPo entro en banda raspando, asi que por el criterio viejo estaba
+         * todo bien -y el punto quedaba en banda y sin autoridad, que es la
+         * clase de punto que se cae al primer cambio de temperatura-.
+         * La senial de que el par lento dejo residuo es IDAC3 AGOTADO. */
+        if(ctl_target_libre && !(ctl_lp_have_pos && ctl_lp_have_neg) &&
+           ctl_seen[4] && ctl_seen[3] && ctl_valid[3] &&
+           (!ctl_valid[4] || magnitude(ctl_dc[4])>v[CP_DEADBAND_UV] ||
+            magnitude((int32)ctl_pi.fine)>v[CP_FINE_MID])) {
+            int32 paso=ctl_target_paso?ctl_target_paso:(v[CP_STABLE_UV]*2);
+            /* Si el disparador fue IDAC3 agotado, el sentido lo marca EL
+             * ACTUADOR y no LPo: IDAC3 contra su tope positivo esta
+             * empujando LPo hacia arriba, o sea que sin el LPo seria mas
+             * negativo, o sea que hay que bajar SUMo.  Cuando LPo todavia
+             * esta afuera manda su propio signo, que es mas directo. */
+            int32 dir;
+            if(ctl_valid[4] && magnitude(ctl_dc[4])<=v[CP_DEADBAND_UV])
+                dir=(ctl_pi.fine>0)?-1:1;
+            else
+                dir=(ctl_dc[4]<0)?-1:1;
+            int32 nuevo=ctl_learn_target+dir*paso;
+            int32 tope=v[CP_VALID_HIGH_UV]-v[CP_MARGIN_UV];
+            int32 piso=v[CP_VALID_LOW_UV]+v[CP_MARGIN_UV];
+            if(nuevo>tope)nuevo=tope;
+            if(nuevo<piso)nuevo=piso;
+            if(paso<v[CP_STABLE_UV]*16)ctl_target_paso=paso*2;
+            if(nuevo!=ctl_learn_target) {
+                ctl_learn_target=nuevo;
+                ctl_emit(0x10A,nuevo,0);
+                ctl_phase=0;ctl_phase_start=now;
+                ctl_learning_prev_ms=now;ctl_learning_prev_sum=ctl_dc[3];
+                return;
+            }
+        }
         if(ctl_target_libre && ctl_lp_have_pos && ctl_lp_have_neg &&
            magnitude(ctl_lp_sum_pos-ctl_lp_sum_neg)>v[CP_STABLE_UV] &&
            (!ctl_valid[4] || magnitude(ctl_dc[4])>v[CP_DEADBAND_UV])) {
@@ -1509,7 +1629,7 @@ uint8 control_command(uint8 cmd,uint8 p1,uint8 p2)
         ctl_learning_start=ctl_phase_start=ctl_ms;
         ctl_bueno_desde=0u;
         ctl_learn_target=ctl_config.value[CP_OPA_TARGET_UV];
-        ctl_lp_have_pos=ctl_lp_have_neg=ctl_target_libre=0u;
+        ctl_lp_have_pos=ctl_lp_have_neg=ctl_target_libre=0u;ctl_target_paso=0;
         ctl_learning_prev_ms=ctl_ms;ctl_learning_prev_sum=ctl_dc[3];
         for(i=0;i<4;++i)ctl_write(i,i<2?0:(int16)ctl_config.value[i==2?CP_INITIAL2:CP_INITIAL3]);
         ctl_route_start();return 1;
