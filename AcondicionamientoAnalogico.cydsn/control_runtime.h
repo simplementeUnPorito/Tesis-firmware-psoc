@@ -36,6 +36,20 @@ uint8 control_set_view_channel(uint8 channel);
 /* Fuerza al lazo a corregir sin congelarse durante `seconds`. 0 cancela.
  * Devuelve 0 si el lazo no esta corriendo (pausado por captura o aprendiendo). */
 uint8 control_force_pi(uint16 seconds);
+/* Avisa al lazo que ALGUIEN MAS movio un IDAC (el comando manual 0xAA).
+ *
+ * Sin esto la escritura manual dura menos de un periodo del PI: el lazo
+ * reescribe `ctl_pi.fine`/`ctl_pi.coarse` en cada tick aunque este congelado,
+ * asi que deshace la inyeccion en ~3 s y la telemetria nunca llega a
+ * mostrarla.  Comprobado el 2026-09-26: se pidio IDAC3=255 y el tap siguio
+ * reportando 154 durante los seis minutos del tramo.
+ *
+ * Eso invalidaba toda inyeccion manual con el lazo corriendo, incluida la
+ * prueba de lazo cerrado -que creia perturbar el punto de trabajo y no
+ * perturbaba nada-.  Con este aviso el lazo adopta el valor nuevo como estado
+ * propio y corrige DESDE ahi, que es lo que una prueba de inyeccion necesita.
+ */
+void control_note_manual_dac(uint8 stage, int16 code);
 /* Avisa al lazo que cambio una ganancia: el punto de trabajo se multiplico,
  * asi que hay que rehacerlo sin esperar a la histeresis ni al enfriamiento
  * del actuador grueso. */

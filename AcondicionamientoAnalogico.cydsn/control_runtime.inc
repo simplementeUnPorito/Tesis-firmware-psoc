@@ -895,6 +895,19 @@ static const ControlConfig *ctl_effective_config(void)
     ctl_scaled.value[CP_COARSE_SLOPE_UV]=escalada;
     return &ctl_scaled;
 }
+void control_note_manual_dac(uint8 stage, int16 code)
+{
+    if(!ctl_initialized || stage>3u)return;
+    /* El DAC ya lo escribio quien llamo (0xAA).  Aca solo se sincroniza el
+     * estado del lazo para que no lo pise en el proximo tick. */
+    ctl_codes[stage]=code;
+    if(stage==3u)ctl_pi.fine=code;
+    else if(stage==2u)ctl_pi.coarse=code;
+    /* El integrador venia acumulando contra el valor viejo: arrastrarlo
+     * despues de un salto manual hace que la primera correccion salga con un
+     * error que ya no existe. */
+    ctl_pi.has_previous=0;ctl_pi.fraction=0;
+}
 uint8 control_force_pi(uint16 seconds)
 {
     if(!ctl_initialized || ctl_state!=CONTROL_RUNNING)return 0u;
@@ -1215,10 +1228,16 @@ static void ctl_learning(uint32 now)
      * atajo aceptaba con LPo todavia yendo hacia el riel opuesto — el nodo
      * pasaba a RUNNING contra el riel y el lazo rapido quedaba saturado.
      * CP_STABLE_MS (10 s) distingue las dos cosas. */
+    /* El atajo exige lo MISMO que la fase 2, vernier incluido.  Si no, es un
+     * bypass: medido el 2026-09-25 a x4/x16, el aprendizaje salia por aca con
+     * LPo en banda e IDAC3 en 233 de 255, y la verificacion de la fase 2 no
+     * llegaba a correr nunca.  Un atajo que acepta lo que el camino largo
+     * rechaza no es un atajo, es un agujero. */
     if(ctl_seen[3] && ctl_valid[3] && ctl_seen[4] && ctl_valid[4] &&
        now-ctl_stamp[3]<=ctl_scan_ms(now)*3u &&
        now-ctl_stamp[4]<=ctl_scan_ms(now)*3u &&
-       magnitude(ctl_dc[4])<=v[CP_SETTLED_BAND_UV]) {
+       magnitude(ctl_dc[4])<=v[CP_SETTLED_BAND_UV] &&
+       magnitude((int32)ctl_codes[3])<=v[CP_FINE_LIMIT]/2) {
         if(ctl_bueno_desde==0u)ctl_bueno_desde=now;
         else if(now-ctl_bueno_desde>=(uint32)v[CP_STABLE_MS]) {
             for(i=0;i<4;++i)ctl_saved_codes[i]=ctl_codes[i];
@@ -1239,6 +1258,19 @@ static void ctl_learning(uint32 now)
      * otro riel pasaba entre dos visitas— y la biseccion no llegaba a
      * activarse nunca.  Se guarda el valor que ESTRECHA el intervalo, no el
      * ultimo que tocó, que es lo que la hace converger. */
+    /* El bracket se anota SOLO con LPo fuera de banda, y eso es deliberado.
+     * Probe agregar aca el caso "vernier agotado con LPo adentro" y fue un
+     * error que trabo el aprendizaje: con LPo en banda SUMo casi no se mueve
+     * -medido el 2026-09-26: 13,4 mV durante 300 s-, asi que los dos lados del
+     * bracket se llenaban con casi el MISMO SUMo.  Con los dos lados marcados
+     * la expansion se bloquea (cree que ya tiene el intervalo) y la biseccion
+     * no puede actuar porque exige que los lados difieran mas de CP_STABLE_UV.
+     * El lazo se quedaba aprendiendo hasta el timeout.
+     *
+     * No hace falta: el disparador de la EXPANSION ya reconoce el vernier
+     * agotado, y mientras LPo siga adentro el bracket no se llena, asi que la
+     * expansion corre, corre el objetivo, y cuando LPo cruza al otro lado el
+     * bracket se completa solo con dos SUMo realmente distintos. */
     if(ctl_seen[3] && ctl_valid[3] && ctl_seen[4] &&
        (!ctl_valid[4] || magnitude(ctl_dc[4])>v[CP_DEADBAND_UV])) {
         uint8 arriba=(ctl_dc[4]>0);
@@ -1361,7 +1393,16 @@ static void ctl_learning(uint32 now)
         if(ctl_target_libre && !(ctl_lp_have_pos && ctl_lp_have_neg) &&
            ctl_seen[4] && ctl_seen[3] && ctl_valid[3] &&
            (!ctl_valid[4] || magnitude(ctl_dc[4])>v[CP_DEADBAND_UV] ||
-            magnitude((int32)ctl_pi.fine)>v[CP_FINE_MID])) {
+            magnitude((int32)ctl_pi.fine)>v[CP_FINE_LIMIT]/2)) {
+            /* El umbral del vernier agotado es FINE_LIMIT/2 y no CP_FINE_MID
+             * (240) por lo mismo que en la fase 2: el lazo estaciona en 213 a
+             * 233 y nunca llega a 240, asi que con FINE_MID este disparador
+             * no se cumplia jamas —verificado: la biseccion no se activo ni
+             * una vez en una corrida entera de aprendizaje—.  Y tiene que ser
+             * el MISMO umbral que usa la fase 2 para rechazar el perfil: si la
+             * fase 2 libera el objetivo por vernier agotado y la fase 1 no lo
+             * reconoce como motivo, el aprendizaje rebota entre las dos sin
+             * mover nada. */
             int32 paso=ctl_target_paso?ctl_target_paso:(v[CP_STABLE_UV]*2);
             /* Si el disparador fue IDAC3 agotado, el sentido lo marca EL
              * ACTUADOR y no LPo: IDAC3 contra su tope positivo esta
@@ -1387,9 +1428,14 @@ static void ctl_learning(uint32 now)
                 return;
             }
         }
+        /* Misma correccion que arriba: el vernier agotado tambien es motivo
+         * para cerrar la biseccion sobre el medio.  Si no, con LPo en banda y
+         * IDAC3 en 233 esta rama no se ejecuta, el objetivo queda donde la
+         * expansion lo dejo y el aprendizaje acepta el punto sin margen. */
         if(ctl_target_libre && ctl_lp_have_pos && ctl_lp_have_neg &&
            magnitude(ctl_lp_sum_pos-ctl_lp_sum_neg)>v[CP_STABLE_UV] &&
-           (!ctl_valid[4] || magnitude(ctl_dc[4])>v[CP_DEADBAND_UV])) {
+           (!ctl_valid[4] || magnitude(ctl_dc[4])>v[CP_DEADBAND_UV] ||
+            magnitude((int32)ctl_pi.fine)>v[CP_FINE_LIMIT]/2)) {
             int32 medio=(int32)(((int64)ctl_lp_sum_pos+(int64)ctl_lp_sum_neg)/2);
             if(medio!=ctl_learn_target) {
                 ctl_learn_target=medio;
@@ -1424,7 +1470,39 @@ static void ctl_learning(uint32 now)
          * en -20,0 mV y LPo en +51,0 —seis milivoltios fuera de la banda
          * muerta, y holgadamente dentro de la ventana de +-97,7— y lo
          * descarto para seguir buscando. */
-        if(!ctl_all_healthy(now) || magnitude(ctl_dc[4])>v[CP_SETTLED_BAND_UV]) {
+        /* ...pero "donde el vernier pueda terminar" hay que MEDIRLO, no
+         * suponerlo.  Barrido de IDAC3 a x4/x16 el 2026-09-25, con el PI
+         * pasivo (banda muerta ensanchada a 95 mV) y 160 codigos sin saturar:
+         *
+         *     0,129 mV por codigo  ->  66 mV en TODO su rango de 510
+         *
+         * O sea que el vernier entero cubre un tercio de la ventana valida
+         * (+-97 mV), y la banda de aceptacion de 60 mV le pide casi el doble
+         * de lo que tiene.  Por eso el aprendizaje venia aceptando puntos con
+         * IDAC3 en 213, 231, 233, 248: LPo en banda y el actuador agotado, que
+         * es justo la clase de punto que la primera deriva termica se lleva
+         * puesto.  Y peor: con el vernier ya en el tope, los dos remedios que
+         * existen -el descargue y la biseccion del objetivo- estan gatillados
+         * en CP_FINE_MID = 240 y el lazo estaciona en 233, siete codigos
+         * cortos de disparar su propia cura.
+         *
+         * Entonces el perfil tiene que dejar DOS cosas, no una: LPo en banda
+         * Y el vernier con margen.  Si LPo entro pero IDAC3 esta pasado de la
+         * mitad de su rango, esto NO es un perfil aceptable: se trata igual
+         * que "todavia no llego", o sea se reinicia el reloj de estabilidad y,
+         * pasadas las mismas 2 a 4 tau, se libera el objetivo de SUMo para que
+         * la biseccion lo corra.  Hay a donde ir: un codigo de IDAC1 mueve LPo
+         * 17,79 mV (medido en el mismo barrido), asi que contra el par lento
+         * el vernier tiene 3,7 veces el rango que necesita.  Contra IDAC2, con
+         * ~150 mV por codigo, no llegaba ni a la mitad: los actuadores no eran
+         * insuficientes, estaban mal emparejados.
+         *
+         * Se usa FINE_LIMIT/2 y no CP_FINE_MID a proposito: FINE_MID es el
+         * umbral de los remedios y subirlo o bajarlo cambia otras dos ramas;
+         * esto es una condicion de ACEPTACION y no necesita parametro nuevo
+         * -agregar uno sube la version de NV y tira el perfil aprendido-. */
+        if(!ctl_all_healthy(now) || magnitude(ctl_dc[4])>v[CP_SETTLED_BAND_UV] ||
+           magnitude((int32)ctl_codes[3])>v[CP_FINE_LIMIT]/2) {
             int32 dist=ctl_seen[4]?magnitude(ctl_dc[4]):INT32_MAX;
             /* Mientras LPo MEJORE no se abandona el punto: el reloj de
              * "este punto no sirve" se reinicia.  Si no, el lazo rapido esta

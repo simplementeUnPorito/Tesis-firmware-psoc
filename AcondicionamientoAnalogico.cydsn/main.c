@@ -2784,6 +2784,10 @@ static void uart_service(void)
                                  * verificacion: no guardarla como calibracion
                                  * buena sin volver a ejecutar el PI. */
                                 g_last_calibration_ok = 0u;
+                                /* Y avisarle al lazo, que si no reescribe su
+                                 * propio valor en el proximo tick y deshace
+                                 * esto antes de que se alcance a medir. */
+                                control_note_manual_dac(stage, code);
                             }
                             uart_send_cfg_ack(0xAAu, ok ? rx_p1 : 0xFFu);
                         }
