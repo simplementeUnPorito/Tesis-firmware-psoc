@@ -34,7 +34,29 @@ void control_config_defaults(ControlConfig *c)
         /* SUMo band is a rail guard, not a target: IDAC3 absorbs a SUMo
          * offset of tens of mV, and a band inside SUMo's noise made IDAC2
          * chase noise forever, kicking LPo across its window each time. */
-        60000, 1, 2500, -150000,
+        /* 2026-09-26: FINE_SLOPE baja de 2500 a 450 uV/codigo.  Los 2500
+         * salieron de mirar transiciones del propio lazo, donde el par lento
+         * se mueve al mismo tiempo, asi que le atribuian a IDAC3 un efecto que
+         * no era suyo.  Medido ahora con el PI congelado (banda muerta ancha),
+         * escalon de 120 codigos, permanencias de 360 s (~9 tau) y estimador
+         * A-B-A-B-A que cancela la deriva lineal:
+         *
+         *     x4/x16 -> 0,49 mV/codigo      x1/x1 -> 0,41 mV/codigo
+         *
+         * Los dos extremos de la tabla de ganancias coinciden, y dos escalones
+         * distintos en el mismo punto (10 y 30 codigos) dieron 0,420 y 0,409:
+         * el vernier es lineal y su efecto NO escala con la ganancia -inyecta
+         * en la etapa LP, aguas abajo del PGA y del PGAout-.  Por eso alcanza
+         * un solo numero para los 81 pares y NO hace falta escalarlo como se
+         * hace con la pendiente gruesa en ctl_effective_config().
+         *
+         * Con 2500 el PI creia que el vernier era cinco veces mas fuerte y
+         * corregia cinco veces de menos: se lo veia mover tres codigos en mil
+         * segundos con LPo a -79 mV.  Corregido, el aprendizaje de x4/x16 paso
+         * de agotar el timeout de 1200 s sin converger a aceptar a los 285 s,
+         * con IDAC3 en 102 en vez de 148 y el pico a pico de LPo cayendo de
+         * 90 mV a 8. */
+        60000, 1, 450, -150000,
         /* Slow slopes: measured from the accepted 0 -> (1,-2) learning
          * transition in the same bank domain. */
         600, 400, 43700, 0, 500000, 1200000,
