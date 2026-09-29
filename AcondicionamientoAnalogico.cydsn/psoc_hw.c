@@ -349,7 +349,7 @@ static uint8  g_sd_diag_last_r1  = 0xFFu;
 static uint8  g_sd_diag_pins     = 0u;
 static uint8  g_sd_diag_timeout  = 0u;
 
-/* CS (P1.6 en la placa actual) quedó ruteado al `ss` de hardware del BSPIM, que deassertea entre
+/* CS (P2.3) quedó ruteado al `ss` de hardware del BSPIM, que deassertea entre
  * bytes. Se lo desengancha del DSI con el bypass del puerto (patrón calcado de
  * tx1_gpio_detach_dsi) para manejarlo por software durante toda la transacción. */
 /* En la placa nueva los cuatro pines de SPIp ya no caen en el mismo puerto,
@@ -372,20 +372,6 @@ static uint8  g_sd_diag_timeout  = 0u;
     #define SD_CS_OE_SEL1       SPIp__0__PRTDSI__OE_SEL1
 #endif
 #define SD_CS_MASK              SPIp__CS__MASK
-#define SD_GPIO_VTRIP_LVTTL     0x01u
-
-/* La SD entrega MISO a 3.3 V aunque el modulo se alimente con 5 V. P15 fue
- * generado con umbral CMOS; con VDDIO=5 V ese alto queda marginal. El bit 0
- * de PRTx_CTL selecciona LVTTL para todo el puerto y conserva el resto de la
- * configuracion (P15.0/Rx tambien acepta sin problema el umbral TTL). */
-static void sd_miso_use_lvttl(void)
-{
-    reg8 *ctl = (reg8 *)SPIp__MISO__CTL;
-    uint8 saved = CyEnterCriticalSection();
-    *ctl |= SD_GPIO_VTRIP_LVTTL;
-    CyExitCriticalSection(saved);
-    CyPins_SetPinDriveMode(SPIp_MISO, CY_PINS_DM_RES_UP);
-}
 
 static void sd_cs_detach_dsi(void)
 {
@@ -404,7 +390,7 @@ static void sd_cs_detach_dsi(void)
     *outSel1 &= (uint8)~SD_CS_MASK;
     *oeSel0  &= (uint8)~SD_CS_MASK;
     *oeSel1  &= (uint8)~SD_CS_MASK;
-    *byp     &= (uint8)~SD_CS_MASK;
+    *byp     |= SD_CS_MASK;
     CyExitCriticalSection(saved);
     CyPins_SetPinDriveMode(SPIp_CS, CY_PINS_DM_STRONG);
 }
@@ -586,7 +572,6 @@ uint8 sd_spi_init(void)
     g_sd_diag_timeout = 0u;
 
     if (!g_sd_spi_started) {
-        sd_miso_use_lvttl();
         sd_cs_detach_dsi();
         SPI_Start();
         g_sd_spi_started = 1u;
