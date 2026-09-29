@@ -3593,15 +3593,6 @@ int main(void)
     psoc_prepare_capture_path();
     uart_send_diag(PSOC_EVT_ANALOG_READY, 0u);
 
-    /* Detección + montaje FatFs. Si GEOLAST.BIN terminó antes de un reset se
-     * recupera y queda inmediatamente disponible para lecturas 0xBF. */
-    (void)sd_spi_init();
-    (void)sd_session_recover();
-    if (g_sd_fs_mounted && sd_spi_present()) { g_sd_cap_en = 1u; }
-    uart_send_diag(PSOC_EVT_SD_STATUS, sd_runtime_status_byte());
-    if (g_sd_session_ready) { uart_send_diag(PSOC_EVT_SD_SESSION, 1u); }
-    psoc_debug_print_u32("[PC] sd_status=", sd_runtime_status_byte());
-
 #if !PSOC_SUPERMAQUINA_OWNS_DMA_IRQ
 #ifdef CY_ISR_isr_DMA_DelSig_RAM_H
     isr_DMA_DelSig_RAM_StartEx(isr_DMA_DelSig_RAM_Handler);
@@ -3634,6 +3625,15 @@ int main(void)
 
     /* ── Loop de arranque: busca el ESP sin bloquear UART/ADC ───────────── */
     wait_for_esp();
+
+    /* Establecer primero el enlace: una SD lenta o defectuosa no debe impedir
+     * que el PSoC emita pings y diagnosticos de arranque. */
+    (void)sd_spi_init();
+    (void)sd_session_recover();
+    if (g_sd_fs_mounted && sd_spi_present()) { g_sd_cap_en = 1u; }
+    uart_send_diag(PSOC_EVT_SD_STATUS, sd_runtime_status_byte());
+    if (g_sd_session_ready) { uart_send_diag(PSOC_EVT_SD_SESSION, 1u); }
+    psoc_debug_print_u32("[PC] sd_status=", sd_runtime_status_byte());
     
     /* ── 5 parpadeos rápidos al conectar ─────────────────────────────────── */
     for (i = 0u; i < 5u; i++)

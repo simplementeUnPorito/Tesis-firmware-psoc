@@ -349,7 +349,7 @@ static uint8  g_sd_diag_last_r1  = 0xFFu;
 static uint8  g_sd_diag_pins     = 0u;
 static uint8  g_sd_diag_timeout  = 0u;
 
-/* CS (P2.3) quedó ruteado al `ss` de hardware del BSPIM, que deassertea entre
+/* CS (P1.6 en la placa actual) quedó ruteado al `ss` de hardware del BSPIM, que deassertea entre
  * bytes. Se lo desengancha del DSI con el bypass del puerto (patrón calcado de
  * tx1_gpio_detach_dsi) para manejarlo por software durante toda la transacción. */
 /* En la placa nueva los cuatro pines de SPIp ya no caen en el mismo puerto,
@@ -390,7 +390,7 @@ static void sd_cs_detach_dsi(void)
     *outSel1 &= (uint8)~SD_CS_MASK;
     *oeSel0  &= (uint8)~SD_CS_MASK;
     *oeSel1  &= (uint8)~SD_CS_MASK;
-    *byp     |= SD_CS_MASK;
+    *byp     &= (uint8)~SD_CS_MASK;
     CyExitCriticalSection(saved);
     CyPins_SetPinDriveMode(SPIp_CS, CY_PINS_DM_STRONG);
 }
