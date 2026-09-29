@@ -2989,6 +2989,11 @@ static void uart_service(void)
                             (void)sd_spi_init();
                             (void)sd_session_recover();
                         }
+                        /* Emitir el detalle antes del estado compacto para que
+                         * el esclavo pueda explicar por qué present=0. */
+                        uart_send_diag(PSOC_EVT_SD_DIAG_STAGE, sd_spi_diag_stage());
+                        uart_send_diag(PSOC_EVT_SD_DIAG_R1, sd_spi_diag_last_r1());
+                        uart_send_diag(PSOC_EVT_SD_DIAG_PINS, sd_spi_diag_pin_flags());
                         uart_send_diag(PSOC_EVT_SD_STATUS, sd_runtime_status_byte());
                         uart_send_cfg_ack(PSOC_CMD_SD_STATUS, sd_runtime_status_byte());
                         break;

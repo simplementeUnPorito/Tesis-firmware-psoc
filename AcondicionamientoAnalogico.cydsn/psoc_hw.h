@@ -253,6 +253,9 @@ uint32 psoc_idac_lsb_uv(void);
 #define PSOC_EVT_SD_SESSION       0x49u  /* value=1: GEOLAST.BIN COMPLETE/listo; 0: no válido */
 #define PSOC_EVT_SD_ERROR         0x4Au  /* value: bit0 write fail, bit1 overrun ring, bit2 header/dir fail, bit3 read fail en dump */
 #define PSOC_EVT_ARMED_TIMEOUT    0x4Bu  /* no llego SYNC dentro del limite; captura abortada y estado restaurado a IDLE */
+#define PSOC_EVT_SD_DIAG_STAGE    0x4Cu  /* bits0-6: etapa init SD; bit7: timeout del periférico SPI */
+#define PSOC_EVT_SD_DIAG_R1       0x4Du  /* última respuesta R1 recibida de la tarjeta (0xFF=sin respuesta) */
+#define PSOC_EVT_SD_DIAG_PINS     0x4Eu  /* pares low/high vistos: MISO[1:0], SCK[3:2], MOSI[5:4], CS[7:6] */
 
 #define PSOC_CMD_STATUS         0xA5u
 #define PSOC_CMD_PGA            0xA6u
