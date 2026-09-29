@@ -210,12 +210,13 @@ static int32 abs_counts(int32 value)
 #define CAL_ADC_DIRECT_CONVERSION_MS 30u
 #endif
 
-/* El servo de offset necesita el valor DC del tap, no la ruta DMA/DFB que se
- * reconfigura al entrar y salir de adquisicion. En banco el ADC directo dio
- * medidas repetibles, mientras el ultimo valor del DFB podia corresponder al
- * transitorio de la ruta anterior y cerraba falsamente cerca del target. */
+/* La calibracion usa la ruta continua ADC -> FIR -> DMA a 2604 Hz. El lector
+ * directo detiene/reinicia el Delta-Sigma y espera 30 ms por iteracion: limita
+ * el lazo a 33,3 Hz y hace alias de la interferencia de red de 50 Hz. La
+ * historia del DFB y la muestra pendiente se limpian en cal_pi_stage_begin(),
+ * antes de arrancar cada etapa, para no reutilizar el transitorio anterior. */
 #ifndef CAL_PI_USE_DIRECT_ADC
-#define CAL_PI_USE_DIRECT_ADC 1u
+#define CAL_PI_USE_DIRECT_ADC 0u
 #endif
 
 /* ==========================================================================
