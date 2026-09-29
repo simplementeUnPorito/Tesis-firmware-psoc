@@ -20,7 +20,9 @@ void control_config_defaults(ControlConfig *c)
          * 2.5 mV/codigo.  Con el valor viejo cada rescate de 100 codigos
          * cruzaba la ventana entera (+-95 mV) y LPo rebotaba entre los dos
          * rieles sin aterrizar nunca.  RESCUE_STEP baja a 25 (~63 mV). */
-        2, 5, 54, 1, 3000, 9000, 1, 4,
+        /* El fallback de entrega muestrea a 1 kHz; 20 muestras abarcan un
+         * ciclo exacto de red de 50 Hz y lo anulan en el promedio de bloque. */
+        2, 5, 20, 1, 3000, 9000, 1, 4,
         /* DEADBAND is the outer band: inside it a held controller stays
          * still.  It must be narrower than the valid window (+-97 mV).
          * 2026-09-17: 20 mV era mas angosto que la patada que cada rafaga de

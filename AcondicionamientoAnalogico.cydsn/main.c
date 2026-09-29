@@ -1657,14 +1657,43 @@ static void sm_sample_capture_debug(void)
 
 static void sm_sample_cal_raw(void)
 {
-    psoc_adc_note_isr_sample(
-        psoc_adc_counts_right_aligned(dma_buf_to_adc_counts(g_dma_raw_buf)));
+    int32 sample = psoc_adc_counts_right_aligned(
+        dma_buf_to_adc_counts(g_dma_raw_buf));
+    psoc_adc_note_isr_sample(sample);
+    control_on_filtered_sample(sample);
 }
 
 static void sm_sample_cal_filt(void)
 {
     int32 sample=psoc_adc_counts_right_aligned(dma_buf_to_i24(g_dma_filt_buf));
     psoc_adc_note_isr_filtered_sample(sample);
+    control_on_filtered_sample(sample);
+}
+
+/* Respaldo de muestreo para el controlador. En esta placa el ADC convierte y
+ * la lectura directa es valida, pero la terminacion DMA/IRQ dejo de llegar a
+ * ambos handlers. El SysTick del controlador limita esta ruta a 1 kHz: supera
+ * holgadamente 300 Hz y permite rechazar 50 Hz con bloques de 20 muestras. */
+#define CONTROL_POLL_HZ 1000u
+static void control_adc_poll_service(void)
+{
+    static uint32 last_ms = 0u;
+    uint32 now;
+    int32 sample;
+
+    if (g_state != PSOC_IDLE) {
+        return;
+    }
+    now = control_millis();
+    /* El DMA lee el registro antes del foreground y limpia/consume la marca
+     * CONV_DONE. No se condiciona el fallback a esa bandera: a 2604 Hz hay
+     * al menos dos conversiones nuevas entre lecturas separadas 1 ms. */
+    if (now == last_ms) {
+        return;
+    }
+    last_ms = now;
+    sample = psoc_adc_counts_right_aligned(ADC_GetResult32());
+    psoc_adc_note_isr_sample(sample);
     control_on_filtered_sample(sample);
 }
 
@@ -3628,6 +3657,7 @@ int main(void)
         }
 
         if (g_state == PSOC_IDLE && !capture_dump_pending()) {
+            control_adc_poll_service();
             if(g_control_capture_paused){
                 g_control_capture_paused=0;
 #if defined(PSOC_TEST) && PSOC_TEST

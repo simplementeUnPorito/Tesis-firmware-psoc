@@ -210,13 +210,12 @@ static int32 abs_counts(int32 value)
 #define CAL_ADC_DIRECT_CONVERSION_MS 30u
 #endif
 
-/* La calibracion usa la ruta continua ADC -> FIR -> DMA a 2604 Hz. El lector
- * directo detiene/reinicia el Delta-Sigma y espera 30 ms por iteracion: limita
- * el lazo a 33,3 Hz y hace alias de la interferencia de red de 50 Hz. La
- * historia del DFB y la muestra pendiente se limpian en cal_pi_stage_begin(),
- * antes de arrancar cada etapa, para no reutilizar el transitorio anterior. */
+/* El servo legado conserva su lectura directa. El aprendizaje operativo de
+ * la consola (`ctl learn`) vive en control_runtime.inc y ya consume la ruta
+ * continua ADC -> FIR -> DMA a 2604 Hz mediante control_on_filtered_sample().
+ * Compartir esa ranura de muestras con este servo deja al runtime sin taps. */
 #ifndef CAL_PI_USE_DIRECT_ADC
-#define CAL_PI_USE_DIRECT_ADC 0u
+#define CAL_PI_USE_DIRECT_ADC 1u
 #endif
 
 /* ==========================================================================

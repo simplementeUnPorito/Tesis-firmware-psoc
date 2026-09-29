@@ -190,12 +190,15 @@ void control_emit_snapshot(uint8 capture)
 static void ctl_select(uint8 channel)
 {
     uint8 saved;
-    ADC_StopConvert();ctl_active=0;
+    /* Mantener el Delta-Sigma continuo al conmutar AMux. Reiniciarlo en cada
+     * tap puede dejar de publicar CONV_DONE para el polling de respaldo; las
+     * CP_SETTLE_SAMPLES ya descartan holgadamente el transitorio del mux. */
+    ctl_active=0;
     psoc_amux_select_exclusive(channel,(uint8)ctl_config.value[CP_CAPACITOR]);
     saved=CyEnterCriticalSection();
     ctl_channel=channel;ctl_sum=0;ctl_count=0;ctl_ready=0;ctl_med_n=0;ctl_med_i=0;
     ctl_discard=(uint16)ctl_config.value[CP_SETTLE_SAMPLES];
-    ctl_active=1;CyExitCriticalSection(saved);ADC_StartConvert();
+    ctl_active=1;CyExitCriticalSection(saved);
 }
 void control_on_filtered_sample(int32 counts)
 {
@@ -210,8 +213,11 @@ void control_on_filtered_sample(int32 counts)
 static void ctl_route_start(void)
 {
     ADC_StopConvert();psoc_adc_select_calibration_config();
-    (void)psoc_filter_load_fir_coefficients(g_fir_calibration_coeffs_q23,FILTER_FIR_NTAPS);
-    dma_route_select(1u);ctl_scan=1;ctl_select(0);
+    /* La salida DMA del DFB dejo de generar terminaciones en la placa aunque
+     * el ADC directo sigue sano. El runtime deja seleccionada la ruta cruda;
+     * control_adc_poll_service() garantiza ademas la entrega a 1 kHz aun si
+     * tampoco llega la IRQ de terminacion del DMA. */
+    dma_route_select(0u);ctl_scan=1;ctl_select(0);ADC_StartConvert();
 }
 static void ctl_write(uint8 stage,int16 code)
 {
