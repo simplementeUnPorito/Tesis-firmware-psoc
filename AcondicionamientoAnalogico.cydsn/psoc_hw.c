@@ -268,6 +268,12 @@ void psoc_link_start(void)
 {
     if (!g_link_started) {
         LINK_I2C(Start)();
+        /* El bloque FF recibe 3 MHz. El divisor generado (2) daba 1 MHz y
+         * dejaba muy poco margen de subida en la placa real; SCL llego a no
+         * bajar de forma fiable. Divisor 7 => 3 MHz/(7+1) = 375 kHz. Mantiene
+         * el mismo protocolo/direccion y dio ACK estable en el banco. */
+        I2C_CLKDIV1_REG = 7u;
+        I2C_CLKDIV2_REG = 0u;
         (void)LINK_I2C(MasterClearStatus)();
         g_link_started = 1u;
     }
