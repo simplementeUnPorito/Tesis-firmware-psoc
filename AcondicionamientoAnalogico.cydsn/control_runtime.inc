@@ -190,15 +190,18 @@ void control_emit_snapshot(uint8 capture)
 static void ctl_select(uint8 channel)
 {
     uint8 saved;
-    /* Mantener el Delta-Sigma continuo al conmutar AMux. Reiniciarlo en cada
-     * tap puede dejar de publicar CONV_DONE para el polling de respaldo; las
-     * CP_SETTLE_SAMPLES ya descartan holgadamente el transitorio del mux. */
+    /* El diagnostico directo reinicia conversion y distingue los taps, pero
+     * el barrido continuo puede conservar una lectura anterior en todos ellos.
+     * Rearmar la conversion al cambiar de tap, igual que el diagnostico.
+     * El polling no depende de CONV_DONE; se conservan los descartes de settle. */
     ctl_active=0;
+    ADC_StopConvert();
     psoc_amux_select_exclusive(channel,(uint8)ctl_config.value[CP_CAPACITOR]);
     saved=CyEnterCriticalSection();
     ctl_channel=channel;ctl_sum=0;ctl_count=0;ctl_ready=0;ctl_med_n=0;ctl_med_i=0;
     ctl_discard=(uint16)ctl_config.value[CP_SETTLE_SAMPLES];
     ctl_active=1;CyExitCriticalSection(saved);
+    ADC_StartConvert();
 }
 void control_on_filtered_sample(int32 counts)
 {

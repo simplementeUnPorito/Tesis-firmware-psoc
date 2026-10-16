@@ -116,9 +116,14 @@
 #define PSOC_IDAC_CODE_MAX              255u
 #define PSOC_IDAC_PGA_RSET_OHM          15000u
 #define PSOC_IDAC_BP_RSET_OHM           15000u
-/* 5,1 kOhm verificado por inspeccion fisica el 2026-09-10. Solo afecta
- * telemetria y calculos nominales: NO se regraba firmware por esto. */
-#define PSOC_IDAC_OPASUM_RSET_OHM       5100u
+/* IDAC2 (sumador): 12 kOhm +-5 % segun el usuario el 2026-10-16. Antes 5,1 k
+ * (inspeccion 2026-09-10). Nominal: 0,125 uA/cod * 12 k = 1,5 mV/cod, fondo de
+ * escala 382,5 mV; con +-5 %: 1,425..1,575 mV/cod. Solo afecta telemetria y
+ * calculos nominales: las pendientes del lazo (CP_COARSE_SLOPE_UV) son
+ * MEDIDAS y no se derivan de este valor; hay que re-medirlas. */
+#define PSOC_IDAC_OPASUM_RSET_OHM       12000u
+#define PSOC_IDAC_OPASUM_RSET_TOL_PCT   5u
+#define PSOC_IDAC_LP_RSET_TOL_PCT       5u
 /* 10 kOhm. Estuvo en 1 kOhm el 2026-09-10 por la noche y se volvio a 10 k por
  * el zocalo; este #define se habia quedado con el valor viejo y el 2026-09-13
  * hizo calcular mal la autoridad de IDAC3. Con 10 k los numeros cierran: el
