@@ -199,6 +199,7 @@ int control_pi_settled(const ControlPI *p,const ControlConfig *c,uint32_t now)
 /* Aprende la pendiente real de IDAC3 mirando lo que consiguio el ultimo
  * movimiento: uV de LPo por codigo, con signo.  Se descartan los pasos
  * chicos (ruido) y los saltos absurdos (lecturas contra el riel). */
+#define CTL_SLOPE_MIN_EFFECT_UV 10000
 static void slope_observe(ControlPI *p,const int32_t *v,int32_t lp)
 {
     int32_t dfine,dlp,est;
@@ -208,7 +209,14 @@ static void slope_observe(ControlPI *p,const int32_t *v,int32_t lp)
         /* 2 codigos alcanza: con 4 el observador no aprendia nunca durante
          * el PI, que mueve de a uno, y el lazo se quedaba con la pendiente
          * de la config justo en la franja fina donde mas duele. */
-        if(dfine>=2 || dfine<=-2) {
+        /* 2026-10-16: pero 2 codigos a 0,45 mV/codigo son ~1 mV, contra
+         * +-3..10 mV de ruido entre lecturas de LPo: el observador "aprendia"
+         * 3-4,5 mV/codigo (7-10x la real), el PI dividia por eso y daba pasos
+         * de 2-3 codigos con 35 mV de error — volver al centro tardaba
+         * minutos.  Solo se aprende de un movimiento cuyo efecto esperado
+         * supera el ruido (CTL_SLOPE_MIN_EFFECT_UV); los pasos de la
+         * biseccion (>=25 codigos) siguen actualizandolo. */
+        if((int64_t)magnitude(dfine)*magnitude(v[CP_FINE_SLOPE_UV]) >= CTL_SLOPE_MIN_EFFECT_UV) {
             est=dlp/dfine;
             if(est<0)est=-est;
             if(est>=100 && est<=10*magnitude(v[CP_FINE_SLOPE_UV]))
@@ -233,6 +241,12 @@ static int forcing(const ControlPI *p,uint32_t now)
  * entera, asi que no hace falta mas, y con la biseccion de vuelta no se
  * vuelve agresivo cerca del centro. */
 #define CTL_RESCUE_STEP_MAX 64
+/* Banda de congelado mientras se fuerza.  Forzar salteaba la histeresis pero
+ * igual se congelaba al entrar en CP_HOLD_UV (25 mV): medido 2026-10-16, con
+ * LPo en +12..+22 mV un forzado de 60 s no movio IDAC3 ni un codigo.  Forzando
+ * se sigue hasta +-6 mV (el ruido del ADC es +-3 mV); al terminar la ventana
+ * vuelven HOLD/DEADBAND normales y el lazo queda quieto cerca de cero. */
+#define CTL_FORCED_HOLD_UV 6000
 /* Tope de codigos de IDAC2 por paso cuando el vernier ya esta saturado. */
 #define CTL_COARSE_RUN_MAX  16
 /* El enfriamiento del grueso NO se acorta ni forzando, y esto costo una
@@ -322,6 +336,9 @@ void control_pi_force(ControlPI *p,uint32_t now,uint32_t ms)
     p->force_until_ms=now+ms;
     if(p->force_until_ms==0u)p->force_until_ms=1u;   /* 0 significa 'sin forzado' */
     p->holding=0;p->wake_count=0;p->has_previous=0;p->fraction=0;
+    /* Forzar = pizarra limpia tambien para la pendiente: una estimacion vieja
+     * inflada por ruido es justo lo que hacia lento al lazo. */
+    p->slope_uv=0;p->slope_armed=0;
 }
 
 void control_pi_step(ControlPI *p,const ControlConfig *c,uint32_t now,
@@ -439,7 +456,8 @@ void control_pi_step(ControlPI *p,const ControlConfig *c,uint32_t now,
         /* Settled: a lone reading outside is a glitch, not drift. */
         if(settled && ++p->wake_count < (uint8_t)v[CP_WAKE_COUNT]) return;
         p->holding=0; p->wake_count=0;
-    } else if(magnitude(lp)<=v[CP_HOLD_UV]) {
+    } else if(magnitude(lp)<=(forcing(p,now) && CTL_FORCED_HOLD_UV<v[CP_HOLD_UV]
+                               ? CTL_FORCED_HOLD_UV : v[CP_HOLD_UV])) {
         p->holding=1; p->hold_ms=now; p->wake_count=0; pi_forget(p);
         p->has_rescue=0; p->rescue_step=0; p->rescue_dir=0;
         p->rescue_bracket=0; p->coarse_run=0;
@@ -495,7 +513,7 @@ void control_pi_step(ControlPI *p,const ControlConfig *c,uint32_t now,
      * plantaba a -32 mV y nunca llegaba a los +-25 que declaran banda (medido
      * 2026-09-18 en x16/x4): el modelo de pendiente hacia el incremento tan
      * chico que truncaba a cero una y otra vez. */
-    if(step==0 && magnitude(lp)>v[CP_HOLD_UV])
+    if(step==0 && magnitude(lp)>(forcing(p,now) ? CTL_FORCED_HOLD_UV : v[CP_HOLD_UV]))
         step=((e>0)==(slope_now(p,v)>0)) ? 1 : -1;
     if(step!=0) {
         int32_t next=bounded(p->fine+step,-v[CP_FINE_LIMIT],v[CP_FINE_LIMIT]);
