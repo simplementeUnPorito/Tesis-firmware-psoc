@@ -888,6 +888,13 @@ static void sdprobe_service(void)
     if (escritas < g_sdprobe_proxima) { return; }
     g_sdprobe_proxima += SDPROBE_CADA_MUESTRAS;
     sd_mark(SD_MARK_WRITE);
+    if ((uint8)(g_sdprobe_armado - 1u) == 7u) {
+        /* Modo 7 (ping): avisa al ESP por I2C en esta muestra exacta para que
+         * dispare su estresor (radio) alineado con la captura. */
+        uart_send_diag(PSOC_EVT_LAB_PING,
+                       (uint8)(g_sdprobe_proxima / SDPROBE_CADA_MUESTRAS));
+        return;
+    }
     (void)sd_spi_probe((uint8)(g_sdprobe_armado - 1u), g_sdprobe_div,
                        g_sdprobe_slew, sd_probe_busy_mark);
 }
@@ -3045,6 +3052,9 @@ static void uart_service(void)
                         if (rx_p1 == 6u) {
                             g_sdprobe_armado = 0u;
                             uart_send_cfg_ack(PSOC_CMD_SD_PROBE, 6u);
+                        } else if (rx_p1 == 7u) {
+                            g_sdprobe_armado = 8u;   /* ping por I2C, sin tocar la SD */
+                            uart_send_cfg_ack(PSOC_CMD_SD_PROBE, 7u);
                         } else if (rx_p1 <= 5u && rx_p3 <= 2u &&
                             (rx_p1 < 4u || sd_spi_present())) {
                             g_sdprobe_armado = (uint8)(rx_p1 + 1u);

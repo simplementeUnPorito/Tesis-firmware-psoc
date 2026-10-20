@@ -261,6 +261,7 @@ uint32 psoc_idac_lsb_uv(void);
 #define PSOC_EVT_SD_DIAG_STAGE    0x4Cu  /* bits0-6: etapa init SD; bit7: timeout del periférico SPI */
 #define PSOC_EVT_SD_DIAG_R1       0x4Du  /* última respuesta R1 recibida de la tarjeta (0xFF=sin respuesta) */
 #define PSOC_EVT_SD_DIAG_PINS     0x4Eu  /* pares low/high vistos: MISO[1:0], SCK[3:2], MOSI[5:4], CS[7:6] */
+#define PSOC_EVT_LAB_PING         0x4Fu  /* sdprobe modo 7: aviso por I2C en cada k*150 muestras (value = k & 0xFF) */
 
 #define PSOC_CMD_STATUS         0xA5u
 #define PSOC_CMD_PGA            0xA6u
