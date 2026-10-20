@@ -347,6 +347,7 @@ static volatile uint8  rx_state       = 0u;
 static volatile uint8  rx_cmd         = 0u;
 static volatile uint8  rx_p1          = 0u;
 static volatile uint8  rx_p2          = 0u;
+static volatile uint8  rx_p3          = 0u;
 static volatile uint8  watchdog_rx    = 0u;
 
 static          uint8  g_esp_connected  = 0u;
@@ -857,6 +858,38 @@ static void sd_mark(uint8 kind)
     uint8 saved = CyEnterCriticalSection();
     g_sd_mark_pending |= kind;
     CyExitCriticalSection(saved);
+}
+
+static int32 sd_mark_sample(int32 val)
+{
+    if (g_sd_mark_pending != 0u) {
+        val ^= (int32)((uint32)(g_sd_mark_pending & 0x03u) << SD_MARK_SHIFT);
+        g_sd_mark_pending = 0u;
+    }
+    return val;
+}
+
+static void sd_probe_busy_mark(void)
+{
+    sd_mark(SD_MARK_SYNC);
+}
+
+/* sdprobe (banco): acción armada en IDLE, ejecutada en la captura a RAM con
+ * la misma cadencia que el drenaje real a SD (un bloque cada 5 lotes). */
+#define SDPROBE_CADA_MUESTRAS ((uint32)SD_BATCHES_PER_BLOCK * (uint32)BATCH_SAMPLES)
+static uint8  g_sdprobe_armado  = 0u;   /* 0 = off; si no, modo + 1 */
+static uint8  g_sdprobe_div     = 0u;
+static uint8  g_sdprobe_slew    = 0u;
+static uint32 g_sdprobe_proxima = SDPROBE_CADA_MUESTRAS;
+
+static void sdprobe_service(void)
+{
+    uint32 escritas = (uint32)(g_capture_wr - g_capture_raw) / (uint32)SAMPLE_BYTES;
+    if (escritas < g_sdprobe_proxima) { return; }
+    g_sdprobe_proxima += SDPROBE_CADA_MUESTRAS;
+    sd_mark(SD_MARK_WRITE);
+    (void)sd_spi_probe((uint8)(g_sdprobe_armado - 1u), g_sdprobe_div,
+                       g_sdprobe_slew, sd_probe_busy_mark);
 }
 
 static void sd_capture_drain(uint8 flush)
@@ -1445,6 +1478,7 @@ static void capture_reset_locked(uint16 stored_batches)
     g_decim_n          = 0u;
     g_capture_wr       = g_capture_raw;
     g_capture_end      = g_capture_raw + ((uint32)stored_batches * CAPTURE_BATCH_BYTES);
+    g_sdprobe_proxima  = SDPROBE_CADA_MUESTRAS;
     /* Estado de captura a SD: siempre se limpia; psoc_arm() re-activa
      * g_sd_cap_active después de este reset si corresponde. Así cualquier
      * camino de stop/abort deja el modo SD desarmado. */
@@ -1543,6 +1577,7 @@ static void sm_sample_capture_raw(void)
     val = g_decim_acc / (int32)g_capture_decim_factor;
     g_decim_acc = 0;
     g_decim_n = 0u;
+    val = sd_mark_sample(val);
     capture_store_decoded(dst, val);
     dst += SAMPLE_BYTES;
     g_capture_wr = dst;
@@ -1565,6 +1600,7 @@ static void sm_sample_capture_filt(void)
     val = g_decim_acc / (int32)g_capture_decim_factor;
     g_decim_acc = 0;
     g_decim_n = 0u;
+    val = sd_mark_sample(val);
     capture_store_decoded(dst, val);
     dst += SAMPLE_BYTES;
     g_capture_wr = dst;
@@ -1594,10 +1630,7 @@ static void sd_ring_store(int32 val)
     /* El archivo es independiente de la config ADC activa: guarda siempre el
      * mismo int24 right-aligned que se transmite por UART. */
     val = psoc_adc_counts_right_aligned(val);
-    if (g_sd_mark_pending != 0u) {
-        val ^= (int32)((uint32)(g_sd_mark_pending & 0x03u) << SD_MARK_SHIFT);
-        g_sd_mark_pending = 0u;
-    }
+    val = sd_mark_sample(val);
     capture_store_decoded(dst, val);
     written++;
     g_sd_ring_samples = written;
@@ -2630,6 +2663,8 @@ static void uart_service(void)
                     case PSOC_CMD_ST_MEAS_DC: case PSOC_CMD_ST_MEAS_AC:
 #endif
                         rx_cmd = rx; rx_state = 2u; break;
+                    case PSOC_CMD_SD_PROBE:
+                        rx_cmd = rx; rx_state = 6u; break;
                     case 0xA3u: case PSOC_CMD_SD_READ_BATCH: case 0xAAu:
                     case PSOC_CMD_CAL_PARAM:
 #if defined(PSOC_TEST) && PSOC_TEST
@@ -2644,20 +2679,32 @@ static void uart_service(void)
                 break;
 
             case 2u:
-                rx_p1 = rx; rx_p2 = 0u; rx_state = 3u; rx_watchdog_start();
+                rx_p1 = rx; rx_p2 = 0u; rx_p3 = 0u; rx_state = 3u; rx_watchdog_start();
                 break;
 
             case 4u:
-                rx_p1 = rx; rx_state = 5u; rx_watchdog_start();
+                rx_p1 = rx; rx_p3 = 0u; rx_state = 5u; rx_watchdog_start();
                 break;
 
             case 5u:
                 rx_p2 = rx; rx_state = 3u; rx_watchdog_start();
                 break;
 
+            case 6u:
+                rx_p1 = rx; rx_state = 7u; rx_watchdog_start();
+                break;
+
+            case 7u:
+                rx_p2 = rx; rx_state = 8u; rx_watchdog_start();
+                break;
+
+            case 8u:
+                rx_p3 = rx; rx_state = 3u; rx_watchdog_start();
+                break;
+
             case 3u:
                 rx_watchdog_stop(); rx_state = 0u;
-                if (rx != (uint8)(rx_cmd ^ rx_p1 ^ rx_p2)) { break; }
+                if (rx != (uint8)(rx_cmd ^ rx_p1 ^ rx_p2 ^ rx_p3)) { break; }
 #if defined(PSOC_TEST) && PSOC_TEST
                 if(rx_cmd==PSOC_CMD_ST_REPORT || rx_cmd==PSOC_CMD_ST_SYNC ||
                    rx_cmd==PSOC_CMD_ST_MEAS_DC || rx_cmd==PSOC_CMD_ST_MEAS_AC || rx_cmd==PSOC_CMD_ST_SET_IDAC) {
@@ -2721,6 +2768,17 @@ static void uart_service(void)
                         case PSOC_CMD_ADC_SNAPSHOT:
                             uart_send_diag(PSOC_EVT_CAL_BUSY, g_state);
                             uart_send_cfg_ack(PSOC_CMD_ADC_SNAPSHOT, 0u);
+                            break;
+                        case PSOC_CMD_SD_PROBE:
+                            if (rx_p1 <= 5u && rx_p3 <= 2u &&
+                                (rx_p1 < 4u || sd_spi_present())) {
+                                sd_mark(SD_MARK_WRITE);
+                                uart_send_cfg_ack(PSOC_CMD_SD_PROBE,
+                                    sd_spi_probe(rx_p1, rx_p2, rx_p3,
+                                                 sd_probe_busy_mark) ? rx_p1 : 0xEEu);
+                            } else {
+                                uart_send_cfg_ack(PSOC_CMD_SD_PROBE, 0xEEu);
+                            }
                             break;
                         case 0xA6u: case PSOC_CMD_PGAOUT: case 0xA9u: case 0xAAu:
                         case PSOC_CMD_ACCEPT_EXTERNAL_CAL:
@@ -2979,6 +3037,25 @@ static void uart_service(void)
                         }
                         led_toggle();
                         break;
+                    case PSOC_CMD_SD_PROBE:
+                        /* En IDLE solo se ARMA: durante la captura la UART
+                         * queda muda (ventana critica), asi que la accion la
+                         * ejecuta el lazo de muestreo cada 5 lotes, igual que
+                         * sd_capture_drain(). p1=6 desarma. */
+                        if (rx_p1 == 6u) {
+                            g_sdprobe_armado = 0u;
+                            uart_send_cfg_ack(PSOC_CMD_SD_PROBE, 6u);
+                        } else if (rx_p1 <= 5u && rx_p3 <= 2u &&
+                            (rx_p1 < 4u || sd_spi_present())) {
+                            g_sdprobe_armado = (uint8)(rx_p1 + 1u);
+                            g_sdprobe_div    = rx_p2;
+                            g_sdprobe_slew   = rx_p3;
+                            uart_send_cfg_ack(PSOC_CMD_SD_PROBE, rx_p1);
+                        } else {
+                            uart_send_cfg_ack(PSOC_CMD_SD_PROBE, 0xEEu);
+                        }
+                        led_toggle();
+                        break;
                     case PSOC_CMD_SD_STATUS:
                         /* p1=1: re-init completo (solo IDLE); p1=0: estado cacheado. */
                         if ((rx_p1 != 0u) && (g_state == PSOC_IDLE)) {
@@ -3198,6 +3275,8 @@ static void service_runtime(void)
                 /* Drenaje concurrente ring→SD. No toca UART/timers, así que
                  * respeta la política de silencio de la ventana de muestreo. */
                 sd_capture_drain(0u);
+            } else if (g_sdprobe_armado != 0u) {
+                sdprobe_service();
             }
             if (!g_capture_wd_due) {
                 return;   /* Silencio total: sin UART RX/TX, sin LED, sin pings. */

@@ -526,6 +526,9 @@ static uint8 sd_read_register(uint8 cmd, uint8 *dst)
         }
     }
     if (token != SD_TOKEN_START) {
+        /* Diagnóstico: en vez del R1 (que fue 0x00), reportar el byte que
+         * llegó en lugar del token 0xFE (0xFF = nunca llegó). */
+        g_sd_diag_last_r1 = token;
         return 0u;
     }
     for (i = 0u; i < 16u; i++) {
@@ -801,6 +804,79 @@ uint8 sd_spi_write_block(uint32 lba, const uint8 *src)
 out:
     sd_cs_write(1u);
     (void)sd_xfer(0xFFu);
+    return ok;
+}
+
+static void sd_probe_set_slew(uint8 slew)
+{
+    reg8 *slw1 = (reg8 *)CYREG_PRT1_SLW;
+    reg8 *slw15 = (reg8 *)CYREG_PRT15_SLW;
+    reg8 *slw2 = (reg8 *)CYREG_PRT2_SLW;
+    uint8 saved = CyEnterCriticalSection();
+
+    if (slew == 1u) {
+        *slw1 |= (uint8)(1u << 6u);   /* CS P1[6] */
+        *slw15 |= (uint8)(1u << 5u);  /* SCK P15[5] */
+        *slw2 |= (uint8)(1u << 5u);   /* MOSI P2[5] */
+    } else if (slew == 2u) {
+        *slw1 &= (uint8)~(1u << 6u);
+        *slw15 &= (uint8)~(1u << 5u);
+        *slw2 &= (uint8)~(1u << 5u);
+    }
+    CyExitCriticalSection(saved);
+}
+
+uint8 sd_spi_probe(uint8 mode, uint8 divider, uint8 slew,
+                   void (*busy_mark)(void))
+{
+    uint16 saved_divider;
+    uint16 i;
+    uint8 resp;
+    uint8 ok = 0u;
+
+    if (mode > 5u || slew > 2u || !g_sd_spi_started) { return 0u; }
+    if (mode >= 4u && (g_sd_type == SD_TYPE_NONE || g_sd_sector_count == 0u)) {
+        return 0u;
+    }
+    sd_probe_set_slew(slew);
+    saved_divider = (uint16)(SPI_IntClock_GetDividerRegister() + 1u);
+    if (divider != 0u) { SPI_IntClock_SetDividerValue((uint16)divider); }
+
+    if (mode == 0u) {
+        ok = 1u;
+    } else if (mode == 1u) {
+        sd_cs_write(0u);
+        sd_cs_write(1u);
+        ok = 1u;
+    } else if (mode == 2u || mode == 3u) {
+        sd_cs_write(1u);
+        for (i = 0u; i < 520u; i++) {
+            (void)sd_xfer((mode == 2u) ? 0x55u : 0xFFu);
+        }
+        ok = 1u;
+    } else {
+        sd_cs_write(0u);
+        if (!sd_wait_ready(40000u)) { goto out; }
+        if (sd_cmd(24u, sd_block_addr(g_sd_sector_count - 1u), 0xFFu) != 0x00u) {
+            goto out;
+        }
+        (void)sd_xfer(0xFFu);
+        (void)sd_xfer(SD_TOKEN_START);
+        for (i = 0u; i < SD_BLOCK_BYTES; i++) { (void)sd_xfer(0x55u); }
+        (void)sd_xfer(0xFFu);
+        (void)sd_xfer(0xFFu);
+        resp = sd_xfer(0xFFu);
+        if ((resp & 0x1Fu) != 0x05u) { goto out; }
+        if (mode == 5u && busy_mark != (void (*)(void))0) { busy_mark(); }
+        if (!sd_wait_ready(80000u)) { goto out; }
+        ok = 1u;
+    }
+out:
+    if (mode >= 4u) {
+        sd_cs_write(1u);
+        (void)sd_xfer(0xFFu);
+    }
+    if (divider != 0u) { SPI_IntClock_SetDividerValue(saved_divider); }
     return ok;
 }
 

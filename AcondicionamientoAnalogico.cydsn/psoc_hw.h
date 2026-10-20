@@ -317,6 +317,8 @@ uint32 psoc_idac_lsb_uv(void);
 #define PSOC_CMD_SD_CAPTURE     0xBEu  /* Param: 1=capturar a SD (ring RAM->SD, permite N>512),
                                           0=modo RAM-only clásico. Solo IDLE. Ack: 0/1=aplicado,
                                           0xEE=rechazado (sin SD o estado ocupado). */
+#define PSOC_CMD_SD_PROBE       0xADu  /* 3 params: modo 0..5, divisor SPI (0=mantener),
+                                          slew 0=mantener/1=lento/2=rapido. */
 /* Param: canal del AMux que se digitaliza en la captura y en el stream
  * (0=PGA/SEo, 1=BP, 2=OPA_SUM, 3=SUM, 4=LP = la senal de siempre).
  * Es una VISTA de diagnostico: no toca el lazo de control, que sigue

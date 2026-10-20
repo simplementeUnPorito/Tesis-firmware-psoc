@@ -63,6 +63,11 @@ uint8 sd_spi_diag_pin_flags(void);
 uint8 sd_spi_read_block(uint32 lba, uint8 *dst);
 uint8 sd_spi_write_block(uint32 lba, const uint8 *src);
 
+/* Sonda de ruido: una sola accion por llamada. busy_mark se invoca justo antes
+ * de esperar el busy de programacion en modo 5. */
+uint8 sd_spi_probe(uint8 mode, uint8 divider, uint8 slew,
+                   void (*busy_mark)(void));
+
 /* Escribe un patrón en un bloque de scratch, lo relee y compara.
  * No pisa el área de datos de capturas. Devuelve 1 si verificó. */
 uint8 sd_spi_self_test(void);
