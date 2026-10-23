@@ -384,7 +384,7 @@ static volatile uint32 g_cal_watchdog_remaining_ms = 0u;
 #define CE_STATUS_ERROR      0x10u
 #define CE_TIMER_EVT_UART       0x01u
 #define CE_TIMER_EVT_PING       0x02u
-#define CE_TIMER_EVT_LED        0x04u
+#define CE_TIMER_EVT_WAIT       0x04u
 #define CE_TIMER_EVT_CAPTURE_WD 0x08u
 #define CE_TIMER_EVT_MASK       0x0Fu
 
@@ -679,7 +679,7 @@ static uint8 capture_engine_poll_timer_events(void)
     }
     if ((Timer_2_ReadStatusRegister() & Timer_2_STATUS_TC) != 0u) {
         Timer_2_Stop();
-        events |= CE_TIMER_EVT_LED;
+        events |= CE_TIMER_EVT_WAIT;
     }
     if (events != 0u) {
         timer_events_accumulate(events);
@@ -901,21 +901,11 @@ static void idle_ping_stop(void)
     g_idle_ping_armed = 0u;
 }
 
-static void comm_led_stop(void)
-{
-    if (g_timer2_mode == TIMER2_MODE_COMM_BLINK) {
-        timer2_stop_quiet();
-    }
-    g_comm_led_active = 0u;
-    g_comm_blink_due = 0u;
-    g_comm_blinks_remaining = 0u;
-}
-
 /* ── Watchdog de captura (Timer_3, dedicado) ──
  * Si superMaquina nunca llega a DONE (p.ej. ADC detenido, DMA sin disparos),
  * el equipo antes quedaba mudo para siempre. Ahora el ARM se despierta al
  * vencer la duracion nominal + margen y aborta con diagnostico. Al tener
- * timer propio no compite con LED/esperas de Timer_2. */
+ * timer propio no compite con las esperas de Timer_2. */
 static uint32 capture_expected_ms(uint16 batches)
 {
     /* `batches` son lotes DECIMADOS (almacenados); psoc_adc_effective_fs_hz()
@@ -956,7 +946,6 @@ static void runtime_timers_stop_for_quiet_window(void)
 {
     rx_watchdog_stop();
     idle_ping_stop();
-    comm_led_stop();
 }
 
 /* Tick de calibracion sobre Timer_1: progreso periodico + watchdog global.
@@ -1025,21 +1014,6 @@ static void capture_reset_locked(uint16 stored_batches)
     g_decim_n          = 0u;
     g_capture_wr       = g_capture_raw;
     g_capture_end      = g_capture_raw + ((uint32)stored_batches * CAPTURE_BATCH_BYTES);
-    g_sdprobe_proxima  = SDPROBE_CADA_MUESTRAS;
-    /* Estado de captura a SD: siempre se limpia; psoc_arm() re-activa
-     * g_sd_cap_active después de este reset si corresponde. Así cualquier
-     * camino de stop/abort deja el modo SD desarmado. */
-    g_sd_cap_active     = 0u;
-    g_sd_ring_samples   = 0u;
-    g_sd_ring_drained   = 0u;
-    g_sd_target_samples = 0u;
-    g_sd_drop_samples   = 0u;
-    g_sd_blk_fill       = 0u;
-    g_sd_blocks_written = 0u;
-    g_sd_dump_blk_cached = 0xFFFFFFFFu;
-    g_sd_err_flags      = 0u;
-    g_sd_write_failed   = 0u;
-    g_sd_mark_pending   = 0u;
     g_live_active       = 0u;
     g_live_written      = 0u;
     g_live_target       = 0u;
@@ -1131,7 +1105,6 @@ static void sm_sample_capture_raw(void)
     val = g_decim_acc / (int32)g_capture_decim_factor;
     g_decim_acc = 0;
     g_decim_n = 0u;
-    val = sd_mark_sample(val);
     capture_store_decoded(dst, val);
     dst += SAMPLE_BYTES;
     g_capture_wr = dst;
@@ -1154,80 +1127,13 @@ static void sm_sample_capture_filt(void)
     val = g_decim_acc / (int32)g_capture_decim_factor;
     g_decim_acc = 0;
     g_decim_n = 0u;
-    val = sd_mark_sample(val);
     capture_store_decoded(dst, val);
     dst += SAMPLE_BYTES;
     g_capture_wr = dst;
     if (dst >= g_capture_end) { g_capture_done = 1u; }
 }
 
-/* Variantes ring para captura a SD: mismos decode/decimación que las
- * versiones RAM-only, pero escriben por contador monotónico con wrap y
- * detección de overrun en vez de puntero lineal. Instaladas SOLO cuando
- * g_sd_cap_active=1 — las versiones clásicas quedan intactas. */
-static void sd_ring_store(int32 val)
-{
-    volatile uint8 *dst;
-    uint32 written = g_sd_ring_samples;
-
-    if (written >= g_sd_target_samples) {
-        return;
-    }
-    if ((written - g_sd_ring_drained) >= SD_RING_SAMPLES) {
-        /* Ring lleno: la SD no drenó a tiempo. Se descarta la muestra y se
-         * reporta al final (PSOC_EVT_SD_ERROR bit1). */
-        g_sd_drop_samples++;
-        g_capture_done = 1u;
-        return;
-    }
-    dst = g_capture_raw + ((written % SD_RING_SAMPLES) * (uint32)SAMPLE_BYTES);
-    /* El archivo es independiente de la config ADC activa: guarda siempre el
-     * mismo int24 right-aligned que se transmite por UART. */
-    val = psoc_adc_counts_right_aligned(val);
-    val = sd_mark_sample(val);
-    capture_store_decoded(dst, val);
-    written++;
-    g_sd_ring_samples = written;
-    if (written >= g_sd_target_samples) {
-        g_capture_done = 1u;
-    }
-}
-
-static void sm_sample_capture_raw_sd(void)
-{
-    int32 val = dma_buf_to_adc_counts(g_dma_raw_buf);
-    g_decim_acc += val;
-    g_decim_n++;
-    if (g_decim_n < g_capture_decim_factor) {
-        return;
-    }
-    val = g_decim_acc / (int32)g_capture_decim_factor;
-    g_decim_acc = 0;
-    g_decim_n = 0u;
-    sd_ring_store(val);
-}
-
-static void sm_sample_capture_filt_sd(void)
-{
-    int32 val;
-    if (g_fir_discard != 0u) {
-        g_fir_discard--;
-        return;
-    }
-    val = dma_buf_to_i24(g_dma_filt_buf);
-    g_decim_acc += val;
-    g_decim_n++;
-    if (g_decim_n < g_capture_decim_factor) {
-        return;
-    }
-    val = g_decim_acc / (int32)g_capture_decim_factor;
-    g_decim_acc = 0;
-    g_decim_n = 0u;
-    sd_ring_store(val);
-}
-
-/* Variantes en vivo: el anillo es el de la SD, pero el limite de pisado lo
- * pone lo que el ESP confirmo, no lo que se drenó a la tarjeta. */
+/* Variantes en vivo: el limite de pisado lo pone lo que el ESP confirmo. */
 static void live_ring_store(int32 val)
 {
     volatile uint8 *dst;
@@ -1236,13 +1142,13 @@ static void live_ring_store(int32 val)
     if (written >= g_live_target) {
         return;
     }
-    if ((written - g_live_acked * (uint32)BATCH_SAMPLES) >= SD_RING_SAMPLES) {
+    if ((written - g_live_acked * (uint32)BATCH_SAMPLES) >= LIVE_RING_SAMPLES) {
         /* Anillo lleno: ni el PSoC ni el ESP tienen donde guardar. */
         g_live_drop++;
         g_capture_done = 1u;
         return;
     }
-    dst = g_capture_raw + ((written % SD_RING_SAMPLES) * (uint32)SAMPLE_BYTES);
+    dst = g_capture_raw + ((written % LIVE_RING_SAMPLES) * (uint32)SAMPLE_BYTES);
     if (g_live_ramp) {
         /* Con el mismo ritmo del ADC: el receptor verifica muestra a muestra. */
         val = (int32)(written & 0x00FFFFFFu);
@@ -1360,10 +1266,10 @@ static sm_sample_handler_t capture_handler_for_source(uint8 source)
 #endif
     if (source == CE_CFG_SRC_FILTER || source == CE_CFG_SRC_COMBINED) {
         if (g_live_active) { return sm_sample_capture_filt_live; }
-        return g_sd_cap_active ? sm_sample_capture_filt_sd : sm_sample_capture_filt;
+        return sm_sample_capture_filt;
     }
     if (g_live_active) { return sm_sample_capture_raw_live; }
-    return g_sd_cap_active ? sm_sample_capture_raw_sd : sm_sample_capture_raw;
+    return sm_sample_capture_raw;
 }
 
 /* Activa el modo en vivo para la captura que se esta armando. Va dentro de la
@@ -1390,7 +1296,6 @@ static void psoc_enter_sampling(uint8 debugMode)
 {
     uint8 saved;
     uint8 source;
-    uint8 use_sd = 0u;
     uint8 live;
     uint16 decim = (uint16)psoc_adc_get_decimation();
     uint16 total_target = capture_target_batches();
@@ -1410,19 +1315,6 @@ static void psoc_enter_sampling(uint8 debugMode)
     if (debugMode) { source = CE_CFG_SRC_DEBUG; }
 #endif
     live = (g_live_en && source != CE_CFG_SRC_DEBUG) ? 1u : 0u;
-    /* Misma regla que psoc_arm(): SD solo si no entra en RAM. */
-    if (!live && g_sd_cap_en && total_target > PSOC_CAPTURE_MAX_BATCHES
-#if PSOC_RAMP_DEBUG_ENABLE
-        && (source != CE_CFG_SRC_DEBUG)
-#endif
-       ) {
-        use_sd = sd_session_begin(total_target);
-        if (!use_sd) {
-            idle_ping_schedule();
-            uart_send_diag(PSOC_EVT_SD_ERROR, 0x04u);
-            return;
-        }
-    }
     saved = CyEnterCriticalSection();
 #if PSOC_RAMP_DEBUG_ENABLE
     g_debug_psoc = debugMode ? 1u : 0u;
@@ -1430,9 +1322,7 @@ static void psoc_enter_sampling(uint8 debugMode)
     (void)debugMode;
     g_debug_psoc = 0u;
 #endif
-    capture_reset_locked(use_sd ? (uint16)PSOC_CAPTURE_MAX_BATCHES : total_target);
-    g_sd_cap_active = use_sd;
-    g_sd_target_samples = (uint32)total_target * (uint32)BATCH_SAMPLES;
+    capture_reset_locked(total_target);
     g_capture_decim_factor = (uint8)decim;
     g_total_target = total_target;
     g_total_sent   = 0u;
@@ -1462,7 +1352,7 @@ static void psoc_enter_sampling(uint8 debugMode)
     capture_engine_clear_flags();
     capture_watchdog_arm();
     capture_engine_pulse(CE_CTRL_START_NOW);
-    if (!use_sd && !live && g_n_batches > PSOC_CAPTURE_MAX_BATCHES) {
+    if (!live && g_n_batches > PSOC_CAPTURE_MAX_BATCHES) {
         /* Pedido recortado al buffer RAM del PSoC. */
         uart_send_diag(PSOC_EVT_CAPTURE_CLAMPED, diag_u16_sat(g_n_batches));
     }
@@ -1511,19 +1401,15 @@ static void service_timer_ping_tc(void)
     }
 }
 
-static void service_timer_led_tc(void)
+static void service_timer_wait_tc(void)
 {
     if (g_timer2_remaining_counts != 0u) {
         timer2_start_next_chunk();
         return;
     }
 
-    if (g_timer2_mode == TIMER2_MODE_BOOT_LED_OFF) {
-        g_boot_led_off_due = 1u;
-    } else if (g_timer2_mode == TIMER2_MODE_WAIT) {
+    if (g_timer2_mode == TIMER2_MODE_WAIT) {
         g_timer2_wait_done = 1u;
-    } else if (g_timer2_mode == TIMER2_MODE_COMM_BLINK) {
-        g_comm_blink_due = 1u;
     }
     g_timer2_mode = TIMER2_MODE_NONE;
 }
@@ -1554,10 +1440,10 @@ static void service_timer_events(uint8 mask)
         (void)Timer_1_ReadStatusRegister();
         service_timer_ping_tc();
     }
-    if ((events & CE_TIMER_EVT_LED) != 0u) {
+    if ((events & CE_TIMER_EVT_WAIT) != 0u) {
         Timer_2_Stop();
         (void)Timer_2_ReadStatusRegister();
-        service_timer_led_tc();
+        service_timer_wait_tc();
     }
     if ((events & CE_TIMER_EVT_CAPTURE_WD) != 0u) {
         Timer_3_Stop();
@@ -1623,7 +1509,7 @@ CY_ISR(isr_Timer_2)
         return;
     }
     g_t2_spurious = 0u;
-    service_timer_led_tc();
+    service_timer_wait_tc();
 }
 
 CY_ISR(isr_Timer_3)
@@ -1685,37 +1571,22 @@ CY_ISR(isr_SyncIn)
 }
 
 /* IRQ único de superMaquina. Fast path: una sola lectura de status y el
- * handler de muestra vigente; el resto (fin de captura, error, botón) va por
+ * handler de muestra vigente; el resto (fin de captura, error) va por
  * el camino lento, que ocurre a lo sumo unas pocas veces por captura.
  * Los TC de timers ya no llegan acá: quedan holdeados en el STATUS_TC de su
  * timer y los consume el polling de service_runtime(). Así cada IRQ sin
- * DONE/ERROR/BUTTON es una muestra, sin ambigüedad ni lecturas extra. */
+ * DONE/ERROR es una muestra, sin ambigüedad ni lecturas extra. */
 CY_ISR(isr_SuperMaquina_Handler)
 {
     uint8 st = status_Read();
 
-    if ((st & (CE_STATUS_DONE | CE_STATUS_ERROR | CE_STATUS_BUTTON)) == 0u)
+    if ((st & (CE_STATUS_DONE | CE_STATUS_ERROR)) == 0u)
     {
         g_sm_sample_handler();
         return;
     }
 
     g_ce_status = st;
-
-#if PSOC_BUTTON_CAL_ENABLE
-    if ((st & CE_STATUS_BUTTON) != 0u)
-    {
-        g_cal_button_pressed = 1u;
-        capture_engine_clear_flags();
-        if ((st & (CE_STATUS_DONE | CE_STATUS_ERROR)) == 0u)
-        {
-            /* El botón puede coincidir con una muestra de bypass (calibración
-             * en curso): no perderla. */
-            g_sm_sample_handler();
-            return;
-        }
-    }
-#endif
 
     if ((st & CE_STATUS_ERROR) != 0u)
     {
@@ -1775,16 +1646,6 @@ CY_ISR(isr_SuperMaquina_Handler)
     }
 }
 
-CY_ISR(isr_Button_Handler)
-{
-#ifdef CY_ISR_isr_Button_H
-    isr_Button_ClearPending();
-#endif
-#if PSOC_BUTTON_CAL_ENABLE
-    g_cal_button_pressed = 1u;
-#endif
-}
-
 /* ── Trampas de robustez ─────────────────────────────────────────────────────
  * 1) isr_SyncIn: calibration.c la deshabilita/rehabilita alrededor de una
  *    corrida (cal_async_complete). Con PSOC_SUPERMAQUINA_OWNS_SYNC_IRQ el
@@ -1794,8 +1655,7 @@ CY_ISR(isr_Button_Handler)
  * 2) Cualquier IRQ que siga apuntando a IntDefaultHandler se re-vector a un
  *    trap que reporta el número de IRQ por UART (EVT 0x7E) y la deshabilita,
  *    en vez de colgar el firmware.
- * 3) HardFault (EVT 0x7F) queda en loop parpadeando el LED rápido. */
-static void led_write(uint8 value);
+ * 3) HardFault (EVT 0x7F) queda detenido en un loop. */
 
 CY_ISR(isr_SyncIn_SafeVector)
 {
@@ -1828,10 +1688,6 @@ CY_ISR(hardfault_trap)
     uart_send_diag(0x7Fu, 0u);
     for (;;)
     {
-        led_write(0u);
-        CyDelay(60u);
-        led_write(1u);
-        CyDelay(60u);
     }
 }
 
@@ -1844,33 +1700,6 @@ static void install_irq_traps(void)
         }
     }
     (void)CyIntSetSysVector(3u, hardfault_trap); /* HardFault */
-}
-
-static void led_write(uint8 value)
-{
-#ifdef CY_PINS_LED_H
-    LED_Write(value);
-#else
-    (void)value;
-#endif
-}
-
-static void led_toggle(void)
-{
-#ifdef CY_PINS_LED_H
-    if (g_state != PSOC_ARMED && g_state != PSOC_SAMPLING) {
-        LED_Write(LED_Read() ^ 0x01u);
-    }
-#endif
-}
-
-static void comm_led_start_identify(void)
-{
-    g_comm_led_active = 1u;
-    g_comm_blinks_remaining = (uint16)IDENTIFY_BLINK_TOGGLES;
-    g_comm_blink_due = 0u;
-    led_write(1u);
-    timer2_arm_ms(COMM_BLINK_MS, TIMER2_MODE_COMM_BLINK);
 }
 
 static void idle_ping_service(void)
@@ -1979,7 +1808,6 @@ static void psoc_arm(void)
     uint16 hw_extra = 0u;
     uint16 decim = (uint16)psoc_adc_get_decimation();
     uint16 discard = 0u;
-    uint8 use_sd = 0u;
     uint8 live;
 
     control_prepare_capture();
@@ -2007,39 +1835,8 @@ static void psoc_arm(void)
     g_capture_adc_raw = (source == CE_CFG_SRC_RAW) ? 1u : 0u;
     live = (g_live_en && source != CE_CFG_SRC_DEBUG) ? 1u : 0u;
 
-    /* Captura a SD: la decisión y la lectura del directorio (I/O SPI, puede
-     * tardar ms) van ANTES de la sección crítica. Si la SD está pedida pero no
-     * disponible, se degrada a RAM-only re-clampeando el target.
-     *
-     * La SD solo se usa si la captura NO entra en RAM: su drenaje escribe un
-     * sector cada 150 muestras (57,6 ms a 2604 Hz) mientras se muestrea, y
-     * cada escritura se ve como una espiga en la señal. Una captura que entra
-     * en los 512 lotes de RAM se hace en silencio aunque la SD esté habilitada.
-     * El ESP aplica la misma regla en allocStore(). */
-    if (!live && g_sd_cap_en && total_target > PSOC_CAPTURE_MAX_BATCHES && sd_spi_present()
-#if PSOC_RAMP_DEBUG_ENABLE
-        && (source != CE_CFG_SRC_DEBUG)
-#endif
-       ) {
-        use_sd = sd_session_begin(total_target);
-    }
-    if (!live && g_sd_cap_en && total_target > PSOC_CAPTURE_MAX_BATCHES && !use_sd
-#if PSOC_RAMP_DEBUG_ENABLE
-        && (source != CE_CFG_SRC_DEBUG)
-#endif
-       ) {
-        idle_ping_schedule();
-        uart_send_diag(PSOC_EVT_SD_ERROR, 0x04u);
-        return;
-    }
-    if (!use_sd && total_target > PSOC_CAPTURE_MAX_BATCHES) {
-        total_target = PSOC_CAPTURE_MAX_BATCHES;
-    }
-
     saved = CyEnterCriticalSection();
-    capture_reset_locked(use_sd ? (uint16)PSOC_CAPTURE_MAX_BATCHES : total_target);
-    g_sd_cap_active = use_sd;
-    g_sd_target_samples = (uint32)total_target * (uint32)BATCH_SAMPLES;
+    capture_reset_locked(total_target);
     g_fir_discard = discard;
     g_capture_decim_factor = (uint8)decim;
     g_total_target = total_target;
@@ -2148,7 +1945,6 @@ static uint8 psoc_start_calibration_if_idle(uint8 send_ack)
     g_total_sent = 0u;
     g_last_calibration_ok = 0u;
     idle_ping_stop();
-    comm_led_stop();
     capture_engine_set_enabled(0u, 0u);
     capture_engine_clear_flags();
     /* La calibracion usa targets definidos para el rango ±2.5 V. Si el host
@@ -2197,31 +1993,6 @@ static void psoc_report_adc_snapshot_if_idle(void)
     uart_send_cfg_ack(PSOC_CMD_ADC_SNAPSHOT, 1u);
     psoc_calibration_report_adc_snapshot();
     dma_route_select(g_stream_mode);
-}
-
-static uint8 service_button_calibration(void)
-{
-#if !PSOC_BUTTON_CAL_ENABLE
-    return 0u;
-#else
-    if (!g_cal_button_pressed) {
-        return 0u;
-    }
-
-    g_cal_button_pressed = 0u;
-    if ((g_state == PSOC_ARMED) || (g_state == PSOC_SAMPLING)) {
-        /* Política: botón fuera de IDLE se descarta; en ventana crítica ni
-         * siquiera se emite diagnóstico UART. */
-        return 0u;
-    }
-    uart_send_diag(PSOC_EVT_BUTTON, g_state);
-    if (g_state == PSOC_IDLE) {
-        (void)psoc_start_calibration_if_idle(0u);
-    } else {
-        uart_send_diag(PSOC_EVT_BUTTON_IGNORED, g_state);
-    }
-    return 1u;
-#endif
 }
 
 static void uart_send_capture_frame_ex(const volatile uint8 *src, uint16 seq,
@@ -2344,19 +2115,6 @@ static void live_ack(uint16 batch16, uint8 flags)
     if (batch > g_live_acked) {
         g_live_acked = batch;
     }
-}
-
-/* Lee exactamente el lote pedido. En éxito el seq UART coincide con el índice;
- * en fallo no se transmite ningún frame de datos. */
-static uint8 uart_send_sd_batch(uint16 batchIndex)
-{
-    uint16 offset = (uint16)((uint32)batchIndex % SD_BATCHES_PER_BLOCK) *
-                    CAPTURE_BATCH_BYTES;
-    if (!sd_session_read_batch(batchIndex)) {
-        return 0u;
-    }
-    uart_send_capture_frame_ex(&g_sd_blk[offset], batchIndex, 0u);
-    return 1u;
 }
 
 static void uart_service(void)
@@ -2509,15 +2267,11 @@ static void uart_service(void)
                             uart_send_cfg_ack(PSOC_CMD_ADC_SNAPSHOT, 0u);
                             break;
                         case PSOC_CMD_SD_PROBE:
-                            if (rx_p1 <= 5u && rx_p3 <= 2u &&
-                                (rx_p1 < 4u || sd_spi_present())) {
-                                sd_mark(SD_MARK_WRITE);
-                                uart_send_cfg_ack(PSOC_CMD_SD_PROBE,
-                                    sd_spi_probe(rx_p1, rx_p2, rx_p3,
-                                                 sd_probe_busy_mark) ? rx_p1 : 0xEEu);
-                            } else {
-                                uart_send_cfg_ack(PSOC_CMD_SD_PROBE, 0xEEu);
-                            }
+                        case PSOC_CMD_SD_STATUS:
+                        case PSOC_CMD_SD_TEST:
+                        case PSOC_CMD_SD_CAPTURE:
+                        case PSOC_CMD_SD_READ_BATCH:
+                            uart_send_cfg_ack(rx_cmd, 0xEEu);
                             break;
                         case 0xA6u: case PSOC_CMD_PGAOUT: case 0xA9u: case 0xAAu:
                         case PSOC_CMD_ACCEPT_EXTERNAL_CAL:
@@ -2526,10 +2280,6 @@ static void uart_service(void)
                         case PSOC_CMD_SET_DECIMATION:
                         case PSOC_CMD_VIEW_CHANNEL:
                         case PSOC_CMD_FORCE_PI:
-                        case PSOC_CMD_SD_STATUS:
-                        case PSOC_CMD_SD_TEST:
-                        case PSOC_CMD_SD_CAPTURE:
-                        case PSOC_CMD_SD_READ_BATCH:
                             uart_send_diag(PSOC_EVT_CAL_BUSY, rx_cmd);
                             uart_send_cfg_ack(rx_cmd, 0u);
                             break;
@@ -2552,15 +2302,15 @@ static void uart_service(void)
                     case 0xA6u:
                         PGAgain_Set(rx_p1);
                         uart_send_cfg_ack(0xA6u, g_pga_code);
-                        led_toggle(); break;
+                        break;
                     case PSOC_CMD_PGAOUT:
                         PGAout_Set(rx_p1);
                         uart_send_cfg_ack(PSOC_CMD_PGAOUT, g_pgaout_code);
-                        led_toggle(); break;
+                        break;
                     case 0xA9u:
                         PGAvdac_Set(rx_p1);
                         uart_send_cfg_ack(0xA9u, g_pgavdac_code);
-                        led_toggle(); break;
+                        break;
                     case PSOC_CMD_CAL_PARAM:
                         /* Parametros de calibracion en caliente. Ver el bloque
                          * de PSOC_CMD_CAL_PARAM en psoc_hw.h. El ack lleva el
@@ -2617,7 +2367,7 @@ static void uart_service(void)
                             }
                             uart_send_cfg_ack(0xAAu, ok ? rx_p1 : 0xFFu);
                         }
-                        led_toggle(); break;
+                        break;
                     case PSOC_CMD_ACCEPT_EXTERNAL_CAL:
                         {
                             uint8 accepted = 0u;
@@ -2641,7 +2391,6 @@ static void uart_service(void)
                         uart_send_diag(PSOC_EVT_START_NOW, 0u);
                         uart_send_cfg_ack(0xB4u, 1u);
                         psoc_start_now();
-                        led_toggle();
                         break;
                     case 0xB3u:
 #if PSOC_RAMP_DEBUG_ENABLE
@@ -2671,7 +2420,6 @@ static void uart_service(void)
                         break;
                     case PSOC_CMD_CALIBRATE:
                         uart_send_cfg_ack(PSOC_CMD_CALIBRATE,control_command(0xD6,CONTROL_LEARN,0));
-                        led_toggle();
                         break;
                     case PSOC_CMD_SAVE_EEPROM:
                         /* Guardar los DAC de calibración actuales en EEPROM.
@@ -2705,7 +2453,6 @@ static void uart_service(void)
                             }
                             uart_send_cfg_ack(PSOC_CMD_SAVE_EEPROM, ok_snap);
                         }
-                        led_toggle();
                         break;
                     case PSOC_CMD_SELECT_STREAM:
                         /* rx_p1: 0=crudo, 1=filtrado FIR */
@@ -2721,7 +2468,6 @@ static void uart_service(void)
                         }
                         dma_route_select(g_stream_mode);
                         uart_send_cfg_ack(PSOC_CMD_SELECT_STREAM, g_stream_mode);
-                        led_toggle();
                         break;
                     case PSOC_CMD_ADC_CONFIG:
                         if ((g_state == PSOC_IDLE) && psoc_adc_set_config(rx_p1)) {
@@ -2732,11 +2478,9 @@ static void uart_service(void)
                         } else {
                             uart_send_cfg_ack(PSOC_CMD_ADC_CONFIG, 0u);
                         }
-                        led_toggle();
                         break;
                     case PSOC_CMD_ADC_SNAPSHOT:
                         psoc_report_adc_snapshot_if_idle();
-                        led_toggle();
                         break;
                     case PSOC_CMD_SET_DECIMATION:
                         if ((g_state == PSOC_IDLE) && psoc_adc_set_decimation(rx_p1)) {
@@ -2745,7 +2489,6 @@ static void uart_service(void)
                         } else {
                             uart_send_cfg_ack(PSOC_CMD_SET_DECIMATION, 0u);
                         }
-                        led_toggle();
                         break;
                     case PSOC_CMD_FORCE_PI:
                         /* Forzar el PI: que corrija a fondo un rato en vez de
@@ -2757,7 +2500,6 @@ static void uart_service(void)
                         } else {
                             uart_send_cfg_ack(PSOC_CMD_FORCE_PI, 0xEEu);
                         }
-                        led_toggle();
                         break;
                     case PSOC_CMD_VIEW_CHANNEL:
                         /* Vista de diagnóstico: mueve el AMux de la captura a
@@ -2774,80 +2516,13 @@ static void uart_service(void)
                         } else {
                             uart_send_cfg_ack(PSOC_CMD_VIEW_CHANNEL, 0xEEu);
                         }
-                        led_toggle();
                         break;
                     case PSOC_CMD_SD_PROBE:
-                        /* En IDLE solo se ARMA: durante la captura la UART
-                         * queda muda (ventana critica), asi que la accion la
-                         * ejecuta el lazo de muestreo cada 5 lotes, igual que
-                         * sd_capture_drain(). p1=6 desarma. */
-                        if (rx_p1 == 6u) {
-                            g_sdprobe_armado = 0u;
-                            uart_send_cfg_ack(PSOC_CMD_SD_PROBE, 6u);
-                        } else if (rx_p1 == 7u) {
-                            g_sdprobe_armado = 8u;   /* ping por I2C, sin tocar la SD */
-                            uart_send_cfg_ack(PSOC_CMD_SD_PROBE, 7u);
-                        } else if (rx_p1 <= 5u && rx_p3 <= 2u &&
-                            (rx_p1 < 4u || sd_spi_present())) {
-                            g_sdprobe_armado = (uint8)(rx_p1 + 1u);
-                            g_sdprobe_div    = rx_p2;
-                            g_sdprobe_slew   = rx_p3;
-                            uart_send_cfg_ack(PSOC_CMD_SD_PROBE, rx_p1);
-                        } else {
-                            uart_send_cfg_ack(PSOC_CMD_SD_PROBE, 0xEEu);
-                        }
-                        led_toggle();
-                        break;
                     case PSOC_CMD_SD_STATUS:
-                        /* p1=1: re-init completo (solo IDLE); p1=0: estado cacheado. */
-                        if ((rx_p1 != 0u) && (g_state == PSOC_IDLE)) {
-                            sd_file_close();
-                            (void)f_mount((FATFS *)0, "0:", 0u);
-                            g_sd_fs_mounted = 0u;
-                            g_sd_session_ready = 0u;
-                            (void)sd_spi_init();
-                            (void)sd_session_recover();
-                        }
-                        /* Emitir el detalle antes del estado compacto para que
-                         * el esclavo pueda explicar por qué present=0. */
-                        uart_send_diag(PSOC_EVT_SD_DIAG_STAGE, sd_spi_diag_stage());
-                        uart_send_diag(PSOC_EVT_SD_DIAG_R1, sd_spi_diag_last_r1());
-                        uart_send_diag(PSOC_EVT_SD_DIAG_PINS, sd_spi_diag_pin_flags());
-                        uart_send_diag(PSOC_EVT_SD_STATUS, sd_runtime_status_byte());
-                        uart_send_cfg_ack(PSOC_CMD_SD_STATUS, sd_runtime_status_byte());
-                        break;
                     case PSOC_CMD_SD_TEST:
-                        if ((g_state == PSOC_IDLE) && sd_spi_present()) {
-                            uart_send_cfg_ack(PSOC_CMD_SD_TEST, sd_fs_self_test());
-                        } else {
-                            uart_send_cfg_ack(PSOC_CMD_SD_TEST, 0u);
-                        }
-                        led_toggle();
-                        break;
                     case PSOC_CMD_SD_CAPTURE:
-                        if (g_state != PSOC_IDLE) {
-                            uart_send_cfg_ack(PSOC_CMD_SD_CAPTURE, 0xEEu);
-                        } else if (rx_p1 == 0u) {
-                            g_sd_cap_en = 0u;
-                            uart_send_cfg_ack(PSOC_CMD_SD_CAPTURE, 0u);
-                        } else if (sd_spi_present() && sd_fs_mount()) {
-                            g_sd_cap_en = 1u;
-                            uart_send_cfg_ack(PSOC_CMD_SD_CAPTURE, 1u);
-                        } else {
-                            uart_send_cfg_ack(PSOC_CMD_SD_CAPTURE, 0xEEu);
-                        }
-                        uart_send_diag(PSOC_EVT_SD_STATUS, sd_runtime_status_byte());
-                        led_toggle();
-                        break;
                     case PSOC_CMD_SD_READ_BATCH:
-                        if (g_state == PSOC_IDLE &&
-                            uart_send_sd_batch((uint16)rx_p1 | ((uint16)rx_p2 << 8u))) {
-                            /* El frame con seq solicitado es el ACK positivo. */
-                        } else {
-                            g_sd_err_flags |= 0x08u;
-                            uart_send_cfg_ack(PSOC_CMD_SD_READ_BATCH, 0u);
-                            uart_send_diag(PSOC_EVT_SD_ERROR, g_sd_err_flags);
-                        }
+                        uart_send_cfg_ack(rx_cmd, 0xEEu);
                         break;
                     case PSOC_CMD_LIVE_MODE:
                         if (g_state == PSOC_IDLE && rx_p1 <= 2u) {
@@ -2858,9 +2533,7 @@ static void uart_service(void)
                                           (uint8)(g_live_en + g_live_ramp));
                         break;
                     case PSOC_CMD_BLINK_LED:
-                        /* Identificacion no bloqueante: Timer_2 encadena
-                         * one-shots y service_comm_led solo consume flags. */
-                        comm_led_start_identify();
+                        /* Reservado: se acepta sin accion. */
                         break;
                     default: break;
                 }
@@ -2934,12 +2607,8 @@ static void timer_storm_recover(void)
         mode = g_timer2_mode;
         g_timer2_mode = TIMER2_MODE_NONE;
         g_timer2_remaining_counts = 0u;
-        if (mode == TIMER2_MODE_BOOT_LED_OFF) {
-            g_boot_led_off_due = 1u;
-        } else if (mode == TIMER2_MODE_WAIT) {
+        if (mode == TIMER2_MODE_WAIT) {
             g_timer2_wait_done = 1u;
-        } else if (mode == TIMER2_MODE_COMM_BLINK) {
-            g_comm_blink_due = 1u;
         }
         CyExitCriticalSection(saved);
         uart_send_diag(PSOC_EVT_TIMER_STORM, 2u);
@@ -3021,13 +2690,14 @@ static void service_runtime(void)
         uint8 capture_error = g_ce_error;
         uint8 capture_watchdog = 0u;
         if (g_capture_done == 0u) {
-            if (g_sd_cap_active) {
-                /* Drenaje concurrente ring→SD. No toca UART/timers, así que
-                 * respeta la política de silencio de la ventana de muestreo. */
-                sd_capture_drain(0u);
-            } else if (g_sdprobe_armado != 0u) {
-                sdprobe_service();
-            } else if (g_live_active) {
+            if (g_live_active) {
+                /* STOP: la bajada de SYNC. superMaquina no la mira (no entra
+                 * en los UDB), asi que se lee el pin: deja de guardar y cierra
+                 * como DONE. Sin pulso STOP, que la llevaria a ERROR. */
+                if ((g_ce_ctrl_level & CE_CTRL_USE_SYNC) != 0u && SYNC_IN_Read() == 0u) {
+                    g_sm_sample_handler = sm_sample_noop;
+                    g_capture_done = 1u;
+                }
                 /* En vivo se rompe el silencio a proposito: tramas I2C hacia
                  * el ESP y, de bajada, solo sus LIVE_ACK. */
                 live_service();
@@ -3087,24 +2757,12 @@ static void service_runtime(void)
                 return;
             }
         }
-        if (g_sd_cap_active) {
-            /* Fin real: persistir y cerrar. Una captura SD no se auto-vuelca
-             * por UART; el ESP pedirá cada lote con 0xBF durante DUMPING. */
-            sd_capture_drain(1u);
-            sd_session_finalize(g_batches_captured);
-            g_batches_sent = g_batches_captured;
-            g_total_sent = g_batches_captured;
-            g_chain_active = 0u;
-        }
         idle_ping_schedule();
         uart_send_diag(PSOC_EVT_CAPTURE_DONE,
                        (capture_error != 0u) ? capture_error : diag_u16_sat(g_batches_captured));
         g_ce_error = 0u;
         g_capture_done = 0u;
         g_state = PSOC_IDLE;
-        if (g_sd_cap_active) {
-            uart_send_diag(PSOC_EVT_DUMP_DONE, diag_u16_sat(g_batches_captured));
-        }
     }
 
     if (capture_dump_pending()) {
@@ -3127,32 +2785,11 @@ static void service_runtime(void)
     uart_service();
 }
 
-static void service_comm_led(void)
-{
-    if (!g_comm_led_active || !g_comm_blink_due) {
-        return;
-    }
-
-    g_comm_blink_due = 0u;
-    if (g_comm_blinks_remaining > 0u) {
-        g_comm_blinks_remaining--;
-        led_toggle();
-    }
-
-    if (g_comm_blinks_remaining > 0u) {
-        timer2_arm_ms(COMM_BLINK_MS, TIMER2_MODE_COMM_BLINK);
-    } else {
-        g_comm_led_active = 0u;
-        led_write(1u);
-    }
-}
-
 static void wait_ms_timer2(uint32 ms)
 {
     g_timer2_wait_done = 0u;
     timer2_arm_ms(ms, TIMER2_MODE_WAIT);
     while (!g_timer2_wait_done) {
-        (void)service_button_calibration();
         service_runtime();
     }
     g_timer2_wait_done = 0u;
@@ -3162,12 +2799,9 @@ static void wait_ms_timer2(uint32 ms)
 static void wait_for_esp(void)
 {
     g_boot_ping_due = 1u;
-    g_boot_led_off_due = 0u;
-    led_write(1u);
     uart_send_diag(PSOC_EVT_WAIT_ESP, 0u);
     while (!g_esp_connected)
     {
-        (void)service_button_calibration();
         service_runtime();
         if (g_esp_connected) {
             break;
@@ -3183,21 +2817,12 @@ static void wait_for_esp(void)
         if (g_boot_ping_due) {
             g_boot_ping_due = 0u;
             uart_send_ping();
-            led_write(1u);
             timer1_arm_ms(PING_PERIOD_MS, TIMER1_MODE_BOOT_PING);
-            timer2_arm_ms((uint32)(PING_PERIOD_MS - PING_OFF_MS), TIMER2_MODE_BOOT_LED_OFF);
-        }
-
-        if (g_boot_led_off_due) {
-            g_boot_led_off_due = 0u;
-            led_write(0u);
         }
     }
     timer1_stop_quiet();
     timer2_stop_quiet();
     g_boot_ping_due = 0u;
-    g_boot_led_off_due = 0u;
-    led_write(1u);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -3316,44 +2941,6 @@ static void dma_adc_init(void)
     dma_route_select(0u);
 }
 
-/* Firma de arranque por LED. Existe para contestar UNA pregunta que por
- * software no se puede: si el PSoC esta EJECUTANDO.
- *
- * Grabar y ejecutar no son lo mismo -el KitProg graba con el chip detenido- y
- * cuando el enlace I2C esta caido no queda ningun otro canal para saberlo. El
- * parpadeo normal del firmware no sirve de testigo porque es de 600 ms
- * encendido / 100 ms apagado a 1,4 Hz, y ademas vive DENTRO del lazo principal:
- * si el arranque se cuelga antes de llegar ahi, no se ve nada.
- *
- * Esta firma va antes que todo lo demas y es deliberadamente lenta y asimetrica
- * -tres pulsos de 300 ms separados por 700 ms, y despues 1,5 s apagado- para
- * que no se confunda con el parpadeo de operacion ni con un LED "atenuado".
- *
- * Como leerlo:
- *   se ven los 3 pulsos y despues el parpadeo rapido -> el PSoC arranca Y llega
- *       al lazo principal; el problema esta en el camino I2C.
- *   se ven los 3 pulsos y despues NADA o el LED fijo -> arranca pero se cuelga
- *       en la inicializacion; el problema esta entre main() y el lazo.
- *   no se ve nada -> no ejecuta: mirar alimentacion y grabado, no el bus.
- */
-#ifndef PSOC_BOOT_LED_SIGNATURE
-#define PSOC_BOOT_LED_SIGNATURE 1
-#endif
-
-static void boot_led_signature(void)
-{
-#if PSOC_BOOT_LED_SIGNATURE && defined(CY_PINS_LED_H)
-    uint8 k;
-    for (k = 0u; k < 3u; k++) {
-        LED_Write(1u);
-        CyDelay(300u);
-        LED_Write(0u);
-        CyDelay(700u);
-    }
-    CyDelay(1500u);
-#endif
-}
-
 /* esp_reset es activo en bajo. En TopDesign pasa por un inversor, de modo que
  * isr_matate recibe un flanco ascendente cuando el ESP baja P1[4]. */
 CY_ISR(isr_esp_reset_handler)
@@ -3370,15 +2957,12 @@ int main(void)
     isr_matate_StartEx(isr_esp_reset_handler);
     CyGlobalIntEnable;
 
-    /* Lo primero, para que sirva de testigo aunque lo que sigue se cuelgue. */
-    boot_led_signature();
 
 #if PSOC_TX1_GPIO_TEST
     tx1_gpio_detach_dsi();
     tx1_gpio_write(1u);
     for (;;)
     {
-        led_toggle();
         tx1_gpio_write(0u);
         CyDelay(50u);
         tx1_gpio_write(1u);
@@ -3391,7 +2975,6 @@ int main(void)
     tx1_manual_write(1u);
     for (;;)
     {
-        led_toggle();
         tx1_bitbang_byte(0xABu);
         tx1_bitbang_byte(0xC0u);
         tx1_bitbang_byte(0x00u);
@@ -3411,7 +2994,6 @@ int main(void)
 #if PSOC_EARLY_UART_TEST
     for (;;)
     {
-        led_toggle();
         uart_send_diag(PSOC_EVT_BOOT, PSOC_HW_CLASS);
         uart_send_ping();
         CyDelay(100u);
@@ -3471,13 +3053,6 @@ int main(void)
 #endif
     isr_SuperMaquina_StartEx(isr_SuperMaquina_Handler);
     isr_SuperMaquina_SetPriority(0u);
-    Clock_1_Start();
-#if PSOC_BUTTON_CAL_ENABLE
-#ifdef CY_ISR_isr_Button_H
-    isr_Button_ClearPending();
-    isr_Button_StartEx(isr_Button_Handler);
-#endif
-#endif
 #if PSOC_SUPERMAQUINA_OWNS_SYNC_IRQ
 #ifdef CY_ISR_isr_SyncIn_H
     *isr_SyncIn_INTC_VECTOR = (uint32)isr_SyncIn_SafeVector;
@@ -3488,21 +3063,6 @@ int main(void)
     /* ── Loop de arranque: busca el ESP sin bloquear UART/ADC ───────────── */
     wait_for_esp();
 
-    /* Establecer primero el enlace: una SD lenta o defectuosa no debe impedir
-     * que el PSoC emita pings y diagnosticos de arranque. */
-    (void)sd_spi_init();
-    (void)sd_session_recover();
-    if (g_sd_fs_mounted && sd_spi_present()) { g_sd_cap_en = 1u; }
-    uart_send_diag(PSOC_EVT_SD_STATUS, sd_runtime_status_byte());
-    if (g_sd_session_ready) { uart_send_diag(PSOC_EVT_SD_SESSION, 1u); }
-    psoc_debug_print_u32("[PC] sd_status=", sd_runtime_status_byte());
-    
-    /* ── 5 parpadeos rápidos al conectar ─────────────────────────────────── */
-    for (i = 0u; i < 5u; i++)
-    {
-        led_write(0u); wait_ms_timer2(CONNECT_BLINK_MS);
-        led_write(1u); wait_ms_timer2(CONNECT_BLINK_MS);
-    }
     idle_ping_schedule();
     
     /* ── Loop principal ─────────────────────────────────────────────────── */
@@ -3539,7 +3099,6 @@ int main(void)
             idle_ping_stop();
         }
 
-        service_comm_led();
     }
 }
 

@@ -268,18 +268,7 @@ begin
 
                 ST_SAMPLING:
                 begin
-                    /* STOP por la bajada de SYNC. sync_det marca los dos
-                     * flancos (EdgeDetect "either"); muestreando, el unico
-                     * que puede llegar es la bajada. Cierra como DONE para
-                     * que el firmware conserve lo capturado (la captura en
-                     * vivo sigue pasando lo pendiente). Solo con use_sync:
-                     * las capturas start-now no miran SYNC. */
-                    if (ctrl_use_sync && sync_det)
-                    begin
-                        state_reg <= ST_DONE;
-                        irq_reg   <= 1'b1;
-                    end
-                    else if (sample_done_rise)
+                    if (sample_done_rise)
                     begin
                         if (sample_will_close_batch)
                         begin

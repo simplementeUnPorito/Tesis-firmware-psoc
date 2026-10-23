@@ -85,8 +85,9 @@ foreach ($required in @($Hex, $GeneratedAdc, $GeneratedProject)) {
 # Gate de identidad: nunca grabar por accidente un HEX HAMMER en la placa GEO.
 $projectHeader = Get-Content -Raw -LiteralPath $GeneratedProject
 if ($projectHeader -notmatch '#include\s+"PGAgain\.h"' -or
-    $projectHeader -notmatch '#include\s+"SPI\.h"') {
-    throw 'El build no es GEO+SPI (faltan PGAgain o SPI en project.h).'
+    $projectHeader -notmatch '#include\s+"PGAout\.h"') {
+    # La SD salio del TopDesign (2026-10-23): la GEO se reconoce por PGAout.
+    throw 'El build no es GEO (faltan PGAgain o PGAout en project.h).'
 }
 
 # Las cuatro configuraciones deben compartir exactamente la Fs pedida.
@@ -249,5 +250,5 @@ foreach ($requiredSuccess in @('PSoC3_ProtectAll', 'PSoC3_VerifyProtect', 'DAP_R
     }
 }
 
-Write-Host "[PSoC] OK: $firmwareKind+SPI, Fs=$ExpectedSampleRate Hz, $rowsWritten filas verificadas."
+Write-Host "[PSoC] OK: $firmwareKind, Fs=$ExpectedSampleRate Hz, $rowsWritten filas verificadas."
 Write-Host "[PSoC] Log: $programLog"
