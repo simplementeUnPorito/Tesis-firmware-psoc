@@ -23,7 +23,6 @@ module superMaquina (
 	output [7:0] state,
 	output [7:0] status,
 	output [7:0] timer_event,
-	input   button_pos,
 	input  [7:0] cfg,
 	input   clk,
 	input  [7:0] ctrl,
@@ -87,12 +86,10 @@ reg ctrl_stop_d;
 reg ctrl_clear_flags_d;
 reg ctrl_load_batch_lo_d;
 reg ctrl_load_batch_hi_d;
-reg button_pos_d;
 reg nrq_dma_adc_d;
 reg nrq_dma_filter_d;
 reg irq_reg;
 reg sync_seen_reg;
-reg button_seen_reg;
 reg batch_seen_reg;
 reg [4:0] sample_count_reg;
 reg [8:0] batch_count_reg;
@@ -104,8 +101,6 @@ wire stop_pulse        = ctrl_stop & ~ctrl_stop_d;
 wire clear_flags_pulse = ctrl_clear_flags & ~ctrl_clear_flags_d;
 wire load_batch_lo_pulse = ctrl_load_batch_lo & ~ctrl_load_batch_lo_d;
 wire load_batch_hi_pulse = ctrl_load_batch_hi & ~ctrl_load_batch_hi_d;
-wire button_pos_rise = button_pos & ~button_pos_d;
-
 wire sampling_active = ctrl_engine_en && (state_reg == ST_SAMPLING);
 wire nrq_dma_adc_rise = nrq_dma_adc & ~nrq_dma_adc_d;
 wire nrq_dma_filter_rise = nrq_dma_filter & ~nrq_dma_filter_d;
@@ -116,12 +111,10 @@ wire sample_irq_event = sample_done_rise &&
  * se descarta; solo muestras y sync interrumpen al ARM durante una captura.
  * - Muestras DMA: unica fuente de irq en ST_SAMPLING (y bypass).
  * - sync_det: solo se mira en ST_ARMED (es quien inicia el muestreo).
- * - button_pos: DESCARTE fuera de IDLE (solo irq/flag en ST_IDLE).
  * - TC de timers: HOLD. Nunca generan irq; cada TC queda retenido en el
  *   STATUS_TC de su propio timer fixed y el firmware lo consume por polling
  *   (el watchdog de captura tambien por polling, atendido incluso durante
  *   SAMPLING). timer_event expone la vista live solo como diagnostico. */
-wire button_irq_event = button_pos_rise && (state_reg == ST_IDLE);
 wire tc_capture_watchdog = tc_watcdog; /* typo externo mantenido por TopDesign */
 wire [3:0] timer_event_live = {tc_capture_watchdog, tc_led, tc_ping, tc_uart};
 wire sample_will_close_batch = (sample_count_reg == 5'd0);
@@ -149,7 +142,7 @@ assign timer_event       = {4'b0000, timer_event_live};
  * ARM hay que liberar PLD antes. */
 assign state             = {5'b00000, state_reg};
 assign status            = {
-    button_seen_reg,
+    1'b0,
     batch_seen_reg,
     sync_seen_reg,
     (state_reg == ST_ERROR),
@@ -172,12 +165,10 @@ begin
         ctrl_clear_flags_d    <= 1'b0;
         ctrl_load_batch_lo_d  <= 1'b0;
         ctrl_load_batch_hi_d  <= 1'b0;
-        button_pos_d          <= 1'b0;
         nrq_dma_adc_d         <= 1'b0;
         nrq_dma_filter_d      <= 1'b0;
         irq_reg               <= 1'b0;
         sync_seen_reg         <= 1'b0;
-        button_seen_reg       <= 1'b0;
         batch_seen_reg        <= 1'b0;
         sample_count_reg      <= 5'd29;
         batch_count_reg       <= 9'd0;
@@ -191,16 +182,10 @@ begin
         ctrl_clear_flags_d   <= ctrl_clear_flags;
         ctrl_load_batch_lo_d <= ctrl_load_batch_lo;
         ctrl_load_batch_hi_d <= ctrl_load_batch_hi;
-        button_pos_d         <= button_pos;
         nrq_dma_adc_d        <= nrq_dma_adc;
         nrq_dma_filter_d     <= nrq_dma_filter;
 
-        irq_reg <= sample_irq_event | button_irq_event;
-
-        if (button_irq_event)
-        begin
-            button_seen_reg <= 1'b1;
-        end
+        irq_reg <= sample_irq_event;
 
         if (load_batch_lo_pulse)
         begin
@@ -222,7 +207,6 @@ begin
                 error_stop_reg  <= 1'b0;
                 error_state_reg <= 1'b0;
                 sync_seen_reg   <= 1'b0;
-                button_seen_reg <= 1'b0;
                 batch_seen_reg  <= 1'b0;
             end
         end
@@ -231,7 +215,6 @@ begin
             error_stop_reg        <= 1'b0;
             error_state_reg       <= 1'b0;
             sync_seen_reg         <= 1'b0;
-            button_seen_reg       <= 1'b0;
             batch_seen_reg        <= 1'b0;
             sample_count_reg      <= 5'd29;
             batch_count_reg       <= 9'd0;
@@ -285,7 +268,18 @@ begin
 
                 ST_SAMPLING:
                 begin
-                    if (sample_done_rise)
+                    /* STOP por la bajada de SYNC. sync_det marca los dos
+                     * flancos (EdgeDetect "either"); muestreando, el unico
+                     * que puede llegar es la bajada. Cierra como DONE para
+                     * que el firmware conserve lo capturado (la captura en
+                     * vivo sigue pasando lo pendiente). Solo con use_sync:
+                     * las capturas start-now no miran SYNC. */
+                    if (ctrl_use_sync && sync_det)
+                    begin
+                        state_reg <= ST_DONE;
+                        irq_reg   <= 1'b1;
+                    end
+                    else if (sample_done_rise)
                     begin
                         if (sample_will_close_batch)
                         begin

@@ -262,6 +262,10 @@ uint32 psoc_idac_lsb_uv(void);
 #define PSOC_EVT_SD_DIAG_R1       0x4Du  /* última respuesta R1 recibida de la tarjeta (0xFF=sin respuesta) */
 #define PSOC_EVT_SD_DIAG_PINS     0x4Eu  /* pares low/high vistos: MISO[1:0], SCK[3:2], MOSI[5:4], CS[7:6] */
 #define PSOC_EVT_LAB_PING         0x4Fu  /* sdprobe modo 7: aviso por I2C en cada k*150 muestras (value = k & 0xFF) */
+#define PSOC_EVT_LIVE_DONE        0x50u  /* captura en vivo cerrada; value = total de lotes completos & 0xFF */
+#define PSOC_EVT_LIVE_OVERRUN     0x51u  /* el anillo se lleno sin confirmacion del ESP; la captura paro ahi */
+#define PSOC_EVT_LIVE_TOTAL1      0x52u  /* bits 8-15 del total; llega antes de LIVE_DONE */
+#define PSOC_EVT_LIVE_TOTAL2      0x53u  /* bits 16-23 del total; llega antes de LIVE_DONE */
 
 #define PSOC_CMD_STATUS         0xA5u
 #define PSOC_CMD_PGA            0xA6u
@@ -305,21 +309,31 @@ uint32 psoc_idac_lsb_uv(void);
 #define PSOC_CMD_SAVE_EEPROM    0xB6u  /* Guardar config calibración en EEPROM */
 #define PSOC_CMD_SELECT_STREAM  0xB7u  /* Param: 0=crudo, 1=filtrado FIR */
 #define PSOC_CMD_ADC_SNAPSHOT   0xB8u  /* Reporte diagnostico de ADC por etapa */
-#define PSOC_CMD_BLINK_LED      0xB9u  /* Titilar LED de identificación del nodo */
+#define PSOC_CMD_BLINK_LED      0xB9u  /* Reservado; se acepta sin accion. */
 #define PSOC_CMD_ADC_CONFIG     0xBAu  /* Param: 1=ADC_CF_2V5 (±2.5V), 2=ADC_CF_0V512 (±0.512V),
                                           3=ADC_CF_1V024 (±1.024V), 4=ADC_CF_0V625 (±0.625V) */
 #define PSOC_CMD_SET_DECIMATION 0xBBu  /* Param: factor de decimación 1..100 (1=sin decimar,
                                           Fs efectiva = 2604/factor). Promedia `factor` muestras
                                           consecutivas del stream ya elegido (raw/FIR) antes de
                                           guardarlas. Solo aceptado en PSOC_IDLE. */
-#define PSOC_CMD_SD_STATUS      0xBCu  /* Param: 0=consultar estado cacheado, 1=re-init (solo IDLE).
-                                          Ack: sd_spi_status_byte(). */
-#define PSOC_CMD_SD_TEST        0xBDu  /* Self-test FatFs no destructivo: usa y elimina GEOTEST.BIN. */
-#define PSOC_CMD_SD_CAPTURE     0xBEu  /* Param: 1=capturar a SD (ring RAM->SD, permite N>512),
-                                          0=modo RAM-only clásico. Solo IDLE. Ack: 0/1=aplicado,
-                                          0xEE=rechazado (sin SD o estado ocupado). */
-#define PSOC_CMD_SD_PROBE       0xADu  /* 3 params: modo 0..5, divisor SPI (0=mantener),
-                                          slew 0=mantener/1=lento/2=rapido. */
+#define PSOC_CMD_SD_STATUS      0xBCu  /* Reservado; ack 0xEE. */
+#define PSOC_CMD_SD_TEST        0xBDu  /* Reservado; ack 0xEE. */
+#define PSOC_CMD_SD_CAPTURE     0xBEu  /* Reservado; ack 0xEE. */
+/* Captura en vivo. Con el modo en 1, la ISR escribe en g_capture_raw como
+ * anillo de 512 lotes y el lazo principal pasa cada lote completo al ESP
+ * mientras muestrea, sin esperar al final. El ESP confirma con LIVE_ACK lo que
+ * ya guardo; sin confirmacion el PSoC retiene en su anillo y, si se llena,
+ * para. N = 0 en este modo es "sin limite": termina con la bajada de SYNC.
+ *   LIVE_MODE: 1 param, 0 = clasico, 1 = vivo, 2 = vivo con rampa de banco
+ *              (indice de muestra en lugar del ADC). Solo IDLE. Ack: modo vigente.
+ *   LIVE_ACK:  3 params, [lote lo][lote hi][flags]. Sin flags: el ESP guardo
+ *              todo lo anterior a ese lote. LIVE_ACK_REWIND: volver a mandar
+ *              desde ese lote. LIVE_ACK_ONE: mandar solo ese lote otra vez. */
+#define PSOC_CMD_LIVE_MODE      0xAEu
+#define PSOC_CMD_LIVE_ACK       0xAFu
+#define LIVE_ACK_REWIND         0x01u
+#define LIVE_ACK_ONE            0x02u
+#define PSOC_CMD_SD_PROBE       0xADu  /* Reservado, 3 parametros; ack 0xEE. */
 /* Param: canal del AMux que se digitaliza en la captura y en el stream
  * (0=PGA/SEo, 1=BP, 2=OPA_SUM, 3=SUM, 4=LP = la senal de siempre).
  * Es una VISTA de diagnostico: no toca el lazo de control, que sigue
@@ -335,8 +349,7 @@ uint32 psoc_idac_lsb_uv(void);
 #define PSOC_CMD_VIEW_CHANNEL   0xACu
 #define PSOC_VIEW_CHANNEL_NONE  0xFFu
 
-#define PSOC_CMD_SD_READ_BATCH  0xBFu  /* 2 params: índice uint16 LE. Éxito: frame normal con
-                                          seq=índice; fallo: CFG_ACK(BF,0), sin datos falsos. */
+#define PSOC_CMD_SD_READ_BATCH  0xBFu  /* Reservado, 2 parametros; ack 0xEE. */
 
 void psoc_hw_start_analog(uint8 pga_code, uint8 pgavdac_code, uint8 pgaout_code);
 void psoc_hw_set_pga(uint8 code);

@@ -9,12 +9,12 @@
 * ─────────────────────────────────────────────────────────────────────────────
 *  GEO — componentes TopDesign:
 *    UART, ADC, AMux_ADC, VDAC_ref_*, PGAgain, OPAref, PGAp,
-*    PGAn, LPF_1, LPF_2, OPAbp, OPAsum, OPAlp, Timer, LED, isr_*.
+ *    PGAn, LPF_1, LPF_2, OPAbp, OPAsum, OPAlp, Timer, isr_*.
 *
 *  HAMMER — componentes TopDesign (simplificado en "Precambios", ya sin
 *  etapa de referencia de entrada separada):
 *    UART, ADC, AMux_ADC, VDAC_PGA, VDAC_LP,
-*    PGA, Opa_ref_PGA, Opa_LP, LPF_ADC, Timer, LED.
+ *    PGA, Opa_ref_PGA, Opa_LP, LPF_ADC, Timer.
 * ─────────────────────────────────────────────────────────────────────────────
 *
 * Cadena: MATLAB → maestro → esclavo (ESP-NOW) → PSoC (UART).
@@ -42,18 +42,12 @@
 #include "project.h"
 #include "psoc_hw.h"
 #include "psoc_adc.h"
-#include "sd_spi.h"
-#include "fatfs/ff.h"
 #include "calibration.h"
 #include "psoc_nv.h"
 #include "control_runtime.h"
 #if defined(PSOC_TEST) && PSOC_TEST
 #include "psoc_selftest.h"
 #endif
-/* LED.h a propósito NO se incluye directo: la placa nueva no tiene el pin LED
- * en el TopDesign. project.h lo trae solo si el pin existe, y led_write() /
- * led_toggle() ya están guardados por CY_PINS_LED_H. Incluirlo a mano hacía
- * que el guard diera verdadero y el link fallara por LED_Write/LED_Read. */
 #include "DMA_DelSig_RAM_dma.h"
 #include "DMA_Filter_RAM_dma.h"
 #include "DMA_DelSig_Filter_dma.h"
@@ -192,16 +186,7 @@
 #endif
 
 #define PING_PERIOD_MS     700u
-#define PING_OFF_MS        100u
 #define IDLE_PING_MS       1000u
-#define COMM_BLINK_MS      200u  /* medio-período del parpadeo del LED (~2.5 Hz, visible) */
-#define CONNECT_BLINK_MS   80u
-
-/* Titilar LED (identificación de nodo): parpadeo NO bloqueante servido por
- * Timer_2. Al recibir PSOC_CMD_BLINK_LED se arma una cadena de one-shots; el
- * LED titila y luego vuelve a su reposo (encendido fijo). */
-#define IDENTIFY_BLINK_WINDOW_MS  8000u
-#define IDENTIFY_BLINK_TOGGLES    ((IDENTIFY_BLINK_WINDOW_MS + COMM_BLINK_MS - 1u) / COMM_BLINK_MS)
 
 #ifndef PSOC_DIAG_ENABLE
 #define PSOC_DIAG_ENABLE      1
@@ -224,14 +209,6 @@
 
 #ifndef PSOC_TX1_GPIO_TEST
 #define PSOC_TX1_GPIO_TEST     0
-#endif
-
-#ifndef PSOC_BUTTON_CAL_ENABLE
-/* En la placa GEO el bit BUTTON del status queda espurio al arrancar. Eso
- * iniciaba una calibracion manual antes de que el ESP pudiera configurar el
- * nodo y bloqueaba ctl/PGA hasta el watchdog de 25 minutos. El barrido y el
- * operador usan el comando UART de calibracion, que permanece disponible. */
-#define PSOC_BUTTON_CAL_ENABLE 0
 #endif
 
 /* -------------------------------------------------------------------------- */
@@ -285,63 +262,31 @@ static volatile uint16 g_batches_sent = 0u;
  * que ese trozo de hardware, el PSoC rearma superMaquina y sigue escribiendo en
  * el mismo buffer hasta completar g_total_target lotes DECIMADOS. El volcado
  * UART se hace una sola vez, al final, para que el ESP vea una captura completa
- * y no cierre por DUMP_DONE parcial. Ver docs/plan_2929_decimation_sd.md. */
+ * y no cierre por DUMP_DONE parcial. */
 static volatile uint16 g_total_target = 0u; /* lotes DECIMADOS pedidos en toda la captura */
 static volatile uint16 g_total_sent   = 0u; /* lotes DECIMADOS ya volcados al ESP32 (acumulado) */
 static volatile uint8  g_chain_active  = 0u; /* 1 = captura multi-corrida en curso */
 
-/* ── Captura a SD (PSOC_CMD_SD_CAPTURE) ──────────────────────────────────────
- * La ISR escribe un ring y main lo drena al archivo FatFs 0:/GEOLAST.BIN.
- * Nunca se escriben LBAs fijos: la tabla FAT, otros archivos y el sector de
- * arranque quedan intactos. El archivo contiene una cabecera de 512 B y luego
- * bloques de 512 B con 5 lotes canónicos int24-LE (450 B + padding).
- */
-#define SD_BATCHES_PER_BLOCK 5u
-#define SD_RING_SAMPLES      ((uint32)PSOC_CAPTURE_MAX_BATCHES * BATCH_SAMPLES)
-/* Techo de N con SD: uint16 de SETN menos margen; 60000 lotes ≈ 30 min a 976 Hz. */
-#define PSOC_SD_MAX_BATCHES  60000u
-#define SD_CAPTURE_PATH      "0:/GEOLAST.BIN"
-#define SD_TEST_PATH         "0:/GEOTEST.BIN"
-#define SD_HEADER_VERSION    2u
-#define SD_HEADER_INPROGRESS 1u
-#define SD_HEADER_COMPLETE   2u
-#define SD_HEADER_CRC_OFFSET 508u
-#define SD_SYNC_BLOCKS       32u
-
-static volatile uint8  g_sd_cap_en         = 0u; /* config (0xBE), pedida por el ESP */
-/* Marcas de escritura a SD. No se puede escribir la SD sin ruido ni cortar el
- * ADC, así que se deja constancia: antes de cada f_write/f_sync el lazo
- * principal deja una marca pendiente y la ISR la pega a la PRÓXIMA muestra que
- * guarda, que es donde empieza la interferencia. Viaja en los bits 21-22 del
- * int24 (el ADC es de 18 bits: ahí solo hay extensión de signo), XOR contra el
- * signo; el ESP la decodifica, restaura el valor y la pasa al byte flags. */
-#define SD_MARK_WRITE        0x01u
-#define SD_MARK_SYNC         0x02u
-#define SD_MARK_SHIFT        21u
-static volatile uint8  g_sd_mark_pending   = 0u;
-static volatile uint8  g_sd_cap_active     = 0u; /* esta captura/dump usa SD */
-static volatile uint32 g_sd_ring_samples   = 0u; /* muestras decimadas escritas (solo ISR) */
-static volatile uint32 g_sd_ring_drained   = 0u; /* main escribe; ISR consulta overrun */
-static volatile uint32 g_sd_target_samples = 0u; /* g_total_target * BATCH_SAMPLES */
-static volatile uint32 g_sd_drop_samples   = 0u; /* overrun del ring (solo ISR) */
-static uint8  g_sd_blk[SD_BLOCK_BYTES];          /* staging drenaje / caché de dump */
-static uint16 g_sd_blk_fill        = 0u;
-static uint32 g_sd_blocks_written  = 0u;
-static uint32 g_sd_dump_blk_cached = 0xFFFFFFFFu;
-static uint8  g_sd_err_flags       = 0u;         /* bits de PSOC_EVT_SD_ERROR (solo main) */
-static uint8  g_sd_write_failed    = 0u;
-static FATFS  g_sd_fs;
-static FIL    g_sd_file;
-static uint8  g_sd_fs_mounted      = 0u;
-static uint8  g_sd_file_open       = 0u;
-static uint8  g_sd_session_ready   = 0u;
-static uint16 g_sd_session_batches = 0u;
+/* ── Captura en vivo (PSOC_CMD_LIVE_MODE) ───────────────────────────────────
+ * La ISR solo pisa lotes que el ESP ya confirmo (g_live_acked); el lazo
+ * principal manda hasta LIVE_WINDOW_BATCHES lotes sin confirmar, que es lo
+ * que entra holgado en el ring de recepcion del ESP (4 KiB = 43 tramas). */
+#define LIVE_RING_SAMPLES    ((uint32)PSOC_CAPTURE_MAX_BATCHES * BATCH_SAMPLES)
+#define LIVE_WINDOW_BATCHES  16u
+#define LIVE_UNLIMITED       0xFFFFFFFFu
+static volatile uint8  g_live_en       = 0u; /* config (0xAE), pedida por el ESP */
+static volatile uint8  g_live_ramp     = 0u; /* banco: guarda el indice de muestra en vez del ADC */
+static volatile uint8  g_live_active   = 0u; /* esta captura es en vivo */
+static volatile uint32 g_live_written  = 0u; /* muestras decimadas escritas (solo ISR) */
+static volatile uint32 g_live_target   = 0u; /* muestras pedidas; LIVE_UNLIMITED = hasta SYNC */
+static volatile uint32 g_live_acked    = 0u; /* lotes que el ESP ya guardo */
+static volatile uint32 g_live_drop     = 0u; /* muestras perdidas por anillo lleno (solo ISR) */
+static          uint32 g_live_sent     = 0u; /* proximo lote a mandar */
+static          uint32 g_live_resend   = 0u;
+static          uint8  g_live_resend_pending = 0u;
 static volatile uint8  g_debug_psoc   = 0u;
 static          uint32 g_dbg_cnt      = 0u;
 static volatile uint8  g_cal_ack_pending = 0u;
-#if PSOC_BUTTON_CAL_ENABLE
-static volatile uint8  g_cal_button_pressed = 0u;
-#endif
 
 static volatile uint8  rx_state       = 0u;
 static volatile uint8  rx_cmd         = 0u;
@@ -359,10 +304,8 @@ static          uint8  g_last_calibration_ok = 0u;
  *   Timer   : watchdog del parser UART RX (concurrente con todo lo demas).
  *   Timer_1 : ping boot/idle + tick de calibracion (nunca concurrentes:
  *             la calibracion detiene los pings antes de arrancar).
- *   Timer_2 : LED/esperas cortas, sin multiplexar con nada mas.
- *   Timer_3 : watchdog de captura dedicado. Antes compartia Timer_2 por modo;
- *             dedicarlo elimina el riesgo de que un blink/espera pise el
- *             watchdog (o al reves) si algun dia coinciden. Si se quisiera
+ *   Timer_2 : esperas cortas.
+ *   Timer_3 : watchdog de captura dedicado. Si se quisiera
  *             reducir a 3 timers, este es el que se pliega de vuelta sobre
  *             Timer_2 (modo CAPTURE_WD) y se elimina del TopDesign. */
 #define TIMER1_MODE_NONE       0u
@@ -371,9 +314,7 @@ static          uint8  g_last_calibration_ok = 0u;
 #define TIMER1_MODE_CAL_TICK   3u
 
 #define TIMER2_MODE_NONE          0u
-#define TIMER2_MODE_BOOT_LED_OFF  1u
-#define TIMER2_MODE_WAIT          2u
-#define TIMER2_MODE_COMM_BLINK    3u
+#define TIMER2_MODE_WAIT          1u
 
 static volatile uint32 g_timer1_remaining_counts = 0u;
 static volatile uint8  g_timer1_mode             = TIMER1_MODE_NONE;
@@ -383,11 +324,7 @@ static volatile uint8  g_idle_ping_armed         = 0u;
 
 static volatile uint32 g_timer2_remaining_counts = 0u;
 static volatile uint8  g_timer2_mode             = TIMER2_MODE_NONE;
-static volatile uint8  g_boot_led_off_due        = 0u;
 static volatile uint8  g_timer2_wait_done        = 0u;
-static volatile uint8  g_comm_blink_due          = 0u;
-static volatile uint16 g_comm_blinks_remaining   = 0u;
-static volatile uint8  g_comm_led_active         = 0u;
 
 /* Timer_3 es monoproposito (watchdog de captura): no necesita variable de
  * modo, solo el resto de cuenta para el troceado a 60000 counts. */
@@ -445,8 +382,6 @@ static volatile uint32 g_cal_watchdog_remaining_ms = 0u;
 #define CE_STATUS_SAMPLING   0x04u
 #define CE_STATUS_DONE       0x08u
 #define CE_STATUS_ERROR      0x10u
-#define CE_STATUS_BUTTON     0x80u
-
 #define CE_TIMER_EVT_UART       0x01u
 #define CE_TIMER_EVT_PING       0x02u
 #define CE_TIMER_EVT_LED        0x04u
@@ -547,14 +482,10 @@ static uint8 diag_u16_sat(uint16 value)
 static uint16 capture_target_batches(void)
 {
     uint16 n = g_n_batches;
-    uint16 max_batches = PSOC_CAPTURE_MAX_BATCHES;
-    if (g_sd_cap_en && sd_spi_present()) {
-        max_batches = PSOC_SD_MAX_BATCHES;
-    }
     if (n == 0u) {
         n = PSOC_CAPTURE_MAX_BATCHES;
-    } else if (n > max_batches) {
-        n = max_batches;
+    } else if (n > PSOC_CAPTURE_MAX_BATCHES) {
+        n = PSOC_CAPTURE_MAX_BATCHES;
     }
     return n;
 }
@@ -566,23 +497,22 @@ static uint8 capture_dump_pending(void)
 
 static uint16 capture_stored_batches(void)
 {
-    if (g_sd_cap_active) {
-        uint32 b = g_sd_ring_samples / (uint32)BATCH_SAMPLES;
-        return (b > 0xFFFFu) ? 0xFFFFu : (uint16)b;
-    }
     return (uint16)(((uint32)(g_capture_wr - g_capture_raw)) / CAPTURE_BATCH_BYTES);
 }
 
 static uint32 capture_written_samples(void)
 {
-    if (g_sd_cap_active) {
-        return g_sd_ring_samples;
+    if (g_live_active) {
+        return g_live_written;
     }
     return ((uint32)(g_capture_wr - g_capture_raw)) / SAMPLE_BYTES;
 }
 
 static uint8 capture_target_samples_reached(void)
 {
+    if (g_live_active) {
+        return (g_live_written >= g_live_target) ? 1u : 0u;
+    }
     return (capture_written_samples() >=
             ((uint32)g_total_target * (uint32)BATCH_SAMPLES)) ? 1u : 0u;
 }
@@ -596,20 +526,26 @@ static uint16 capture_next_hw_target(uint16 target_batches, uint16 decim, uint16
     uint32 raw_batches_needed;
     uint32 target;
 
-    if (target_batches == 0u) {
+    if (target_batches == 0u && !g_live_active) {
         return 1u;
     }
     if (decim == 0u) {
         decim = 1u;
     }
 
-    target_samples = (uint32)target_batches * (uint32)BATCH_SAMPLES;
+    target_samples = g_live_active ? g_live_target
+                                   : (uint32)target_batches * (uint32)BATCH_SAMPLES;
     written_samples = capture_written_samples();
     if (written_samples >= target_samples) {
         return 1u;
     }
 
     remaining_decim_samples = target_samples - written_samples;
+    /* En vivo sin limite el resto es enorme: basta con saber que pasa de una
+     * corrida de hardware, y asi el producto por decim no desborda. */
+    if (remaining_decim_samples > (uint32)PSOC_CAPTURE_MAX_BATCHES * (uint32)BATCH_SAMPLES) {
+        remaining_decim_samples = (uint32)PSOC_CAPTURE_MAX_BATCHES * (uint32)BATCH_SAMPLES;
+    }
     raw_samples_needed = remaining_decim_samples * (uint32)decim;
     if ((uint32)g_decim_n < raw_samples_needed) {
         raw_samples_needed -= (uint32)g_decim_n;
@@ -627,415 +563,6 @@ static uint16 capture_next_hw_target(uint16 target_batches, uint16 decim, uint16
         target = 1u;
     }
     return (uint16)target;
-}
-
-/* ── Helpers de captura a SD (corren SOLO en main loop, nunca en ISR) ────── */
-
-static void sd_put_le32(uint8 *p, uint32 v)
-{
-    p[0] = (uint8)v;
-    p[1] = (uint8)(v >> 8u);
-    p[2] = (uint8)(v >> 16u);
-    p[3] = (uint8)(v >> 24u);
-}
-
-static void sd_put_le16(uint8 *p, uint16 v)
-{
-    p[0] = (uint8)v;
-    p[1] = (uint8)(v >> 8u);
-}
-
-static uint16 sd_get_le16(const uint8 *p)
-{
-    return (uint16)p[0] | ((uint16)p[1] << 8u);
-}
-
-static uint32 sd_get_le32(const uint8 *p)
-{
-    return (uint32)p[0] | ((uint32)p[1] << 8u) |
-           ((uint32)p[2] << 16u) | ((uint32)p[3] << 24u);
-}
-
-static uint32 sd_crc32(const uint8 *data, uint16 n)
-{
-    uint32 crc = 0xFFFFFFFFu;
-    uint16 i;
-    uint8 bit;
-    for (i = 0u; i < n; i++) {
-        crc ^= (uint32)data[i];
-        for (bit = 0u; bit < 8u; bit++) {
-            crc = (crc >> 1u) ^ ((crc & 1u) ? 0xEDB88320u : 0u);
-        }
-    }
-    return ~crc;
-}
-
-static void sd_file_close(void)
-{
-    if (g_sd_file_open) {
-        (void)f_close(&g_sd_file);
-        g_sd_file_open = 0u;
-    }
-}
-
-static uint8 sd_fs_mount(void)
-{
-    if (g_sd_fs_mounted) {
-        return 1u;
-    }
-    if (!sd_spi_present()) {
-        return 0u;
-    }
-    if (f_mount(&g_sd_fs, "0:", 1u) != FR_OK) {
-        return 0u;
-    }
-    g_sd_fs_mounted = 1u;
-    return 1u;
-}
-
-static uint8 sd_runtime_status_byte(void)
-{
-    uint8 status = sd_spi_status_byte();
-    if (g_sd_fs_mounted) { status |= 0x10u; }
-    if (g_sd_session_ready) { status |= 0x20u; }
-    if (g_sd_cap_en) { status |= 0x40u; }
-    return status;
-}
-
-static void sd_header_build(uint8 state, uint16 target, uint16 captured,
-                            uint32 blocks)
-{
-    uint16 i;
-    uint32 crc;
-    for (i = 0u; i < SD_BLOCK_BYTES; i++) { g_sd_blk[i] = 0u; }
-    g_sd_blk[0] = (uint8)'G'; g_sd_blk[1] = (uint8)'E';
-    g_sd_blk[2] = (uint8)'O'; g_sd_blk[3] = (uint8)'L';
-    g_sd_blk[4] = (uint8)'A'; g_sd_blk[5] = (uint8)'S';
-    g_sd_blk[6] = (uint8)'T'; g_sd_blk[7] = (uint8)'1';
-    g_sd_blk[8] = SD_HEADER_VERSION;
-    g_sd_blk[9] = state;
-    g_sd_blk[10] = 1u; /* bloques de cabecera */
-    g_sd_blk[11] = (uint8)SD_BATCHES_PER_BLOCK;
-    g_sd_blk[12] = (uint8)SAMPLE_BYTES;
-    g_sd_blk[13] = (uint8)BATCH_SAMPLES;
-    g_sd_blk[14] = 1u; /* signed int24 LE, right-aligned/canónico */
-    g_sd_blk[15] = g_stream_mode;
-    g_sd_blk[16] = psoc_adc_get_config();
-    g_sd_blk[17] = psoc_adc_get_decimation();
-    control_copy_capture_metadata(&g_sd_blk[64]);
-    sd_put_le16(&g_sd_blk[18], (uint16)PSOC_ADC_NATIVE_FS_HZ);
-    sd_put_le16(&g_sd_blk[20], psoc_adc_effective_fs_hz());
-    sd_put_le16(&g_sd_blk[22], target);
-    sd_put_le16(&g_sd_blk[24], captured);
-    sd_put_le32(&g_sd_blk[28], blocks);
-    crc = sd_crc32(g_sd_blk, SD_HEADER_CRC_OFFSET);
-    sd_put_le32(&g_sd_blk[SD_HEADER_CRC_OFFSET], crc);
-}
-
-static uint8 sd_header_valid(uint16 *captured_out, uint32 *blocks_out)
-{
-    uint16 target;
-    uint16 captured;
-    uint32 blocks;
-    uint32 expected_crc;
-    if (g_sd_blk[0] != (uint8)'G' || g_sd_blk[1] != (uint8)'E' ||
-        g_sd_blk[2] != (uint8)'O' || g_sd_blk[3] != (uint8)'L' ||
-        g_sd_blk[4] != (uint8)'A' || g_sd_blk[5] != (uint8)'S' ||
-        g_sd_blk[6] != (uint8)'T' || g_sd_blk[7] != (uint8)'1' ||
-        g_sd_blk[8] != SD_HEADER_VERSION ||
-        g_sd_blk[9] != SD_HEADER_COMPLETE ||
-        g_sd_blk[10] != 1u || g_sd_blk[11] != SD_BATCHES_PER_BLOCK ||
-        g_sd_blk[12] != SAMPLE_BYTES || g_sd_blk[13] != BATCH_SAMPLES ||
-        g_sd_blk[14] != 1u) {
-        return 0u;
-    }
-    expected_crc = sd_get_le32(&g_sd_blk[SD_HEADER_CRC_OFFSET]);
-    if (sd_crc32(g_sd_blk, SD_HEADER_CRC_OFFSET) != expected_crc) {
-        return 0u;
-    }
-    target = sd_get_le16(&g_sd_blk[22]);
-    captured = sd_get_le16(&g_sd_blk[24]);
-    blocks = sd_get_le32(&g_sd_blk[28]);
-    if (target == 0u || target > PSOC_SD_MAX_BATCHES || captured != target ||
-        blocks != (((uint32)captured + SD_BATCHES_PER_BLOCK - 1u) /
-                   SD_BATCHES_PER_BLOCK)) {
-        return 0u;
-    }
-    *captured_out = captured;
-    *blocks_out = blocks;
-    return 1u;
-}
-
-/* Recupera la última sesión COMPLETE tras reset. Un archivo IN_PROGRESS jamás
- * se presenta como válido ni se rellena con ceros. */
-static uint8 sd_session_recover(void)
-{
-    UINT nread = 0u;
-    uint16 captured = 0u;
-    uint32 blocks = 0u;
-    FSIZE_t expected_size;
-
-    g_sd_session_ready = 0u;
-    g_sd_session_batches = 0u;
-    sd_file_close();
-    if (!sd_fs_mount()) { return 0u; }
-    if (f_open(&g_sd_file, SD_CAPTURE_PATH, FA_READ) != FR_OK) { return 0u; }
-    g_sd_file_open = 1u;
-    if (f_read(&g_sd_file, g_sd_blk, SD_BLOCK_BYTES, &nread) != FR_OK ||
-        nread != SD_BLOCK_BYTES || !sd_header_valid(&captured, &blocks)) {
-        sd_file_close();
-        return 0u;
-    }
-    expected_size = (FSIZE_t)SD_BLOCK_BYTES + (FSIZE_t)blocks * SD_BLOCK_BYTES;
-    if (f_size(&g_sd_file) < expected_size) {
-        sd_file_close();
-        return 0u;
-    }
-    g_sd_session_batches = captured;
-    g_sd_session_ready = 1u;
-    g_sd_dump_blk_cached = 0xFFFFFFFFu;
-    return 1u;
-}
-
-static uint8 sd_write_header(uint8 state, uint16 target, uint16 captured,
-                             uint32 blocks)
-{
-    UINT nwritten = 0u;
-    sd_header_build(state, target, captured, blocks);
-    if (f_lseek(&g_sd_file, 0u) != FR_OK ||
-        f_write(&g_sd_file, g_sd_blk, SD_BLOCK_BYTES, &nwritten) != FR_OK ||
-        nwritten != SD_BLOCK_BYTES || f_sync(&g_sd_file) != FR_OK) {
-        return 0u;
-    }
-    return 1u;
-}
-
-/* Crea/preasigna el único archivo de captura antes de entrar a la ventana
- * silenciosa. Devuelve 0 si no hay filesystem o espacio suficiente. */
-static uint8 sd_session_begin(uint16 target_batches)
-{
-    FRESULT fr;
-    FSIZE_t total_bytes;
-    UINT nwritten = 0u;
-    uint8 zero = 0u;
-    uint32 blocks = ((uint32)target_batches + SD_BATCHES_PER_BLOCK - 1u) /
-                    SD_BATCHES_PER_BLOCK;
-
-    g_sd_session_ready = 0u;
-    g_sd_session_batches = 0u;
-    sd_file_close();
-    if (!sd_fs_mount()) { return 0u; }
-    fr = f_open(&g_sd_file, SD_CAPTURE_PATH,
-                (BYTE)(FA_CREATE_ALWAYS | FA_READ | FA_WRITE));
-    if (fr != FR_OK) { return 0u; }
-    g_sd_file_open = 1u;
-    total_bytes = (FSIZE_t)SD_BLOCK_BYTES + (FSIZE_t)blocks * SD_BLOCK_BYTES;
-    fr = f_expand(&g_sd_file, total_bytes, 1u);
-    if (fr != FR_OK) {
-        /* Fallback seguro para una tarjeta fragmentada: FatFs asigna la cadena
-         * al extender; no se toca ningún sector fuera del archivo. */
-        if (f_lseek(&g_sd_file, total_bytes - 1u) != FR_OK ||
-            f_write(&g_sd_file, &zero, 1u, &nwritten) != FR_OK ||
-            nwritten != 1u) {
-            sd_file_close();
-            return 0u;
-        }
-    }
-    if (!sd_write_header(SD_HEADER_INPROGRESS, target_batches, 0u, blocks) ||
-        f_lseek(&g_sd_file, SD_BLOCK_BYTES) != FR_OK) {
-        sd_file_close();
-        return 0u;
-    }
-    return 1u;
-}
-
-/* Drena lotes decimados completos del ring hacia la SD. flush=1 al terminar la
- * captura: escribe también el bloque parcial que quede en staging. El buffer
- * ring mide un múltiplo exacto de lotes (512×90 B), así que un lote nunca se
- * parte en el wrap. */
-static void sd_mark(uint8 kind)
-{
-    uint8 saved = CyEnterCriticalSection();
-    g_sd_mark_pending |= kind;
-    CyExitCriticalSection(saved);
-}
-
-static int32 sd_mark_sample(int32 val)
-{
-    if (g_sd_mark_pending != 0u) {
-        val ^= (int32)((uint32)(g_sd_mark_pending & 0x03u) << SD_MARK_SHIFT);
-        g_sd_mark_pending = 0u;
-    }
-    return val;
-}
-
-static void sd_probe_busy_mark(void)
-{
-    sd_mark(SD_MARK_SYNC);
-}
-
-/* sdprobe (banco): acción armada en IDLE, ejecutada en la captura a RAM con
- * la misma cadencia que el drenaje real a SD (un bloque cada 5 lotes). */
-#define SDPROBE_CADA_MUESTRAS ((uint32)SD_BATCHES_PER_BLOCK * (uint32)BATCH_SAMPLES)
-static uint8  g_sdprobe_armado  = 0u;   /* 0 = off; si no, modo + 1 */
-static uint8  g_sdprobe_div     = 0u;
-static uint8  g_sdprobe_slew    = 0u;
-static uint32 g_sdprobe_proxima = SDPROBE_CADA_MUESTRAS;
-
-static void sdprobe_service(void)
-{
-    uint32 escritas = (uint32)(g_capture_wr - g_capture_raw) / (uint32)SAMPLE_BYTES;
-    if (escritas < g_sdprobe_proxima) { return; }
-    g_sdprobe_proxima += SDPROBE_CADA_MUESTRAS;
-    sd_mark(SD_MARK_WRITE);
-    if ((uint8)(g_sdprobe_armado - 1u) == 7u) {
-        /* Modo 7 (ping): avisa al ESP por I2C en esta muestra exacta para que
-         * dispare su estresor (radio) alineado con la captura. */
-        uart_send_diag(PSOC_EVT_LAB_PING,
-                       (uint8)(g_sdprobe_proxima / SDPROBE_CADA_MUESTRAS));
-        return;
-    }
-    (void)sd_spi_probe((uint8)(g_sdprobe_armado - 1u), g_sdprobe_div,
-                       g_sdprobe_slew, sd_probe_busy_mark);
-}
-
-static void sd_capture_drain(uint8 flush)
-{
-    if (g_sd_write_failed || !g_sd_file_open) { return; }
-    for (;;) {
-        uint32 avail_samples = g_sd_ring_samples - g_sd_ring_drained;
-        const volatile uint8 *src;
-        uint16 i;
-        UINT nwritten = 0u;
-
-        if (avail_samples < (uint32)BATCH_SAMPLES) {
-            break;
-        }
-        src = g_capture_raw +
-              ((g_sd_ring_drained % SD_RING_SAMPLES) * (uint32)SAMPLE_BYTES);
-        for (i = 0u; i < CAPTURE_BATCH_BYTES; i++) {
-            g_sd_blk[g_sd_blk_fill + i] = src[i];
-        }
-        g_sd_blk_fill += CAPTURE_BATCH_BYTES;
-        g_sd_ring_drained += (uint32)BATCH_SAMPLES;
-
-        if (g_sd_blk_fill >= (uint16)(SD_BATCHES_PER_BLOCK * CAPTURE_BATCH_BYTES)) {
-            for (i = g_sd_blk_fill; i < SD_BLOCK_BYTES; i++) {
-                g_sd_blk[i] = 0u;
-            }
-            sd_mark(SD_MARK_WRITE);
-            if (f_write(&g_sd_file, g_sd_blk, SD_BLOCK_BYTES, &nwritten) != FR_OK ||
-                nwritten != SD_BLOCK_BYTES) {
-                g_sd_err_flags |= 0x01u;
-                g_sd_write_failed = 1u;
-                g_capture_done = 1u;
-                return;
-            }
-            g_sd_blocks_written++;
-            g_sd_blk_fill = 0u;
-            if ((g_sd_blocks_written % SD_SYNC_BLOCKS) == 0u) {
-                sd_mark(SD_MARK_SYNC);
-            }
-            if ((g_sd_blocks_written % SD_SYNC_BLOCKS) == 0u &&
-                f_sync(&g_sd_file) != FR_OK) {
-                g_sd_err_flags |= 0x01u;
-                g_sd_write_failed = 1u;
-                g_capture_done = 1u;
-                return;
-            }
-        }
-    }
-
-    if (flush && (g_sd_blk_fill != 0u)) {
-        uint16 i;
-        UINT nwritten = 0u;
-        for (i = g_sd_blk_fill; i < SD_BLOCK_BYTES; i++) {
-            g_sd_blk[i] = 0u;
-        }
-        if (f_write(&g_sd_file, g_sd_blk, SD_BLOCK_BYTES, &nwritten) != FR_OK ||
-            nwritten != SD_BLOCK_BYTES) {
-            g_sd_err_flags |= 0x01u;
-            g_sd_write_failed = 1u;
-            g_capture_done = 1u;
-            return;
-        }
-        g_sd_blocks_written++;
-        g_sd_blk_fill = 0u;
-    }
-}
-
-/* Header de sesión + actualización del directorio al terminar la captura.
- * Deja la sesión persistida en la SD (respaldo de campo) además del dump UART. */
-static void sd_session_finalize(uint16 batches_captured)
-{
-    uint8 complete;
-    if (g_sd_drop_samples != 0u) { g_sd_err_flags |= 0x02u; }
-    complete = (g_sd_err_flags == 0u && !g_sd_write_failed &&
-                batches_captured == g_total_target &&
-                g_sd_blocks_written ==
-                    (((uint32)batches_captured + SD_BATCHES_PER_BLOCK - 1u) /
-                     SD_BATCHES_PER_BLOCK)) ? 1u : 0u;
-    if (complete && !sd_write_header(SD_HEADER_COMPLETE, g_total_target,
-                                     batches_captured, g_sd_blocks_written)) {
-        g_sd_err_flags |= 0x04u;
-        complete = 0u;
-    }
-    sd_file_close();
-    if (complete && sd_session_recover()) {
-        uart_send_diag(PSOC_EVT_SD_SESSION, 1u);
-    } else {
-        g_sd_session_ready = 0u;
-        uart_send_diag(PSOC_EVT_SD_SESSION, 0u);
-        if (g_sd_err_flags == 0u) { g_sd_err_flags = 0x04u; }
-    }
-    if (g_sd_err_flags != 0u) { uart_send_diag(PSOC_EVT_SD_ERROR, g_sd_err_flags); }
-}
-
-static uint8 sd_session_read_batch(uint16 batch_index)
-{
-    UINT nread = 0u;
-    uint32 block;
-    if (!g_sd_session_ready || batch_index >= g_sd_session_batches) { return 0u; }
-    if (!g_sd_file_open && !sd_session_recover()) { return 0u; }
-    block = (uint32)batch_index / SD_BATCHES_PER_BLOCK;
-    if (block != g_sd_dump_blk_cached) {
-        FSIZE_t offset = (FSIZE_t)SD_BLOCK_BYTES + (FSIZE_t)block * SD_BLOCK_BYTES;
-        if (f_lseek(&g_sd_file, offset) != FR_OK ||
-            f_read(&g_sd_file, g_sd_blk, SD_BLOCK_BYTES, &nread) != FR_OK ||
-            nread != SD_BLOCK_BYTES) {
-            g_sd_err_flags |= 0x08u;
-            return 0u;
-        }
-        g_sd_dump_blk_cached = block;
-    }
-    return 1u;
-}
-
-static uint8 sd_fs_self_test(void)
-{
-    FIL test;
-    UINT n = 0u;
-    uint16 i;
-    uint8 ok = 0u;
-    if (!sd_fs_mount()) { sd_spi_set_self_test_result(0u); return 0u; }
-    for (i = 0u; i < 128u; i++) { g_sd_blk[i] = (uint8)(0xA5u ^ (uint8)i); }
-    if (f_open(&test, SD_TEST_PATH, (BYTE)(FA_CREATE_ALWAYS | FA_READ | FA_WRITE)) != FR_OK) {
-        sd_spi_set_self_test_result(0u); return 0u;
-    }
-    if (f_write(&test, g_sd_blk, 128u, &n) == FR_OK && n == 128u &&
-        f_sync(&test) == FR_OK && f_lseek(&test, 0u) == FR_OK) {
-        for (i = 0u; i < 128u; i++) { g_sd_blk[i] = 0u; }
-        if (f_read(&test, g_sd_blk, 128u, &n) == FR_OK && n == 128u) {
-            ok = 1u;
-            for (i = 0u; i < 128u; i++) {
-                if (g_sd_blk[i] != (uint8)(0xA5u ^ (uint8)i)) { ok = 0u; break; }
-            }
-        }
-    }
-    (void)f_close(&test);
-    if (f_unlink(SD_TEST_PATH) != FR_OK) { ok = 0u; }
-    sd_spi_set_self_test_result(ok);
-    return ok;
 }
 
 static void capture_engine_refresh_status(void)
@@ -1399,9 +926,22 @@ static uint32 capture_expected_ms(uint16 batches)
            (uint32)psoc_adc_effective_fs_hz();
 }
 
+static void capture_watchdog_stop(void);
+
 static void capture_watchdog_arm(void)
 {
-    uint32 ms = capture_expected_ms(capture_target_batches());
+    uint32 ms;
+    if (g_live_active) {
+        /* Sin limite no hay duracion esperada: el fin lo pone SYNC. */
+        if (g_live_target == LIVE_UNLIMITED) {
+            capture_watchdog_stop();
+            return;
+        }
+        ms = ((g_live_target / (uint32)BATCH_SAMPLES) * (uint32)BATCH_SAMPLES * 1000u) /
+             (uint32)psoc_adc_effective_fs_hz();
+    } else {
+        ms = capture_expected_ms(capture_target_batches());
+    }
     g_capture_wd_due = 0u;
     timer3_arm_ms(ms + (ms >> 1u) + CAPTURE_WD_MARGIN_MS);
 }
@@ -1500,6 +1040,13 @@ static void capture_reset_locked(uint16 stored_batches)
     g_sd_err_flags      = 0u;
     g_sd_write_failed   = 0u;
     g_sd_mark_pending   = 0u;
+    g_live_active       = 0u;
+    g_live_written      = 0u;
+    g_live_target       = 0u;
+    g_live_acked        = 0u;
+    g_live_drop         = 0u;
+    g_live_sent         = 0u;
+    g_live_resend_pending = 0u;
 }
 
 static int32 sign_extend_bits(uint32 value, uint8 bits)
@@ -1679,6 +1226,70 @@ static void sm_sample_capture_filt_sd(void)
     sd_ring_store(val);
 }
 
+/* Variantes en vivo: el anillo es el de la SD, pero el limite de pisado lo
+ * pone lo que el ESP confirmo, no lo que se drenó a la tarjeta. */
+static void live_ring_store(int32 val)
+{
+    volatile uint8 *dst;
+    uint32 written = g_live_written;
+
+    if (written >= g_live_target) {
+        return;
+    }
+    if ((written - g_live_acked * (uint32)BATCH_SAMPLES) >= SD_RING_SAMPLES) {
+        /* Anillo lleno: ni el PSoC ni el ESP tienen donde guardar. */
+        g_live_drop++;
+        g_capture_done = 1u;
+        return;
+    }
+    dst = g_capture_raw + ((written % SD_RING_SAMPLES) * (uint32)SAMPLE_BYTES);
+    if (g_live_ramp) {
+        /* Con el mismo ritmo del ADC: el receptor verifica muestra a muestra. */
+        val = (int32)(written & 0x00FFFFFFu);
+    } else {
+        val = psoc_adc_counts_right_aligned(val);
+    }
+    capture_store_decoded(dst, val);
+    written++;
+    g_live_written = written;
+    if (written >= g_live_target) {
+        g_capture_done = 1u;
+    }
+}
+
+static void sm_sample_capture_raw_live(void)
+{
+    int32 val = dma_buf_to_adc_counts(g_dma_raw_buf);
+    g_decim_acc += val;
+    g_decim_n++;
+    if (g_decim_n < g_capture_decim_factor) {
+        return;
+    }
+    val = g_decim_acc / (int32)g_capture_decim_factor;
+    g_decim_acc = 0;
+    g_decim_n = 0u;
+    live_ring_store(val);
+}
+
+static void sm_sample_capture_filt_live(void)
+{
+    int32 val;
+    if (g_fir_discard != 0u) {
+        g_fir_discard--;
+        return;
+    }
+    val = dma_buf_to_i24(g_dma_filt_buf);
+    g_decim_acc += val;
+    g_decim_n++;
+    if (g_decim_n < g_capture_decim_factor) {
+        return;
+    }
+    val = g_decim_acc / (int32)g_capture_decim_factor;
+    g_decim_acc = 0;
+    g_decim_n = 0u;
+    live_ring_store(val);
+}
+
 #if PSOC_RAMP_DEBUG_ENABLE
 static void sm_sample_capture_debug(void)
 {
@@ -1748,9 +1359,22 @@ static sm_sample_handler_t capture_handler_for_source(uint8 source)
     if (source == CE_CFG_SRC_DEBUG) { return sm_sample_capture_debug; }
 #endif
     if (source == CE_CFG_SRC_FILTER || source == CE_CFG_SRC_COMBINED) {
+        if (g_live_active) { return sm_sample_capture_filt_live; }
         return g_sd_cap_active ? sm_sample_capture_filt_sd : sm_sample_capture_filt;
     }
+    if (g_live_active) { return sm_sample_capture_raw_live; }
     return g_sd_cap_active ? sm_sample_capture_raw_sd : sm_sample_capture_raw;
+}
+
+/* Activa el modo en vivo para la captura que se esta armando. Va dentro de la
+ * seccion critica, despues de capture_reset_locked(). */
+static void live_begin_locked(void)
+{
+    g_live_active = 1u;
+    g_live_target = (g_n_batches == 0u) ? LIVE_UNLIMITED
+                                         : (uint32)g_n_batches * (uint32)BATCH_SAMPLES;
+    g_total_target = g_n_batches;
+    g_chain_active = 1u;
 }
 
 static void sm_sample_armed_wait(void)
@@ -1767,6 +1391,7 @@ static void psoc_enter_sampling(uint8 debugMode)
     uint8 saved;
     uint8 source;
     uint8 use_sd = 0u;
+    uint8 live;
     uint16 decim = (uint16)psoc_adc_get_decimation();
     uint16 total_target = capture_target_batches();
     uint16 hw_target;
@@ -1784,8 +1409,9 @@ static void psoc_enter_sampling(uint8 debugMode)
 #if PSOC_RAMP_DEBUG_ENABLE
     if (debugMode) { source = CE_CFG_SRC_DEBUG; }
 #endif
+    live = (g_live_en && source != CE_CFG_SRC_DEBUG) ? 1u : 0u;
     /* Misma regla que psoc_arm(): SD solo si no entra en RAM. */
-    if (g_sd_cap_en && total_target > PSOC_CAPTURE_MAX_BATCHES
+    if (!live && g_sd_cap_en && total_target > PSOC_CAPTURE_MAX_BATCHES
 #if PSOC_RAMP_DEBUG_ENABLE
         && (source != CE_CFG_SRC_DEBUG)
 #endif
@@ -1812,6 +1438,9 @@ static void psoc_enter_sampling(uint8 debugMode)
     g_total_sent   = 0u;
     g_chain_active = 0u;
     g_state = PSOC_SAMPLING;
+    if (live) {
+        live_begin_locked();
+    }
     hw_target = capture_next_hw_target(total_target, decim, 0u);
     if ((uint32)total_target * (uint32)decim > (uint32)PSOC_CAPTURE_MAX_BATCHES) {
         g_chain_active = 1u;
@@ -1833,7 +1462,7 @@ static void psoc_enter_sampling(uint8 debugMode)
     capture_engine_clear_flags();
     capture_watchdog_arm();
     capture_engine_pulse(CE_CTRL_START_NOW);
-    if (!use_sd && g_n_batches > PSOC_CAPTURE_MAX_BATCHES) {
+    if (!use_sd && !live && g_n_batches > PSOC_CAPTURE_MAX_BATCHES) {
         /* Pedido recortado al buffer RAM del PSoC. */
         uart_send_diag(PSOC_EVT_CAPTURE_CLAMPED, diag_u16_sat(g_n_batches));
     }
@@ -2030,6 +1659,15 @@ CY_ISR(isr_SyncIn)
             psoc_enter_sampling(g_debug_psoc);
         }
     }
+    else if (g_live_active && g_state == PSOC_SAMPLING)
+    {
+        /* STOP en vivo: se corta el muestreo pero el anillo se conserva; el
+         * lazo principal cierra la captura y sigue pasando lo pendiente. */
+        uart_send_diag(PSOC_EVT_SYNC_FALL, g_state);
+        g_sm_sample_handler = sm_sample_noop;
+        capture_engine_pulse(CE_CTRL_STOP);
+        g_capture_done = 1u;
+    }
     else
     {
         uart_send_diag(PSOC_EVT_SYNC_FALL, g_state);
@@ -2092,8 +1730,16 @@ CY_ISR(isr_SuperMaquina_Handler)
 
     if ((st & CE_STATUS_DONE) != 0u)
     {
+        /* DONE por la bajada de SYNC (STOP, superMaquina.v): no trae muestra
+         * y no se encadena. Solo en capturas armadas con SYNC; las start-now
+         * corren con SYNC bajo. */
+        uint8 sync_stop = ((g_ce_ctrl_level & CE_CTRL_USE_SYNC) != 0u &&
+                           SYNC_IN_Read() == 0u) ? 1u : 0u;
+
         /* La última muestra del último lote llega junto con DONE. */
-        g_sm_sample_handler();
+        if (!sync_stop) {
+            g_sm_sample_handler();
+        }
 
         /* Encadenado continuo: el contador de lotes de superMaquina es de 9
          * bits (512 lotes crudos por corrida). Si la captura necesita más, se
@@ -2104,7 +1750,7 @@ CY_ISR(isr_SuperMaquina_Handler)
          * ESP a mitad de captura. Antes esto lo hacía el lazo principal con
          * ADC_StopConvert/ADC_StartConvert y un diag CHAIN_NEXT por I2C, lo
          * que dejaba un corte y un transitorio cada ~5,9 s. */
-        if (g_state == PSOC_SAMPLING && g_chain_active && g_capture_done == 0u &&
+        if (!sync_stop && g_state == PSOC_SAMPLING && g_chain_active && g_capture_done == 0u &&
             g_ce_error == 0u && !capture_target_samples_reached())
         {
             uint16 decim = (uint16)g_capture_decim_factor;
@@ -2334,6 +1980,7 @@ static void psoc_arm(void)
     uint16 decim = (uint16)psoc_adc_get_decimation();
     uint16 discard = 0u;
     uint8 use_sd = 0u;
+    uint8 live;
 
     control_prepare_capture();
     g_control_capture_paused=1;
@@ -2358,6 +2005,7 @@ static void psoc_arm(void)
     g_capture_align = 1u;
 #endif
     g_capture_adc_raw = (source == CE_CFG_SRC_RAW) ? 1u : 0u;
+    live = (g_live_en && source != CE_CFG_SRC_DEBUG) ? 1u : 0u;
 
     /* Captura a SD: la decisión y la lectura del directorio (I/O SPI, puede
      * tardar ms) van ANTES de la sección crítica. Si la SD está pedida pero no
@@ -2368,14 +2016,14 @@ static void psoc_arm(void)
      * cada escritura se ve como una espiga en la señal. Una captura que entra
      * en los 512 lotes de RAM se hace en silencio aunque la SD esté habilitada.
      * El ESP aplica la misma regla en allocStore(). */
-    if (g_sd_cap_en && total_target > PSOC_CAPTURE_MAX_BATCHES && sd_spi_present()
+    if (!live && g_sd_cap_en && total_target > PSOC_CAPTURE_MAX_BATCHES && sd_spi_present()
 #if PSOC_RAMP_DEBUG_ENABLE
         && (source != CE_CFG_SRC_DEBUG)
 #endif
        ) {
         use_sd = sd_session_begin(total_target);
     }
-    if (g_sd_cap_en && total_target > PSOC_CAPTURE_MAX_BATCHES && !use_sd
+    if (!live && g_sd_cap_en && total_target > PSOC_CAPTURE_MAX_BATCHES && !use_sd
 #if PSOC_RAMP_DEBUG_ENABLE
         && (source != CE_CFG_SRC_DEBUG)
 #endif
@@ -2398,6 +2046,9 @@ static void psoc_arm(void)
     g_total_sent   = 0u;
     g_chain_active = 0u;
     g_state = PSOC_ARMED;
+    if (live) {
+        live_begin_locked();
+    }
     hw_target = capture_next_hw_target(total_target, decim, hw_extra);
     if (((uint32)total_target * (uint32)decim + (uint32)hw_extra) >
         (uint32)PSOC_CAPTURE_MAX_BATCHES) {
@@ -2623,6 +2274,78 @@ static void uart_send_capture_batch(uint16 batchIndex)
     uart_send_capture_frame(&g_capture_raw[(uint32)batchIndex * CAPTURE_BATCH_BYTES]);
 }
 
+/* ── Captura en vivo: envio y confirmacion ─────────────────────────────── */
+static uint8 live_batch_in_ring(uint32 batch)
+{
+    /* La ISR esta escribiendo el lote written/30; el slot de `batch` sigue
+     * intacto mientras no lo haya alcanzado una vuelta completa. */
+    uint32 writing = g_live_written / (uint32)BATCH_SAMPLES;
+    return (batch < writing &&
+            (writing - batch) < (uint32)PSOC_CAPTURE_MAX_BATCHES) ? 1u : 0u;
+}
+
+static void live_send_batch(uint32 batch)
+{
+    uart_send_capture_frame_ex(
+        &g_capture_raw[(batch % PSOC_CAPTURE_MAX_BATCHES) * CAPTURE_BATCH_BYTES],
+        (uint16)batch, 0u);
+}
+
+/* Un lote por pasada del lazo principal: la trama I2C tarda ~2,5 ms y llega
+ * un lote cada 11,5 ms a 2604 Hz. */
+static void live_service(void)
+{
+    uint32 ready;
+
+    if (!g_live_active) {
+        return;
+    }
+    if (g_live_resend_pending) {
+        g_live_resend_pending = 0u;
+        if (live_batch_in_ring(g_live_resend)) {
+            live_send_batch(g_live_resend);
+        }
+        return;
+    }
+    ready = g_live_written / (uint32)BATCH_SAMPLES;
+    /* Tras un REWIND por debajo de lo confirmado, sent < acked: no hay ventana. */
+    if (g_live_sent >= ready ||
+        (g_live_sent > g_live_acked &&
+         (g_live_sent - g_live_acked) >= LIVE_WINDOW_BATCHES)) {
+        return;
+    }
+    live_send_batch(g_live_sent);
+    if (psoc_link_last_ok()) {
+        g_live_sent++;
+    }
+}
+
+/* El ESP manda los 16 bits bajos del lote; se desenrolla contra lo enviado,
+ * que siempre es mayor o igual a cualquier lote que el ESP pueda nombrar. */
+static void live_ack(uint16 batch16, uint8 flags)
+{
+    uint32 sent = g_live_sent;
+    uint32 batch = sent - (uint32)(uint16)((uint16)sent - batch16);
+
+    if (!g_live_active) {
+        return;
+    }
+    if ((flags & LIVE_ACK_ONE) != 0u) {
+        g_live_resend = batch;
+        g_live_resend_pending = 1u;
+        return;
+    }
+    if ((flags & LIVE_ACK_REWIND) != 0u) {
+        if (live_batch_in_ring(batch) || batch == sent) {
+            g_live_sent = batch;
+        }
+        return;
+    }
+    if (batch > g_live_acked) {
+        g_live_acked = batch;
+    }
+}
+
 /* Lee exactamente el lote pedido. En éxito el seq UART coincide con el índice;
  * en fallo no se transmite ningún frame de datos. */
 static uint8 uart_send_sd_batch(uint16 batchIndex)
@@ -2665,12 +2388,14 @@ static void uart_service(void)
                     case PSOC_CMD_SD_CAPTURE:
                     case PSOC_CMD_BLINK_LED:
                     case PSOC_CMD_PONG:
+                    case PSOC_CMD_LIVE_MODE:
 #if defined(PSOC_TEST) && PSOC_TEST
                     case PSOC_CMD_ST_REPORT: case PSOC_CMD_ST_SYNC:
                     case PSOC_CMD_ST_MEAS_DC: case PSOC_CMD_ST_MEAS_AC:
 #endif
                         rx_cmd = rx; rx_state = 2u; break;
                     case PSOC_CMD_SD_PROBE:
+                    case PSOC_CMD_LIVE_ACK:
                         rx_cmd = rx; rx_state = 6u; break;
                     case 0xA3u: case PSOC_CMD_SD_READ_BATCH: case 0xAAu:
                     case PSOC_CMD_CAL_PARAM:
@@ -2712,6 +2437,13 @@ static void uart_service(void)
             case 3u:
                 rx_watchdog_stop(); rx_state = 0u;
                 if (rx != (uint8)(rx_cmd ^ rx_p1 ^ rx_p2 ^ rx_p3)) { break; }
+                if (rx_cmd == PSOC_CMD_LIVE_ACK) {
+                    live_ack((uint16)rx_p1 | ((uint16)rx_p2 << 8u), rx_p3);
+                    break;
+                }
+                if (g_state == PSOC_SAMPLING) {
+                    break;   /* muestreando en vivo solo se atiende LIVE_ACK */
+                }
 #if defined(PSOC_TEST) && PSOC_TEST
                 if(rx_cmd==PSOC_CMD_ST_REPORT || rx_cmd==PSOC_CMD_ST_SYNC ||
                    rx_cmd==PSOC_CMD_ST_MEAS_DC || rx_cmd==PSOC_CMD_ST_MEAS_AC || rx_cmd==PSOC_CMD_ST_SET_IDAC) {
@@ -3117,6 +2849,14 @@ static void uart_service(void)
                             uart_send_diag(PSOC_EVT_SD_ERROR, g_sd_err_flags);
                         }
                         break;
+                    case PSOC_CMD_LIVE_MODE:
+                        if (g_state == PSOC_IDLE && rx_p1 <= 2u) {
+                            g_live_en = (rx_p1 != 0u) ? 1u : 0u;
+                            g_live_ramp = (rx_p1 == 2u) ? 1u : 0u;
+                        }
+                        uart_send_cfg_ack(PSOC_CMD_LIVE_MODE,
+                                          (uint8)(g_live_en + g_live_ramp));
+                        break;
                     case PSOC_CMD_BLINK_LED:
                         /* Identificacion no bloqueante: Timer_2 encadena
                          * one-shots y service_comm_led solo consume flags. */
@@ -3287,6 +3027,11 @@ static void service_runtime(void)
                 sd_capture_drain(0u);
             } else if (g_sdprobe_armado != 0u) {
                 sdprobe_service();
+            } else if (g_live_active) {
+                /* En vivo se rompe el silencio a proposito: tramas I2C hacia
+                 * el ESP y, de bajada, solo sus LIVE_ACK. */
+                live_service();
+                uart_service();
             }
             if (!g_capture_wd_due) {
                 return;   /* Silencio total: sin UART RX/TX, sin LED, sin pings. */
@@ -3306,11 +3051,38 @@ static void service_runtime(void)
         g_sm_sample_handler = sm_sample_noop;
         capture_engine_set_enabled(0u, 0u);
         capture_engine_clear_flags();
+        if (g_live_active) {
+            /* Cierre en vivo: no hay volcado; lo que falte pasar lo sigue
+             * mandando live_service() desde IDLE. Los parciales se descartan. */
+            uint32 total = g_live_written / (uint32)BATCH_SAMPLES;
+            g_chain_active = 0u;
+            g_batches_captured = 0u;
+            g_batches_sent = 0u;
+            idle_ping_schedule();
+            if (g_live_drop != 0u) {
+                uart_send_diag(PSOC_EVT_LIVE_OVERRUN, 1u);
+            }
+            if (capture_error != 0u || capture_watchdog != 0u) {
+                uart_send_diag(PSOC_EVT_CAPTURE_DONE, capture_error);
+            }
+            /* El total va en tres bytes: el ESP puede estar mas de 256 lotes
+             * atras (anillo del PSoC lleno). LIVE_DONE, con el byte bajo,
+             * va ultimo y cierra. */
+            uart_send_diag(PSOC_EVT_LIVE_TOTAL1, (uint8)((total >> 8u) & 0xFFu));
+            uart_send_diag(PSOC_EVT_LIVE_TOTAL2, (uint8)((total >> 16u) & 0xFFu));
+            uart_send_diag(PSOC_EVT_LIVE_DONE, (uint8)(total & 0xFFu));
+            g_ce_error = 0u;
+            g_capture_done = 0u;
+            g_state = PSOC_IDLE;
+            return;
+        }
         /* Lotes completos realmente escritos por la ISR (los parciales de un
          * aborto se descartan). */
         g_batches_captured = capture_stored_batches();
+        /* Tras un STOP (bajada de SYNC, ver superMaquina.v) no se rearma. */
         if (capture_error == 0u && capture_watchdog == 0u &&
-            g_total_target > 0u && !capture_target_samples_reached()) {
+            g_total_target > 0u && !capture_target_samples_reached() &&
+            !((g_ce_ctrl_level & CE_CTRL_USE_SYNC) != 0u && SYNC_IN_Read() == 0u)) {
             if (capture_rearm_next_chunk()) {
                 return;
             }
@@ -3351,6 +3123,7 @@ static void service_runtime(void)
 
     if (watchdog_rx) { watchdog_rx = 0u; rx_state = 0u; }
 
+    live_service();
     uart_service();
 }
 

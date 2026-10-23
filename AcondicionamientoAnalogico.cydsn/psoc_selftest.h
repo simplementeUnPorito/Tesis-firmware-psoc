@@ -7,9 +7,6 @@
  * Este header vive SOLO en el proyecto AcondicionamientoAnalogicoTest.
  * Se incluye una vez desde main.c y todas sus funciones son static: asi no
  * hace falta registrar un .c nuevo en el .cyprj, que no se edita a mano.
- * El precedente es sd_spi.*, implementado dentro de psoc_hw.c por el mismo
- * motivo.
- *
  * REPARTO DE TAREAS
  * -----------------
  * El PSoC NO secuencia el autotest ni saca conclusiones: expone primitivas
@@ -176,7 +173,7 @@ static void st_send_result(uint8 test_id, uint8 status, int32 v0, int32 v1)
 #define ST_REP_CAL      2u
 #define ST_REP_ADCCFG   3u
 #define ST_REP_IRQ      4u
-/* 5 lo atiende main.c (el estado de la SD vive en sus statics). */
+/* 5 y 6 quedan reservados para conservar los IDs del protocolo. */
 #define ST_REP_BUTTON   6u
 /* Deja el AMux en el canal de captura y el ADC parado, que es el estado que el
  * resto del firmware espera en IDLE. El autotest lo pide al terminar el grupo
@@ -250,20 +247,6 @@ static void st_report_irq(void)
                    (int32)g_st_irq_traps, (int32)g_st_hardfaults);
 }
 
-/* Pulsador de calibracion (P2[2]). En la placa nueva ese pin es el pulsador
- * onboard del CY8CKIT-059, por eso en el esquematico de la carrier figura sin
- * conectar.
- *
- * Se reporta solo el nivel crudo del pin. La salida del debouncer vive en el
- * Status Register de superMaquina, cuyo header (status.h) main.c incluye
- * DESPUES de este archivo; alcanzarla desde aca obligaria a duplicar la
- * mascara de bits, y un define repetido que se desincroniza es peor que no
- * tener el dato. El ESP igual detecta un pulsador pegado con el nivel crudo. */
-static void st_report_button(void)
-{
-    st_send_result(ST_ID_BUTTON, ST_OK, (int32)Button_Read(), 0);
-}
-
 static void st_handle_report(uint8 what)
 {
     switch (what)
@@ -273,7 +256,6 @@ static void st_handle_report(uint8 what)
         case ST_REP_CAL:      st_report_cal();      break;
         case ST_REP_ADCCFG:   st_report_adccfg();   break;
         case ST_REP_IRQ:      st_report_irq();      break;
-        case ST_REP_BUTTON:   st_report_button();   break;
         case ST_REP_RESTORE:
             psoc_selftest_restore();
             st_send_result(ST_ID_IDENTITY, ST_OK, (int32)ST_REP_RESTORE, 0);
