@@ -331,6 +331,7 @@ uint32 psoc_idac_lsb_uv(void);
  *              desde ese lote. LIVE_ACK_ONE: mandar solo ese lote otra vez. */
 #define PSOC_CMD_LIVE_MODE      0xAEu
 #define PSOC_CMD_LIVE_ACK       0xAFu
+#define PSOC_LIVE_FRAME         0x9Eu
 #define LIVE_ACK_REWIND         0x01u
 #define LIVE_ACK_ONE            0x02u
 #define PSOC_CMD_SD_PROBE       0xADu  /* Reservado, 3 parametros; ack 0xEE. */
@@ -374,8 +375,8 @@ uint16 psoc_hw_pgaout_gain_x1000(void);
 #ifndef PSOC_LINK_I2C_ADDR
 #define PSOC_LINK_I2C_ADDR      0x42u   /* dirección del ESP32 como esclavo I2C */
 #endif
-/* Frame más largo del protocolo: 4 cabecera + 30*3 muestras + 1 CRC. */
-#define PSOC_LINK_MAX_FRAME     95u
+/* Frame vivo: cabecera + muestras + dos anclas uint32 + CRC. */
+#define PSOC_LINK_MAX_FRAME     103u
 
 void  psoc_link_start(void);
 void  psoc_link_put_array(const uint8 *buf, uint16 len);

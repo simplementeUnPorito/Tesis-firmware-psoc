@@ -178,6 +178,7 @@
 
 #define BATCH_SAMPLES      30u
 #define FRAME_BYTES        (4u + BATCH_SAMPLES * 3u + 1u)   /* 95 */
+#define LIVE_FRAME_BYTES   (4u + BATCH_SAMPLES * 3u + 8u + 1u) /* 103 */
 #define SAMPLE_BYTES       3u
 #define CAPTURE_BATCH_BYTES (BATCH_SAMPLES * SAMPLE_BYTES)
 
@@ -284,6 +285,7 @@ static volatile uint32 g_live_drop     = 0u; /* muestras perdidas por anillo lle
 static          uint32 g_live_sent     = 0u; /* proximo lote a mandar */
 static          uint32 g_live_resend   = 0u;
 static          uint8  g_live_resend_pending = 0u;
+static          uint32 g_live_prev_end = 0xFFFFFFFFu;
 static volatile uint8  g_debug_psoc   = 0u;
 static          uint32 g_dbg_cnt      = 0u;
 static volatile uint8  g_cal_ack_pending = 0u;
@@ -1021,6 +1023,7 @@ static void capture_reset_locked(uint16 stored_batches)
     g_live_drop         = 0u;
     g_live_sent         = 0u;
     g_live_resend_pending = 0u;
+    g_live_prev_end     = 0xFFFFFFFFu;
 }
 
 static int32 sign_extend_bits(uint32 value, uint8 bits)
@@ -2057,9 +2060,35 @@ static uint8 live_batch_in_ring(uint32 batch)
 
 static void live_send_batch(uint32 batch)
 {
-    uart_send_capture_frame_ex(
-        &g_capture_raw[(batch % PSOC_CAPTURE_MAX_BATCHES) * CAPTURE_BATCH_BYTES],
-        (uint16)batch, 0u);
+    const volatile uint8 *src =
+        &g_capture_raw[(batch % PSOC_CAPTURE_MAX_BATCHES) * CAPTURE_BATCH_BYTES];
+    uint8 frame[LIVE_FRAME_BYTES];
+    uint32 anchor;
+    uint32 prev_end = g_live_prev_end;
+    uint16 i;
+    uint8 crc = 0u;
+
+    frame[0] = 0xABu;
+    frame[1] = PSOC_LIVE_FRAME;
+    frame[2] = (uint8)(batch & 0xFFu);
+    frame[3] = (uint8)((batch >> 8u) & 0xFFu);
+    for (i = 0u; i < CAPTURE_BATCH_BYTES; i++) {
+        frame[4u + i] = src[i];
+    }
+    frame[98]  = (uint8)( prev_end         & 0xFFu);
+    frame[99]  = (uint8)((prev_end >>  8u) & 0xFFu);
+    frame[100] = (uint8)((prev_end >> 16u) & 0xFFu);
+    frame[101] = (uint8)((prev_end >> 24u) & 0xFFu);
+
+    anchor = g_live_written;
+    frame[94] = (uint8)( anchor         & 0xFFu);
+    frame[95] = (uint8)((anchor >>  8u) & 0xFFu);
+    frame[96] = (uint8)((anchor >> 16u) & 0xFFu);
+    frame[97] = (uint8)((anchor >> 24u) & 0xFFu);
+    for (i = 0u; i < (LIVE_FRAME_BYTES - 1u); i++) { crc ^= frame[i]; }
+    frame[LIVE_FRAME_BYTES - 1u] = crc;
+    psoc_link_put_array(frame, LIVE_FRAME_BYTES);
+    g_live_prev_end = g_live_written;
 }
 
 /* Un lote por pasada del lazo principal: la trama I2C tarda ~2,5 ms y llega
