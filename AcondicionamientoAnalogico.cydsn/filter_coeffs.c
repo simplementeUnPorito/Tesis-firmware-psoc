@@ -2,6 +2,53 @@
 #include "Filter.h"
 #include "Filter_PVT.h"
 #include <string.h>
+#include "FIR_adquisition.h"
+
+static uint8 g_fir_stage[FILTER_FIR_NTAPS * 4u];
+static uint8 g_fir_user[FILTER_FIR_NTAPS * 4u];
+static uint8 g_fir_user_valid = 0u;
+
+const uint8 *psoc_fir_acquisition_coeffs(void)
+{
+    return g_fir_user_valid ? g_fir_user : g_fir_adquisition_coeffs_q23;
+}
+
+uint8 psoc_fir_user_command(uint8 cmd, uint8 p1, uint8 p2, uint8 p3)
+{
+    uint16 i;
+    uint16 sum = 0u;
+    if (cmd == PSOC_CMD_FIR_TAP_LO) {
+        if (p1 < FILTER_FIR_NTAPS) {
+            g_fir_stage[(uint16)p1 * 4u + 0u] = p2;
+            g_fir_stage[(uint16)p1 * 4u + 1u] = p3;
+        }
+        return 0xFFu;
+    }
+    if (cmd == PSOC_CMD_FIR_TAP_HI) {
+        if (p1 < FILTER_FIR_NTAPS) {
+            g_fir_stage[(uint16)p1 * 4u + 2u] = p2;
+            g_fir_stage[(uint16)p1 * 4u + 3u] = 0u;
+        }
+        return 0xFFu;
+    }
+    if (cmd != PSOC_CMD_FIR_COMMIT) {
+        return 0xFFu;
+    }
+    if (p1 == 0u) {
+        g_fir_user_valid = 0u;
+        return psoc_filter_load_fir_coefficients(g_fir_adquisition_coeffs_q23, FILTER_FIR_NTAPS);
+    }
+    for (i = 0u; i < FILTER_FIR_NTAPS; i++) {
+        sum = (uint16)(sum + g_fir_stage[i * 4u] + g_fir_stage[i * 4u + 1u] +
+                       g_fir_stage[i * 4u + 2u]);
+    }
+    if (sum != (uint16)((uint16)p2 | ((uint16)p3 << 8u))) {
+        return 0u;
+    }
+    (void)memcpy(g_fir_user, g_fir_stage, sizeof(g_fir_user));
+    g_fir_user_valid = 1u;
+    return psoc_filter_load_fir_coefficients(g_fir_user, FILTER_FIR_NTAPS);
+}
 
 /* Si esto frena la compilacion, FILTER_FIR_NTAPS (filter_coeffs.h) quedo
  * desincronizado del "Number of Taps" configurado en el customizer del

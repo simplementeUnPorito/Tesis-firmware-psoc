@@ -755,7 +755,7 @@ static void cal_async_complete(void)
     /* Restaura el FIR de adquisicion -- cal_pi_start() cargo el de
      * calibracion al empezar esta corrida; fuera de una calibracion el
      * Filter de hardware debe volver a tener el diseño de adquisicion. */
-    (void)psoc_filter_load_fir_coefficients(g_fir_adquisition_coeffs_q23, FILTER_FIR_NTAPS);
+    (void)psoc_filter_load_fir_coefficients(psoc_fir_acquisition_coeffs(), FILTER_FIR_NTAPS);
 #if defined(SYNC_IN_INTSTAT)
     (void)SYNC_IN_ClearInterrupt();
 #endif

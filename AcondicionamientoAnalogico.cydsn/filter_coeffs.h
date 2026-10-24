@@ -40,4 +40,19 @@ uint8 psoc_filter_load_fir_coefficients(const uint8 *coeffs_bytes, uint16 ntaps)
  * el DC de una etapa no arrastre historia de la etapa anterior. */
 void psoc_filter_reset_history(void);
 
+/* FIR de adquisicion cargado desde la web (ESP -> PSoC):
+ *   0xC9 [tap][byte0][byte1]   bytes bajos del tap (Q1.23 LE)
+ *   0xCA [tap][byte2][0]       byte alto
+ *   0xCB [accion][sum lo][sum hi]  accion 1 = cargar lo recibido si la
+ *        suma de los 3 x 128 bytes coincide; 0 = volver al de fabrica.
+ * Reemplaza al de fabrica tambien cuando la calibracion lo restaura. Vive
+ * en RAM: la web lo vuelve a mandar cuando el nodo se identifica. */
+#define PSOC_CMD_FIR_TAP_LO   0xC9u
+#define PSOC_CMD_FIR_TAP_HI   0xCAu
+#define PSOC_CMD_FIR_COMMIT   0xCBu
+const uint8 *psoc_fir_acquisition_coeffs(void);
+/* Devuelve el valor de ACK para 0xCB (1 ok, 0 suma o estado mal) o 0xFF
+ * para los comandos que no responden. */
+uint8 psoc_fir_user_command(uint8 cmd, uint8 p1, uint8 p2, uint8 p3);
+
 #endif

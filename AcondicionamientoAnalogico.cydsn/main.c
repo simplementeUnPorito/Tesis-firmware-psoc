@@ -2159,6 +2159,9 @@ static void uart_service(void)
                         rx_cmd = rx; rx_state = 2u; break;
                     case PSOC_CMD_SD_PROBE:
                     case PSOC_CMD_LIVE_ACK:
+                    case PSOC_CMD_FIR_TAP_LO:
+                    case PSOC_CMD_FIR_TAP_HI:
+                    case PSOC_CMD_FIR_COMMIT:
                         rx_cmd = rx; rx_state = 6u; break;
                     case 0xA3u: case PSOC_CMD_SD_READ_BATCH: case 0xAAu:
                     case PSOC_CMD_CAL_PARAM:
@@ -2206,6 +2209,12 @@ static void uart_service(void)
                 }
                 if (g_state == PSOC_SAMPLING) {
                     break;   /* muestreando en vivo solo se atiende LIVE_ACK */
+                }
+                if (rx_cmd == PSOC_CMD_FIR_TAP_LO || rx_cmd == PSOC_CMD_FIR_TAP_HI ||
+                    rx_cmd == PSOC_CMD_FIR_COMMIT) {
+                    uint8 fa = psoc_fir_user_command(rx_cmd, rx_p1, rx_p2, rx_p3);
+                    if (fa != 0xFFu) { uart_send_cfg_ack(rx_cmd, fa); }
+                    break;
                 }
 #if defined(PSOC_TEST) && PSOC_TEST
                 if(rx_cmd==PSOC_CMD_ST_REPORT || rx_cmd==PSOC_CMD_ST_SYNC ||
@@ -2463,7 +2472,7 @@ static void uart_service(void)
                         /* rx_p1: 0=crudo, 1=filtrado FIR */
                         g_stream_mode = (rx_p1 != 0u) ? 1u : 0u;
                         if (g_stream_mode != 0u) {
-                            (void)psoc_filter_load_fir_coefficients(g_fir_adquisition_coeffs_q23,
+                            (void)psoc_filter_load_fir_coefficients(psoc_fir_acquisition_coeffs(),
                                                                      FILTER_FIR_NTAPS);
                             psoc_filter_reset_history();
                             psoc_adc_clear_isr_filtered_sample();
@@ -3033,7 +3042,7 @@ int main(void)
     /* Activa el FIR de adquisicion (FIR_adquisition.h) -- calibration.c
      * carga el de calibracion (FIR_calibration.h) solo durante una corrida
      * y restaura este al terminar (ver cal_pi_start/cal_async_complete). */
-    (void)psoc_filter_load_fir_coefficients(g_fir_adquisition_coeffs_q23, FILTER_FIR_NTAPS);
+    (void)psoc_filter_load_fir_coefficients(psoc_fir_acquisition_coeffs(), FILTER_FIR_NTAPS);
     dma_adc_init();
     capture_engine_reset_hw();
     capture_engine_set_enabled(0u, 0u);
