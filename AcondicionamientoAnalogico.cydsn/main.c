@@ -48,6 +48,7 @@
 #if defined(PSOC_TEST) && PSOC_TEST
 #include "psoc_selftest.h"
 #endif
+#include "aa_decim.h"
 #include "DMA_DelSig_RAM_dma.h"
 #include "DMA_Filter_RAM_dma.h"
 #include "DMA_DelSig_Filter_dma.h"
@@ -236,8 +237,6 @@ static volatile uint16 g_fir_discard      = 0u;
  * descarte de transitorio del FIR (g_fir_discard) para no promediar
  * muestras del transitorio. 1 = sin decimar. */
 static volatile uint8  g_capture_decim_factor = 1u;
-static volatile int32  g_decim_acc        = 0;
-static volatile uint8  g_decim_n          = 0u;
 static          uint16 g_seq              = 0u;
 static volatile uint16 g_batches_captured = 0u;
 static volatile uint8  g_capture_done     = 0u;
@@ -549,8 +548,8 @@ static uint16 capture_next_hw_target(uint16 target_batches, uint16 decim, uint16
         remaining_decim_samples = (uint32)PSOC_CAPTURE_MAX_BATCHES * (uint32)BATCH_SAMPLES;
     }
     raw_samples_needed = remaining_decim_samples * (uint32)decim;
-    if ((uint32)g_decim_n < raw_samples_needed) {
-        raw_samples_needed -= (uint32)g_decim_n;
+    if ((uint32)g_aa_phase < raw_samples_needed) {
+        raw_samples_needed -= (uint32)g_aa_phase;
     } else {
         raw_samples_needed = 1u;
     }
@@ -1012,8 +1011,7 @@ static void capture_reset_locked(uint16 stored_batches)
     g_dbg_cnt          = 0u;
     g_seq              = 0u;
     g_fir_discard      = 0u;
-    g_decim_acc        = 0;
-    g_decim_n          = 0u;
+    aa_reset();
     g_capture_wr       = g_capture_raw;
     g_capture_end      = g_capture_raw + ((uint32)stored_batches * CAPTURE_BATCH_BYTES);
     g_live_active       = 0u;
@@ -1102,12 +1100,7 @@ static void sm_sample_capture_raw(void)
     int32 val;
     if (dst >= g_capture_end) { return; }
     val = dma_buf_to_adc_counts(g_dma_raw_buf);
-    g_decim_acc += val;
-    g_decim_n++;
-    if (g_decim_n < g_capture_decim_factor) { return; }
-    val = g_decim_acc / (int32)g_capture_decim_factor;
-    g_decim_acc = 0;
-    g_decim_n = 0u;
+    if (!aa_push(val, &val)) { return; }
     capture_store_decoded(dst, val);
     dst += SAMPLE_BYTES;
     g_capture_wr = dst;
@@ -1124,12 +1117,7 @@ static void sm_sample_capture_filt(void)
     }
     if (dst >= g_capture_end) { return; }
     val = dma_buf_to_i24(g_dma_filt_buf);
-    g_decim_acc += val;
-    g_decim_n++;
-    if (g_decim_n < g_capture_decim_factor) { return; }
-    val = g_decim_acc / (int32)g_capture_decim_factor;
-    g_decim_acc = 0;
-    g_decim_n = 0u;
+    if (!aa_push(val, &val)) { return; }
     capture_store_decoded(dst, val);
     dst += SAMPLE_BYTES;
     g_capture_wr = dst;
@@ -1169,14 +1157,7 @@ static void live_ring_store(int32 val)
 static void sm_sample_capture_raw_live(void)
 {
     int32 val = dma_buf_to_adc_counts(g_dma_raw_buf);
-    g_decim_acc += val;
-    g_decim_n++;
-    if (g_decim_n < g_capture_decim_factor) {
-        return;
-    }
-    val = g_decim_acc / (int32)g_capture_decim_factor;
-    g_decim_acc = 0;
-    g_decim_n = 0u;
+    if (!aa_push(val, &val)) { return; }
     live_ring_store(val);
 }
 
@@ -1188,14 +1169,7 @@ static void sm_sample_capture_filt_live(void)
         return;
     }
     val = dma_buf_to_i24(g_dma_filt_buf);
-    g_decim_acc += val;
-    g_decim_n++;
-    if (g_decim_n < g_capture_decim_factor) {
-        return;
-    }
-    val = g_decim_acc / (int32)g_capture_decim_factor;
-    g_decim_acc = 0;
-    g_decim_n = 0u;
+    if (!aa_push(val, &val)) { return; }
     live_ring_store(val);
 }
 
@@ -1327,6 +1301,7 @@ static void psoc_enter_sampling(uint8 debugMode)
 #endif
     capture_reset_locked(total_target);
     g_capture_decim_factor = (uint8)decim;
+    if (g_aa_decim != decim) { aa_configure(decim); } else { aa_reset(); }
     g_total_target = total_target;
     g_total_sent   = 0u;
     g_chain_active = 0u;
@@ -1842,6 +1817,7 @@ static void psoc_arm(void)
     capture_reset_locked(total_target);
     g_fir_discard = discard;
     g_capture_decim_factor = (uint8)decim;
+    if (g_aa_decim != decim) { aa_configure(decim); } else { aa_reset(); }
     g_total_target = total_target;
     g_total_sent   = 0u;
     g_chain_active = 0u;
